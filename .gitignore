@@ -1,0 +1,19 @@
+vendor
+Tools
+.env
+.htaccess
+READMEE.md
+keys/*.key
+src/db
+test
+#runtime-data
+runtime-data/media/audio/*
+runtime-data/media/image/*
+runtime-data/media/other/*
+#runtime-data/media/profile/*           to be added later (currently populated with example images)
+runtime-data/media/text/*
+runtime-data/media/userData/*
+runtime-data/media/video/*
+
+
+!/**/placeholder.txt
