@@ -129,7 +129,7 @@ class Post
             ],
 			'title' => [
 				'required' => false,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
 				'validators' => [
 					['name' => 'StringLength', 'options' => [
 						'min' => 3,
@@ -160,11 +160,11 @@ class Post
             ],
             'mediadescription' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
 				'validators' => [
 					['name' => 'StringLength', 'options' => [
 						'min' => 3,
-						'max' => 440,
+						'max' => 500,
 					]],
 					['name' => 'isString'],
 				],
