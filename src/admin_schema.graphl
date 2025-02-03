@@ -1,0 +1,521 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type Subscription {
+  getChatMessages(chatid: ID!): AddChatmessageResponse
+  setChatMessages(chatid: ID!, content: String!): AddChatmessageResponse
+}
+
+type Query {
+  hello: HelloResponse
+
+  searchuser(userid: ID, email: String, username: String, status: Int, verified: Int, ip: String, offset: Int, limit: Int!): UserSearchResponse
+  getallusers(offset: Int, limit: Int!): UserSearchResponse
+  profile(userid: ID, postLimit: Int): ProfileInfo
+  follows(userid: ID, offset: Int, limit: Int!): UserFollows
+  followrelations(userid: ID, offset: Int, limit: Int!): RelationsFollow
+  friends(offset: Int, limit: Int!): UserFriends
+
+  searchpost(title: String, postid: ID, tag: String, commentOffset: Int, commentLimit: Int!): PostResponse
+  getallposts(filterBy: FilterType, sortBy: SortType, title: String, tag: String, from: Date, to: Date, postOffset: Int, postLimit: Int!, commentOffset: Int, commentLimit: Int!): PostResponse
+  parentcomments(parent: ID!): CommentResponse
+  tags(offset: Int, limit: Int!): TagSearchResponse
+
+  searchchat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse
+  getallchats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int!, messageOffset: Int, messageLimit: Int!): ChatResponse
+  readMessages(chatid: ID!, offset: Int, limit: Int!): AddChatmessageResponse!
+
+  dailyfree: StandardResponse
+  dailyfreestatus: StandardResponse
+  dailyFreeFuncFront(input: DailyResponseInput!): StandardResponse
+  dailyFreeFunc(postid: ID, input: DailyResponseInput!): StandardResponse
+  getpercentbeforetransaction(tokenAmount: Int!): StandardResponse
+
+  cleangems: DefaultResponse
+  cleanwallet: DefaultResponse
+  cleanlogwins: DefaultResponse
+  resetcollected: DefaultResponse
+
+  refreshmarketcap: StandardResponse
+  globalwins: DefaultResponse
+
+  gemster: StandardResponse
+  gemsters(day: DayType!): GenericResponse
+
+  wallet(userid: ID, postid: ID, fromid: ID, whereby: Int, offset: Int, limit: Int!): GenericResponse
+  userwallet(postid: ID, fromid: ID, offset: Int, limit: Int!): GenericResponse
+
+  currentliquidity: StandardResponse
+  getuserinfo: StandardResponse
+  fetchwinslog(day: DayType!, offset: Int, limit: Int!): GenericResponse
+
+}
+
+type Mutation {
+  refreshToken(refreshToken: String!): AuthPayload!
+  updateName(username: String!, password: String!): DefaultResponse
+  updateMail(email: String!, password: String!): DefaultResponse
+  updatePassword(password: String!, expassword: String!): DefaultResponse
+  updatePrivateProfile: DefaultResponse
+  updateBiography(biography: String!): DefaultResponse
+  updateProfilePicture(img: String!): DefaultResponse
+  userFollow(userid: ID!): setFollowUseresponse
+  deleteAccount(password: String!): DefaultResponse
+  createChat(input: CreateChatInput!): AddChatResponse!
+  updateChat(input: UpdateChatInput!): AddChatResponse!
+  addParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
+  remParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
+  addMessage(chatid: ID!, content: String!): AddChatmessageResponse!
+  remMessage(chatid: ID!, messid: Int!): DefaultResponse!
+  deleteChat(id: ID!): DefaultResponse
+  createFeed(input: CreateFeedInput!): AddPostResponse!
+
+  likeComment(commentid: ID!): DefaultResponse
+  reportComment(commentid: ID!): DefaultResponse
+  deletePost(id: ID!): DefaultResponse
+
+  contactus(name: String!, email: String!, message: String!): StandardResponse
+
+  createPost(action: PostenType!, input: CreatePostInput!): StandardResponse!
+
+  createComment(action: CommentsType!, input: CreateCommentInput!): StandardResponse!
+
+  resolveActionPost(postid: ID!, action: ActionType!): StandardResponse!
+}
+
+scalar Decimal
+
+enum ActionType {
+  LIKE
+  DISLIKE
+  REPORT
+  VIEW
+  SHARE
+  SAVE
+}
+
+enum PostenType {
+  POST
+}
+
+enum CommentsType {
+  COMMENT
+}
+
+enum FilterType {
+  IMAGE
+  AUDIO
+  VIDEO
+  TEXT
+  FOLLOWED
+  FOLLOWER
+}
+
+enum SortType {
+  NEWEST
+  FOLLOWER
+  FOLLOWED
+  TRENDING
+  LIKES
+  DISLIKES
+  VIEWS
+  COMMENTS
+}
+
+enum DayType {
+  D0
+  D1
+  D2
+  D3
+  D4
+  D5
+  W0
+  M0
+  Y0
+}
+
+input DailyResponseInput {
+  liken: Int
+  comments: Int
+  posten: Int
+}
+
+type GenericResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: JSON
+}
+
+type StandardResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: JSON
+}
+
+scalar JSON
+scalar Date
+scalar Tags
+
+type HelloResponse {
+  root: String
+  args: String
+  context: String
+  userroles: Int
+  currentuserid: String
+}
+
+type DailyResponse {
+  liken: Int
+  comments: Int
+  posten: Int
+}
+
+type CurrentLiquidity {
+  currentliquidity: Decimal
+}
+
+type GetUserInfo {
+  userid: ID!
+  liquidity: Decimal!
+  amountposts: Int!
+  amounttrending: Int!
+  amountfollower: Int!
+  amountfollowed: Int!
+  updatedat: Date
+}
+
+type ChatResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [Chat!]
+}
+
+type Chat {
+  id: ID!
+  image: String!
+  name: String!
+  createdat: Date
+  updatedat: Date
+  chatmessages: [ChatMessage!]!
+  chatparticipants: [ChatParticipant!]!
+}
+
+type ChatMessage {
+  id: ID!
+  senderid: ID!
+  chatid: ID!
+  content: String!
+  createdat: Date!
+}
+
+type ChatParticipant {
+  userid: ID!
+  img: String!
+  username: String!
+  hasaccess: Int!
+}
+
+type setFollowUseresponse {
+  status: String!
+  isfollowing: Boolean
+  ResponseCode: String
+}
+
+type ProfilPostMed {
+  id: ID!
+  title: String
+  contenttype: String!
+  media: String!
+  createdat: String
+}
+
+type AuthPayload {
+  status: String!
+  ResponseCode: String
+  accessToken: String
+  refreshToken: String
+}
+
+type DefaultResponse {
+  status: String!
+  ResponseCode: String
+}
+
+type ToggleResponse {
+  status: String!
+  isSaved: Boolean
+  ResponseCode: String
+}
+
+type AddPostResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: Postinfo
+}
+
+type Postinfo {
+  postid: ID!
+  userid: ID!
+  title: String!
+  media: String!
+  mediadescription: String!
+  contenttype: String!
+}
+
+type AddChatResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: Chatinfo
+}
+
+type Chatinfo {
+  chatid: ID
+  image: String
+  name: String
+}
+
+type AddChatmessageResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: [Chatmessageinfo]
+}
+
+type Chatmessageinfo {
+  messid: ID
+  chatid: ID
+  userid: ID
+  content: String
+  createdat: Date
+}
+
+type Userinforesponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: Userinfo
+}
+
+type Userinfo {
+  userid: ID
+  img: String
+  username: String
+  biography: String
+  updatedat: Date!
+}
+
+type UserFriends {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [Userinfo]
+}
+
+type User {
+  id: ID
+  situation: String
+  email: String
+  username: String
+  password: String
+  status: Int
+  verified: Int
+  slug: Int
+  roles_mask: Int
+  ip: String
+  img: String
+  biography: String
+  liquidity: Decimal
+  createdat: Date
+  updatedat: Date
+}
+
+type Profile {
+  id: ID
+  situation: String
+  username: String
+  status: Int
+  slug: Int
+  img: String
+  biography: String
+  amountposts: Int
+  amounttrending: Int
+  isfollowed: Boolean
+  isfollowing: Boolean
+  amountfollowed: Int
+  amountfollower: Int
+  imageposts: [ProfilPostMed!]
+  textposts: [ProfilPostMed!]
+  videoposts: [ProfilPostMed!]
+  audioposts: [ProfilPostMed!]
+}
+
+type ProfileInfo {
+  status: String
+  ResponseCode: String
+  affectedRows: Profile
+}
+
+type ProfilUser {
+  id: ID!
+  username: String!
+  img: String
+  isfollowed: Boolean
+  isfollowing: Boolean
+}
+
+type FollowRelations {
+  followers: [ProfilUser!]
+  following: [ProfilUser!]
+  friends: [ProfilUser!]
+}
+
+type RelationsFollow {
+  status: String
+  counter: Int!
+  ResponseCode: String
+  affectedRows: FollowRelations
+}
+
+type Followes {
+  followers: [ProfilUser!]
+  following: [ProfilUser!]
+}
+
+type UserFollows {
+  status: String
+  counter: Int!
+  ResponseCode: String
+  affectedRows: Followes
+}
+
+type UserSearchResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [User]
+}
+
+type Tag {
+  tagid: ID!
+  name: String!
+}
+
+type TagSearchResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [Tag]
+}
+
+type PostResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [Post!]
+}
+
+type Post {
+  id: ID!
+  contenttype: String!
+  title: String!
+  media: String!
+  mediadescription: String!
+  createdat: Date!
+  amountlikes: Int!
+  amountviews: Int!
+  amountcomments: Int!
+  amountdislikes: Int!
+  amounttrending: Int!
+  isliked: Boolean!
+  isviewed: Boolean!
+  isreported: Boolean!
+  isdisliked: Boolean!
+  issaved: Boolean!
+  tags: Tags!
+  user: ProfilUser!
+  comments: [Comment!]!
+}
+
+type Comment {
+  commentid: ID!
+  userid: ID!
+  postid: ID!
+  parentid: ID
+  content: String!
+  amountlikes: Int!
+  isliked: Boolean!
+  createdat: Date!
+  user: ProfilUser!
+}
+
+type CommentResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [Comment]
+}
+
+type Wallet {
+  token: String!
+  userid: ID!
+  postid: ID!
+  fromid: ID!
+  numbers: Decimal!
+  whereby: Int!
+  createdat: Date!
+}
+
+type UserWallet {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [Wallet]
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  username: String!
+}
+
+input CreatePostInput {
+  title: String!
+  media: String!
+  mediadescription: String!
+  contenttype: String!
+  tags: [String!]
+}
+
+input CreateCommentInput {
+  postid: ID!
+  parentid: ID
+  content: String!
+}
+
+input CreateChatInput {
+  name: String!
+  image: String!
+  recipients: [String!]!
+}
+
+input UpdateChatInput {
+  chatid: ID!
+  name: String
+  image: String
+}
+
+input CreateChatParticipantsInput {
+  chatid: ID!
+  recipients: [String!]!
+}
+
+input CreateFeedInput {
+  feedid: ID!
+  title: String!
+  media: String!
+  mediadescription: String
+  contenttype: String!
+}

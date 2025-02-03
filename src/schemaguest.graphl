@@ -1,0 +1,54 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  hello: HelloResponse
+}
+
+type Mutation {
+  register(input: RegisterInput!): RegisterResponse!
+  verifiedAccount(userid: ID!): verifiedAccount!
+  login(email: String!, password: String!): AuthPayload!
+  contactus(name: String!, email: String!, message: String!): StandardResponse!
+}
+
+type StandardResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: JSON
+}
+
+scalar JSON
+
+type HelloResponse {
+  root: String
+  args: String
+  context: String
+  currentuserid: ID
+}
+
+type RegisterResponse {
+  status: String!
+  ResponseCode: String
+  userid: ID
+}
+
+type verifiedAccount {
+  status: String!
+  ResponseCode: String
+}
+
+type AuthPayload {
+  status: String!
+  ResponseCode: String
+  accessToken: String
+  refreshToken: String
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  username: String!
+}
