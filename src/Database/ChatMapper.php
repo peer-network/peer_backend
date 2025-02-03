@@ -340,7 +340,6 @@ class ChatMapper
         $this->logger->info("ChatMapper.insert started");
 
         $data = $chat->getArrayCopy();
-        $createdAt = $data['createdat'];
         $updatedAt = (new \DateTime())->format('Y-m-d H:i:s.u'); 
 
         $query = "INSERT INTO chats (chatid, creatorid, image, name, ispublic, createdat, updatedat) 
@@ -355,8 +354,8 @@ class ChatMapper
             $stmt->bindValue(':image', $data['image'], \PDO::PARAM_STR);
             $stmt->bindValue(':name', $data['name'], \PDO::PARAM_STR);
             $stmt->bindValue(':ispublic', $data['ispublic'], \PDO::PARAM_INT);
-            $stmt->bindValue(':createdat', $createdAt, \PDO::PARAM_STR); // Ensure this is properly formatted
-            $stmt->bindValue(':updatedat', $updatedAt, \PDO::PARAM_STR); // Ensure this is properly formatted
+            $stmt->bindValue(':createdat', $updatedAt, \PDO::PARAM_STR); 
+            $stmt->bindValue(':updatedat', $updatedAt, \PDO::PARAM_STR); 
 
             $stmt->execute();
 
