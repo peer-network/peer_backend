@@ -129,11 +129,11 @@ class Post
             ],
 			'title' => [
 				'required' => false,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
 				'validators' => [
 					['name' => 'StringLength', 'options' => [
 						'min' => 3,
-						'max' => 96,
+						'max' => 100,
 					]],
 					['name' => 'isString'],
 				],
