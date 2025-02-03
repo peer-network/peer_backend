@@ -2,6 +2,7 @@ vendor
 Tools
 .env
 .htaccess
+index.php
 READMEE.md
 keys/*.key
 src/db
