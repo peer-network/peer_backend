@@ -15,6 +15,7 @@ runtime-data/media/other/*
 runtime-data/media/text/*
 runtime-data/media/userData/*
 runtime-data/media/video/*
+runtime-data/logs/*
 
 
 !/**/placeholder.txt
