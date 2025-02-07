@@ -1,124 +1,124 @@
-# Peerapipg
+# Peer Backend  
+This is the repository of Peer Networks Backend Code.
+Instructions for contributing to the Project can be found here:  
+[![Contributing](https://img.shields.io/badge/Contributing-Guidelines-blue.svg)](https://github.com/peer-network/.github/blob/main/CONTRIBUTING.md)  
 
-## Version 1.0.0
+# Backend Setup Guide
 
-### Peer GraphQL PHP
+## 🛠️ Local Quick Setup
+
+Follow these steps to set up the backend on your local machine:
 
 ---
 
-### Installation
-
-1. **Install Composer**:
-   Follow the instructions at [Composer](https://github.com/composer/composer) to install Composer.
-
-2. **Install Dependencies**:
-   ```sh
-   composer install
-   ```
-
-3. **Database Setup**:
-   - Ensure that PostgreSQL Database Server is installed and configured. You can download it from [postgresql.org](https://www.postgresql.org/download/).
-   - Determine the PostgreSQL version required for compatibility (16.3).
-   - Execute the SQL files located in the `/sql/` directory to set up the database schema and any necessary seed data. Use the `psql` command or a database management tool like pgAdmin.
-
-4. **Create Required Folders**:
-   Create the following folders in the root directory with write permissions:
-   ```sh
-   mkdir -p runtime-data/logs || runtime-data/cache || runtime-data/ratelimiter || runtime-data/media/audio || runtime-data/media/image || runtime-data/media/text || runtime-data/media/video || runtime-data/media/other || runtime-data/media/userData || runtime-data/media/profile
-   chmod -R 775 runtime-data/
-   ```
-   These folders are required for logging and caching purposes:
-   - ` runtime-data/logs/`: Used by the `LoggerInterface` to store logs.
-   - ` runtime-data/cache/`: Used for Dependency Injection and caching.
-   - ` runtime-data/ratelimiter/`: Used by the `ratelimiter` to rate.
-   - ` runtime-data/media/video/, runtime-data/media/audio/, runtime-data/media/text/, runtime-data/media/image/, runtime-data/media/other/, runtime-data/media/userData, runtime-data/media/profile`: Used for Uploaded Media Data.
-
-5. **Environment Configuration**:
-   - Rename `.env.schema` to `.env`.
-   - Populate the `.env` file with the necessary variables. Here are some common variables:
-     ```plaintext
-     DB_HOST=localhost
-     DB_PORT=5432
-     DB_USER=your_username
-     DB_PASSWORD=your_password
-     DB_NAME=your_database_name
-     ```
-   - Ensure the environment variables are correctly configured by running `printenv` on Unix-based systems.
-
-6. **Start the Server**:
-   Start the PHP built-in server for development purposes:
-   ```sh
-   php -S localhost:8888 -t public/
-   ```
-   Ensure the command is executed from the project root directory. Note that this server is suitable only for development, not production.
-
-7. **Test with Postman**:
-   - Set the GraphQL endpoint in Postman to:
-     ```
-     http://localhost:8888/graphql
-     ```
-   - Configure any required headers, such as `Content-Type: application/json`.
-   - Use the following example query to test the endpoint:
-     ```graphql
-     {
-       hello {
-         root
-         args
-		 context
-		 currentuserid
-       }
-     }
-     ```
-   - You can change the port as needed.
-
-### Project Structure that is compatible with automation (optional_data.sql is optional).
-Note:    We plan to delete the keys-directory and runtime-data-directory once they are both configurable by .env.
-Note2:   One .env line per subdirectory of runtime-data (cache, logs, media) and one for the keys directory (already exists).
-
-```plaintext
-project_root/
-├── keys/
-│   └── placeholder.txt          //this file needs to exist. Empty Folders can't be commited via Git. (mandatory)
-├── runtime-data/
-│   └── cache/
-         └── placeholder.txt     //this file needs to exist. Empty Folders can't be commited via Git. (mandatory)
-│   └── logs/
-         └── placeholder.txt     //this file needs to exist. Empty Folders can't be commited via Git. (mandatory)
-│   └── ratelimiter/
-         └── placeholder.txt     //this file needs to exist. Empty Folders can't be commited via Git. (mandatory)
-│   └── media/
-│       ├── audio/
-            └── placeholder.txt  //this file needs to exist. Empty Folders can't be commited via Git. (mandatory)
-│       ├── image/
-            └── placeholder.txt  //this file needs to exist. Empty Folders can't be commited via Git. (mandatory)
-│       ├── other/
-            └── placeholder.txt  //this file needs to exist. Empty Folders can't be commited via Git. (mandatory)
-│       ├── profile/
-            └── placeholder.txt  //this file needs to exist. Empty Folders can't be commited via Git. (mandatory)
-│       ├── text/
-            └── placeholder.txt  //this file needs to exist. Empty Folders can't be commited via Git. (mandatory)
-│       ├── userData/
-            └── placeholder.txt  //this file needs to exist. Empty Folders can't be commited via Git. (mandatory)
-│       └── video/
-            └── placeholder.txt  //this file needs to exist. Empty Folders can't be commited via Git. (mandatory)
-├── sql_files_for_import/
-    ├──.env.schema               //contains some needed informations for the deployment of the database. (mandatory)
-│   ├──optional_data.psql        //contains additional data for Postgres (entries into the tables) (optional)
-│   └── structure.psql           //contains the mandatory data for Postgres (e.g. Tables) (mandatory)
-├── .env.schema                  //contains needed informations for the deployment of the Backend. (mandatory)
-├── composer.json                //this file describes the dependencies of the project and may contain additional metadata.   (mandatory)
-├── composer.lock                //contains the exact versions of the packages . (mandatory)  
+### **1. Install PHP 8.3 & Extensions**
+```bash
+sudo apt install php8.3-cli
+sudo apt-get install php-pgsql php-bcmath
 ```
 
-### Additional Steps
+### **2. Install Composer**
+```bash
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php -r "if (hash_file('sha384', 'composer-setup.php') === 'dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f7cd84f6db9189d43a81e5503cda447da73c7e5b6') { echo 'Installer verified'.PHP_EOL; } else { echo 'Installer corrupt'.PHP_EOL; unlink('composer-setup.php'); exit(1); }"
+php composer-setup.php
+php -r "unlink('composer-setup.php');"
 
-- **Folder Permissions**:
-  - Ensure `runtime-data/logs/`, `runtime-data/cache/`, and `runtime-data/media/` directories are writable. This can be achieved by setting the appropriate permissions:
-    ```sh
-    chmod -R 775 runtime-data/
-    ```
+# Add to PATH (recommended)
+sudo mv composer.phar /usr/local/bin/composer
+```
 
-- **Environment Variables**:
-  - Verify that all required environment variables are defined in the `.env` file, and adjust according to your setup.
+### **3. Install & Configure PostgreSQL**
+```bash
+# Install PostgreSQL
+apt install postgresql
 
-With these detailed instructions, you should be able to set up and run the Peerapipg application efficiently. If you encounter any issues, please consult the documentation or seek assistance from the Peer community.
+# Start service
+sudo systemctl enable postgresql
+sudo service postgresql start
+```
+
+#### Configure Database
+```sql
+sudo -u postgres psql
+-- In PostgreSQL terminal:
+ALTER USER postgres WITH PASSWORD 'test';
+CREATE DATABASE peer;
+GRANT ALL PRIVILEGES ON DATABASE peer TO postgres;
+\q
+```
+
+#### Edit Authentication Method
+```bash
+sudo nano /etc/postgresql/<version>/main/pg_hba.conf
+```
+```conf
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+local   all             postgres                                md5
+```
+```bash
+sudo service postgresql restart
+```
+
+### **4. Initialize Database**
+```bash
+psql -U postgres -d peer -f sql/structure.psql
+psql -U postgres -d peer -f sql/optional_data.psql
+
+# Access database:
+psql -U postgres -d peer
+```
+
+### **5. Configure Environment**
+
+**Install Dependencies:**
+In project root execute:
+```bash
+composer install
+```
+
+Create `.env` from `.env.schema`
+
+Set these values:
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=test
+DB_NAME=peer
+```
+
+### **6. Generate Security Keys**
+```bash
+# From keys directory:
+openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048
+openssl rsa -pubout -in private.pem -out public.pem
+openssl genpkey -algorithm RSA -out refresh_private.pem -pkeyopt rsa_keygen_bits:2048
+openssl rsa -pubout -in refresh_private.pem -out refresh_public.pem
+
+# Rename files
+mv private.pem private.key
+mv public.pem public.key
+mv refresh_private.pem refresh_private.key
+mv refresh_public.pem refresh_public.key
+```
+
+### **7. Run Application**
+```bash at project root
+php -S localhost:8888 -t public/
+```
+
+---
+
+## 🌐 Access the API
+
+Endpoint:
+```
+http://localhost:8888/graphql
+```
+
+Recommended Testing Tool:
+Postman API Platform  
+(Use GraphQL format for requests)
+
+Note: All credentials and security keys in this example are for development purposes only. Always use secure credentials in production environments.  
