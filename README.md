@@ -1,5 +1,5 @@
 # Peer Backend  
-This is the repository of Peer Networks Backend Code.
+This is the repository of Peer Networks Backend Code.  
 Instructions for contributing to the Project can be found here:  
 [![Contributing](https://img.shields.io/badge/Contributing-Guidelines-blue.svg)](https://github.com/peer-network/.github/blob/main/CONTRIBUTING.md)  
 
@@ -40,7 +40,9 @@ sudo service postgresql start
 
 #### Configure Database
 ```sql
+-- Log into postgres Terminal from the shell:
 sudo -u postgres psql
+
 -- In PostgreSQL terminal:
 ALTER USER postgres WITH PASSWORD 'test';
 CREATE DATABASE peer;
@@ -50,18 +52,24 @@ GRANT ALL PRIVILEGES ON DATABASE peer TO postgres;
 
 #### Edit Authentication Method
 ```bash
+# Open .conf file:
 sudo nano /etc/postgresql/<version>/main/pg_hba.conf
 ```
 ```conf
+# Change the method from peer to md5 in the following line:  
+
 # TYPE  DATABASE        USER            ADDRESS                 METHOD
 local   all             postgres                                md5
 ```
 ```bash
+# Restart postgres for changes to take affect:
 sudo service postgresql restart
 ```
 
 ### **4. Initialize Database**
 ```bash
+# These commands will add the schema and some optional data to the Database peer:
+# From project-root directory:
 psql -U postgres -d peer -f sql/structure.psql
 psql -U postgres -d peer -f sql/optional_data.psql
 
@@ -71,9 +79,9 @@ psql -U postgres -d peer
 
 ### **5. Configure Environment**
 
-**Install Dependencies:**
-In project root execute:
+**Install Dependencies:**  
 ```bash
+# From project-root directory:
 composer install
 ```
 
@@ -90,7 +98,7 @@ DB_NAME=peer
 
 ### **6. Generate Security Keys**
 ```bash
-# From keys directory:
+# From project-root/keys directory:
 openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048
 openssl rsa -pubout -in private.pem -out public.pem
 openssl genpkey -algorithm RSA -out refresh_private.pem -pkeyopt rsa_keygen_bits:2048
@@ -104,7 +112,8 @@ mv refresh_public.pem refresh_public.key
 ```
 
 ### **7. Run Application**
-```bash at project root
+```bash
+# From project-root directory:
 php -S localhost:8888 -t public/
 ```
 
@@ -121,4 +130,4 @@ Recommended Testing Tool:
 Postman API Platform  
 (Use GraphQL format for requests)
 
-Note: All credentials and security keys in this example are for development purposes only. Always use secure credentials in production environments.  
+**Note: All credentials and security keys in this example are for development purposes only. Always use secure credentials in production environments.**  
