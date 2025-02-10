@@ -6,6 +6,7 @@ use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
 use Psr\Log\LoggerInterface;
+use function bcpow;
 
 const TABLESTOGEMS = true;
 
@@ -106,7 +107,7 @@ class WalletMapper
         $stmt->execute($queryParams);
 
         $results = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             try {
                 $results[] = new Wallet($row);
 				$this->logger->info('Executing SQL query', ['row' => $row]);
@@ -184,7 +185,7 @@ class WalletMapper
 			$stmt->execute($params);
 
 			$results = [];
-			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+			while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
 				$results[] = new Wallet($row);
 			}
 
@@ -216,7 +217,7 @@ class WalletMapper
         $sql = "SELECT * FROM wallet WHERE userid = :userid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['userid' => $userid]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new Wallet($data);
@@ -231,10 +232,10 @@ class WalletMapper
     {
         $this->logger->info('WalletMapper.loadLiquidityById started');
 
-        $sql = "SELECT SUM(numbers) AS currentliquidity FROM wallet WHERE userid = :userid";
+        $sql = "SELECT liquidity AS currentliquidity FROM wallett WHERE userid = :userid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['userid' => $userid]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
 			$this->logger->info('transaction found with', ['data' => $data]);
@@ -349,7 +350,7 @@ class WalletMapper
         do {
             $stmt = $this->db->prepare('SELECT token FROM wallet WHERE token = ?');
             $stmt->execute([$token]);
-            $res = $stmt->fetch(PDO::FETCH_ASSOC);
+            $res = $stmt->fetch(\PDO::FETCH_ASSOC);
         } while ($res && $x++ < 100);
         return $token;
     }
@@ -363,7 +364,7 @@ class WalletMapper
 					FROM posts 
 					WHERE feedid IS NULL";
 			$stmt = $this->db->query($sql);
-			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			$data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 		} catch (\Exception $e) {
 			$this->logger->error('Error fetching post user IDs', ['exception' => $e]);
 			return false;
@@ -409,7 +410,7 @@ class WalletMapper
 					lw.token,
 					lw.userid,
 					lw.postid, 
-					lw.nmbers, 
+					lw.numbers, 
 					lw.whereby AS action, 
 					lw.createdat
 				FROM logwins lw
@@ -420,11 +421,11 @@ class WalletMapper
 			";
 
 			$stmt = $this->db->prepare($sql);
-			$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-			$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-			$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+			$stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
+			$stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+			$stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
 			$stmt->execute();
-			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			$rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 			$this->logger->info('WalletMapper.fetchWinsLog rows: ', ['rows' => $rows]);
 
 			if (empty($rows)) {
@@ -469,15 +470,15 @@ class WalletMapper
 			$stmt = $this->db->prepare($sql);
 
 			// Bind values explicitly
-			$stmt->bindValue(':token', $this->getPeerToken(), PDO::PARAM_STR);
-			$stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
-			$stmt->bindValue(':postid', $args['postid'], PDO::PARAM_STR);
-			$stmt->bindValue(':fromid', $args['fromid'], PDO::PARAM_STR);
-			$stmt->bindValue(':gems', $args['gems'], PDO::PARAM_STR);
-			$stmt->bindValue(':numbers', $args['numbers'], PDO::PARAM_STR);
-			$stmt->bindValue(':numbersq', $this->decimalToQ64_96($args['numbers']), PDO::PARAM_STR); // 29 char precision
-			$stmt->bindValue(':whereby', $args['whereby'], PDO::PARAM_INT);
-			$stmt->bindValue(':createdat', $args['createdat'], PDO::PARAM_STR);
+			$stmt->bindValue(':token', $this->getPeerToken(), \PDO::PARAM_STR);
+			$stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+			$stmt->bindValue(':postid', $args['postid'], \PDO::PARAM_STR);
+			$stmt->bindValue(':fromid', $args['fromid'], \PDO::PARAM_STR);
+			$stmt->bindValue(':gems', $args['gems'], \PDO::PARAM_STR);
+			$stmt->bindValue(':numbers', $args['numbers'], \PDO::PARAM_STR);
+			$stmt->bindValue(':numbersq', $this->decimalToQ64_96($args['numbers']), \PDO::PARAM_STR); // 29 char precision
+			$stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
+			$stmt->bindValue(':createdat', $args['createdat'], \PDO::PARAM_STR);
 
 			$stmt->execute();
 			$this->saveWalletEntry($userId, $args['numbers']);
@@ -551,7 +552,7 @@ class WalletMapper
                     INNER JOIN posts p ON s.postid = p.postid AND s.userid != p.userid 
                     WHERE s.collected = 0";
             $stmt = $this->db->query($sql);
-            $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $entries = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Exception $e) {
             $this->logger->error('Error fetching entries for ' . $tableName, ['exception' => $e]);
             return $this->respondWithError($e->getMessage());
@@ -621,7 +622,7 @@ class WalletMapper
 			";
 			
 			$stmt = $this->db->query($sql);
-			$entries = $stmt->fetch(PDO::FETCH_ASSOC);
+			$entries = $stmt->fetch(\PDO::FETCH_ASSOC);
 			$this->logger->info('fetching entries for ', ['entries' => $entries]);
 		} catch (\Exception $e) {
 			$this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
@@ -693,7 +694,7 @@ class WalletMapper
 
 		try {
 			$stmt = $this->db->query($sql);
-			$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			$data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 			$this->logger->info('fetching data for ', ['data' => $data]);
 		} catch (\Exception $e) {
 			$this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
@@ -749,7 +750,7 @@ class WalletMapper
                 $gemIds = array_column($data, 'gemid');
                 $quotedGemIds = array_map(fn($gemId) => $this->db->quote($gemId), $gemIds);
 
-                //$this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
+                $this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
 
             } catch (\Exception $e) {
                 $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
@@ -781,7 +782,7 @@ class WalletMapper
             $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['userid' => $userId]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (!$result || !$result['invited']) {
                 $this->logger->warning('No inviter found for the given user', ['userid' => $userId]);
@@ -791,12 +792,8 @@ class WalletMapper
             $inviterId = $result['invited'];
             $this->logger->info('Inviter found', ['inviterId' => $inviterId]);
 
-            // Beginn Deduct 1% from the user's liquidity
             $percent = round((float)$tokenAmount * 0.01, 2);
             $tosend = round((float)$tokenAmount - $percent, 2);
-
-            // Deduct total amount from the user's wallet
-			//$result = $this->saveWalletEntry($userId, -abs($tokenAmount));
 
 			if ($result) {
 
@@ -810,9 +807,6 @@ class WalletMapper
 
 				$this->insertWinToLog($userId, $args);
 			}
-
-            // Add 1% to the inviter's wallet
-			//$result = $this->saveWalletEntry($inviterId, abs($percent));
 
 			if ($result) {
 
@@ -900,8 +894,6 @@ class WalletMapper
 			if ($results === false) {
 				return $this->respondWithError('Failed to deduct from wallet.');
 			}
-
-			//$results = $this->saveWalletEntry($userId, -abs($price));
 
 			$this->logger->info('Wallet deduction successful.', [
 				'userId' => $userId,
@@ -1003,12 +995,11 @@ class WalletMapper
 		try {
 			$this->db->beginTransaction();
 
-			// Check if userId exists directly in the database
 			$query = "SELECT 1 FROM wallett WHERE userid = :userid";
 			$stmt = $this->db->prepare($query);
 			$stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
 			$stmt->execute();
-			$userExists = $stmt->fetchColumn(); // Returns 1 if user exists, false otherwise
+			$userExists = $stmt->fetchColumn(); 
 
 			if (!$userExists) {
 				// Insert new entry
@@ -1056,7 +1047,6 @@ class WalletMapper
 		}
 	}
 
-    // Fetch the ranked posts
     public function getRankedPosts($limit = 10) {
         $sql = "
             WITH post_totals AS (
@@ -1089,88 +1079,18 @@ class WalletMapper
             ORDER BY rank ASC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':limit' => $limit]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     protected function decimalToQ64_96($value) {
-        // Multiply the decimal number by 2^96 and truncate
-        return bcmul($value, Q64_96_SCALE, 0); // Scale factor with no decimals
+        return bcmul($value, Q64_96_SCALE, 0); 
     }
 
     protected function q64_96ToDecimal($qValue) {
-        // Divide the Q64.96 number by 2^96
-        return bcdiv($qValue, Q64_96_SCALE, 15); // Precision up to 15 decimal places
+        return bcdiv($qValue, Q64_96_SCALE, 15); 
     }
 
     protected function addQ64_96($qValue1, $qValue2) {
-        // Add two Q64.96 integers
         return bcadd($qValue1, $qValue2);
     }
-
-    public function deleteAllInWallet(): array
-    {
-        try {
-            $this->logger->info('Deleting all records from wallet table.');
-            $sql = "DELETE FROM wallet";
-            $this->db->query($sql);
-            $success = ['status' => 'success', 'ResponseCode' => 'All records deleted from wallet.'];
-			return $success;
-        } catch (\Exception $e) {
-            $this->logger->error('Error deleting all records from wallet', ['exception' => $e]);
-            return $this->respondWithError($e->getMessage());
-        }
-    }
-
-    public function deleteAllInGems(): array
-    {
-        try {
-            $this->logger->info('Deleting all records from gems table and resetting gemid.');
-            $sql = "TRUNCATE TABLE gems RESTART IDENTITY";
-            $this->db->query($sql);
-            $success = ['status' => 'success', 'ResponseCode' => 'All records deleted from gems and gemid reset.'];
-			return $success;
-        } catch (\Exception $e) {
-            $this->logger->error('Error deleting all records from gems and resetting gemid', ['exception' => $e]);
-            return $this->respondWithError($e->getMessage());
-        }
-    }
-
-    public function deleteAllInLogWins(): array
-    {
-        try {
-            $this->logger->info('Deleting all records from logwins table and resetting gemid.');
-            $sql = "TRUNCATE TABLE logwins RESTART IDENTITY";
-            $this->db->query($sql);
-            $success = ['status' => 'success', 'ResponseCode' => 'All records deleted from logwins and logid reset.'];
-			return $success;
-        } catch (\Exception $e) {
-            $this->logger->error('Error deleting all records from logwins and resetting logid', ['exception' => $e]);
-            return $this->respondWithError($e->getMessage());
-        }
-    }
-
-    public function resetAllCollected(): array
-    {
-        $tables = ['user_post_comments', 'user_post_saves', 'user_post_views', 'user_post_reports', 'user_post_shares', 'user_post_likes', 'user_post_dislikes', 'users_info', 'gems'];
-        $responses = [];
-
-        foreach ($tables as $table) {
-            try {
-                $this->logger->info("Resetting collected field to 0 for $table where collected = 1.");
-                $sql = "UPDATE $table SET collected = 0 WHERE collected = 1";
-                $stmt = $this->db->query($sql);
-                $affectedRows = $stmt->rowCount();
-                $responses[$table] = "Collected field reset for $affectedRows rows in $table.";
-                //return ['status' => 'success', 'ResponseCode' => 'Successfully Reseted'];
-            } catch (\Exception $e) {
-                $this->logger->error("Error resetting collected field for $table", ['exception' => $e]);
-                $responses[$table] = 'Error: ' . $e->getMessage();
-                //return $this->respondWithError($e->getMessage());
-            }
-        }
-
-        $success = ['status' => 'success', 'ResponseCode' => 'Successfully Reseted'];
-		return $success;
-    }
-
 }

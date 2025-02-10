@@ -52,7 +52,7 @@ class UserMapper
             $url = $_SERVER['REQUEST_URI'] ?? 'unknown';
             $httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'unknown';
             $statusCode = http_response_code();
-            $responseTime = round((microtime(true) - ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true))) * 1000, 2); // in milliseconds
+            $responseTime = round((microtime(true) - ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true))) * 1000, 2); 
             $location = $this->getLocationFromIP($ip) ?? 'unknown';
             $actionType = $actionType ?? 'login';
 
@@ -64,8 +64,6 @@ class UserMapper
 
 			if ($query !== null) {
 				try {
-					//$mediafile = $_POST;
-					//unset($mediafile['img'], $mediafile['media'], $mediafile['image'], $mediafile['biography']);
 					$requestPayload = !empty($input) ? json_encode($input, JSON_THROW_ON_ERROR) : 'null';
 
 				} catch (\Exception $e) {
@@ -206,7 +204,7 @@ class UserMapper
         $stmt->execute($queryParams);
 
         $results = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $this->logger->info("UserMapper.fetchAll.row started");
             try {
                 $results[] = new User([
@@ -331,7 +329,7 @@ class UserMapper
         $stmt->execute($queryParams);
 
         $results = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $this->logger->info("UserMapper.fetchAll.row started");
             try {
                 $results[] = new UserAdvanced([
@@ -379,7 +377,7 @@ class UserMapper
         $stmt->execute(['username' => $username]);
 
         $results = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $results[] = new User($row);
         }
 
@@ -398,7 +396,7 @@ class UserMapper
         $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat FROM users WHERE uid = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new User($data);
@@ -415,7 +413,7 @@ class UserMapper
         $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat FROM users WHERE email = :email";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['email' => $email]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new User($data);
@@ -432,7 +430,7 @@ class UserMapper
         $sql = "SELECT uid, username, img, biography, updatedat FROM users WHERE uid = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return $data;
@@ -541,7 +539,7 @@ class UserMapper
             'offset' => $offset,
         ]);
 
-		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return $stmt->fetchAll(\PDO::FETCH_ASSOC);
 	}
 
     public function fetchFollowers(string $userId, string $currentUserId, int $offset = 0, int $limit = 10): array
@@ -576,7 +574,7 @@ class UserMapper
         ]);
 
         $results = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $results[] = new ProfilUser($row);
         }
 
@@ -621,7 +619,7 @@ class UserMapper
         ]);
 
         $results = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $results[] = new ProfilUser($row);
         }
 
@@ -720,7 +718,7 @@ class UserMapper
             'offset' => $offset,
         ]);
 
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         // Remove exact duplicates from results if any
         $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
@@ -780,7 +778,7 @@ class UserMapper
             'currentUserId' => $currentUserId,
         ]);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
     public function fetchProfileData(string $userid, string $currentUserId): Profile|false
@@ -820,7 +818,7 @@ class UserMapper
         $queryParams = [':verified' => 1, 'userid' => $userid, ':currentUserId' => $currentUserId];
         $stmt = $this->db->prepare($sql);
         $stmt->execute($queryParams);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new Profile($data);
@@ -1152,7 +1150,7 @@ class UserMapper
         try {
             $sql = "SELECT uid FROM users WHERE verified IS NULL";
             $stmt = $this->db->query($sql);
-            $unverifiedUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $unverifiedUsers = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             if ($unverifiedUsers) {
                 $this->logger->info("Fetched all unverified users from database", ['count' => count($unverifiedUsers)]);
@@ -1231,68 +1229,4 @@ class UserMapper
         $stmt = $this->db->prepare($query);
         $stmt->execute($data);
     }
-
-	public function loadByIdByAccount(string $id): User|false
-	{
-		$this->logger->info("UserMapper.loadById started");
-
-		// Query to load user details
-		$sqlUser = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
-					FROM users 
-					WHERE uid = :id";
-		$stmtUser = $this->db->prepare($sqlUser);
-		$stmtUser->execute(['id' => $id]);
-		$data = $stmtUser->fetch(PDO::FETCH_ASSOC);
-
-		if ($data === false) {
-			$this->logger->warning("No user found with id", ['id' => $id]);
-			return false;
-		}
-
-		// Query to load dailyfree stats
-		$sqlDailyFree = "SELECT 
-							COALESCE(liken, 0) AS liken, 
-							COALESCE(comments, 0) AS comments, 
-							COALESCE(posten, 0) AS posten 
-						 FROM dailyfree 
-						 WHERE userid = :id";
-		$stmtDailyFree = $this->db->prepare($sqlDailyFree);
-		$stmtDailyFree->execute(['id' => $id]);
-		$dailyFreeData = $stmtDailyFree->fetch(PDO::FETCH_ASSOC);
-
-		// Set default values if no dailyfree data exists
-		if ($dailyFreeData === false) {
-			$dailyFreeData = ['liken' => 0, 'comments' => 0, 'posten' => 0];
-		}
-
-		// Query to check the user's liquidity
-		$sqlLiquidity = "SELECT 
-							COALESCE(SUM(numbers), 0) AS total_liquidity 
-						 FROM wallet 
-						 WHERE userid = :id";
-		$stmtLiquidity = $this->db->prepare($sqlLiquidity);
-		$stmtLiquidity->execute(['id' => $id]);
-		$liquidityData = $stmtLiquidity->fetch(PDO::FETCH_ASSOC);
-
-		// Set default value if no wallet data exists
-		$totalLiquidity = $liquidityData['total_liquidity'] ?? 0;
-
-		// Add daily usage and liquidity data to the user object
-		$user = new User($data);
-		$user->dailyFree = [
-			'liken' => $dailyFreeData['liken'],
-			'comments' => $dailyFreeData['comments'],
-			'posten' => $dailyFreeData['posten'],
-			'max_likes' => 3,
-			'max_comments' => 4,
-			'max_posten' => 1
-		];
-		$user->liquidity = $totalLiquidity;
-
-		// Log daily usage and liquidity for debug purposes
-		$this->logger->info("Daily free stats", ['dailyFree' => $user->dailyFree]);
-		$this->logger->info("Total liquidity", ['totalLiquidity' => $totalLiquidity]);
-
-		return $user;
-	}
 }

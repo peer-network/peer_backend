@@ -138,7 +138,7 @@ class McapMapper
 		$this->logger->info('McapMapper.fetchAndUpdateMarketPrices started');
 
 		try {
-			$numberoftokens = (float) $this->db->query('SELECT SUM(numbers) FROM wallet')->fetchColumn() ?: 0;
+			$numberoftokens = (float) $this->db->query('SELECT SUM(liquidity) FROM wallett')->fetchColumn() ?: 0;
 			$numberofgems = (float) $this->db->query('SELECT SUM(gems) FROM gems WHERE collected = 0')->fetchColumn() ?: 0;
 
 			if ($numberoftokens === 0 || $numberofgems === 0) {

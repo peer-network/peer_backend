@@ -12,6 +12,7 @@ class Post
     protected string $title;
     protected string $contenttype;
     protected string $media;
+    protected string $cover;
     protected string $mediadescription;
     protected string $createdat;
 
@@ -26,6 +27,7 @@ class Post
         $this->title = $data['title'] ?? '';
         $this->contenttype = $data['contenttype'] ?? 'text';
         $this->media = $data['media'] ?? '';
+        $this->cover = $data['cover'] ?? '';
         $this->mediadescription = $data['mediadescription'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
@@ -51,6 +53,7 @@ class Post
             'title' => $this->title,
             'contenttype' => $this->contenttype,
             'media' => $this->media,
+            'cover' => $this->cover,
             'mediadescription' => $this->mediadescription,
             'createdat' => $this->createdat,
         ];
@@ -129,7 +132,7 @@ class Post
             ],
 			'title' => [
 				'required' => false,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
+				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
 				'validators' => [
 					['name' => 'StringLength', 'options' => [
 						'min' => 3,
@@ -158,9 +161,20 @@ class Post
                     ['name' => 'isString'],
                 ],
             ],
+            'cover' => [
+                'required' => false,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 30,
+                        'max' => 244,
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
             'mediadescription' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
+				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
 				'validators' => [
 					['name' => 'StringLength', 'options' => [
 						'min' => 3,

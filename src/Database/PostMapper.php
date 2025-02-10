@@ -348,9 +348,9 @@ class PostMapper
 		$data = $post->getArrayCopy();
 
 		$query = "INSERT INTO posts 
-				  (postid, userid, feedid, title, media, mediadescription, contenttype, createdat)
+				  (postid, userid, feedid, title, media, cover, mediadescription, contenttype, createdat)
 				  VALUES 
-				  (:postid, :userid, :feedid, :title, :media, :mediadescription, :contenttype, :createdat)";
+				  (:postid, :userid, :feedid, :title, :media, :cover, :mediadescription, :contenttype, :createdat)";
 
 		try {
 			$stmt = $this->db->prepare($query);
@@ -361,6 +361,7 @@ class PostMapper
 			$stmt->bindValue(':feedid', $data['feedid'], \PDO::PARAM_STR);
 			$stmt->bindValue(':title', $data['title'], \PDO::PARAM_STR);
 			$stmt->bindValue(':media', $data['media'], \PDO::PARAM_STR);
+			$stmt->bindValue(':cover', $data['cover'], \PDO::PARAM_STR);
 			$stmt->bindValue(':mediadescription', $data['mediadescription'], \PDO::PARAM_STR);
 			$stmt->bindValue(':contenttype', $data['contenttype'], \PDO::PARAM_STR);
 			$stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
@@ -393,7 +394,7 @@ class PostMapper
 
         $from = $args['from'] ?? null;
         $to = $args['to'] ?? null;
-        $filterBy = $args['filterBy'] ?? '*';
+        $filterBy = $args['filterBy'] ?? [];
         $sortBy = $args['sortBy'] ?? null;
         $title = $args['title'] ?? null;
         $tag = $args['tag'] ?? null; 
@@ -426,7 +427,6 @@ class PostMapper
             $params['to'] = $to;
         }
 
-        // New Tag Filtering
         if ($tag !== null) {
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
@@ -436,18 +436,43 @@ class PostMapper
             $params['tag'] = $tag;
         }
 
-        $filterClause = match ($filterBy) {
-            'IMAGE' => "p.contenttype = 'image'",
-            'AUDIO' => "p.contenttype = 'audio'",
-            'VIDEO' => "p.contenttype = 'video'",
-            'TEXT' => "p.contenttype = 'text'",
-            'FOLLOWED' => "p.userid IN (SELECT followedid FROM follows WHERE followerid = :currentUserId)",
-            'FOLLOWER' => "p.userid IN (SELECT followerid FROM follows WHERE followedid = :currentUserId)",
-            default => null,
-        };
-        if ($filterClause) {
-            $whereClauses[] = $filterClause;
-        }
+		if (!empty($filterBy) && is_array($filterBy)) {
+			$validTypes = [];
+			$userFilters = [];
+
+			$mapping = [
+				'IMAGE' => 'image',
+				'AUDIO' => 'audio',
+				'VIDEO' => 'video',
+				'TEXT' => 'text',
+			];
+
+			$userMapping = [
+				'FOLLOWED' => "p.userid IN (SELECT followedid FROM follows WHERE followerid = :currentUserId)",
+				'FOLLOWER' => "p.userid IN (SELECT followerid FROM follows WHERE followedid = :currentUserId)",
+			];
+
+			foreach ($filterBy as $type) {
+				if (isset($mapping[$type])) {
+					$validTypes[] = $mapping[$type]; 
+				} elseif (isset($userMapping[$type])) {
+					$userFilters[] = $userMapping[$type]; 
+				}
+			}
+
+			if (!empty($validTypes)) {
+				$placeholders = implode(", ", array_map(fn($k) => ":filter$k", array_keys($validTypes)));
+				$whereClauses[] = "p.contenttype IN ($placeholders)";
+
+				foreach ($validTypes as $key => $value) {
+					$params["filter$key"] = $value;
+				}
+			}
+
+			if (!empty($userFilters)) {
+				$whereClauses[] = "(" . implode(" OR ", $userFilters) . ")";
+			}
+		}
 
         $orderBy = match ($sortBy) {
             'NEWEST' => "p.createdat DESC",
@@ -468,6 +493,7 @@ class PostMapper
                 p.contenttype, 
                 p.title, 
                 p.media, 
+                p.cover, 
                 p.mediadescription, 
                 p.createdat, 
                 u.username, 
@@ -518,6 +544,7 @@ class PostMapper
                     'contenttype' => $row['contenttype'],
                     'title' => $row['title'],
                     'media' => $row['media'],
+                    'cover' => $row['cover'],
                     'mediadescription' => $row['mediadescription'],
                     'createdat' => $row['createdat'],
                     'amountlikes' => (int)$row['amountlikes'],

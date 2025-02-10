@@ -12,32 +12,30 @@ type Subscription {
 type Query {
   hello: HelloResponse
 
-  searchuser(userid: ID, email: String, username: String, status: Int, verified: Int, ip: String, offset: Int, limit: Int!): UserSearchResponse
-  getallusers(offset: Int, limit: Int!): UserSearchResponse
+  searchuser(userid: ID, email: String, username: String, status: Int, verified: Int, ip: String, offset: Int, limit: Int): UserSearchResponse
+  getallusers(offset: Int, limit: Int): UserSearchResponse
   profile(userid: ID, postLimit: Int): ProfileInfo
-  follows(userid: ID, offset: Int, limit: Int!): UserFollows
-  followrelations(userid: ID, offset: Int, limit: Int!): RelationsFollow
-  friends(offset: Int, limit: Int!): UserFriends
+  follows(userid: ID, offset: Int, limit: Int): UserFollows
+  followrelations(userid: ID, offset: Int, limit: Int): RelationsFollow
+  friends(offset: Int, limit: Int): UserFriends
 
-  searchpost(title: String, postid: ID, tag: String, commentOffset: Int, commentLimit: Int!): PostResponse
-  getallposts(filterBy: FilterType, sortBy: SortType, title: String, tag: String, from: Date, to: Date, postOffset: Int, postLimit: Int!, commentOffset: Int, commentLimit: Int!): PostResponse
+  searchpost(title: String, postid: ID, tag: String, commentOffset: Int, commentLimit: Int): PostResponse
+  getallposts(filterBy: [FilterType], sortBy: SortType, title: String, tag: String, from: Date, to: Date, postOffset: Int, postLimit: Int, commentOffset: Int, commentLimit: Int): PostResponse
+
+  getpostinfo(postid: ID!): StandardResponse
+  getcommentinfo(commentid: ID!): StandardResponse
+
   parentcomments(parent: ID!): CommentResponse
-  tags(offset: Int, limit: Int!): TagSearchResponse
+
+  tags(offset: Int, limit: Int): TagSearchResponse
+  tagsearch(tagname: String!, offset: Int, limit: Int): GenericResponse
 
   searchchat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse
-  getallchats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int!, messageOffset: Int, messageLimit: Int!): ChatResponse
-  readMessages(chatid: ID!, offset: Int, limit: Int!): AddChatmessageResponse!
+  getallchats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse
+  readMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
 
-  dailyfree: StandardResponse
   dailyfreestatus: StandardResponse
-  dailyFreeFuncFront(input: DailyResponseInput!): StandardResponse
-  dailyFreeFunc(postid: ID, input: DailyResponseInput!): StandardResponse
   getpercentbeforetransaction(tokenAmount: Int!): StandardResponse
-
-  cleangems: DefaultResponse
-  cleanwallet: DefaultResponse
-  cleanlogwins: DefaultResponse
-  resetcollected: DefaultResponse
 
   refreshmarketcap: StandardResponse
   globalwins: DefaultResponse
@@ -45,12 +43,9 @@ type Query {
   gemster: StandardResponse
   gemsters(day: DayType!): GenericResponse
 
-  wallet(userid: ID, postid: ID, fromid: ID, whereby: Int, offset: Int, limit: Int!): GenericResponse
-  userwallet(postid: ID, fromid: ID, offset: Int, limit: Int!): GenericResponse
-
   currentliquidity: StandardResponse
   getuserinfo: StandardResponse
-  fetchwinslog(day: DayType!, offset: Int, limit: Int!): GenericResponse
+  fetchwinslog(day: DayType!, offset: Int, limit: Int): GenericResponse
 
 }
 
@@ -161,9 +156,6 @@ scalar Date
 scalar Tags
 
 type HelloResponse {
-  root: String
-  args: String
-  context: String
   userroles: Int
   currentuserid: String
 }
@@ -275,8 +267,6 @@ type AddChatResponse {
 
 type Chatinfo {
   chatid: ID
-  image: String
-  name: String
 }
 
 type AddChatmessageResponse {
@@ -422,6 +412,7 @@ type Post {
   contenttype: String!
   title: String!
   media: String!
+  cover: String!
   mediadescription: String!
   createdat: Date!
   amountlikes: Int!
@@ -484,6 +475,7 @@ input RegisterInput {
 input CreatePostInput {
   title: String!
   media: String!
+  cover: String
   mediadescription: String!
   contenttype: String!
   tags: [String!]

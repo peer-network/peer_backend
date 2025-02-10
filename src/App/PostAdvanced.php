@@ -11,6 +11,7 @@ class PostAdvanced
     protected ?string $feedid;
     protected string $title;
     protected string $media;
+    protected string $cover;
     protected string $mediadescription;
     protected string $contenttype;
     protected ?int $amountlikes;
@@ -41,6 +42,7 @@ class PostAdvanced
         $this->feedid = $data['feedid'] ?? null;
         $this->title = $data['title'] ?? '';
         $this->media = $data['media'] ?? '';
+        $this->cover = $data['cover'] ?? '';
         $this->mediadescription = $data['mediadescription'] ?? '';
         $this->contenttype = $data['contenttype'] ?? 'text';
         $this->amountlikes = $data['amountlikes'] ?? 0;
@@ -82,6 +84,7 @@ class PostAdvanced
             'feedid' => $this->feedid,
             'title' => $this->title,
             'media' => $this->media,
+            'cover' => $this->cover,
             'mediadescription' => $this->mediadescription,
             'contenttype' => $this->contenttype,
             'amountlikes' => $this->amountlikes,
@@ -177,7 +180,7 @@ class PostAdvanced
             ],
 			'title' => [
 				'required' => false,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
 				'validators' => [
 					['name' => 'StringLength', 'options' => [
 						'min' => 3,
@@ -197,9 +200,20 @@ class PostAdvanced
                     ['name' => 'isString'],
                 ],
             ],
-            'mediadescription' => [
+            'cover' => [
                 'required' => false,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 30,
+                        'max' => 244,
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'mediadescription' => [
+                'required' => false,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
 				'validators' => [
 					['name' => 'StringLength', 'options' => [
 						'min' => 3,
