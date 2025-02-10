@@ -294,4 +294,23 @@ class PostInfoService
 
         return $this->postInfoMapper->togglePostSaved($this->currentUserId, $postId);
     }
+
+    public function findPostInfo(string $postId): array|false
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
+
+        $this->logger->info("PostInfoService.findPostInfo started");
+
+        $postinfo = $this->postInfoMapper->loadById($postId);
+
+        if (!$postinfo) {
+            return $this->respondWithError('PostInfo not found.');
+        }
+
+		$results = $postinfo->getArrayCopy();
+
+        return $results;
+    }
 }

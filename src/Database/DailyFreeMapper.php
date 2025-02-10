@@ -244,11 +244,9 @@ class DailyFreeMapper
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$result) {
-            // Return default values if no row exists for the user today
             return array_map(fn($label) => ['name' => $label, 'value' => 0], $columnMap);
         }
 
-        // Map the database result to include column names and values
         return array_map(fn($column, $label) => [
             'name' => $label,
             'value' => (int)($result[$column] ?? 0),
@@ -280,7 +278,6 @@ class DailyFreeMapper
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$result) {
-            // If no usage data exists, return the full daily limits
             return array_map(fn($column, $label) => [
                 'name' => $label,
                 'used' => 0,
@@ -288,7 +285,6 @@ class DailyFreeMapper
             ], array_keys($columnMap), $columnMap);
         }
 
-        // Calculate availability for each action
         return array_map(fn($column, $label) => [
             'name' => $label,
             'used' => (int)($result[$column] ?? 0),
@@ -311,7 +307,6 @@ class DailyFreeMapper
         }
 
         try {
-            // Check if the user record exists
             $existsQuery = "SELECT createdat::date 
                             FROM dailyfree 
                             WHERE userid = :userId";
@@ -326,7 +321,6 @@ class DailyFreeMapper
                 $isToday = $recordDate === date('Y-m-d');
 
                 if ($isToday) {
-                    // Update the specific column for today
                     $updateQuery = "UPDATE dailyfree 
                                     SET $column = $column + 1 
                                     WHERE userid = :userId 
@@ -335,7 +329,6 @@ class DailyFreeMapper
                     $updateStmt = $this->db->prepare($updateQuery);
                     return $updateStmt->execute(['userId' => $userId]);
                 } else {
-                    // Reset limits for a new day and increment the specific column
                     $resetQuery = "UPDATE dailyfree 
                                    SET liken = :liken, comments = :comments, posten = :posten, createdat = NOW()
                                    WHERE userid = :userId";
@@ -351,7 +344,6 @@ class DailyFreeMapper
                     return $resetStmt->execute($resetParams);
                 }
             } else {
-                // Insert a new record if no existing record is found
                 $insertQuery = "INSERT INTO dailyfree (userid, liken, comments, posten, createdat)
                                 VALUES (:userId, :liken, :comments, :posten, NOW())";
 
@@ -366,7 +358,6 @@ class DailyFreeMapper
                 return $insertStmt->execute($insertParams);
             }
         } catch (\Exception $e) {
-            // Log any errors for debugging
             $this->logger->error('Error incrementing user daily usage', [
                 'userId' => $userId,
                 'artType' => $artType,

@@ -82,6 +82,51 @@ class TagMapper
         return false;
     }
 
+	public function searchByName(?array $args = []): array|false
+	{
+		$this->logger->info("TagMapper.loadByName started");
+
+		$offset = max((int)($args['offset'] ?? 0), 0);
+		$limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+
+		$name = strtolower($args['tagname']);
+
+		$sql = "SELECT * FROM tags WHERE name ILIKE :name ORDER BY name ASC LIMIT :limit OFFSET :offset";
+
+        try {
+			$stmt = $this->db->prepare($sql);
+			
+			$searchTerm = '%' . $name . '%';
+			$stmt->bindValue(':name', $searchTerm, \PDO::PARAM_STR);
+			$stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+			$stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+
+			$stmt->execute();
+			$data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+			if (!empty($data)) {
+				$this->logger->info("Tags found with name", ['data' => $data]);
+
+				$tags = [];
+				foreach ($data as $row) {
+					$tags[] = new Tag($row);
+				}
+
+				return $tags;
+			}
+        } catch (\PDOException $e) {
+            $this->logger->error("Error fetching tags from database", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return false;
+        }
+
+		$this->logger->warning("No tags found with name", ['name' => $name]);
+
+		return false;
+	}
+
     public function insert(Tag $tag): Tag|false
     {
         $this->logger->info("TagMapper.insert started");

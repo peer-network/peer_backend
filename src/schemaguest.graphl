@@ -23,9 +23,6 @@ type StandardResponse {
 scalar JSON
 
 type HelloResponse {
-  root: String
-  args: String
-  context: String
   currentuserid: ID
 }
 

@@ -393,10 +393,16 @@ class DailyFreeService
 		$this->logger->info('DailyFreeService.getUserDailyAvailability started');
 
 		try {
-			$results = $this->dailyFreeMapper->getUserDailyAvailability($userId);
+			$affectedRows = $this->dailyFreeMapper->getUserDailyAvailability($userId);
 
-			if ($results !== false) {
-				return $results;
+			if ($affectedRows !== false) {
+
+                $success = [
+                    'status' => 'success',
+                    'ResponseCode' => 'DailyFree data prepared successfully',
+                    'affectedRows' => $affectedRows,
+                ];
+				return $success;
 			}
 
 			return [];
