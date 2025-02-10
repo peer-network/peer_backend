@@ -169,4 +169,23 @@ class CommentInfoService
             'affectedRows' => $commentInfo->getReports(),
         ];
     }
+
+    public function findCommentInfo(string $commentId): array|false
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
+
+        $this->logger->info("CommentInfoService.findCommentInfo started");
+
+        $commentinfo = $this->commentInfoMapper->loadById($commentId);
+
+        if (!$commentinfo) {
+            return $this->respondWithError('Commentinfo not found.');
+        }
+
+		$results = $commentinfo->getArrayCopy();
+
+        return $results;
+    }
 }

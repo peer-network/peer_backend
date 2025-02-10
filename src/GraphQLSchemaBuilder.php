@@ -188,24 +188,12 @@ class GraphQLSchemaBuilder
             'Mutation' => $this->buildMutationResolvers(),
             'Subscription' => $this->buildSubscriptionResolvers(),
 			'HelloResponse' => [
-				'root' => function (array $root): string {
+				'currentuserid' => function (array $root): string {
 					$this->logger->info('Query.HelloResponse Resolvers');
-					return $root['root'] ?? '';
-				},
-				'args' => function (array $root): string {
-					return $root['args'] ?? '';
-				},
-				'context' => function (array $root): string {
-					return $root['context'] ?? '';
+					return $root['currentuserid'] ?? '';
 				},
 				'userroles' => function (array $root): int {
 					return $root['userroles'] ?? 0;
-				},
-				'wallet' => function (array $root): int {
-					return $root['wallet'] ?? 0;
-				},
-				'currentuserid' => function (array $root): string {
-					return $root['currentuserid'] ?? '';
 				},
 			],
 			'RegisterResponse' => [
@@ -518,6 +506,9 @@ class GraphQLSchemaBuilder
 				'media' => function (array $root): string {
 					return $root['media'] ?? '';
 				},
+				'cover' => function (array $root): string {
+					return $root['cover'] ?? '';
+				},
 				'mediadescription' => function (array $root): string {
 					return $root['mediadescription'] ?? '';
 				},
@@ -733,14 +724,8 @@ class GraphQLSchemaBuilder
                 },
 			],
 			'Chatinfo' => [
-				'image' => function (array $root): string {
-					$this->logger->info('Query.Chatinfo Resolvers');
-					return $root['image'] ?? '';
-				},
-				'name' => function (array $root): string {
-					return $root['name'] ?? '';
-				},
 				'chatid' => function (array $root): string {
+					$this->logger->info('Query.Chatinfo Resolvers');
 					return $root['chatid'] ?? '';
 				},
 			],
@@ -971,45 +956,28 @@ class GraphQLSchemaBuilder
 
         return [
             'hello' => fn(mixed $root, array $args, mixed $context) => $this->resolveHello($root, $args, $context),
-
             'searchuser' => fn(mixed $root, array $args) => $this->resolveSearchUser($args),
             'getallusers' => fn(mixed $root, array $args) => $this->resolveUsers($args),
             'profile' => fn(mixed $root, array $args) => $this->resolveProfile($args),
             'follows' => fn(mixed $root, array $args) => $this->resolveFollows($args),
             'followrelations' => fn(mixed $root, array $args) => $this->resolveFollowRelations($args),
             'friends' => fn(mixed $root, array $args) => $this->resolveFriends($args),
-
             'searchpost' => fn(mixed $root, array $args) => $this->resolvePost($args),
             'getallposts' => fn(mixed $root, array $args) => $this->resolvePosts($args),
+            'getpostinfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
+            'getcommentinfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentid']),
             'parentcomments' => fn(mixed $root, array $args) => $this->resolveComments($args),
             'tags' => fn(mixed $root, array $args) => $this->resolveTags($args),
-			
-
+            'tagsearch' => fn(mixed $root, array $args) => $this->resolveTagsearch($args),
             'searchchat' => fn(mixed $root, array $args) => $this->resolveChat($args),
             'getallchats' => fn(mixed $root, array $args) => $this->resolveChats($args),
             'readMessages' => fn(mixed $root, array $args) => $this->chatService->readChatMessages($args),
-
-            'dailyfree' => fn(mixed $root, array $args) => $this->resolveDailyFree(),
             'dailyfreestatus' => fn(mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
-            'dailyFreeFuncFront' => fn(mixed $root, array $args) => $this->resolveDailyFreeFuncFront($args),
-            'dailyFreeFunc' => fn(mixed $root, array $args) => $this->resolveDailyFreeFunc($args),
-
             'getpercentbeforetransaction' => fn(mixed $root, array $args) => $this->resolveBeforeTransaction($args),
-
-            'cleangems' => fn(mixed $root, array $args) => $this->walletService->deleteAllInGems(),
-            'cleanwallet' => fn(mixed $root, array $args) => $this->walletService->deleteAllInWallet(),
-            'cleanlogwins' => fn(mixed $root, array $args) => $this->walletService->deleteAllInLogWin(),
-            'resetcollected' => fn(mixed $root, array $args) => $this->walletService->resetCollected(),
-
             'refreshmarketcap' => fn(mixed $root, array $args) => $this->resolveMcap(),
             'globalwins' => fn(mixed $root, array $args) => $this->walletService->callGlobalWins(),
-
             'gemster' => fn(mixed $root, array $args) => $this->walletService->callGemster(),
             'gemsters' => fn(mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
-
-            'wallet' => fn(mixed $root, array $args) => $this->resolveWallet($args),
-            'userwallet' => fn(mixed $root, array $args) => $this->resolveUserWallet($args),
-
             'currentliquidity' => fn(mixed $root, array $args) => $this->resolveLiquidity(),
             'getuserinfo' => fn(mixed $root, array $args) => $this->resolveUserInfo(),
             'fetchwinslog' => fn(mixed $root, array $args) => $this->walletService->callFetchWinsLog($args),
@@ -1041,17 +1009,11 @@ class GraphQLSchemaBuilder
             'addMessage' => fn(mixed $root, array $args) => $this->chatService->addMessage($args['chatid'], $args['content']),
             'remMessage' => fn(mixed $root, array $args) => $this->chatService->removeMessage($args['chatid'], $args['messid']),
             'deletePost' => fn(mixed $root, array $args) => $this->postService->deletePost($args['id']),
-
-
 			'likeComment' => fn(mixed $root, array $args) => $this->commentInfoService->likeComment($args['commentid']),
 			'reportComment' => fn(mixed $root, array $args) => $this->commentInfoService->reportComment($args['commentid']),
-
 			'contactus' => fn(mixed $root, array $args) => $this->ContactUs($args),
-
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
-
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
-
             'resolveActionPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
         ];
     }
@@ -1202,18 +1164,9 @@ class GraphQLSchemaBuilder
 
     protected function resolveHello(mixed $root, array $args, mixed $context): array
     {
-        /*
-        $captchaToken = $args['captcha'] ?? '';
-        if (!$this->validateCaptcha($captchaToken)) {
-            return $this->respondWithError('CAPTCHA verification failed. Please try again.');
-        }
-        */
         $this->logger->info('Query.hello started', ['args' => $args]);
 
         return [
-            'root' => json_encode($root),
-            'args' => json_encode($args),
-            'context' => json_encode($context),
             'userroles' => $this->userRoles,
             'currentuserid' => $this->currentUserId
         ];
@@ -1251,7 +1204,7 @@ class GraphQLSchemaBuilder
 		}
 
 		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+			//return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
 		}
 
         $this->logger->info('Query.resolveTags started');
@@ -1263,141 +1216,24 @@ class GraphQLSchemaBuilder
         return $this->respondWithError('No tags found');
     }
 
-	protected function resolveDailyFree(): ?array
-	{
+    protected function resolveTagsearch(array $args): ?array
+    {
 		if (!$this->checkAuthentication()) {
 			return $this->respondWithError('Unauthorized');
 		}
 
-		$this->logger->info('Query.resolveDailyFree started');
-
-		$results = $this->dailyFreeService->loadById($this->currentUserId);
-		if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Query.resolveDailyFree successful');
-
-			return $results;
+		if (empty($args['tagname'])) {
+			return $this->respondWithError('No arguments provided. Please provide valid args parameters.');
 		}
 
-		if (isset($results['status']) && $results['status'] === 'error') {
-            return $this->respondWithError($results['ResponseCode']);
-		}
+        $this->logger->info('Query.resolveTagsearch started');
+        $data = $this->tagService->loadTag($args);
+        if ($data !== false) {
+            return $data;
+        }
 
-        $this->logger->warning('Query.resolveDailyFree Failed to find dailyfree');
-        return $this->respondWithError('Failed to find dailyfree');
-	}
-
-	protected function resolveDailyFreeFuncFront(?array $args = []): array
-	{
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
-
-		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
-		}
-
-		if (!isset($args['input'])) {
-			return $this->respondWithError('No input arguments provided. Please provide valid input parameters.');
-		}
-
-		$input = $args['input'];
-
-		$liken = isset($input['liken']) ? trim($input['liken']) : null;
-		$comments = isset($input['comments']) ? trim($input['comments']) : null;
-		$posten = isset($input['posten']) ? trim($input['posten']) : null;
-
-		$activeParams = array_filter([$liken, $comments, $posten], function ($param) {
-			return $param !== null;
-		});
-
-		if (count($activeParams) !== 1) {
-			return $this->respondWithError('Exactly one of liken, comments, or posten must be provided.');
-		}
-
-		$this->logger->info('Query.resolveDailyFreeFuncFront started');
-
-		$paramKey = null;
-		if ($liken !== null) {
-			$paramKey = LIKE_;
-		} elseif ($comments !== null) {
-			$paramKey = COMMENT_;
-		} elseif ($posten !== null) {
-			$paramKey = POST_;
-		}
-
-		$results = $this->dailyFreeService->dailyFreeFuncFront($this->currentUserId, $paramKey);
-
-		if (isset($results['status']) && $results['status'] === 'success') {
-			$this->logger->info('Query.resolveDailyFreeFuncFront successful');
-			return $results;
-		}
-
-		if (isset($results['status']) && $results['status'] === 'error') {
-			return $this->respondWithError($results['ResponseCode']);
-		}
-
-		$this->logger->warning('Query.resolveDailyFreeFuncFront Failed funcfront');
-		return $this->respondWithError('Failed to funcfront');
-	}
-
-	protected function resolveDailyFreeFunc(?array $args = []): array
-	{
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
-
-		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
-		}
-
-		if (!isset($args['input'])) {
-			return $this->respondWithError('No input arguments provided. Please provide valid input parameters.');
-		}
-
-		$input = $args['input'];
-
-		$postId = isset($args['postid']) ? trim($args['postid']) : null;
-		$liken = isset($input['liken']) ? trim($input['liken']) : null;
-		$comments = isset($input['comments']) ? trim($input['comments']) : null;
-		$posten = isset($input['posten']) ? trim($input['posten']) : null;
-
-		if ($postId !== null && !self::isValidUUID($postId)) {
-			return $this->respondWithError('Invalid uuid input');
-		}
-
-		$activeParams = array_filter([$liken, $comments, $posten], function ($param) {
-			return $param !== null;
-		});
-
-		if (count($activeParams) !== 1) {
-			return $this->respondWithError('Exactly one of liken, comments, or posten must be provided.');
-		}
-
-		$this->logger->info('Query.resolveDailyFreeFunc started');
-
-		$paramKey = null;
-		if ($liken !== null) {
-			$paramKey = LIKE_;
-		} elseif ($comments !== null) {
-			$paramKey = COMMENT_;
-		} elseif ($posten !== null) {
-			$paramKey = POST_;
-		}
-
-		$results = $this->dailyFreeService->dailyFreeFunc($this->currentUserId, $postId, $paramKey);
-
-		if (isset($results['status']) && $results['status'] === 'success') {
-			$this->logger->info('Query.resolveDailyFreeFunc successful');
-			return $results;
-		}
-
-		if (isset($results['status']) && $results['status'] === 'error') {
-			return $this->respondWithError($results['ResponseCode']);
-		}
-
-		$this->logger->warning('Query.resolveDailyFreeFunc Failed funcfront');
-		return $this->respondWithError('Failed to funcfront');
-	}
+        return $this->respondWithError('No tags found');
+    }
 
 	protected function resolveBeforeTransaction(?array $args = []): array
 	{
@@ -1547,79 +1383,16 @@ class GraphQLSchemaBuilder
 
         $this->logger->info('Query.resolveSearchUser started');
 
-        $data = $this->userMapper->fetchAllAdvance($args, $this->currentUserId);
+        $data = $this->userService->fetchAllAdvance($args);
 
         if ($data && count($data) > 0) {
-            $daten = array_map(
-                fn(\Fawaz\App\UserAdvanced $user) => $user->getArrayCopy(),
-                $data
-            );
+            $this->logger->info('Query.resolveSearchUser.fetchAll successful', ['userCount' => count($data)]);
 
-            $this->logger->info('Query.resolveSearchUser.fetchAll successful', ['userCount' => count($daten)]);
-
-            return [
-                'status' => 'success',
-				'counter' => count($data),
-                'ResponseCode' => 'Success getting all users',
-                'affectedRows' => $daten,
-            ];
+            return $data;
         }
 
         return $this->respondWithError('No users founds');
     }
-
-    protected function resolveWallet(array $args): ?array
-    {
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
-
-		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
-		}
-
-        $this->logger->info('Query.resolveWallet started');
-
-        $data = $this->walletService->fetchAll($args);
-        if ($data !== false) {
-            return [
-                'status' => 'success',
-                'counter' => count($data),
-                'ResponseCode' => 'Success get all transactions',
-                'affectedRows' => $data,
-            ];
-        }
-
-        $this->logger->warning('Query.resolveWallet No transactions found');
-        return $this->respondWithError('No transactions found.');
-    }
-
-	protected function resolveUserWallet(array $args): ?array
-	{
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
-
-		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
-		}
-
-		$this->logger->info('Query.resolveUserWallet started');
-
-		$results = $this->walletService->fetchWalletById($args);
-		if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Query.resolveUserWallet successful');
-
-			return $results;
-		}
-
-		if (isset($results['status']) && $results['status'] === 'error') {
-            return $this->respondWithError($results['ResponseCode']);
-		}
-
-        $this->logger->warning('Query.resolveUserWallet Failed to find user transactions');
-        return $this->respondWithError('Failed to find user transactions');
-	}
 
     protected function resolveFollows(array $args): ?array
     {
@@ -1628,7 +1401,7 @@ class GraphQLSchemaBuilder
 		}
 
 		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+			//return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
 		}
 
         $this->logger->info('Query.resolveFollows started');
@@ -1655,7 +1428,7 @@ class GraphQLSchemaBuilder
 		}
 
 		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+			//return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
 		}
 
         $this->logger->info('Query.resolveFollowRelations started');
@@ -1682,7 +1455,7 @@ class GraphQLSchemaBuilder
 		}
 
 		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+			//return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
 		}
 
         if (isset($args['userid']) && !self::isValidUUID($args['userid'])) {
@@ -1713,7 +1486,7 @@ class GraphQLSchemaBuilder
 		}
 
 		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+			//return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
 		}
 
         $this->logger->info('Query.resolveFriends started');
@@ -1797,7 +1570,7 @@ class GraphQLSchemaBuilder
 		}
 
 		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+			//return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
 		}
 
         $this->logger->info('Query.resolveUsers started');
@@ -1855,7 +1628,7 @@ class GraphQLSchemaBuilder
 		}
 
 		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+			//return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
 		}
 
         $this->logger->info('Query.resolveChats started');
@@ -1889,7 +1662,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($args)) {
-            return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+            //return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
         }
 
         $title = isset($args['title']) ? trim($args['title']) : '';
@@ -1951,6 +1724,76 @@ class GraphQLSchemaBuilder
         ];
     }
 
+    protected function resolvePostInfo(string $postId): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized access. Please authenticate.');
+        }
+
+        if (empty($postId)) {
+            return $this->respondWithError('No arguments provided. Please provide valid postId parameters.');
+        }
+
+        if (!empty($postId) && !self::isValidUUID($postId)) {
+            return $this->respondWithError('Invalid postid format. Please provide a valid UUID.');
+        }
+
+        $this->logger->info('Query.resolvePostInfo started');
+
+        $postId = isset($postId) ? trim($postId) : '';
+
+        if (!empty($postId)) {
+            $posts = $this->postInfoService->findPostInfo($postId);
+
+            if ($posts === false) {
+                return $this->respondWithError('No post found for the provided postId.');
+            }
+        } else {
+            return $this->respondWithError('Unable to locate a post with the provided information.');
+        }
+
+        return [
+            'status' => 'success',
+            'ResponseCode' => 'Successfully retrieved post info.',
+            'affectedRows' => $posts,
+        ];
+    }
+
+    protected function resolveCommentInfo(string $commentId): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized access. Please authenticate.');
+        }
+
+        if (empty($commentId)) {
+            return $this->respondWithError('No arguments provided. Please provide valid commentId parameters.');
+        }
+
+        if (!empty($commentId) && !self::isValidUUID($commentId)) {
+            return $this->respondWithError('Invalid commentId format. Please provide a valid UUID.');
+        }
+
+        $this->logger->info('Query.resolveCommentInfo started');
+
+        $commentId = isset($commentId) ? trim($commentId) : '';
+
+        if (!empty($commentId)) {
+            $comments = $this->commentInfoService->findCommentInfo($commentId);
+
+            if ($comments === false) {
+                return $this->respondWithError('No comment found for the provided commentId.');
+            }
+        } else {
+            return $this->respondWithError('Unable to locate a comment with the provided information.');
+        }
+
+        return [
+            'status' => 'success',
+            'ResponseCode' => 'Successfully retrieved comment info.',
+            'affectedRows' => $comments,
+        ];
+    }
+
     protected function resolvePosts(array $args): ?array
     {
 		if (!$this->checkAuthentication()) {
@@ -1958,7 +1801,7 @@ class GraphQLSchemaBuilder
 		}
 
 		if (empty($args)) {
-			return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+			//return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
 		}
 
         $this->logger->info('Query.resolvePosts started');

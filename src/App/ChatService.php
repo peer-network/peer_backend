@@ -188,7 +188,7 @@ class ChatService
 			return [
 				'status' => 'success',
 				'ResponseCode' => 'Chat and participants created successfully',
-				'affectedRows' => $chatData,
+				'affectedRows' => ['chatid' => $chatId],
 			];
 		} catch (\Exception $e) {
 			$this->logger->error('Failed to create chat and participants', ['args' => $args, 'exception' => $e]);

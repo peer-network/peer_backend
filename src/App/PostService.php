@@ -97,6 +97,7 @@ class PostService
             'contenttype' => $args['contenttype'],
             'title' => $args['title'],
             'media' => null,
+            'cover' => null,
             'mediadescription' => $args['mediadescription'] ?? null,
             'createdat' => $createdAt,
         ];
@@ -118,10 +119,20 @@ class PostService
                 $postData['media'] = $mediaPath;
             }
 
+            if (isset($args['cover']) && !empty($args['cover'])) {
+                $coverPath = $this->fileUploader->handleFileUpload($args['cover'], 'image', $postId.'_cover', false);
+                if ($coverPath === null) {
+                    return $this->respondWithError('Media upload failed');
+                }
+                $postData['cover'] = $coverPath;
+            }
+
             $post = new Post($postData);
             $this->postMapper->insert($post);
 
-            $this->handleTags($args['tags'] ?? [], $postId, $createdAt);
+            if (isset($args['tags']) && is_array($args['tags'])) {
+				$this->handleTags($args['tags'], $postId, $createdAt);
+            }
 
             if (!$postData['feedid']) {
                 $this->insertPostMetadata($postId, $this->currentUserId);
@@ -153,6 +164,7 @@ class PostService
             
             if (!$tag) {
 				$this->logger->info('get tag name', ['tagName' => $tagName]);
+				unset($tag);
                 $tag = $this->createTag($tagName);
             }
             
@@ -180,7 +192,7 @@ class PostService
         }
     }
 
-    private function createTag(string $tagName): Tag
+    private function createTag(string $tagName): Tag|false
     {
         $tagId = 0;
         $tag = new Tag(['tagid' => $tagId, 'name' => $tagName]);

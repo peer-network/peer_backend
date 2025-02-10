@@ -182,43 +182,6 @@ class WalletService
         return $this->walletMapper->callGlobalWins();
     }
 
-    public function resetCollected(): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
-        }
-
-        return $this->walletMapper->resetAllCollected();
-    }
-
-    public function deleteAllInGems(): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
-        }
-
-        return $this->walletMapper->deleteAllInGems();
-    }
-
-    public function deleteAllInWallet(): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
-        }
-
-        return $this->walletMapper->deleteAllInWallet();
-    }
-
-    public function deleteAllInLogWin(): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
-        }
-
-        return $this->walletMapper->deleteAllInLogWins();
-    }
-
-
     public function callGemster(): array
     {
         if (!$this->checkAuthentication()) {

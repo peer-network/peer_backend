@@ -106,12 +106,10 @@ class TagService
 	{
 		$this->logger->info("TagService.fetchAll started");
 
-		// Sanitize and validate offset and limit
 		$offset = max((int)($args['offset'] ?? 0), 0);
 		$limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
 		try {
-			// Fetch tags and map them to array format
 			$tags = $this->tagMapper->fetchAll($offset, $limit);
 			$result = array_map(fn(Tag $tag) => $tag->getArrayCopy(), $tags);
 
@@ -122,54 +120,36 @@ class TagService
 		}
 	}
 
-	public function loadById(string $tagId): array
-	{
-		return $this->loadTag('id', $tagId);
-	}
-
-	public function loadByName(string $name): array
-	{
-		return $this->loadTag('name', $name);
-	}
-
-	private function loadTag(string $type, string $value): array
+	public function loadTag(array $args): array
 	{
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
         }
 
-		if ($value === '') {
-			return $this->respondWithError('At least one of ' . $type . ' is required.');
-		}
-
-		if ($type === 'id' && !self::isValidUUID($value)) {
-			return $this->respondWithError('Invalid tagId provided.');
+		if (empty($args)) {
+			return $this->respondWithError('At least one of args is required.');
 		}
 
 		$this->logger->info("TagService.loadTag started");
 
 		try {
-			$tags = ($type === 'id') ? $this->tagMapper->loadById($value) : $this->tagMapper->loadByName($value);
+			$tags = $this->tagMapper->searchByName($args);
 
 			if ($tags === false) {
 				return $this->respondWithError('Failed to fetch tags from database.');
 			}
 
-			$tagData = array_map(fn(Tag $tag) => $tag->getArrayCopy(), $tags);
-
 			$this->logger->info("TagService.loadTag successfully fetched tags", [
-				'type' => $type,
-				'value' => $value,
-				'count' => count($tagData),
+				'count' => count($tags),
 			]);
 
-			return $tagData;
+			$tagData = array_map(fn(Tag $tag) => $tag->getName(), $tags);
+
+			return $this->createSuccessResponse('Tags fetched successfully', $tagData);
 
 		} catch (\Throwable $e) {
 			$this->logger->error("Error occurred in TagService.loadTag", [
 				'error' => $e->getMessage(),
-				'type' => $type,
-				'value' => $value,
 			]);
 			return $this->respondWithError('An internal error occurred.');
 		}
