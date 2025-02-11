@@ -122,14 +122,6 @@ class TagService
 
 	public function loadTag(array $args): array
 	{
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
-        }
-
-		if (empty($args)) {
-			return $this->respondWithError('At least one of args is required.');
-		}
-
 		$this->logger->info("TagService.loadTag started");
 
 		try {
@@ -143,9 +135,9 @@ class TagService
 				'count' => count($tags),
 			]);
 
-			$tagData = array_map(fn(Tag $tag) => $tag->getName(), $tags);
+			$result = array_map(fn(Tag $tag) => $tag->getArrayCopy(), $tags);
 
-			return $this->createSuccessResponse('Tags fetched successfully', $tagData);
+			return $this->createSuccessResponse('Tags fetched successfully', $result);
 
 		} catch (\Throwable $e) {
 			$this->logger->error("Error occurred in TagService.loadTag", [
