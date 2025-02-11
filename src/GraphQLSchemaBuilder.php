@@ -980,16 +980,28 @@ class GraphQLSchemaBuilder
 					return $root['affectedRows'] ?? [];
 				},
 			],
-            'DailyResponse' => [
-				'liken' => function (array $root): int {
-					$this->logger->info('Query.DailyResponse Resolvers', ['root' => $root]);
-					return $root['liken'] ?? 0;
+			'GetDailyResponse' => [
+				'status' => function (array $root): string {
+					$this->logger->info('Query.GetDailyResponse Resolvers');
+					return $root['status'] ?? '';
 				},
-                'comments' => function (array $root): int {
-                    return $root['comments'] ?? 0;
+				'ResponseCode' => function (array $root): string {
+					return $root['ResponseCode'] ?? '';
+				},
+				'affectedRows' => function (array $root): array {
+					return $root['affectedRows'] ?? [];
+				},
+			],
+            'DailyResponse' => [
+				'name' => function (array $root): string {
+					$this->logger->info('Query.DailyResponse Resolvers', ['root' => $root]);
+					return $root['name'] ?? '';
+				},
+                'used' => function (array $root): int {
+                    return $root['used'] ?? 0;
                 },
-                'posten' => function (array $root): int {
-                    return $root['posten'] ?? 0;
+                'available' => function (array $root): int {
+                    return $root['available'] ?? 0;
                 },
             ],
 			'CurrentLiquidity' => [
