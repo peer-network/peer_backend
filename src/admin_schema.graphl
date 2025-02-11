@@ -28,7 +28,7 @@ type Query {
   searchchat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse!
   getallchats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
   readMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
-  dailyfreestatus: StandardResponse!
+  dailyfreestatus: GetDailyResponse!
   getpercentbeforetransaction(tokenAmount: Int!): StandardResponse!
   refreshmarketcap: StandardResponse!
   globalwins: DefaultResponse!
@@ -116,12 +116,6 @@ enum DayType {
   Y0
 }
 
-input DailyResponseInput {
-  liken: Int
-  comments: Int
-  posten: Int
-}
-
 type GenericResponse {
   status: String!
   counter: Int!
@@ -144,10 +138,16 @@ type HelloResponse {
   currentuserid: String
 }
 
+type GetDailyResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: [DailyResponse]
+}
+
 type DailyResponse {
-  liken: Int
-  comments: Int
-  posten: Int
+  name: String!
+  used: Int!
+  available: Int!
 }
 
 type CurrentLiquidity {
