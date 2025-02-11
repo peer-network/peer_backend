@@ -155,6 +155,12 @@ type CurrentLiquidity {
   currentliquidity: Decimal
 }
 
+type GetUserinforesponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: GetUserInfo
+}
+
 type GetUserInfo {
   userid: ID!
   liquidity: Decimal!
@@ -163,6 +169,34 @@ type GetUserInfo {
   amountfollower: Int!
   amountfollowed: Int!
   updatedat: Date
+}
+
+type GetPostinforesponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: GetPostInfo
+}
+
+type GetPostInfo {
+  likes: Int!
+  dislikes: Int!
+  reports: Int!
+  views: Int!
+  saves: Int!
+  shares: Int!
+  comments: Int!
+}
+
+type GetCommentinforesponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: GetCommentInfo
+}
+
+type GetCommentInfo {
+  likes: Int!
+  reports: Int!
+  comments: Int!
 }
 
 type ChatResponse {
