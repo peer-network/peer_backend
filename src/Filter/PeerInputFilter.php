@@ -586,8 +586,6 @@ class PeerInputFilter
             $chatmessage = (object)$chatmessage;
         }
 
-        error_log("ValidateChatStructure: " . print_r($chatmessage, true));
-
         return isset($chatmessage->messid) && $this->IsNumeric($chatmessage->messid) &&
                isset($chatmessage->chatid) && $this->Uuid($chatmessage->chatid) &&
                isset($chatmessage->userid) && $this->Uuid($chatmessage->userid) &&
@@ -616,11 +614,9 @@ class PeerInputFilter
             $participant = (object)$participant;
         }
 
-        error_log("ValidateParticipantStructure: " . print_r($participant, true));
-
         return isset($participant->userid) && $this->Uuid($participant->userid) &&
                isset($participant->username) && $this->StringLength($participant->username, ['min' => 3, 'max' => 23]) &&
-               isset($participant->img) && $this->StringLength($participant->img, ['min' => 10, 'max' => 100]) &&
+               isset($participant->img) && $this->StringLength($participant->img, ['min' => 0, 'max' => 100]) &&
                isset($participant->hasaccess) && $this->IsNumeric($participant->hasaccess);
     }
 
@@ -644,8 +640,6 @@ class PeerInputFilter
         if (is_array($user)) {
             $user = (object)$user;
         }
-
-        error_log("ValidateUserStructure: " . print_r($user, true));
 
         return isset($user->uid) && $this->Uuid($user->uid) &&
                isset($user->username) && $this->StringLength($user->username, ['min' => 3, 'max' => 23]) &&
@@ -675,8 +669,6 @@ class PeerInputFilter
             $profilepost = (object)$profilepost;
         }
 
-        error_log("ValidatePostStructure: " . print_r($profilepost, true));
-
         return isset($profilepost->postid) && $this->Uuid($profilepost->postid) &&
                isset($profilepost->title) && $this->StringLength($profilepost->title, ['min' => 3, 'max' => 96]) &&
                isset($profilepost->contenttype) && $this->InArray($profilepost->contenttype, ['haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery']]) &&
@@ -704,8 +696,6 @@ class PeerInputFilter
         if (is_array($profilepost)) {
             $profilepost = (object)$profilepost;
         }
-
-        error_log("ValidatePostPureStructure: " . print_r($profilepost, true));
 
         return isset($profilepost->postid) && $this->Uuid($profilepost->postid) &&
                isset($profilepost->userid) && $this->Uuid($profilepost->userid) &&

@@ -93,7 +93,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=test
-DB_NAME=peer
+DB_DATABASE=peer
 ```
 
 ### **6. Generate Security Keys**
