@@ -136,7 +136,7 @@ type HelloResponse {
 
 type GetDailyResponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: String!
   affectedRows: [DailyResponse]
 }
 
@@ -152,7 +152,7 @@ type CurrentLiquidity {
 
 type GetUserinforesponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: String!
   affectedRows: GetUserInfo
 }
 
@@ -168,7 +168,7 @@ type GetUserInfo {
 
 type GetPostinforesponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: String!
   affectedRows: GetPostInfo
 }
 
@@ -184,7 +184,7 @@ type GetPostInfo {
 
 type GetCommentinforesponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: String!
   affectedRows: GetCommentInfo
 }
 
