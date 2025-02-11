@@ -114,6 +114,9 @@ class TagMapper
 
 				return $tags;
 			}
+
+			return false;
+
         } catch (\PDOException $e) {
             $this->logger->error("Error fetching tags from database", [
                 'error' => $e->getMessage(),
