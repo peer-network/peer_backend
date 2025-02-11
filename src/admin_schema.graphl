@@ -5,79 +5,63 @@ schema {
 }
 
 type Subscription {
-  getChatMessages(chatid: ID!): AddChatmessageResponse
-  setChatMessages(chatid: ID!, content: String!): AddChatmessageResponse
+  getChatMessages(chatid: ID!): AddChatmessageResponse!
+  setChatMessages(chatid: ID!, content: String!): AddChatmessageResponse!
 }
 
 type Query {
-  hello: HelloResponse
-
-  searchuser(userid: ID, email: String, username: String, status: Int, verified: Int, ip: String, offset: Int, limit: Int): UserSearchResponse
-  getallusers(offset: Int, limit: Int): UserSearchResponse
-  profile(userid: ID, postLimit: Int): ProfileInfo
-  follows(userid: ID, offset: Int, limit: Int): UserFollows
-  followrelations(userid: ID, offset: Int, limit: Int): RelationsFollow
-  friends(offset: Int, limit: Int): UserFriends
-
-  searchpost(title: String, postid: ID, tag: String, commentOffset: Int, commentLimit: Int): PostResponse
-  getallposts(filterBy: [FilterType], sortBy: SortType, title: String, tag: String, from: Date, to: Date, postOffset: Int, postLimit: Int, commentOffset: Int, commentLimit: Int): PostResponse
-
-  getpostinfo(postid: ID!): StandardResponse
-  getcommentinfo(commentid: ID!): StandardResponse
-
-  parentcomments(parent: ID!): CommentResponse
-
-  tags(offset: Int, limit: Int): TagSearchResponse
-  tagsearch(tagname: String!, offset: Int, limit: Int): GenericResponse
-
-  searchchat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse
-  getallchats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse
+  hello: HelloResponse!
+  searchuser(userid: ID, email: String, username: String, status: Int, verified: Int, ip: String, offset: Int, limit: Int): UserSearchResponse!
+  getallusers(offset: Int, limit: Int): UserSearchResponse!
+  profile(userid: ID, postLimit: Int): ProfileInfo!
+  follows(userid: ID, offset: Int, limit: Int): UserFollows!
+  followrelations(userid: ID, offset: Int, limit: Int): RelationsFollow!
+  friends(offset: Int, limit: Int): UserFriends!
+  getuserinfo: GetUserinforesponse!
+  searchpost(title: String, postid: ID, tag: String, commentOffset: Int, commentLimit: Int): PostResponse!
+  getallposts(filterBy: [FilterType], sortBy: SortType, title: String, tag: String, from: Date, to: Date, postOffset: Int, postLimit: Int, commentOffset: Int, commentLimit: Int): PostResponse!
+  getpostinfo(postid: ID!): GetPostinforesponse!
+  getcommentinfo(commentid: ID!): GetCommentinforesponse!
+  parentcomments(parent: ID!): CommentResponse!
+  tags(offset: Int, limit: Int): TagSearchResponse!
+  tagsearch(tagname: String!, offset: Int, limit: Int): GenericResponse!
+  searchchat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse!
+  getallchats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
   readMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
-
-  dailyfreestatus: StandardResponse
-  getpercentbeforetransaction(tokenAmount: Int!): StandardResponse
-
-  refreshmarketcap: StandardResponse
-  globalwins: DefaultResponse
-
-  gemster: StandardResponse
-  gemsters(day: DayType!): GenericResponse
-
-  currentliquidity: StandardResponse
-  getuserinfo: StandardResponse
-  fetchwinslog(day: DayType!, offset: Int, limit: Int): GenericResponse
-
+  dailyfreestatus: StandardResponse!
+  getpercentbeforetransaction(tokenAmount: Int!): StandardResponse!
+  refreshmarketcap: StandardResponse!
+  globalwins: DefaultResponse!
+  gemster: StandardResponse!
+  gemsters(day: DayType!): GenericResponse!
+  currentliquidity: StandardResponse!
+  fetchwinslog(day: DayType!, offset: Int, limit: Int): GenericResponse!
 }
 
 type Mutation {
   refreshToken(refreshToken: String!): AuthPayload!
-  updateName(username: String!, password: String!): DefaultResponse
-  updateMail(email: String!, password: String!): DefaultResponse
-  updatePassword(password: String!, expassword: String!): DefaultResponse
-  updatePrivateProfile: DefaultResponse
-  updateBiography(biography: String!): DefaultResponse
-  updateProfilePicture(img: String!): DefaultResponse
-  userFollow(userid: ID!): setFollowUseresponse
-  deleteAccount(password: String!): DefaultResponse
+  updateName(username: String!, password: String!): DefaultResponse!
+  updateMail(email: String!, password: String!): DefaultResponse!
+  updatePassword(password: String!, expassword: String!): DefaultResponse!
+  updatePrivateProfile: DefaultResponse!
+  updateBiography(biography: String!): DefaultResponse!
+  updateProfilePicture(img: String!): DefaultResponse!
+  userFollow(userid: ID!): setFollowUseresponse!
+  deleteAccount(password: String!): DefaultResponse!
   createChat(input: CreateChatInput!): AddChatResponse!
   updateChat(input: UpdateChatInput!): AddChatResponse!
   addParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
   remParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
   addMessage(chatid: ID!, content: String!): AddChatmessageResponse!
   remMessage(chatid: ID!, messid: Int!): DefaultResponse!
-  deleteChat(id: ID!): DefaultResponse
+  deleteChat(id: ID!): DefaultResponse!
   createFeed(input: CreateFeedInput!): AddPostResponse!
-
-  likeComment(commentid: ID!): DefaultResponse
-  reportComment(commentid: ID!): DefaultResponse
-  deletePost(id: ID!): DefaultResponse
-
-  contactus(name: String!, email: String!, message: String!): StandardResponse
-
+  likeComment(commentid: ID!): DefaultResponse!
+  reportComment(commentid: ID!): DefaultResponse!
+  deletePost(id: ID!): DefaultResponse!
+  contactus(name: String!, email: String!, message: String!): StandardResponse!
   createPost(action: PostenType!, input: CreatePostInput!): StandardResponse!
-
   createComment(action: CommentsType!, input: CreateCommentInput!): StandardResponse!
-
   resolveActionPost(postid: ID!, action: ActionType!): StandardResponse!
 }
 
@@ -423,7 +407,6 @@ type UserSearchResponse {
 }
 
 type Tag {
-  tagid: ID!
   name: String!
 }
 
