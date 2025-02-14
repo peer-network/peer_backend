@@ -388,7 +388,6 @@ class PostMapper
     {
         $this->logger->info("PostMapper.findPostser started");
 
-        // Extract query arguments
         $offset = max((int)($args['postOffset'] ?? 0), 0);
 		$limit = min(max((int)($args['postLimit'] ?? 10), 1), 20);
 
@@ -399,6 +398,7 @@ class PostMapper
         $title = $args['title'] ?? null;
         $tag = $args['tag'] ?? null; 
         $postId = $args['postid'] ?? null;
+        $userId = $args['userid'] ?? null;
 
         $whereClauses = ["p.feedid IS NULL"];
         $params = ['currentUserId' => $currentUserId];
@@ -406,10 +406,14 @@ class PostMapper
 		$trendlimit = 4;
 		$trenddays = 17;
 
-        // Add filters based on input
         if ($postId !== null) {
             $whereClauses[] = "p.postid = :postId";
             $params['postId'] = $postId;
+        }
+
+        if ($userId !== null) {
+            $whereClauses[] = "p.userid = :userId";
+            $params['userId'] = $userId;
         }
 
         if ($title !== null) {
