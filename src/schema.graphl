@@ -18,8 +18,7 @@ type Query {
   followrelations(userid: ID, offset: Int, limit: Int): RelationsFollow!
   friends(offset: Int, limit: Int): UserFriends!
   getuserinfo: GetUserinforesponse!
-  searchpost(title: String, postid: ID, tag: String, commentOffset: Int, commentLimit: Int): PostResponse!
-  getallposts(filterBy: [FilterType], sortBy: SortType, title: String, tag: String, from: Date, to: Date, postOffset: Int, postLimit: Int, commentOffset: Int, commentLimit: Int): PostResponse!
+  getallposts(filterBy: [FilterType], sortBy: SortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, postOffset: Int, postLimit: Int, commentOffset: Int, commentLimit: Int): PostResponse!
   getpostinfo(postid: ID!): GetPostinforesponse!
   getcommentinfo(commentid: ID!): GetCommentinforesponse!
   parentcomments(parent: ID!): CommentResponse!
