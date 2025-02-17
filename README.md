@@ -55,7 +55,7 @@ GRANT ALL PRIVILEGES ON DATABASE peer TO postgres;
 # Open .conf file:
 sudo nano /etc/postgresql/<version>/main/pg_hba.conf
 ```
-```conf
+```conf   
 # Change the method from peer to md5 in the following line:  
 
 # TYPE  DATABASE        USER            ADDRESS                 METHOD
