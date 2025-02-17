@@ -122,7 +122,7 @@ class ChatMessages
 				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
 				'validators' => [
 					['name' => 'StringLength', 'options' => [
-						'min' => 3,
+						'min' => 1,
 						'max' => 250,
 					]],
 					['name' => 'isString'],
