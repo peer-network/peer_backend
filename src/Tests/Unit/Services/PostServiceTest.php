@@ -108,24 +108,6 @@ class PostServiceTest extends TestCase
         $this->assertEquals(['status' => 'error', 'ResponseCode' => 'No access to the newsfeed'], $result);
     }
 
-    // public function testCreatePostMediaUploadFailed()
-    // {
-    //     $this->postMapper->method('isNewsFeedExist')->with($this->feedId)->willReturn(true);
-    //     $this->postMapper->method('isHasAccessInNewsFeed')->with($this->feedId, $this->currentUserId)->willReturn(true);
-    //     $this->fileUploader->method('handleFileUpload')->willReturn(null);
-    //     // for some reason the mock doesnt work and returns an empty string
-
-    //     $args = [
-    //         'title' => 'Test Title',
-    //         'media' => 'test.jpg',
-    //         'contenttype' => 'image',
-    //         'feedid' => $this->feedId
-    //     ];
-
-    //     $result = $this->postService->createPost($args);
-    //     $this->assertEquals(['status' => 'error', 'ResponseCode' => 'Media upload failed'], $result);
-    // }
-
     public function testCreatePostSuccess()
     {
         $this->postMapper->method('isNewsFeedExist')->with($this->feedId)->willReturn(true);
@@ -137,7 +119,6 @@ class PostServiceTest extends TestCase
 
         $args = [
             'title' => 'Test Title',
-            'media' => 'test.jpg',
             'contenttype' => 'image',
             'feedid' => $this->feedId
         ];
@@ -149,6 +130,5 @@ class PostServiceTest extends TestCase
         $this->assertEquals($result['affectedRows']['title'], $args['title']);
         $this->assertEquals($result['affectedRows']['feedid'], $this->feedId);
         $this->assertEquals($result['affectedRows']['contenttype'], $args['contenttype']);
-       // $this->assertEquals($result['affectedRows']['media'], $args['media']);
     }
 }

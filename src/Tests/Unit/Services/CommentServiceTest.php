@@ -4,7 +4,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Fawaz\Database\{PostInfoMapper, CommentInfoMapper, CommentMapper};
 use Fawaz\App\{CommentService,PostInfo,Comment};
-use Mockery;
 use Tests\Helper\IdHelper;
 
 class CommentServiceTest extends TestCase
@@ -70,12 +69,12 @@ class CommentServiceTest extends TestCase
 
     public function commonStubsForSuccess($args): void
     {
-      $comment_spy = Mockery::spy(Comment::class);
+      $comment_mock = $this->createMock(Comment::class);
       $post_info = new PostInfo(['postid' => $args['postid'], 'userid' => $args['postid'], 'comments' => 0]);
 
       $this->commentMapper->expects($this->once())
           ->method('insert')
-          ->willReturn($comment_spy);
+          ->willReturn($comment_mock);
 
       $this->postInfoMapper->expects($this->once())
           ->method('loadById')
