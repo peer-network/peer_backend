@@ -7,6 +7,7 @@ READMEE.md
 keys/*.key
 src/db
 test
+srccc
 #runtime-data
 runtime-data/media/audio/*
 runtime-data/media/image/*
