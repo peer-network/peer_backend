@@ -148,10 +148,10 @@ class UserService
 		$email = trim($args['email']);
 		$password = $args['password'];
 		$mediaFile = isset($args['img']) ? trim($args['img']) : '';
-		$biography = $args['biography'] ?? null;
 		$isPrivate = (int)($args['isprivate'] ?? 0);
         $invited = $args['invited'] ?? null;
 		$id = $this->generateUUID();
+		$biography = $args['biography'] ?? '/userData/' . $id . '.txt';
 
 		$usernameValidation = $this->validateUsername($username);
 		if ($usernameValidation['status'] === 'error') {
@@ -186,7 +186,7 @@ class UserService
 			'biography' => $biography,
 			'isprivate' => $isPrivate,
 			'slug' => $slug,
-			'img' => $args['img'] ?? null,
+			'img' => $args['img'] ?? '/profile/' . $id . '.jpg',
 		];
 
         $infoData = [
