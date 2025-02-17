@@ -69,7 +69,7 @@ use Fawaz\Database\ContactusMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\UserMapper;
-use Fawaz\Services\JWTService;
+use Fawaz\Services\{JWTService, FileReaderService}; 
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
@@ -102,7 +102,8 @@ class GraphQLSchemaBuilder
         protected CommentInfoService $commentInfoService,
         protected ChatService $chatService,
         protected WalletService $walletService,
-        protected JWTService $tokenService
+        protected JWTService $tokenService,
+        protected FileReaderService $fileReader,
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -120,8 +121,9 @@ class GraphQLSchemaBuilder
         } else {
             $schema = 'admin_schema.graphl';
         }
-
-        $contents = file_get_contents(__DIR__ . '/' . $schema);
+        
+        $contents = $this->fileReader->getFileContents(__DIR__ . '/' . $schema);
+       
         $schema = BuildSchema::build($contents);
 
         Executor::setDefaultFieldResolver([$this, 'fieldResolver']);
