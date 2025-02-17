@@ -11,9 +11,11 @@ use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
 use Psr\Log\LoggerInterface;
+use Fawaz\App\HelperTraits\UuidTools;    
 
 class PostService
 {
+    use UuidTools;
     protected ?string $currentUserId = null;
     private FileUploader $fileUploader;
 
@@ -31,18 +33,6 @@ class PostService
     public function setCurrentUserId(string $userid): void
     {
         $this->currentUserId = $userid;
-    }
-
-    private function generateUUID(): string
-    {
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000,
-            mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-        );
     }
 
     public static function isValidUUID(string $uuid): bool
