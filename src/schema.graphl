@@ -30,8 +30,7 @@ type Query {
   dailyfreestatus: GetDailyResponse!
   currentliquidity: StandardResponse!
   fetchwinslog(day: DayType!, offset: Int, limit: Int): GenericResponse!
-  userwallet(postid: ID, fromid: ID, offset: Int, limit: Int): GenericResponse!
-  getrankedposts(num: Int!): StandardResponse!
+  fetchpayslog(day: DayType!, offset: Int, limit: Int): GenericResponse!
 }
 
 type Mutation {
