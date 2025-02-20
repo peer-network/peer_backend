@@ -12,7 +12,7 @@ $sslmode = $_ENV['DB_SSLMODE'] ?? 'prefer';
 //header('Content-Type: application/vnd.api+json; charset=UTF-8');
 
 function secure_output($message, $status = 'error') {
-	header('Content-Type: application/vnd.api+json; charset=UTF-8');
+    header('Content-Type: application/vnd.api+json; charset=UTF-8');
     echo json_encode(['status' => $status, 'message' => $message]) . "\n";
 }
 

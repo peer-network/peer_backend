@@ -29,7 +29,7 @@ class NewsFeedMapper
 
     public function loadById(string $id): Post|false
     {
-		$this->logger->info("NewsFeedMapper.loadById started");
+        $this->logger->info("NewsFeedMapper.loadById started");
 
         $sql = "SELECT * FROM posts WHERE feedid = :feedid";
         $stmt = $this->db->prepare($sql);
@@ -104,7 +104,7 @@ class NewsFeedMapper
 
         $sql = "SELECT * FROM posts WHERE feedid = :feedid";
         $stmt = $this->db->prepare($sql);
-		$stmt->execute(['feedid' => $feedid]);
+        $stmt->execute(['feedid' => $feedid]);
 
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -121,7 +121,7 @@ class NewsFeedMapper
 
             foreach ($results as &$feed) {
 
-				$feed = $feed->getArrayCopy();
+                $feed = $feed->getArrayCopy();
                 $userid = $feed['userid'];
                 $userInfo = $this->userInfoForFeeds($userid);
                 $feed['user'] = $userInfo;

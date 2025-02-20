@@ -26,7 +26,7 @@ class UserInfoMapper
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data !== false) {
-			$this->logger->info('load Info By Id', ['data' => $data]);
+            $this->logger->info('load Info By Id', ['data' => $data]);
             return new UserInfo($data);
         }
 
@@ -80,68 +80,68 @@ class UserInfoMapper
         return new User($data);
     }
 
-	public function toggleUserFollow(string $followerid, string $followeduserid): array
-	{
-		$this->logger->info('UserInfoMapper.toggleUserFollow started');
+    public function toggleUserFollow(string $followerid, string $followeduserid): array
+    {
+        $this->logger->info('UserInfoMapper.toggleUserFollow started');
 
-		try {
-			$this->db->beginTransaction();
-			
-			$query = "SELECT COUNT(*) FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-			$stmt = $this->db->prepare($query);
-			$stmt->execute(['followerid' => $followerid, 'followeduserid' => $followeduserid]);
-			
-			if ($stmt->fetchColumn() > 0) {
-				$query = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-				$stmt = $this->db->prepare($query);
-				$stmt->execute(['followerid' => $followerid, 'followeduserid' => $followeduserid]);
-
-                //// Here Mark third
-				$queryUpdateFollower = "UPDATE users_info SET amountfollowed = amountfollowed - 1 WHERE userid = :followerid";
-				$stmt = $this->db->prepare($queryUpdateFollower);
-				$stmt->execute(['followerid' => $followerid]);
+        try {
+            $this->db->beginTransaction();
+            
+            $query = "SELECT COUNT(*) FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['followerid' => $followerid, 'followeduserid' => $followeduserid]);
+            
+            if ($stmt->fetchColumn() > 0) {
+                $query = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute(['followerid' => $followerid, 'followeduserid' => $followeduserid]);
 
                 //// Here Mark third
-				$queryUpdateFollowed = "UPDATE users_info SET amountfollower = amountfollower - 1 WHERE userid = :followeduserid";
-				$stmt = $this->db->prepare($queryUpdateFollowed);
-				$stmt->execute(['followeduserid' => $followeduserid]);
-
-				$action = false;
-				$response = 'UnFollow user set successful.';
-			} else {
-				$query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
-				$stmt = $this->db->prepare($query);
-				$stmt->execute(['followerid' => $followerid, 'followeduserid' => $followeduserid]);
+                $queryUpdateFollower = "UPDATE users_info SET amountfollowed = amountfollowed - 1 WHERE userid = :followerid";
+                $stmt = $this->db->prepare($queryUpdateFollower);
+                $stmt->execute(['followerid' => $followerid]);
 
                 //// Here Mark third
-				$queryUpdateFollower = "UPDATE users_info SET amountfollowed = amountfollowed + 1 WHERE userid = :followerid";
-				$stmt = $this->db->prepare($queryUpdateFollower);
-				$stmt->execute(['followerid' => $followerid]);
+                $queryUpdateFollowed = "UPDATE users_info SET amountfollower = amountfollower - 1 WHERE userid = :followeduserid";
+                $stmt = $this->db->prepare($queryUpdateFollowed);
+                $stmt->execute(['followeduserid' => $followeduserid]);
+
+                $action = false;
+                $response = 'UnFollow user set successful.';
+            } else {
+                $query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute(['followerid' => $followerid, 'followeduserid' => $followeduserid]);
 
                 //// Here Mark third
-				$queryUpdateFollowed = "UPDATE users_info SET amountfollower = amountfollower + 1 WHERE userid = :followeduserid";
-				$stmt = $this->db->prepare($queryUpdateFollowed);
-				$stmt->execute(['followeduserid' => $followeduserid]);
+                $queryUpdateFollower = "UPDATE users_info SET amountfollowed = amountfollowed + 1 WHERE userid = :followerid";
+                $stmt = $this->db->prepare($queryUpdateFollower);
+                $stmt->execute(['followerid' => $followerid]);
 
-				$action = true;
-				$response = 'Follow user set successful.';
-			}
+                //// Here Mark third
+                $queryUpdateFollowed = "UPDATE users_info SET amountfollower = amountfollower + 1 WHERE userid = :followeduserid";
+                $stmt = $this->db->prepare($queryUpdateFollowed);
+                $stmt->execute(['followeduserid' => $followeduserid]);
 
-			$this->db->commit();
+                $action = true;
+                $response = 'Follow user set successful.';
+            }
 
-			return ['status' => 'success', 'ResponseCode' => $response, 'isfollowing' => $action];
-		} catch (\Exception $e) {
-			$this->db->rollBack();
-			$this->logger->error('Failed to toggle user follow', ['exception' => $e]);
-			return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user follow'];
-		}
-	}
+            $this->db->commit();
+
+            return ['status' => 'success', 'ResponseCode' => $response, 'isfollowing' => $action];
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            $this->logger->error('Failed to toggle user follow', ['exception' => $e]);
+            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user follow'];
+        }
+    }
 
     public function isUserExistById(string $id): bool
     {
         $this->logger->info('UserInfoMapper.isUserExistById started');
 
-		$stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :id");
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :id");
         $stmt->bindParam(':id', $id);
         $stmt->execute();
 

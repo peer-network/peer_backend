@@ -51,7 +51,7 @@ class ChatMapper
 
     public function isCreator(string $chatid, string $currentUserId): bool
     {
-		$this->logger->info("ChatMapper.isCreator started");
+        $this->logger->info("ChatMapper.isCreator started");
 
         $sql = "SELECT COUNT(*) FROM chats WHERE chatid = :chatid AND creatorid = :currentUserId";
         $stmt = $this->db->prepare($sql);
@@ -62,7 +62,7 @@ class ChatMapper
 
     public function isPrivate(string $chatid): bool
     {
-		$this->logger->info("ChatMapper.isPrivate started");
+        $this->logger->info("ChatMapper.isPrivate started");
 
         $sql = "SELECT COUNT(*) FROM chats WHERE chatid = :chatid AND ispublic = 0";
         $stmt = $this->db->prepare($sql);
@@ -71,40 +71,40 @@ class ChatMapper
         return (bool) $stmt->fetchColumn();
     }
 
-	public function fetchFriends(string $userid): array
-	{
-		$this->logger->info("ChatMapper.fetchFriends started");
+    public function fetchFriends(string $userid): array
+    {
+        $this->logger->info("ChatMapper.fetchFriends started");
 
-		$sql = "SELECT u.uid, u.username, u.updatedat, u.biography, u.img 
-				FROM follows f1 
-				INNER JOIN follows f2 ON f1.followedid = f2.followerid 
-				INNER JOIN users u ON f1.followedid = u.uid 
-				WHERE f1.followerid = :userid 
-				AND f2.followedid = :userid";
+        $sql = "SELECT u.uid, u.username, u.updatedat, u.biography, u.img 
+                FROM follows f1 
+                INNER JOIN follows f2 ON f1.followedid = f2.followerid 
+                INNER JOIN users u ON f1.followedid = u.uid 
+                WHERE f1.followerid = :userid 
+                AND f2.followedid = :userid";
 
-		$stmt = $this->db->prepare($sql);
-		$stmt->execute(['userid' => $userid]);
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['userid' => $userid]);
 
-		return $stmt->fetchAll(PDO::FETCH_ASSOC);
-	}
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-	public function getPrivateChatBetweenUsers(string $userId1, string $userId2): bool
-	{
-		$this->logger->info("ChatMapper.getPrivateChatBetweenUsers started");
+    public function getPrivateChatBetweenUsers(string $userId1, string $userId2): bool
+    {
+        $this->logger->info("ChatMapper.getPrivateChatBetweenUsers started");
 
-		$sql = "SELECT chatid FROM chats
-				WHERE ispublic = 0 
-				AND chatid IN (
-					SELECT chatid FROM chatparticipants WHERE userid IN (:userId1, :userId2)
-					GROUP BY chatid
-					HAVING COUNT(DISTINCT userid) = 2
-				) LIMIT 1";
+        $sql = "SELECT chatid FROM chats
+                WHERE ispublic = 0 
+                AND chatid IN (
+                    SELECT chatid FROM chatparticipants WHERE userid IN (:userId1, :userId2)
+                    GROUP BY chatid
+                    HAVING COUNT(DISTINCT userid) = 2
+                ) LIMIT 1";
 
-		$stmt = $this->db->prepare($sql);
-		$stmt->execute(['userId1' => $userId1, 'userId2' => $userId2]);
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['userId1' => $userId1, 'userId2' => $userId2]);
 
-		return (bool) $stmt->fetchColumn();
-	}
+        return (bool) $stmt->fetchColumn();
+    }
 
     public function loadById(string $id): Chat|false
     {
@@ -123,217 +123,217 @@ class ChatMapper
         return false;
     }
 
-	public function loadChatById(?array $args = [], string $currentUserId): Chat|array
-	{
-		$this->logger->info("ChatMapper.loadChatById started");
+    public function loadChatById(?array $args = [], string $currentUserId): Chat|array
+    {
+        $this->logger->info("ChatMapper.loadChatById started");
 
-		$chatId = $args['chatid'] ?? null;
+        $chatId = $args['chatid'] ?? null;
 
-		try {
-			// Check if chat exists
-			$chatExistsSql = "SELECT chatid FROM chats WHERE chatid = :chatid";
-			$chatExistsStmt = $this->db->prepare($chatExistsSql);
-			$chatExistsStmt->execute(['chatid' => $chatId]);
-			$chatExists = $chatExistsStmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            // Check if chat exists
+            $chatExistsSql = "SELECT chatid FROM chats WHERE chatid = :chatid";
+            $chatExistsStmt = $this->db->prepare($chatExistsSql);
+            $chatExistsStmt->execute(['chatid' => $chatId]);
+            $chatExists = $chatExistsStmt->fetch(PDO::FETCH_ASSOC);
 
-			if (!$chatExists) {
-				$this->logger->warning("Chat ID not found", ['chatid' => $chatId]);
-				return [
-					'status' => 'error',
-					'ResponseCode' => 'Chat ID not found',
-				];
-			}
+            if (!$chatExists) {
+                $this->logger->warning("Chat ID not found", ['chatid' => $chatId]);
+                return [
+                    'status' => 'error',
+                    'ResponseCode' => 'Chat ID not found',
+                ];
+            }
 
-			// Check if user is a participant
-			$isParticipantSql = "
-				SELECT EXISTS(
-					SELECT 1
-					FROM chatparticipants 
-					WHERE chatid = :chatid AND userid = :currentUserId
-				) AS isParticipant;
-			";
-			$isParticipantStmt = $this->db->prepare($isParticipantSql);
-			$isParticipantStmt->execute([
-				'chatid' => $chatId,
-				'currentUserId' => $currentUserId,
-			]);
-			$isParticipant = (bool)$isParticipantStmt->fetchColumn();
+            // Check if user is a participant
+            $isParticipantSql = "
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM chatparticipants 
+                    WHERE chatid = :chatid AND userid = :currentUserId
+                ) AS isParticipant;
+            ";
+            $isParticipantStmt = $this->db->prepare($isParticipantSql);
+            $isParticipantStmt->execute([
+                'chatid' => $chatId,
+                'currentUserId' => $currentUserId,
+            ]);
+            $isParticipant = (bool)$isParticipantStmt->fetchColumn();
 
-			if (!$isParticipant) {
-				$this->logger->warning("User is not allowed to access chat", [
-					'chatid' => $chatId,
-					'currentUserId' => $currentUserId,
-				]);
-				return [
-					'status' => 'error',
-					'ResponseCode' => 'AccessDenied',
-				];
-			}
+            if (!$isParticipant) {
+                $this->logger->warning("User is not allowed to access chat", [
+                    'chatid' => $chatId,
+                    'currentUserId' => $currentUserId,
+                ]);
+                return [
+                    'status' => 'error',
+                    'ResponseCode' => 'AccessDenied',
+                ];
+            }
 
-			// Load chat details
-			$sql = "
-				SELECT 
-					chatid, 
-					creatorid, 
-					name, 
-					image, 
-					ispublic, 
-					createdat, 
-					updatedat
-				FROM chats 
-				WHERE chatid = :chatid;
-			";
-			$stmt = $this->db->prepare($sql);
-			$stmt->execute(['chatid' => $chatId]);
+            // Load chat details
+            $sql = "
+                SELECT 
+                    chatid, 
+                    creatorid, 
+                    name, 
+                    image, 
+                    ispublic, 
+                    createdat, 
+                    updatedat
+                FROM chats 
+                WHERE chatid = :chatid;
+            ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['chatid' => $chatId]);
 
-			$chatRow = $stmt->fetch(PDO::FETCH_ASSOC);
-			if (!$chatRow) {
-				$this->logger->warning("No chat details found for chatid", ['chatid' => $chatId]);
-				return [
-					'status' => 'error',
-					'ResponseCode' => 'ChatNotFound',
-				];
-			}
+            $chatRow = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$chatRow) {
+                $this->logger->warning("No chat details found for chatid", ['chatid' => $chatId]);
+                return [
+                    'status' => 'error',
+                    'ResponseCode' => 'ChatNotFound',
+                ];
+            }
 
-			// Fetch messages with pagination or using last_seen_message_id
-			$messageLimit = min(max((int)($args['messageLimit'] ?? 10), 1), 20);
-			$messageOffset = isset($args['messageOffset']) ? max((int)($args['messageOffset']), 0) : null;
+            // Fetch messages with pagination or using last_seen_message_id
+            $messageLimit = min(max((int)($args['messageLimit'] ?? 10), 1), 20);
+            $messageOffset = isset($args['messageOffset']) ? max((int)($args['messageOffset']), 0) : null;
 
-			// If messageOffset is provided, use OFFSET instead of lastSeenMessageId logic
-			if ($messageOffset !== null) {
-				$chatMessagesSql = "
-					SELECT 
-						messid, 
-						chatid, 
-						userid, 
-						content, 
-						createdat 
-					FROM chatmessages 
-					WHERE chatid = :chatid 
-					ORDER BY createdat DESC
-					LIMIT :limit OFFSET :offset;
-				";
-				$messageStmt = $this->db->prepare($chatMessagesSql);
-				$messageStmt->bindValue('chatid', $chatId);
-				$messageStmt->bindValue('limit', $messageLimit, PDO::PARAM_INT);
-				$messageStmt->bindValue('offset', $messageOffset, PDO::PARAM_INT);
-			} else {
-				// If messageOffset is not set, fallback to last_seen_message_id logic
-				$lastSeenSql = "
-					SELECT last_seen_message_id 
-					FROM user_chat_status 
-					WHERE userid = :userid AND chatid = :chatid
-				";
-				$lastSeenStmt = $this->db->prepare($lastSeenSql);
-				$lastSeenStmt->execute([
-					'userid' => $currentUserId,
-					'chatid' => $chatId,
-				]);
-				$lastSeenMessageId = (int) $lastSeenStmt->fetchColumn();
+            // If messageOffset is provided, use OFFSET instead of lastSeenMessageId logic
+            if ($messageOffset !== null) {
+                $chatMessagesSql = "
+                    SELECT 
+                        messid, 
+                        chatid, 
+                        userid, 
+                        content, 
+                        createdat 
+                    FROM chatmessages 
+                    WHERE chatid = :chatid 
+                    ORDER BY createdat DESC
+                    LIMIT :limit OFFSET :offset;
+                ";
+                $messageStmt = $this->db->prepare($chatMessagesSql);
+                $messageStmt->bindValue('chatid', $chatId);
+                $messageStmt->bindValue('limit', $messageLimit, PDO::PARAM_INT);
+                $messageStmt->bindValue('offset', $messageOffset, PDO::PARAM_INT);
+            } else {
+                // If messageOffset is not set, fallback to last_seen_message_id logic
+                $lastSeenSql = "
+                    SELECT last_seen_message_id 
+                    FROM user_chat_status 
+                    WHERE userid = :userid AND chatid = :chatid
+                ";
+                $lastSeenStmt = $this->db->prepare($lastSeenSql);
+                $lastSeenStmt->execute([
+                    'userid' => $currentUserId,
+                    'chatid' => $chatId,
+                ]);
+                $lastSeenMessageId = (int) $lastSeenStmt->fetchColumn();
 
-				$chatMessagesSql = "
-					SELECT 
-						messid, 
-						chatid, 
-						userid, 
-						content, 
-						createdat 
-					FROM chatmessages 
-					WHERE chatid = :chatid 
-					AND messid > :lastSeenMessageId
-					ORDER BY createdat DESC
-					LIMIT :limit;
-				";
-				$messageStmt = $this->db->prepare($chatMessagesSql);
-				$messageStmt->bindValue('chatid', $chatId);
-				$messageStmt->bindValue('lastSeenMessageId', $lastSeenMessageId, PDO::PARAM_INT);
-				$messageStmt->bindValue('limit', $messageLimit, PDO::PARAM_INT);
-			}
+                $chatMessagesSql = "
+                    SELECT 
+                        messid, 
+                        chatid, 
+                        userid, 
+                        content, 
+                        createdat 
+                    FROM chatmessages 
+                    WHERE chatid = :chatid 
+                    AND messid > :lastSeenMessageId
+                    ORDER BY createdat DESC
+                    LIMIT :limit;
+                ";
+                $messageStmt = $this->db->prepare($chatMessagesSql);
+                $messageStmt->bindValue('chatid', $chatId);
+                $messageStmt->bindValue('lastSeenMessageId', $lastSeenMessageId, PDO::PARAM_INT);
+                $messageStmt->bindValue('limit', $messageLimit, PDO::PARAM_INT);
+            }
 
-			$messageStmt->execute();
-			$chatMessages = $messageStmt->fetchAll(PDO::FETCH_ASSOC);
+            $messageStmt->execute();
+            $chatMessages = $messageStmt->fetchAll(PDO::FETCH_ASSOC);
 
-			if ($chatMessages) {
-				$lastMessage = $chatMessages[0] ?? null;
-				if ($lastMessage) {
-					$this->updateLastSeenMessage($currentUserId, $chatId, $lastMessage['messid']);
-				}
-			}
+            if ($chatMessages) {
+                $lastMessage = $chatMessages[0] ?? null;
+                if ($lastMessage) {
+                    $this->updateLastSeenMessage($currentUserId, $chatId, $lastMessage['messid']);
+                }
+            }
 
-			// Fetch participants
-			$chatParticipantsSql = "
-				SELECT 
-					p.userid, 
-					u.username, 
-					u.img, 
-					p.hasaccess 
-				FROM chatparticipants p 
-				JOIN users u ON p.userid = u.uid 
-				WHERE p.chatid = :chatid 
-				ORDER BY p.createdat DESC;
-			";
-			$participantStmt = $this->db->prepare($chatParticipantsSql);
-			$participantStmt->execute(['chatid' => $chatId]);
-			$chatParticipants = $participantStmt->fetchAll(PDO::FETCH_ASSOC);
+            // Fetch participants
+            $chatParticipantsSql = "
+                SELECT 
+                    p.userid, 
+                    u.username, 
+                    u.img, 
+                    p.hasaccess 
+                FROM chatparticipants p 
+                JOIN users u ON p.userid = u.uid 
+                WHERE p.chatid = :chatid 
+                ORDER BY p.createdat DESC;
+            ";
+            $participantStmt = $this->db->prepare($chatParticipantsSql);
+            $participantStmt->execute(['chatid' => $chatId]);
+            $chatParticipants = $participantStmt->fetchAll(PDO::FETCH_ASSOC);
 
-			// Return the simplified response
-			return [
-				'status' => 'success',
-				'ResponseCode' => 'Chat fetched successfullyd',
-				'data' => new Chat([
-					'chatid' => $chatRow['chatid'],
-					'creatorid' => $chatRow['creatorid'],
-					'name' => $chatRow['name'],
-					'image' => $chatRow['image'],
-					'ispublic' => (bool)$chatRow['ispublic'],
-					'createdat' => $chatRow['createdat'],
-					'updatedat' => $chatRow['updatedat'],
-					'chatmessages' => $chatMessages, // Messages with pagination
-					'chatparticipants' => $chatParticipants, // Participants
-				]),
-			];
+            // Return the simplified response
+            return [
+                'status' => 'success',
+                'ResponseCode' => 'Chat fetched successfullyd',
+                'data' => new Chat([
+                    'chatid' => $chatRow['chatid'],
+                    'creatorid' => $chatRow['creatorid'],
+                    'name' => $chatRow['name'],
+                    'image' => $chatRow['image'],
+                    'ispublic' => (bool)$chatRow['ispublic'],
+                    'createdat' => $chatRow['createdat'],
+                    'updatedat' => $chatRow['updatedat'],
+                    'chatmessages' => $chatMessages, // Messages with pagination
+                    'chatparticipants' => $chatParticipants, // Participants
+                ]),
+            ];
 
-		} catch (PDOException $e) {
-			$this->logger->error("Database error occurred in loadChatById", [
-				'error' => $e->getMessage(),
-				'chatid' => $chatId,
-				'currentUserId' => $currentUserId,
-			]);
-			return [
-				'status' => 'error',
-				'ResponseCode' => 'DatabaseError',
-			];
-		}
-	}
+        } catch (PDOException $e) {
+            $this->logger->error("Database error occurred in loadChatById", [
+                'error' => $e->getMessage(),
+                'chatid' => $chatId,
+                'currentUserId' => $currentUserId,
+            ]);
+            return [
+                'status' => 'error',
+                'ResponseCode' => 'DatabaseError',
+            ];
+        }
+    }
 
-	public function getChatMessages(array $args): array
-	{
+    public function getChatMessages(array $args): array
+    {
         $this->logger->info("ChatMapper.getChatMessages started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-		$chatId = $args['chatid'] ?? null;
+        $chatId = $args['chatid'] ?? null;
 
-		try {
-			$sql = "SELECT * FROM chatmessages WHERE chatid = :chatid ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
+        try {
+            $sql = "SELECT * FROM chatmessages WHERE chatid = :chatid ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
 
-			$params['limit'] = $limit;
-			$params['offset'] = $offset;
-			$params['chatid'] = $chatId;
+            $params['limit'] = $limit;
+            $params['offset'] = $offset;
+            $params['chatid'] = $chatId;
 
-			$stmt = $this->db->prepare($sql);
-			$stmt->execute($params);
-			//$results = array_map(fn($row) => new ChatMessages($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
-			//return $results ?: [];
-			return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-		} catch (PDOException $e) {
-			error_log('Database error: ' . $e->getMessage());
-			return [];
-		} catch (Exception $e) {
-			error_log('General error: ' . $e->getMessage());
-			return [];
-		}
-	}
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            //$results = array_map(fn($row) => new ChatMessages($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+            //return $results ?: [];
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (PDOException $e) {
+            error_log('Database error: ' . $e->getMessage());
+            return [];
+        } catch (Exception $e) {
+            error_log('General error: ' . $e->getMessage());
+            return [];
+        }
+    }
 
     public function insert(Chat $chat): Chat
     {

@@ -19,18 +19,18 @@ class RateLimiter
         }
     }
 
-	private function loadRequests(): array
-	{
-		$data = file_get_contents($this->storageFile);
-		$decodedData = json_decode($data, true);
+    private function loadRequests(): array
+    {
+        $data = file_get_contents($this->storageFile);
+        $decodedData = json_decode($data, true);
 
-		if ($decodedData === null && json_last_error() !== JSON_ERROR_NONE) {
-			error_log("Failed to decode JSON from storage file: " . json_last_error_msg());
-			return [];
-		}
+        if ($decodedData === null && json_last_error() !== JSON_ERROR_NONE) {
+            error_log("Failed to decode JSON from storage file: " . json_last_error_msg());
+            return [];
+        }
 
-		return is_array($decodedData) ? $decodedData : [];
-	}
+        return is_array($decodedData) ? $decodedData : [];
+    }
 
     private function saveRequests(array $requests): void
     {

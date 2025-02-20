@@ -43,18 +43,18 @@ class GraphQLHandler implements RequestHandlerInterface
             'bearerToken' => $bearerToken
         ];
 
-		$errorFormatter = function (Throwable $e) use ($request): array {
-			$this->logger->error('GraphQL Error', [
-				'message' => $e->getMessage(),
-				'trace' => $e->getTraceAsString(),
-			]);
+        $errorFormatter = function (Throwable $e) use ($request): array {
+            $this->logger->error('GraphQL Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
-			return [
-				'status' => 'error',
-				'ResponseCode' => 'Input Required to Proceed.',
-				'exceptionMessage' => $e->getMessage(),
-			];
-		};
+            return [
+                'status' => 'error',
+                'ResponseCode' => 'Input Required to Proceed.',
+                'exceptionMessage' => $e->getMessage(),
+            ];
+        };
 
         $config = ServerConfig::create()
             ->setSchema($schema)
