@@ -95,79 +95,79 @@ class CommentMapper
         return $deleted;
     }
 
-	public function fetchAllByPostIdetaild(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
-	{
-		$this->logger->info("CommentMapper.fetchAllByPostIdetaild started");
+    public function fetchAllByPostIdetaild(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
+    {
+        $this->logger->info("CommentMapper.fetchAllByPostIdetaild started");
 
-		$sql = "
-			SELECT 
-				c.*,
-				COALESCE(like_counts.like_count, 0) AS amountlikes,
-				CASE WHEN ul.userid IS NOT NULL THEN TRUE ELSE FALSE END AS isliked,
-				u.uid,
-				u.username,
-				u.img,
-				CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
-				CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed
-			FROM 
-				comments c
-			LEFT JOIN 
-				users u ON c.userid = u.uid
-			LEFT JOIN 
-				(SELECT commentid, COUNT(*) AS like_count FROM user_comment_likes GROUP BY commentid) like_counts 
-				ON c.commentid = like_counts.commentid
-			LEFT JOIN 
-				user_comment_likes ul 
-				ON c.commentid = ul.commentid AND ul.userid = :currentUserId
-			LEFT JOIN 
-				follows f1 
-				ON u.uid = f1.followerid AND f1.followedid = :currentUserId -- Is the author following the current user?
-			LEFT JOIN 
-				follows f2 
-				ON u.uid = f2.followedid AND f2.followerid = :currentUserId -- Is the current user following the author?
-			WHERE 
-				c.postid = :postId AND c.parentid IS NULL
-			ORDER BY 
-				c.createdat ASC
-			LIMIT :limit OFFSET :offset;
-		";
+        $sql = "
+            SELECT 
+                c.*,
+                COALESCE(like_counts.like_count, 0) AS amountlikes,
+                CASE WHEN ul.userid IS NOT NULL THEN TRUE ELSE FALSE END AS isliked,
+                u.uid,
+                u.username,
+                u.img,
+                CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
+                CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed
+            FROM 
+                comments c
+            LEFT JOIN 
+                users u ON c.userid = u.uid
+            LEFT JOIN 
+                (SELECT commentid, COUNT(*) AS like_count FROM user_comment_likes GROUP BY commentid) like_counts 
+                ON c.commentid = like_counts.commentid
+            LEFT JOIN 
+                user_comment_likes ul 
+                ON c.commentid = ul.commentid AND ul.userid = :currentUserId
+            LEFT JOIN 
+                follows f1 
+                ON u.uid = f1.followerid AND f1.followedid = :currentUserId -- Is the author following the current user?
+            LEFT JOIN 
+                follows f2 
+                ON u.uid = f2.followedid AND f2.followerid = :currentUserId -- Is the current user following the author?
+            WHERE 
+                c.postid = :postId AND c.parentid IS NULL
+            ORDER BY 
+                c.createdat ASC
+            LIMIT :limit OFFSET :offset;
+        ";
 
-		$stmt = $this->db->prepare($sql);
-		$stmt->bindValue(':postId', $postId, PDO::PARAM_STR);
-		$stmt->bindValue(':currentUserId', $currentUserId, PDO::PARAM_STR);
-		$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-		$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-		$stmt->execute();
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':postId', $postId, PDO::PARAM_STR);
+        $stmt->bindValue(':currentUserId', $currentUserId, PDO::PARAM_STR);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
 
-		$results = [];
-		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			$results[] = new CommentAdvanced([
-				'commentid' => $row['commentid'],
-				'userid' => $row['userid'],
-				'postid' => $row['postid'],
-				'parentid' => $row['parentid'],
-				'content' => $row['content'],
-				'amountlikes' => (int) $row['amountlikes'],
-				'isliked' => (bool) $row['isliked'],
-				'createdat' => $row['createdat'],
-				'user' => [
-					'uid' => $row['uid'],
-					'username' => $row['username'],
-					'img' => $row['img'],
-					'isfollowed' => (bool) $row['isfollowed'],
-					'isfollowing' => (bool) $row['isfollowing'],
-				],
-			]);
-		}
+        $results = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $results[] = new CommentAdvanced([
+                'commentid' => $row['commentid'],
+                'userid' => $row['userid'],
+                'postid' => $row['postid'],
+                'parentid' => $row['parentid'],
+                'content' => $row['content'],
+                'amountlikes' => (int) $row['amountlikes'],
+                'isliked' => (bool) $row['isliked'],
+                'createdat' => $row['createdat'],
+                'user' => [
+                    'uid' => $row['uid'],
+                    'username' => $row['username'],
+                    'img' => $row['img'],
+                    'isfollowed' => (bool) $row['isfollowed'],
+                    'isfollowing' => (bool) $row['isfollowing'],
+                ],
+            ]);
+        }
 
-		$this->logger->info("Fetched comments for post", ['count' => count($results)]);
+        $this->logger->info("Fetched comments for post", ['count' => count($results)]);
 
-		return $results;
-	}
+        return $results;
+    }
 
     public function fetchAllByPostId(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
     {
-		$this->logger->info("CommentMapper.fetchAllByPostId started");
+        $this->logger->info("CommentMapper.fetchAllByPostId started");
 
         $sql = "SELECT * FROM comments WHERE postid = :postid AND parentid IS NULL ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
         $params = [
@@ -266,7 +266,7 @@ class CommentMapper
 
     public function fetchByParentIdd(string $parentId, string $currentUserId, int $offset = 0, int $limit = 10): array
     {
-		$this->logger->info("CommentMapper.fetchByParentId started");
+        $this->logger->info("CommentMapper.fetchByParentId started");
 
         $sql = "SELECT * FROM comments WHERE parentid = :parentid ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
         $params = [
@@ -288,7 +288,7 @@ class CommentMapper
 
     public function loadById(string $id): Comment|false
     {
-		$this->logger->info("CommentMapper.loadById started");
+        $this->logger->info("CommentMapper.loadById started");
 
         $sql = "SELECT * FROM comments WHERE id = :id";
         $stmt = $this->db->prepare($sql);

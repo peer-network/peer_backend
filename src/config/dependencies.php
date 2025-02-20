@@ -32,7 +32,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         },
 
         JWTService::class => function (ContainerInterface $c) {
-			$settings = $c->get('settings');
+            $settings = $c->get('settings');
             return new JWTService(
                 file_get_contents($settings['privateKeyPath']),
                 file_get_contents($settings['publicKeyPath']),

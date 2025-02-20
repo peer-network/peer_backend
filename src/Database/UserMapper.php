@@ -21,28 +21,28 @@ class UserMapper
         return $userid === $currentUserId;
     }
 
-	public function logLoginData(string $userId, ?string $actionType = 'login'): void
-	{
-		try {
-			$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-			$browser = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
-			$actionType = $actionType ?? 'login';
+    public function logLoginData(string $userId, ?string $actionType = 'login'): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            $browser = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+            $actionType = $actionType ?? 'login';
 
-			$sql = "INSERT INTO logdata (userid, ip, browser, action_type) VALUES (:userid, :ip, :browser, :action_type)";
-			$stmt = $this->db->prepare($sql);
-			$stmt->execute([
-				':userid' => $userId,
-				':ip' => $ip,
-				':browser' => $browser,
+            $sql = "INSERT INTO logdata (userid, ip, browser, action_type) VALUES (:userid, :ip, :browser, :action_type)";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':userid' => $userId,
+                ':ip' => $ip,
+                ':browser' => $browser,
                 ':action_type' => $actionType,
-			]);
+            ]);
 
-			$this->logger->info('Login data logged', ['userid' => $userId, 'ip' => $ip, 'browser' => $browser]);
+            $this->logger->info('Login data logged', ['userid' => $userId, 'ip' => $ip, 'browser' => $browser]);
 
-		} catch (\Exception $e) {
-			$this->logger->error('Failed to log login data', ['ResponseCode' => $e->getMessage()]);
-		}
-	}
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to log login data', ['ResponseCode' => $e->getMessage()]);
+        }
+    }
 
     public function logLoginDaten(string $userId, ?string $actionType = 'login'): void
     {
@@ -56,22 +56,22 @@ class UserMapper
             $location = $this->getLocationFromIP($ip) ?? 'unknown';
             $actionType = $actionType ?? 'login';
 
-			$rawInput = \file_get_contents('php://input');
-			$input = \json_decode($rawInput, true);
+            $rawInput = \file_get_contents('php://input');
+            $input = \json_decode($rawInput, true);
 
-			$query = $input['query'] ?? null;
-			$variableValues = $input['variables'] ?? null;
+            $query = $input['query'] ?? null;
+            $variableValues = $input['variables'] ?? null;
 
-			if ($query !== null) {
-				try {
-					$requestPayload = !empty($input) ? json_encode($input, JSON_THROW_ON_ERROR) : 'null';
+            if ($query !== null) {
+                try {
+                    $requestPayload = !empty($input) ? json_encode($input, JSON_THROW_ON_ERROR) : 'null';
 
-				} catch (\Exception $e) {
-					echo "An error occurred: " . $e->getMessage();
-				}
-			} else {
-				$requestPayload = null;
-			}
+                } catch (\Exception $e) {
+                    echo "An error occurred: " . $e->getMessage();
+                }
+            } else {
+                $requestPayload = null;
+            }
             $authStatus = 'success';
 
             $sql = "
@@ -152,7 +152,7 @@ class UserMapper
         $this->logger->info("UserMapper.fetchAll started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
-		$limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $sql = "
             SELECT 
@@ -163,7 +163,7 @@ class UserMapper
                 status,
                 verified,
                 slug,
-				roles_mask,
+                roles_mask,
                 ip,
                 img,
                 biography,
@@ -241,9 +241,9 @@ class UserMapper
         $this->logger->info("UserMapper.fetchAll started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
-		$limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-		$trendlimit = 4;
-		$trenddays = 7;
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $trendlimit = 4;
+        $trenddays = 7;
 
         $sql = "
             SELECT 
@@ -254,37 +254,37 @@ class UserMapper
                 u.status,
                 u.verified,
                 u.slug,
-				u.roles_mask,
+                u.roles_mask,
                 u.ip,
                 u.img,
                 u.biography,
                 u.createdat,
                 u.updatedat,
-				COALESCE((
+                COALESCE((
                     SELECT COUNT(p.postid)
                     FROM posts p
                     WHERE p.userid = u.uid
                 ), 0) AS amountposts,
-				COALESCE((
-					SELECT COUNT(*) 
-					FROM post_info pi 
-					WHERE pi.userid = u.uid 
-					  AND pi.likes > :trendlimit 
-					  AND pi.createdat >= NOW() - INTERVAL '7 days'
-				), 0) AS amounttrending,
+                COALESCE((
+                    SELECT COUNT(*) 
+                    FROM post_info pi 
+                    WHERE pi.userid = u.uid 
+                      AND pi.likes > :trendlimit 
+                      AND pi.createdat >= NOW() - INTERVAL '7 days'
+                ), 0) AS amounttrending,
                 CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed,
                 CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
-				COALESCE((
+                COALESCE((
                     SELECT COUNT(*)
                     FROM follows fr
                     WHERE fr.followerid = u.uid
                 ), 0) AS amountfollowed,
-				COALESCE((
+                COALESCE((
                     SELECT COUNT(*)
                     FROM follows fd
                     WHERE fd.followedid = u.uid
                 ), 0) AS amountfollower,
-				COALESCE((
+                COALESCE((
                     SELECT SUM(numbers)
                     FROM wallet w
                     WHERE w.userid = u.uid
@@ -471,28 +471,28 @@ class UserMapper
         return $stmt->fetchColumn() !== false;
     }
 
-	public function verifyAccount(string $uid): bool
-	{
-		$this->logger->info("UserMapper.verifyAccount started");
+    public function verifyAccount(string $uid): bool
+    {
+        $this->logger->info("UserMapper.verifyAccount started");
 
-		try {
-			if (!$this->isUserExistById($uid)) {
-				return false;
-			}
+        try {
+            if (!$this->isUserExistById($uid)) {
+                return false;
+            }
 
-			$sql = "UPDATE users SET verified = 1 WHERE uid = :uid AND verified = 0";
-			$stmt = $this->db->prepare($sql);
-			$stmt->execute(['uid' => $uid]);
+            $sql = "UPDATE users SET verified = 1 WHERE uid = :uid AND verified = 0";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['uid' => $uid]);
 
-			return $stmt->rowCount() > 0;
-		} catch (PDOException $e) {
-			error_log('Database error: ' . $e->getMessage());
-			return false;
-		} catch (Exception $e) {
-			error_log('General error: ' . $e->getMessage());
-			return false;
-		}
-	}
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log('Database error: ' . $e->getMessage());
+            return false;
+        } catch (Exception $e) {
+            error_log('General error: ' . $e->getMessage());
+            return false;
+        }
+    }
 
     public function deactivateAccount(string $uid): bool
     {
@@ -519,16 +519,16 @@ class UserMapper
         return (int) $stmt->fetchColumn();
     }
 
-	public function fetchFriends(string $userId, int $offset = 0, int $limit = 10): ?array
-	{
-		$this->logger->info("UserMapper.fetchFriends started");
+    public function fetchFriends(string $userId, int $offset = 0, int $limit = 10): ?array
+    {
+        $this->logger->info("UserMapper.fetchFriends started");
 
-		$sql = "SELECT u.uid, u.username, u.updatedat, u.biography, u.img 
-				FROM follows f1 
-				INNER JOIN follows f2 ON f1.followedid = f2.followerid 
-				INNER JOIN users u ON f1.followedid = u.uid 
-				WHERE f1.followerid = :userId 
-				AND f2.followedid = :userId
+        $sql = "SELECT u.uid, u.username, u.updatedat, u.biography, u.img 
+                FROM follows f1 
+                INNER JOIN follows f2 ON f1.followedid = f2.followerid 
+                INNER JOIN users u ON f1.followedid = u.uid 
+                WHERE f1.followerid = :userId 
+                AND f2.followedid = :userId
                 ORDER BY u.username ASC
                 LIMIT :limit OFFSET :offset";
 
@@ -539,8 +539,8 @@ class UserMapper
             'offset' => $offset,
         ]);
 
-		return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-	}
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 
     public function fetchFollowers(string $userId, string $currentUserId, int $offset = 0, int $limit = 10): array
     {
@@ -791,18 +791,18 @@ class UserMapper
                 u.status,
                 u.img,
                 u.biography,
-				COALESCE((
+                COALESCE((
                     SELECT COUNT(p.postid)
                     FROM posts p
                     WHERE p.userid = u.uid
                 ), 0) AS amountposts,
-				COALESCE((
-					SELECT COUNT(*) 
-					FROM post_info pi 
-					WHERE pi.userid = u.uid 
-					  AND pi.likes > 4 
-					  AND pi.createdat >= NOW() - INTERVAL '7 days'
-				), 0) AS amounttrending,
+                COALESCE((
+                    SELECT COUNT(*) 
+                    FROM post_info pi 
+                    WHERE pi.userid = u.uid 
+                      AND pi.likes > 4 
+                      AND pi.createdat >= NOW() - INTERVAL '7 days'
+                ), 0) AS amounttrending,
                 EXISTS (
                     SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId
                 ) AS isfollowing,
@@ -832,11 +832,11 @@ class UserMapper
     {
         $this->logger->info("UserMapper.setPassword started");
 
-		if(defined('PASSWORD_ARGON2ID')) {
-			$hash = \password_hash($password, \PASSWORD_ARGON2ID, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
-		} else {
-			$hash = \password_hash($password, \PASSWORD_BCRYPT, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
-		}
+        if(defined('PASSWORD_ARGON2ID')) {
+            $hash = \password_hash($password, \PASSWORD_ARGON2ID, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
+        } else {
+            $hash = \password_hash($password, \PASSWORD_BCRYPT, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
+        }
 
         return $hash;
     }
@@ -877,271 +877,271 @@ class UserMapper
         }
     }
 
-	public function insert(User $user): User
-	{
-		$this->logger->info("UserMapper.insert started");
+    public function insert(User $user): User
+    {
+        $this->logger->info("UserMapper.insert started");
 
-		$data = $user->getArrayCopy();
+        $data = $user->getArrayCopy();
 
-		$query = "INSERT INTO users 
-				  (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat)
-				  VALUES 
-				  (:uid, :email, :username, :password, :status, :verified, :slug, :roles_mask, :ip, :img, :biography, :createdat, :updatedat)";
+        $query = "INSERT INTO users 
+                  (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat)
+                  VALUES 
+                  (:uid, :email, :username, :password, :status, :verified, :slug, :roles_mask, :ip, :img, :biography, :createdat, :updatedat)";
 
-		try {
-			$stmt = $this->db->prepare($query);
+        try {
+            $stmt = $this->db->prepare($query);
 
-			// Explicitly bind each value
-			$stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
-			$stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
-			$stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
-			$stmt->bindValue(':password', $data['password'], \PDO::PARAM_STR); // Password should already be hashed
-			$stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
-			$stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
-			$stmt->bindValue(':slug', $data['slug'], \PDO::PARAM_INT);
-			$stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
-			$stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-			$stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
-			$stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-			$stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR); // Ensure date is formatted correctly
-			$stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); // Ensure date is formatted correctly
+            // Explicitly bind each value
+            $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
+            $stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
+            $stmt->bindValue(':password', $data['password'], \PDO::PARAM_STR); // Password should already be hashed
+            $stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
+            $stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
+            $stmt->bindValue(':slug', $data['slug'], \PDO::PARAM_INT);
+            $stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
+            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
+            $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
+            $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR); // Ensure date is formatted correctly
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); // Ensure date is formatted correctly
 
-			$stmt->execute();
+            $stmt->execute();
 
-			$this->logger->info("Inserted new user into database", ['uid' => $data['uid']]);
+            $this->logger->info("Inserted new user into database", ['uid' => $data['uid']]);
 
-			return new User($data);
-		} catch (\PDOException $e) {
-			$this->logger->error(
-				"UserMapper.insert: Exception occurred while inserting user",
-				[
-					'uid' => $data['uid'] ?? null,
-					'exception' => $e->getMessage(),
-				]
-			);
+            return new User($data);
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "UserMapper.insert: Exception occurred while inserting user",
+                [
+                    'uid' => $data['uid'] ?? null,
+                    'exception' => $e->getMessage(),
+                ]
+            );
 
-			throw new \RuntimeException("Failed to insert user into database: " . $e->getMessage());
-		}
-	}
+            throw new \RuntimeException("Failed to insert user into database: " . $e->getMessage());
+        }
+    }
 
-	public function insertinfo(UserInfo $user): UserInfo
-	{
-		$this->logger->info("UserMapper.insertinfo started");
+    public function insertinfo(UserInfo $user): UserInfo
+    {
+        $this->logger->info("UserMapper.insertinfo started");
 
-		$data = $user->getArrayCopy();
+        $data = $user->getArrayCopy();
 
-		$query = "INSERT INTO users_info 
-				  (userid, liquidity, amountposts, amounttrending, amountfollower, amountfollowed, isprivate, invited, updatedat)
-				  VALUES 
-				  (:userid, :liquidity, :amountposts, :amounttrending, :amountfollower, :amountfollowed, :isprivate, :invited, :updatedat)";
+        $query = "INSERT INTO users_info 
+                  (userid, liquidity, amountposts, amounttrending, amountfollower, amountfollowed, isprivate, invited, updatedat)
+                  VALUES 
+                  (:userid, :liquidity, :amountposts, :amounttrending, :amountfollower, :amountfollowed, :isprivate, :invited, :updatedat)";
 
-		try {
-			$stmt = $this->db->prepare($query);
+        try {
+            $stmt = $this->db->prepare($query);
 
-			// Explicitly bind each value
-			$stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-			$stmt->bindValue(':liquidity', $data['liquidity'], \PDO::PARAM_STR);
-			$stmt->bindValue(':amountposts', $data['amountposts'], \PDO::PARAM_INT);
-			$stmt->bindValue(':amounttrending', $data['amounttrending'], \PDO::PARAM_INT); 
-			$stmt->bindValue(':amountfollower', $data['amountfollower'], \PDO::PARAM_INT);
-			$stmt->bindValue(':amountfollowed', $data['amountfollowed'], \PDO::PARAM_INT);
-			$stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
-			$stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
-			$stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            // Explicitly bind each value
+            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':liquidity', $data['liquidity'], \PDO::PARAM_STR);
+            $stmt->bindValue(':amountposts', $data['amountposts'], \PDO::PARAM_INT);
+            $stmt->bindValue(':amounttrending', $data['amounttrending'], \PDO::PARAM_INT); 
+            $stmt->bindValue(':amountfollower', $data['amountfollower'], \PDO::PARAM_INT);
+            $stmt->bindValue(':amountfollowed', $data['amountfollowed'], \PDO::PARAM_INT);
+            $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
+            $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
 
-			$stmt->execute();
+            $stmt->execute();
 
-			$this->logger->info("Inserted new user into database", ['userid' => $data['userid']]);
+            $this->logger->info("Inserted new user into database", ['userid' => $data['userid']]);
 
-			return new UserInfo($data);
-		} catch (\PDOException $e) {
-			$this->logger->error(
-				"UserMapper.insert: Exception occurred while inserting UserInfo",
-				[
-					'userid' => $data['userid'] ?? null,
-					'exception' => $e->getMessage(),
-				]
-			);
+            return new UserInfo($data);
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "UserMapper.insert: Exception occurred while inserting UserInfo",
+                [
+                    'userid' => $data['userid'] ?? null,
+                    'exception' => $e->getMessage(),
+                ]
+            );
 
-			throw new \RuntimeException("Failed to insert UserInfo into database: " . $e->getMessage());
-		}
-	}
+            throw new \RuntimeException("Failed to insert UserInfo into database: " . $e->getMessage());
+        }
+    }
 
-	public function update(User $user): User
-	{
-		$this->logger->info("UserMapper.update started");
+    public function update(User $user): User
+    {
+        $this->logger->info("UserMapper.update started");
 
-		$data = $user->getArrayCopy();
+        $data = $user->getArrayCopy();
 
-		$query = "UPDATE users
-				  SET username = :username,
-					  password = :password,
-					  email = :email,
-					  status = :status,
-					  verified = :verified,
-					  roles_mask = :roles_mask,
-					  ip = :ip,
-					  img = :img,
-					  biography = :biography,
-					  updatedat = :updatedat
-				  WHERE uid = :uid";
+        $query = "UPDATE users
+                  SET username = :username,
+                      password = :password,
+                      email = :email,
+                      status = :status,
+                      verified = :verified,
+                      roles_mask = :roles_mask,
+                      ip = :ip,
+                      img = :img,
+                      biography = :biography,
+                      updatedat = :updatedat
+                  WHERE uid = :uid";
 
-		try {
-			$stmt = $this->db->prepare($query);
+        try {
+            $stmt = $this->db->prepare($query);
 
-			// Bind each value explicitly
-			$stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
-			$stmt->bindValue(':password', $data['password'], \PDO::PARAM_STR); 
-			$stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
-			$stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
-			$stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
-			$stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
-			$stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-			$stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
-			$stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-			$stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
-			$stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
+            // Bind each value explicitly
+            $stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
+            $stmt->bindValue(':password', $data['password'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
+            $stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
+            $stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
+            $stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
+            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
+            $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
+            $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
 
-			$stmt->execute();
+            $stmt->execute();
 
-			$this->logger->info("Updated user in database", ['uid' => $data['uid']]);
+            $this->logger->info("Updated user in database", ['uid' => $data['uid']]);
 
-			return new User($data);
-		} catch (\PDOException $e) {
-			$this->logger->error(
-				"UserMapper.update: Exception occurred while updating user",
-				[
-					'uid' => $data['uid'] ?? null,
-					'exception' => $e->getMessage(),
-				]
-			);
+            return new User($data);
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "UserMapper.update: Exception occurred while updating user",
+                [
+                    'uid' => $data['uid'] ?? null,
+                    'exception' => $e->getMessage(),
+                ]
+            );
 
-			throw new \RuntimeException("Failed to update user in database: " . $e->getMessage());
-		}
-	}
+            throw new \RuntimeException("Failed to update user in database: " . $e->getMessage());
+        }
+    }
 
-	public function updatePass(User $user): User
-	{
-		$this->logger->info("UserMapper.updatePass started");
+    public function updatePass(User $user): User
+    {
+        $this->logger->info("UserMapper.updatePass started");
 
-		$data = $user->getArrayCopy(); 
-		$passwordHash = $this->setPassword($data['password']); 
+        $data = $user->getArrayCopy(); 
+        $passwordHash = $this->setPassword($data['password']); 
 
-		$query = "UPDATE users
-				  SET password = :password,
-					  ip = :ip,
-					  updatedat = :updatedat
-				  WHERE uid = :uid";
+        $query = "UPDATE users
+                  SET password = :password,
+                      ip = :ip,
+                      updatedat = :updatedat
+                  WHERE uid = :uid";
 
-		try {
-			$stmt = $this->db->prepare($query);
+        try {
+            $stmt = $this->db->prepare($query);
 
-			// Explicitly bind only the required values
-			$stmt->bindValue(':password', $passwordHash, \PDO::PARAM_STR);
-			$stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-			$stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
-			$stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
+            // Explicitly bind only the required values
+            $stmt->bindValue(':password', $passwordHash, \PDO::PARAM_STR);
+            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
 
-			$stmt->execute();
+            $stmt->execute();
 
-			$this->logger->info("Updated password in database", ['uid' => $data['uid']]);
+            $this->logger->info("Updated password in database", ['uid' => $data['uid']]);
 
-			return new User($data); 
-		} catch (\PDOException $e) {
-			$this->logger->error(
-				"UserMapper.updatePass: Exception occurred while updating password",
-				[
-					'uid' => $data['uid'] ?? null,
-					'exception' => $e->getMessage(),
-				]
-			);
+            return new User($data); 
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "UserMapper.updatePass: Exception occurred while updating password",
+                [
+                    'uid' => $data['uid'] ?? null,
+                    'exception' => $e->getMessage(),
+                ]
+            );
 
-			throw new \RuntimeException("Failed to update password in database: " . $e->getMessage());
-		}
-	}
+            throw new \RuntimeException("Failed to update password in database: " . $e->getMessage());
+        }
+    }
 
-	public function updateProfil(User $user): User
-	{
-		$this->logger->info("UserMapper.updateProfil started");
+    public function updateProfil(User $user): User
+    {
+        $this->logger->info("UserMapper.updateProfil started");
 
-		$data = $user->getArrayCopy(); 
+        $data = $user->getArrayCopy(); 
 
-		$query = "UPDATE users
-				  SET username = :username,
-					  email = :email,
-					  status = :status,
-					  verified = :verified,
-					  slug = :slug,
-					  roles_mask = :roles_mask,
-					  ip = :ip,
-					  img = :img,
-					  biography = :biography,
-					  updatedat = :updatedat
-				  WHERE uid = :uid";
+        $query = "UPDATE users
+                  SET username = :username,
+                      email = :email,
+                      status = :status,
+                      verified = :verified,
+                      slug = :slug,
+                      roles_mask = :roles_mask,
+                      ip = :ip,
+                      img = :img,
+                      biography = :biography,
+                      updatedat = :updatedat
+                  WHERE uid = :uid";
 
-		try {
-			$stmt = $this->db->prepare($query);
+        try {
+            $stmt = $this->db->prepare($query);
 
-			// Explicitly bind each value
-			$stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
-			$stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
-			$stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
-			$stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
-			$stmt->bindValue(':slug', $data['slug'], \PDO::PARAM_INT);
-			$stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
-			$stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-			$stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
-			$stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-			$stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
-			$stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
+            // Explicitly bind each value
+            $stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
+            $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
+            $stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
+            $stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
+            $stmt->bindValue(':slug', $data['slug'], \PDO::PARAM_INT);
+            $stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
+            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
+            $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
+            $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
 
-			$stmt->execute();
+            $stmt->execute();
 
-			$this->logger->info("Updated profile in database", ['uid' => $data['uid']]);
+            $this->logger->info("Updated profile in database", ['uid' => $data['uid']]);
 
-			return new User($data);
-		} catch (\PDOException $e) {
-			$this->logger->error(
-				"UserMapper.updateProfil: Exception occurred while updating profile",
-				[
-					'uid' => $data['uid'] ?? null,
-					'exception' => $e->getMessage(),
-				]
-			);
+            return new User($data);
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "UserMapper.updateProfil: Exception occurred while updating profile",
+                [
+                    'uid' => $data['uid'] ?? null,
+                    'exception' => $e->getMessage(),
+                ]
+            );
 
-			throw new \RuntimeException("Failed to update profile in database: " . $e->getMessage());
-		}
-	}
+            throw new \RuntimeException("Failed to update profile in database: " . $e->getMessage());
+        }
+    }
 
-	public function delete(string $id): bool
-	{
-		$this->logger->info("UserMapper.delete started");
+    public function delete(string $id): bool
+    {
+        $this->logger->info("UserMapper.delete started");
 
-		$query = "DELETE FROM users WHERE uid = :uid";
+        $query = "DELETE FROM users WHERE uid = :uid";
 
-		try {
-			$stmt = $this->db->prepare($query);
+        try {
+            $stmt = $this->db->prepare($query);
 
-			// Explicitly bind the `id` parameter
-			$stmt->bindValue(':uid', $id, \PDO::PARAM_STR);
+            // Explicitly bind the `id` parameter
+            $stmt->bindValue(':uid', $id, \PDO::PARAM_STR);
 
-			$stmt->execute();
+            $stmt->execute();
 
-			$this->logger->info("Deleted user in database", ['id' => $id]);
+            $this->logger->info("Deleted user in database", ['id' => $id]);
 
-			return (bool)$stmt->rowCount(); 
-		} catch (\PDOException $e) {
-			$this->logger->error(
-				"UserMapper.delete: Exception occurred while deleting user",
-				[
-					'id' => $id,
-					'exception' => $e->getMessage(),
-				]
-			);
+            return (bool)$stmt->rowCount(); 
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "UserMapper.delete: Exception occurred while deleting user",
+                [
+                    'id' => $id,
+                    'exception' => $e->getMessage(),
+                ]
+            );
 
-			throw new \RuntimeException("Failed to delete user from database: " . $e->getMessage());
-		}
-	}
+            throw new \RuntimeException("Failed to delete user from database: " . $e->getMessage());
+        }
+    }
 
     public function deleteUnverifiedUsers(): void
     {

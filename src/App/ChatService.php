@@ -372,6 +372,7 @@ class ChatService
                 $participantData = [
                     'chatid' => $chatId,
                     'userid' => $participantId,
+					'hasaccess' => 0,
                     'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
                 ];
                 $participant = new ChatParticipants($participantData);

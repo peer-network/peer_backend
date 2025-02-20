@@ -101,39 +101,39 @@ class PostMapper
         return $results;
     }
 
-	public function loadByTitle(string $title): array
-	{
-		$this->logger->info("PostMapper.loadByTitle started");
+    public function loadByTitle(string $title): array
+    {
+        $this->logger->info("PostMapper.loadByTitle started");
 
-		$sql = "SELECT * FROM posts WHERE title LIKE :title AND feedid IS NULL";
-		$stmt = $this->db->prepare($sql);
-		$stmt->execute(['title' => '%' . $title . '%']);
-		$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $sql = "SELECT * FROM posts WHERE title LIKE :title AND feedid IS NULL";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['title' => '%' . $title . '%']);
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-		if (!empty($data)) {
-			return array_map(fn($row) => new Post($row), $data);
-		}
+        if (!empty($data)) {
+            return array_map(fn($row) => new Post($row), $data);
+        }
 
-		$this->logger->warning("No posts found with title", ['title' => $title]);
-		return [];
-	}
+        $this->logger->warning("No posts found with title", ['title' => $title]);
+        return [];
+    }
 
-	public function loadById(string $id): Post|false
-	{
-		$this->logger->info("PostMapper.loadById started");
+    public function loadById(string $id): Post|false
+    {
+        $this->logger->info("PostMapper.loadById started");
 
-		$sql = "SELECT * FROM posts WHERE postid = :postid AND feedid IS NULL";
-		$stmt = $this->db->prepare($sql);
-		$stmt->execute(['postid' => $id]);
-		$data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $sql = "SELECT * FROM posts WHERE postid = :postid AND feedid IS NULL";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['postid' => $id]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-		if ($data !== false) {
-			return new Post($data);
-		}
+        if ($data !== false) {
+            return new Post($data);
+        }
 
-		$this->logger->warning("No post found with id", ['id' => $id]);
-		return false;
-	}
+        $this->logger->warning("No post found with id", ['id' => $id]);
+        return false;
+    }
 
     public function fetchPostsByType(string $userid, int $limitPerType = 5): array
     {
@@ -341,55 +341,55 @@ class PostMapper
     }
 
     // Create a post
-	public function insert(Post $post): Post
-	{
-		$this->logger->info("PostMapper.insert started");
+    public function insert(Post $post): Post
+    {
+        $this->logger->info("PostMapper.insert started");
 
-		$data = $post->getArrayCopy();
+        $data = $post->getArrayCopy();
 
-		$query = "INSERT INTO posts 
-				  (postid, userid, feedid, title, media, cover, mediadescription, contenttype, createdat)
-				  VALUES 
-				  (:postid, :userid, :feedid, :title, :media, :cover, :mediadescription, :contenttype, :createdat)";
+        $query = "INSERT INTO posts 
+                  (postid, userid, feedid, title, media, cover, mediadescription, contenttype, createdat)
+                  VALUES 
+                  (:postid, :userid, :feedid, :title, :media, :cover, :mediadescription, :contenttype, :createdat)";
 
-		try {
-			$stmt = $this->db->prepare($query);
+        try {
+            $stmt = $this->db->prepare($query);
 
-			// Explicitly bind each value
-			$stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
-			$stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-			$stmt->bindValue(':feedid', $data['feedid'], \PDO::PARAM_STR);
-			$stmt->bindValue(':title', $data['title'], \PDO::PARAM_STR);
-			$stmt->bindValue(':media', $data['media'], \PDO::PARAM_STR);
-			$stmt->bindValue(':cover', $data['cover'], \PDO::PARAM_STR);
-			$stmt->bindValue(':mediadescription', $data['mediadescription'], \PDO::PARAM_STR);
-			$stmt->bindValue(':contenttype', $data['contenttype'], \PDO::PARAM_STR);
-			$stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            // Explicitly bind each value
+            $stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':feedid', $data['feedid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':title', $data['title'], \PDO::PARAM_STR);
+            $stmt->bindValue(':media', $data['media'], \PDO::PARAM_STR);
+            $stmt->bindValue(':cover', $data['cover'], \PDO::PARAM_STR);
+            $stmt->bindValue(':mediadescription', $data['mediadescription'], \PDO::PARAM_STR);
+            $stmt->bindValue(':contenttype', $data['contenttype'], \PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
 
-			$stmt->execute();
+            $stmt->execute();
 
-			$this->logger->info("Inserted new post into database", ['post' => $data]);
+            $this->logger->info("Inserted new post into database", ['post' => $data]);
 
-			return new Post($data);
-		} catch (\PDOException $e) {
-			$this->logger->error(
-				"PostMapper.insert: Exception occurred while inserting post",
-				[
-					'data' => $data,
-					'exception' => $e->getMessage(),
-				]
-			);
+            return new Post($data);
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "PostMapper.insert: Exception occurred while inserting post",
+                [
+                    'data' => $data,
+                    'exception' => $e->getMessage(),
+                ]
+            );
 
-			throw new \RuntimeException("Failed to insert post into database: " . $e->getMessage());
-		}
-	}
+            throw new \RuntimeException("Failed to insert post into database: " . $e->getMessage());
+        }
+    }
 
     public function findPostser(?array $args = [], string $currentUserId): array
     {
         $this->logger->info("PostMapper.findPostser started");
 
         $offset = max((int)($args['postOffset'] ?? 0), 0);
-		$limit = min(max((int)($args['postLimit'] ?? 10), 1), 20);
+        $limit = min(max((int)($args['postLimit'] ?? 10), 1), 20);
 
         $from = $args['from'] ?? null;
         $to = $args['to'] ?? null;
@@ -403,8 +403,8 @@ class PostMapper
         $whereClauses = ["p.feedid IS NULL"];
         $params = ['currentUserId' => $currentUserId];
 
-		$trendlimit = 4;
-		$trenddays = 17;
+        $trendlimit = 4;
+        $trenddays = 17;
 
         if ($postId !== null) {
             $whereClauses[] = "p.postid = :postId";
@@ -440,43 +440,43 @@ class PostMapper
             $params['tag'] = $tag;
         }
 
-		if (!empty($filterBy) && is_array($filterBy)) {
-			$validTypes = [];
-			$userFilters = [];
+        if (!empty($filterBy) && is_array($filterBy)) {
+            $validTypes = [];
+            $userFilters = [];
 
-			$mapping = [
-				'IMAGE' => 'image',
-				'AUDIO' => 'audio',
-				'VIDEO' => 'video',
-				'TEXT' => 'text',
-			];
+            $mapping = [
+                'IMAGE' => 'image',
+                'AUDIO' => 'audio',
+                'VIDEO' => 'video',
+                'TEXT' => 'text',
+            ];
 
-			$userMapping = [
-				'FOLLOWED' => "p.userid IN (SELECT followedid FROM follows WHERE followerid = :currentUserId)",
-				'FOLLOWER' => "p.userid IN (SELECT followerid FROM follows WHERE followedid = :currentUserId)",
-			];
+            $userMapping = [
+                'FOLLOWED' => "p.userid IN (SELECT followedid FROM follows WHERE followerid = :currentUserId)",
+                'FOLLOWER' => "p.userid IN (SELECT followerid FROM follows WHERE followedid = :currentUserId)",
+            ];
 
-			foreach ($filterBy as $type) {
-				if (isset($mapping[$type])) {
-					$validTypes[] = $mapping[$type]; 
-				} elseif (isset($userMapping[$type])) {
-					$userFilters[] = $userMapping[$type]; 
-				}
-			}
+            foreach ($filterBy as $type) {
+                if (isset($mapping[$type])) {
+                    $validTypes[] = $mapping[$type]; 
+                } elseif (isset($userMapping[$type])) {
+                    $userFilters[] = $userMapping[$type]; 
+                }
+            }
 
-			if (!empty($validTypes)) {
-				$placeholders = implode(", ", array_map(fn($k) => ":filter$k", array_keys($validTypes)));
-				$whereClauses[] = "p.contenttype IN ($placeholders)";
+            if (!empty($validTypes)) {
+                $placeholders = implode(", ", array_map(fn($k) => ":filter$k", array_keys($validTypes)));
+                $whereClauses[] = "p.contenttype IN ($placeholders)";
 
-				foreach ($validTypes as $key => $value) {
-					$params["filter$key"] = $value;
-				}
-			}
+                foreach ($validTypes as $key => $value) {
+                    $params["filter$key"] = $value;
+                }
+            }
 
-			if (!empty($userFilters)) {
-				$whereClauses[] = "(" . implode(" OR ", $userFilters) . ")";
-			}
-		}
+            if (!empty($userFilters)) {
+                $whereClauses[] = "(" . implode(" OR ", $userFilters) . ")";
+            }
+        }
 
         $orderBy = match ($sortBy) {
             'NEWEST' => "p.createdat DESC",
@@ -507,12 +507,12 @@ class PostMapper
                 (SELECT COUNT(*) FROM user_post_dislikes WHERE postid = p.postid) as amountdislikes,
                 (SELECT COUNT(*) FROM user_post_views WHERE postid = p.postid) as amountviews,
                 (SELECT COUNT(*) FROM comments WHERE postid = p.postid) as amountcomments,
-				COALESCE((
-					SELECT SUM(w.numbers)
-					FROM wallet w
-					WHERE w.postid = p.postid
-					  AND w.createdat >= NOW() - INTERVAL '$trenddays days'
-				), 0) AS amounttrending,
+                COALESCE((
+                    SELECT SUM(w.numbers)
+                    FROM wallet w
+                    WHERE w.postid = p.postid
+                      AND w.createdat >= NOW() - INTERVAL '$trenddays days'
+                ), 0) AS amounttrending,
                 EXISTS (SELECT 1 FROM user_post_likes WHERE postid = p.postid AND userid = :currentUserId) as isliked,
                 EXISTS (SELECT 1 FROM user_post_views WHERE postid = p.postid AND userid = :currentUserId) as isviewed,
                 EXISTS (SELECT 1 FROM user_post_reports WHERE postid = p.postid AND userid = :currentUserId) as isreported,
