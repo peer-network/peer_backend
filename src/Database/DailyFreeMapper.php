@@ -41,162 +41,162 @@ class DailyFreeMapper
         }
     }
 
-	public function loadById(string $userid): DailyFree|false
-	{
-		$this->logger->info("DailyFreeMapper.loadById started");
+    public function loadById(string $userid): DailyFree|false
+    {
+        $this->logger->info("DailyFreeMapper.loadById started");
 
-		$sql = "SELECT * FROM dailyfree WHERE userid = :userid";
-		$stmt = $this->db->prepare($sql);
-		$stmt->execute(['userid' => $userid]);
-		$data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $sql = "SELECT * FROM dailyfree WHERE userid = :userid";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['userid' => $userid]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-		if ($data !== false) {
-			$this->logger->info("User found with userid", ['data' => $data]);
-			return new DailyFree($data);
-		}
+        if ($data !== false) {
+            $this->logger->info("User found with userid", ['data' => $data]);
+            return new DailyFree($data);
+        }
 
-		$this->logger->warning("No user found with userid", ['userid' => $userid]);
+        $this->logger->warning("No user found with userid", ['userid' => $userid]);
 
-		try {
-			$dailyData = [
-				'userid' => $userid,
-				'liken' => 0,
-				'comments' => 0,
-				'posten' => 0,
-				'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u')
-			];
+        try {
+            $dailyData = [
+                'userid' => $userid,
+                'liken' => 0,
+                'comments' => 0,
+                'posten' => 0,
+                'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u')
+            ];
 
-			$newUser = new DailyFree($dailyData);
-			$insertedUser = $this->insert($newUser);
+            $newUser = new DailyFree($dailyData);
+            $insertedUser = $this->insert($newUser);
 
-			if ($insertedUser === false) {
-				$this->logger->error("Failed to create new user", ['userid' => $userid]);
-				return false;
-			}
+            if ($insertedUser === false) {
+                $this->logger->error("Failed to create new user", ['userid' => $userid]);
+                return false;
+            }
 
-			$this->logger->info("New user created successfully", ['userid' => $userid]);
-			return $insertedUser;
-		} catch (\Throwable $e) {
-			$this->logger->error("Unexpected error during user creation", [
-				'userid' => $userid,
-				'error' => $e->getMessage(),
-			]);
-			return false;
-		}
-	}
+            $this->logger->info("New user created successfully", ['userid' => $userid]);
+            return $insertedUser;
+        } catch (\Throwable $e) {
+            $this->logger->error("Unexpected error during user creation", [
+                'userid' => $userid,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
 
-	public function insert(DailyFree $user): DailyFree|false
-	{
-		$this->logger->info("DailyFree.insert started");
+    public function insert(DailyFree $user): DailyFree|false
+    {
+        $this->logger->info("DailyFree.insert started");
 
-		try {
-			$data = $user->getArrayCopy();
+        try {
+            $data = $user->getArrayCopy();
 
-			$query = "INSERT INTO dailyfree (userid, liken, comments, posten, createdat) VALUES (:userid, :liken, :comments, :posten, :createdat)";
+            $query = "INSERT INTO dailyfree (userid, liken, comments, posten, createdat) VALUES (:userid, :liken, :comments, :posten, :createdat)";
 
-			$stmt = $this->db->prepare($query);
-			$stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-			$stmt->bindValue(':liken', $data['liken'], \PDO::PARAM_INT);
-			$stmt->bindValue(':comments', $data['comments'], \PDO::PARAM_INT);
-			$stmt->bindValue(':posten', $data['posten'], \PDO::PARAM_INT);
-			$stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
-			$stmt->execute();
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':liken', $data['liken'], \PDO::PARAM_INT);
+            $stmt->bindValue(':comments', $data['comments'], \PDO::PARAM_INT);
+            $stmt->bindValue(':posten', $data['posten'], \PDO::PARAM_INT);
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->execute();
 
-			$this->logger->info("Inserted new record into database", ['record' => $data]);
+            $this->logger->info("Inserted new record into database", ['record' => $data]);
 
-			return new DailyFree($data);
-		} catch (\PDOException $e) {
-			if ($e->getCode() === '23505') {
-				$this->logger->warning("Duplicate record detected", [
-					'userid' => $user->getArrayCopy()['userid'],
-					'error' => $e->getMessage(),
-				]);
-				return false;
-			}
+            return new DailyFree($data);
+        } catch (\PDOException $e) {
+            if ($e->getCode() === '23505') {
+                $this->logger->warning("Duplicate record detected", [
+                    'userid' => $user->getArrayCopy()['userid'],
+                    'error' => $e->getMessage(),
+                ]);
+                return false;
+            }
 
-			$this->logger->error("Error inserting record into database", [
-				'error' => $e->getMessage(),
-				'data' => $user->getArrayCopy(),
-			]);
-			return false;
-		} catch (\Throwable $e) {
-			$this->logger->error("Unexpected error during record creation", [
-				'error' => $e->getMessage(),
-				'data' => $user->getArrayCopy(),
-			]);
-			return false;
-		}
-	}
+            $this->logger->error("Error inserting record into database", [
+                'error' => $e->getMessage(),
+                'data' => $user->getArrayCopy(),
+            ]);
+            return false;
+        } catch (\Throwable $e) {
+            $this->logger->error("Unexpected error during record creation", [
+                'error' => $e->getMessage(),
+                'data' => $user->getArrayCopy(),
+            ]);
+            return false;
+        }
+    }
 
-	public function update(DailyFree $user): DailyFree|false
-	{
-		$this->logger->info("DailyFree.update started");
+    public function update(DailyFree $user): DailyFree|false
+    {
+        $this->logger->info("DailyFree.update started");
 
-		try {
-			$data = $user->getArrayCopy();
+        try {
+            $data = $user->getArrayCopy();
 
-			$query = "UPDATE dailyfree SET liken = :liken, comments = :comments, posten = :posten, createdat = :createdat WHERE userid = :userid";
+            $query = "UPDATE dailyfree SET liken = :liken, comments = :comments, posten = :posten, createdat = :createdat WHERE userid = :userid";
 
-			$stmt = $this->db->prepare($query);
-			$stmt->bindValue(':liken', $data['liken'], \PDO::PARAM_INT);
-			$stmt->bindValue(':comments', $data['comments'], \PDO::PARAM_INT);
-			$stmt->bindValue(':posten', $data['posten'], \PDO::PARAM_INT);
-			$stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
-			$stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':liken', $data['liken'], \PDO::PARAM_INT);
+            $stmt->bindValue(':comments', $data['comments'], \PDO::PARAM_INT);
+            $stmt->bindValue(':posten', $data['posten'], \PDO::PARAM_INT);
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
 
-			$stmt->execute();
+            $stmt->execute();
 
-			$this->logger->info("User updated successfully in database", ['user' => $data]);
+            $this->logger->info("User updated successfully in database", ['user' => $data]);
 
-			return new DailyFree($data);
-		} catch (\PDOException $e) {
-			$this->logger->error("Database error during user update", [
-				'error' => $e->getMessage(),
-				'user' => $user->getArrayCopy(),
-			]);
-			return false;
-		} catch (\Throwable $e) {
-			$this->logger->error("Unexpected error during user update", [
-				'error' => $e->getMessage(),
-				'user' => $user->getArrayCopy(),
-			]);
-			return false;
-		}
-	}
+            return new DailyFree($data);
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error during user update", [
+                'error' => $e->getMessage(),
+                'user' => $user->getArrayCopy(),
+            ]);
+            return false;
+        } catch (\Throwable $e) {
+            $this->logger->error("Unexpected error during user update", [
+                'error' => $e->getMessage(),
+                'user' => $user->getArrayCopy(),
+            ]);
+            return false;
+        }
+    }
 
-	public function delete(string $userid): bool
-	{
-		$this->logger->info("DailyFree.delete started");
+    public function delete(string $userid): bool
+    {
+        $this->logger->info("DailyFree.delete started");
 
-		try {
-			$query = "DELETE FROM dailyfree WHERE userid = :userid";
-			$stmt = $this->db->prepare($query);
-			$stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-			$stmt->execute();
+        try {
+            $query = "DELETE FROM dailyfree WHERE userid = :userid";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
+            $stmt->execute();
 
-			$deleted = (bool)$stmt->rowCount();
+            $deleted = (bool)$stmt->rowCount();
 
-			if ($deleted) {
-				$this->logger->info("User successfully deleted from database", ['userid' => $userid]);
-			} else {
-				$this->logger->warning("No user found to delete in database", ['userid' => $userid]);
-			}
+            if ($deleted) {
+                $this->logger->info("User successfully deleted from database", ['userid' => $userid]);
+            } else {
+                $this->logger->warning("No user found to delete in database", ['userid' => $userid]);
+            }
 
-			return $deleted;
-		} catch (\PDOException $e) {
-			$this->logger->error("Database error during user deletion", [
-				'error' => $e->getMessage(),
-				'userid' => $userid
-			]);
-			return false;
-		} catch (\Throwable $e) {
-			$this->logger->error("Unexpected error during user deletion", [
-				'error' => $e->getMessage(),
-				'userid' => $userid
-			]);
-			return false;
-		}
-	}
+            return $deleted;
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error during user deletion", [
+                'error' => $e->getMessage(),
+                'userid' => $userid
+            ]);
+            return false;
+        } catch (\Throwable $e) {
+            $this->logger->error("Unexpected error during user deletion", [
+                'error' => $e->getMessage(),
+                'userid' => $userid
+            ]);
+            return false;
+        }
+    }
 
     public function getUserDailyUsage(string $userId, string $artType): int
     {

@@ -36,7 +36,7 @@ class CommentInfoMapper
     {
         $this->logger->info("CommentInfoMapper.isUserExistById started");
 
-		$stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :id");
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :id");
         $stmt->bindParam(':id', $id);
         $stmt->execute();
 
@@ -100,12 +100,12 @@ class CommentInfoMapper
         $exists = $stmtCheck->fetchColumn() > 0;
 
         if (!$exists) {
-			$sql = "INSERT INTO $table (userid, commentid) VALUES (:userid, :commentid)";
-			$stmt = $this->db->prepare($sql);
-			return $stmt->execute(['userid' => $userid, 'commentid' => $commentid]);
+            $sql = "INSERT INTO $table (userid, commentid) VALUES (:userid, :commentid)";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute(['userid' => $userid, 'commentid' => $commentid]);
         }
 
-		return false;
+        return false;
     }
 
     public function countLikes(string $commentid): int

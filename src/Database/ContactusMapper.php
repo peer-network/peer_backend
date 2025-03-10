@@ -11,10 +11,10 @@ class ContactusMapper
     {
     }
 
-	private function respondWithError(string $message): array
-	{
-		return ['status' => 'error', 'ResponseCode' => $message];
-	}
+    private function respondWithError(string $message): array
+    {
+        return ['status' => 'error', 'ResponseCode' => $message];
+    }
 
     public function checkLimit(string $email): bool
     {
@@ -41,52 +41,52 @@ class ContactusMapper
         }
     }
 
-	public function checkRateLimit(string $ip): bool
-	{
-		$this->logger->info("ContactusMapper.Rate limit check started for IP: {$ip}");
+    public function checkRateLimit(string $ip): bool
+    {
+        $this->logger->info("ContactusMapper.Rate limit check started for IP: {$ip}");
 
-		$query = "SELECT request_count, last_request FROM contactus_rate_limit WHERE ip = :ip";
-		$stmt = $this->db->prepare($query);
-		$stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
-		$stmt->execute();
+        $query = "SELECT request_count, last_request FROM contactus_rate_limit WHERE ip = :ip";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
+        $stmt->execute();
 
-		$result = $stmt->fetch(\PDO::FETCH_ASSOC);
-		$now = new \DateTime();
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $now = new \DateTime();
 
-		if ($result) {
-			$lastRequest = new \DateTime($result['last_request']);
-			$interval = $now->diff($lastRequest);
+        if ($result) {
+            $lastRequest = new \DateTime($result['last_request']);
+            $interval = $now->diff($lastRequest);
 
-			if ($interval->i < 1 && $result['request_count'] >= 5) {
-				$this->logger->warning("Rate limit exceeded for IP: {$ip}");
-				return false;
-			}
+            if ($interval->i < 1 && $result['request_count'] >= 5) {
+                $this->logger->warning("Rate limit exceeded for IP: {$ip}");
+                return false;
+            }
 
-			$query = "UPDATE contactus_rate_limit
-					  SET request_count = request_count + 1, last_request = :now
-					  WHERE ip = :ip";
-			$stmt = $this->db->prepare($query);
-			$stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
-			$stmt->bindValue(':now', $now->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
-			$stmt->execute();
-		} else {
-			$query = "INSERT INTO contactus_rate_limit (ip, request_count, last_request)
-					  VALUES (:ip, 1, :now)";
-			$stmt = $this->db->prepare($query);
-			$stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
-			$stmt->bindValue(':now', $now->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
-			$stmt->execute();
-		}
+            $query = "UPDATE contactus_rate_limit
+                      SET request_count = request_count + 1, last_request = :now
+                      WHERE ip = :ip";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
+            $stmt->bindValue(':now', $now->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+            $stmt->execute();
+        } else {
+            $query = "INSERT INTO contactus_rate_limit (ip, request_count, last_request)
+                      VALUES (:ip, 1, :now)";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
+            $stmt->bindValue(':now', $now->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+            $stmt->execute();
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     public function fetchAll(?array $args = []): array
     {
         $this->logger->info("ContactusMapper.fetchAll started");
 
-		$offset = max((int)($args['offset'] ?? 0), 0);
-		$limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $sql = "SELECT * FROM contactus ORDER BY name ASC LIMIT :limit OFFSET :offset";
 
@@ -150,57 +150,57 @@ class ContactusMapper
         return false;
     }
 
-	public function insert(Contactus $contact): Contactus|false
-	{
-		$this->logger->info("ContactusMapper.insert started");
+    public function insert(Contactus $contact): Contactus|false
+    {
+        $this->logger->info("ContactusMapper.insert started");
 
-		try {
-			$data = $contact->getArrayCopy();
+        try {
+            $data = $contact->getArrayCopy();
 
-			unset($data['msgid']);
+            unset($data['msgid']);
 
-			$query = "INSERT INTO contactus (name, email, message, ip, createdat) VALUES (:name, :email, :message, :ip, :createdat) RETURNING msgid";
+            $query = "INSERT INTO contactus (name, email, message, ip, createdat) VALUES (:name, :email, :message, :ip, :createdat) RETURNING msgid";
 
-			$stmt = $this->db->prepare($query);
-			$stmt->bindValue(':name', $data['name'], \PDO::PARAM_STR);
-			$stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
-			$stmt->bindValue(':message', $data['message'], \PDO::PARAM_STR);
-			$stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-			$stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
-			$stmt->execute();
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':name', $data['name'], \PDO::PARAM_STR);
+            $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
+            $stmt->bindValue(':message', $data['message'], \PDO::PARAM_STR);
+            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->execute();
 
-			$generatedContactId = $stmt->fetchColumn();
+            $generatedContactId = $stmt->fetchColumn();
 
-			if (!$generatedContactId) {
-				throw new \RuntimeException("Failed to retrieve generated msgid");
-			}
+            if (!$generatedContactId) {
+                throw new \RuntimeException("Failed to retrieve generated msgid");
+            }
 
-			$data['msgid'] = (int) $generatedContactId;
-			$this->logger->info("Inserted new contact into database", ['contact' => $data]);
+            $data['msgid'] = (int) $generatedContactId;
+            $this->logger->info("Inserted new contact into database", ['contact' => $data]);
 
-			return new Contactus($data);
-		} catch (\PDOException $e) {
-			if ($e->getCode() === '23505') { // Unique constraint violation
-				$this->logger->warning("Duplicate email detected", [
-					'email' => $contact->getArrayCopy()['email'],
-					'error' => $e->getMessage(),
-				]);
-				return false; // Or return a specific error response
-			}
+            return new Contactus($data);
+        } catch (\PDOException $e) {
+            if ($e->getCode() === '23505') { // Unique constraint violation
+                $this->logger->warning("Duplicate email detected", [
+                    'email' => $contact->getArrayCopy()['email'],
+                    'error' => $e->getMessage(),
+                ]);
+                return false; // Or return a specific error response
+            }
 
-			$this->logger->error("Error inserting contact into database", [
-				'error' => $e->getMessage(),
-				'data' => $contact->getArrayCopy(),
-			]);
-			return false;
-		} catch (\Throwable $e) {
-			$this->logger->error("Unexpected error during contact creation", [
-				'error' => $e->getMessage(),
-				'data' => $contact->getArrayCopy(),
-			]);
-			return false;
-		}
-	}
+            $this->logger->error("Error inserting contact into database", [
+                'error' => $e->getMessage(),
+                'data' => $contact->getArrayCopy(),
+            ]);
+            return false;
+        } catch (\Throwable $e) {
+            $this->logger->error("Unexpected error during contact creation", [
+                'error' => $e->getMessage(),
+                'data' => $contact->getArrayCopy(),
+            ]);
+            return false;
+        }
+    }
 
     public function update(Contactus $contact): Contactus|false
     {

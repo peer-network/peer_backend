@@ -69,9 +69,9 @@ class UserService
             return $this->respondWithError('Username must be between 3 and 23 characters.');
         }
 
-		if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
-			return $this->respondWithError('Username must only contain letters, numbers, and underscores.');
-		}
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+            return $this->respondWithError('Username must only contain letters, numbers, and underscores.');
+        }
 
         return ['status' => 'success'];
     }
@@ -134,60 +134,60 @@ class UserService
         return [];
     }
 
-	public function createUser(array $args): array
-	{
-		$this->logger->info('UserService.createUser started');
+    public function createUser(array $args): array
+    {
+        $this->logger->info('UserService.createUser started');
 
-		$requiredFields = ['username', 'email', 'password'];
-		$validationErrors = $this->validateRequiredFields($args, $requiredFields);
-		if (!empty($validationErrors)) {
-			return $validationErrors;
-		}
+        $requiredFields = ['username', 'email', 'password'];
+        $validationErrors = $this->validateRequiredFields($args, $requiredFields);
+        if (!empty($validationErrors)) {
+            return $validationErrors;
+        }
 
-		$username = trim($args['username']);
-		$email = trim($args['email']);
-		$password = $args['password'];
-		$mediaFile = isset($args['img']) ? trim($args['img']) : '';
-		$biography = $args['biography'] ?? null;
-		$isPrivate = (int)($args['isprivate'] ?? 0);
+        $username = trim($args['username']);
+        $email = trim($args['email']);
+        $password = $args['password'];
+        $mediaFile = isset($args['img']) ? trim($args['img']) : '';
+        $isPrivate = (int)($args['isprivate'] ?? 0);
         $invited = $args['invited'] ?? null;
-		$id = $this->generateUUID();
+        $id = $this->generateUUID();
+        $biography = $args['biography'] ?? '/userData/' . $id . '.txt';
 
-		$usernameValidation = $this->validateUsername($username);
-		if ($usernameValidation['status'] === 'error') {
-			return $usernameValidation;
-		}
+        $usernameValidation = $this->validateUsername($username);
+        if ($usernameValidation['status'] === 'error') {
+            return $usernameValidation;
+        }
 
-		$passwordValidation = $this->validatePassword($password);
-		if ($passwordValidation['status'] === 'error') {
-			return $passwordValidation;
-		}
+        $passwordValidation = $this->validatePassword($password);
+        if ($passwordValidation['status'] === 'error') {
+            return $passwordValidation;
+        }
 
-		if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-			return $this->respondWithError('Invalid email format.');
-		}
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->respondWithError('Invalid email format.');
+        }
 
-		if ($this->userMapper->isEmailTaken($email)) {
-			return $this->respondWithError('Email already registered.');
-		}
+        if ($this->userMapper->isEmailTaken($email)) {
+            return $this->respondWithError('Email already registered.');
+        }
 
-		$slug = $this->generateUniqueSlug($username);
+        $slug = $this->generateUniqueSlug($username);
         $createdat = (new \DateTime())->format('Y-m-d H:i:s.u');
 
-		if ($mediaFile !== '') {
-			$args['img'] = $this->uploadMedia($mediaFile, $id, 'profile');
-		}
+        if ($mediaFile !== '') {
+            $args['img'] = $this->uploadMedia($mediaFile, $id, 'profile');
+        }
 
-		$args = [
-			'uid' => $id,
-			'username' => $username,
-			'email' => $email,
-			'password' => $password,
-			'biography' => $biography,
-			'isprivate' => $isPrivate,
-			'slug' => $slug,
-			'img' => $args['img'] ?? null,
-		];
+        $args = [
+            'uid' => $id,
+            'username' => $username,
+            'email' => $email,
+            'password' => $password,
+            'biography' => $biography,
+            'isprivate' => $isPrivate,
+            'slug' => $slug,
+            'img' => $args['img'] ?? '/profile/' . $id . '.jpg',
+        ];
 
         $infoData = [
             'userid' => $id,
@@ -217,8 +217,8 @@ class UserService
             'createdat' => $createdat
         ];
 
-		try {
-			$this->userMapper->createUser($args);
+        try {
+            $this->userMapper->createUser($args);
             unset($args);
 
             $userinfo = new UserInfo($infoData);
@@ -236,18 +236,18 @@ class UserService
             $this->dailyFreeMapper->insert($createuserDaily);
             unset($dailyData, $createuserDaily);
 
-			$this->userMapper->logLoginDaten($id);
-			$this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
-			return [
-				'status' => 'success',
-				'ResponseCode' => 'User registered successfully. Please verify your account.',
-				'userid' => $id,
-			];
-		} catch (\Exception $e) {
-			$this->logger->error('Error registering user.', ['exception' => $e]);
-			return $this->respondWithError('Failed to register user.');
-		}
-	}
+            $this->userMapper->logLoginDaten($id);
+            $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
+            return [
+                'status' => 'success',
+                'ResponseCode' => 'User registered successfully. Please verify your account.',
+                'userid' => $id,
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Error registering user.', ['exception' => $e]);
+            return $this->respondWithError('Failed to register user.');
+        }
+    }
 
     private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
     {
@@ -335,10 +335,10 @@ class UserService
         $newPassword = $args['password'] ?? null;
         $currentPassword = $args['expassword'] ?? null;
 
-		$passwordValidation = $this->validatePassword($newPassword);
-		if ($passwordValidation['status'] === 'error') {
-			return $passwordValidation;
-		}
+        $passwordValidation = $this->validatePassword($newPassword);
+        if ($passwordValidation['status'] === 'error') {
+            return $passwordValidation;
+        }
 
         if ($newPassword === $currentPassword) {
             return $this->respondWithError('New password cannot be the same as the current password.');
@@ -484,41 +484,41 @@ class UserService
         }
     }
 
-	public function deleteAccount(string $expassword): array
-	{
+    public function deleteAccount(string $expassword): array
+    {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
         }
 
         if (empty($expassword)) {
             return $this->respondWithError('Could not find mandatory expassword');
-		}
+        }
 
-		$this->logger->info('UserService.deleteAccount started');
+        $this->logger->info('UserService.deleteAccount started');
 
-		$userId = $this->currentUserId;
+        $userId = $this->currentUserId;
 
-		$user = $this->userMapper->loadById($userId);
-		if (!$user) {
+        $user = $this->userMapper->loadById($userId);
+        if (!$user) {
             return $this->respondWithError('Could not find user');
-		}
+        }
 
         if (!$this->validatePasswordMatch($expassword, $user->getPassword())) {
             return $this->respondWithError('Wrong Actual Password');
         }
 
-		try {
-			$this->userMapper->delete($userId);
-			$this->logger->info('User deleted successfully', ['userId' => $userId]);
-			return [
-				'status' => 'success',
-				'message' => 'User deleted successfully',
-			];
-		} catch (\Exception $e) {
-			$this->logger->error('Failed to delete user', ['exception' => $e]);
+        try {
+            $this->userMapper->delete($userId);
+            $this->logger->info('User deleted successfully', ['userId' => $userId]);
+            return [
+                'status' => 'success',
+                'message' => 'User deleted successfully',
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete user', ['exception' => $e]);
             return $this->respondWithError('Failed to delete user');
-		}
-	}
+        }
+    }
 
     public function Profile(?array $args = []): array
     {
@@ -608,7 +608,7 @@ class UserService
 
         $userId = $args['userid'] ?? $this->currentUserId;
         $offset = max((int)($args['offset'] ?? 0), 0);
-		$limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if (!self::isValidUUID($userId)) {
             return $this->respondWithError('Invalid UUID provided for Follows.');
@@ -651,7 +651,7 @@ class UserService
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
-		$limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $this->logger->info('Fetching friends list', ['currentUserId' => $this->currentUserId, 'offset' => $offset, 'limit' => $limit]);
 
@@ -662,7 +662,7 @@ class UserService
                 $this->logger->info('Friends list retrieved successfully', ['userCount' => count($users)]);
                 return [
                     'status' => 'success',
-					'counter' => count($users),
+                    'counter' => count($users),
                     'ResponseCode' => 'Friends data prepared successfully',
                     'affectedRows' => $users,
                 ];

@@ -21,7 +21,7 @@ return static function(string $appEnv) {
         'log_errors' => true,
         'default' => $_ENV['DB_DRIVER'] ?? 'postgres',
         'db' => [
-			'dsn' => 'pgsql:host=' . $_ENV['DB_HOST'] . ';port=5432;dbname=' . $_ENV['DB_DATABASE'] . '',
+            'dsn' => 'pgsql:host=' . $_ENV['DB_HOST'] . ';port=5432;dbname=' . $_ENV['DB_DATABASE'] . '',
             'username' => $_ENV['DB_USERNAME'],
             'password' => $_ENV['DB_PASSWORD'],
             'database' => $_ENV['DB_DATABASE'],
@@ -41,7 +41,7 @@ return static function(string $appEnv) {
         ],
         'logger' => [
             'name' => $_ENV['LOGGER_NAME'],
-			'path' => __DIR__ . '/../../' . $_ENV['LOGGER_PATH'] . date('Y-m-d') . '.log',
+            'path' => __DIR__ . '/../../' . $_ENV['LOGGER_PATH'] . date('Y-m-d') . '.log',
             'level' => constant('Monolog\Logger::' . $_ENV['LOGGER_LEVEL']),
         ],
         'privateKeyPath' => __DIR__ . '/../../' . $_ENV['PRIVATE_KEY_PATH'],
