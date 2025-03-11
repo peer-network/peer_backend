@@ -10,6 +10,20 @@ use Slim\Psr7\Stream;
 
 class HtmlentityDecoderMiddleware implements MiddlewareInterface
 {
+    /**
+     * Recursively decode HTML entities columns
+     * 
+     * Add more columns here for decode html entity
+     */
+    protected const DECODE_ENTITY_COLUMNS = [
+        'title', 
+        'mediadescription', 
+        'content', 
+        'comments', 
+        'message', 
+        'name'
+    ];
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
@@ -39,14 +53,16 @@ class HtmlentityDecoderMiddleware implements MiddlewareInterface
     /**
      * Recursively decode HTML entities in all string values
      */
-    private function decodeHtmlEntities($data)
+    private function decodeHtmlEntities($data, $key = '')
     {
         if (is_array($data)) {
             foreach ($data as $key => &$value) {
-                $value = $this->decodeHtmlEntities($value);
+                $value = $this->decodeHtmlEntities($value, $key);
             }
         } elseif (is_string($data)) {
-            $data = html_entity_decode(htmlspecialchars_decode($data), ENT_NOQUOTES, 'UTF-8');
+            if(in_array($key, static::DECODE_ENTITY_COLUMNS)){
+                $data = html_entity_decode(htmlspecialchars_decode($data), ENT_NOQUOTES, 'UTF-8');
+            }
         }
 
         return $data;
