@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Fawaz\Middleware\HtmlentityDecoderMiddleware;
 use Slim\App;
 use Psr\Container\ContainerInterface;
 use Fawaz\Middleware\RateLimiterMiddleware;
@@ -27,6 +28,9 @@ return static function (App $app, ContainerInterface $container, array $settings
 
     // Register the SecurityHeadersMiddleware
     $app->add(SecurityHeadersMiddleware::class);
+
+    // Add Middleware for Decode special character HTML entities
+    $app->add(HtmlentityDecoderMiddleware::class);
 
     // Add the error middleware
     $app->addErrorMiddleware(true, true, true);
