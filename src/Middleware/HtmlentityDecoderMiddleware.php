@@ -61,7 +61,7 @@ class HtmlentityDecoderMiddleware implements MiddlewareInterface
             }
         } elseif (is_string($data)) {
             if(in_array($key, static::DECODE_ENTITY_COLUMNS)){
-                $data = html_entity_decode(htmlspecialchars_decode($data), ENT_NOQUOTES, 'UTF-8');
+                $data = html_entity_decode(htmlspecialchars_decode($data), ENT_QUOTES, 'UTF-8');
             }
         }
 
