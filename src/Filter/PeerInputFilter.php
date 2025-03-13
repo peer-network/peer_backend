@@ -168,7 +168,6 @@ class PeerInputFilter
     protected function FloatSanitize(mixed $value, array $options = []): float
     {
         if (!is_numeric($value)) {
-            //throw new ValidationException("Value is not a valid float.");
             $this->errors['value'][] = "Value is not a valid float.";
         }
 
@@ -426,113 +425,6 @@ class PeerInputFilter
         return true;
     }
 
-    protected function isImage644(string $base64File, array $options = []): bool
-    {
-        $allowedExtensions = $options['extensions'] ?? ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'tiff'];
-        $allowedMimeTypes = $options['mime_types'] ?? ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif', 'image/tiff'];
-        $maxFileSize = $options['max_size'] ?? 5 * 1024 * 1024; // 5MB
-
-        $searchStrings = $this->getSearchStrings('image');
-        foreach ($searchStrings as $searchStr) {
-            $pos = 0;
-            while (($pos = \strpos($base64File, $searchStr, $pos)) !== false) {
-                $end = \strpos($base64File, '"', $pos + \strlen($searchStr));
-                if ($end === false) {
-                    $this->errors['img'][] = 'Failed to find the end of the base64 encoded string';
-                    return false;
-                }
-
-                $b64 = \substr($base64File, $pos, $end - $pos);
-                $base64String = \substr($b64, \strlen($searchStr));
-                $decodedImage = base64_decode($base64String, true);
-                if ($decodedImage === false) {
-                    $this->errors['img'][] = 'Failed to decode the base64 image.';
-                    return false;
-                }
-
-                if (strlen($decodedImage) > $maxFileSize) {
-                    $this->errors['img'][] = 'Image size exceeds the maximum limit of ' . ($maxFileSize / 1024 / 1024) . ' MB.';
-                    return false;
-                }
-
-                $extension = strtolower(str_replace(['data:image/', ';base64,'], '', $searchStr));
-                if (!in_array($extension, $allowedExtensions)) {
-                    $this->errors['img'][] = 'Invalid image extension. Allowed extensions: ' . implode(', ', $allowedExtensions);
-                    return false;
-                }
-
-                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                $mimeType = finfo_buffer($finfo, $decodedImage);
-                finfo_close($finfo);
-
-                if (!in_array($mimeType, $allowedMimeTypes)) {
-                    $this->errors['img'][] = 'Invalid MIME type. Allowed types: ' . implode(', ', $allowedMimeTypes);
-                    return false;
-                }
-
-                return true;
-            }
-        }
-
-        $this->errors['img'][] = 'No valid base64 image found in the input.';
-        return false;
-    }
-
-    protected function isImage64(string $base64File, array $options = []): bool
-    {
-        $allowedExtensions = $options['extensions'] ?? ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'tiff'];
-        $allowedMimeTypes = $options['mime_types'] ?? ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif', 'image/tiff'];
-        $maxFileSize = $options['max_size'] ?? 5 * 1024 * 1024; // 5MB
-
-        // Extract Base64 images using a robust pattern
-        $pattern = '#data:image/(?<extension>\w+);base64,(?<content>[A-Za-z0-9+/=\r\n]+)#';
-
-        if (preg_match_all($pattern, $base64File, $matches)) {
-            foreach ($matches['extension'] as $key => $extension) {
-                $extension = strtolower($extension);
-                $base64String = $matches['content'][$key];
-
-                // Validate the extension
-                if (!in_array($extension, $allowedExtensions)) {
-                    $this->errors['img'][] = 'Invalid image extension. Allowed extensions: ' . implode(', ', $allowedExtensions);
-                    return false;
-                }
-
-                // Remove any whitespace/newlines in the Base64 content
-                $base64String = preg_replace('/\s+/', '', $base64String);
-
-                // Decode the Base64-encoded image
-                $decodedImage = base64_decode($base64String, true);
-                if ($decodedImage === false) {
-                    $this->errors['img'][] = 'Failed to decode the Base64 image.';
-                    return false;
-                }
-
-                // Check file size
-                $imageSize = strlen($decodedImage);
-                if ($imageSize > $maxFileSize) {
-                    $this->errors['img'][] = 'Image size exceeds the maximum limit of ' . ($maxFileSize / 1024 / 1024) . ' MB.';
-                    return false;
-                }
-
-                // Check MIME type using finfo
-                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                $mimeType = finfo_buffer($finfo, $decodedImage);
-                finfo_close($finfo);
-
-                if (!in_array($mimeType, $allowedMimeTypes)) {
-                    $this->errors['img'][] = 'Invalid MIME type. Allowed types: ' . implode(', ', $allowedMimeTypes);
-                    return false;
-                }
-
-                return true;
-            }
-        }
-
-        $this->errors['img'][] = 'No valid Base64 image found in the input.';
-        return false;
-    }
-
     private function getSearchStrings(string $contentType): array
     {
         return match ($contentType) {
@@ -542,6 +434,173 @@ class PeerInputFilter
             'text' => ['data:text/plain;base64,'],
             default => []
         };
+    }
+
+    protected function sanitizeBase64Input(string $input): string {
+        // Remove everything before "data:"
+        if (preg_match('/data:[a-zA-Z0-9+.-]+\/[a-zA-Z0-9+.-]+;base64,[A-Za-z0-9+\/=]+/', $input, $matches)) {
+            return $matches[0]; // Return only the matched Base64 string
+        }
+        return $input; // Return as is if "data:" is not found
+    }
+
+    protected function isValidBase64Media(string $base64File, array $options = []): bool
+    {
+        $allowedExtensions = [
+            'image' => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'tiff'],
+            'video' => ['mp4', 'ogg', 'mov'],
+            'audio' => ['mp3', 'wav'],
+            'text'  => ['txt'],
+        ];
+
+        $allowedMimeTypes = [
+            'image' => ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif', 'image/tiff'],
+            'video' => ['video/mp4', 'video/ogg', 'video/quicktime'],
+            'audio' => ['audio/mpeg', 'audio/wav'],
+            'text'  => ['text/plain'],
+        ];
+
+        $maxFileSize = $options['max_size'] ?? 10 * 1024 * 1024; // 10MB default
+        $base64File = $this->sanitizeBase64Input($base64File);
+
+        // 🔍 Log the raw input for debugging
+        //error_log("Raw Input (first 100 chars): " . substr($base64File, 0, 100));
+
+        // 🎯 Regex to extract MIME type & Base64 content
+        $pattern = '#^data:(?<type>image|video|audio|text)/(?<extension>\w+);base64,(?<content>[A-Za-z0-9+/=\r\n]+)#i';
+
+        if (!preg_match($pattern, $base64File, $matches)) {
+            //error_log("❌ Regex did NOT match. Input may be incorrectly formatted.");
+            $this->errors['unknown'][] = 'No valid Base64 media found in the input.';
+            return false;
+        }
+
+        // 🏷 Extract details from regex match
+        $mediaType = strtolower($matches['type']);
+        $extension = strtolower($matches['extension']);
+        $base64String = $matches['content'];
+
+        // 🔄 Normalize extracted extension
+        if ($mediaType === 'audio' && $extension === 'mpeg') {
+            $extension = 'mp3';
+        }
+        if ($mediaType === 'text' && $extension === 'plain') {
+            $extension = 'txt'; // ✅ Convert "plain" to "txt"
+        }
+
+        //error_log("✅ Regex matched. Extracted type: $mediaType | Normalized extension: $extension");
+
+        // 🚨 Validate extension
+        if (!in_array($extension, $allowedExtensions[$mediaType])) {
+            //error_log("❌ Invalid extension: $extension. Allowed: " . implode(', ', $allowedExtensions[$mediaType]));
+            $this->errors[$mediaType][] = "Invalid $mediaType extension ($extension). Allowed: " . implode(', ', $allowedExtensions[$mediaType]);
+            return false;
+        }
+
+        // 🛠 Clean Base64 string (remove spaces, newlines)
+        $base64String = preg_replace('/\s+/', '', $base64String);
+        
+        // 🔍 Log sanitized Base64
+        //error_log("🛠 Sanitized Base64 (first 100 chars): " . substr($base64String, 0, 100));
+
+        // 📥 Decode Base64 string
+        $decodedFile = @base64_decode($base64String, true);
+
+        if ($decodedFile === false) {
+            //error_log("❌ Failed to decode Base64 media.");
+            $this->errors[$mediaType][] = 'Failed to decode the Base64 media.';
+            return false;
+        }
+
+        // 📏 Check file size
+        if (strlen($decodedFile) > $maxFileSize) {
+            //error_log("❌ $mediaType size exceeds max limit: " . ($maxFileSize / 1024 / 1024) . " MB");
+            $this->errors[$mediaType][] = ucfirst($mediaType) . " size exceeds the max limit of " . ($maxFileSize / 1024 / 1024) . " MB.";
+            return false;
+        }
+
+        // 🔍 Detect MIME type
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_buffer($finfo, $decodedFile);
+        finfo_close($finfo);
+
+        //error_log("🧐 Detected MIME type: $mimeType");
+
+        // 🛡 Validate MIME type
+        if (!in_array($mimeType, $allowedMimeTypes[$mediaType])) {
+            //error_log("❌ Invalid MIME type: $mimeType. Allowed: " . implode(', ', $allowedMimeTypes[$mediaType]));
+            $this->errors[$mediaType][] = "Invalid MIME type ($mimeType). Allowed: " . implode(', ', $allowedMimeTypes[$mediaType]);
+            return false;
+        }
+
+        error_log("✅ Base64 $mediaType is valid.");
+        return true;
+    }
+
+    protected function isImage64(string $base64File, array $options = []): bool
+    {
+        $allowedExtensions = $options['extensions'] ?? ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'tiff', 'bmp', 'svg'];
+        $allowedMimeTypes = $options['mime_types'] ?? ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif', 'image/tiff', 'image/bmp', 'image/svg+xml'];
+        $maxFileSize = $options['max_size'] ?? 5 * 1024 * 1024;
+
+        //error_log("Raw Input (first 100 chars): " . substr($base64File, 0, 100));
+
+        // Extract Base64 from an <img> tag if provided
+        if (preg_match('/src="([^"]+)"/', $base64File, $match)) {
+            $base64File = $match[1];
+            //error_log("Extracted Base64 from <img>: " . substr($base64File, 0, 100));
+        }
+
+        // Clean up Base64 input
+        $base64File = trim($base64File);
+        $base64File = str_replace(["\r", "\n", " "], '', $base64File);
+
+        //error_log("Sanitized Base64 (first 100 chars): " . substr($base64File, 0, 100));
+
+        // More flexible regex pattern
+        $pattern = '#^data:image/(?<extension>jpeg|jpg|png|gif|webp|heic|heif|tiff|bmp|svg);base64,(?<content>[A-Za-z0-9+/]+={0,2})#i';
+
+        if (!preg_match($pattern, $base64File, $matches)) {
+            //error_log("Regex did NOT match. Check formatting.");
+            $this->errors['img'][] = 'No valid Base64 image found in the input.';
+            return false;
+        }
+
+        //error_log("Regex matched. Extracted extension: " . $matches['extension']);
+
+        $extension = strtolower($matches['extension']);
+        $base64String = $matches['content'];
+
+        if (!in_array($extension, $allowedExtensions)) {
+            $this->errors['img'][] = "Invalid image extension ($extension). Allowed: " . implode(', ', $allowedExtensions);
+            return false;
+        }
+
+        // Decode Base64 safely
+        $decodedImage = @base64_decode($base64String, true);
+        if ($decodedImage === false) {
+            $this->errors['img'][] = 'Failed to decode the Base64 image.';
+            return false;
+        }
+
+        // Check file size
+        if (strlen($decodedImage) > $maxFileSize) {
+            $this->errors['img'][] = 'Image size exceeds ' . ($maxFileSize / 1024 / 1024) . ' MB.';
+            return false;
+        }
+
+        // Validate MIME type using finfo
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_buffer($finfo, $decodedImage);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, $allowedMimeTypes)) {
+            $this->errors['img'][] = "Invalid MIME type ($mimeType). Allowed: " . implode(', ', $allowedMimeTypes);
+            return false;
+        }
+
+        error_log("✅ Base64 img is valid.");
+        return true;
     }
 
     private function getBooleanFlags(array $types): int
@@ -729,25 +788,37 @@ class PeerInputFilter
         return true;
     }
 
-    protected function validateUsername(string $value, array $options = []): bool
-    {
-        if ($value === '') {
-            $this->errors['username'][] = 'Could not find mandatory username';
-            return false;
-        }
+	protected function validateUsername(string $value, array $options = []): bool
+	{
+		$forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root']; // Add more as needed
 
-        if (strlen($value) < 3 || strlen($value) > 23) {
-            $this->errors['username'][] = 'Username must be between 3 and 23 characters.';
-            return false;
-        }
+		if ($value === '') {
+			$this->errors['username'][] = 'Could not find mandatory username';
+			return false;
+		}
 
-        if (!preg_match('/^[a-zA-Z0-9_]+$/', $value)) {
-            $this->errors['username'][] = 'Username must only contain letters, numbers, and underscores.';
-            return false;
-        }
+		if (strlen($value) < 3 || strlen($value) > 23) {
+			$this->errors['username'][] = 'Username must be between 3 and 23 characters.';
+			return false;
+		}
 
-        return true;
-    }
+		if (!preg_match('/^[a-zA-Z0-9_]+$/', $value)) {
+			$this->errors['username'][] = 'Username must only contain letters, numbers, and underscores.';
+			return false;
+		}
+
+		if (!preg_match('/[a-zA-Z]/', $value)) {
+			$this->errors['username'][] = 'Username must contain at least one letter.';
+			return false;
+		}
+
+		if (in_array(strtolower($value), $forbiddenUsernames, true)) {
+			$this->errors['username'][] = 'This username is not allowed.';
+			return false;
+		}
+
+		return true;
+	}
 
     protected function validateTagName(string $value, array $options = []): bool
     {
@@ -761,7 +832,7 @@ class PeerInputFilter
             return false;
         }
 
-        if (!preg_match('/^[a-zA-Z]+$/', $value)) {
+        if (!preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
             $this->errors['tag'][] = "Tag contains invalid characters. It must only contain letters (A-Z, a-z). Given value: $value";
             return false;
         }

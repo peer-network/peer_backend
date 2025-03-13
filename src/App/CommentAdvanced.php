@@ -47,7 +47,7 @@ class CommentAdvanced
             'createdat' => $this->createdat,
             'user' => $this->user,
         ];
-		return $att;
+        return $att;
     }
 
     // Getter and Setter methods
@@ -107,28 +107,28 @@ class CommentAdvanced
     }
 
     // Validation and Array Filtering methods
-	public function validate(array $data, array $elements = []): array
-	{
-		$inputFilter = $this->createInputFilter($elements);
-		$inputFilter->setData($data);
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
 
-		if ($inputFilter->isValid()) {
-			return $inputFilter->getValues();
-		}
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
 
-		$validationErrors = $inputFilter->getMessages();
+        $validationErrors = $inputFilter->getMessages();
 
-		foreach ($validationErrors as $field => $errors) {
-			$errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
-			foreach ($errors as $error) {
-				$errorMessages[] = ": $error";
-			}
-			$errorMessageString = implode("", $errorMessages);
-			
-			throw new ValidationException($errorMessageString);
-		}
-	}
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            $errorMessages[] = "Validation errors for $field";
+            foreach ($errors as $error) {
+                $errorMessages[] = ": $error";
+            }
+            $errorMessageString = implode("", $errorMessages);
+            
+            throw new ValidationException($errorMessageString);
+        }
+    }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {

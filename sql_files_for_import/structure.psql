@@ -24,11 +24,11 @@ CREATE INDEX idx_users_username_slug ON users(username, slug);
 -- Table: users_info
 CREATE TABLE users_info (
     userid UUID PRIMARY KEY,
-	liquidity DOUBLE PRECISION DEFAULT 0.0 NOT NULL,
+	liquidity NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
     amountposts INTEGER DEFAULT 0 NOT NULL,
-    amounttrending INTEGER DEFAULT 0 NOT NULL,
     amountfollower INTEGER DEFAULT 0 NOT NULL,
     amountfollowed INTEGER DEFAULT 0 NOT NULL,
+    amountblocked INTEGER DEFAULT 0 NOT NULL,
     isprivate SMALLINT DEFAULT 0 NOT NULL,
     invited UUID DEFAULT NULL,
     updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -120,10 +120,7 @@ CREATE TABLE IF NOT EXISTS posts (
     media VARCHAR (100) NOT NULL,
     cover VARCHAR (100) DEFAULT NULL,
     mediadescription VARCHAR (500),
-    -- amountlikes INTEGER DEFAULT 0 NOT NULL,
-    -- amountdislikes INTEGER DEFAULT 0 NOT NULL,
-    -- amountviews INTEGER DEFAULT 0 NOT NULL,
-    -- amountcomments INTEGER DEFAULT 0 NOT NULL,
+    options VARCHAR (200),
     status SMALLINT DEFAULT 10 NOT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_posts_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
@@ -212,11 +209,11 @@ CREATE INDEX idx_dailyfree_createdat ON dailyfree(createdat);
 
 -- Table: gems
 CREATE TABLE IF NOT EXISTS gems (
-    gemid BIGSERIAL PRIMARY KEY,
+    gemid UUID PRIMARY KEY,
     userid UUID NOT NULL,
     postid UUID NOT NULL,
     fromid UUID NOT NULL,
-	gems REAL DEFAULT 0.0 NOT NULL,
+	gems NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
     whereby INTEGER NOT NULL,
     collected SMALLINT DEFAULT 0 NOT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -226,6 +223,14 @@ CREATE TABLE IF NOT EXISTS gems (
 );
 CREATE INDEX idx_gems_userid ON gems(userid);
 CREATE INDEX idx_gems_postid ON gems(postid);
+
+-- Table: invisibles
+CREATE TABLE IF NOT EXISTS invisibles (
+    invis_id UUID PRIMARY KEY,
+    CONSTRAINT fk_invisibles_users FOREIGN KEY (invis_id) 
+        REFERENCES users(uid) 
+        ON DELETE CASCADE 
+);
 
 -- Table: logdata
 CREATE TABLE IF NOT EXISTS logdata (
@@ -261,12 +266,12 @@ CREATE TABLE IF NOT EXISTS logdaten (
 
 -- Table: logwins
 CREATE TABLE IF NOT EXISTS logwins (
-    token VARCHAR(12) PRIMARY KEY,
+    token UUID PRIMARY KEY,
     userid UUID NOT NULL,
-    postid UUID NOT NULL,
+    postid UUID DEFAULT NULL,
     fromid UUID DEFAULT NULL,
-	gems REAL DEFAULT 0.0,
-	numbers REAL DEFAULT 0.0,
+	gems NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+	numbers NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
 	numbersq NUMERIC(64) DEFAULT 0 NOT NULL,
     whereby INTEGER DEFAULT 0  NOT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -277,13 +282,22 @@ CREATE INDEX idx_logwins_postid ON logwins(postid);
 -- Table: mcap
 CREATE TABLE IF NOT EXISTS mcap (
     capid SERIAL PRIMARY KEY,
-	coverage DOUBLE PRECISION DEFAULT 0.0 NOT NULL,
-	tokenprice DOUBLE PRECISION DEFAULT 0.0 NOT NULL,
-	gemprice DOUBLE PRECISION DEFAULT 0.0 NOT NULL,
-	daygems DOUBLE PRECISION DEFAULT 0.0 NOT NULL,
-	daytokens DOUBLE PRECISION DEFAULT 0.0 NOT NULL,
-	totaltokens DOUBLE PRECISION DEFAULT 0.0 NOT NULL,
+	coverage NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+	tokenprice NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+	gemprice NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+	daygems NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+	daytokens NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+	totaltokens NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Table: password_resets
+CREATE TABLE IF NOT EXISTS password_resets (
+    id BIGSERIAL PRIMARY KEY,
+    userid UUID NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Default to current timestamp,
+    FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
 );
 
 -- Table: tags
@@ -320,8 +334,8 @@ CREATE TABLE IF NOT EXISTS user_block_user (
     CONSTRAINT fk_user_block_user_blocker FOREIGN KEY (blockerid) REFERENCES users(uid) ON DELETE CASCADE,
     CONSTRAINT fk_user_block_user_blocked FOREIGN KEY (blockedid) REFERENCES users(uid) ON DELETE CASCADE
 );
--- CREATE INDEX idx_user_block_user_blockerid ON user_block_user(blockerid);
--- CREATE INDEX idx_user_block_user_blockedid ON user_block_user(blockedid);
+CREATE INDEX idx_user_block_user_blockerid ON user_block_user(blockerid);
+CREATE INDEX idx_user_block_user_blockedid ON user_block_user(blockedid);
 
 -- Table: user_chat_status
 CREATE TABLE IF NOT EXISTS user_chat_status (
@@ -335,7 +349,7 @@ CREATE TABLE IF NOT EXISTS user_chat_status (
     CONSTRAINT fk_user_chat_status_last_seen FOREIGN KEY (last_seen_message_id) REFERENCES chatmessages(messid) ON DELETE NO ACTION ON UPDATE CASCADE
 );
 CREATE INDEX idx_user_chat_status_userid ON user_chat_status(userid);
--- CREATE INDEX idx_user_chat_status_chatid ON user_chat_status(chatid);
+CREATE INDEX idx_user_chat_status_chatid ON user_chat_status(chatid);
 
 -- Table: user_comment_likes
 CREATE TABLE IF NOT EXISTS user_comment_likes (
@@ -347,8 +361,7 @@ CREATE TABLE IF NOT EXISTS user_comment_likes (
     CONSTRAINT fk_user_comment_likes_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
     CONSTRAINT fk_user_comment_likes_comments FOREIGN KEY (commentid) REFERENCES comments(commentid) ON DELETE CASCADE
 );
--- CREATE INDEX idx_user_comment_likes_userid ON user_comment_likes(userid);
--- CREATE INDEX idx_user_comment_likes_postid ON user_comment_likes(postid);
+--CREATE INDEX idx_user_comment_likes_userid ON user_comment_likes(userid);
 
 -- Table: user_comment_reports
 CREATE TABLE IF NOT EXISTS user_comment_reports (
@@ -374,8 +387,8 @@ CREATE TABLE IF NOT EXISTS user_post_comments (
     CONSTRAINT fk_user_post_comments_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
     CONSTRAINT fk_user_post_comments_postid FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
 );
--- CREATE INDEX idx_user_post_comments_userid ON user_post_comments(userid);
--- CREATE INDEX idx_user_post_comments_postid ON user_post_comments(postid);
+CREATE INDEX idx_user_post_comments_userid ON user_post_comments(userid);
+CREATE INDEX idx_user_post_comments_postid ON user_post_comments(postid);
 
 -- Table: user_post_dislikes
 CREATE TABLE IF NOT EXISTS user_post_dislikes (
@@ -387,8 +400,8 @@ CREATE TABLE IF NOT EXISTS user_post_dislikes (
     CONSTRAINT fk_user_post_dislikes_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
     CONSTRAINT fk_user_post_dislikes_postid FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
 );
--- CREATE INDEX idx_user_post_dislikes_userid ON user_post_dislikes(userid);
--- CREATE INDEX idx_user_post_dislikes_postid ON user_post_dislikes(postid);
+CREATE INDEX idx_user_post_dislikes_userid ON user_post_dislikes(userid);
+CREATE INDEX idx_user_post_dislikes_postid ON user_post_dislikes(postid);
 
 -- Table: user_post_likes
 CREATE TABLE IF NOT EXISTS user_post_likes (
@@ -400,8 +413,8 @@ CREATE TABLE IF NOT EXISTS user_post_likes (
     CONSTRAINT fk_user_post_likes_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
     CONSTRAINT fk_user_post_likes_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
 );
--- CREATE INDEX idx_user_post_likes_userid ON user_post_likes(userid);
--- CREATE INDEX idx_user_post_likes_postid ON user_post_likes(postid);
+CREATE INDEX idx_user_post_likes_userid ON user_post_likes(userid);
+CREATE INDEX idx_user_post_likes_postid ON user_post_likes(postid);
 
 -- Table: user_post_reports
 CREATE TABLE IF NOT EXISTS user_post_reports (
@@ -452,40 +465,32 @@ CREATE TABLE IF NOT EXISTS user_post_views (
     CONSTRAINT fk_user_post_views_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
     CONSTRAINT fk_user_post_views_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
 );
--- CREATE INDEX idx_user_post_views_userid ON user_post_views(userid);
--- CREATE INDEX idx_user_post_views_postid ON user_post_views(postid);
+CREATE INDEX idx_user_post_views_userid ON user_post_views(userid);
+CREATE INDEX idx_user_post_views_postid ON user_post_views(postid);
 
 -- Table: wallet
 CREATE TABLE IF NOT EXISTS wallet (
-    token VARCHAR(12) PRIMARY KEY, -- Unique token identifier, fixed length up to 12 characters
-    userid UUID NOT NULL, -- User ID referencing the users table
-    postid UUID NOT NULL, -- Post ID associated with the wallet record
-    fromid UUID NOT NULL, -- Source user ID referencing the users table
-	numbers DOUBLE PRECISION DEFAULT 0.0 NOT NULL,
-    whereby INTEGER DEFAULT 0 NOT NULL, -- Use SMALLINT for smaller integer ranges
-    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Default to current timestamp
-    CONSTRAINT fk_wallet_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE, -- Ensures related cleanup
-    CONSTRAINT fk_wallet_fromid FOREIGN KEY (fromid) REFERENCES users(uid) ON DELETE CASCADE -- Ensures related cleanup
+    token VARCHAR(12) PRIMARY KEY,
+    userid UUID NOT NULL,
+    postid UUID DEFAULT NULL,
+    fromid UUID DEFAULT NULL,
+	numbers NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+	numbersq NUMERIC(64) DEFAULT 0.0 NOT NULL,
+    whereby INTEGER DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_wallet_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
 );
+CREATE INDEX idx_wallet_userid ON wallet(userid);
 
 -- Table: wallett
 CREATE TABLE IF NOT EXISTS wallett (
     userid UUID PRIMARY KEY,
-	liquidity DOUBLE PRECISION DEFAULT 0.0 NOT NULL,
-	liquiditq NUMERIC(64) DEFAULT 0 NOT NULL,
+	liquidity NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+	liquiditq NUMERIC(64) DEFAULT 0.0 NOT NULL,
     updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_wallett_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
 );
 CREATE INDEX idx_wallett_userid ON wallett(userid);
-
--- Table: password_resets
-CREATE TABLE IF NOT EXISTS password_resets (
-    id BIGSERIAL PRIMARY KEY,
-    userid UUID NOT NULL,
-    token VARCHAR(255) NOT NULL,
-    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Default to current timestamp,
-    FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
-);
 
 COMMIT;

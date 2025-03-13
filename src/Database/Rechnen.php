@@ -99,13 +99,15 @@ class Rechnen {
     }
 
     // @return float val
-    public static function calculate_token_preis(float $daily_token = 0, float $daily_gems = 0): float 
+    public static function calculate_token_preis(float $daily_token = 0, float $daily_gems = 0, int $precision = 10): float 
     {
-        if ($daily_token == 0 || $daily_gems == 0) {
-            return 0;
+        if ($daily_token <= 0 || $daily_gems <= 0) {
+            return 0.0;
         }
 
-        return ($daily_token / $daily_gems);
+        $result = bcdiv((string)$daily_token, (string)$daily_gems, $precision);
+
+        return (float) $result;
     }
 
     // @return float val

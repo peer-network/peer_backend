@@ -46,7 +46,7 @@ class Chat
             'chatmessages' => $this->chatmessages,
             'chatparticipants' => $this->chatparticipants,
         ];
-		return $att;
+        return $att;
     }
 
     // Array Update methods
@@ -124,34 +124,34 @@ class Chat
         return $this->updatedat;
     }
 
-    public function setUpdatedAt(?string $updatedat): void
+    public function setUpdatedAt(): void
     {
-        $this->updatedat = $updatedat;
+        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
     // Validation and Array Filtering methods
-	public function validate(array $data, array $elements = []): array
-	{
-		$inputFilter = $this->createInputFilter($elements);
-		$inputFilter->setData($data);
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
 
-		if ($inputFilter->isValid()) {
-			return $inputFilter->getValues();
-		}
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
 
-		$validationErrors = $inputFilter->getMessages();
+        $validationErrors = $inputFilter->getMessages();
 
-		foreach ($validationErrors as $field => $errors) {
-			$errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
-			foreach ($errors as $error) {
-				$errorMessages[] = ": $error";
-			}
-			$errorMessageString = implode("", $errorMessages);
-			
-			throw new ValidationException($errorMessageString);
-		}
-	}
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            $errorMessages[] = "Validation errors for $field";
+            foreach ($errors as $error) {
+                $errorMessages[] = ": $error";
+            }
+            $errorMessageString = implode("", $errorMessages);
+            
+            throw new ValidationException($errorMessageString);
+        }
+    }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {

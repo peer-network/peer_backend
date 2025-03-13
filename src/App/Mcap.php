@@ -43,7 +43,7 @@ class Mcap
             'totaltokens' => $this->totaltokens,
             'createdat' => $this->createdat,
         ];
-		return $att;
+        return $att;
     }
 
     // Getter and Setter methods
@@ -118,28 +118,28 @@ class Mcap
     }
 
     // Validation and Array Filtering methods
-	public function validate(array $data, array $elements = []): array
-	{
-		$inputFilter = $this->createInputFilter($elements);
-		$inputFilter->setData($data);
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
 
-		if ($inputFilter->isValid()) {
-			return $inputFilter->getValues();
-		}
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
 
-		$validationErrors = $inputFilter->getMessages();
+        $validationErrors = $inputFilter->getMessages();
 
-		foreach ($validationErrors as $field => $errors) {
-			$errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
-			foreach ($errors as $error) {
-				$errorMessages[] = ": $error";
-			}
-			$errorMessageString = implode("", $errorMessages);
-			
-			throw new ValidationException($errorMessageString);
-		}
-	}
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            $errorMessages[] = "Validation errors for $field";
+            foreach ($errors as $error) {
+                $errorMessages[] = ": $error";
+            }
+            $errorMessageString = implode("", $errorMessages);
+            
+            throw new ValidationException($errorMessageString);
+        }
+    }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
@@ -149,96 +149,96 @@ class Mcap
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
-			'coverage' => [
-				'required' => true,
-				'filters' => [
-					['name' => 'FloatSanitize']
-				],
-				'validators' => [
-					[
-						'name' => 'ValidateFloat',
-						'options' => [
-							'min' => 0.0,
-							'max' => 18250000.0
-						]
-					]
-				]
-			],
-			'tokenprice' => [
-				'required' => true,
-				'filters' => [
-					['name' => 'FloatSanitize']
-				],
-				'validators' => [
-					[
-						'name' => 'ValidateFloat',
-						'options' => [
-							'min' => 0.0,
-							'max' => 18250000.0
-						]
-					]
-				]
-			],
-			'gemprice' => [
-				'required' => true,
-				'filters' => [
-					['name' => 'FloatSanitize']
-				],
-				'validators' => [
-					[
-						'name' => 'ValidateFloat',
-						'options' => [
-							'min' => 0.0,
-							'max' => 18250000.0
-						]
-					]
-				]
-			],
-			'daygems' => [
-				'required' => true,
-				'filters' => [
-					['name' => 'FloatSanitize']
-				],
-				'validators' => [
-					[
-						'name' => 'ValidateFloat',
-						'options' => [
-							'min' => 0.0,
-							'max' => 18250000.0
-						]
-					]
-				]
-			],
-			'daytokens' => [
-				'required' => true,
-				'filters' => [
-					['name' => 'FloatSanitize']
-				],
-				'validators' => [
-					[
-						'name' => 'ValidateFloat',
-						'options' => [
-							'min' => 0.0,
-							'max' => 5000.0
-						]
-					]
-				]
-			],
-			'totaltokens' => [
-				'required' => true,
-				'filters' => [
-					['name' => 'FloatSanitize']
-				],
-				'validators' => [
-					[
-						'name' => 'ValidateFloat',
-						'options' => [
-							'min' => 0.0,
-							'max' => 18250000.0
-						]
-					]
-				]
-			],
+            'coverage' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'FloatSanitize']
+                ],
+                'validators' => [
+                    [
+                        'name' => 'ValidateFloat',
+                        'options' => [
+                            'min' => 0.0,
+                            'max' => 18250000.0
+                        ]
+                    ]
+                ]
+            ],
+            'tokenprice' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'FloatSanitize']
+                ],
+                'validators' => [
+                    [
+                        'name' => 'ValidateFloat',
+                        'options' => [
+                            'min' => 0.0,
+                            'max' => 18250000.0
+                        ]
+                    ]
+                ]
+            ],
+            'gemprice' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'FloatSanitize']
+                ],
+                'validators' => [
+                    [
+                        'name' => 'ValidateFloat',
+                        'options' => [
+                            'min' => 0.0,
+                            'max' => 18250000.0
+                        ]
+                    ]
+                ]
+            ],
+            'daygems' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'FloatSanitize']
+                ],
+                'validators' => [
+                    [
+                        'name' => 'ValidateFloat',
+                        'options' => [
+                            'min' => 0.0,
+                            'max' => 18250000.0
+                        ]
+                    ]
+                ]
+            ],
+            'daytokens' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'FloatSanitize']
+                ],
+                'validators' => [
+                    [
+                        'name' => 'ValidateFloat',
+                        'options' => [
+                            'min' => 0.0,
+                            'max' => 5000.0
+                        ]
+                    ]
+                ]
+            ],
+            'totaltokens' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'FloatSanitize']
+                ],
+                'validators' => [
+                    [
+                        'name' => 'ValidateFloat',
+                        'options' => [
+                            'min' => 0.0,
+                            'max' => 18250000.0
+                        ]
+                    ]
+                ]
+            ],
             'createdat' => [
                 'required' => false,
                 'validators' => [

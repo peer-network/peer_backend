@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 final class Status {

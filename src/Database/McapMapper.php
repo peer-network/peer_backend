@@ -139,14 +139,16 @@ class McapMapper
 
         try {
             $numberoftokens = (float) $this->db->query('SELECT SUM(liquidity) FROM wallett')->fetchColumn() ?: 0;
-            $numberofgems = (float) $this->db->query('SELECT SUM(gems) FROM gems WHERE collected = 0')->fetchColumn() ?: 0;
+            $numberofgems = (float) $this->db->query('SELECT SUM(gems) FROM gems WHERE collected = 0 AND createdat = NOW()')->fetchColumn() ?: 0;
 
             if ($numberoftokens === 0 || $numberofgems === 0) {
-                return $this->respondWithError('Var Empty: numberoftokens or numberofgems.');
+				$this->logger->info("numberoftokens or numberofgems is empty.", ['numberoftokens' => $numberoftokens, 'numberofgems' => $numberofgems]);
+                return $this->respondWithError('numberoftokens or numberofgems is empty.');
             }
 
             $resultLastData = $this->refreshMarketData();
             if ($resultLastData['status'] !== 'success') {
+				$this->logger->info(resultLastData['ResponseCode'], ['resultLastData' => $resultLastData]);
                 return $this->respondWithError('refreshMarketData failed.');
             }
 
@@ -155,6 +157,7 @@ class McapMapper
             $daytokens = $resultLastData['affectedRows']['daytokens'] ?? 0.0;
 
             if ($insertedId === null) {
+				$this->logger->info("Inserted ID is missing from refreshMarketData response.", ['insertedId' => $insertedId]);
                 return $this->respondWithError('Inserted ID is missing from refreshMarketData response.');
             }
 

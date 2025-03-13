@@ -7,34 +7,29 @@ use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
 use Psr\Log\LoggerInterface;
 
-const TABLESTOGEMS = true;
-
-const DAILY_NUMBER_TOKEN= 5000;
-const POOLPOST = 'b615755c-685b-41d6-9ec8-b08d1bccb3c8';
-
-const VIEW_=1;
-const LIKE_=2;
-const DISLIKE_=3;
-const COMMENT_=4;
-const POST_=5;
-const INVITATION_=11;
-
-const RECEIVELIKE=5;
-const RECEIVEDISLIKE=4;
-const RECEIVECOMMENT=2;
-const RECEIVEPOSTVIEW=0.25;
-const RECEIVEINVITATION=0.01;
-
-const PRICELIKE=3;
-const PRICEDISLIKE=5;
-const PRICECOMMENT=0.5;
-const PRICEPOST=20;
-
-class WalletMapper
+class PoolMapper
 {
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
+	private const TABLESTOGEMS = true;
+	private const DAILY_NUMBER_TOKEN= 5000;
+	private const POOLPOST = 'b615755c-685b-41d6-9ec8-b08d1bccb3c8';
+	private const VIEW_=1;
+	private const LIKE_=2;
+	private const DISLIKE_=3;
+	private const COMMENT_=4;
+	private const POST_=5;
+	private const INVITATION_=11;
+	private const RECEIVELIKE=5;
+	private const RECEIVEDISLIKE=4;
+	private const RECEIVECOMMENT=2;
+	private const RECEIVEPOSTVIEW=0.25;
+	private const RECEIVEINVITATION=0.01;
+	private const PRICELIKE=3;
+	private const PRICEDISLIKE=5;
+	private const PRICECOMMENT=0.5;
+	private const PRICEPOST=20;
 
     public function __construct(protected LoggerInterface $logger, protected PDO $db)
     {
@@ -43,18 +38,6 @@ class WalletMapper
     protected function respondWithError(string $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    private function generateUUID(): string
-    {
-        return \sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0x0fff) | 0x4000,
-            \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
-        );
     }
 
     public function fetchPool(array $args = []): array
@@ -661,8 +644,6 @@ class WalletMapper
 
     protected function insertWinToLog(string $userId, array $args): bool
     {
-		\ignore_user_abort(true);
-
         $this->logger->info('WalletMapper.insertWinToLog started');
 
         if (empty($args['postid'])) {
@@ -677,8 +658,6 @@ class WalletMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-
-			$this->logger->info('WalletMapper.insertWinToLog args:', ['userId' => $userId, 'args' => $args]);
 
             $stmt->bindValue(':token', $args['gemid'] ?? $this->generateUUID(), \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
@@ -711,8 +690,6 @@ class WalletMapper
 
     protected function insertWinToPool(string $userId, array $args): bool
     {
-		\ignore_user_abort(true);
-
         $this->logger->info('WalletMapper.insertWinToPool started');
 
         if (empty($args['postid'])) {
@@ -1151,7 +1128,7 @@ class WalletMapper
         $args = [
             'postid' => $postId,
             'fromid' => $fromId,
-            'gems' => 0.0,
+            'gems' => null,
             'numbers' => -abs($price),
             'whereby' => $whereby,
             'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
@@ -1162,7 +1139,6 @@ class WalletMapper
             if ($results === false) {
                 return $this->respondWithError('Failed to deduct from wallet.');
             }
-
             $results = $this->insertWinToPool($userId, $args);
             if ($results === false) {
                 return $this->respondWithError('Failed to deduct from wallet.');
@@ -1171,7 +1147,7 @@ class WalletMapper
             $this->logger->info('Wallet deduction successful.', [
                 'userId' => $userId,
                 'postId' => $postId,
-                'gems' => 0.0,
+                'gems' => null,
                 'numbers' => -abs($price),
                 'whereby' => $whereby,
             ]);
@@ -1245,7 +1221,6 @@ class WalletMapper
 
     public function saveWalletEntry(string $userId, float $liquidity): float
     {
-		\ignore_user_abort(true);
         $this->logger->info('WalletMapper.saveWalletEntry started');
 
         try {

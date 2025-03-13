@@ -25,11 +25,11 @@ class PostMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new Post($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+            $results = array_map(fn($row) => new Post($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched posts successfully" : "No posts found",
@@ -87,7 +87,7 @@ class PostMapper
         $stmt->execute(['feedid' => $feedid]);
 
         $results = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $results[] = new Post($row);
         }
 
@@ -108,7 +108,7 @@ class PostMapper
         $sql = "SELECT * FROM posts WHERE title LIKE :title AND feedid IS NULL";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['title' => '%' . $title . '%']);
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         if (!empty($data)) {
             return array_map(fn($row) => new Post($row), $data);
@@ -125,7 +125,7 @@ class PostMapper
         $sql = "SELECT * FROM posts WHERE postid = :postid AND feedid IS NULL";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $id]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new Post($data);
@@ -149,11 +149,11 @@ class PostMapper
         ";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue('userid', $userid, PDO::PARAM_STR);
-        $stmt->bindValue('limit', $limitPerType, PDO::PARAM_INT);
+        $stmt->bindValue('userid', $userid, \PDO::PARAM_STR);
+        $stmt->bindValue('limit', $limitPerType, \PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function fetchComments(string $postid): array
@@ -164,7 +164,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function fetchLikes(string $postid): array
@@ -175,7 +175,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function fetchDislikes(string $postid): array
@@ -186,7 +186,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function fetchSaves(string $postid): array
@@ -197,7 +197,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function fetchViews(string $postid): array
@@ -208,7 +208,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function fetchReports(string $postid): array
@@ -219,7 +219,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function countLikes(string $postid): int
@@ -330,7 +330,7 @@ class PostMapper
         $sql = "SELECT uid AS id, username, img FROM users WHERE uid = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data === false) {
             $this->logger->warning("No user found with id: " . $id);
@@ -348,9 +348,9 @@ class PostMapper
         $data = $post->getArrayCopy();
 
         $query = "INSERT INTO posts 
-                  (postid, userid, feedid, title, media, cover, mediadescription, contenttype, createdat)
+                  (postid, userid, feedid, title, media, cover, mediadescription, contenttype, options, createdat)
                   VALUES 
-                  (:postid, :userid, :feedid, :title, :media, :cover, :mediadescription, :contenttype, :createdat)";
+                  (:postid, :userid, :feedid, :title, :media, :cover, :mediadescription, :contenttype, :options, :createdat)";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -364,11 +364,17 @@ class PostMapper
             $stmt->bindValue(':cover', $data['cover'], \PDO::PARAM_STR);
             $stmt->bindValue(':mediadescription', $data['mediadescription'], \PDO::PARAM_STR);
             $stmt->bindValue(':contenttype', $data['contenttype'], \PDO::PARAM_STR);
+            $stmt->bindValue(':options', $data['options'], \PDO::PARAM_STR);
             $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
-            $this->logger->info("Inserted new post into database", ['post' => $data]);
+			$queryUpdateProfile = "UPDATE users_info SET amountposts = amountposts + 1 WHERE userid = :userid";
+			$stmt = $this->db->prepare($queryUpdateProfile);
+            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+			$stmt->execute();
+
+            $this->logger->info("Inserted new post into database");
 
             return new Post($data);
         } catch (\PDOException $e) {
@@ -394,6 +400,7 @@ class PostMapper
         $from = $args['from'] ?? null;
         $to = $args['to'] ?? null;
         $filterBy = $args['filterBy'] ?? [];
+        $Ignorlist = $args['IgnorList'] ?? 'NO';
         $sortBy = $args['sortBy'] ?? null;
         $title = $args['title'] ?? null;
         $tag = $args['tag'] ?? null; 
@@ -478,6 +485,10 @@ class PostMapper
             }
         }
 
+		if (!empty($Ignorlist) && $Ignorlist === 'YES') {
+			$whereClauses[] = "p.userid NOT IN (SELECT blockedid FROM user_block_user WHERE blockerid = :currentUserId)";
+		}
+
         $orderBy = match ($sortBy) {
             'NEWEST' => "p.createdat DESC",
             'FOLLOWER' => "isfollowing DESC, p.createdat DESC",
@@ -499,6 +510,7 @@ class PostMapper
                 p.media, 
                 p.cover, 
                 p.mediadescription, 
+				p.options, 
                 p.createdat, 
                 u.username, 
                 u.img AS userimg,
@@ -509,7 +521,7 @@ class PostMapper
                 (SELECT COUNT(*) FROM comments WHERE postid = p.postid) as amountcomments,
                 COALESCE((
                     SELECT SUM(w.numbers)
-                    FROM wallet w
+                    FROM logwins w
                     WHERE w.postid = p.postid
                       AND w.createdat >= NOW() - INTERVAL '$trenddays days'
                 ), 0) AS amounttrending,
@@ -561,6 +573,7 @@ class PostMapper
                     'isreported' => (bool)$row['isreported'],
                     'isdisliked' => (bool)$row['isdisliked'],
                     'issaved' => (bool)$row['issaved'],
+                    'options' => (string)$row['options'],
                     'tags' => $row['tags'],
                     'user' => [
                         'uid' => $row['userid'],

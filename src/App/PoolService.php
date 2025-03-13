@@ -6,7 +6,7 @@ use Fawaz\App\Wallet;
 use Fawaz\Database\WalletMapper;
 use Psr\Log\LoggerInterface;
 
-class WalletService
+class PoolService
 {
     protected ?string $currentUserId = null;
 
@@ -276,7 +276,8 @@ class WalletService
         $this->logger->info('WalletService.getUserWalletBalance started');
 
         try {
-            $results = $this->walletMapper->getUserWalletBalance($userId);
+            //$results = $this->walletMapper->getUserWalletBalance($userId);
+            $results = $this->walletMapper->getUserWalletBalances($userId);
 
             if ($results !== false) {
                 return $results;

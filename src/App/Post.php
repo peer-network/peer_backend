@@ -14,6 +14,7 @@ class Post
     protected string $media;
     protected string $cover;
     protected string $mediadescription;
+    protected string $options;
     protected string $createdat;
 
     // Constructor
@@ -29,18 +30,8 @@ class Post
         $this->media = $data['media'] ?? '';
         $this->cover = $data['cover'] ?? '';
         $this->mediadescription = $data['mediadescription'] ?? '';
+        $this->options = $data['options'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-    }
-
-    // Getter and Setter for Tags
-    public function getTags(): array
-    {
-        return $this->tags;
-    }
-
-    public function setTags(array $tags): void
-    {
-        $this->tags = $tags;
     }
 
     // Array Copy methods
@@ -55,12 +46,13 @@ class Post
             'media' => $this->media,
             'cover' => $this->cover,
             'mediadescription' => $this->mediadescription,
+            'options' => $this->options,
             'createdat' => $this->createdat,
         ];
         return $att;
     }
 
-    // Other Methods (Unchanged)
+    // Getter and Setter
     public function getPostId(): string
     {
         return $this->postid;
@@ -91,29 +83,34 @@ class Post
         return $this->contenttype;
     }
 
+    public function getOptions(): string
+    {
+        return $this->options;
+    }
+
     // Validation and Array Filtering methods (Unchanged)
-	public function validate(array $data, array $elements = []): array
-	{
-		$inputFilter = $this->createInputFilter($elements);
-		$inputFilter->setData($data);
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
 
-		if ($inputFilter->isValid()) {
-			return $inputFilter->getValues();
-		}
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
 
-		$validationErrors = $inputFilter->getMessages();
+        $validationErrors = $inputFilter->getMessages();
 
-		foreach ($validationErrors as $field => $errors) {
-			$errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
-			foreach ($errors as $error) {
-				$errorMessages[] = ": $error";
-			}
-			$errorMessageString = implode("", $errorMessages);
-			
-			throw new ValidationException($errorMessageString);
-		}
-	}
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            $errorMessages[] = "Validation errors for $field";
+            foreach ($errors as $error) {
+                $errorMessages[] = ": $error";
+            }
+            $errorMessageString = implode("", $errorMessages);
+            
+            throw new ValidationException($errorMessageString);
+        }
+    }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
@@ -130,29 +127,29 @@ class Post
                 'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],
-			'title' => [
-				'required' => false,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
-				'validators' => [
-					['name' => 'StringLength', 'options' => [
-						'min' => 3,
-						'max' => 100,
-					]],
-					['name' => 'isString'],
-				],
-			],
-			'contenttype' => [
-				'required' => true,
-				'validators' => [
-					['name' => 'InArray', 'options' => [
-						'haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery'],
-					]],
-					['name' => 'isString'],
-				],
-			],
+            'title' => [
+                'required' => true,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 63,
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'contenttype' => [
+                'required' => true,
+                'validators' => [
+                    ['name' => 'InArray', 'options' => [
+                        'haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery'],
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
             'media' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'required' => true,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,
@@ -163,7 +160,7 @@ class Post
             ],
             'cover' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,
@@ -174,17 +171,28 @@ class Post
             ],
             'mediadescription' => [
                 'required' => false,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
-				'validators' => [
-					['name' => 'StringLength', 'options' => [
-						'min' => 3,
-						'max' => 500,
-					]],
-					['name' => 'isString'],
-				],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 3,
+                        'max' => 500,
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'options' => [
+                'required' => false,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 4,
+                        'max' => 250,
+                    ]],
+                    ['name' => 'isString'],
+                ],
             ],
             'createdat' => [
-                'required' => false,
+                'required' => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                     ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],

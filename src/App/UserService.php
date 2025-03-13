@@ -6,12 +6,13 @@ use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
+use Fawaz\Services\Base64FileHandler;
 use Psr\Log\LoggerInterface;
 
 class UserService
 {
     protected ?string $currentUserId = null;
-    private FileUploader $fileUploader;
+    private Base64FileHandler $base64filehandler;
 
     public function __construct(
         protected LoggerInterface $logger,
@@ -193,7 +194,7 @@ class UserService
             'userid' => $id,
             'liquidity' => 0.0,
             'amountposts' => 0,
-            'amounttrending' => 0,
+            'amountblocked' => 0,
             'amountfollower' => 0,
             'amountfollowed' => 0,
             'isprivate' => 0,
@@ -252,12 +253,27 @@ class UserService
     private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
     {
         try {
-            $path = $this->fileUploader->handleFileUpload($mediaFile, 'image', $userId, true, $folder);
-            if ($path) {
-                $this->logger->info('Media uploaded successfully.', ['userId' => $userId, 'path' => $path]);
-                return $path;
+
+
+            if (!empty($mediaFile)) {
+                $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $userId, $folder);
+                $this->logger->info('UserService.uploadMedia mediaPath', ['mediaPath' => $mediaPath]);
+
+                if ($mediaPath === '') {
+                    return $this->respondWithError('Media upload failed');
+                }
+
+                if (isset($mediaPath['path'])) {
+					return $mediaPath['path'];
+                } else {
+					return $this->respondWithError('Media path necessary for upload');
+				}
+
+            } else {
+                return $this->respondWithError('Media necessary for upload');
             }
-            $this->logger->warning('Failed to upload media file.', ['userId' => $userId]);
+
+
         } catch (\Exception $e) {
             $this->logger->error('Error uploading media.', ['exception' => $e]);
         }
@@ -670,6 +686,38 @@ class UserService
 
             $this->logger->info('No friends found for the user', ['currentUserId' => $this->currentUserId]);
             return $this->respondWithError('No friends found for the user.');
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
+            return $this->respondWithError('Failed to retrieve friends list.');
+        }
+    }
+
+    public function getAllFriends(?array $args = []): array|null
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
+
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+
+        $this->logger->info('Fetching all friends list', ['offset' => $offset, 'limit' => $limit]);
+
+        try {
+            $users = $this->userMapper->fetchAllFriends($offset, $limit);
+
+            if (!empty($users)) {
+                $this->logger->info('All friends list retrieved successfully', ['userCount' => count($users)]);
+                return [
+                    'status' => 'success',
+                    'counter' => count($users),
+                    'ResponseCode' => 'All friends data prepared successfully',
+                    'affectedRows' => $users,
+                ];
+            }
+
+            $this->logger->info('No friends found @ all');
+            return $this->respondWithError('No friends found @ all.');
         } catch (\Exception $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
             return $this->respondWithError('Failed to retrieve friends list.');
