@@ -5,12 +5,13 @@ namespace Fawaz\Handler;
 use Fawaz\GraphQLSchemaBuilder;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Server\StandardServer;
+use GraphQL\Validator\Rules\QueryComplexity;
+use GraphQL\Validator\DocumentValidator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Psr7\Response;
-use Throwable;
 
 class GraphQLHandler implements RequestHandlerInterface
 {
@@ -23,6 +24,14 @@ class GraphQLHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $this->logger->info("GraphQLHandler.handle started");
+
+        $PeerFormatter = function ($error) {
+            return [
+                'message' => $error->getMessage(),
+                'locations' => $error->getLocations(),
+                'path' => $error->getPath(),
+            ];
+        };
 
         $authorizationHeader = $request->getHeader('Authorization');
         $bearerToken = null;
@@ -38,28 +47,20 @@ class GraphQLHandler implements RequestHandlerInterface
 
         $schema = $this->schemaBuilder->build();
 
+        //$rule = new QueryComplexity(100);
+        //DocumentValidator::addRule($rule);
+
         $context = [
             'request' => $request,
             'bearerToken' => $bearerToken
         ];
 
-        $errorFormatter = function (Throwable $e) use ($request): array {
-            $this->logger->error('GraphQL Error', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return [
-                'status' => 'error',
-                'ResponseCode' => 'Input Required to Proceed.',
-                'exceptionMessage' => $e->getMessage(),
-            ];
-        };
-
         $config = ServerConfig::create()
             ->setSchema($schema)
             ->setContext($context)
-            ->setErrorFormatter($errorFormatter);
+            ->setErrorFormatter($PeerFormatter)
+            ->setQueryBatching(true)
+            ->setDebugFlag(true);
 
         $server = new StandardServer($config);
         $response = new Response();
@@ -70,6 +71,6 @@ class GraphQLHandler implements RequestHandlerInterface
             $response = $response->withHeader('Authorization', 'Bearer ' . $bearerToken);
         }
 
-        return $response->withHeader('Content-Type', 'application/json');
+        return $response->withHeader('Content-Type', 'application/json', 'charset=UTF-8');
     }
 }

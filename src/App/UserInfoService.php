@@ -3,18 +3,19 @@
 namespace Fawaz\App;
 
 use Fawaz\Database\UserInfoMapper;
+use Fawaz\Services\Base64FileHandler;
 use Psr\Log\LoggerInterface;
 
 class UserInfoService
 {
     protected ?string $currentUserId = null;
-    private FileUploader $fileUploader;
+    private Base64FileHandler $base64filehandler;
 
     public function __construct(
         protected LoggerInterface $logger,
         protected UserInfoMapper $userInfoMapper
     ) {
-        $this->fileUploader = new FileUploader($this->logger);
+		$this->base64filehandler = new Base64FileHandler();
     }
 
     public function setCurrentUserId(string $userId): void
@@ -50,14 +51,14 @@ class UserInfoService
             $results = $this->userInfoMapper->loadInfoById($this->currentUserId);
 
             if ($results !== false) {
-				$affectedRows = $results->getArrayCopy();
-				$this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
+                $affectedRows = $results->getArrayCopy();
+                $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 'Userinfo data prepared successfully',
                     'affectedRows' => $affectedRows,
                 ];
-				return $success;
+                return $success;
             }
 
             return $this->respondWithError('No data found for the user.');
@@ -93,41 +94,99 @@ class UserInfoService
         return $this->userInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
     }
 
-	public function toggleProfilePrivacy(): array
-	{
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
+    public function toggleUserBlock(string $blockedUserId): array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
 
-		$this->logger->info('UserInfoService.toggleProfilePrivacy started');
+        if (!self::isValidUUID($blockedUserId)) {
+            return $this->respondWithError('Invalid user ID');
+        }
 
-		try {
-			$user = $this->userInfoMapper->loadInfoById($this->currentUserId);
-			if (!$user) {
-				return $this->respondWithError('User not found');
-			}
+        if ($this->currentUserId === $blockedUserId) {
+            return $this->respondWithError('Cannot block yourself');
+        }
 
-			// Toggle the privacy status
-			$newIsPrivate = !$user->getIsPrivate();
-			$user->setIsPrivate((int) $newIsPrivate);
-			
-			// Update the user information
-			$updatedUser = $this->userInfoMapper->update($user);
-			
-			// Set response message based on new privacy status
-			$responseMessage = $newIsPrivate ? 'Profile privacy set to private' : 'Profile privacy set to public';
+        $this->logger->info('UserInfoService.toggleUserBlock started');
 
-			$this->logger->info('Profile privacy toggled', ['userId' => $this->currentUserId, 'newPrivacy' => $newIsPrivate]);
+        if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
+            return $this->respondWithError('Blocker user not found');
+        }
 
-			return [
-				'status' => 'success', 
-				'ResponseCode' => $responseMessage, 
-				//'affectedRows' => $updatedUser->getArrayCopy()
-			];
-		} catch (\Exception $e) {
-			return $this->respondWithError('Failed to toggle profile privacy');
-		}
-	}
+        if (!$this->userInfoMapper->isUserExistById($blockedUserId)) {
+            return $this->respondWithError('Blocked user not found');
+        }
+
+        return $this->userInfoMapper->toggleUserBlock($this->currentUserId, $blockedUserId);
+    }
+
+    public function loadBlocklist(?array $args = []): array
+    {
+
+        $this->logger->info('UserInfoService.loadLastId started');
+
+        try {
+            $results = $this->userInfoMapper->getBlockedUsers($this->currentUserId);
+
+            if ($results !== false) {
+				$affectedRows = array_map(
+					static function (UserBlock $result) {
+						return $result->getArrayCopy();
+					},
+					$results
+				);
+
+                $this->logger->info("UserInfoService.loadBlocklist found", ['affectedRows' => $affectedRows]);
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => 'Blocklist data prepared successfully',
+                    'affectedRows' => $affectedRows,
+                ];
+            }
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 'No data found for the user.',
+            ];
+
+        } catch (\Exception $e) {
+            return $this->respondWithError('Failed to retrieve user data.');
+        }
+    }
+
+    public function toggleProfilePrivacy(): array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
+
+        $this->logger->info('UserInfoService.toggleProfilePrivacy started');
+
+        try {
+            $user = $this->userInfoMapper->loadInfoById($this->currentUserId);
+            if (!$user) {
+                return $this->respondWithError('User not found');
+            }
+
+            $newIsPrivate = !$user->getIsPrivate();
+            $user->setIsPrivate((int) $newIsPrivate);
+            
+            $updatedUser = $this->userInfoMapper->update($user);
+            
+            $responseMessage = $newIsPrivate ? 'Profile privacy set to private' : 'Profile privacy set to public';
+
+            $this->logger->info('Profile privacy toggled', ['userId' => $this->currentUserId, 'newPrivacy' => $newIsPrivate]);
+
+            return [
+                'status' => 'success', 
+                'ResponseCode' => $responseMessage, 
+                //'affectedRows' => $updatedUser->getArrayCopy()
+            ];
+        } catch (\Exception $e) {
+            return $this->respondWithError('Failed to toggle profile privacy');
+        }
+    }
 
     public function updateBio(string $biography): array
     {
@@ -147,22 +206,35 @@ class UserInfoService
                 return $this->respondWithError('User not found');
             }
 
-            $mediaPath = $this->fileUploader->handleFileUpload($biography, 'text', $this->currentUserId, true, 'userData');
-            if (!$mediaPath) {
-                return $this->respondWithError('Failed to upload media file');
+            if (!empty($biography)) {
+                $mediaPath = $this->base64filehandler->handleFileUpload($biography, 'text', $this->currentUserId, 'userData');
+                $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
+
+                if ($mediaPath === '') {
+                    return $this->respondWithError('Biography upload failed');
+                }
+
+                if (!empty($mediaPath['path'])) {
+					$mediaPathFile = $mediaPath['path'];
+                } else {
+					return $this->respondWithError('Media path necessary for upload');
+				}
+
+            } else {
+                return $this->respondWithError('Media necessary for upload');
             }
 
-            $user->setBiography($mediaPath);
+            $user->setBiography($mediaPathFile);
             $updatedUser = $this->userInfoMapper->updateUsers($user);
-			$responseMessage = 'User biography updated successfully';
+            $responseMessage = 'User biography updated successfully';
 
             $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
 
-			return [
-				'status' => 'success', 
-				'ResponseCode' => $responseMessage, 
-				//'affectedRows' => $updatedUser->getArrayCopy()
-			];
+            return [
+                'status' => 'success', 
+                'ResponseCode' => $responseMessage, 
+                //'affectedRows' => $updatedUser->getArrayCopy()
+            ];
         } catch (\Exception $e) {
             $this->logger->error('Error updating biography', ['exception' => $e]);
             return $this->respondWithError('Failed to update biography');
@@ -187,22 +259,34 @@ class UserInfoService
                 return $this->respondWithError('User not found');
             }
 
-            $mediaPath = $this->fileUploader->handleFileUpload($mediaFile, $contentType, $this->currentUserId, true, 'profile');
-            if (!$mediaPath) {
-                return $this->respondWithError('Failed to upload media file');
+            if (!empty($mediaFile)) {
+                $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $this->currentUserId, 'profile');
+
+                if ($mediaPath === '') {
+                    return $this->respondWithError('Profile upload failed');
+                }
+
+                if (!empty($mediaPath['path'])) {
+					$mediaPathFile = $mediaPath['path'];
+                } else {
+					return $this->respondWithError('Media path necessary for upload');
+				}
+
+            } else {
+                return $this->respondWithError('Media necessary for upload');
             }
 
-            $user->setProfilePicture($mediaPath);
+            $user->setProfilePicture($mediaPathFile);
             $updatedUser = $this->userInfoMapper->updateUsers($user);
-			$responseMessage = 'Profile picture updated successfully';
+            $responseMessage = 'Profile picture updated successfully';
 
             $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
 
-			return [
-				'status' => 'success', 
-				'ResponseCode' => $responseMessage, 
-				//'affectedRows' => $updatedUser->getArrayCopy()
-			];
+            return [
+                'status' => 'success', 
+                'ResponseCode' => $responseMessage, 
+                //'affectedRows' => $updatedUser->getArrayCopy()
+            ];
         } catch (\Exception $e) {
             $this->logger->error('Error setting profile picture', ['exception' => $e]);
             return $this->respondWithError('Failed to update profile picture');

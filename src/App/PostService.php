@@ -4,18 +4,18 @@ namespace Fawaz\App;
 
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
-use Fawaz\App\FileUploader;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
+use Fawaz\Services\Base64FileHandler;
 use Psr\Log\LoggerInterface;
 
 class PostService
 {
     protected ?string $currentUserId = null;
-    private FileUploader $fileUploader;
+    private Base64FileHandler $base64filehandler;
 
     public function __construct(
         protected LoggerInterface $logger,
@@ -25,7 +25,7 @@ class PostService
         protected TagMapper $tagMapper,
         protected TagPostMapper $tagPostMapper,
     ) {
-        $this->fileUploader = new FileUploader($this->logger);
+		$this->base64filehandler = new Base64FileHandler();
     }
 
     public function setCurrentUserId(string $userid): void
@@ -50,15 +50,20 @@ class PostService
         return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
     }
 
+	private static function validateDate($date, $format = 'Y-m-d') {
+		$d = \DateTime::createFromFormat($format, $date);
+		return $d && $d->format($format) === $date;
+	}
+
     private function respondWithError(string $responseCode, array $extraData = []): array
     {
         return array_merge(['status' => 'error', 'ResponseCode' => $responseCode], $extraData);
     }
 
-	private function createSuccessResponse(string $message, array $data = []): array
-	{
-		return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
-	}
+    private function createSuccessResponse(string $message, array $data = []): array
+    {
+        return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
+    }
 
     private function checkAuthentication(): bool
     {
@@ -67,6 +72,14 @@ class PostService
             return false;
         }
         return true;
+    }
+
+	private function argsToJsString($args) {
+		return json_encode($args);
+	}
+
+    private function argsToString($args) {
+        return serialize($args);
     }
 
     public function createPost(array $args): array
@@ -99,6 +112,7 @@ class PostService
             'media' => null,
             'cover' => null,
             'mediadescription' => $args['mediadescription'] ?? null,
+            'options' => null,
             'createdat' => $createdAt,
         ];
 
@@ -112,26 +126,48 @@ class PostService
 
         try {
             if (!empty($args['media'])) {
-                $mediaPath = $this->fileUploader->handleFileUpload($args['media'], $args['contenttype'], $postId, false);
-                if ($mediaPath === null) {
+                $mediaPath = $this->base64filehandler->handleFileUpload($args['media'], $args['contenttype'], $postId);
+                $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
+
+                if ($mediaPath === '') {
                     return $this->respondWithError('Media upload failed');
                 }
-                $postData['media'] = $mediaPath;
+
+                if (isset($mediaPath['options'])) {
+                    $postData['options'] = $this->argsToJsString($mediaPath['options']);
+                }
+
+                if (!empty($mediaPath['path'])) {
+					$postData['media'] = $mediaPath['path'];
+                } else {
+					return $this->respondWithError('Media path necessary for upload');
+				}
+
+            } else {
+                return $this->respondWithError('Media necessary for upload');
             }
 
-            if (isset($args['cover']) && !empty($args['cover'])) {
-                $coverPath = $this->fileUploader->handleFileUpload($args['cover'], 'image', $postId.'_cover', false);
-                if ($coverPath === null) {
-                    return $this->respondWithError('Media upload failed');
+            if (!empty($args['cover'])) {
+                $coverPath = $this->base64filehandler->handleFileUpload($args['cover'], 'image', $postId . '_cover');
+				$this->logger->info('PostService.createPost coverPath', ['coverPath' => $coverPath]);
+
+                if ($coverPath === '') {
+                    return $this->respondWithError('Cover upload failed');
                 }
-                $postData['cover'] = $coverPath;
+
+                if (!empty($coverPath['path'])) {
+					$postData['cover'] = $coverPath['path'];
+                } else {
+					return $this->respondWithError('Cover path necessary for upload');
+				}
+
             }
 
             $post = new Post($postData);
             $this->postMapper->insert($post);
 
             if (isset($args['tags']) && is_array($args['tags'])) {
-				$this->handleTags($args['tags'], $postId, $createdAt);
+                $this->handleTags($args['tags'], $postId, $createdAt);
             }
 
             if (!$postData['feedid']) {
@@ -155,16 +191,15 @@ class PostService
         foreach ($tags as $tagName) {
             $tagName = trim($tagName);
             
-            if (strlen($tagName) < 2 || strlen($tagName) > 50 || !preg_match('/^[a-zA-Z]+$/', $tagName)) {
+            if (strlen($tagName) < 2 || strlen($tagName) > 53 || !preg_match('/^[a-zA-Z0-9-]+$/', $tagName)) {
                 throw new \Exception('Invalid tag name');
             }
 
-            // Attempt to load or create the tag
             $tag = $this->tagMapper->loadByName($tagName);
             
             if (!$tag) {
-				$this->logger->info('get tag name', ['tagName' => $tagName]);
-				unset($tag);
+                $this->logger->info('get tag name', ['tagName' => $tagName]);
+                unset($tag);
                 $tag = $this->createTag($tagName);
             }
             
@@ -216,34 +251,34 @@ class PostService
         $this->postInfoMapper->insert($postInfo);
     }
 
-	public function fetchAll(?array $args = []): array
-	{
+    public function fetchAll(?array $args = []): array
+    {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
         }
 
-		$this->logger->info("PostService.fetchAll started");
+        $this->logger->info("PostService.fetchAll started");
 
-		// Sanitize and validate offset and limit
-		$offset = max((int)($args['offset'] ?? 0), 0);
-		$limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        // Sanitize and validate offset and limit
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
-		try {
-			// Fetch posts and map them to array format
-			$posts = $this->postMapper->fetchAll($offset, $limit);
-			$result = array_map(fn(Post $post) => $post->getArrayCopy(), $posts);
+        try {
+            // Fetch posts and map them to array format
+            $posts = $this->postMapper->fetchAll($offset, $limit);
+            $result = array_map(fn(Post $post) => $post->getArrayCopy(), $posts);
 
-			$this->logger->info("Posts fetched successfully", ['count' => count($result)]);
-			return $this->createSuccessResponse('Posts fetched successfully', [$result]);
+            $this->logger->info("Posts fetched successfully", ['count' => count($result)]);
+            return $this->createSuccessResponse('Posts fetched successfully', [$result]);
 
-		} catch (\Throwable $e) {
-			$this->logger->error("Error fetching Posts", [
-				'error' => $e->getMessage(),
-				'trace' => $e->getTraceAsString(),
-			]);
-			return $this->respondWithError('Failed to fetch posts');
-		}
-	}
+        } catch (\Throwable $e) {
+            $this->logger->error("Error fetching Posts", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError('Failed to fetch posts');
+        }
+    }
 
     public function findPostser(?array $args = []): array|false
     {
@@ -251,38 +286,65 @@ class PostService
             return $this->respondWithError('Unauthorized');
         }
 
+        $from = $args['from'] ?? null;
+        $to = $args['to'] ?? null;
+        $filterBy = $args['filterBy'] ?? [];
+        $Ignorlist = $args['IgnorList'] ?? null;
+        $sortBy = $args['sortBy'] ?? null;
+        $title = $args['title'] ?? null;
+        $tag = $args['tag'] ?? null; 
+        $postId = $args['postid'] ?? null;
+        $userId = $args['userid'] ?? null;
+
+        if ($postId !== null && !self::isValidUUID($postId)) {
+			return $this->respondWithError('Invalid postid format provided');
+        }
+
+        if ($userId !== null && !self::isValidUUID($userId)) {
+			return $this->respondWithError('Invalid userid format provided');
+        }
+
+        if ($title !== null && strlen($title) < 2 || strlen($title) > 33) {
+            return $this->respondWithError('Title must be between 2 and 30 characters.');
+        }
+
+		if ($from !== null && !self::validateDate($from)) {
+			return $this->respondWithError('Invalid from date format provided');
+		}
+
+		if ($to !== null && !self::validateDate($to)) {
+			return $this->respondWithError('Invalid to date format provided');
+		}
+
+        if ($tag !== null) {
+            if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
+                $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
+				return $this->respondWithError('Invalid tag format provided');
+            }
+        }
+
+		if (!empty($filterBy) && is_array($filterBy)) {
+			$allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER'];
+
+			$invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
+
+			if (!empty($invalidTypes)) {
+				return $this->respondWithError('Invalid type parameter(s) provided');
+			}
+		}
+
+		if ($Ignorlist !== null) {
+			$Ignorlisten = ['YES', 'NO'];
+			if (!in_array($Ignorlist, $Ignorlisten, true)) {
+				return $this->respondWithError('Invalid Ignorlist parameter provided.');
+			}
+		}
+
         $this->logger->info("PostService.findPostser started");
 
         $results = $this->postMapper->findPostser($args, $this->currentUserId);
 
         return $results;
-    }
-
-    public function getLastPosts(array $args): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
-        }
-
-        $this->logger->info("PostService.getLastPosts started");
-
-        try {
-            $posts = $this->postMapper->findPostser($args, $this->currentUserId);
-
-            $result = array_map(
-                fn(Post $post) => $this->mapFeedsWithComments($post),
-                $posts
-            );
-
-            return [
-                'status' => 'success',
-                'ResponseCode' => 'Posts fetched successfully',
-                'affectedRows' => $result,
-            ];
-        } catch (\Exception $e) {
-            $this->logger->error('Failed to fetch last posts', ['exception' => $e]);
-            return $this->respondWithError('Failed to fetch last posts');
-        }
     }
 
     public function getChatFeedsByID(string $feedid): ?array
@@ -349,13 +411,13 @@ class PostService
 
         $posts = $this->postMapper->loadById($id);
         if (!$posts) {
-			return $this->respondWithError('PostId not found.');
+            return $this->respondWithError('PostId not found.');
         }
 
         $post = $posts->getArrayCopy();
 
         if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
-			return $this->respondWithError('Unauthorized: You can only delete your own posts.');
+            return $this->respondWithError('Unauthorized: You can only delete your own posts.');
         }
 
         try {
@@ -369,9 +431,9 @@ class PostService
                 ];
             }
         } catch (\Exception $e) {
-			return $this->respondWithError('Failed to delete post.');
+            return $this->respondWithError('Failed to delete post.');
         }
 
-		return $this->respondWithError('Failed to delete post.');
+        return $this->respondWithError('Failed to delete post.');
     }
 }

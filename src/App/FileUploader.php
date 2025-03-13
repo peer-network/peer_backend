@@ -38,7 +38,7 @@ class FileUploader
                 $fileContent = base64_decode(substr($b64, strlen($searchStr)), true);
 
                 if ($fileContent === false) {
-                    $this->logger->error('Failed to decode base64 file content', ['base64Content' => $b64]);
+                    $this->logger->error('Failed to decode base64 file content');
                     return null;
                 }
 

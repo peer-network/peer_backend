@@ -1,15 +1,19 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
-class Wallett
+class Pool
 {
+    protected string $token;
     protected string $userid;
-    protected float $liquidity;
-    protected int $liquiditq;
-    protected string $updatedat;
+    protected string $postid;
+    protected string $fromid;
+    protected float $numbers;
+    protected int $numbersq;
+    protected int $whereby;
     protected string $createdat;
 
     // Constructor
@@ -17,10 +21,13 @@ class Wallett
     {
         $data = $this->validate($data);
 
+        $this->token = $data['token'] ?? '';
         $this->userid = $data['userid'] ?? '';
-        $this->liquidity = $data['liquidity'] ?? 0.0;
-        $this->liquiditq = $data['liquiditq'] ?? 0;
-        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->postid = $data['postid'] ?? '';
+        $this->fromid = $data['fromid'] ?? '';
+        $this->numbers = $data['numbers'] ?? 0.0;
+        $this->numbersq = $data['numbersq'] ?? 0;
+        $this->whereby = $data['whereby'] ?? 0;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
@@ -28,16 +35,39 @@ class Wallett
     public function getArrayCopy(): array
     {
         $att = [
+            'token' => $this->token,
             'userid' => $this->userid,
-            'liquidity' => $this->liquidity,
-            'liquiditq' => $this->liquiditq,
-            'updatedat' => $this->updatedat,
+            'postid' => $this->postid,
+            'fromid' => $this->fromid,
+            'numbers' => $this->numbers,
+            'numbersq' => $this->numbersq,
+            'whereby' => $this->whereby,
             'createdat' => $this->createdat,
         ];
         return $att;
     }
 
     // Getter and Setter
+    public function getTokenId(): string
+    {
+        return $this->token;
+    }
+
+    public function setTokenId(string $token): void
+    {
+        $this->token = $token;
+    }
+
+    public function getPostId(): string
+    {
+        return $this->postid;
+    }
+
+    public function setPostId(string $postid): void
+    {
+        $this->postid = $postid;
+    }
+
     public function getUserId(): string
     {
         return $this->userid;
@@ -48,27 +78,47 @@ class Wallett
         $this->userid = $userid;
     }
 
-    public function getLiquidity(): float
+    public function getFromId(): string
     {
-        return $this->liquidity;
+        return $this->fromid;
     }
 
-    public function setLiquidity(float $liquidity): void
+    public function setFromId(string $fromid): void
     {
-        $this->liquidity = $liquidity;
+        $this->fromid = $fromid;
     }
 
-    public function getLiquiditq(): int
+    public function getNumbers(): float
     {
-        return $this->liquiditq;
+        return $this->numbers;
     }
 
-    public function setLiquiditq(int $liquiditq): void
+    public function setNumbers(float $numbers): void
     {
-        $this->liquiditq = $liquiditq;
+        $this->numbers = $numbers;
     }
 
-    public function getCreatedAt(): ?string
+    public function getNumbersq(): int
+    {
+        return $this->numbersq;
+    }
+
+    public function setNumbersq(int $numbersq): void
+    {
+        $this->numbersq = $numbersq;
+    }
+
+    public function getWhereby(): int
+    {
+        return $this->whereby;
+    }
+
+    public function setWhereby(int $whereby): void
+    {
+        $this->whereby = $whereby;
+    }
+
+    public function getCreatedAt(): string
     {
         return $this->createdat;
     }
@@ -76,16 +126,6 @@ class Wallett
     public function setCreatedAt(?string $createdat): void
     {
         $this->createdat = $createdat;
-    }
-
-    public function getUpdatedAt(): ?string
-    {
-        return $this->updatedat;
-    }
-
-    public function setUpdatedAt(): void
-    {
-        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
     // Validation and Array Filtering methods (Unchanged)
@@ -115,29 +155,48 @@ class Wallett
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
         $specification = [
+            'token' => [
+                'required' => true,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 12,
+                        'max' => 12,
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
             'userid' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'liquidity' => [
+            'postid' => [
+                'required' => true,
+                'validators' => [['name' => 'Uuid']],
+            ],
+            'fromid' => [
+                'required' => true,
+                'validators' => [['name' => 'Uuid']],
+            ],
+            'numbers' => [
                 'required' => true,
                 'filters' => [['name' => 'FloatSanitize']],
                 'validators' => [
-                    ['name' => 'ValidateFloat', 'options' => ['min' => -5000.0, 'max' => 18250000.0]],
+                    ['name' => 'ValidateFloat', 'options' => ['min' => -5000.0, 'max' => 5000.0]],
                 ],
             ],
-            'liquiditq' => [
+            'numbersq' => [
                 'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 99999999999999999999999999999]],
                 ],
             ],
-            'updatedat' => [
+            'whereby' => [
                 'required' => true,
+                'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'validateIntRange', 'options' => ['min' => 1, 'max' => 100]],
                 ],
             ],
             'createdat' => [

@@ -23,16 +23,32 @@ class RateLimiterMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $ipAddress = $request->getServerParams()['REMOTE_ADDR'] ?? 'unknown';
+        // Sanitize & get IP address
+        $ipAddress = filter_var($request->getServerParams()['REMOTE_ADDR'] ?? 'unknown', FILTER_VALIDATE_IP);
+
+        if (!$ipAddress) {
+            $this->logger->error('Invalid IP address detected');
+            $ipAddress = 'unknown';
+        }
 
         $this->logger->info("RateLimiterMiddleware: IP $ipAddress");
 
+        // Check rate limiting
         if (!$this->rateLimiter->isAllowed($ipAddress)) {
-            $this->logger->info("Rate limit exceeded for IP: $ipAddress");
+            $this->logger->warn("Rate limit exceeded for IP: $ipAddress");
 
             $response = new Response();
-            $response->getBody()->write(json_encode(['errors' => 'Rate limit exceeded']));
-            return $response->withStatus(429)->withHeader('Content-Type', 'application/json');
+            $response->getBody()->write(json_encode([
+                'errors' => 'Rate limit exceeded',
+                'message' => 'You have exceeded the allowed number of requests.',
+                'retry_after' => 60 
+            ]));
+            return $response
+                ->withStatus(429)
+                ->withHeader('Content-Type', 'application/json')
+                ->withHeader('X-RateLimit-Limit', $this->rateLimiter->getLimit($ipAddress))
+                ->withHeader('X-RateLimit-Remaining', 0)
+                ->withHeader('X-RateLimit-Reset', time() + 60);
         }
 
         return $handler->handle($request);

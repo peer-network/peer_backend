@@ -91,9 +91,9 @@ class PostInfoService
             return $this->respondWithError('Post not found');
         }
 
-		if ($postInfo->getOwnerId() === $this->currentUserId) {
+        if ($postInfo->getOwnerId() === $this->currentUserId) {
             return $this->respondWithError('Post owner cannot like their own post');
-		}
+        }
 
         $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
 
@@ -101,7 +101,7 @@ class PostInfoService
             return $this->respondWithError('Already liked');
         }
 
-		$postInfo->setLikes($postInfo->getLikes() + 1);
+        $postInfo->setLikes($postInfo->getLikes() + 1);
         $this->postInfoMapper->update($postInfo);
 
         return [
@@ -129,9 +129,9 @@ class PostInfoService
             return $this->respondWithError('Post not found');
         }
 
-		if ($postInfo->getOwnerId() === $this->currentUserId) {
+        if ($postInfo->getOwnerId() === $this->currentUserId) {
             return $this->respondWithError('Post owner cannot dislike their own post');
-		}
+        }
 
         $exists = $this->postInfoMapper->addUserActivity('dislikePost', $this->currentUserId, $postId);
 
@@ -167,9 +167,9 @@ class PostInfoService
             return $this->respondWithError('Post not found');
         }
 
-		if ($postInfo->getOwnerId() === $this->currentUserId) {
+        if ($postInfo->getOwnerId() === $this->currentUserId) {
             return $this->respondWithError('Post owner cannot report their own post');
-		}
+        }
 
         $exists = $this->postInfoMapper->addUserActivity('reportPost', $this->currentUserId, $postId);
 
@@ -205,9 +205,9 @@ class PostInfoService
             return $this->respondWithError('Post not found');
         }
 
-		if ($postInfo->getOwnerId() === $this->currentUserId) {
+        if ($postInfo->getOwnerId() === $this->currentUserId) {
             return $this->respondWithError('Post owner cannot views their own post');
-		}
+        }
 
         $exists = $this->postInfoMapper->addUserActivity('viewPost', $this->currentUserId, $postId);
 
@@ -309,7 +309,7 @@ class PostInfoService
             return $this->respondWithError('PostInfo not found.');
         }
 
-		$results = $postinfo->getArrayCopy();
+        $results = $postinfo->getArrayCopy();
 
         return $results;
     }

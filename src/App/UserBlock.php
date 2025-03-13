@@ -1,26 +1,23 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
-class ChatMessages
+class UserBlock
 {
-    protected int $messid;
-    protected string $userid;
-    protected string $chatid;
-    protected string $content;
+    protected string $blockerid;
+    protected string $blockedid;
     protected string $createdat;
 
     // Constructor
-    public function __construct(array $data)
+    public function __construct(array $data = [])
     {
         $data = $this->validate($data);
 
-        $this->messid = $data['messid'] ?? 0;
-        $this->userid = $data['userid'] ?? '';
-        $this->chatid = $data['chatid'] ?? '';
-        $this->content = $data['content'] ?? '';
+        $this->blockerid = $data['blockerid'] ?? '';
+        $this->blockedid = $data['blockedid'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
@@ -28,54 +25,40 @@ class ChatMessages
     public function getArrayCopy(): array
     {
         $att = [
-            'messid' => $this->messid,
-            'chatid' => $this->chatid,
-            'userid' => $this->userid,
-            'content' => $this->content,
-            'createdat' => $this->createdat,
+            'blockedid' => $this->blockedid,
         ];
         return $att;
     }
 
     // Getter and Setter methods
-    public function getMessId(): int
+    public function getBlocker(): string
     {
-        return $this->messid;
+        return $this->blockerid;
     }
 
-    public function setMessId(int $messid): void
+    public function setBlocker(string $blockerid): void
     {
-        $this->messid = $messid;
+        $this->blockerid = $blockerid;
     }
 
-    public function getUserId(): string
+    public function getBlocked(): string
     {
-        return $this->userid;
+        return $this->blockedid;
     }
 
-    public function setUserId(string $userid): void
+    public function setBlocked(string $blockedid): void
     {
-        $this->userid = $userid;
+        $this->blockedid = $blockedid;
     }
 
-    public function getChatId(): string
+    public function getCreatedAt(): ?string
     {
-        return $this->chatid;
+        return $this->createdat;
     }
 
-    public function setChatId(string $chatid): void
+    public function setCreatedAt(?string $createdat): void
     {
-        $this->chatid = $chatid;
-    }
-
-    public function getContent(): string
-    {
-        return $this->content;
-    }
-
-    public function setContent(string $content): void
-    {
-        $this->content = $content;
+        $this->createdat = $createdat;
     }
 
     // Validation and Array Filtering methods
@@ -105,34 +88,18 @@ class ChatMessages
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
         $specification = [
-            'messid' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
-            ],
-            'userid' => [
+            'blockerid' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'chatid' => [
+            'blockedid' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
-            ],
-            'content' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
-                'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 1,
-                        'max' => 500,
-                    ]],
-                    ['name' => 'isString'],
-                ],
             ],
             'createdat' => [
                 'required' => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];

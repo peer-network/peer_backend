@@ -37,31 +37,14 @@ class CommentInfoService
         return true;
     }
 
-    public function updateCommentInfo(CommentInfo $commentInfo): array
-    {
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
-
-        $this->logger->info('CommentInfoService.updateCommentInfo started');
-
-        try {
-            $this->commentInfoMapper->update($commentInfo);
-            return ['status' => 'success', 'ResponseCode' => 'Comment info updated successfully',];
-        } catch (\Exception $e) {
-            $this->logger->error("Failed to update comment info", ['exception' => $e]);
-			return $this->respondWithError('Failed to update comment info');
-        }
-    }
-
     public function deleteCommentInfo(string $commentId): array
     {
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
 
         if (!self::isValidUUID($commentId)) {
-			return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError('Invalid uuid input');
         }
 
         $this->logger->info('CommentInfoService.deleteCommentInfo started');
@@ -69,18 +52,18 @@ class CommentInfoService
         if ($this->commentInfoMapper->delete($commentId)) {
             return ['status' => 'success', 'ResponseCode' => 'Comment deleted successfully'];
         } else {
-			return $this->respondWithError('Failed to delete comment');
+            return $this->respondWithError('Failed to delete comment');
         }
     }
 
     public function countLikes(string $commentId): int
     {
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
 
         if (!self::isValidUUID($commentId)) {
-			return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError('Invalid uuid input');
         }
 
         $this->logger->info('CommentInfoService.countLikes started');
@@ -88,7 +71,7 @@ class CommentInfoService
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentInfo) {
-			return $this->respondWithError('Comment not found');
+            return $this->respondWithError('Comment not found');
         }
 
         return $this->commentInfoMapper->countLikes($commentId);
@@ -96,12 +79,12 @@ class CommentInfoService
 
     public function likeComment(string $commentId): array
     {
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
 
         if (!self::isValidUUID($commentId)) {
-			return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError('Invalid uuid input');
         }
 
         $this->logger->info('CommentInfoService.likeComment started');
@@ -109,17 +92,17 @@ class CommentInfoService
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentInfo) {
-			return $this->respondWithError('Comment not found');
+            return $this->respondWithError('Comment not found');
         }
 
-		if ($commentInfo->getOwnerId() === $this->currentUserId) {
-			return $this->respondWithError('Comment owner cannot like their own comment');
-		}
+        if ($commentInfo->getOwnerId() === $this->currentUserId) {
+            return $this->respondWithError('Comment owner cannot like their own comment');
+        }
 
         $exists = $this->commentInfoMapper->addUserActivity('likeComment', $this->currentUserId, $commentId);
 
         if (!$exists) {
-			return $this->respondWithError('Already liked');
+            return $this->respondWithError('Already liked');
         }
 
         $commentInfo->setLikes($commentInfo->getLikes() + 1);
@@ -134,12 +117,12 @@ class CommentInfoService
 
     public function reportComment(string $commentId): array
     {
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
 
         if (!self::isValidUUID($commentId)) {
-			return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError('Invalid uuid input');
         }
 
         $this->logger->info('CommentInfoService.reportComment started');
@@ -147,17 +130,17 @@ class CommentInfoService
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentInfo) {
-			return $this->respondWithError('Comment not found');
+            return $this->respondWithError('Comment not found');
         }
 
-		if ($commentInfo->getOwnerId() === $this->currentUserId) {
-			return $this->respondWithError('Comment owner cannot report their own comment');
-		}
+        if ($commentInfo->getOwnerId() === $this->currentUserId) {
+            return $this->respondWithError('Comment owner cannot report their own comment');
+        }
 
         $exists = $this->commentInfoMapper->addUserActivity('reportComment', $this->currentUserId, $commentId);
 
         if (!$exists) {
-			return $this->respondWithError('Already report');
+            return $this->respondWithError('Already report');
         }
 
         $commentInfo->setReports($commentInfo->getReports() + 1);
@@ -184,7 +167,7 @@ class CommentInfoService
             return $this->respondWithError('Commentinfo not found.');
         }
 
-		$results = $commentinfo->getArrayCopy();
+        $results = $commentinfo->getArrayCopy();
 
         return $results;
     }
