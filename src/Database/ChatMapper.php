@@ -970,4 +970,17 @@ class ChatMapper
             return false;
         }
     }
+
+    public function getParticipants(string $chatId)
+    {
+        $this->logger->info("ChatMapper.getParticipants started");
+
+        $sql = "SELECT * FROM chatparticipants WHERE chatid = :chatId";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['chatId' => $chatId]);
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return ($data);
+    }
+    
 }
