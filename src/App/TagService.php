@@ -125,10 +125,16 @@ class TagService
         $this->logger->info("TagService.loadTag started");
 
         try {
+
+            if(isset($args['tagname'])){
+                if (!$this->isValidTagName(strtolower($args['tagname']))) {
+                    return $this->respondWithError('Invalid string format. Must be contain only letters and 2-50 letters long.');
+                }
+            }
             $tags = $this->tagMapper->searchByName($args);
 
-            if ($tags === false) {
-                return $this->respondWithError('Failed to fetch tags from database.');
+            if (empty($tags) && count($tags) === 0) {
+                return $this->respondWithError('No tags found including this string.');
             }
 
             $this->logger->info("TagService.loadTag successfully fetched tags", [
