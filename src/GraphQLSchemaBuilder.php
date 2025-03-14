@@ -1519,15 +1519,17 @@ class GraphQLSchemaBuilder
         }
         
         $comments = $this->commentService->fetchByParentId($args);
-        $results = array_map(fn(CommentAdvanced $comment) => $comment->getArrayCopy(), $comments);
+        if(is_array($comments) && count($comments) > 0){
+            $results = array_map(fn(CommentAdvanced $comment) => $comment->getArrayCopy(), $comments);
         
-        if ($results !== false) {
-            return [
-                'status' => 'success',
-                'counter' => count($results),
-                'ResponseCode' => 'Success get comments',
-                'affectedRows' => $results,
-            ];
+            if ($results !== false) {
+                return [
+                    'status' => 'success',
+                    'counter' => count($results),
+                    'ResponseCode' => 'Success get comments',
+                    'affectedRows' => $results,
+                ];
+            }
         }
 
         return $this->respondWithError('No comments found');
