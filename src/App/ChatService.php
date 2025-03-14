@@ -531,6 +531,31 @@ class ChatService
         }
 
         try {
+
+            if ($chat && $chat->getIsPublic() == 0) {
+                $participants = $this->chatMapper->getParticipants($chatId);
+
+                if(count($participants) === 2){
+                    // Find the recipients
+                    $friends = $this->getFriends();
+
+                    // Check if $friends is an array and has follow
+                    if (!is_array($friends) || empty($friends)) {
+                        return $this->respondWithError("You can't send a message because mutual following is not there.");
+                    }
+                    $friendIds = array_column($friends, 'uid');
+
+                    $participants = array_column($participants, 'userid', 'userid');
+                    unset($participants[$this->currentUserId]);
+
+                    foreach ($participants as $participantId) {
+                        if (!in_array($participantId, $friendIds)) {
+                            return $this->respondWithError("You can't send a message because mutual following is not there.");
+                        }
+                    }
+                }
+            }
+
             $messageData = [
                 'messid' => 0,
                 'chatid' => $chatId,
