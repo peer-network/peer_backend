@@ -23,7 +23,7 @@ class GraphQLHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $this->logger->info("GraphQLHandler.handle started");
+        $this->logger->info("GraphQLHandler handle started");
 
         $PeerFormatter = function ($error) {
             return [
