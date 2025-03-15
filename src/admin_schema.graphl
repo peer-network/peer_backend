@@ -286,12 +286,6 @@ type DefaultResponse {
   ResponseCode: String
 }
 
-type ToggleResponse {
-  status: String!
-  isSaved: Boolean
-  ResponseCode: String
-}
-
 type AddPostResponse {
   status: String!
   ResponseCode: String
@@ -527,23 +521,6 @@ type CommentResponse {
   counter: Int!
   ResponseCode: String
   affectedRows: [Comment]
-}
-
-type Wallet {
-  token: String!
-  userid: ID!
-  postid: ID!
-  fromid: ID!
-  numbers: Decimal!
-  whereby: Int!
-  createdat: Date!
-}
-
-type UserWallet {
-  status: String!
-  counter: Int!
-  ResponseCode: String
-  affectedRows: [Wallet]
 }
 
 input RegisterInput {

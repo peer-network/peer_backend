@@ -726,18 +726,6 @@ class GraphQLSchemaBuilder
                     return $root['contenttype'] ?? '';
                 },
             ],
-            'ToggleResponse' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.ToggleResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-                'isSaved' => function (array $root): bool {
-                    return $root['isSaved'] ?? false;
-                },
-            ],
             'Comment' => [
                 'commentid' => function (array $root): string {
                     $this->logger->info('Query.Comment Resolvers', ['root' => $root]);
@@ -981,45 +969,6 @@ class GraphQLSchemaBuilder
                 },
                 'name' => function (array $root): string {
                     return $root['name'] ?? '';
-                },
-            ],
-            'Wallet' => [
-                'token' => function (array $root): string {
-                    $this->logger->info('Query.Wallet Resolvers', ['root' => $root]);
-                    return $root['token'] ?? '';
-                },
-                'userid' => function (array $root): string {
-                    return $root['userid'] ?? '';
-                },
-                'postid' => function (array $root): string {
-                    return $root['postid'] ?? '';
-                },
-                'fromid' => function (array $root): string {
-                    return $root['fromid'] ?? '';
-                },
-                'numbers' => function (array $root): float {
-                    return $root['numbers'] ?? 0.0;
-                },
-                'whereby' => function (array $root): int {
-                    return $root['whereby'] ?? 0;
-                },
-                'createdat' => function (array $root): string {
-                    return $root['createdat'] ?? '';
-                },
-            ],
-            'UserWallet' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.UserWallet Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'counter' => function (array $root): int {
-                    return $root['counter'] ?? 0;
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-                'affectedRows' => function (array $root): array {
-                    return $root['affectedRows'] ?? [];
                 },
             ],
             'GetDailyResponse' => [
