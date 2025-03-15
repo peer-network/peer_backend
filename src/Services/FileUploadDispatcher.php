@@ -88,6 +88,7 @@ class FileUploadDispatcher
             }
         }
 
-        return !empty($results) ? json_encode($results) : null;
+        //return !empty($results) ? json_encode($results) : null;
+        return !empty($results) ? implode(',', $results) : null;
     }
 }
