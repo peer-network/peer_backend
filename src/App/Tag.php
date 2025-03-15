@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -56,28 +57,28 @@ class Tag
     }
 
     // Validation and Array Filtering methods
-	public function validate(array $data, array $elements = []): array
-	{
-		$inputFilter = $this->createInputFilter($elements);
-		$inputFilter->setData($data);
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
 
-		if ($inputFilter->isValid()) {
-			return $inputFilter->getValues();
-		}
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
 
-		$validationErrors = $inputFilter->getMessages();
+        $validationErrors = $inputFilter->getMessages();
 
-		foreach ($validationErrors as $field => $errors) {
-			$errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
-			foreach ($errors as $error) {
-				$errorMessages[] = ": $error";
-			}
-			$errorMessageString = implode("", $errorMessages);
-			
-			throw new ValidationException($errorMessageString);
-		}
-	}
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            $errorMessages[] = "Validation errors for $field";
+            foreach ($errors as $error) {
+                $errorMessages[] = ": $error";
+            }
+            $errorMessageString = implode("", $errorMessages);
+            
+            throw new ValidationException($errorMessageString);
+        }
+    }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
@@ -89,14 +90,9 @@ class Tag
             ],
             'name' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 53,
-                    ]],
-                    ['name' => 'isString'],
-                ],
+                    ['name' => 'validateTagName']
+                ]
             ],
         ];
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -34,7 +35,7 @@ class ProfilUser
             'isfollowed' => $this->isfollowed,
             'isfollowing' => $this->isfollowing,
         ];
-		return $att;
+        return $att;
     }
 
     // Getter and Setter methods
@@ -69,28 +70,28 @@ class ProfilUser
     }
 
     // Validation and Array Filtering methods
-	public function validate(array $data, array $elements = []): array
-	{
-		$inputFilter = $this->createInputFilter($elements);
-		$inputFilter->setData($data);
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
 
-		if ($inputFilter->isValid()) {
-			return $inputFilter->getValues();
-		}
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
 
-		$validationErrors = $inputFilter->getMessages();
+        $validationErrors = $inputFilter->getMessages();
 
-		foreach ($validationErrors as $field => $errors) {
-			$errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
-			foreach ($errors as $error) {
-				$errorMessages[] = ": $error";
-			}
-			$errorMessageString = implode("", $errorMessages);
-			
-			throw new ValidationException($errorMessageString);
-		}
-	}
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            $errorMessages[] = "Validation errors for $field";
+            foreach ($errors as $error) {
+                $errorMessages[] = ": $error";
+            }
+            $errorMessageString = implode("", $errorMessages);
+            
+            throw new ValidationException($errorMessageString);
+        }
+    }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
@@ -99,17 +100,17 @@ class ProfilUser
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-			'username' => [
-				'required' => true,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
-				'validators' => [
-					['name' => 'StringLength', 'options' => [
-						'min' => 3,
-						'max' => 23,
-					]],
-					['name' => 'isString'],
-				],
-			],
+            'username' => [
+                'required' => true,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 3,
+                        'max' => 23,
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
             'img' => [
                 'required' => false,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
@@ -135,6 +136,6 @@ class ProfilUser
             $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
-		return (new PeerInputFilter($specification));
+        return (new PeerInputFilter($specification));
     }
 }

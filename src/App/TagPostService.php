@@ -45,10 +45,10 @@ class TagPostService
         return true;
     }
 
-	private function isValidTagName(?string $tagName): bool
-	{
-		return $tagName && strlen($tagName) >= 2 && strlen($tagName) <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
-	}
+    private function isValidTagName(?string $tagName): bool
+    {
+        return $tagName && strlen($tagName) >= 2 && strlen($tagName) <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
+    }
 
     private function validateTagName(string $tagName): array|bool
     {
@@ -56,9 +56,9 @@ class TagPostService
             return $this->respondWithError('Could not find mandatory username');
         }
 
-		if (strlen($tagName) < 2 || strlen($tagName) > 50 || !preg_match('/^[a-zA-Z]+$/', $tagName)) {
-			return $this->respondWithError('Invalid tag name');
-		}
+        if (strlen($tagName) < 2 || strlen($tagName) > 50 || !preg_match('/^[a-zA-Z]+$/', $tagName)) {
+            return $this->respondWithError('Invalid tag name');
+        }
 
         return true;
     }
@@ -69,17 +69,17 @@ class TagPostService
             return $this->respondWithError('Unauthorized');
         }
 
-		$maxTags = min(max((int)($maxTags ?? 5), 1), 10);
+        $maxTags = min(max((int)($maxTags ?? 5), 1), 10);
         if (count($tags) > $maxTags) {
             return $this->respondWithError('Maximum tag limit exceeded');
         }
 
         foreach ($tags as $tagName) {
             $tagName = trim($tagName);
-			// Validate tagName
-			if (!$this->isValidTagName($tagName)) {
-				return $this->respondWithError('Invalid tagName. Must be 2-50 letters long and contain only letters.');
-			}
+            // Validate tagName
+            if (!$this->isValidTagName($tagName)) {
+                return $this->respondWithError('Invalid tagName. Must be 2-50 letters long and contain only letters.');
+            }
 
             $tag = $this->tagMapper->loadByName($tagName) ?? $this->createTag($tagName);
             $tagPost = new TagPost([
@@ -99,95 +99,95 @@ class TagPostService
         return $tag;
     }
 
-	public function createTag(string $tagName): array
-	{
+    public function createTag(string $tagName): array
+    {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
         }
 
-		$this->logger->info('TagService.createTag started');
+        $this->logger->info('TagService.createTag started');
 
-		$tagName = trim($tagName);
-		if (!$this->isValidTagName($tagName)) {
-			return $this->respondWithError('Invalid tagName. Must be 2-50 letters long and contain only letters.');
-		}
+        $tagName = trim($tagName);
+        if (!$this->isValidTagName($tagName)) {
+            return $this->respondWithError('Invalid tagName. Must be 2-50 letters long and contain only letters.');
+        }
 
-		try {
-			$tag = $this->tagMapper->loadByName($tagName);
+        try {
+            $tag = $this->tagMapper->loadByName($tagName);
 
-			if ($tag) {
-				return $this->respondWithError('Tag already exists.');
-			}
+            if ($tag) {
+                return $this->respondWithError('Tag already exists.');
+            }
 
-			$tagId = $this->generateUUID();
-			if (empty($tagId)) {
-				$this->logger->critical('Failed to generate tag ID');
-				return $this->respondWithError('Failed to generate tag ID');
-			}
+            $tagId = $this->generateUUID();
+            if (empty($tagId)) {
+                $this->logger->critical('Failed to generate tag ID');
+                return $this->respondWithError('Failed to generate tag ID');
+            }
 
-			$tagData = ['tagid' => $tagId, 'name' => $tagName];
-			$tag = new Tag($tagData);
+            $tagData = ['tagid' => $tagId, 'name' => $tagName];
+            $tag = new Tag($tagData);
 
-			if (!$this->tagMapper->insert($tag)) {
-				$this->logger->error('Failed to insert tag into database', ['tagName' => $tagName]);
-				return $this->respondWithError('Failed to insert tag');
-			}
+            if (!$this->tagMapper->insert($tag)) {
+                $this->logger->error('Failed to insert tag into database', ['tagName' => $tagName]);
+                return $this->respondWithError('Failed to insert tag');
+            }
 
-			$this->logger->info('Tag created successfully', ['tagName' => $tagName]);
-			return $this->createSuccessResponse('Tag saved successfully', [$tagData]);
+            $this->logger->info('Tag created successfully', ['tagName' => $tagName]);
+            return $this->createSuccessResponse('Tag saved successfully', [$tagData]);
 
-		} catch (\Throwable $e) {
-			$this->logger->error('Error occurred while creating tag', [
-				'error' => $e->getMessage(),
-				'trace' => $e->getTraceAsString(),
-			]);
-			return $this->respondWithError('Failed to create tag');
-		} finally {
-			$this->logger->debug('createTag function execution completed');
-		}
-	}
+        } catch (\Throwable $e) {
+            $this->logger->error('Error occurred while creating tag', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError('Failed to create tag');
+        } finally {
+            $this->logger->debug('createTag function execution completed');
+        }
+    }
 
-	private function isValidTagName(?string $tagName): bool
-	{
-		return $tagName && strlen($tagName) >= 2 && strlen($tagName) <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
-	}
+    private function isValidTagName(?string $tagName): bool
+    {
+        return $tagName && strlen($tagName) >= 2 && strlen($tagName) <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
+    }
 
-	private function respondWithError(string $message): array
-	{
-		return ['status' => 'error', 'ResponseCode' => $message];
-	}
+    private function respondWithError(string $message): array
+    {
+        return ['status' => 'error', 'ResponseCode' => $message];
+    }
 
-	private function createSuccessResponse(string $message, array $data = []): array
-	{
-		return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
-	}
+    private function createSuccessResponse(string $message, array $data = []): array
+    {
+        return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
+    }
 
-	public function fetchAll(?array $args = []): array
-	{
+    public function fetchAll(?array $args = []): array
+    {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
         }
 
-		$this->logger->info('TagPostService.fetchAll started');
+        $this->logger->info('TagPostService.fetchAll started');
 
-		// Sanitize and validate offset and limit
-		$offset = max((int)($args['offset'] ?? 0), 0);
-		$limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        // Sanitize and validate offset and limit
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
-		try {
-			// Fetch TagPost and map them to array format
-			$TagPost = $this->tagPostMapper->fetchAll($offset, $limit);
-			$result = array_map(fn(TagPost $tag) => $tag->getArrayCopy(), $TagPost);
+        try {
+            // Fetch TagPost and map them to array format
+            $TagPost = $this->tagPostMapper->fetchAll($offset, $limit);
+            $result = array_map(fn(TagPost $tag) => $tag->getArrayCopy(), $TagPost);
 
-			$this->logger->info('TagPost fetched successfully', ['count' => count($result)]);
-			return $this->createSuccessResponse('TagPost fetched successfully', [$result]);
+            $this->logger->info('TagPost fetched successfully', ['count' => count($result)]);
+            return $this->createSuccessResponse('TagPost fetched successfully', [$result]);
 
-		} catch (\Throwable $e) {
-			$this->logger->error('Error fetching TagPost', [
-				'error' => $e->getMessage(),
-				'trace' => $e->getTraceAsString(),
-			]);
-			return $this->respondWithError('Failed to fetch TagPost');
-		}
-	}
+        } catch (\Throwable $e) {
+            $this->logger->error('Error fetching TagPost', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError('Failed to fetch TagPost');
+        }
+    }
 }

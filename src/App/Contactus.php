@@ -37,7 +37,7 @@ class Contactus
             'ip' => $this->ip,
             'createdat' => $this->createdat,
         ];
-		return $att;
+        return $att;
     }
 
     // Getter and Setter methods
@@ -102,28 +102,28 @@ class Contactus
     }
 
     // Validation and Array Filtering methods
-	public function validate(array $data, array $elements = []): array
-	{
-		$inputFilter = $this->createInputFilter($elements);
-		$inputFilter->setData($data);
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
 
-		if ($inputFilter->isValid()) {
-			return $inputFilter->getValues();
-		}
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
 
-		$validationErrors = $inputFilter->getMessages();
+        $validationErrors = $inputFilter->getMessages();
 
-		foreach ($validationErrors as $field => $errors) {
-			$errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
-			foreach ($errors as $error) {
-				$errorMessages[] = ": $error";
-			}
-			$errorMessageString = implode("", $errorMessages);
-			
-			throw new ValidationException($errorMessageString);
-		}
-	}
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            $errorMessages[] = "Validation errors for $field";
+            foreach ($errors as $error) {
+                $errorMessages[] = ": $error";
+            }
+            $errorMessageString = implode("", $errorMessages);
+            
+            throw new ValidationException($errorMessageString);
+        }
+    }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
@@ -132,14 +132,14 @@ class Contactus
                 'required' => false,
                 'validators' => [['name' => 'ToInt']],
             ],
-			'email' => [
-				'required' => true,
-				'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
-				'validators' => [
-					['name' => 'EmailAddress'],
-					['name' => 'isString'],
-				],
-			],
+            'email' => [
+                'required' => true,
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'EmailAddress'],
+                    ['name' => 'isString'],
+                ],
+            ],
             'name' => [
                 'required' => true,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
@@ -153,21 +153,21 @@ class Contactus
             ],
             'message' => [
                 'required' => true,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
-				'validators' => [
-					['name' => 'StringLength', 'options' => [
-						'min' => 3,
-						'max' => 500,
-					]],
-					['name' => 'isString'],
-				],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 3,
+                        'max' => 500,
+                    ]],
+                    ['name' => 'isString'],
+                ],
             ],
-			'ip' => [
-				'required' => true,
-				'validators' => [
-					['name' => 'IsIp', 'options' => ['ipv4' => true, 'ipv6' => true]],
-				],
-			],
+            'ip' => [
+                'required' => true,
+                'validators' => [
+                    ['name' => 'IsIp', 'options' => ['ipv4' => true, 'ipv6' => true]],
+                ],
+            ],
             'createdat' => [
                 'required' => true,
                 'validators' => [

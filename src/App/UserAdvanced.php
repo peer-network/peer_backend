@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -13,7 +14,7 @@ class UserAdvanced
     protected int $status;
     protected int $verified;
     protected int $slug;
-	protected ?int $roles_mask;
+    protected ?int $roles_mask;
     protected ?string $ip;
     protected ?string $img;
     protected ?string $biography;
@@ -82,7 +83,7 @@ class UserAdvanced
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
         ];
-		return $att;
+        return $att;
     }
 
     // Array Copy methods
@@ -91,10 +92,10 @@ class UserAdvanced
         $att = [
             'uid' => $this->uid,
             'password' => $this->password,
-			'ip' => $this->ip,
-			'updatedat' => (new DateTime())->format('Y-m-d H:i:s.u'),
+            'ip' => $this->ip,
+            'updatedat' => (new DateTime())->format('Y-m-d H:i:s.u'),
         ];
-		return $att;
+        return $att;
     }
 
     // Array Copy methods
@@ -108,7 +109,7 @@ class UserAdvanced
             'img' => $this->img,
             'biography' => $this->biography,
         ];
-		return $att;
+        return $att;
     }
 
     // Array Update methods
@@ -307,28 +308,28 @@ class UserAdvanced
         return $this->updatedat;
     }
 
-    public function setUpdatedAt(?string $updatedat): void
+    public function setUpdatedAt(): void
     {
-        $this->updatedat = $updatedat;
+        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
     // Password Verify methods
-	public function verifyPassword(string $password): bool
-	{
-		if (\password_verify($password, $this->password)) {
-			
-			if (\password_needs_rehash($this->password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1])) {
-				
-				$newHash = \password_hash($password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1]);
-				
-				$this->password = $newHash;
-			}
+    public function verifyPassword(string $password): bool
+    {
+        if (\password_verify($password, $this->password)) {
+            
+            if (\password_needs_rehash($this->password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1])) {
+                
+                $newHash = \password_hash($password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1]);
+                
+                $this->password = $newHash;
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
     // Password Update methods
     public function validatePass(array $data): void
@@ -339,28 +340,28 @@ class UserAdvanced
     }
 
     // Validation and Array Filtering methods
-	public function validate(array $data, array $elements = []): array
-	{
-		$inputFilter = $this->createInputFilter($elements);
-		$inputFilter->setData($data);
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
 
-		if ($inputFilter->isValid()) {
-			return $inputFilter->getValues();
-		}
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
 
-		$validationErrors = $inputFilter->getMessages();
+        $validationErrors = $inputFilter->getMessages();
 
-		foreach ($validationErrors as $field => $errors) {
-			$errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
-			foreach ($errors as $error) {
-				$errorMessages[] = ": $error";
-			}
-			$errorMessageString = implode("", $errorMessages);
-			
-			throw new ValidationException($errorMessageString);
-		}
-	}
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            $errorMessages[] = "Validation errors for $field";
+            foreach ($errors as $error) {
+                $errorMessages[] = ": $error";
+            }
+            $errorMessageString = implode("", $errorMessages);
+            
+            throw new ValidationException($errorMessageString);
+        }
+    }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
@@ -369,36 +370,36 @@ class UserAdvanced
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-			'email' => [
-				'required' => true,
-				'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
-				'validators' => [
-					['name' => 'EmailAddress'],
-					['name' => 'isString'],
-				],
-			],
-			'username' => [
-				'required' => true,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
-				'validators' => [
-					['name' => 'StringLength', 'options' => [
-						'min' => 3,
-						'max' => 23,
-					]],
-					['name' => 'isString'],
-				],
-			],
-			'password' => [
-				'required' => true,
-				'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
-				'validators' => [
-					['name' => 'StringLength', 'options' => [
-						'min' => 8,
-						'max' => 128,
-					]],
-					['name' => 'isString'],
-				],
-			],
+            'email' => [
+                'required' => true,
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'EmailAddress'],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'username' => [
+                'required' => true,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 3,
+                        'max' => 23,
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'password' => [
+                'required' => true,
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 8,
+                        'max' => 128,
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
             'status' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
@@ -427,12 +428,12 @@ class UserAdvanced
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 1048576]],
                 ],
             ],
-			'ip' => [
-				'required' => true,
-				'validators' => [
-					['name' => 'IsIp', 'options' => ['ipv4' => true, 'ipv6' => true]],
-				],
-			],
+            'ip' => [
+                'required' => true,
+                'validators' => [
+                    ['name' => 'IsIp', 'options' => ['ipv4' => true, 'ipv6' => true]],
+                ],
+            ],
             'img' => [
                 'required' => true,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
@@ -446,14 +447,14 @@ class UserAdvanced
             ],
             'biography' => [
                 'required' => false,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
-				'validators' => [
-					['name' => 'StringLength', 'options' => [
-						'min' => 3,
-						'max' => 500,
-					]],
-					['name' => 'isString'],
-				],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 3,
+                        'max' => 500,
+                    ]],
+                    ['name' => 'isString'],
+                ],
             ],
             'amountposts' => [
                 'required' => false,
@@ -515,6 +516,6 @@ class UserAdvanced
             $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
-		return (new PeerInputFilter($specification));
+        return (new PeerInputFilter($specification));
     }
 }

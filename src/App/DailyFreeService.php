@@ -132,7 +132,7 @@ class DailyFreeService
             return $this->respondWithError('Unauthorized');
         }
 
-		$dailyid = (int)$dailyid;
+        $dailyid = (int)$dailyid;
 
         try {
             $daily = $this->dailyFreeMapper->loadById($dailyid);
@@ -153,32 +153,32 @@ class DailyFreeService
         }
     }
 
-	public function fetchAll(?array $args = []): array
-	{
+    public function fetchAll(?array $args = []): array
+    {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
         }
 
-		$this->logger->info("DailyFreeService.fetchAll started");
+        $this->logger->info("DailyFreeService.fetchAll started");
 
-		$offset = max((int)($args['offset'] ?? 0), 0);
-		$limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
-		try {
-			$dailys = $this->surveyMapper->fetchAll($offset, $limit);
-			$result = array_map(fn(DailyFree $daily) => $daily->getArrayCopy(), $dailys);
+        try {
+            $dailys = $this->surveyMapper->fetchAll($offset, $limit);
+            $result = array_map(fn(DailyFree $daily) => $daily->getArrayCopy(), $dailys);
 
-			$this->logger->info("Dailys fetched successfully", ['count' => count($result)]);
-			return $this->createSuccessResponse('Dailys fetched successfully', [$result]);
+            $this->logger->info("Dailys fetched successfully", ['count' => count($result)]);
+            return $this->createSuccessResponse('Dailys fetched successfully', [$result]);
 
-		} catch (\Throwable $e) {
-			$this->logger->error("Error fetching Dailys", [
-				'error' => $e->getMessage(),
-				'trace' => $e->getTraceAsString(),
-			]);
-			return $this->respondWithError('Failed to fetch Dailys');
-		}
-	}
+        } catch (\Throwable $e) {
+            $this->logger->error("Error fetching Dailys", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError('Failed to fetch Dailys');
+        }
+    }
 
     public function loadById(): array
     {
@@ -186,18 +186,18 @@ class DailyFreeService
         $this->logger->info('DailyFreeService.loadById started');
 
         try {
-			$results = $this->dailyFreeMapper->loadById($this->currentUserId);
+            $results = $this->dailyFreeMapper->loadById($this->currentUserId);
 
             if ($results !== false) {
-				$affectedRows = $results->getArrayCopy();
-				$this->logger->info("DailyFreeService.loadById dailyfree found", ['affectedRows' => $affectedRows]);
-				unset($affectedRows['userid'], $affectedRows['createdat']);
+                $affectedRows = $results->getArrayCopy();
+                $this->logger->info("DailyFreeService.loadById dailyfree found", ['affectedRows' => $affectedRows]);
+                unset($affectedRows['userid'], $affectedRows['createdat']);
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 'DailyFree data prepared successfully',
                     'affectedRows' => $affectedRows,
                 ];
-				return $success;
+                return $success;
             }
 
             return $this->respondWithError('No dailyfree found for the user.');
@@ -206,225 +206,226 @@ class DailyFreeService
         }
     }
 
-	public function dailyFreeFuncFront(string $userId, int $art): array
-	{
-		$this->logger->info('DailyFreeService.dailyFreeFuncFront started');
-		$message = 'Daily Free Record Exist';
+    public function dailyFreeFuncFront(string $userId, int $art): array
+    {
+        $this->logger->info('DailyFreeService.dailyFreeFuncFront started');
+        $message = 'Daily Free Record Exist';
 
-		if (empty($userId)) {
-			return $this->respondWithError('No userid provided. Please provide valid userid parameters.');
-		}
+        if (empty($userId)) {
+            return $this->respondWithError('No userid provided. Please provide valid userid parameters.');
+        }
 
-		if (empty($art)) {
-			return $this->respondWithError('No art provided. Please provide valid art parameters.');
-		}
+        if (empty($art)) {
+            return $this->respondWithError('No art provided. Please provide valid art parameters.');
+        }
 
-		try {
-			$user = $this->dailyFreeMapper->loadById($userId);
+        try {
+            $user = $this->dailyFreeMapper->loadById($userId);
 
-			if (!$user) {
-				$dailyData = [
-					'userid' => $userId,
-					'liken' => 0,
-					'comments' => 0,
-					'posten' => 0,
-					'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u')
-				];
-				$user = $this->dailyFreeMapper->insert(new DailyFree($dailyData));
+            if (!$user) {
+                $dailyData = [
+                    'userid' => $userId,
+                    'liken' => 0,
+                    'comments' => 0,
+                    'posten' => 0,
+                    'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u')
+                ];
+                $user = $this->dailyFreeMapper->insert(new DailyFree($dailyData));
 
-				if (!$user) {
-					return $this->respondWithError('Failed to initialize Daily Free Record');
-				}
-			}
+                if (!$user) {
+                    return $this->respondWithError('Failed to initialize Daily Free Record');
+                }
+            }
 
-			if (\date('Y-m-d', \strtotime($user->getCreatedAt())) !== \date('Y-m-d')) {
-				$user->setLiken(0);
-				$user->setComments(0);
-				$user->setPosten(0);
-				$user->setCreatedAt((new \DateTime())->format('Y-m-d H:i:s.u'));
-				$message = 'Daily Free Record Updated successfully';
+            if (\date('Y-m-d', \strtotime($user->getCreatedAt())) !== \date('Y-m-d')) {
+                $user->setLiken(0);
+                $user->setComments(0);
+                $user->setPosten(0);
+                $user->setCreatedAt((new \DateTime())->format('Y-m-d H:i:s.u'));
+                $message = 'Daily Free Record Updated successfully';
 
-				$user = $this->dailyFreeMapper->update($user);
-			}
+                $user = $this->dailyFreeMapper->update($user);
+            }
 
-			if ($art === LIKE_ && $user->getLiken() >= DAILYFREELIKE) {
-				return $this->respondWithError('LIMIT_REACHED');
-			}
+            if ($art === LIKE_ && $user->getLiken() >= DAILYFREELIKE) {
+                return $this->respondWithError('LIMIT_REACHED');
+            }
 
-			if ($art === COMMENT_ && $user->getComments() >= DAILYFREECOMMENT) {
-				return $this->respondWithError('LIMIT_REACHED');
-			}
+            if ($art === COMMENT_ && $user->getComments() >= DAILYFREECOMMENT) {
+                return $this->respondWithError('LIMIT_REACHED');
+            }
 
-			if ($art === POST_ && $user->getPosten() >= DAILYFREEPOST) {
-				return $this->respondWithError('LIMIT_REACHED');
-			}
+            if ($art === POST_ && $user->getPosten() >= DAILYFREEPOST) {
+                return $this->respondWithError('LIMIT_REACHED');
+            }
 
-			return ['status' => 'success', 'ResponseCode' => $message];
+            return ['status' => 'success', 'ResponseCode' => $message];
 
-		} catch (\Throwable $e) {
-			$this->logger->error('Error in DailyFreeFuncFront', [
-				'userid' => $userId,
-				'art' => $art,
-				'error' => $e->getMessage()
-			]);
-			return $this->respondWithError($e->getMessage());
-		}
-	}
+        } catch (\Throwable $e) {
+            $this->logger->error('Error in DailyFreeFuncFront', [
+                'userid' => $userId,
+                'art' => $art,
+                'error' => $e->getMessage()
+            ]);
+            return $this->respondWithError($e->getMessage());
+        }
+    }
 
-	public function dailyFreeFunc(string $userId, string $postId, int $art): array
-	{
-		$this->logger->info('DailyFreeService.dailyFreeFunc started');
+    public function dailyFreeFunc(string $userId, string $postId, int $art): array
+    {
+        $this->logger->info('DailyFreeService.dailyFreeFunc started');
 
-		if (empty($userId)) {
-			return $this->respondWithError('No userid provided. Please provide valid userid parameters.');
-		}
+        if (empty($userId)) {
+            return $this->respondWithError('No userid provided. Please provide valid userid parameters.');
+        }
 
-		if (empty($postId)) {
-			return $this->respondWithError('No postid provided. Please provide valid postid parameters.');
-		}
+        if (empty($postId)) {
+            return $this->respondWithError('No postid provided. Please provide valid postid parameters.');
+        }
 
-		if (empty($art)) {
-			return $this->respondWithError('No art provided. Please provide valid art parameters.');
-		}
+        if (empty($art)) {
+            return $this->respondWithError('No art provided. Please provide valid art parameters.');
+        }
 
-		$column = match ($art) {
-			LIKE_ => 'liken',
-			COMMENT_ => 'comments',
-			POST_ => 'posten',
-			default => null,
-		};
+        $column = match ($art) {
+            LIKE_ => 'liken',
+            COMMENT_ => 'comments',
+            POST_ => 'posten',
+            default => null,
+        };
 
-		$text = match ($art) {
-			LIKE_ => 'Likes',
-			COMMENT_ => 'Comments',
-			POST_ => 'Post',
-			default => null,
-		};
+        $text = match ($art) {
+            LIKE_ => 'Likes',
+            COMMENT_ => 'Comments',
+            POST_ => 'Post',
+            default => null,
+        };
 
-		if ($column === null) {
-			return $this->respondWithError('Method Not Exist Exception');
-		}
+        if ($column === null) {
+            return $this->respondWithError('Method Not Exist Exception');
+        }
 
-		try {
-			$user = $this->dailyFreeMapper->loadById($userId);
+        try {
+            $user = $this->dailyFreeMapper->loadById($userId);
 
-			if (!$user) {
-				$dailyData = [
-					'userid' => $userId,
-					'liken' => 0,
-					'comments' => 0,
-					'posten' => 0,
-					'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u')
-				];
-				$user = $this->dailyFreeMapper->insert(new DailyFree($dailyData));
+            if (!$user) {
+                $dailyData = [
+                    'userid' => $userId,
+                    'liken' => 0,
+                    'comments' => 0,
+                    'posten' => 0,
+                    'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u')
+                ];
+                $user = $this->dailyFreeMapper->insert(new DailyFree($dailyData));
 
-				if (!$user) {
-					return $this->respondWithError('Failed to initialize Daily Free Record');
-				}
-			}
+                if (!$user) {
+                    return $this->respondWithError('Failed to initialize Daily Free Record');
+                }
+            }
 
-			if (\date('Y-m-d', \strtotime($user->getCreatedAt())) !== \date('Y-m-d')) {
-				$user->setLiken(0);
-				$user->setComments(0);
-				$user->setPosten(0);
-				$user->setCreatedAt((new \DateTime())->format('Y-m-d H:i:s.u'));
-			}
+            if (\date('Y-m-d', \strtotime($user->getCreatedAt())) !== \date('Y-m-d')) {
+                $user->setLiken(0);
+                $user->setComments(0);
+                $user->setPosten(0);
+                $user->setCreatedAt((new \DateTime())->format('Y-m-d H:i:s.u'));
+            }
 
-			$currentValue = $user->{'get' . ucfirst($column)}();
+            $currentValue = $user->{'get' . ucfirst($column)}();
 
-			if (($art === LIKE_ && $currentValue >= DAILYFREELIKE) ||
-				($art === COMMENT_ && $currentValue >= DAILYFREECOMMENT) ||
-				($art === POST_ && $currentValue >= DAILYFREEPOST)) {
-				return $this->respondWithError("LIMIT_REACHED");
-			}
+            if (($art === LIKE_ && $currentValue >= DAILYFREELIKE) ||
+                ($art === COMMENT_ && $currentValue >= DAILYFREECOMMENT) ||
+                ($art === POST_ && $currentValue >= DAILYFREEPOST)) {
+                return $this->respondWithError("LIMIT_REACHED");
+            }
 
-			$user->{'set' . ucfirst($column)}($currentValue + 1);
-			$this->dailyFreeMapper->update($user);
+            $user->{'set' . ucfirst($column)}($currentValue + 1);
+            $this->dailyFreeMapper->update($user);
 
-			return ['status' => 'success', 'ResponseCode' => "Daily Free Record: {$text}"];
+            return ['status' => 'success', 'ResponseCode' => "Daily Free Record: {$text}"];
 
-		} catch (\Throwable $e) {
-			$this->logger->error('Error in DailyFreeFunc', [
-				'userid' => $userId,
-				'postId' => $postId,
-				'art' => $art,
-				'error' => $e->getMessage()
-			]);
-			return $this->respondWithError($e->getMessage());
-		}
-	}
+        } catch (\Throwable $e) {
+            $this->logger->error('Error in DailyFreeFunc', [
+                'userid' => $userId,
+                'postId' => $postId,
+                'art' => $art,
+                'error' => $e->getMessage()
+            ]);
+            return $this->respondWithError($e->getMessage());
+        }
+    }
 
-	public function getUserDailyUsage(string $userId, string $artType): int
-	{
-		$this->logger->info('DailyFreeService.getUserDailyUsage started');
+    public function getUserDailyUsage(string $userId, string $artType): int
+    {
+        $this->logger->info('DailyFreeService.getUserDailyUsage started');
 
-		try {
-			$results = $this->dailyFreeMapper->getUserDailyUsage($userId, $artType);
+        try {
+            $results = $this->dailyFreeMapper->getUserDailyUsage($userId, $artType);
+			$this->logger->info('DailyFreeService.getUserDailyUsage results:', ['results' => $results]);
 
-			if ($results !== false) {
-				return (int)$results;
-			}
+            if ($results !== false) {
+                return (int)$results;
+            }
 
-			return 0;
-		} catch (\Exception $e) {
-			return 0;
-		}
-	}
+            return 0;
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
 
-	public function getUserDailyUsageWithColumnNames(string $userId): array
-	{
-		$this->logger->info('DailyFreeService.getUserDailyUsageWithColumnNames started');
+    public function getUserDailyUsageWithColumnNames(string $userId): array
+    {
+        $this->logger->info('DailyFreeService.getUserDailyUsageWithColumnNames started');
 
-		try {
-			$results = $this->dailyFreeMapper->getUserDailyUsageWithColumnNames($userId);
+        try {
+            $results = $this->dailyFreeMapper->getUserDailyUsageWithColumnNames($userId);
 
-			if ($results !== false) {
-				return $results;
-			}
+            if ($results !== false) {
+                return $results;
+            }
 
-			return [];
-		} catch (\Exception $e) {
-			return [];
-		}
-	}
+            return [];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
 
-	public function getUserDailyAvailability(string $userId): array
-	{
-		$this->logger->info('DailyFreeService.getUserDailyAvailability started');
+    public function getUserDailyAvailability(string $userId): array
+    {
+        $this->logger->info('DailyFreeService.getUserDailyAvailability started');
 
-		try {
-			$affectedRows = $this->dailyFreeMapper->getUserDailyAvailability($userId);
+        try {
+            $affectedRows = $this->dailyFreeMapper->getUserDailyAvailability($userId);
 
-			if ($affectedRows !== false) {
+            if ($affectedRows !== false) {
 
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 'DailyFree data prepared successfully',
                     'affectedRows' => $affectedRows,
                 ];
-				return $success;
-			}
+                return $success;
+            }
 
-			return [];
-		} catch (\Exception $e) {
-			return [];
-		}
-	}
+            return [];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
 
-	public function incrementUserDailyUsage(string $userId, string $artType): bool
-	{
-		$this->logger->info('DailyFreeService.incrementUserDailyUsage started');
+    public function incrementUserDailyUsage(string $userId, string $artType): bool
+    {
+        $this->logger->info('DailyFreeService.incrementUserDailyUsage started');
 
-		try {
+        try {
 
-			if ($this->dailyFreeMapper->incrementUserDailyUsage($userId, $artType)) {
-				return true;
-			}
+            if ($this->dailyFreeMapper->incrementUserDailyUsage($userId, $artType)) {
+                return true;
+            }
 
-			return false;
-		} catch (\Exception $e) {
-			return false;
-		}
-	}
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -7,9 +8,9 @@ use Fawaz\Filter\PeerInputFilter;
 class UserInfo
 {
     protected string $userid;
-	protected float $liquidity;
+    protected float $liquidity;
     protected int $amountposts;
-    protected int $amounttrending;
+    protected int $amountblocked;
     protected int $amountfollower;
     protected int $amountfollowed;
     protected int $isprivate;
@@ -24,12 +25,12 @@ class UserInfo
         $this->userid = $data['userid'] ?? '';
         $this->liquidity = $data['liquidity'] ?? 0.0;
         $this->amountposts = $data['amountposts'] ?? 0;
-        $this->amounttrending = $data['amounttrending'] ?? 0;
+        $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->amountfollower = $data['amountfollower'] ?? 0;
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
         $this->isprivate = $data['isprivate'] ?? 0;
         $this->invited = $data['invited'] ?? null;
-		$this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
@@ -39,14 +40,14 @@ class UserInfo
             'userid' => $this->userid,
             'liquidity' => $this->liquidity,
             'amountposts' => $this->amountposts,
-            'amounttrending' => $this->amounttrending,
+            'amountblocked' => $this->amountblocked,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
             'isprivate' => $this->isprivate,
             'invited' => $this->invited,
-			'updatedat' => (new DateTime())->format('Y-m-d H:i:s.u'),
+            'updatedat' => $this->updatedat,
         ];
-		return $att;
+        return $att;
     }
 
     // Getter and Setter methods
@@ -70,14 +71,14 @@ class UserInfo
         $this->amountposts = $amountposts;
     }
 
-    public function getAmountTrending(): int
+    public function getAmountBlocked(): int
     {
-        return $this->amounttrending;
+        return $this->amountblocked;
     }
 
-    public function setAmountTrending(int $amounttrending): void
+    public function setAmountBlocked(int $amountblocked): void
     {
-        $this->amounttrending = $amounttrending;
+        $this->amountblocked = $amountblocked;
     }
 
     public function getAmountFollowes(): int
@@ -120,29 +121,39 @@ class UserInfo
         $this->invited = $invited;
     }
 
+    public function getUpdatedAt(): ?string
+    {
+        return $this->updatedat;
+    }
+
+    public function setUpdatedAt(): void
+    {
+        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
+    }
+
     // Validation and Array Filtering methods
-	public function validate(array $data, array $elements = []): array
-	{
-		$inputFilter = $this->createInputFilter($elements);
-		$inputFilter->setData($data);
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
 
-		if ($inputFilter->isValid()) {
-			return $inputFilter->getValues();
-		}
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
 
-		$validationErrors = $inputFilter->getMessages();
+        $validationErrors = $inputFilter->getMessages();
 
-		foreach ($validationErrors as $field => $errors) {
-			$errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
-			foreach ($errors as $error) {
-				$errorMessages[] = ": $error";
-			}
-			$errorMessageString = implode("", $errorMessages);
-			
-			throw new ValidationException($errorMessageString);
-		}
-	}
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            $errorMessages[] = "Validation errors for $field";
+            foreach ($errors as $error) {
+                $errorMessages[] = ": $error";
+            }
+            $errorMessageString = implode("", $errorMessages);
+            
+            throw new ValidationException($errorMessageString);
+        }
+    }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
@@ -163,7 +174,7 @@ class UserInfo
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
-            'amounttrending' => [
+            'amountblocked' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
@@ -202,6 +213,6 @@ class UserInfo
             $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
-		return (new PeerInputFilter($specification));
+        return (new PeerInputFilter($specification));
     }
 }

@@ -77,7 +77,7 @@ class TagMapper
             return new Tag($data);
         }
 
-        $this->logger->warning("No tag found with name", ['name' => $name]);
+        $this->logger->info("No tag found with name", ['name' => $name]);
 
         return false;
     }

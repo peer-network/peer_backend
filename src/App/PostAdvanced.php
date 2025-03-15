@@ -27,6 +27,7 @@ class PostAdvanced
     protected ?bool $issaved;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
+    protected string $options;
     protected string $createdat;
     protected ?array $tags = []; // Changed to array
     protected ?array $user = [];
@@ -58,6 +59,7 @@ class PostAdvanced
         $this->issaved = $data['issaved'] ?? false;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
+        $this->options = $data['options'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
@@ -100,6 +102,7 @@ class PostAdvanced
             'issaved' => $this->issaved,
             'isfollowed' => $this->isfollowed,
             'isfollowing' => $this->isfollowing,
+            'options' => $this->options,
             'createdat' => $this->createdat,
             'tags' => $this->tags, // Include tags
             'user' => $this->user,
@@ -139,29 +142,34 @@ class PostAdvanced
         return $this->contenttype;
     }
 
+    public function getOptions(): string
+    {
+        return $this->options;
+    }
+
     // Validation and Array Filtering methods (Unchanged)
-	public function validate(array $data, array $elements = []): array
-	{
-		$inputFilter = $this->createInputFilter($elements);
-		$inputFilter->setData($data);
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
 
-		if ($inputFilter->isValid()) {
-			return $inputFilter->getValues();
-		}
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
 
-		$validationErrors = $inputFilter->getMessages();
+        $validationErrors = $inputFilter->getMessages();
 
-		foreach ($validationErrors as $field => $errors) {
-			$errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
-			foreach ($errors as $error) {
-				$errorMessages[] = ": $error";
-			}
-			$errorMessageString = implode("", $errorMessages);
-			
-			throw new ValidationException($errorMessageString);
-		}
-	}
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            $errorMessages[] = "Validation errors for $field";
+            foreach ($errors as $error) {
+                $errorMessages[] = ": $error";
+            }
+            $errorMessageString = implode("", $errorMessages);
+            
+            throw new ValidationException($errorMessageString);
+        }
+    }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
@@ -178,19 +186,19 @@ class PostAdvanced
                 'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],
-			'title' => [
-				'required' => false,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
-				'validators' => [
-					['name' => 'StringLength', 'options' => [
-						'min' => 3,
-						'max' => 96,
-					]],
-					['name' => 'isString'],
-				],
-			],
+            'title' => [
+                'required' => true,
+				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 63,
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
             'media' => [
-                'required' => false,
+                'required' => true,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
@@ -213,24 +221,24 @@ class PostAdvanced
             ],
             'mediadescription' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
-				'validators' => [
-					['name' => 'StringLength', 'options' => [
-						'min' => 3,
-						'max' => 440,
-					]],
-					['name' => 'isString'],
-				],
+				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 3,
+                        'max' => 440,
+                    ]],
+                    ['name' => 'isString'],
+                ],
             ],
-			'contenttype' => [
-				'required' => true,
-				'validators' => [
-					['name' => 'InArray', 'options' => [
-						'haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery'],
-					]],
-					['name' => 'isString'],
-				],
-			],
+            'contenttype' => [
+                'required' => true,
+                'validators' => [
+                    ['name' => 'InArray', 'options' => [
+                        'haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery'],
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
             'amountlikes' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
@@ -288,6 +296,17 @@ class PostAdvanced
             'isfollowing' => [
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
+            ],
+            'options' => [
+                'required' => false,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 4,
+                        'max' => 250,
+                    ]],
+                    ['name' => 'isString'],
+                ],
             ],
             'tags' => [
                 'required' => false,

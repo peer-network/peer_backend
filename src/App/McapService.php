@@ -40,18 +40,22 @@ class McapService
         $this->logger->info('McapService.loadLastId started');
 
         try {
-            $this->mcapMapper->fetchAndUpdateMarketPrices();
-			$results = $this->mcapMapper->loadLastId();
+            $fetchUpdate = $this->mcapMapper->fetchAndUpdateMarketPrices();
+			if (isset($fetchUpdate['status']) && $fetchUpdate['status'] === 'error') {
+				return $this->respondWithError($fetchUpdate['ResponseCode']);
+			}
+
+            $results = $this->mcapMapper->loadLastId();
 
             if ($results !== false) {
-				$affectedRows = $results->getArrayCopy();
-				$this->logger->info("McapService.loadLastId mcap found", ['affectedRows' => $affectedRows]);
+                $affectedRows = $results->getArrayCopy();
+                $this->logger->info("McapService.loadLastId mcap found", ['affectedRows' => $affectedRows]);
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 'Mcap data prepared successfully',
                     'affectedRows' => $affectedRows,
                 ];
-				return $success;
+                return $success;
             }
 
             return $this->respondWithError('No mcaps found for the user.');
@@ -76,7 +80,7 @@ class McapService
                     'ResponseCode' => 'Users data prepared successfully',
                     'affectedRows' => $fetchAll,
                 ];
-				return $success;
+                return $success;
             }
 
             return $this->respondWithError('No users found for the user.');
