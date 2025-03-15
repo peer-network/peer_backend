@@ -212,11 +212,7 @@ CREATE TABLE IF NOT EXISTS gems (
     gemid UUID PRIMARY KEY,
     userid UUID NOT NULL,
     postid UUID NOT NULL,
-<<<<<<< HEAD
-    fromid UUID NOT NULL,
-=======
     fromid UUID DEFAULT NULL,
->>>>>>> tRas/refactor/tabfix
 	gems NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
     whereby INTEGER NOT NULL,
     collected SMALLINT DEFAULT 0 NOT NULL,
