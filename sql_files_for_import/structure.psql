@@ -212,14 +212,17 @@ CREATE TABLE IF NOT EXISTS gems (
     gemid UUID PRIMARY KEY,
     userid UUID NOT NULL,
     postid UUID NOT NULL,
+<<<<<<< HEAD
     fromid UUID NOT NULL,
+=======
+    fromid UUID DEFAULT NULL,
+>>>>>>> tRas/refactor/tabfix
 	gems NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
     whereby INTEGER NOT NULL,
     collected SMALLINT DEFAULT 0 NOT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_gems_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
-    CONSTRAINT fk_gems_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE,
-    CONSTRAINT fk_gems_fromid FOREIGN KEY (fromid) REFERENCES users(uid) ON DELETE CASCADE
+    CONSTRAINT fk_gems_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
 );
 CREATE INDEX idx_gems_userid ON gems(userid);
 CREATE INDEX idx_gems_postid ON gems(postid);

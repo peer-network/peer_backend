@@ -16,10 +16,32 @@ class Base64FileHandler
     private function getAllowedMimeTypes(string $contentType): array
     {
         return match ($contentType) {
+<<<<<<< HEAD
             'image' => ['image/webp', 'image/jpeg', 'image/png', 'image/gif', 'image/heic', 'image/heif', 'image/tiff'],
             'video' => ['video/mp4', 'video/ogg', 'video/quicktime'],
             'audio' => ['audio/mpeg', 'audio/wav'],
             'text' => ['text/plain'],
+=======
+            // Bildformate (gängig auf iOS & Android)
+            'image' => [
+                'image/webp', 'image/jpeg', 'image/png', 'image/gif',
+                'image/heic', 'image/heif', 'image/tiff'
+            ],
+
+            // Videoformate (gängig auf iOS & Android)
+            'video' => [
+                'video/mp4', 'video/quicktime', 'video/x-m4v',
+                'video/x-msvideo', 'video/3gpp', 'video/x-matroska',
+                'video/webm' // WebM kann VP8, VP9 und AV1 enthalten
+            ],
+
+            // Audioformate (Standard für die meisten Geräte)
+            'audio' => ['audio/mpeg', 'audio/wav'],
+
+            // Textformate
+            'text' => ['text/plain'],
+
+>>>>>>> tRas/refactor/tabfix
             default => []
         };
     }
@@ -27,10 +49,25 @@ class Base64FileHandler
     private function getAllowedExtensions(string $contentType): array
     {
         return match ($contentType) {
+<<<<<<< HEAD
             'image' => ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'],
             'video' => ['mp4', 'ogg', 'mov'],
             'audio' => ['mp3', 'wav'],
             'text' => ['txt'],
+=======
+            // Bilddateierweiterungen
+            'image' => ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'],
+
+            // Videoerweiterungen (entsprechend den MIME-Typen)
+            'video' => ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'webm'],
+
+            // Audioerweiterungen
+            'audio' => ['mp3', 'wav'],
+
+            // Texterweiterungen
+            'text' => ['txt'],
+
+>>>>>>> tRas/refactor/tabfix
             default => []
         };
     }
@@ -43,12 +80,23 @@ class Base64FileHandler
         }
 
         return match($contentType) {
+<<<<<<< HEAD
             'image' => 'image',
             'audio' => 'audio',
             'video' => 'video',
             'text' => 'text',
             'userData' => 'userData',
             'profile' => 'profile',
+=======
+            'audio' => 'audio',
+            'chat' => 'chat',
+            'cover' => 'cover',
+            'image' => 'image',
+            'profile' => 'profile',
+            'text' => 'text',
+            'userData' => 'userData',
+            'video' => 'video',
+>>>>>>> tRas/refactor/tabfix
             default => 'other'
         };
     }
