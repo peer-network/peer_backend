@@ -8,33 +8,39 @@ class RateLimiter
     private int $timeWindow;
     private string $storageFile;
 
-    public function __construct(int $rateLimit, int $timeWindow, string $ratepath)
+    public function __construct(int $rateLimit, int $timeWindow, string $ratePath)
     {
         $this->rateLimit = $rateLimit;
         $this->timeWindow = $timeWindow;
-        $this->storageFile = $ratepath . date('Y-m-d') . '_rate_limiter_storage.json';
+        $this->storageFile = rtrim($ratePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . date('Y-m-d') . '_rate_limiter_storage.json';
 
         if (!file_exists($this->storageFile)) {
-            file_put_contents($this->storageFile, json_encode([]));
+            file_put_contents($this->storageFile, json_encode([]), LOCK_EX);
         }
     }
 
     private function loadRequests(): array
     {
         $data = file_get_contents($this->storageFile);
-        $decodedData = json_decode($data, true);
+        if ($data === false) {
+            error_log("Failed to read rate limiter storage file.");
+            return [];
+        }
 
-        if ($decodedData === null && json_last_error() !== JSON_ERROR_NONE) {
+        $decodedData = json_decode($data, true);
+        if (!is_array($decodedData)) {
             error_log("Failed to decode JSON from storage file: " . json_last_error_msg());
             return [];
         }
 
-        return is_array($decodedData) ? $decodedData : [];
+        return $decodedData;
     }
 
     private function saveRequests(array $requests): void
     {
-        file_put_contents($this->storageFile, json_encode($requests));
+        if (file_put_contents($this->storageFile, json_encode($requests, JSON_PRETTY_PRINT), LOCK_EX) === false) {
+            error_log("Failed to write to rate limiter storage file.");
+        }
     }
 
     public function isAllowed(string $identifier): bool
@@ -42,18 +48,7 @@ class RateLimiter
         $currentTime = time();
         $requests = $this->loadRequests();
 
-        if (isset($requests[$identifier])) {
-            $requests[$identifier] = array_filter(
-                $requests[$identifier],
-                function (int $timestamp) use ($currentTime): bool {
-                    return ($currentTime - $timestamp) < $this->timeWindow;
-                }
-            );
-        }
-
-        if (!isset($requests[$identifier])) {
-            $requests[$identifier] = [];
-        }
+        $requests[$identifier] = array_filter($requests[$identifier] ?? [], fn(int $timestamp) => ($currentTime - $timestamp) < $this->timeWindow);
 
         if (count($requests[$identifier]) >= $this->rateLimit) {
             error_log("Rate limit exceeded for identifier: $identifier");
