@@ -15,8 +15,9 @@ New
 hide
 error
 srccc
-runtime-data
 runtime-data/media/audio/*
+runtime-data/media/chat/*
+runtime-data/media/cover/*
 runtime-data/media/image/*
 runtime-data/media/other/*
 runtime-data/media/profile/*
