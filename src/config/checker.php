@@ -1,6 +1,6 @@
 <?php
 
-$db_driver = $_ENV['DB_DRIVER'] ?? ''; // postgres
+$db_driver = $_ENV['DB_DRIVER'] ?? '';
 $host = $_ENV['DB_HOST'] ?? '';
 $port = $_ENV['DB_PORT'] ?? '';
 $dbname = $_ENV['DB_DATABASE'] ?? '';
@@ -8,8 +8,6 @@ $user = $_ENV['DB_USERNAME'] ?? '';
 $password = $_ENV['DB_PASSWORD'] ?? '';
 $connect_timeout = $_ENV['DB_TIMEOUT'] ?? 10;
 $sslmode = $_ENV['DB_SSLMODE'] ?? 'prefer';
-
-//header('Content-Type: application/vnd.api+json; charset=UTF-8');
 
 function secure_output($message, $status = 'error') {
     header('Content-Type: application/vnd.api+json; charset=UTF-8');
