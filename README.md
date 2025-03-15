@@ -26,9 +26,6 @@ php -r "unlink('composer-setup.php');"
 
 # Add to PATH (recommended)
 sudo mv composer.phar /usr/local/bin/composer
-
-# Install a dependency for uploads
-sudo composer require james-heinrich/getid3
 ```
 
 ### **3. Install & Configure PostgreSQL**

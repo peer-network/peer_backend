@@ -1728,10 +1728,6 @@ class GraphQLSchemaBuilder
             return $this->respondWithError('Unauthorized');
         }
 
-        if (empty($args)) {
-            //return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
-        }
-
         $this->logger->info('Query.resolveFollows started');
 
         $results = $this->userService->Follows($args);
@@ -1755,10 +1751,6 @@ class GraphQLSchemaBuilder
             return $this->respondWithError('Unauthorized');
         }
 
-        if (empty($args)) {
-            //return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
-        }
-
         $this->logger->info('Query.resolveFollowRelations started');
 
         $results = $this->userService->FollowRelations($args);
@@ -1780,10 +1772,6 @@ class GraphQLSchemaBuilder
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
-        }
-
-        if (empty($args)) {
-            //return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
         }
 
         if (isset($args['userid']) && !self::isValidUUID($args['userid'])) {
@@ -1811,10 +1799,6 @@ class GraphQLSchemaBuilder
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
-        }
-
-        if (empty($args)) {
-            //return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
         }
 
         $this->logger->info('Query.resolveFriends started');
@@ -1920,10 +1904,6 @@ class GraphQLSchemaBuilder
             return $this->respondWithError('Unauthorized');
         }
 
-        if (empty($args)) {
-            //return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
-        }
-
         $this->logger->info('Query.resolveUsers started');
 
         if ($this->userRoles === 16) {
@@ -1976,10 +1956,6 @@ class GraphQLSchemaBuilder
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
-        }
-
-        if (empty($args)) {
-            //return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
         }
 
         $this->logger->info('Query.resolveChats started');
@@ -2080,10 +2056,6 @@ class GraphQLSchemaBuilder
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
-        }
-
-        if (empty($args)) {
-            //return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
         }
 
         $this->logger->info('Query.resolvePosts started');
