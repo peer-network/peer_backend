@@ -23,7 +23,6 @@ class RateLimiterMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // Sanitize & get IP address
         $ipAddress = filter_var($request->getServerParams()['REMOTE_ADDR'] ?? 'unknown', FILTER_VALIDATE_IP);
 
         if (!$ipAddress) {
@@ -33,7 +32,6 @@ class RateLimiterMiddleware implements MiddlewareInterface
 
         $this->logger->info("RateLimiterMiddleware: IP $ipAddress");
 
-        // Check rate limiting
         if (!$this->rateLimiter->isAllowed($ipAddress)) {
             $this->logger->warn("Rate limit exceeded for IP: $ipAddress");
 
