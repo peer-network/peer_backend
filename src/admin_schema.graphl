@@ -37,11 +37,9 @@ type Query {
   fetchpayslog(day: DayType!, offset: Int, limit: Int): UserLogWins!
   getpercentbeforetransaction(tokenAmount: Int!): StandardResponse!
   refreshmarketcap: StandardResponse!
-
   globalwins: DefaultResponse!
   gemster: StandardResponse!
   gemsters(day: DayType!): GenericResponse!
-
   liquiditypool(userid: ID, postid: ID, fromid: ID, whereby: Int, offset: Int, limit: Int): GenericResponse!
   testingpool(offset: Int, limit: Int): GenericResponse!
 }
