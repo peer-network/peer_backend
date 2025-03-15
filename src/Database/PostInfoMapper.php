@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Database;
 
 use PDO;
@@ -23,7 +24,7 @@ class PostInfoMapper
         $sql = "SELECT * FROM post_info WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new PostInfo($data);
@@ -84,6 +85,14 @@ class PostInfoMapper
                 ]
             );
             return false;
+        } catch (\Exception $e) {
+            $this->logger->critical(
+                "PostInfoMapper.update: Unexpected exception occurred",
+                [
+                    'postid' => $data['postid'] ?? null,
+                    'exception' => $e->getMessage()
+                ]
+            );
         }
     }
 
@@ -336,7 +345,7 @@ class PostInfoMapper
                 'followeduserid' => $followeduserid,
                 'exception' => $e->getMessage(),
             ]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user follow'];
+            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user follow.'];
         }
     }
 

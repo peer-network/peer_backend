@@ -8,23 +8,18 @@ use Fawaz\App\Wallett;
 use Psr\Log\LoggerInterface;
 
 const TABLESTOGEMS = true;
-
 const DAILY_NUMBER_TOKEN= 5000;
-const POOLPOST = 'b615755c-685b-41d6-9ec8-b08d1bccb3c8';
-
 const VIEW_=1;
 const LIKE_=2;
 const DISLIKE_=3;
 const COMMENT_=4;
 const POST_=5;
 const INVITATION_=11;
-
 const RECEIVELIKE=5;
 const RECEIVEDISLIKE=4;
 const RECEIVECOMMENT=2;
 const RECEIVEPOSTVIEW=0.25;
 const RECEIVEINVITATION=0.01;
-
 const PRICELIKE=3;
 const PRICEDISLIKE=5;
 const PRICECOMMENT=0.5;
@@ -661,7 +656,7 @@ class WalletMapper
 
     protected function insertWinToLog(string $userId, array $args): bool
     {
-		\ignore_user_abort(true);
+        \ignore_user_abort(true);
 
         $this->logger->info('WalletMapper.insertWinToLog started');
 
@@ -678,7 +673,7 @@ class WalletMapper
         try {
             $stmt = $this->db->prepare($sql);
 
-			$this->logger->info('WalletMapper.insertWinToLog args:', ['userId' => $userId, 'args' => $args]);
+            $this->logger->info('WalletMapper.insertWinToLog args:', ['userId' => $userId, 'args' => $args]);
 
             $stmt->bindValue(':token', $args['gemid'] ?? $this->generateUUID(), \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
@@ -711,7 +706,7 @@ class WalletMapper
 
     protected function insertWinToPool(string $userId, array $args): bool
     {
-		\ignore_user_abort(true);
+        \ignore_user_abort(true);
 
         $this->logger->info('WalletMapper.insertWinToPool started');
 
@@ -1245,7 +1240,7 @@ class WalletMapper
 
     public function saveWalletEntry(string $userId, float $liquidity): float
     {
-		\ignore_user_abort(true);
+        \ignore_user_abort(true);
         $this->logger->info('WalletMapper.saveWalletEntry started');
 
         try {

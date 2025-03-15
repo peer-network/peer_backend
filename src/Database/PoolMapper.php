@@ -12,24 +12,23 @@ class PoolMapper
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
-	private const TABLESTOGEMS = true;
-	private const DAILY_NUMBER_TOKEN= 5000;
-	private const POOLPOST = 'b615755c-685b-41d6-9ec8-b08d1bccb3c8';
-	private const VIEW_=1;
-	private const LIKE_=2;
-	private const DISLIKE_=3;
-	private const COMMENT_=4;
-	private const POST_=5;
-	private const INVITATION_=11;
-	private const RECEIVELIKE=5;
-	private const RECEIVEDISLIKE=4;
-	private const RECEIVECOMMENT=2;
-	private const RECEIVEPOSTVIEW=0.25;
-	private const RECEIVEINVITATION=0.01;
-	private const PRICELIKE=3;
-	private const PRICEDISLIKE=5;
-	private const PRICECOMMENT=0.5;
-	private const PRICEPOST=20;
+    private const TABLESTOGEMS = true;
+    private const DAILY_NUMBER_TOKEN= 5000;
+    private const VIEW_=1;
+    private const LIKE_=2;
+    private const DISLIKE_=3;
+    private const COMMENT_=4;
+    private const POST_=5;
+    private const INVITATION_=11;
+    private const RECEIVELIKE=5;
+    private const RECEIVEDISLIKE=4;
+    private const RECEIVECOMMENT=2;
+    private const RECEIVEPOSTVIEW=0.25;
+    private const RECEIVEINVITATION=0.01;
+    private const PRICELIKE=3;
+    private const PRICEDISLIKE=5;
+    private const PRICECOMMENT=0.5;
+    private const PRICEPOST=20;
 
     public function __construct(protected LoggerInterface $logger, protected PDO $db)
     {
@@ -178,7 +177,7 @@ class PoolMapper
                     'total_numbersq' => $totalNumbersQ,
                     'transaction_count' => (int)$row['transaction_count'],
                 ];
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
             }
         }
@@ -253,7 +252,7 @@ class PoolMapper
                     'total_numbers' => $totalNumbers,
                     'total_numbersq' => $totalNumbersQ,
                 ];
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
             }
         }
@@ -306,7 +305,7 @@ class PoolMapper
             try {
                 $results[] = new Wallet($row);
                 $this->logger->info('Executing SQL query', ['row' => $row]);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->error('Failed to create User object', ['error' => $e->getMessage(), 'data' => $row]);
             }
         }
@@ -397,7 +396,7 @@ class PoolMapper
 
             return $results;
 
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->logger->error('Database error occurred in loadWalletById', [
                 'error' => $e->getMessage(),
             ]);
@@ -1076,12 +1075,12 @@ class PoolMapper
                 ]
             ];
 
-        } catch (PDOException $pdoe) {
+        } catch (\PDOException $pdoe) {
             $this->db->rollBack();
             $this->logger->error('PDOException occurred during transaction', ['exception' => $pdoe]);
             return $this->respondWithError("Database error: " . $pdoe->getMessage());
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->db->rollBack();
             $this->logger->error('Exception occurred during transaction', ['exception' => $e]);
             return $this->respondWithError("Transaction failed: " . $e->getMessage());
