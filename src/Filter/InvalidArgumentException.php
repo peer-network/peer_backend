@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Filter;
 
 use Fawaz\Filter\ExceptionInterface;
