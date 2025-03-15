@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Database;
 
 use PDO;
@@ -147,80 +148,80 @@ class UserInfoMapper
         return $stmt->fetchColumn() > 0;
     }
 
-	public function toggleUserBlock(string $blockerid, string $blockedid): array
-	{
-		$this->logger->info('UserInfoMapper.toggleUserBlock started');
+    public function toggleUserBlock(string $blockerid, string $blockedid): array
+    {
+        $this->logger->info('UserInfoMapper.toggleUserBlock started');
 
-		try {
-			$this->db->beginTransaction();
-			
-			$query = "SELECT COUNT(*) FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
-			$stmt = $this->db->prepare($query);
-			$stmt->execute(['blockerid' => $blockerid, 'blockedid' => $blockedid]);
-			
-			if ($stmt->fetchColumn() > 0) {
-				$query = "DELETE FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
-				$stmt = $this->db->prepare($query);
-				$stmt->execute(['blockerid' => $blockerid, 'blockedid' => $blockedid]);
-				
+        try {
+            $this->db->beginTransaction();
+            
+            $query = "SELECT COUNT(*) FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['blockerid' => $blockerid, 'blockedid' => $blockedid]);
+            
+            if ($stmt->fetchColumn() > 0) {
+                $query = "DELETE FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute(['blockerid' => $blockerid, 'blockedid' => $blockedid]);
+                
                 $queryUpdateBlocker = "UPDATE users_info SET amountblocked = amountblocked - 1 WHERE userid = :blockerid";
                 $stmt = $this->db->prepare($queryUpdateBlocker);
                 $stmt->execute(['blockerid' => $blockerid]);
 
-				$action = false;
-				$response = 'User unblocked successfully.';
-			} else {
-				$query = "INSERT INTO user_block_user (blockerid, blockedid) VALUES (:blockerid, :blockedid)";
-				$stmt = $this->db->prepare($query);
-				$stmt->execute(['blockerid' => $blockerid, 'blockedid' => $blockedid]);
-				
+                $action = false;
+                $response = 'User unblocked successfully.';
+            } else {
+                $query = "INSERT INTO user_block_user (blockerid, blockedid) VALUES (:blockerid, :blockedid)";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute(['blockerid' => $blockerid, 'blockedid' => $blockedid]);
+                
                 $queryUpdateBlocker = "UPDATE users_info SET amountblocked = amountblocked + 1 WHERE userid = :blockerid";
                 $stmt = $this->db->prepare($queryUpdateBlocker);
                 $stmt->execute(['blockerid' => $blockerid]);
 
-				$action = true;
-				$response = 'User blocked successfully.';
-			}
+                $action = true;
+                $response = 'User blocked successfully.';
+            }
 
-			$this->db->commit();
+            $this->db->commit();
 
-			return ['status' => 'success', 'ResponseCode' => $response, 'isBlocked' => $action];
-		} catch (\Exception $e) {
-			$this->db->rollBack();
-			$this->logger->error('Failed to toggle user block', ['exception' => $e]);
-			return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user block'];
-		}
-	}
+            return ['status' => 'success', 'ResponseCode' => $response, 'isBlocked' => $action];
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            $this->logger->error('Failed to toggle user block', ['exception' => $e->getMessage]);
+            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user block'];
+        }
+    }
 
-	public function getBlockedUsers(string $blockerid): array|false
-	{
-		$this->logger->info('UserInfoMapper.getBlockedUsers started');
+    public function getBlockedUsers(string $blockerid): array|false
+    {
+        $this->logger->info('UserInfoMapper.getBlockedUsers started');
 
-		$query = "SELECT * FROM user_block_user WHERE blockerid = :blockerid";
-		
-		try {
-			$stmt = $this->db->prepare($query);
-			$stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
-			$stmt->execute();
+        $query = "SELECT * FROM user_block_user WHERE blockerid = :blockerid";
+        
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
+            $stmt->execute();
 
-			$results = [];
-			while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-				$this->logger->info('UserInfoMapper.while', ['row' => $row]);
-				$results[] = new UserBlock($row);
-			}
+            $results = [];
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $this->logger->info('UserInfoMapper.while', ['row' => $row]);
+                $results[] = new UserBlock($row);
+            }
 
-			if (!empty($results)) {
-				$this->logger->info("Fetched all blocked users from database", ['count' => count($results)]);
-				return $results;
-			} else {
-				$this->logger->warning("No blocked users found for blockerid: $blockerid");
-				return false;
-			}
-		} catch (\PDOException $e) {
-			$this->logger->error("Database error while fetching blocked users: " . $e->getMessage());
-			return false;
-		}
-	}
+            if (!empty($results)) {
+                $this->logger->info("Fetched all blocked users from database", ['count' => count($results)]);
+                return $results;
+            } else {
+                $this->logger->warning("No blocked users found for blockerid: $blockerid");
+                return false;
+            }
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error while fetching blocked users: " . $e->getMessage());
+            return false;
+        }
+    }
 
     public function updateUserInfoStats(string $userid): array
     {
