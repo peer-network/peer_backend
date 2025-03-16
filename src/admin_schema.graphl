@@ -28,7 +28,6 @@ type Query {
   getallchats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
   readMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
   dailyfreestatus: GetDailyResponse!
-  testObjector(offset: Int, limit: Int): StandardResponse!
   blockedlist(offset: Int, limit: Int): UserBlocked!
   callusermove: StandardResponse!
   allfriends(offset: Int, limit: Int): AllUserFriends!
