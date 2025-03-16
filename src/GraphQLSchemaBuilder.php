@@ -1160,7 +1160,6 @@ class GraphQLSchemaBuilder
             'getuserinfo' => fn(mixed $root, array $args) => $this->resolveUserInfo(),
             'fetchwinslog' => fn(mixed $root, array $args) => $this->walletService->callFetchWinsLog($args),
             'fetchpayslog' => fn(mixed $root, array $args) => $this->walletService->callFetchPaysLog($args),
-            'testObjector' => fn(mixed $root, array $args) => $this->fetchProcessedObjects($args),
             'blockedlist' => fn(mixed $root, array $args) => $this->userInfoService->loadBlocklist($args),
             'callusermove' => fn(mixed $root, array $args) => $this->walletService->callUserMove(),
             'liquiditypool' => fn(mixed $root, array $args) => $this->resolvePool($args),
@@ -1246,47 +1245,6 @@ class GraphQLSchemaBuilder
 
         $this->logger->warning('Query.resolvePool No transactions found');
         return $this->respondWithError('No transactions found.');
-    }
-
-    protected function convertObjectsToArray(string $className, array $array): array
-    {
-        $this->logger->info('Query.convertObjectsToArray started By using:', ['className' => $className]);
-
-        if (empty($array)) {
-            return $this->respondWithError('Failed to fetch data from database.');
-        }
-
-        foreach ($array as $item) {
-            if (!$item instanceof $className) {
-                return $this->respondWithError("Invalid data type in array. Expected instances of {$className}.");
-            }
-        }
-
-        return array_map(
-            static function ($item) {
-                return method_exists($item, 'getArrayCopy') ? $item->getArrayCopy() : (array) $item;
-            },
-            $array
-        );
-    }
-
-    public function fetchProcessedObjects(?array $args = []): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
-        }
-
-        try {
-            $Daten = $this->convertObjectsToArray(User::class, $this->userMapper->fetchAll($args, $this->currentUserId));
-
-            return [
-                'status' => 'success',
-                'ResponseCode' => 'Successfully fetched objects',
-                'affectedRows' => $Daten
-            ];
-        } catch (Exception $e) {
-            return $this->respondWithError('An internal error occurred.');
-        }
     }
 
     protected function resolveActionPost(?array $args = []): ?array
