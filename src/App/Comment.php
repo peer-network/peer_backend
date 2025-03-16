@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -12,7 +13,6 @@ class Comment
     protected ?string $parentid;
     protected string $content;
     protected string $createdat;
-    
 
     // Constructor
     public function __construct(array $data = [])
@@ -142,11 +142,7 @@ class Comment
             ],
             'content' => [
                 'required' => true,
-<<<<<<< HEAD
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
-=======
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
->>>>>>> tRas/refactor/tabfix
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 2,
