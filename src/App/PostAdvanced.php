@@ -333,28 +333,12 @@ class PostAdvanced
                 'required' => false,
                 'validators' => [
                     ['name' => 'IsArray'],
-                    [
-                        'name' => 'ArrayValues',
-                        'options' => [
-                            'validator' => [
-                                'name' => 'IsString',
-                            ],
-                        ],
-                    ],
                 ],
             ],
             'comments' => [
                 'required' => false,
                 'validators' => [
                     ['name' => 'IsArray'],
-                    [
-                        'name' => 'ArrayValues',
-                        'options' => [
-                            'validator' => [
-                                'name' => 'IsString',
-                            ],
-                        ],
-                    ],
                 ],
             ],
         ];
