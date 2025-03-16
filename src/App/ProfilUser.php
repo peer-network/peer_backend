@@ -38,7 +38,7 @@ class ProfilUser
         return $att;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getUserId(): string
     {
         return $this->uid;

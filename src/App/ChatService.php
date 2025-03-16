@@ -18,7 +18,7 @@ class ChatService
 
     public function __construct(protected LoggerInterface $logger, protected ChatMapper $chatMapper)
     {
-		$this->base64filehandler = new Base64FileHandler();
+        $this->base64filehandler = new Base64FileHandler();
     }
 
     public function setCurrentUserId(string $userId): void
@@ -119,23 +119,23 @@ class ChatService
         try {
             if ($image !== null && $image !== '' && count($recipients) > $maxUsers) {
 
-				if (!empty($image)) {
-					$mediaPath = $this->base64filehandler->handleFileUpload($image, 'image', $chatId);
-					$this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
+                if (!empty($image)) {
+                    $mediaPath = $this->base64filehandler->handleFileUpload($image, 'image', $chatId);
+                    $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
-					if ($mediaPath === '') {
-						return $this->respondWithError('Media upload failed');
-					}
+                    if ($mediaPath === '') {
+                        return $this->respondWithError('Media upload failed');
+                    }
 
-					if (isset($mediaPath['path'])) {
-						$image = $mediaPath['path'];
-					} else {
-						return $this->respondWithError('Media path necessary for upload');
-					}
+                    if (isset($mediaPath['path'])) {
+                        $image = $mediaPath['path'];
+                    } else {
+                        return $this->respondWithError('Media path necessary for upload');
+                    }
 
-				} else {
-					return $this->respondWithError('Media necessary for upload');
-				}
+                } else {
+                    return $this->respondWithError('Media necessary for upload');
+                }
 
             }
         } catch (\Exception $e) {
@@ -260,8 +260,8 @@ class ChatService
 
         try {
             if (!empty($image)) {
-				$mediaPath = $this->base64filehandler->handleFileUpload($image, 'image', $chatId);
-				$this->logger->info('mediaPath', ['mediaPath' => $mediaPath]);
+                $mediaPath = $this->base64filehandler->handleFileUpload($image, 'image', $chatId);
+                $this->logger->info('mediaPath', ['mediaPath' => $mediaPath]);
                 if ($mediaPath !== null) {
                     $image = $mediaPath['path'];
                 }
@@ -277,8 +277,8 @@ class ChatService
                 return $this->respondWithError('Invalid chatId');
             }
 
-			$chat->setName($name);
-			$chat->setImage($image);
+            $chat->setName($name);
+            $chat->setImage($image);
 
             $this->chatMapper->update($chat);
 
@@ -636,7 +636,7 @@ class ChatService
             'ResponseCode' => $results['ResponseCode'],
         ]);
 
-        return $results; // Pass the structured response directly
+        return $results;
     }
 
     public function findChatser(?array $args = []): array|false

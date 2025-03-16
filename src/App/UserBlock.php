@@ -30,7 +30,7 @@ class UserBlock
         return $att;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getBlocker(): string
     {
         return $this->blockerid;

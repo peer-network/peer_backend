@@ -134,7 +134,7 @@ class CommentInfoService
         }
 
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
-            return $this->respondWithError('Comment owner cannot report their own comment');
+            return $this->respondWithError('Comment owner cannot report their own comment.');
         }
 
         $exists = $this->commentInfoMapper->addUserActivity('reportComment', $this->currentUserId, $commentId);

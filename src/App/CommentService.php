@@ -189,7 +189,7 @@ class CommentService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if ($parentId !== null && !self::isValidUUID($parentId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError('Invalid uuid input.');
         }
 
         $this->logger->info("PostService.findPostser started");

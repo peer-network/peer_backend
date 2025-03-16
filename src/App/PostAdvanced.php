@@ -187,21 +187,12 @@ class PostAdvanced
                 'validators' => [['name' => 'Uuid']],
             ],
             'title' => [
-<<<<<<< HEAD
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
-                'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 96,
-=======
                 'required' => true,
 				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 2,
                         'max' => 63,
->>>>>>> tRas/refactor/tabfix
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -230,11 +221,7 @@ class PostAdvanced
             ],
             'mediadescription' => [
                 'required' => false,
-<<<<<<< HEAD
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
-=======
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
->>>>>>> tRas/refactor/tabfix
+                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,
@@ -315,7 +302,7 @@ class PostAdvanced
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 4,
+                        'min' => 0,
                         'max' => 250,
                     ]],
                     ['name' => 'isString'],
@@ -344,11 +331,31 @@ class PostAdvanced
             ],
             'user' => [
                 'required' => false,
-                'validators' => [['name' => 'IsArray']],
+                'validators' => [
+                    ['name' => 'IsArray'],
+                    [
+                        'name' => 'ArrayValues',
+                        'options' => [
+                            'validator' => [
+                                'name' => 'IsString',
+                            ],
+                        ],
+                    ],
+                ],
             ],
             'comments' => [
                 'required' => false,
-                'validators' => [['name' => 'IsArray']],
+                'validators' => [
+                    ['name' => 'IsArray'],
+                    [
+                        'name' => 'ArrayValues',
+                        'options' => [
+                            'validator' => [
+                                'name' => 'IsString',
+                            ],
+                        ],
+                    ],
+                ],
             ],
         ];
 

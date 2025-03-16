@@ -128,7 +128,7 @@ class Pool
         $this->createdat = $createdat;
     }
 
-    // Validation and Array Filtering methods (Unchanged)
+    // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array
     {
         $inputFilter = $this->createInputFilter($elements);

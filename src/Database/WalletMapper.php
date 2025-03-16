@@ -1115,7 +1115,7 @@ class WalletMapper
 
     public function deductFromWallets(string $userId, ?array $args = []): array
     {
-        $this->logger->info('WalletMapper.deductFromWallet started');
+        $this->logger->info('WalletMapper.deductFromWallets started');
 
         $postId = $args['postid'] ?? null;
         $art = $args['art'] ?? null;

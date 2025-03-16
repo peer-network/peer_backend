@@ -74,7 +74,7 @@ class ContactusService
             return $this->createSuccessResponse('Contactus fetched successfully', $result);
 
         } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to fetch Contactus');
+            return $this->respondWithError('Failed to fetch Contactus.');
         }
     }
 

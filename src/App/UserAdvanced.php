@@ -57,7 +57,7 @@ class UserAdvanced
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
-    // Array Copy methodsgetUpdateInfo
+    // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
@@ -132,7 +132,7 @@ class UserAdvanced
         $this->password = $data['password'] ?? $this->password;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getUserId(): string
     {
         return $this->uid;
