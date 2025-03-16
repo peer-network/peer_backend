@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -301,7 +302,7 @@ class PostAdvanced
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 4,
+                        'min' => 0,
                         'max' => 250,
                     ]],
                     ['name' => 'isString'],
@@ -330,11 +331,31 @@ class PostAdvanced
             ],
             'user' => [
                 'required' => false,
-                'validators' => [['name' => 'IsArray']],
+                'validators' => [
+                    ['name' => 'IsArray'],
+                    [
+                        'name' => 'ArrayValues',
+                        'options' => [
+                            'validator' => [
+                                'name' => 'IsString',
+                            ],
+                        ],
+                    ],
+                ],
             ],
             'comments' => [
                 'required' => false,
-                'validators' => [['name' => 'IsArray']],
+                'validators' => [
+                    ['name' => 'IsArray'],
+                    [
+                        'name' => 'ArrayValues',
+                        'options' => [
+                            'validator' => [
+                                'name' => 'IsString',
+                            ],
+                        ],
+                    ],
+                ],
             ],
         ];
 

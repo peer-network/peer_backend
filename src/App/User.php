@@ -107,7 +107,7 @@ class User
         $this->password = $data['password'] ?? $this->password;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getUserId(): string
     {
         return $this->uid;

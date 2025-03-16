@@ -25,11 +25,11 @@ class McapMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new Mcap($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+            $results = array_map(fn($row) => new Mcap($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched capid successfully" : "No capid found",
@@ -54,7 +54,7 @@ class McapMapper
             $sql = "SELECT * FROM mcap ORDER BY createdat DESC LIMIT 1";
             $stmt = $this->db->query($sql);
 
-            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
             $this->logger->info("McapMapper.mcap found", ['data' => $data]);
 
             if ($data !== false) {
@@ -126,7 +126,7 @@ class McapMapper
         try {
             $sql = "SELECT coverage, daytokens, createdat FROM mcap ORDER BY createdat DESC LIMIT 1";
             $stmt = $this->db->query($sql);
-            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
             return $data !== false ? (array) $data : [];
         } catch (\PDOException $e) {
             return [];
@@ -142,13 +142,13 @@ class McapMapper
             $numberofgems = (float) $this->db->query('SELECT SUM(gems) FROM gems WHERE collected = 0 AND createdat = NOW()')->fetchColumn() ?: 0;
 
             if ($numberoftokens === 0 || $numberofgems === 0) {
-				$this->logger->info("numberoftokens or numberofgems is empty.", ['numberoftokens' => $numberoftokens, 'numberofgems' => $numberofgems]);
+                $this->logger->info("numberoftokens or numberofgems is empty.", ['numberoftokens' => $numberoftokens, 'numberofgems' => $numberofgems]);
                 return $this->respondWithError('numberoftokens or numberofgems is empty.');
             }
 
             $resultLastData = $this->refreshMarketData();
             if ($resultLastData['status'] !== 'success') {
-				$this->logger->info(resultLastData['ResponseCode'], ['resultLastData' => $resultLastData]);
+                $this->logger->info(resultLastData['ResponseCode'], ['resultLastData' => $resultLastData]);
                 return $this->respondWithError('refreshMarketData failed.');
             }
 
@@ -157,7 +157,7 @@ class McapMapper
             $daytokens = $resultLastData['affectedRows']['daytokens'] ?? 0.0;
 
             if ($insertedId === null) {
-				$this->logger->info("Inserted ID is missing from refreshMarketData response.", ['insertedId' => $insertedId]);
+                $this->logger->info("Inserted ID is missing from refreshMarketData response.", ['insertedId' => $insertedId]);
                 return $this->respondWithError('Inserted ID is missing from refreshMarketData response.');
             }
 

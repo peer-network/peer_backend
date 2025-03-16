@@ -726,18 +726,6 @@ class GraphQLSchemaBuilder
                     return $root['contenttype'] ?? '';
                 },
             ],
-            'ToggleResponse' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.ToggleResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-                'isSaved' => function (array $root): bool {
-                    return $root['isSaved'] ?? false;
-                },
-            ],
             'Comment' => [
                 'commentid' => function (array $root): string {
                     $this->logger->info('Query.Comment Resolvers', ['root' => $root]);
@@ -983,45 +971,6 @@ class GraphQLSchemaBuilder
                     return $root['name'] ?? '';
                 },
             ],
-            'Wallet' => [
-                'token' => function (array $root): string {
-                    $this->logger->info('Query.Wallet Resolvers', ['root' => $root]);
-                    return $root['token'] ?? '';
-                },
-                'userid' => function (array $root): string {
-                    return $root['userid'] ?? '';
-                },
-                'postid' => function (array $root): string {
-                    return $root['postid'] ?? '';
-                },
-                'fromid' => function (array $root): string {
-                    return $root['fromid'] ?? '';
-                },
-                'numbers' => function (array $root): float {
-                    return $root['numbers'] ?? 0.0;
-                },
-                'whereby' => function (array $root): int {
-                    return $root['whereby'] ?? 0;
-                },
-                'createdat' => function (array $root): string {
-                    return $root['createdat'] ?? '';
-                },
-            ],
-            'UserWallet' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.UserWallet Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'counter' => function (array $root): int {
-                    return $root['counter'] ?? 0;
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-                'affectedRows' => function (array $root): array {
-                    return $root['affectedRows'] ?? [];
-                },
-            ],
             'GetDailyResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.GetDailyResponse Resolvers');
@@ -1212,8 +1161,8 @@ class GraphQLSchemaBuilder
             'fetchwinslog' => fn(mixed $root, array $args) => $this->walletService->callFetchWinsLog($args),
             'fetchpayslog' => fn(mixed $root, array $args) => $this->walletService->callFetchPaysLog($args),
             'testObjector' => fn(mixed $root, array $args) => $this->fetchProcessedObjects($args),
-			'blockedlist' => fn(mixed $root, array $args) => $this->userInfoService->loadBlocklist($args),
-			'callusermove' => fn(mixed $root, array $args) => $this->walletService->callUserMove(),
+            'blockedlist' => fn(mixed $root, array $args) => $this->userInfoService->loadBlocklist($args),
+            'callusermove' => fn(mixed $root, array $args) => $this->walletService->callUserMove(),
             'liquiditypool' => fn(mixed $root, array $args) => $this->resolvePool($args),
             'allfriends' => fn(mixed $root, array $args) => $this->resolveAllFriends($args),
             'testingpool' => fn(mixed $root, array $args) => $this->resolveTestingPool($args),
@@ -1235,7 +1184,7 @@ class GraphQLSchemaBuilder
             'updateBiography' => fn(mixed $root, array $args) => $this->userInfoService->updateBio($args['biography']),
             'updateProfilePicture' => fn(mixed $root, array $args) => $this->userInfoService->setProfilePicture($args['img']),
             'userFollow' => fn(mixed $root, array $args) => $this->userInfoService->toggleUserFollow($args['userid']),
-			'userBlock' => fn(mixed $root, array $args) => $this->userInfoService->toggleUserBlock($args['userid']),
+            'userBlock' => fn(mixed $root, array $args) => $this->userInfoService->toggleUserBlock($args['userid']),
             'deleteAccount' => fn(mixed $root, array $args) => $this->userService->deleteAccount($args['password']),
             'createChat' => fn(mixed $root, array $args) => $this->chatService->createChatWithRecipients($args['input']),
             'updateChat' => fn(mixed $root, array $args) => $this->chatService->updateChat($args['input']),
@@ -1257,9 +1206,9 @@ class GraphQLSchemaBuilder
 
     protected function resolveTestingPool(array $args): ?array
     {
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
 
         $this->logger->info('Query.resolvePool started');
 
@@ -1279,9 +1228,9 @@ class GraphQLSchemaBuilder
 
     protected function resolvePool(array $args): ?array
     {
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized');
-		}
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
 
         $this->logger->info('Query.resolvePool started');
 
@@ -1299,46 +1248,46 @@ class GraphQLSchemaBuilder
         return $this->respondWithError('No transactions found.');
     }
 
-	protected function convertObjectsToArray(string $className, array $array): array
-	{
+    protected function convertObjectsToArray(string $className, array $array): array
+    {
         $this->logger->info('Query.convertObjectsToArray started By using:', ['className' => $className]);
 
-		if (empty($array)) {
-			return $this->respondWithError('Failed to fetch data from database.');
-		}
+        if (empty($array)) {
+            return $this->respondWithError('Failed to fetch data from database.');
+        }
 
-		foreach ($array as $item) {
-			if (!$item instanceof $className) {
-				return $this->respondWithError("Invalid data type in array. Expected instances of {$className}.");
-			}
-		}
+        foreach ($array as $item) {
+            if (!$item instanceof $className) {
+                return $this->respondWithError("Invalid data type in array. Expected instances of {$className}.");
+            }
+        }
 
-		return array_map(
-			static function ($item) {
-				return method_exists($item, 'getArrayCopy') ? $item->getArrayCopy() : (array) $item;
-			},
-			$array
-		);
-	}
+        return array_map(
+            static function ($item) {
+                return method_exists($item, 'getArrayCopy') ? $item->getArrayCopy() : (array) $item;
+            },
+            $array
+        );
+    }
 
-	public function fetchProcessedObjects(?array $args = []): array
-	{
-		if (!$this->checkAuthentication()) {
-			return $this->respondWithError('Unauthorized.');
-		}
+    public function fetchProcessedObjects(?array $args = []): array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized.');
+        }
 
-		try {
-			$Daten = $this->convertObjectsToArray(User::class, $this->userMapper->fetchAll($args, $this->currentUserId));
+        try {
+            $Daten = $this->convertObjectsToArray(User::class, $this->userMapper->fetchAll($args, $this->currentUserId));
 
-			return [
-				'status' => 'success',
-				'ResponseCode' => 'Successfully fetched objects',
-				'affectedRows' => $Daten
-			];
-		} catch (Exception $e) {
-			return $this->respondWithError('An internal error occurred.');
-		}
-	}
+            return [
+                'status' => 'success',
+                'ResponseCode' => 'Successfully fetched objects',
+                'affectedRows' => $Daten
+            ];
+        } catch (Exception $e) {
+            return $this->respondWithError('An internal error occurred.');
+        }
+    }
 
     protected function resolveActionPost(?array $args = []): ?array
     {
@@ -2162,10 +2111,10 @@ class GraphQLSchemaBuilder
         return [];
     }
 
-	protected function validateDate($date, $format = 'Y-m-d') {
-		$d = DateTime::createFromFormat($format, $date);
-		return $d && $d->format($format) === $date;
-	}
+    protected function validateDate($date, $format = 'Y-m-d') {
+        $d = DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) === $date;
+    }
 
     protected function validateCaptcha(string $token): bool
     {

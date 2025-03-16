@@ -46,5 +46,4 @@ final class Role {
     }
 
     private function __construct() {}
-
 }

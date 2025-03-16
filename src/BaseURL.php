@@ -16,7 +16,7 @@ class BaseURL
             $https = $_SERVER['HTTPS'] ?? false;
             $scheme = ($https === false || $https === 'off') ? 'http' : 'https';
 
-            // Authority: Username and password
+            // Authority: Username and pass
             $username = $_SERVER['PHP_AUTH_USER'] ?? '';
             $password = $_SERVER['PHP_AUTH_PW'] ?? '';
             $userInfo = $username . (!empty($password) ? ":$password" : '');

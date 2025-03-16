@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Database;
 
 use PDO;
@@ -369,10 +370,10 @@ class PostMapper
 
             $stmt->execute();
 
-			$queryUpdateProfile = "UPDATE users_info SET amountposts = amountposts + 1 WHERE userid = :userid";
-			$stmt = $this->db->prepare($queryUpdateProfile);
+            $queryUpdateProfile = "UPDATE users_info SET amountposts = amountposts + 1 WHERE userid = :userid";
+            $stmt = $this->db->prepare($queryUpdateProfile);
             $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-			$stmt->execute();
+            $stmt->execute();
 
             $this->logger->info("Inserted new post into database");
 
@@ -485,9 +486,9 @@ class PostMapper
             }
         }
 
-		if (!empty($Ignorlist) && $Ignorlist === 'YES') {
-			$whereClauses[] = "p.userid NOT IN (SELECT blockedid FROM user_block_user WHERE blockerid = :currentUserId)";
-		}
+        if (!empty($Ignorlist) && $Ignorlist === 'YES') {
+            $whereClauses[] = "p.userid NOT IN (SELECT blockedid FROM user_block_user WHERE blockerid = :currentUserId)";
+        }
 
         $orderBy = match ($sortBy) {
             'NEWEST' => "p.createdat DESC",
@@ -510,7 +511,7 @@ class PostMapper
                 p.media, 
                 p.cover, 
                 p.mediadescription, 
-				p.options, 
+                p.options, 
                 p.createdat, 
                 u.username, 
                 u.img AS userimg,

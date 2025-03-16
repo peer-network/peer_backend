@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -151,7 +152,7 @@ class CommentAdvanced
             ],
             'content' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 2,

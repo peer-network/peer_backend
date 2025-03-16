@@ -1090,14 +1090,14 @@ class UserMapper
         $this->logger->info("UserMapper.setPassword started");
 
         if (defined('PASSWORD_ARGON2ID')) {
-            $hash = password_hash($password, PASSWORD_ARGON2ID, [
+            $hash = \password_hash($password, PASSWORD_ARGON2ID, [
                 'time_cost' => 3,
                 'memory_cost' => 65536, // Memory usage (64MB)
                 'threads' => 2
             ]);
             $algorithm = 'ARGON2ID';
         } else {
-            $hash = password_hash($password, PASSWORD_BCRYPT, [
+            $hash = \password_hash($password, \PASSWORD_BCRYPT, [
                 'cost' => 12
             ]);
             $algorithm = 'BCRYPT';
@@ -1190,6 +1190,12 @@ class UserMapper
             );
 
             throw new \RuntimeException("Failed to insert user into database: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error("UserMapper.insert: Exception occurred while inserting user", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new \RuntimeException("Failed to insert user into database: " . $e->getMessage());
         }
     }
 
@@ -1231,6 +1237,12 @@ class UserMapper
                 ]
             );
 
+            throw new \RuntimeException("Failed to insert UserInfo into database: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error("UserMapper.insert: Exception occurred while inserting user", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             throw new \RuntimeException("Failed to insert UserInfo into database: " . $e->getMessage());
         }
     }
@@ -1284,6 +1296,12 @@ class UserMapper
             );
 
             throw new \RuntimeException("Failed to update user in database: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error("UserMapper.update: Exception occurred while updating user", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new \RuntimeException("Failed to update user into database: " . $e->getMessage());
         }
     }
 
@@ -1323,6 +1341,12 @@ class UserMapper
             );
 
             throw new \RuntimeException("Failed to update password in database: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error("UserMapper.updatePass: Exception occurred while updating password", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new \RuntimeException("Failed to update password into database: " . $e->getMessage());
         }
     }
 
@@ -1375,6 +1399,12 @@ class UserMapper
             );
 
             throw new \RuntimeException("Failed to update profile in database: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error("UserMapper.updateProfil: Exception occurred while updating profile", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new \RuntimeException("Failed to update profile in database: " . $e->getMessage());
         }
     }
 
@@ -1403,6 +1433,12 @@ class UserMapper
                 ]
             );
 
+            throw new \RuntimeException("Failed to delete user from database: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error("UserMapper.delete: Exception occurred while deleting user", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             throw new \RuntimeException("Failed to delete user from database: " . $e->getMessage());
         }
     }
@@ -1472,6 +1508,8 @@ class UserMapper
             $this->logger->info("Access token successfully saved or updated for user: $userid");
         } catch (\PDOException $e) {
             $this->logger->error("Database error in saveOrUpdateAccessToken: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error("Database error in saveOrUpdateAccessToken: ", ['error' => $e]);
         }
     }
 
@@ -1509,6 +1547,8 @@ class UserMapper
             $this->logger->info("Refresh token successfully saved or updated for user: $userid");
         } catch (\PDOException $e) {
             $this->logger->error("Database error in saveOrUpdateRefreshToken: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error("Database error in saveOrUpdateRefreshToken: ", ['error' => $e]);
         }
     }
 
@@ -1583,8 +1623,9 @@ class UserMapper
         } catch (\PDOException $e) {
             $this->logger->error("Database error in fetchFriends: " . $e->getMessage());
             return null;
+        } catch (\Exception $e) {
+            $this->logger->error('Database error in fetchFriends: ', ['exception' => $e->getMessage()]);
+            return null;
         }
     }
-
-
 }

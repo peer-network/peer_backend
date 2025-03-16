@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Database;
 
 class Rechnen {

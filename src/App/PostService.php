@@ -25,7 +25,7 @@ class PostService
         protected TagMapper $tagMapper,
         protected TagPostMapper $tagPostMapper,
     ) {
-		$this->base64filehandler = new Base64FileHandler();
+        $this->base64filehandler = new Base64FileHandler();
     }
 
     public function setCurrentUserId(string $userid): void
@@ -50,10 +50,10 @@ class PostService
         return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
     }
 
-	private static function validateDate($date, $format = 'Y-m-d') {
-		$d = \DateTime::createFromFormat($format, $date);
-		return $d && $d->format($format) === $date;
-	}
+    private static function validateDate($date, $format = 'Y-m-d') {
+        $d = \DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) === $date;
+    }
 
     private function respondWithError(string $responseCode, array $extraData = []): array
     {
@@ -74,9 +74,9 @@ class PostService
         return true;
     }
 
-	private function argsToJsString($args) {
-		return json_encode($args);
-	}
+    private function argsToJsString($args) {
+        return json_encode($args);
+    }
 
     private function argsToString($args) {
         return serialize($args);
@@ -117,11 +117,11 @@ class PostService
         ];
 
         if ($postData['feedid'] && !$this->postMapper->isNewsFeedExist($postData['feedid'])) {
-            return $this->respondWithError('Invalid newsfeed ID');
+            return $this->respondWithError('Invalid newsfeed ID.');
         }
 
         if ($postData['feedid'] && !$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
-            return $this->respondWithError('No access to the newsfeed');
+            return $this->respondWithError('No access to the newsfeed.');
         }
 
         try {
@@ -130,7 +130,7 @@ class PostService
                 $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                 if ($mediaPath === '') {
-                    return $this->respondWithError('Media upload failed');
+                    return $this->respondWithError('Media upload failed.');
                 }
 
                 if (isset($mediaPath['options'])) {
@@ -138,28 +138,28 @@ class PostService
                 }
 
                 if (!empty($mediaPath['path'])) {
-					$postData['media'] = $mediaPath['path'];
+                    $postData['media'] = $mediaPath['path'];
                 } else {
-					return $this->respondWithError('Media path necessary for upload');
-				}
+                    return $this->respondWithError('Media path necessary for upload.');
+                }
 
             } else {
-                return $this->respondWithError('Media necessary for upload');
+                return $this->respondWithError('Media necessary for upload.');
             }
 
             if (!empty($args['cover'])) {
                 $coverPath = $this->base64filehandler->handleFileUpload($args['cover'], 'image', $postId . '_cover');
-				$this->logger->info('PostService.createPost coverPath', ['coverPath' => $coverPath]);
+                $this->logger->info('PostService.createPost coverPath', ['coverPath' => $coverPath]);
 
                 if ($coverPath === '') {
                     return $this->respondWithError('Cover upload failed');
                 }
 
                 if (!empty($coverPath['path'])) {
-					$postData['cover'] = $coverPath['path'];
+                    $postData['cover'] = $coverPath['path'];
                 } else {
-					return $this->respondWithError('Cover path necessary for upload');
-				}
+                    return $this->respondWithError('Cover path necessary for upload');
+                }
 
             }
 
@@ -259,12 +259,10 @@ class PostService
 
         $this->logger->info("PostService.fetchAll started");
 
-        // Sanitize and validate offset and limit
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         try {
-            // Fetch posts and map them to array format
             $posts = $this->postMapper->fetchAll($offset, $limit);
             $result = array_map(fn(Post $post) => $post->getArrayCopy(), $posts);
 
@@ -276,7 +274,7 @@ class PostService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError('Failed to fetch posts');
+            return $this->respondWithError('Failed to fetch posts.');
         }
     }
 
@@ -297,48 +295,48 @@ class PostService
         $userId = $args['userid'] ?? null;
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-			return $this->respondWithError('Invalid postid format provided');
+            return $this->respondWithError('Invalid postid format provided.');
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-			return $this->respondWithError('Invalid userid format provided');
+            return $this->respondWithError('Invalid userid format provided.');
         }
 
         if ($title !== null && strlen($title) < 2 || strlen($title) > 33) {
             return $this->respondWithError('Title must be between 2 and 30 characters.');
         }
 
-		if ($from !== null && !self::validateDate($from)) {
-			return $this->respondWithError('Invalid from date format provided');
-		}
+        if ($from !== null && !self::validateDate($from)) {
+            return $this->respondWithError('Invalid from date format provided.');
+        }
 
-		if ($to !== null && !self::validateDate($to)) {
-			return $this->respondWithError('Invalid to date format provided');
-		}
+        if ($to !== null && !self::validateDate($to)) {
+            return $this->respondWithError('Invalid to date format provided.');
+        }
 
         if ($tag !== null) {
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
-				return $this->respondWithError('Invalid tag format provided');
+                return $this->respondWithError('Invalid tag format provided.');
             }
         }
 
-		if (!empty($filterBy) && is_array($filterBy)) {
-			$allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER'];
+        if (!empty($filterBy) && is_array($filterBy)) {
+            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER'];
 
-			$invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
+            $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
-			if (!empty($invalidTypes)) {
-				return $this->respondWithError('Invalid type parameter(s) provided');
-			}
-		}
+            if (!empty($invalidTypes)) {
+                return $this->respondWithError('Invalid type parameter(s) provided.');
+            }
+        }
 
-		if ($Ignorlist !== null) {
-			$Ignorlisten = ['YES', 'NO'];
-			if (!in_array($Ignorlist, $Ignorlisten, true)) {
-				return $this->respondWithError('Invalid Ignorlist parameter provided.');
-			}
-		}
+        if ($Ignorlist !== null) {
+            $Ignorlisten = ['YES', 'NO'];
+            if (!in_array($Ignorlist, $Ignorlisten, true)) {
+                return $this->respondWithError('Invalid Ignorlist parameter provided.');
+            }
+        }
 
         $this->logger->info("PostService.findPostser started");
 
@@ -370,7 +368,7 @@ class PostService
             ];
         } catch (\Exception $e) {
             $this->logger->error('Failed to fetch chat feeds', ['feedid' => $feedid, 'exception' => $e]);
-            return $this->respondWithError('Failed to fetch chat feeds');
+            return $this->respondWithError('Failed to fetch chat feeds.');
         }
     }
 
