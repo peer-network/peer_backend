@@ -37,11 +37,9 @@ type Query {
   fetchpayslog(day: DayType!, offset: Int, limit: Int): UserLogWins!
   getpercentbeforetransaction(tokenAmount: Int!): StandardResponse!
   refreshmarketcap: StandardResponse!
-
   globalwins: DefaultResponse!
   gemster: StandardResponse!
   gemsters(day: DayType!): GenericResponse!
-
   liquiditypool(userid: ID, postid: ID, fromid: ID, whereby: Int, offset: Int, limit: Int): GenericResponse!
   testingpool(offset: Int, limit: Int): GenericResponse!
 }
@@ -288,12 +286,6 @@ type DefaultResponse {
   ResponseCode: String
 }
 
-type ToggleResponse {
-  status: String!
-  isSaved: Boolean
-  ResponseCode: String
-}
-
 type AddPostResponse {
   status: String!
   ResponseCode: String
@@ -529,23 +521,6 @@ type CommentResponse {
   counter: Int!
   ResponseCode: String
   affectedRows: [Comment]
-}
-
-type Wallet {
-  token: String!
-  userid: ID!
-  postid: ID!
-  fromid: ID!
-  numbers: Decimal!
-  whereby: Int!
-  createdat: Date!
-}
-
-type UserWallet {
-  status: String!
-  counter: Int!
-  ResponseCode: String
-  affectedRows: [Wallet]
 }
 
 input RegisterInput {

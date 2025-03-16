@@ -35,7 +35,7 @@ class Tag
         $this->name = $data['name'] ?? $this->name;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getTagId(): int
     {
         return $this->tagid;

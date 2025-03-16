@@ -22,8 +22,8 @@ class PostInfo
     {
         $data = $this->validate($data);
 
-        $this->postid = $data['postid'];
-        $this->userid = $data['userid'];
+        $this->postid = $data['postid'] ?? '';
+        $this->userid = $data['userid'] ?? '';
         $this->likes = $data['likes'] ?? 0;
         $this->dislikes = $data['dislikes'] ?? 0;
         $this->reports = $data['reports'] ?? 0;

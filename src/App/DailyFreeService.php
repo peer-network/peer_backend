@@ -82,10 +82,10 @@ class DailyFreeService
             $Daily = new DailyFree($dailyData);
             $daily = $this->dailyFreeMapper->insert($Daily);
 
-            $this->logger->info('Daily created successfully');
+            $this->logger->info('Daily created successfully.');
             return ['status' => 'success', 'affectedRows' => $daily];
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to create daily');
+            return $this->respondWithError('Failed to create daily.');
         }
     }
 
@@ -360,7 +360,7 @@ class DailyFreeService
 
         try {
             $results = $this->dailyFreeMapper->getUserDailyUsage($userId, $artType);
-			$this->logger->info('DailyFreeService.getUserDailyUsage results:', ['results' => $results]);
+            $this->logger->info('DailyFreeService.getUserDailyUsage results:', ['results' => $results]);
 
             if ($results !== false) {
                 return (int)$results;

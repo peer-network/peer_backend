@@ -53,11 +53,11 @@ class TagPostService
     private function validateTagName(string $tagName): array|bool
     {
         if ($tagName === '') {
-            return $this->respondWithError('Could not find mandatory username');
+            return $this->respondWithError('Could not find mandatory username.');
         }
 
         if (strlen($tagName) < 2 || strlen($tagName) > 50 || !preg_match('/^[a-zA-Z]+$/', $tagName)) {
-            return $this->respondWithError('Invalid tag name');
+            return $this->respondWithError('Invalid tag name.');
         }
 
         return true;
@@ -122,7 +122,7 @@ class TagPostService
             $tagId = $this->generateUUID();
             if (empty($tagId)) {
                 $this->logger->critical('Failed to generate tag ID');
-                return $this->respondWithError('Failed to generate tag ID');
+                return $this->respondWithError('Failed to generate tag ID.');
             }
 
             $tagData = ['tagid' => $tagId, 'name' => $tagName];
@@ -130,7 +130,7 @@ class TagPostService
 
             if (!$this->tagMapper->insert($tag)) {
                 $this->logger->error('Failed to insert tag into database', ['tagName' => $tagName]);
-                return $this->respondWithError('Failed to insert tag');
+                return $this->respondWithError('Failed to insert tag.');
             }
 
             $this->logger->info('Tag created successfully', ['tagName' => $tagName]);
@@ -141,7 +141,7 @@ class TagPostService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError('Failed to create tag');
+            return $this->respondWithError('Failed to create tag.');
         } finally {
             $this->logger->debug('createTag function execution completed');
         }
@@ -170,12 +170,10 @@ class TagPostService
 
         $this->logger->info('TagPostService.fetchAll started');
 
-        // Sanitize and validate offset and limit
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         try {
-            // Fetch TagPost and map them to array format
             $TagPost = $this->tagPostMapper->fetchAll($offset, $limit);
             $result = array_map(fn(TagPost $tag) => $tag->getArrayCopy(), $TagPost);
 

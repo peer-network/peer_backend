@@ -20,11 +20,11 @@ class DailyFreeMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new DailyFree($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+            $results = array_map(fn($row) => new DailyFree($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched dailyfree successfully" : "No dailyfree found",
@@ -48,7 +48,7 @@ class DailyFreeMapper
         $sql = "SELECT * FROM dailyfree WHERE userid = :userid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['userid' => $userid]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             $this->logger->info("User found with userid", ['data' => $data]);
@@ -220,7 +220,7 @@ class DailyFreeMapper
         $stmt = $this->db->prepare($query);
         $stmt->execute(['userId' => $userId]);
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         return (int)($result[$column] ?? 0);
     }
@@ -241,7 +241,7 @@ class DailyFreeMapper
         $stmt = $this->db->prepare($query);
         $stmt->execute(['userId' => $userId]);
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if (!$result) {
             return array_map(fn($label) => ['name' => $label, 'value' => 0], $columnMap);
@@ -275,7 +275,7 @@ class DailyFreeMapper
         $stmt = $this->db->prepare($query);
         $stmt->execute(['userId' => $userId]);
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if (!$result) {
             return array_map(fn($column, $label) => [
@@ -314,7 +314,7 @@ class DailyFreeMapper
             $existsStmt = $this->db->prepare($existsQuery);
             $existsStmt->execute(['userId' => $userId]);
 
-            $result = $existsStmt->fetch(PDO::FETCH_ASSOC);
+            $result = $existsStmt->fetch(\PDO::FETCH_ASSOC);
 
             if ($result) {
                 $recordDate = $result['createdat'];

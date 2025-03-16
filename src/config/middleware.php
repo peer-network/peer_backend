@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 use Slim\App;
@@ -17,7 +16,7 @@ return static function (App $app, ContainerInterface $container, array $settings
     $time = (int)$settings['timeLimiter'];
     $rate = (int)$settings['rateLimiter'];
     $path = (string)$settings['rateLimiterpath'];
-    $rateLimiter = new RateLimiter($rate, $time, $path); // ? requests per hour
+    $rateLimiter = new RateLimiter($rate, $time, $path);
 
     $logger = $container->get(LoggerInterface::class);
 

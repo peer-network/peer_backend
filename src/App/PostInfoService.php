@@ -275,8 +275,6 @@ class PostInfoService
             return $this->respondWithError('User not found');
         }
 
-        $this->logger->info('PostInfoService.toggleUserFollow started');
-
         return $this->postInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
     }
 

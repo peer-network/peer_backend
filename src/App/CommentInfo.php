@@ -18,8 +18,8 @@ class CommentInfo
     {
         $data = $this->validate($data);
 
-        $this->commentid = $data['commentid'];
-        $this->userid = $data['userid'];
+        $this->commentid = $data['commentid'] ?? '';
+        $this->userid = $data['userid'] ?? '';
         $this->likes = $data['likes'] ?? 0;
         $this->reports = $data['reports'] ?? 0;
         $this->comments = $data['comments'] ?? 0;

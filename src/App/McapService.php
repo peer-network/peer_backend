@@ -41,9 +41,9 @@ class McapService
 
         try {
             $fetchUpdate = $this->mcapMapper->fetchAndUpdateMarketPrices();
-			if (isset($fetchUpdate['status']) && $fetchUpdate['status'] === 'error') {
-				return $this->respondWithError($fetchUpdate['ResponseCode']);
-			}
+            if (isset($fetchUpdate['status']) && $fetchUpdate['status'] === 'error') {
+                return $this->respondWithError($fetchUpdate['ResponseCode']);
+            }
 
             $results = $this->mcapMapper->loadLastId();
 
@@ -83,11 +83,9 @@ class McapService
                 return $success;
             }
 
-            return $this->respondWithError('No users found for the user.');
+            return $this->respondWithError('No users found.');
         } catch (\Exception $e) {
             return $this->respondWithError('Failed to retrieve users list.');
         }
     }
 }
-
-

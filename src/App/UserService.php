@@ -21,7 +21,7 @@ class UserService
         protected PostMapper $postMapper,
         protected WalletMapper $walletMapper
     ) {
-        $this->fileUploader = new FileUploader($this->logger);
+        $this->base64filehandler = new Base64FileHandler();
     }
 
     public function setCurrentUserId(string $userId): void
@@ -264,10 +264,10 @@ class UserService
                 }
 
                 if (isset($mediaPath['path'])) {
-					return $mediaPath['path'];
+                    return $mediaPath['path'];
                 } else {
-					return $this->respondWithError('Media path necessary for upload');
-				}
+                    return $this->respondWithError('Media path necessary for upload');
+                }
 
             } else {
                 return $this->respondWithError('Media necessary for upload');
@@ -772,5 +772,3 @@ class UserService
         }
     }
 }
-
-
