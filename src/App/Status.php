@@ -30,5 +30,4 @@ final class Status {
 	}
 
 	private function __construct() {}
-
 }

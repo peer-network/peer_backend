@@ -31,7 +31,7 @@ class TagPost
         ];
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getTagId(): int
     {
         return $this->tagid;

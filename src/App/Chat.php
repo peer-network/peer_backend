@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -177,7 +178,7 @@ class Chat
             ],
             'name' => [
                 'required' => false,
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,

@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -142,11 +143,7 @@ class Comment
             ],
             'content' => [
                 'required' => true,
-<<<<<<< HEAD
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
-=======
-				'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
->>>>>>> tRas/refactor/tabfix
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 2,

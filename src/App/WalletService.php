@@ -41,7 +41,7 @@ class WalletService
     public function createTransaction(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         if (empty($args)) {
@@ -87,7 +87,7 @@ class WalletService
     public function fetchPool(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         $this->logger->info("WalletService.fetchPool started");
@@ -99,7 +99,7 @@ class WalletService
     public function fetchAll(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         $this->logger->info("WalletService.fetchAll started");
@@ -118,7 +118,7 @@ class WalletService
     public function fetchWalletById(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         $userId = $this->currentUserId;
@@ -178,7 +178,7 @@ class WalletService
     public function callFetchWinsLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -195,7 +195,7 @@ class WalletService
     public function callFetchPaysLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -212,7 +212,7 @@ class WalletService
     public function callGlobalWins(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         return $this->walletMapper->callGlobalWins();
@@ -221,7 +221,7 @@ class WalletService
     public function callGemster(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         return $this->walletMapper->getTimeSorted();
@@ -230,7 +230,7 @@ class WalletService
     public function callGemsters(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -245,7 +245,8 @@ class WalletService
 
     public function getPercentBeforeTransaction(string $userId, int $tokenAmount): array
     {
-        //$this->logger->info('WalletService.getPercentBeforeTransaction started');
+        $this->logger->info('WalletService.getPercentBeforeTransaction started');
+
         return $this->walletMapper->getPercentBeforeTransaction($userId, $tokenAmount);
     }
 
@@ -313,11 +314,11 @@ class WalletService
 
         try {
             $response = $this->walletMapper->callUserMove($this->currentUserId);
-			return [
-				'status' => 'success',
-				'ResponseCode' => $response['ResponseCode'],
-				'affectedRows' => $response['affectedRows'],
-			];
+            return [
+                'status' => 'success',
+                'ResponseCode' => $response['ResponseCode'],
+                'affectedRows' => $response['affectedRows'],
+            ];
 
         } catch (\Exception $e) {
             return $this->respondWithError('Unknown Error.');

@@ -178,7 +178,7 @@ class PoolService
     public function callFetchWinsLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -195,7 +195,7 @@ class PoolService
     public function callFetchPaysLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -212,7 +212,7 @@ class PoolService
     public function callGlobalWins(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         return $this->walletMapper->callGlobalWins();
@@ -221,7 +221,7 @@ class PoolService
     public function callGemster(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         return $this->walletMapper->getTimeSorted();
@@ -230,7 +230,7 @@ class PoolService
     public function callGemsters(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError('Unauthorized');
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -276,8 +276,7 @@ class PoolService
         $this->logger->info('WalletService.getUserWalletBalance started');
 
         try {
-            //$results = $this->walletMapper->getUserWalletBalance($userId);
-            $results = $this->walletMapper->getUserWalletBalances($userId);
+            $results = $this->walletMapper->getUserWalletBalance($userId);
 
             if ($results !== false) {
                 return $results;
@@ -294,7 +293,6 @@ class PoolService
         $this->logger->info('WalletService.deductFromWallet started');
 
         try {
-            //$response = $this->walletMapper->deductFromWallet($userId, $args);
             $response = $this->walletMapper->deductFromWallets($userId, $args);
 
             if ($response['status'] === 'success') {
@@ -314,11 +312,11 @@ class PoolService
 
         try {
             $response = $this->walletMapper->callUserMove($this->currentUserId);
-			return [
-				'status' => 'success',
-				'ResponseCode' => $response['ResponseCode'],
-				'affectedRows' => $response['affectedRows'],
-			];
+            return [
+                'status' => 'success',
+                'ResponseCode' => $response['ResponseCode'],
+                'affectedRows' => $response['affectedRows'],
+            ];
 
         } catch (\Exception $e) {
             return $this->respondWithError('Unknown Error.');

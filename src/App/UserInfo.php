@@ -50,7 +50,7 @@ class UserInfo
         return $att;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getLiquidity(): float
     {
         return $this->liquidity;

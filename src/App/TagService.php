@@ -83,20 +83,20 @@ class TagService
             $tagId = $this->generateUUID();
             if (empty($tagId)) {
                 $this->logger->critical('Failed to generate tag ID');
-                return $this->respondWithError('Failed to generate tag ID');
+                return $this->respondWithError('Failed to generate tag ID.');
             }
 
             $tagData = ['tagid' => $tagId, 'name' => $tagName];
             $tag = new Tag($tagData);
 
             if (!$this->tagMapper->insert($tag)) {
-                return $this->respondWithError('Failed to insert tag into database');
+                return $this->respondWithError('Failed to insert tag into database.');
             }
 
             return $this->createSuccessResponse('Tag created successfully', [$tagData]);
 
         } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to create tag');
+            return $this->respondWithError('Failed to create tag.');
         } finally {
             $this->logger->debug('createTag function execution completed');
         }
@@ -116,7 +116,7 @@ class TagService
             return $this->createSuccessResponse('Tags fetched successfully', $result);
 
         } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to fetch tags');
+            return $this->respondWithError('Failed to fetch tags.');
         }
     }
 
