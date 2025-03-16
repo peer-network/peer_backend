@@ -72,18 +72,18 @@ class Base64FileHandler
         return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
     }
 
-	private function formatBytes(int $bytes): string
-	{
-		$units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-		$index = 0;
+    private function formatBytes(int $bytes): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+        $index = 0;
 
-		while ($bytes >= 1024 && $index < count($units) - 1) {
-			$bytes /= 1024;
-			$index++;
-		}
+        while ($bytes >= 1024 && $index < count($units) - 1) {
+            $bytes /= 1024;
+            $index++;
+        }
 
-		return \sprintf('%.2f %s', $bytes, $units[$index]);
-	}
+        return \sprintf('%.2f %s', $bytes, $units[$index]);
+    }
 
     private function getMediaDuration(string $filePath): ?array
     {
@@ -94,20 +94,20 @@ class Base64FileHandler
         try {
             $getID3 = new getID3();
             $fileInfo = $getID3->analyze($filePath);
-			$information = [];
+            $information = [];
 
-			if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
-				$width = $fileInfo['video']['resolution_x'];
-				$height = $fileInfo['video']['resolution_y'];
-				
-				$gcd = gmp_intval(gmp_gcd($width, $height));
-				$ratio = ($width / $gcd) . ':' . ($height / $gcd);
-				$auflg = "{$width}x{$height}";
-			}
+            if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
+                $width = $fileInfo['video']['resolution_x'];
+                $height = $fileInfo['video']['resolution_y'];
+                
+                $gcd = gmp_intval(gmp_gcd($width, $height));
+                $ratio = ($width / $gcd) . ':' . ($height / $gcd);
+                $auflg = "{$width}x{$height}";
+            }
 
-			$information['duration'] = isset($fileInfo['playtime_seconds']) ? (float)$fileInfo['playtime_seconds'] : null;
-			$information['ratiofrm'] = isset($ratio) ? $ratio : null;
-			$information['resolution'] = isset($auflg) ? $auflg : null;
+            $information['duration'] = isset($fileInfo['playtime_seconds']) ? (float)$fileInfo['playtime_seconds'] : null;
+            $information['ratiofrm'] = isset($ratio) ? $ratio : null;
+            $information['resolution'] = isset($auflg) ? $auflg : null;
 
             return isset($information) ? (array)$information : null;
             
@@ -122,7 +122,7 @@ class Base64FileHandler
         if (preg_match('/data:[a-zA-Z0-9+.-]+\/([a-zA-Z0-9+.-]+);base64,([A-Za-z0-9+\/=\r\n]+)/', $input, $matches)) {
             return $matches[0];
         } else {
-			$this->errors['Base64'][] = 'Invalid Base64 format: ' . substr($input, 0, 100);
+            $this->errors['Base64'][] = 'Invalid Base64 format: ' . substr($input, 0, 100);
         }
         return $input;
     }
@@ -134,7 +134,7 @@ class Base64FileHandler
             if (preg_match('/data:[a-zA-Z0-9+.-]+\/([a-zA-Z0-9+.-]+);base64,([A-Za-z0-9+\/=\r\n]+)/', $input, $matches)) {
                 $sanitizedBase64Array[] = $matches[0];
             } else {
-				$this->errors['Base64'][] = 'Invalid Base64 format: ' . substr($input, 0, 100);
+                $this->errors['Base64'][] = 'Invalid Base64 format: ' . substr($input, 0, 100);
             }
         }
 
@@ -239,7 +239,7 @@ class Base64FileHandler
         $getfileinfo = $this->getMediaDuration($filePath);
 
         $duration = $ratiofrm = $resolution = null;
-		$size = $this->formatBytes(\strlen($decodedFile));
+        $size = $this->formatBytes(\strlen($decodedFile));
 
         if (in_array($contentType, ['audio', 'video'])) {
             $duration = $getfileinfo['duration'] ?? null;

@@ -13,7 +13,6 @@ class Comment
     protected ?string $parentid;
     protected string $content;
     protected string $createdat;
-    
 
     // Constructor
     public function __construct(array $data = [])
