@@ -97,12 +97,12 @@ class Base64FileHandler
             $information = [];
 
             if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
-                $width = $fileInfo['video']['resolution_x'];
-                $height = $fileInfo['video']['resolution_y'];
-                
-                $gcd = gmp_intval(gmp_gcd($width, $height));
-                $ratio = ($width / $gcd) . ':' . ($height / $gcd);
-                $auflg = "{$width}x{$height}";
+              $width = $fileInfo['video']['resolution_x'];
+              $height = $fileInfo['video']['resolution_y'];
+
+              $gcd = gmp_intval(gmp_gcd($width, $height));
+              $ratio = ($width / $gcd) . ':' . ($height / $gcd);
+              $auflg = "{$width}x{$height}";
             }
 
             $information['duration'] = isset($fileInfo['playtime_seconds']) ? (float)$fileInfo['playtime_seconds'] : null;

@@ -101,7 +101,7 @@ class PostAdvanced
         return $att;
     }
 
-    // Getter and Setter for Tags
+    // Getter and Setter
     public function getTags(): array
     {
         return $this->tags;
