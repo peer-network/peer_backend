@@ -9,18 +9,9 @@ const DISLIKE_=3;// whereby DISLIKE
 const COMMENT_=4;// whereby COMMENT
 const POST_=5;// whereby POST
 const REPORT_=6;// whereby MELDEN
-const FRAME_=7;// whereby RAHM
-const FRAMES_=8;// whereby RAHMEN
-const POSTINCREASE_=9;// whereby POSTERHOHEN
-const CRYPTEDMSG_=10;// whereby CRYPTEDMSG
 const INVITATION_=11;// whereby EINLADEN
 const OWNSHARED_=12;// whereby SHAREN SENDER
 const OTHERSHARED_=13;// whereby SHAREN POSTER
-const DIRECTDEBIT_=14;// whereby LASTSCHRIFT
-const CREDIT_=15;// whereby GUTSCHRIFT
-const FRIEND_=16;// whereby FREUND
-const MESSAGE_=17;// whereby MESSAGE
-const TRANSFER_=18;// whereby TRANSFER
 const FREELIKE_=30;// whereby FREELIKE
 const FREECOMMENT_=31;// whereby FREECOMMENT
 const FREEPOST_=32;// whereby FREEPOST
@@ -41,9 +32,6 @@ const PRICELIKE=3;
 const PRICEDISLIKE=5;
 const PRICECOMMENT=0.5;
 const PRICEPOST=20;
-const PRICEREPORT=20;
-const PRICEFRAME=2000;
-const PRICEFRAMES=75000;
 
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
