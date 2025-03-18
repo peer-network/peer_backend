@@ -249,6 +249,7 @@ type ChatParticipant {
   userid: ID!
   img: String!
   username: String!
+  slug: Int!
   hasaccess: Int!
 }
 
@@ -330,6 +331,7 @@ type Userinforesponse {
 type Userinfo {
   userid: ID
   img: String
+  slug: Int
   username: String
   biography: String
   updatedat: Date!
@@ -382,6 +384,7 @@ type ProfilUser {
   id: ID!
   username: String!
   img: String
+  slug: Int
   isfollowed: Boolean
   isfollowing: Boolean
 }

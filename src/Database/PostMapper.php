@@ -513,6 +513,7 @@ class PostMapper
 				p.options, 
                 p.createdat, 
                 u.username, 
+                u.slug,
                 u.img AS userimg,
                 COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
                 (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) as amountlikes,
@@ -537,7 +538,7 @@ class PostMapper
             LEFT JOIN post_tags pt ON p.postid = pt.postid
             LEFT JOIN tags t ON pt.tagid = t.tagid
             WHERE %s
-            GROUP BY p.postid, u.username, u.img
+            GROUP BY p.postid, u.username, u.img, u.slug
             ORDER BY %s
             LIMIT :limit OFFSET :offset",
             implode(" AND ", $whereClauses),
@@ -579,6 +580,7 @@ class PostMapper
                         'uid' => $row['userid'],
                         'username' => $row['username'],
                         'img' => $row['userimg'],
+                        'slug' => $row['slug'],
                         'isfollowed' => (bool)$row['isfollowed'],
                         'isfollowing' => (bool)$row['isfollowing'],
                     ],

@@ -107,6 +107,7 @@ class CommentMapper
                 u.uid,
                 u.username,
                 u.img,
+                u.slug,
                 CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
                 CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed
             FROM 
@@ -154,6 +155,7 @@ class CommentMapper
                     'uid' => $row['uid'],
                     'username' => $row['username'],
                     'img' => $row['img'],
+                    'slug' => $row['slug'],
                     'isfollowed' => (bool) $row['isfollowed'],
                     'isfollowing' => (bool) $row['isfollowing'],
                 ],
@@ -204,6 +206,7 @@ class CommentMapper
                 u.uid,
                 u.username,
                 u.img,
+                u.slug,
                 (f1.followerid IS NOT NULL) AS isfollowing,
                 (f2.followerid IS NOT NULL) AS isfollowed
             FROM 
@@ -253,6 +256,7 @@ class CommentMapper
                     'uid' => $row['uid'],
                     'username' => $row['username'],
                     'img' => $row['img'],
+                    'slug' => $row['slug'],
                     'isfollowed' => (bool) $row['isfollowed'],
                     'isfollowing' => (bool) $row['isfollowing'],
                 ],

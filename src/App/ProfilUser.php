@@ -10,6 +10,7 @@ class ProfilUser
     protected string $uid;
     protected string $username;
     protected ?string $img;
+    protected ?int $slug;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
 
@@ -21,6 +22,7 @@ class ProfilUser
         $this->uid = $data['uid'] ?? '';
         $this->username = $data['username'] ?? '';
         $this->img = $data['img'] ?? '';
+        $this->slug = $data['slug'] ?? '';
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
     }
@@ -32,6 +34,7 @@ class ProfilUser
             'uid' => $this->uid,
             'username' => $this->username,
             'img' => $this->img,
+            'slug' => $this->slug,
             'isfollowed' => $this->isfollowed,
             'isfollowing' => $this->isfollowing,
         ];

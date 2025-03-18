@@ -725,7 +725,7 @@ class UserMapper
 
         try {
             $sql = "
-                SELECT u.uid, u.username, u.updatedat, u.biography, u.img 
+                SELECT u.uid, u.username, u.updatedat, u.biography, u.img, u.slug 
                 FROM follows f1 
                 INNER JOIN follows f2 ON f1.followedid = f2.followerid 
                 INNER JOIN users u ON f1.followedid = u.uid 
@@ -772,6 +772,7 @@ class UserMapper
                     f.followerid AS uid, 
                     u.username, 
                     u.img,
+                    u.slug,
                     EXISTS (
                         SELECT 1 
                         FROM follows ff 
@@ -829,6 +830,7 @@ class UserMapper
                     f.followedid AS uid, 
                     u.username, 
                     u.img,
+                    u.slug,
                     EXISTS (
                         SELECT 1 
                         FROM follows ff 
@@ -892,6 +894,7 @@ class UserMapper
                         f.followerid AS uid, 
                         u.username, 
                         u.img,
+                        u.slug,
                         EXISTS (
                             SELECT 1 
                             FROM follows ff 
@@ -914,6 +917,7 @@ class UserMapper
                         f.followedid AS uid, 
                         u.username, 
                         u.img,
+                        u.slug,
                         EXISTS (
                             SELECT 1 
                             FROM follows ff 
@@ -936,6 +940,7 @@ class UserMapper
                         f1.followerid AS uid, 
                         u.username, 
                         u.img,
+                        u.slug,
                         EXISTS (
                             SELECT 1 
                             FROM follows ff 

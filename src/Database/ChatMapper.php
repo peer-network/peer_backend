@@ -266,6 +266,7 @@ class ChatMapper
                     p.userid, 
                     u.username, 
                     u.img, 
+                    u.slug, 
                     p.hasaccess 
                 FROM chatparticipants p 
                 JOIN users u ON p.userid = u.uid 
@@ -792,6 +793,7 @@ class ChatMapper
                         p.userid, 
                         u.username, 
                         u.img, 
+                        u.slug, 
                         p.hasaccess 
                     FROM 
                         chatparticipants p 
