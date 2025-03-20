@@ -4,91 +4,64 @@ namespace Fawaz\Services;
 
 class FileUploadDispatcher
 {
-    private ImageChatService $imageChatService;
-    private UserAvatarService $userAvatarService;
-    private UserBiographyService $userBiographyService;
+    private CoverPostService $coverPostService;
     private ImagePostService $imagePostService;
     private PodcastPostService $podcastPostService;
     private VideoPostService $videoPostService;
     private NotesPostService $notesPostService;
 
-    public function __construct(
-        ImageChatService $imageChatService,
-        UserAvatarService $userAvatarService,
-        UserBiographyService $userBiographyService,
-        ImagePostService $imagePostService,
-        PodcastPostService $podcastPostService,
-        VideoPostService $videoPostService,
-        NotesPostService $notesPostService
-    ) {
-        $this->imageChatService = $imageChatService;
-        $this->userAvatarService = $userAvatarService;
-        $this->userBiographyService = $userBiographyService;
-        $this->imagePostService = $imagePostService;
-        $this->podcastPostService = $podcastPostService;
-        $this->videoPostService = $videoPostService;
-        $this->notesPostService = $notesPostService;
+    public function __construct()
+    {
+        $this->coverPostService = new CoverPostService();
+        $this->imagePostService = new ImagePostService();
+        $this->podcastPostService = new PodcastPostService();
+        $this->videoPostService = new VideoPostService();
+        $this->notesPostService = new NotesPostService();
     }
 
-    public function handleUploads(array $files): string
+    private function argsToJsString($args) {
+        return json_encode($args);
+    }
+
+    public function handleUploads(array $files, string $contentType, string $identifiers): array
     {
         $results = [];
-        $identifiers = [];
-        $imageCount = count(array_filter($files, fn($file) => $file['type'] === 'image'));
+
+        if (empty($files)) {
+            return ['success' => false, 'error' => 'Invalid files parameter provided'];
+        }
+
+        $serviceMap = [
+            'cover' => $this->coverPostService,
+            'image' => $this->imagePostService,
+            'audio' => $this->podcastPostService,
+            'video' => $this->videoPostService,
+            'text' => $this->notesPostService,
+        ];
+
+        if (!isset($serviceMap[$contentType])) {
+            return ['success' => false, 'error' => 'Invalid contentType parameter provided'];
+        }
+
+        $imageCount = count(array_filter($files));
 
         foreach ($files as $index => $file) {
-            $contentType = $file['type'] ?? null;
-            $base64Data = $file['data'] ?? null;
-
-            if (!$contentType || !$base64Data) {
-                $results[] = ['success' => false, 'error' => 'Invalid file data'];
+            if (!$file) {
                 continue;
             }
 
-            if ($contentType === 'image' && $imageCount > 1) {
-                if (!isset($identifiers['image'])) {
-                    $identifiers['image'] = uniqid();
-                }
-                $identifier = $identifiers['image'] . '_' . ($index + 1);
+            $identifier = ($imageCount > 1) ? "{$identifiers}_" . ($index + 1) : $identifiers;
+
+            $result = $serviceMap[$contentType]->handleFileUpload($file, $identifier);
+
+            if (!empty($result['success'])) {
+                unset($result['success']);
+                $results[] = $result;
             } else {
-                $identifier = uniqid();
-            }
-
-            switch ($contentType) {
-                case 'chatimage':
-                    $results[] = $this->imageChatService->handleFileUpload($base64Data, $identifier);
-                    break;
-
-                case 'profile':
-                    $results[] = $this->userAvatarService->handleFileUpload($base64Data, $identifier);
-                    break;
-
-                case 'biography':
-                    $results[] = $this->userBiographyService->handleFileUpload($base64Data, $identifier);
-                    break;
-
-                case 'image':
-                    $results[] = $this->imagePostService->handleFileUpload($base64Data, $identifier);
-                    break;
-
-                case 'audio':
-                    $results[] = $this->podcastPostService->handleFileUpload($base64Data, $identifier);
-                    break;
-
-                case 'video':
-                    $results[] = $this->videoPostService->handleFileUpload($base64Data, $identifier);
-                    break;
-
-                case 'text':
-                    $results[] = $this->notesPostService->handleFileUpload($base64Data, $identifier);
-                    break;
-
-                default:
-                    $results[] = ['success' => false, 'error' => "Unsupported file type: $contentType"];
+                return ['success' => false, 'error' => $this->argsToJsString($result['error'] ?? 'Unknown error')];
             }
         }
 
-        //return !empty($results) ? json_encode($results) : null;
-        return !empty($results) ? implode(',', $results) : null;
+        return !empty($results) ? ['path' => $this->argsToJsString($results)] : ['success' => false, 'error' => 'No valid files uploaded'];
     }
 }

@@ -35,7 +35,7 @@ class Base64FileHandler
     {
         return match ($contentType) {
             'image' => ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'],
-            'video' => ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'webm'],
+            'video' => ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'webm', 'quicktime'],
             'audio' => ['mp3', 'wav'],
             'text' => ['txt'],
             default => []

@@ -117,11 +117,11 @@ CREATE TABLE IF NOT EXISTS posts (
     feedid UUID DEFAULT NULL,
     title VARCHAR(63) NOT NULL,
     contenttype VARCHAR(13) NOT NULL DEFAULT 'text' CHECK (contenttype IN ('image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery', 'secretgallery')),
-    media VARCHAR (100) NOT NULL,
-    cover VARCHAR (100) DEFAULT NULL,
-    mediadescription VARCHAR (500),
-    options VARCHAR (200),
+    mediadescription VARCHAR (500) DEFAULT NULL,
     status SMALLINT DEFAULT 10 NOT NULL,
+    media TEXT NOT NULL,
+    cover TEXT DEFAULT NULL,
+    options TEXT DEFAULT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_posts_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
     CONSTRAINT fk_posts_feedid FOREIGN KEY (feedid) REFERENCES newsfeed(feedid) ON DELETE CASCADE
@@ -148,6 +148,17 @@ CREATE TABLE IF NOT EXISTS post_info (
 );
 CREATE INDEX idx_post_info_postid ON post_info(postid);
 CREATE INDEX idx_post_info_userid ON post_info(userid);
+
+-- Table: posts_media
+CREATE TABLE IF NOT EXISTS posts_media (
+    postid UUID NOT NULL,
+    contenttype VARCHAR(13) NOT NULL DEFAULT 'text' CHECK (contenttype IN ('image', 'text', 'video', 'audio', 'cover')),
+    media VARCHAR(100) NOT NULL,
+    options VARCHAR(250) DEFAULT NULL,
+    CONSTRAINT fk_posts_media_postid FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE,
+    PRIMARY KEY (postid, media)
+);
+CREATE INDEX idx_posts_media_postid ON posts_media(postid);
 
 -- Table: comments
 CREATE TABLE IF NOT EXISTS comments (

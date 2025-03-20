@@ -9,13 +9,12 @@ use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
-use Fawaz\Services\Base64FileHandler;
+use Fawaz\Services\FileUploadDispatcher;
 use Psr\Log\LoggerInterface;
 
 class PostService
 {
     protected ?string $currentUserId = null;
-    private Base64FileHandler $base64filehandler;
 
     public function __construct(
         protected LoggerInterface $logger,
@@ -24,9 +23,8 @@ class PostService
         protected PostInfoMapper $postInfoMapper,
         protected TagMapper $tagMapper,
         protected TagPostMapper $tagPostMapper,
-    ) {
-        $this->base64filehandler = new Base64FileHandler();
-    }
+        protected FileUploadDispatcher $base64filehandler,
+    ) {}
 
     public function setCurrentUserId(string $userid): void
     {
@@ -57,7 +55,7 @@ class PostService
 
     private function respondWithError(string $responseCode, array $extraData = []): array
     {
-        return array_merge(['status' => 'error', 'ResponseCode' => $responseCode], $extraData);
+        return ['status' => 'error', 'ResponseCode' => $responseCode];
     }
 
     private function createSuccessResponse(string $message, array $data = []): array
@@ -82,7 +80,7 @@ class PostService
         return serialize($args);
     }
 
-    public function createPost(array $args): array
+    public function createPost(array $args = []): array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
@@ -92,14 +90,14 @@ class PostService
             return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
         }
 
-        $requiredFields = ['title', 'media', 'contenttype'];
-        foreach ($requiredFields as $field) {
+        foreach (['title', 'media', 'contenttype'] as $field) {
             if (empty($args[$field])) {
                 return $this->respondWithError("$field is required");
             }
         }
 
         $this->logger->info('PostService.createPost started');
+
         $postId = $this->generateUUID();
         $createdAt = (new \DateTime())->format('Y-m-d H:i:s.u');
 
@@ -112,73 +110,81 @@ class PostService
             'media' => null,
             'cover' => null,
             'mediadescription' => $args['mediadescription'] ?? null,
-            'options' => null,
             'createdat' => $createdAt,
         ];
 
-        if ($postData['feedid'] && !$this->postMapper->isNewsFeedExist($postData['feedid'])) {
-            return $this->respondWithError('Invalid newsfeed ID.');
-        }
+        if ($postData['feedid']) {
+            if (!$this->postMapper->isNewsFeedExist($postData['feedid'])) {
+                return $this->respondWithError('Invalid newsfeed ID.');
+            }
 
-        if ($postData['feedid'] && !$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
-            return $this->respondWithError('No access to the newsfeed.');
+            if (!$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
+                return $this->respondWithError('No access to the newsfeed.');
+            }
         }
 
         try {
-            if (!empty($args['media'])) {
-                $mediaPath = $this->base64filehandler->handleFileUpload($args['media'], $args['contenttype'], $postId);
+            // Media Upload
+            if ($this->isValidMedia($args['media'])) {
+                $mediaPath = $this->base64filehandler->handleUploads($args['media'], $args['contenttype'], $postId);
                 $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
-                if ($mediaPath === '') {
-                    return $this->respondWithError('Media upload failed.');
-                }
-
-                if (isset($mediaPath['options'])) {
-                    $postData['options'] = $this->argsToJsString($mediaPath['options']);
+                if (!empty($mediaPath['error'])) {
+                    return $this->respondWithError('Invalid Base64 code: ' . json_encode($mediaPath['error']));
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $postData['media'] = $mediaPath['path'];
                 } else {
-                    return $this->respondWithError('Media path necessary for upload.');
+                    return $this->respondWithError('Media upload failed.');
                 }
-
             } else {
                 return $this->respondWithError('Media necessary for upload.');
             }
 
-            if (!empty($args['cover'])) {
-                $coverPath = $this->base64filehandler->handleFileUpload($args['cover'], 'image', $postId . '_cover');
+            // Cover Upload (Audio & Video)
+            if ($this->isValidCover($args)) {
+                $coverPath = $this->base64filehandler->handleUploads($args['cover'], 'cover', $postId);
                 $this->logger->info('PostService.createPost coverPath', ['coverPath' => $coverPath]);
-
-                if ($coverPath === '') {
-                    return $this->respondWithError('Cover upload failed');
-                }
 
                 if (!empty($coverPath['path'])) {
                     $postData['cover'] = $coverPath['path'];
                 } else {
-                    return $this->respondWithError('Cover path necessary for upload');
+                    return $this->respondWithError('Cover upload failed.');
                 }
-
             }
 
+            // Post speichern
             $post = new Post($postData);
             $this->postMapper->insert($post);
 
-            if (isset($args['tags']) && is_array($args['tags'])) {
+            // Tags speichern
+            if (!empty($args['tags']) && is_array($args['tags'])) {
                 $this->handleTags($args['tags'], $postId, $createdAt);
             }
 
+            // Metadaten für eigene Posts (kein Feed)
             if (!$postData['feedid']) {
                 $this->insertPostMetadata($postId, $this->currentUserId);
             }
 
             return $this->createSuccessResponse('Post created successfully', $post->getArrayCopy());
+
         } catch (\Exception $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);
-            return $this->respondWithError('Failed to create post');
+            return $this->respondWithError($e->getMessage());
         }
+    }
+
+    private function isValidMedia($media): bool
+    {
+        return isset($media) && is_array($media) && !empty($media);
+    }
+
+    private function isValidCover(array $args): bool
+    {
+        return isset($args['cover']) && is_array($args['cover']) && !empty($args['cover'])
+            && in_array($args['contenttype'], ['audio', 'video'], true);
     }
 
     private function handleTags(array $tags, string $postId, string $createdAt): void

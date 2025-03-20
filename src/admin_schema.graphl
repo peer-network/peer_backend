@@ -469,7 +469,7 @@ type TagSearchResponse {
 type PostResponse {
   status: String!
   ResponseCode: String
-  affectedRows: Post!
+  affectedRows: Post
 }
 
 type GetAllPostResponse {
@@ -497,7 +497,6 @@ type Post {
   isreported: Boolean!
   isdisliked: Boolean!
   issaved: Boolean!
-  options: String!
   tags: Tags!
   user: ProfilUser!
   comments: [Comment!]!
@@ -530,10 +529,10 @@ input RegisterInput {
 
 input CreatePostInput {
   title: String!
-  media: String!
-  cover: String
   mediadescription: String
   contenttype: ContenType!
+  media: [String!]
+  cover: [String!]
   tags: [String!]
 }
 

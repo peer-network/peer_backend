@@ -2,7 +2,7 @@
 
 namespace Fawaz\Services;
 
-class UserBiographyService
+class CoverPostService
 {
     private Base64FileHandler $fileHandler;
 
@@ -16,8 +16,8 @@ class UserBiographyService
         return $this->fileHandler->getErrors();
     }
 
-    public function handleFileUpload(string $base64Pdf, string $userId): array
+    public function handleFileUpload(string $base64Image, string $imageId): array
     {
-        return $this->fileHandler->handleFileUpload($base64Pdf, 'text', $userId, 'userData');
+        return $this->fileHandler->handleFileUpload($base64Image, 'image', $imageId, 'cover');
     }
 }
