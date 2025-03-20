@@ -294,7 +294,6 @@ class WalletService
         $this->logger->info('WalletService.deductFromWallet started');
 
         try {
-            //$response = $this->walletMapper->deductFromWallet($userId, $args);
             $response = $this->walletMapper->deductFromWallets($userId, $args);
 
             if ($response['status'] === 'success') {

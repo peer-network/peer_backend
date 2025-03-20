@@ -1228,7 +1228,7 @@ class GraphQLSchemaBuilder
     {
         $this->logger->info('Query.resolveActionPost started');
 
-        $postId = $args['postid'] ?? null;
+		$postId = $args['postid'] ?? null;
         $action = $args['action'] = strtolower($args['action'] ?? 'LIKE');
         $args['fromid'] = $this->currentUserId;
 
@@ -1283,7 +1283,7 @@ class GraphQLSchemaBuilder
                 if ($DailyUsage < $limit) {
                     if ($action === 'comment') 
                     {
-                        $response = $this->commentService->createComment($args['input']);
+                        $response = $this->commentService->createComment($args);
                     }
                     elseif ($action === 'post') 
                     {
@@ -1331,7 +1331,7 @@ class GraphQLSchemaBuilder
 
             if ($action === 'comment') 
             {
-                $response = $this->commentService->createComment($args['input']);
+                $response = $this->commentService->createComment($args);
             }
             elseif ($action === 'post') 
             {

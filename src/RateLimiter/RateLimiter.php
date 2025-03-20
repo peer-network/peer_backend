@@ -19,29 +19,41 @@ class RateLimiter
         }
     }
 
-    private function loadRequests(): array
-    {
-        $data = file_get_contents($this->storageFile);
-        if ($data === false) {
-            error_log("Failed to read rate limiter storage file.");
-            return [];
-        }
+	private function loadRequests(): array
+	{
+		if (!file_exists($this->storageFile)) {
+			error_log("Rate limiter storage file does not exist.");
+			return [];
+		}
 
-        $decodedData = json_decode($data, true);
-        if (!is_array($decodedData)) {
-            error_log("Failed to decode JSON from storage file: " . json_last_error_msg());
-            return [];
-        }
+		$data = file_get_contents($this->storageFile);
+		if ($data === false || trim($data) === '') {
+			error_log("Failed to read or empty rate limiter storage file.");
+			return [];
+		}
 
-        return $decodedData;
-    }
+		$decodedData = json_decode($data, true);
+		if (!is_array($decodedData)) {
+			error_log("Failed to decode JSON from storage file: " . json_last_error_msg());
+			file_put_contents($this->storageFile, json_encode([]), LOCK_EX); // Reset file
+			return [];
+		}
 
-    private function saveRequests(array $requests): void
-    {
-        if (file_put_contents($this->storageFile, json_encode($requests, JSON_PRETTY_PRINT), LOCK_EX) === false) {
-            error_log("Failed to write to rate limiter storage file.");
-        }
-    }
+		return $decodedData;
+	}
+
+	private function saveRequests(array $requests): void
+	{
+		$tempFile = $this->storageFile . '.tmp';
+		if (file_put_contents($tempFile, json_encode($requests, JSON_PRETTY_PRINT), LOCK_EX) === false) {
+			error_log("Failed to write temporary rate limiter storage file.");
+			return;
+		}
+
+		if (!rename($tempFile, $this->storageFile)) {
+			error_log("Failed to move temporary rate limiter storage file to final destination.");
+		}
+	}
 
     public function isAllowed(string $identifier): bool
     {
