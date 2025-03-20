@@ -51,12 +51,8 @@ use Fawaz\App\UserInfoService;
 use Fawaz\App\UserService;
 use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
-use Fawaz\Database\ChatMapper;
 use Fawaz\Database\CommentMapper;
-use Fawaz\Database\CommentInfoMapper;
 use Fawaz\Database\ContactusMapper;
-use Fawaz\Database\PostMapper;
-use Fawaz\Database\TagMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
@@ -74,12 +70,8 @@ class GraphQLSchemaBuilder
     public function __construct(
         protected LoggerInterface $logger,
         protected UserMapper $userMapper,
-        protected PostMapper $postMapper,
-        protected ChatMapper $chatMapper,
-        protected TagMapper $tagMapper,
         protected TagService $tagService,
         protected CommentMapper $commentMapper,
-        protected CommentInfoMapper $commentInfoMapper,
         protected ContactusMapper $contactusMapper,
         protected DailyFreeService $dailyFreeService,
         protected McapService $mcapService,
@@ -599,9 +591,6 @@ class GraphQLSchemaBuilder
                 'issaved' => function (array $root): bool {
                     return $root['issaved'] ?? false;
                 },
-                'options' => function (array $root): string {
-                    return $root['options'] ?? '';
-                },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 },
@@ -716,7 +705,7 @@ class GraphQLSchemaBuilder
             ],
             'Comment' => [
                 'commentid' => function (array $root): string {
-                    $this->logger->info('Query.Comment Resolvers', ['root' => $root]);
+                    $this->logger->info('Query.Comment Resolvers');
                     if (!isset($root['commentid'])) {
                         return '';
                     }
@@ -973,7 +962,7 @@ class GraphQLSchemaBuilder
             ],
             'DailyResponse' => [
                 'name' => function (array $root): string {
-                    $this->logger->info('Query.DailyResponse Resolvers', ['root' => $root]);
+                    $this->logger->info('Query.DailyResponse Resolvers');
                     return $root['name'] ?? '';
                 },
                 'used' => function (array $root): int {
@@ -1021,7 +1010,7 @@ class GraphQLSchemaBuilder
             ],
             'StandardResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.StandardResponse Resolvers', ['root' => $root]);
+                    $this->logger->info('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -1033,7 +1022,7 @@ class GraphQLSchemaBuilder
             ],
             'GenericResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.GenericResponse Resolvers', ['root' => $root]);
+                    $this->logger->info('Query.GenericResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -1072,7 +1061,7 @@ class GraphQLSchemaBuilder
             ],
             'UserLogWins' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.UserLogWins Resolvers', ['root' => $root]);
+                    $this->logger->info('Query.UserLogWins Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -1102,7 +1091,7 @@ class GraphQLSchemaBuilder
             ],
             'AllUserFriends' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.AllUserFriends Resolvers', ['root' => $root]);
+                    $this->logger->info('Query.AllUserFriends Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -1299,6 +1288,9 @@ class GraphQLSchemaBuilder
                     elseif ($action === 'post') 
                     {
                         $response = $this->postService->createPost($args['input']);
+                        if (isset($response['status']) && $response['status'] === 'error') {
+                            return $response;
+                        }
                     }
                     elseif ($action === 'like') 
                     {
@@ -1344,8 +1336,15 @@ class GraphQLSchemaBuilder
             elseif ($action === 'post') 
             {
                 $response = $this->postService->createPost($args['input']);
-                unset($args['input'], $args['action']);
-                $args['postid'] = $response['affectedRows']['postid'];
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    return $response;
+                }
+
+                if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])){
+
+                    unset($args['input'], $args['action']);
+                    $args['postid'] = $response['affectedRows']['postid'];
+                }
             }
             elseif ($action === 'like') 
             {
@@ -1403,30 +1402,27 @@ class GraphQLSchemaBuilder
         ];
     }
 
-    protected function resolveComments(array $args): ?array
+    protected function resolveComments(array $args): array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
         }
 
         if (empty($args)) {
-            return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+            return $this->respondWithError('No arguments provided.', ['errorCode' => 400]);
         }
-        
+
         $comments = $this->commentService->fetchByParentId($args);
 
-		if(is_array($comments) && count($comments) > 0){
-			$results = array_map(fn(CommentAdvanced $comment) => $comment->getArrayCopy(), $comments);
-			
-			if ($results !== false) {
-				return [
-					'status' => 'success',
-					'counter' => count($results),
-					'ResponseCode' => 'Success get comments',
-					'affectedRows' => $results,
-				];
-			}
-		}
+        if (empty($comments)) {
+            return $this->createSuccessResponse('No comments found', [], false);
+        }
+
+        $results = array_map(fn(CommentAdvanced $comment) => $comment->getArrayCopy(), $comments);
+
+        if (is_array($results) || !empty($results)) {
+            return $this->createSuccessResponse('Success get comments', $results);
+        }
 
         return $this->respondWithError('No comments found');
     }
@@ -2039,6 +2035,21 @@ class GraphQLSchemaBuilder
     protected function respondWithError(string $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
+    }
+
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true): array
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            $response['counter'] = count($data);
+        }
+
+        return $response;
     }
 
     protected function checkAuthentication(): bool

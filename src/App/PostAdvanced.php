@@ -28,7 +28,6 @@ class PostAdvanced
     protected ?bool $issaved;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
-    protected string $options;
     protected string $createdat;
     protected ?array $tags = []; // Changed to array
     protected ?array $user = [];
@@ -60,7 +59,6 @@ class PostAdvanced
         $this->issaved = $data['issaved'] ?? false;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
-        $this->options = $data['options'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
@@ -92,7 +90,6 @@ class PostAdvanced
             'issaved' => $this->issaved,
             'isfollowed' => $this->isfollowed,
             'isfollowing' => $this->isfollowing,
-            'options' => $this->options,
             'createdat' => $this->createdat,
             'tags' => $this->tags, // Include tags
             'user' => $this->user,
@@ -140,11 +137,6 @@ class PostAdvanced
     public function getContentType(): string
     {
         return $this->contenttype;
-    }
-
-    public function getOptions(): string
-    {
-        return $this->options;
     }
 
     // Validation and Array Filtering methods
@@ -199,22 +191,20 @@ class PostAdvanced
             ],
             'media' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,
-                        'max' => 244,
+                        'max' => 1000,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'cover' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,
-                        'max' => 244,
+                        'max' => 1000,
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -296,17 +286,6 @@ class PostAdvanced
             'isfollowing' => [
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
-            ],
-            'options' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
-                'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 0,
-                        'max' => 250,
-                    ]],
-                    ['name' => 'isString'],
-                ],
             ],
             'tags' => [
                 'required' => false,

@@ -5,17 +5,12 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
-class Post
+class PostMedia
 {
     protected string $postid;
-    protected string $userid;
-    protected ?string $feedid;
-    protected string $title;
     protected string $contenttype;
     protected string $media;
-    protected string $cover;
-    protected string $mediadescription;
-    protected string $createdat;
+    protected string $options;
 
     // Constructor
     public function __construct(array $data = [])
@@ -23,14 +18,9 @@ class Post
         $data = $this->validate($data);
 
         $this->postid = $data['postid'] ?? '';
-        $this->userid = $data['userid'] ?? '';
-        $this->feedid = $data['feedid'] ?? null;
-        $this->title = $data['title'] ?? '';
         $this->contenttype = $data['contenttype'] ?? 'text';
         $this->media = $data['media'] ?? '';
-        $this->cover = $data['cover'] ?? '';
-        $this->mediadescription = $data['mediadescription'] ?? '';
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->options = $data['options'] ?? '';
     }
 
     // Array Copy methods
@@ -38,14 +28,9 @@ class Post
     {
         $att = [
             'postid' => $this->postid,
-            'userid' => $this->userid,
-            'feedid' => $this->feedid,
-            'title' => $this->title,
             'contenttype' => $this->contenttype,
             'media' => $this->media,
-            'cover' => $this->cover,
-            'mediadescription' => $this->mediadescription,
-            'createdat' => $this->createdat,
+            'options' => $this->options,
         ];
         return $att;
     }
@@ -56,21 +41,6 @@ class Post
         return $this->postid;
     }
 
-    public function getTitle(): string
-    {
-        return $this->title;
-    }
-
-    public function getUserId(): string
-    {
-        return $this->userid;
-    }
-
-    public function getFeedId(): string
-    {
-        return $this->feedid;
-    }
-
     public function getMedia(): string
     {
         return $this->media;
@@ -79,6 +49,11 @@ class Post
     public function getContentType(): string
     {
         return $this->contenttype;
+    }
+
+    public function getOptions(): string
+    {
+        return $this->options;
     }
 
     // Validation and Array Filtering methods
@@ -112,70 +87,35 @@ class Post
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'userid' => [
-                'required' => true,
-                'validators' => [['name' => 'Uuid']],
-            ],
-            'feedid' => [
-                'required' => false,
-                'validators' => [['name' => 'Uuid']],
-            ],
-            'title' => [
-                'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
-                'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 63,
-                    ]],
-                    ['name' => 'isString'],
-                ],
-            ],
             'contenttype' => [
                 'required' => true,
                 'validators' => [
                     ['name' => 'InArray', 'options' => [
-                        'haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery'],
+                        'haystack' => ['image', 'text', 'video', 'audio', 'cover'],
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'media' => [
                 'required' => true,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,
-                        'max' => 1000,
+                        'max' => 100,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
-            'cover' => [
-                'required' => false,
-                'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 1000,
-                    ]],
-                    ['name' => 'isString'],
-                ],
-            ],
-            'mediadescription' => [
+            'options' => [
                 'required' => false,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 500,
+                        'min' => 0,
+                        'max' => 200,
                     ]],
                     ['name' => 'isString'],
-                ],
-            ],
-            'createdat' => [
-                'required' => true,
-                'validators' => [
-                    ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];

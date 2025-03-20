@@ -5,6 +5,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
+use Fawaz\App\PostMedia;
 use Psr\Log\LoggerInterface;
 
 class PostMapper
@@ -42,6 +43,11 @@ class PostMapper
             $this->logger->error("Error fetching posts from database", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            $this->logger->error("Error fetching posts from database", [
+                'error' => $e->getMessage(),
             ]);
             return [];
         }
@@ -349,9 +355,9 @@ class PostMapper
         $data = $post->getArrayCopy();
 
         $query = "INSERT INTO posts 
-                  (postid, userid, feedid, title, media, cover, mediadescription, contenttype, options, createdat)
+                  (postid, userid, feedid, title, media, cover, mediadescription, contenttype, createdat)
                   VALUES 
-                  (:postid, :userid, :feedid, :title, :media, :cover, :mediadescription, :contenttype, :options, :createdat)";
+                  (:postid, :userid, :feedid, :title, :media, :cover, :mediadescription, :contenttype, :createdat)";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -365,7 +371,6 @@ class PostMapper
             $stmt->bindValue(':cover', $data['cover'], \PDO::PARAM_STR);
             $stmt->bindValue(':mediadescription', $data['mediadescription'], \PDO::PARAM_STR);
             $stmt->bindValue(':contenttype', $data['contenttype'], \PDO::PARAM_STR);
-            $stmt->bindValue(':options', $data['options'], \PDO::PARAM_STR);
             $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
 
             $stmt->execute();
@@ -382,12 +387,69 @@ class PostMapper
             $this->logger->error(
                 "PostMapper.insert: Exception occurred while inserting post",
                 [
-                    'data' => $data,
-                    'exception' => $e->getMessage(),
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
                 ]
             );
 
             throw new \RuntimeException("Failed to insert post into database: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error(
+                "PostMapper.insert: Exception occurred while inserting post",
+                [
+                    'error' => $e->getMessage()
+                ]
+            );
+
+            throw new \RuntimeException("Failed to insert post into database: " . $e->getMessage());
+        }
+    }
+
+    // Create a post Media
+    public function insertmed(PostMedia $post): PostMedia
+    {
+        $this->logger->info("PostMapper.insertmed started");
+
+        $data = $post->getArrayCopy();
+
+        $query = "INSERT INTO posts_media 
+                  (postid, contenttype, media, options)
+                  VALUES 
+                  (:postid, :contenttype, :media, :options)";
+
+        try {
+            $stmt = $this->db->prepare($query);
+
+            // Explicitly bind each value
+            $stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':contenttype', $data['contenttype'], \PDO::PARAM_STR);
+            $stmt->bindValue(':media', $data['media'], \PDO::PARAM_STR);
+            $stmt->bindValue(':options', $data['options'], \PDO::PARAM_STR);
+
+            $stmt->execute();
+
+            $this->logger->info("Inserted new PostMedia into database");
+
+            return new PostMedia($data);
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "PostMapper.insertmed: Exception occurred while inserting PostMedia",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+
+            throw new \RuntimeException("Failed to insert PostMedia into database: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error(
+                "PostMapper.insertmed: Exception occurred while inserting PostMedia",
+                [
+                    'error' => $e->getMessage()
+                ]
+            );
+
+            throw new \RuntimeException("Failed to insert PostMedia into database: " . $e->getMessage());
         }
     }
 
@@ -511,7 +573,6 @@ class PostMapper
                 p.media, 
                 p.cover, 
                 p.mediadescription, 
-                p.options, 
                 p.createdat, 
                 u.username, 
                 u.img AS userimg,
@@ -574,7 +635,6 @@ class PostMapper
                     'isreported' => (bool)$row['isreported'],
                     'isdisliked' => (bool)$row['isdisliked'],
                     'issaved' => (bool)$row['issaved'],
-                    'options' => (string)$row['options'],
                     'tags' => $row['tags'],
                     'user' => [
                         'uid' => $row['userid'],
@@ -590,8 +650,12 @@ class PostMapper
         } catch (\PDOException $e) {
             $this->logger->error("Database error in findPostser", [
                 'error' => $e->getMessage(),
-                'sql' => $sql,
-                'params' => $params,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            $this->logger->error('Database error in findPostser', [
+                'error' => $e->getMessage(),
             ]);
             return [];
         }
