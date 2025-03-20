@@ -66,8 +66,8 @@ type Mutation {
   deletePost(id: ID!): DefaultResponse!
   contactus(name: String!, email: String!, message: String!): StandardResponse!
   createPost(action: PostenType!, input: CreatePostInput!): PostResponse!
-  createComment(action: CommentsType!, input: CreateCommentInput!): StandardResponse!
-  resolveActionPost(postid: ID!, action: ActionType!): StandardResponse!
+  createComment(action: CommentsType!, postid: ID!, parentid: ID, content: String!): StandardResponse!
+  resolveActionPost(action: ActionType!, postid: ID!): StandardResponse!
 }
 
 scalar Decimal
@@ -534,12 +534,6 @@ input CreatePostInput {
   media: [String!]
   cover: [String!]
   tags: [String!]
-}
-
-input CreateCommentInput {
-  postid: ID!
-  parentid: ID
-  content: String!
 }
 
 input CreateChatInput {

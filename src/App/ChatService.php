@@ -120,7 +120,7 @@ class ChatService
             if ($image !== null && $image !== '' && count($recipients) > $maxUsers) {
 
                 if (!empty($image)) {
-                    $mediaPath = $this->base64filehandler->handleFileUpload($image, 'image', $chatId);
+                    $mediaPath = $this->base64filehandler->handleFileUpload($image, 'image', $chatId, 'chat');
                     $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                     if ($mediaPath === '') {
