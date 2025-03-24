@@ -319,199 +319,6 @@ class PoolMapper
         return $results;
     }
 
-    public function loadWalletById(?array $args = [], string $currentUserId): array|false
-    {
-        $this->logger->info('WalletMapper.loadWalletById started');
-
-        $userId = $currentUserId ?? null;
-        $postId = $args['postid'] ?? null;
-        $fromId = $args['fromid'] ?? null;
-
-        if ($userId === null && $postId === null && $fromId === null) {
-            $this->logger->warning('WalletMapper.loadWalletById missing required identifiers in args');
-            return false;
-        }
-
-        try {
-            $offset = max((int)($args['offset'] ?? 0), 0);
-            $limit = max((int)($args['limit'] ?? 10), 1);
-
-            $conditions = [];
-            $params = [];
-
-            if ($userId !== null) {
-                $conditions[] = "userid = :userid";
-                $params['userid'] = $userId;
-            }
-            if ($postId !== null) {
-                $conditions[] = "postid = :postid";
-                $params['postid'] = $postId;
-            }
-            if ($fromId !== null) {
-                $conditions[] = "fromid = :fromid";
-                $params['fromid'] = $fromId;
-            }
-
-            $whereClause = implode(' AND ', $conditions);
-
-            $sql = "
-                SELECT 
-                    token, 
-                    userid, 
-                    postid, 
-                    fromid, 
-                    numbers, 
-                    whereby, 
-                    createdat 
-                FROM 
-                    wallet 
-                WHERE 
-                    $whereClause
-                ORDER BY 
-                    createdat DESC
-                LIMIT :limit OFFSET :offset;
-            ";
-
-            $stmt = $this->db->prepare($sql);
-            $params['limit'] = (int)$limit;
-            $params['offset'] = (int)$offset;
-
-            $stmt->execute($params);
-
-            $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                $results[] = new Wallet($row);
-            }
-
-            if ($results) {
-                $this->logger->info('Fetched transactions for filters from database', [
-                    'count' => count($results),
-                    'filters' => $args,
-                ]);
-            } else {
-                $this->logger->warning('No transactions found for filters in database', [
-                    'filters' => $args,
-                ]);
-            }
-
-            return $results;
-
-        } catch (\PDOException $e) {
-            $this->logger->error('Database error occurred in loadWalletById', [
-                'error' => $e->getMessage(),
-            ]);
-            return false;
-        }
-    }
-
-    public function loadById(string $userid): Wallet|false
-    {
-        $this->logger->info('WalletMapper.loadById started');
-
-        $sql = "SELECT * FROM wallet WHERE userid = :userid";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['userid' => $userid]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if ($data !== false) {
-            return new Wallet($data);
-        }
-
-        $this->logger->warning('No transaction found with', ['userid' => $userid]);
-
-        return false;
-    }
-
-    public function loadLiquidityById(string $userid): float
-    {
-        $this->logger->info('WalletMapper.loadLiquidityById started');
-
-        $sql = "SELECT liquidity AS currentliquidity FROM wallett WHERE userid = :userid";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['userid' => $userid]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if ($data !== false) {
-            $this->logger->info('transaction found with', ['data' => $data]);
-            return (float)$data['currentliquidity'];
-        }
-
-        $this->logger->warning('No transaction found with', ['userid' => $userid]);
-
-        return 0.0;
-    }
-
-    public function insert(Wallet $wallet): Wallet
-    {
-        $this->logger->info('WalletMapper.insert started');
-
-        $data = $wallet->getArrayCopy();
-
-        $query = "INSERT INTO wallet (token, userid, postid, fromid, numbers, numbersq, whereby, createdat) 
-                  VALUES (:token, :userid, :postid, :fromid, :numbers, :numbersq, :whereby, :createdat)";
-
-        try {
-            $stmt = $this->db->prepare($query);
-
-            // Explicitly bind each value
-            $stmt->bindValue(':token', $data['token'], \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':fromid', $data['fromid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':numbers', $data['numbers'], \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $data['numbersq'], \PDO::PARAM_INT);
-            $stmt->bindValue(':whereby', $data['whereby'], \PDO::PARAM_INT);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
-
-            $stmt->execute();
-
-            $this->logger->info('Inserted new transaction into database', ['data' => $data]);
-
-            return new Wallet($data);
-        } catch (\PDOException $e) {
-            $this->logger->error('Failed to insert transaction into database', [
-                'data' => $data,
-                'exception' => $e->getMessage(),
-            ]);
-
-            throw new \RuntimeException("Failed to insert wallet transaction: " . $e->getMessage());
-        }
-    }
-
-    public function insertt(Wallett $wallet): Wallett
-    {
-        $this->logger->info('WalletMapper.insertt started');
-
-        $data = $wallet->getArrayCopy();
-
-        $query = "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat, createdat) 
-                  VALUES (:userid, :liquidity, :liquiditq, :updatedat, :createdat)";
-
-        try {
-            $stmt = $this->db->prepare($query);
-
-            // Explicitly bind each value
-            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':liquidity', $data['liquidity'], \PDO::PARAM_STR);
-            $stmt->bindValue(':liquiditq', $data['liquiditq'], \PDO::PARAM_INT);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
-
-            $stmt->execute();
-
-            $this->logger->info('Inserted new transaction into database', ['data' => $data]);
-
-            return new Wallett($data);
-        } catch (\PDOException $e) {
-            $this->logger->error('Failed to insert transaction into database', [
-                'data' => $data,
-                'exception' => $e->getMessage(),
-            ]);
-
-            throw new \RuntimeException("Failed to insert wallett transaction: " . $e->getMessage());
-        }
-    }
-
     // CRYPTO GENERATOR
     public function crypto_rand_secure(int $min, int $max): int
     {
@@ -853,7 +660,7 @@ class PoolMapper
                 COUNT(CASE WHEN DATE_PART('week', createdat) = DATE_PART('week', CURRENT_DATE) AND EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE) THEN 1 END) AS w0,
                 COUNT(CASE WHEN TO_CHAR(createdat, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM') THEN 1 END) AS m0,
                 COUNT(CASE WHEN EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE) THEN 1 END) AS y0
-                FROM gems WHERE collected = 0
+                FROM gems
             ";
             
             $stmt = $this->db->query($sql);
@@ -866,7 +673,7 @@ class PoolMapper
 
         $success = [
             'status' => 'success',
-            'ResponseCode' => 'Gems data prepared successfully.',
+            'ResponseCode' => 'Gems transactions prepared successfully.',
             'affectedRows' => $entries
         ];
 
@@ -904,7 +711,7 @@ class PoolMapper
                     userid,
                     GREATEST(SUM(gems), 0) AS total_numbers
                 FROM gems
-                WHERE {$whereCondition} AND collected = 0
+                WHERE {$whereCondition}
                 GROUP BY userid
             ),
             total_sum AS (
@@ -913,8 +720,6 @@ class PoolMapper
             SELECT 
                 g.userid,
                 g.gemid,
-                g.postid,
-                g.fromid,
                 g.gems,
                 g.whereby,
                 g.createdat,
@@ -924,7 +729,7 @@ class PoolMapper
             FROM gems g
             JOIN user_sums us ON g.userid = us.userid
             CROSS JOIN total_sum ts
-            WHERE us.total_numbers > 0 AND g.collected = 0;
+            WHERE us.total_numbers > 0 AND g.{$whereCondition};
         ";
 
         try {
@@ -937,21 +742,14 @@ class PoolMapper
         }
 
         if (empty($data)) {
-            return $this->respondWithError('No data found.');
+            return $this->respondWithError('No records found for ' . $day);
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
-        $dailyToken = DAILY_NUMBER_TOKEN;
-
-        $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
-
-        $bestatigung = bcadd(bcmul($totalGems, $gemsintoken, 10), '0.00005', 4);
 
         $args = [
             'winstatus' => [
                 'totalGems' => $totalGems,
-                'gemsintoken' => $gemsintoken,
-                'bestatigung' => $bestatigung
             ]
         ];
 
@@ -962,48 +760,49 @@ class PoolMapper
                 $args[$userId] = [
                     'userid' => $userId,
                     'gems' => $row['total_numbers'],
-                    'tokens' => bcmul($row['total_numbers'], $gemsintoken, 10),
                     'percentage' => $row['percentage'],
                     'details' => []
                 ];
             }
 
-            $rowgems2token = bcmul($row['gems'], $gemsintoken, 10);
+            $whereby = $row['whereby'];
+
+            $mapping = [
+                1 => ['text' => 'View'],
+                2 => ['text' => 'Like'],
+                3 => ['text' => 'Dislike'],
+                4 => ['text' => 'Comment'],
+                5 => ['text' => 'Post'],
+            ];
+
+            if (!isset($mapping[$whereby])) {
+                return $this->respondWithError('Invalid action type.');
+            }
+
+            $whereby = $mapping[$whereby]['text'];
 
             $args[$userId]['details'][] = [
                 'gemid' => $row['gemid'],
-                'userid' => $row['userid'],
-                'postid' => $row['postid'],
-                'fromid' => $row['fromid'],
                 'gems' => $row['gems'],
-                'numbers' => $rowgems2token,
-                'whereby' => $row['whereby'],
+                'whereby' => $whereby,
                 'createdat' => $row['createdat']
             ];
 
-            $this->insertWinToLog($userId, end($args[$userId]['details']));
-            $this->insertWinToPool($userId, end($args[$userId]['details']));
+            //$this->insertWinToLog($userId, end($args[$userId]['details']));
+            //$this->insertWinToPool($userId, end($args[$userId]['details']));
         }
 
         if (!empty($data)) {
-            try {
-                $gemIds = array_column($data, 'gemid');
-                $quotedGemIds = array_map(fn($gemId) => $this->db->quote($gemId), $gemIds);
-
-                $this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
-
-            } catch (\Exception $e) {
-                $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
-                return $this->respondWithError($e->getMessage());
-            }
 
             return [
                 'status' => 'success',
-                'counter' => count($args),
+                'counter' => count($args) -1,
                 'ResponseCode' => 'Records found for ' . $day,
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
         }
+
+        return $this->respondWithError('Don\'t have any transaction in gems');
     }
 
     public function getPercentBeforeTransaction(string $userId, int $tokenAmount) : array

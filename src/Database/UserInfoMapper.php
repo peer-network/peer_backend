@@ -23,7 +23,7 @@ class UserInfoMapper
     {
         $this->logger->info('UserInfoMapper.loadInfoById started');
 
-        $stmt = $this->db->prepare('SELECT userid, liquidity, amountposts, amountblocked, amountfollower, amountfollowed, isprivate, updatedat FROM users_info WHERE userid = :id');
+        $stmt = $this->db->prepare('SELECT userid, liquidity, amountposts, amountblocked, amountfollower, amountfollowed, amountfriends, isprivate, updatedat FROM users_info WHERE userid = :id');
         $stmt->execute(['id' => $id]);
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -43,7 +43,7 @@ class UserInfoMapper
 
         $user->setUpdatedAt();
         $data = $user->getArrayCopy();
-        $query = "UPDATE users_info SET liquidity = :liquidity, amountposts = :amountposts, amountblocked = :amountblocked, amountfollower = :amountfollower, amountfollowed = :amountfollowed, isprivate = :isprivate, updatedat = :updatedat WHERE userid = :userid";
+        $query = "UPDATE users_info SET liquidity = :liquidity, amountposts = :amountposts, amountblocked = :amountblocked, amountfollower = :amountfollower, amountfollowed = :amountfollowed, amountfriends = :amountfriends, isprivate = :isprivate, updatedat = :updatedat WHERE userid = :userid";
         $stmt = $this->db->prepare($query);
         $stmt->execute($data);
 
@@ -82,6 +82,43 @@ class UserInfoMapper
         $this->logger->info("Updated user in database", ['user' => $data]);
 
         return new User($data);
+    }
+
+    public function fetchFriendsCounts(string $userId): void
+	{
+        $this->logger->info("UserMapper.fetchFriendsCounts started", ['userId' => $userId]);
+
+        try {
+            $sql = "
+                SELECT COUNT(*) AS fr
+                FROM follows f1 
+                INNER JOIN follows f2 ON f1.followedid = f2.followerid 
+                INNER JOIN users u ON f1.followedid = u.uid 
+                WHERE f1.followerid = :userId 
+                AND f2.followedid = :userId
+            ";
+
+            $stmt = $this->db->prepare($sql);
+
+            $stmt->bindValue(':userId', $userId, \PDO::PARAM_INT);
+
+            $stmt->execute();
+
+            $amountfriends = $stmt->fetch(\PDO::FETCH_ASSOC);
+			$friendsCount = (int)$amountfriends['fr'] ?? 0;
+
+			$queryUpdateFollower = "UPDATE users_info SET amountfriends = :amountfriends WHERE userid = :userId";
+			$stmt = $this->db->prepare($queryUpdateFollower);
+			$stmt->execute(['userId' => $userId, 'amountfriends' => $friendsCount]);
+
+            if ($amountfriends) {
+                $this->logger->info("fetchFriendsCounts retrieved friends", ['friends' => $amountfriends]);
+            } else {
+                $this->logger->warning("No friends found for user", ['userId' => $userId]);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error("Database error in fetchFriendsCounts", ['error' => $e->getMessage()]);
+        }
     }
 
     public function toggleUserFollow(string $followerid, string $followeduserid): array
@@ -128,6 +165,8 @@ class UserInfoMapper
             }
 
             $this->db->commit();
+			$this->fetchFriendsCounts($followerid);
+			$this->fetchFriendsCounts($followeduserid);
 
             return ['status' => 'success', 'ResponseCode' => $response, 'isfollowing' => $action];
         } catch (\Exception $e) {

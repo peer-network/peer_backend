@@ -1,0 +1,42 @@
+schema {
+  query: Query
+}
+
+type Query {
+  hello: HelloResponse!
+  dailygemstatus: StandardResponse!
+  dailygemsresults(day: DayType!): GenericResponse!
+}
+
+scalar Decimal
+scalar DATEN
+scalar Date
+
+enum DayType {
+  D0
+  D1
+  D2
+  D3
+  D4
+  D5
+  W0
+  M0
+  Y0
+}
+
+type StandardResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DATEN
+}
+
+type HelloResponse {
+  currentuserid: String
+}
+
+type GenericResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: DATEN
+}

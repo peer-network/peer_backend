@@ -42,7 +42,7 @@ class McapService
         try {
             $fetchUpdate = $this->mcapMapper->fetchAndUpdateMarketPrices();
             if (isset($fetchUpdate['status']) && $fetchUpdate['status'] === 'error') {
-                return $this->respondWithError($fetchUpdate['ResponseCode']);
+                return $fetchUpdate;
             }
 
             $results = $this->mcapMapper->loadLastId();

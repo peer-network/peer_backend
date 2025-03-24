@@ -334,7 +334,7 @@ class PostMapper
     {
         $this->logger->info("PostMapper.userInfoForPosts started");
 
-        $sql = "SELECT uid AS id, username, img FROM users WHERE uid = :id";
+        $sql = "SELECT uid AS id, username, slug, img FROM users WHERE uid = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -575,6 +575,7 @@ class PostMapper
                 p.mediadescription, 
                 p.createdat, 
                 u.username, 
+				u.slug,
                 u.img AS userimg,
                 COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
                 (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) as amountlikes,
@@ -599,7 +600,7 @@ class PostMapper
             LEFT JOIN post_tags pt ON p.postid = pt.postid
             LEFT JOIN tags t ON pt.tagid = t.tagid
             WHERE %s
-            GROUP BY p.postid, u.username, u.img
+            GROUP BY p.postid, u.username, u.slug, u.img
             ORDER BY %s
             LIMIT :limit OFFSET :offset",
             implode(" AND ", $whereClauses),
@@ -639,6 +640,7 @@ class PostMapper
                     'user' => [
                         'uid' => $row['userid'],
                         'username' => $row['username'],
+                        'slug' => $row['slug'],
                         'img' => $row['userimg'],
                         'isfollowed' => (bool)$row['isfollowed'],
                         'isfollowing' => (bool)$row['isfollowing'],

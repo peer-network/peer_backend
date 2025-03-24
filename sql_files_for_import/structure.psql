@@ -28,9 +28,11 @@ CREATE TABLE users_info (
     amountposts INTEGER DEFAULT 0 NOT NULL,
     amountfollower INTEGER DEFAULT 0 NOT NULL,
     amountfollowed INTEGER DEFAULT 0 NOT NULL,
+    amountfriends INTEGER DEFAULT 0 NOT NULL,
     amountblocked INTEGER DEFAULT 0 NOT NULL,
     isprivate SMALLINT DEFAULT 0 NOT NULL,
     invited UUID DEFAULT NULL,
+    pkey VARCHAR(44) DEFULT NULL,
     updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_users_info_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
     CONSTRAINT fk_users_info_invited FOREIGN KEY (invited) REFERENCES users(uid) ON DELETE CASCADE

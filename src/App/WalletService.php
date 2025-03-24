@@ -38,52 +38,6 @@ class WalletService
         return true;
     }
 
-    public function createTransaction(?array $args = []): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
-        }
-
-        if (empty($args)) {
-            return $this->respondWithError('Could not find mandatory args.');
-        }
-
-        $this->logger->info('WalletService.createTransaction started');
-
-        $token = $this->walletMapper->getPeerToken();
-        $userid = $this->currentUserId;
-        $postid = $args['postid'] ?? '';
-        $fromid = $args['fromid'] ?? '';
-        $numbers = $args['numbers'] ?? 0;
-        $whereby = $args['whereby'] ?? 0;
-        $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
-
-        // Validate input parameters
-        try {
-            // Create the Survey
-            $walletData = [
-                'token' => $token,
-                'userid' => $userid,
-                'postid' => $postid,
-                'fromid' => $fromid,
-                'numbers' => $numbers,
-                'whereby' => $whereby,
-                'createdat' => $createdat,
-            ];
-            $towallet = new Wallet($walletData);
-            $this->walletMapper->insert($towallet);
-
-            $this->logger->info('Transaction created successfully', ['token' => $token]);
-            return [
-                'status' => 'success',
-                'affectedRows' => $walletData,
-            ];
-        } catch (\Exception $e) {
-            $this->logger->error('Failed to create Transaction', ['args' => $args, 'exception' => $e]);
-            return $this->respondWithError('Failed to create Transaction.');
-        }
-    }
-
     public function fetchPool(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
@@ -295,7 +249,6 @@ class WalletService
 
         try {
             $response = $this->walletMapper->deductFromWallets($userId, $args);
-
             if ($response['status'] === 'success') {
                 return $response;
             } else {

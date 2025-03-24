@@ -5,6 +5,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\Comment;
 use Fawaz\App\CommentAdvanced;
+use Fawaz\App\Commented;
 use Psr\Log\LoggerInterface;
 
 class CommentMapper
@@ -26,23 +27,6 @@ class CommentMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['commentid' => $commentid, 'userid' => $userid]);
         return (bool) $stmt->fetchColumn();
-    }
-
-    public function loadUserInfoById(string $id): array|false
-    {
-        $this->logger->info("UserMapper.loadUserInfoById started");
-
-        $sql = "SELECT uid, username, img, biography, updatedat FROM users WHERE uid = :id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($data !== false) {
-            return $data;
-        }
-
-        $this->logger->warning("No user found with id: " . $id);
-        return false;
     }
 
     public function insert(Comment $comment): Comment
@@ -107,6 +91,7 @@ class CommentMapper
                 CASE WHEN ul.userid IS NOT NULL THEN TRUE ELSE FALSE END AS isliked,
                 u.uid,
                 u.username,
+				u.slug,
                 u.img,
                 CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
                 CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed
@@ -154,6 +139,7 @@ class CommentMapper
                 'user' => [
                     'uid' => $row['uid'],
                     'username' => $row['username'],
+                    'slug' => $row['slug'],
                     'img' => $row['img'],
                     'isfollowed' => (bool) $row['isfollowed'],
                     'isfollowing' => (bool) $row['isfollowing'],
@@ -166,11 +152,11 @@ class CommentMapper
         return $results;
     }
 
-    public function fetchAllByPostId(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
+    public function fetchAllByPostIdd(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
     {
         $this->logger->info("CommentMapper.fetchAllByPostId started");
 
-        $sql = "SELECT * FROM comments WHERE postid = :postid AND parentid IS NULL ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT * FROM comments WHERE postid = :postId AND parentid IS NULL ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
         $params = [
             'postId' => $postId,
             'limit' => $limit,
@@ -186,6 +172,44 @@ class CommentMapper
         }
 
         return $comments;
+    }
+
+    public function fetchAllByPostId(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
+    {
+        $this->logger->info("CommentMapper.fetchAllByPostId started");
+
+        $sql = "SELECT * FROM comments WHERE postid = :postid AND parentid IS NULL ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':postid', $postId, PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $comments = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $comment = new Commented($row);
+            $commentArray = $comment->getArrayCopy();
+            $commentArray['subcomments'] = $this->fetchSubComments($comment->getId());
+            $comments[] = $commentArray;
+        }
+
+        return $comments;
+    }
+
+    private function fetchSubComments(string $parentId): array
+    {
+        $sql = "SELECT * FROM comments WHERE parentid = :parentid ORDER BY createdat ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':parentid', $parentId, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $subComments = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $subComment = new CommentAdvanced($row);
+            $subComments[] = $subComment->getArrayCopy();
+        }
+        
+        return $subComments;
     }
 
     public function fetchByParentId(string $parentId, string $currentUserId, int $offset = 0, int $limit = 10): array
@@ -204,6 +228,7 @@ class CommentMapper
                 (ul.userid IS NOT NULL) AS isliked,
                 u.uid,
                 u.username,
+                u.slug,
                 u.img,
                 (f1.followerid IS NOT NULL) AS isfollowing,
                 (f2.followerid IS NOT NULL) AS isfollowed
@@ -226,7 +251,7 @@ class CommentMapper
             WHERE 
                 c.parentid = :parentId
             ORDER BY 
-                c.createdat ASC
+                c.createdat DESC
             LIMIT :limit OFFSET :offset;
         ";
 
@@ -253,6 +278,7 @@ class CommentMapper
                 'user' => [
                     'uid' => $row['uid'],
                     'username' => $row['username'],
+                    'slug' => $row['slug'],
                     'img' => $row['img'],
                     'isfollowed' => (bool) $row['isfollowed'],
                     'isfollowing' => (bool) $row['isfollowing'],
@@ -302,5 +328,15 @@ class CommentMapper
 
         $this->logger->warning("No comment found with id", ['id' => $id]);
         return false;
+    }
+
+    public function isParentTopLevel(string $commentId): bool
+    {
+        $this->logger->info("CommentMapper.isParentTopLevel started");
+
+        $sql = "SELECT COUNT(*) FROM comments WHERE commentid = :commentId AND parentid IS NULL";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['commentId' => $commentId]);
+        return (bool) $stmt->fetchColumn();
     }
 }
