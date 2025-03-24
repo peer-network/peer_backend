@@ -15,13 +15,12 @@ type Query {
   getallusers(offset: Int, limit: Int): UserSearchResponse!
   profile(userid: ID, postLimit: Int): ProfileInfo!
   follows(userid: ID, offset: Int, limit: Int): UserFollows!
-  followrelations(userid: ID, offset: Int, limit: Int): RelationsFollow!
   friends(offset: Int, limit: Int): UserFriends!
   getuserinfo: GetUserinforesponse!
   getallposts(filterBy: [FilterType!], IgnorList: IgnoredList, sortBy: SortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, postOffset: Int, postLimit: Int, commentOffset: Int, commentLimit: Int): GetAllPostResponse!
   getpostinfo(postid: ID!): GetPostinforesponse!
   getcommentinfo(commentid: ID!): GetCommentinforesponse!
-  parentcomments(parent: ID!): CommentResponse!
+  parentcomments(parent: ID!, offset: Int, limit: Int): CommentResponse!
   tags(offset: Int, limit: Int): TagSearchResponse!
   tagsearch(tagname: String!, offset: Int, limit: Int): TagSearchResponse!
   searchchat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse!
@@ -43,7 +42,7 @@ type Mutation {
   updateBiography(biography: String!): DefaultResponse!
   updateProfilePicture(img: String!): DefaultResponse!
   userFollow(userid: ID!): setFollowUseresponse!
-  userBlock(userid: ID!): setBlockUseresponse!
+  userBlock(userid: ID!): DefaultResponse!
   deleteAccount(password: String!): DefaultResponse!
   createChat(input: CreateChatInput!): AddChatResponse!
   updateChat(input: UpdateChatInput!): AddChatResponse!
@@ -56,10 +55,9 @@ type Mutation {
   likeComment(commentid: ID!): DefaultResponse!
   reportComment(commentid: ID!): DefaultResponse!
   deletePost(id: ID!): DefaultResponse!
-  contactus(name: String!, email: String!, message: String!): StandardResponse!
   createPost(action: PostenType!, input: CreatePostInput!): PostResponse!
-  createComment(action: CommentsType!, postid: ID!, parentid: ID, content: String!): StandardResponse!
-  resolveActionPost(action: ActionType!, postid: ID!): StandardResponse!
+  createComment(action: CommentsType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
+  resolveActionPost(action: ActionType!, postid: ID!): DefaultResponse!
 }
 
 scalar Decimal
@@ -179,9 +177,10 @@ type GetUserInfo {
   userid: ID!
   liquidity: Decimal!
   amountposts: Int!
-  amounttrending: Int!
+  amountblocked: Int!
   amountfollower: Int!
   amountfollowed: Int!
+  amountfriends: Int!
   updatedat: Date
 }
 
@@ -242,18 +241,14 @@ type ChatParticipant {
   userid: ID!
   img: String!
   username: String!
+  slug: Int!
   hasaccess: Int!
 }
 
 type setFollowUseresponse {
   status: String!
+  ResponseCode: String
   isfollowing: Boolean
-  ResponseCode: String
-}
-
-type setBlockUseresponse {
-  status: String!
-  ResponseCode: String
 }
 
 type ProfilPostMed {
@@ -318,6 +313,7 @@ type Userinfo {
   userid: ID
   img: String
   username: String
+  slug: Int
   biography: String
   updatedat: Date!
 }
@@ -347,12 +343,13 @@ type Profile {
   slug: Int
   img: String
   biography: String
-  amountposts: Int
-  amounttrending: Int
   isfollowed: Boolean
   isfollowing: Boolean
+  amountposts: Int
+  amounttrending: Int
   amountfollowed: Int
   amountfollower: Int
+  amountfriends: Int!
   imageposts: [ProfilPostMed!]
   textposts: [ProfilPostMed!]
   videoposts: [ProfilPostMed!]
@@ -367,23 +364,11 @@ type ProfileInfo {
 
 type ProfilUser {
   id: ID!
-  username: String!
+  username: String
+  slug: Int
   img: String
   isfollowed: Boolean
   isfollowing: Boolean
-}
-
-type FollowRelations {
-  followers: [ProfilUser!]
-  following: [ProfilUser!]
-  friends: [ProfilUser!]
-}
-
-type RelationsFollow {
-  status: String
-  counter: Int!
-  ResponseCode: String
-  affectedRows: FollowRelations
 }
 
 type Followes {
@@ -470,9 +455,9 @@ type Comment {
   postid: ID!
   parentid: ID
   content: String!
+  createdat: Date!
   amountlikes: Int!
   isliked: Boolean!
-  createdat: Date!
   user: ProfilUser!
 }
 

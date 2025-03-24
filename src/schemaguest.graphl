@@ -49,4 +49,5 @@ input RegisterInput {
   email: String!
   password: String!
   username: String!
+  pkey: String!
 }

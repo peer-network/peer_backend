@@ -943,7 +943,7 @@ class WalletMapper
             FROM gems g
             JOIN user_sums us ON g.userid = us.userid
             CROSS JOIN total_sum ts
-            WHERE us.total_numbers > 0 AND g.collected = 0;
+            WHERE us.total_numbers > 0 AND g.collected = 0 AND g.{$whereCondition};
         ";
 
         try {
@@ -956,7 +956,7 @@ class WalletMapper
         }
 
         if (empty($data)) {
-            return $this->respondWithError('No data found.');
+            return $this->respondWithError('No records found for ' . $day);
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
@@ -1018,7 +1018,7 @@ class WalletMapper
 
             return [
                 'status' => 'success',
-                'counter' => count($args),
+                'counter' => count($args) -1,
                 'ResponseCode' => 'Records found for ' . $day,
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];

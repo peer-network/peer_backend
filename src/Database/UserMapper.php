@@ -375,7 +375,7 @@ class UserMapper
             $sql .= " AND " . implode(" AND ", $conditions);
         }
 
-        $sql .= " ORDER BY u.uid LIMIT :limit OFFSET :offset";
+        $sql .= " ORDER BY u.createdat DESC LIMIT :limit OFFSET :offset";
         $queryParams[':limit'] = $limit;
         $queryParams[':offset'] = $offset;
         $queryParams[':trendlimit'] = $trendlimit;
@@ -548,7 +548,7 @@ class UserMapper
         $this->logger->info("UserMapper.loadUserInfoById started", ['id' => $id]);
 
         try {
-            $sql = "SELECT uid, username, img, biography, updatedat FROM users WHERE uid = :id";
+            $sql = "SELECT uid, username, slug, img, biography, updatedat FROM users WHERE uid = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);  // Use bindValue here
             $stmt->execute();
@@ -725,7 +725,7 @@ class UserMapper
 
         try {
             $sql = "
-                SELECT u.uid, u.username, u.updatedat, u.biography, u.img 
+                SELECT u.uid, u.username, u.slug, u.updatedat, u.biography, u.img 
                 FROM follows f1 
                 INNER JOIN follows f2 ON f1.followedid = f2.followerid 
                 INNER JOIN users u ON f1.followedid = u.uid 
@@ -771,6 +771,7 @@ class UserMapper
                 SELECT 
                     f.followerid AS uid, 
                     u.username, 
+					u.slug,
                     u.img,
                     EXISTS (
                         SELECT 1 
@@ -828,6 +829,7 @@ class UserMapper
                 SELECT 
                     f.followedid AS uid, 
                     u.username, 
+					u.slug,
                     u.img,
                     EXISTS (
                         SELECT 1 
@@ -868,114 +870,6 @@ class UserMapper
             return $users;
         } catch (\Exception $e) {
             $this->logger->error("Database error in fetchFollowing", ['error' => $e->getMessage()]);
-            return [];
-        }
-    }
-
-    public function fetchFollowRelations(
-        string $userId, 
-        string $currentUserId, 
-        int $offset = 0, 
-        int $limit = 10, 
-        string $relationType = 'followers'
-    ): array {
-        $this->logger->info("UserMapper.fetchFollowRelations started", ['relationType' => $relationType]);
-
-        try {
-            $isFollowers = $relationType === 'followers';
-            $isFollowing = $relationType === 'following';
-            $isFriends = $relationType === 'friends';
-
-            if ($isFollowers) {
-                $sql = "
-                    SELECT 
-                        f.followerid AS uid, 
-                        u.username, 
-                        u.img,
-                        EXISTS (
-                            SELECT 1 
-                            FROM follows ff 
-                            WHERE ff.followerid = :currentUserId AND ff.followedid = f.followerid
-                        ) AS isfollowed,
-                        EXISTS (
-                            SELECT 1 
-                            FROM follows ff 
-                            WHERE ff.followerid = f.followerid AND ff.followedid = :currentUserId
-                        ) AS isfollowing
-                    FROM follows f
-                    JOIN users u ON u.uid = f.followerid
-                    WHERE f.followedid = :userId
-                    ORDER BY f.createdat DESC
-                    LIMIT :limit OFFSET :offset
-                ";
-            } elseif ($isFollowing) {
-                $sql = "
-                    SELECT 
-                        f.followedid AS uid, 
-                        u.username, 
-                        u.img,
-                        EXISTS (
-                            SELECT 1 
-                            FROM follows ff 
-                            WHERE ff.followerid = :currentUserId AND ff.followedid = f.followedid
-                        ) AS isfollowed,
-                        EXISTS (
-                            SELECT 1 
-                            FROM follows ff 
-                            WHERE ff.followerid = f.followedid AND ff.followedid = :currentUserId
-                        ) AS isfollowing
-                    FROM follows f
-                    JOIN users u ON u.uid = f.followedid
-                    WHERE f.followerid = :userId
-                    ORDER BY f.createdat DESC
-                    LIMIT :limit OFFSET :offset
-                ";
-            } elseif ($isFriends) {
-                $sql = "
-                    SELECT 
-                        f1.followerid AS uid, 
-                        u.username, 
-                        u.img,
-                        EXISTS (
-                            SELECT 1 
-                            FROM follows ff 
-                            WHERE ff.followerid = :currentUserId AND ff.followedid = f1.followerid
-                        ) AS isfollowed,
-                        EXISTS (
-                            SELECT 1 
-                            FROM follows ff 
-                            WHERE ff.followerid = f1.followerid AND ff.followedid = :currentUserId
-                        ) AS isfollowing
-                    FROM follows f1
-                    JOIN follows f2 ON f1.followerid = f2.followedid
-                    JOIN users u ON u.uid = f1.followerid
-                    WHERE f1.followedid = :userId AND f2.followerid = :userId
-                    ORDER BY f1.createdat DESC
-                    LIMIT :limit OFFSET :offset
-                ";
-            } else {
-                throw new InvalidArgumentException('Invalid relationType. Use "followers", "following", or "friends".');
-            }
-
-            $stmt = $this->db->prepare($sql);
-            
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-
-            $stmt->execute();
-            $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-            $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
-
-            $users = array_map(fn($row) => new ProfilUser($row), $uniqueResults);
-
-            $this->logger->info("fetchFollowRelations completed", ['count' => count($users)]);
-
-            return $users;
-        } catch (\Exception $e) {
-            $this->logger->error("Database error in fetchFollowRelations", ['error' => $e->getMessage()]);
             return [];
         }
     }
@@ -1054,13 +948,15 @@ class UserMapper
                 u.status,
                 u.img,
                 u.biography,
-                COALESCE((SELECT COUNT(p.postid) FROM posts p WHERE p.userid = u.uid), 0) AS amountposts,
+				ui.amountposts,
+				ui.amountfollower,
+				ui.amountfollowed,
+				ui.amountfriends,
                 COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed,
-                (SELECT COUNT(*) FROM follows WHERE followedid = u.uid) AS amountfollower,
-                (SELECT COUNT(*) FROM follows WHERE followerid = u.uid) AS amountfollowed
+                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
             FROM users u
+            LEFT JOIN users_info ui ON ui.userid = u.uid
             WHERE u.uid = :userid AND u.verified = :verified
         ";
 

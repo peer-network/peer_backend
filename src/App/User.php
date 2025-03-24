@@ -18,6 +18,7 @@ class User
     protected string $ip;
     protected ?string $biography;
     protected ?string $img;
+    protected ?string $pkey;
     protected string $createdat;
     protected string $updatedat;
 

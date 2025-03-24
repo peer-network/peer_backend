@@ -76,7 +76,7 @@ class ChatMapper
     {
         $this->logger->info("ChatMapper.fetchFriends started");
 
-        $sql = "SELECT u.uid, u.username, u.updatedat, u.biography, u.img 
+        $sql = "SELECT u.uid, u.username, u.slug, u.updatedat, u.biography, u.img 
                 FROM follows f1 
                 INNER JOIN follows f2 ON f1.followedid = f2.followerid 
                 INNER JOIN users u ON f1.followedid = u.uid 
@@ -266,6 +266,7 @@ class ChatMapper
                 SELECT 
                     p.userid, 
                     u.username, 
+					u.slug,
                     u.img, 
                     p.hasaccess 
                 FROM chatparticipants p 
@@ -792,6 +793,7 @@ class ChatMapper
                     SELECT 
                         p.userid, 
                         u.username, 
+						u.slug,
                         u.img, 
                         p.hasaccess 
                     FROM 

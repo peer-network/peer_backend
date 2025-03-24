@@ -5,7 +5,7 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
-class CommentAdvanced
+class Commented
 {
     protected string $commentid;
     protected string $userid;
@@ -16,7 +16,7 @@ class CommentAdvanced
     protected ?int $amountlikes;
     protected ?bool $isliked;
     protected ?array $user = [];
-    
+    protected ?array $subcomments = [];
 
     // Constructor
     public function __construct(array $data = [])
@@ -32,6 +32,7 @@ class CommentAdvanced
         $this->amountlikes = $data['amountlikes'] ?? 0;
         $this->isliked = $data['isliked'] ?? false;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
+        $this->subcomments = isset($data['subcomments']) && is_array($data['subcomments']) ? $data['subcomments'] : [];
     }
 
     // Array Copy methods
@@ -47,6 +48,7 @@ class CommentAdvanced
             'amountlikes' => $this->amountlikes,
             'isliked' => $this->isliked,
             'user' => $this->user,
+            'subcomments' => $this->subcomments,
         ];
         return $att;
     }
@@ -105,6 +107,16 @@ class CommentAdvanced
     public function setContent(string $content): void
     {
         $this->content = $content;
+    }
+
+    public function getSubComments(): string
+    {
+        return $this->subcomments;
+    }
+
+    public function setSubComments(string $subcomments): void
+    {
+        $this->subcomments = $subcomments;
     }
 
     // Validation and Array Filtering methods
@@ -178,6 +190,10 @@ class CommentAdvanced
                 'filters' => [['name' => 'Boolean']],
             ],
             'user' => [
+                'required' => false,
+                'validators' => [['name' => 'IsArray']],
+            ],
+            'subcomments' => [
                 'required' => false,
                 'validators' => [['name' => 'IsArray']],
             ],

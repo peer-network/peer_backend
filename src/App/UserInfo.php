@@ -13,6 +13,7 @@ class UserInfo
     protected int $amountblocked;
     protected int $amountfollower;
     protected int $amountfollowed;
+    protected int $amountfriends;
     protected int $isprivate;
     protected ?string $invited;
     protected string $updatedat;
@@ -28,6 +29,7 @@ class UserInfo
         $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->amountfollower = $data['amountfollower'] ?? 0;
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
+        $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->isprivate = $data['isprivate'] ?? 0;
         $this->invited = $data['invited'] ?? null;
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -43,6 +45,7 @@ class UserInfo
             'amountblocked' => $this->amountblocked,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
+            'amountfriends' => $this->amountfriends,
             'isprivate' => $this->isprivate,
             'invited' => $this->invited,
             'updatedat' => $this->updatedat,
@@ -99,6 +102,16 @@ class UserInfo
     public function setAmountFollowed(int $amountfollowed): void
     {
         $this->amountfollowed = $amountfollowed;
+    }
+
+    public function getAmountFriends(): int|null
+    {
+        return $this->amountfriends;
+    }
+
+    public function setAmountFriends(int $amountfriends): void
+    {
+        $this->amountfriends = $amountfriends;
     }
 
     public function getIsPrivate(): int
@@ -185,6 +198,11 @@ class UserInfo
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountfollowed' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountfriends' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],

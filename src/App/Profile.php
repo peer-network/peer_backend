@@ -19,6 +19,7 @@ class Profile
     protected ?bool $isfollowing;
     protected ?int $amountfollower;
     protected ?int $amountfollowed;
+    protected ?int $amountfriends;
     protected ?array $imageposts = [];
     protected ?array $textposts = [];
     protected ?array $videoposts = [];
@@ -41,6 +42,7 @@ class Profile
         $this->isfollowing = $data['isfollowing'] ?? false;
         $this->amountfollower = $data['amountfollower'] ?? 0;
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
+        $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->imageposts = isset($data['imageposts']) && is_array($data['imageposts']) ? $data['imageposts'] : [];
         $this->textposts = isset($data['textposts']) && is_array($data['textposts']) ? $data['textposts'] : [];
         $this->videoposts = isset($data['videoposts']) && is_array($data['videoposts']) ? $data['videoposts'] : [];
@@ -63,6 +65,7 @@ class Profile
             'isfollowing' => $this->isfollowing,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
+            'amountfriends' => $this->amountfriends,
             'imageposts' => $this->imageposts,
             'textposts' => $this->textposts,
             'videoposts' => $this->videoposts,
@@ -194,6 +197,11 @@ class Profile
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountfollowed' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountfriends' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],

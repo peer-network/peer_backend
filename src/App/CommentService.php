@@ -7,6 +7,7 @@ use Fawaz\App\CommentInfo;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\CommentInfoMapper;
 use Fawaz\Database\PostInfoMapper;
+use Fawaz\Database\UserMapper;
 use Psr\Log\LoggerInterface;
 
 class CommentService
@@ -17,7 +18,8 @@ class CommentService
         protected LoggerInterface $logger,
         protected CommentMapper $commentMapper,
         protected CommentInfoMapper $commentInfoMapper,
-        protected PostInfoMapper $postInfoMapper
+        protected PostInfoMapper $postInfoMapper,
+        protected UserMapper $userMapper
     ) {
     }
 
@@ -99,12 +101,17 @@ class CommentService
         }
 
         if ($parentId !== null && !$this->validateUUID($parentId)) {
-            $this->logger->warning('Invalid parent ID', ['parentId' => $parentId]);
-            $parentId = null;
+			return $this->respondWithError('Invalid parent ID', ['parentId' => $parentId]);
         }
 
         if ($content === '') {
             return $this->respondWithError('Content is required');
+        }
+
+        if ($parentId !== null) {
+            if (!$this->commentMapper->isParentTopLevel($parentId)) {
+                return $this->respondWithError('Parent comment must be top level.');
+            }
         }
 
         try {
@@ -145,7 +152,6 @@ class CommentService
             $commentInfo = new CommentInfo($commentInfoData);
             $this->commentInfoMapper->insert($commentInfo);
 
-            // If the comment has a parent, increment the "comments" field for the parent in comment_info
             if (!empty($parentId)) {
                 $parentCommentInfo = $this->commentInfoMapper->loadById($parentId);
                 if ($parentCommentInfo) {
@@ -157,7 +163,7 @@ class CommentService
             }
 
             $commentResponse = $result->getArrayCopy();
-            $commentResponse['user'] = $this->commentMapper->loadUserInfoById($this->currentUserId);
+            $commentResponse['user'] = $this->userMapper->loadUserInfoById($this->currentUserId);
 
             $this->logger->info('Comment created successfully', ['commentResponse' => $commentResponse]);
 
@@ -192,9 +198,31 @@ class CommentService
             return $this->respondWithError('Invalid uuid input.');
         }
 
-        $this->logger->info("PostService.findPostser started");
+        $this->logger->info("CommentService.fetchByParentId started");
 
         $results = $this->commentMapper->fetchByParentId($parentId, $this->currentUserId, $offset, $limit);
         return $results;
     }
+
+    public function fetchAllByPostId(?array $args = []): array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
+
+        $postId = $args['postid'] ?? null;
+
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+
+        if ($postId !== null && !self::isValidUUID($postId)) {
+            return $this->respondWithError('Invalid uuid input.');
+        }
+
+        $this->logger->info("CommentService.fetchAllByPostId started");
+
+        $results = $this->commentMapper->fetchAllByPostId($postId, $this->currentUserId, $offset, $limit);
+        return $results;
+    }
+
 }

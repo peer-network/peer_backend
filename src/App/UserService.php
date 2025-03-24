@@ -77,6 +77,23 @@ class UserService
         return ['status' => 'success'];
     }
 
+    private function validatePkey(string $pkey): array
+    {
+        if ($pkey === '') {
+            return $this->respondWithError('Could not find mandatory pkey');
+        }
+
+        if (strlen($pkey) < 43 || strlen($pkey) > 44) {
+            return $this->respondWithError('Pkey must be between 43 and 44 characters.');
+        }
+
+		if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $pkey)) {
+			return $this->respondWithError('Invalid Solana Public Key.');
+		}
+
+        return ['status' => 'success'];
+    }
+
     private function validatePassword(string $password): array
     {
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
@@ -148,6 +165,7 @@ class UserService
         $username = trim($args['username']);
         $email = trim($args['email']);
         $password = $args['password'];
+        $pkey = $args['pkey'] ?? null;
         $mediaFile = isset($args['img']) ? trim($args['img']) : '';
         $isPrivate = (int)($args['isprivate'] ?? 0);
         $invited = $args['invited'] ?? null;
@@ -167,6 +185,13 @@ class UserService
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $this->respondWithError('Invalid email format.');
         }
+
+		if ($pkey !== null && !empty($pkey)) {
+			$validatePkey = $this->validatePkey($pkey);
+			if ($validatePkey['status'] === 'error') {
+				return $validatePkey;
+			}
+		}
 
         if ($this->userMapper->isEmailTaken($email)) {
             return $this->respondWithError('Email already registered.');
@@ -199,6 +224,7 @@ class UserService
             'amountfollowed' => 0,
             'isprivate' => 0,
             'invited' => $invited,
+            'pkey' => $pkey,
             'updatedat' => $createdat,
         ];
 
@@ -614,48 +640,6 @@ class UserService
             ];
         } catch (\Exception $e) {
             $this->logger->error('Failed to fetch followers or following data', ['error' => $e->getMessage()]);
-            return $this->respondWithError('Failed to fetch followers or following data.');
-        }
-    }
-
-    public function FollowRelations(?array $args = []): array
-    {
-        $this->logger->info('UserService.FollowRelations started');
-
-        $userId = $args['userid'] ?? $this->currentUserId;
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-
-        if (!self::isValidUUID($userId)) {
-            return $this->respondWithError('Invalid UUID provided for Follows.');
-        }
-
-        try {
-            $followers = $this->userMapper->fetchFollowRelations($userId, $this->currentUserId, $offset, $limit, 'followers');
-            $following = $this->userMapper->fetchFollowRelations($userId, $this->currentUserId, $offset, $limit, 'following');
-            $friends = $this->userMapper->fetchFollowRelations($userId, $this->currentUserId, $offset, $limit, 'friends');
-            $counter = count($followers) + count($following) + count($friends);
-
-            return [
-                'status' => 'success',
-                'counter' => $counter,
-                'ResponseCode' => 'FollowRelations data prepared successfully',
-                'affectedRows' => [
-                'followers' => array_map(
-                    fn(ProfilUser $follower) => $follower->getArrayCopy(),
-                    $followers
-                ),
-                'following' => array_map(
-                    fn(ProfilUser $followed) => $followed->getArrayCopy(),
-                    $following
-                ),
-                'friends' => array_map(
-                    fn(ProfilUser $followed) => $followed->getArrayCopy(),
-                    $friends
-                )]
-            ];
-        } catch (\Exception $e) {
-            $this->logger->error('Failed to fetch follow relations data', ['error' => $e->getMessage()]);
             return $this->respondWithError('Failed to fetch followers or following data.');
         }
     }

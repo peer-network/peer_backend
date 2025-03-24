@@ -25,6 +25,7 @@ class UserAdvanced
     protected ?bool $isfollowing;
     protected ?int $amountfollower;
     protected ?int $amountfollowed;
+    protected ?int $amountfriends;
     protected ?float $liquidity;
     protected ?string $createdat;
     protected ?string $updatedat;
@@ -52,6 +53,7 @@ class UserAdvanced
         $this->isfollowing = $data['isfollowing'] ?? false;
         $this->amountfollower = $data['amountfollower'] ?? 0;
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
+        $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->liquidity = $data['liquidity'] ?? 0.0;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -79,6 +81,7 @@ class UserAdvanced
             'isfollowing' => $this->isfollowing,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
+            'amountfriends' => $this->amountfriends,
             'liquidity' => $this->liquidity,
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
@@ -263,24 +266,54 @@ class UserAdvanced
         $this->img = $imgPath;
     }
 
-    public function getamountposts(): int|null
+    public function getAmountPosts(): int|null
     {
         return $this->amountposts;
     }
 
-    public function setamountposts(int $amountposts): void
+    public function setAmountPosts(int $amountposts): void
     {
         $this->amountposts = $amountposts;
     }
 
-    public function getamounttrending(): int|null
+    public function getAmountTrending(): int|null
     {
         return $this->amounttrending;
     }
 
-    public function setamounttrending(int $amounttrending): void
+    public function setAmountTrending(int $amounttrending): void
     {
         $this->amounttrending = $amounttrending;
+    }
+
+    public function getAmountFollowes(): int
+    {
+        return $this->amountfollower;
+    }
+
+    public function setAmountFollowers(int $amountfollower): void
+    {
+        $this->amountfollower = $amountfollower;
+    }
+
+    public function getAmountFollowed(): int
+    {
+        return $this->amountfollowed;
+    }
+
+    public function setAmountFollowed(int $amountfollowed): void
+    {
+        $this->amountfollowed = $amountfollowed;
+    }
+
+    public function getAmountFriends(): int|null
+    {
+        return $this->amountfriends;
+    }
+
+    public function setAmountFriends(int $amountfriends): void
+    {
+        $this->amountfriends = $amountfriends;
     }
 
     public function getLiquidity(): float
@@ -485,6 +518,11 @@ class UserAdvanced
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountfollowed' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountfriends' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],

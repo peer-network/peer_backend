@@ -107,7 +107,6 @@ class PostInfoService
         return [
             'status' => 'success',
             'ResponseCode' => 'Successfully liked',
-            'affectedRows' => ['userid' => $postInfo->getOwnerId()],
         ];
     }
 
@@ -145,7 +144,6 @@ class PostInfoService
         return [
             'status' => 'success',
             'ResponseCode' => 'Successfully disliked',
-            'affectedRows' => ['userid' => $postInfo->getOwnerId()],
         ];
     }
 
@@ -183,7 +181,6 @@ class PostInfoService
         return [
             'status' => 'success',
             'ResponseCode' => 'Successfully report',
-            'affectedRows' => ['reported' => $postInfo->getReports()],
         ];
     }
 
@@ -221,7 +218,6 @@ class PostInfoService
         return [
             'status' => 'success',
             'ResponseCode' => 'Successfully viewed',
-            'affectedRows' => ['viewed' => $postInfo->getViews()],
         ];
     }
 
@@ -255,7 +251,6 @@ class PostInfoService
         return [
             'status' => 'success',
             'ResponseCode' => 'Successfully shared',
-            'affectedRows' => ['shared' => $postInfo->getShares()],
         ];
     }
 
