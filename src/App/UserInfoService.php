@@ -233,7 +233,6 @@ class UserInfoService
             return [
                 'status' => 'success', 
                 'ResponseCode' => $responseMessage, 
-                //'affectedRows' => $updatedUser->getArrayCopy()
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error updating biography', ['exception' => $e]);
@@ -285,7 +284,6 @@ class UserInfoService
             return [
                 'status' => 'success', 
                 'ResponseCode' => $responseMessage, 
-                //'affectedRows' => $updatedUser->getArrayCopy()
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error setting profile picture', ['exception' => $e]);

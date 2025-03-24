@@ -21,103 +21,193 @@ class UserInfoMapper
 
     public function loadInfoById(string $id): UserInfo|false
     {
-        $this->logger->info('UserInfoMapper.loadInfoById started');
+        $this->logger->info('UserInfoMapper.loadInfoById started', ['id' => $id]);
 
-        $stmt = $this->db->prepare('SELECT userid, liquidity, amountposts, amountblocked, amountfollower, amountfollowed, amountfriends, isprivate, updatedat FROM users_info WHERE userid = :id');
-        $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        try {
+            $stmt = $this->db->prepare(
+                'SELECT userid, liquidity, amountposts, amountblocked, amountfollower, 
+                        amountfollowed, amountfriends, isprivate, updatedat 
+                 FROM users_info 
+                 WHERE userid = :id'
+            );
 
-        if ($data !== false) {
-            $this->logger->info('load Info By Id', ['data' => $data]);
-            return new UserInfo($data);
+            $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
+            $stmt->execute();
+
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($data) {
+                $this->logger->info('User info loaded successfully', ['id' => $id, 'data' => $data]);
+                return new UserInfo($data);
+            } else {
+                $this->logger->warning("No user found with given ID", ['id' => $id]);
+                return false;
+            }
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error in loadInfoById", [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        } catch (\Exception $e) {
+            $this->logger->error("Unexpected error in loadInfoById", [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return false;
         }
-
-        $this->logger->warning("No user found with id", ['id' => $id]);
-
-        return false;
     }
 
     public function update(UserInfo $user): UserInfo
     {
-        $this->logger->info('UserInfoMapper.update started');
+        $this->logger->info('UserInfoMapper.update started', ['userid' => $user->getUserId()]);
 
-        $user->setUpdatedAt();
-        $data = $user->getArrayCopy();
-        $query = "UPDATE users_info SET liquidity = :liquidity, amountposts = :amountposts, amountblocked = :amountblocked, amountfollower = :amountfollower, amountfollowed = :amountfollowed, amountfriends = :amountfriends, isprivate = :isprivate, updatedat = :updatedat WHERE userid = :userid";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute($data);
+        try {
+            $user->setUpdatedAt();
+            $data = $user->getArrayCopy();
 
-        $this->logger->info("Updated user in database", ['user' => $data]);
+            $query = "UPDATE users_info 
+                      SET liquidity = :liquidity, 
+                          amountposts = :amountposts, 
+                          amountblocked = :amountblocked, 
+                          amountfollower = :amountfollower, 
+                          amountfollowed = :amountfollowed, 
+                          amountfriends = :amountfriends, 
+                          isprivate = :isprivate, 
+                          updatedat = :updatedat 
+                      WHERE userid = :userid";
 
-        return new UserInfo($data);
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindValue(':liquidity', $data['liquidity'], \PDO::PARAM_STR);
+            $stmt->bindValue(':amountposts', $data['amountposts'], \PDO::PARAM_INT);
+            $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
+            $stmt->bindValue(':amountfollower', $data['amountfollower'], \PDO::PARAM_INT);
+            $stmt->bindValue(':amountfollowed', $data['amountfollowed'], \PDO::PARAM_INT);
+            $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT);
+            $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) {
+                $this->logger->info("User info updated successfully", ['userid' => $data['userid']]);
+            } else {
+                $this->logger->warning("No changes made to user info", ['userid' => $data['userid']]);
+            }
+
+            return new UserInfo($data);
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error in update", [
+                'userid' => $data['userid'],
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        } catch (\Exception $e) {
+            $this->logger->error("Unexpected error in update", [
+                'userid' => $data['userid'],
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
     }
 
     public function loadById(string $id): User|false
     {
-        $this->logger->info('UserInfoMapper.loadById started');
+        $this->logger->info('UserInfoMapper.loadById started', ['id' => $id]);
 
-        $stmt = $this->db->prepare('SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, updatedat, createdat FROM users WHERE uid = :id');
-        $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        try {
+            $stmt = $this->db->prepare(
+                'SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, updatedat, createdat 
+                 FROM users 
+                 WHERE uid = :id'
+            );
 
-        if ($data !== false) {
-            return new User($data);
+            $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
+            $stmt->execute();
+
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($data !== false) {
+                $this->logger->info('User loaded successfully', ['id' => $id, 'user' => $data]);
+                return new User($data);
+            } else {
+                $this->logger->warning("No user found with the given ID", ['id' => $id]);
+                return false;
+            }
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error in loadById", [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        } catch (\Exception $e) {
+            $this->logger->error("Unexpected error in loadById", [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return false;
         }
-
-        $this->logger->warning("No user found with id", ['id' => $id]);
-
-        return false;
     }
 
-    public function updateUsers(User $user): User
+    public function updateUsers(User $user): ?User
     {
         $this->logger->info('UserInfoMapper.updateUsers started');
 
-        $user->setUpdatedAt();
-        $data = $user->getArrayCopy();
-        $query = "UPDATE users SET email = :email, username = :username, password = :password, status = :status, verified = :verified, slug = :slug, roles_mask = :roles_mask, ip = :ip, img = :img, biography = :biography, updatedat = :updatedat, createdat = :createdat WHERE uid = :uid";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute($data);
-
-        $this->logger->info("Updated user in database", ['user' => $data]);
-
-        return new User($data);
-    }
-
-    public function fetchFriendsCounts(string $userId): void
-	{
-        $this->logger->info("UserMapper.fetchFriendsCounts started", ['userId' => $userId]);
-
         try {
-            $sql = "
-                SELECT COUNT(*) AS fr
-                FROM follows f1 
-                INNER JOIN follows f2 ON f1.followedid = f2.followerid 
-                INNER JOIN users u ON f1.followedid = u.uid 
-                WHERE f1.followerid = :userId 
-                AND f2.followedid = :userId
-            ";
+            $user->setUpdatedAt();
+            $user->setIp();
+            $data = $user->getArrayCopy();
 
-            $stmt = $this->db->prepare($sql);
+            $query = "UPDATE users 
+                      SET email = :email, 
+                          username = :username, 
+                          password = :password, 
+                          status = :status, 
+                          verified = :verified, 
+                          slug = :slug, 
+                          roles_mask = :roles_mask, 
+                          ip = :ip, 
+                          img = :img, 
+                          biography = :biography, 
+                          updatedat = :updatedat, 
+                          createdat = :createdat 
+                      WHERE uid = :uid";
 
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_INT);
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
+            $stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
+            $stmt->bindValue(':password', $data['password'], \PDO::PARAM_STR);
+            $stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
+            $stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
+            $stmt->bindValue(':slug', $data['slug'], \PDO::PARAM_INT);
+            $stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
+            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
+            $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
+            $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
-            $amountfriends = $stmt->fetch(\PDO::FETCH_ASSOC);
-			$friendsCount = (int)$amountfriends['fr'] ?? 0;
+            $this->logger->info("User updated successfully", ['user' => $data]);
 
-			$queryUpdateFollower = "UPDATE users_info SET amountfriends = :amountfriends WHERE userid = :userId";
-			$stmt = $this->db->prepare($queryUpdateFollower);
-			$stmt->execute(['userId' => $userId, 'amountfriends' => $friendsCount]);
+            return new User($data);
+        } catch (\PDOException $e) {
+            $this->logger->error('Database error in updateUsers', [
+                'error' => $e->getMessage()
+            ]);
 
-            if ($amountfriends) {
-                $this->logger->info("fetchFriendsCounts retrieved friends", ['friends' => $amountfriends]);
-            } else {
-                $this->logger->warning("No friends found for user", ['userId' => $userId]);
-            }
+            return null;
         } catch (\Exception $e) {
-            $this->logger->error("Database error in fetchFriendsCounts", ['error' => $e->getMessage()]);
+            $this->logger->error('Unexpected error in updateUsers', [
+                'error' => $e->getMessage()
+            ]);
+
+            return null;
         }
     }
 
@@ -127,48 +217,48 @@ class UserInfoMapper
 
         try {
             $this->db->beginTransaction();
-            
+
             $query = "SELECT COUNT(*) FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['followerid' => $followerid, 'followeduserid' => $followeduserid]);
-            
+            $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
+            $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
+            $stmt->execute();
+
             if ($stmt->fetchColumn() > 0) {
+
                 $query = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
                 $stmt = $this->db->prepare($query);
-                $stmt->execute(['followerid' => $followerid, 'followeduserid' => $followeduserid]);
+                $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
+                $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
+                $stmt->execute();
 
-                $queryUpdateFollower = "UPDATE users_info SET amountfollowed = amountfollowed - 1 WHERE userid = :followerid";
-                $stmt = $this->db->prepare($queryUpdateFollower);
-                $stmt->execute(['followerid' => $followerid]);
-
-                $queryUpdateFollowed = "UPDATE users_info SET amountfollower = amountfollower - 1 WHERE userid = :followeduserid";
-                $stmt = $this->db->prepare($queryUpdateFollowed);
-                $stmt->execute(['followeduserid' => $followeduserid]);
+                $this->updateFollowCounts($followerid, -1, "amountfollowed");
+                $this->updateFollowCounts($followeduserid, -1, "amountfollower");
 
                 $action = false;
-                $response = 'UnFollow user set successful.';
+                $response = 'Unfollow successful.';
             } else {
+
                 $query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
                 $stmt = $this->db->prepare($query);
-                $stmt->execute(['followerid' => $followerid, 'followeduserid' => $followeduserid]);
+                $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
+                $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
+                $stmt->execute();
 
-                $queryUpdateFollower = "UPDATE users_info SET amountfollowed = amountfollowed + 1 WHERE userid = :followerid";
-                $stmt = $this->db->prepare($queryUpdateFollower);
-                $stmt->execute(['followerid' => $followerid]);
-
-                $queryUpdateFollowed = "UPDATE users_info SET amountfollower = amountfollower + 1 WHERE userid = :followeduserid";
-                $stmt = $this->db->prepare($queryUpdateFollowed);
-                $stmt->execute(['followeduserid' => $followeduserid]);
+                $this->updateFollowCounts($followerid, 1, "amountfollowed");
+                $this->updateFollowCounts($followeduserid, 1, "amountfollower");
 
                 $action = true;
-                $response = 'Follow user set successful.';
+                $response = 'Follow successful.';
             }
 
+            $this->updateFriendsCount($followerid);
+            $this->updateFriendsCount($followeduserid);
+
             $this->db->commit();
-			$this->fetchFriendsCounts($followerid);
-			$this->fetchFriendsCounts($followeduserid);
 
             return ['status' => 'success', 'ResponseCode' => $response, 'isfollowing' => $action];
+
         } catch (\Exception $e) {
             $this->db->rollBack();
             $this->logger->error('Failed to toggle user follow', ['exception' => $e]);
@@ -176,47 +266,112 @@ class UserInfoMapper
         }
     }
 
-    public function isUserExistById(string $id): bool
+    private function updateFollowCounts(string $userId, int $change, string $column): void
     {
-        $this->logger->info('UserInfoMapper.isUserExistById started');
+        $allowedColumns = ['amountfollowed', 'amountfollower'];
 
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :id");
-        $stmt->bindParam(':id', $id);
+        if (!in_array($column, $allowedColumns, true)) {
+            throw new \InvalidArgumentException("Invalid column name: $column");
+        }
+
+        $query = "UPDATE users_info SET $column = GREATEST($column + :change, 0) WHERE userid = :userId";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':change', $change, \PDO::PARAM_INT);
+        $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
         $stmt->execute();
+    }
 
-        return $stmt->fetchColumn() > 0;
+    private function updateFriendsCount(string $userId): void
+    {
+        $query = "
+            UPDATE users_info 
+            SET amountfriends = (
+                SELECT COUNT(*) 
+                FROM follows f1 
+                INNER JOIN follows f2 ON f1.followedid = f2.followerid 
+                WHERE f1.followerid = :userId 
+                AND f2.followedid = :userId
+            ) 
+            WHERE userid = :userId
+        ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+        $stmt->execute();
+    }
+
+    public function isUserExistById(string $userId): bool
+    {
+        $this->logger->info('UserInfoMapper.isUserExistById started', ['userId' => $userId]);
+
+        try {
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :userId");
+            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->execute();
+
+            $exists = $stmt->fetchColumn() > 0;
+
+            $this->logger->info('Checked user existence', ['userId' => $userId, 'exists' => $exists]);
+
+            return $exists;
+        } catch (\PDOException $e) {
+            $this->logger->error('Database error in isUserExistById', [
+                'userId' => $userId,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        } catch (\Exception $e) {
+            $this->logger->error('Unexpected error in isUserExistById', [
+                'userId' => $userId,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
     }
 
     public function toggleUserBlock(string $blockerid, string $blockedid): array
     {
-        $this->logger->info('UserInfoMapper.toggleUserBlock started');
+        $this->logger->info('UserInfoMapper.toggleUserBlock started', [
+            'blockerid' => $blockerid,
+            'blockedid' => $blockedid
+        ]);
 
         try {
             $this->db->beginTransaction();
             
             $query = "SELECT COUNT(*) FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['blockerid' => $blockerid, 'blockedid' => $blockedid]);
-            
+            $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
+            $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
+            $stmt->execute();
+
             if ($stmt->fetchColumn() > 0) {
+
                 $query = "DELETE FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
                 $stmt = $this->db->prepare($query);
-                $stmt->execute(['blockerid' => $blockerid, 'blockedid' => $blockedid]);
-                
-                $queryUpdateBlocker = "UPDATE users_info SET amountblocked = amountblocked - 1 WHERE userid = :blockerid";
+                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
+                $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
+                $stmt->execute();
+
+                $queryUpdateBlocker = "UPDATE users_info SET amountblocked = GREATEST(amountblocked - 1, 0) WHERE userid = :blockerid";
                 $stmt = $this->db->prepare($queryUpdateBlocker);
-                $stmt->execute(['blockerid' => $blockerid]);
+                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
+                $stmt->execute();
 
                 $action = false;
                 $response = 'User unblocked successfully.';
             } else {
+
                 $query = "INSERT INTO user_block_user (blockerid, blockedid) VALUES (:blockerid, :blockedid)";
                 $stmt = $this->db->prepare($query);
-                $stmt->execute(['blockerid' => $blockerid, 'blockedid' => $blockedid]);
-                
+                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
+                $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
+                $stmt->execute();
+
                 $queryUpdateBlocker = "UPDATE users_info SET amountblocked = amountblocked + 1 WHERE userid = :blockerid";
                 $stmt = $this->db->prepare($queryUpdateBlocker);
-                $stmt->execute(['blockerid' => $blockerid]);
+                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
+                $stmt->execute();
 
                 $action = true;
                 $response = 'User blocked successfully.';
@@ -225,16 +380,24 @@ class UserInfoMapper
             $this->db->commit();
 
             return ['status' => 'success', 'ResponseCode' => $response, 'isBlocked' => $action];
+        } catch (\PDOException $e) {
+            $this->db->rollBack();
+            $this->logger->error('Database error in toggleUserBlock', [
+                'error' => $e->getMessage()
+            ]);
+            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user block'];
         } catch (\Exception $e) {
             $this->db->rollBack();
-            $this->logger->error('Failed to toggle user block', ['exception' => $e->getMessage]);
+            $this->logger->error('Unexpected error in toggleUserBlock', [
+                'error' => $e->getMessage()
+            ]);
             return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user block'];
         }
     }
 
-    public function getBlockedUsers(string $blockerid): array|false
+    public function getBlockedUsers(string $blockerid): array
     {
-        $this->logger->info('UserInfoMapper.getBlockedUsers started');
+        $this->logger->info('UserInfoMapper.getBlockedUsers started', ['blockerid' => $blockerid]);
 
         $query = "SELECT * FROM user_block_user WHERE blockerid = :blockerid";
         
@@ -253,25 +416,37 @@ class UserInfoMapper
                 $this->logger->info("Fetched all blocked users from database", ['count' => count($results)]);
                 return $results;
             } else {
-                $this->logger->warning("No blocked users found for blockerid: $blockerid");
-                return false;
+                $this->logger->warning("No blocked users found for blockerid", ['blockerid' => $blockerid]);
+                return [];
             }
         } catch (\PDOException $e) {
-            $this->logger->error("Database error while fetching blocked users: " . $e->getMessage());
-            return false;
+            $this->logger->error("Database error while fetching blocked users", [
+                'error' => $e->getMessage()
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            $this->logger->error("Unexpected error while fetching blocked users", [
+                'error' => $e->getMessage()
+            ]);
+            return [];
         }
     }
 
     public function updateUserInfoStats(string $userid): array
     {
-        $this->logger->info('UserInfoMapper.updateUserInfoStats started');
+        $this->logger->info('UserInfoMapper.updateUserInfoStats started', ['userid' => $userid]);
+        $trenddays = 7;
 
         try {
             $this->db->beginTransaction();
 
             $queries = [
                 'amountposts' => "SELECT COUNT(*) FROM posts WHERE userid = :userid",
-                //'amounttrending' => "SELECT COUNT(*) FROM posts WHERE userid = :userid AND trending = 1",
+                'amounttrending' => "SELECT COALESCE(SUM(w.numbers), 0) 
+                                     FROM logwins w
+                                     INNER JOIN posts p ON w.postid = p.postid 
+                                     WHERE p.userid = :userid 
+                                       AND w.createdat >= NOW() - INTERVAL :trenddays DAY",
                 'amountfollower' => "SELECT COUNT(*) FROM follows WHERE followedid = :userid",
                 'amountfollowed' => "SELECT COUNT(*) FROM follows WHERE followerid = :userid",
                 'amountchats' => "SELECT COUNT(*) FROM chats WHERE creatorid = :userid",
@@ -288,29 +463,52 @@ class UserInfoMapper
             $updates = [];
             foreach ($queries as $field => $query) {
                 $stmt = $this->db->prepare($query);
-                $stmt->execute(['userid' => $userid]);
-                $updates[$field] = $stmt->fetchColumn();
+                $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
+
+                if ($field === 'amounttrending') {
+                    $stmt->bindValue(':trenddays', $trenddays, \PDO::PARAM_INT);
+                }
+
+                $stmt->execute();
+                $updates[$field] = (int) $stmt->fetchColumn();
             }
 
-            $updateQuery = "UPDATE users_info SET ";
             $updateParts = [];
-            $params = ['userid' => $userid];
-            
+            $params = [':userid' => $userid];
+
             foreach ($updates as $field => $value) {
                 $updateParts[] = "$field = :$field";
-                $params[$field] = $value;
+                $params[":$field"] = $value;
             }
 
-            $updateQuery .= implode(', ', $updateParts) . " WHERE userid = :userid";
+            $updateQuery = "UPDATE users_info SET " . implode(', ', $updateParts) . " WHERE userid = :userid";
             $stmt = $this->db->prepare($updateQuery);
-            $stmt->execute($params);
 
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value, \PDO::PARAM_INT);
+            }
+
+            $stmt->execute();
             $this->db->commit();
 
-            return ['status' => 'success', 'message' => 'User stats updated successfully', 'updated_data' => $updates];
+            return [
+                'status' => 'success',
+                'message' => 'User stats updated successfully',
+                'updated_data' => $updates
+            ];
+        } catch (\PDOException $e) {
+            $this->db->rollBack();
+            $this->logger->error('Database error in updateUserInfoStats', [
+                'userid' => $userid,
+                'error' => $e->getMessage()
+            ]);
+            return ['status' => 'error', 'message' => 'Failed to update user stats'];
         } catch (\Exception $e) {
             $this->db->rollBack();
-            $this->logger->error('Failed to update user info stats', ['exception' => $e]);
+            $this->logger->error('Unexpected error in updateUserInfoStats', [
+                'userid' => $userid,
+                'error' => $e->getMessage()
+            ]);
             return ['status' => 'error', 'message' => 'Failed to update user stats'];
         }
     }
