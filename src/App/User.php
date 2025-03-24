@@ -194,9 +194,9 @@ class User
         return $this->ip;
     }
 
-    public function setIp(?string $ip): void
+    public function setIp(?string $ip = null): void
     {
-        $this->ip = $ip;
+        $this->ip = filter_var($ip, FILTER_VALIDATE_IP) ?: ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
     }
 
     public function getImg(): ?string
