@@ -424,9 +424,15 @@ type UserFollows {
   affectedRows: Followes
 }
 
+type BlockedUser {
+  blockerid: String
+  blockedid: String
+  createdat: Date
+}
+
 type Blocked {
-  blockerid: [ProfilUser!]
-  blockedid: [ProfilUser!]
+  blockerid: [BlockedUser!]
+  blockedid: [BlockedUser!]
 }
 
 type UserBlocked {

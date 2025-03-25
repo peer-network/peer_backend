@@ -642,13 +642,9 @@ class WalletMapper
             $stmt->execute();
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             $this->logger->info("WalletMapper.fetchWinsLog rows: ", ['rows' => $rows]);
+            $result = !empty($rows) ? $rows : [];
 
-            return [
-                'status' => 'success',
-                'counter' => count($rows),
-                'ResponseCode' => empty($rows) ? 'No records found for the specified date.' : 'Records found.',
-                'affectedRows' => $rows
-            ];
+            return $result;
         } catch (\Exception $e) {
             return $this->respondWithError($e->getMessage());
         }

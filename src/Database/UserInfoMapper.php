@@ -395,40 +395,46 @@ class UserInfoMapper
         }
     }
 
-    public function getBlockedUsers(string $blockerid): array
+    public function getBlockRelations(string $myUserId): array
     {
-        $this->logger->info('UserInfoMapper.getBlockedUsers started', ['blockerid' => $blockerid]);
+        $this->logger->info('Fetching block relationships', ['myUserId' => $myUserId]);
 
-        $query = "SELECT * FROM user_block_user WHERE blockerid = :blockerid";
-        
+        $query = "SELECT blockerid, blockedid, createdat FROM user_block_user 
+                  WHERE blockerid = :myUserId OR blockedid = :myUserId";
+
         try {
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
+            $stmt->bindValue(':myUserId', $myUserId, \PDO::PARAM_STR);
             $stmt->execute();
 
-            $results = [];
+            $blockedBy = []; 
+            $iBlocked = []; 
+
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                $this->logger->info('UserInfoMapper.while', ['row' => $row]);
-                $results[] = new UserBlock($row);
+                if ($row['blockedid'] === $myUserId) {
+                    $blockedBy[] = [
+                        'blockerid' => $row['blockerid'],
+                        'blockedid' => $row['blockedid'],
+                        'createdat' => $row['createdat'],
+                    ];
+                } elseif ($row['blockerid'] === $myUserId) {
+                    $iBlocked[] = [
+                        'blockerid' => $row['blockerid'],
+                        'blockedid' => $row['blockedid'],
+                        'createdat' => $row['createdat'],
+                    ];
+                }
             }
 
-            if (!empty($results)) {
-                $this->logger->info("Fetched all blocked users from database", ['count' => count($results)]);
-                return $results;
-            } else {
-                $this->logger->warning("No blocked users found for blockerid", ['blockerid' => $blockerid]);
-                return [];
-            }
+            $this->logger->info("Fetched block relationships", ['blockedByCount' => count($blockedBy), 'iBlockedCount' => count($iBlocked)]);
+
+            return [
+                'blockedid' => $blockedBy,
+                'blockerid' => $iBlocked
+            ];
         } catch (\PDOException $e) {
-            $this->logger->error("Database error while fetching blocked users", [
-                'error' => $e->getMessage()
-            ]);
-            return [];
-        } catch (\Exception $e) {
-            $this->logger->error("Unexpected error while fetching blocked users", [
-                'error' => $e->getMessage()
-            ]);
-            return [];
+            $this->logger->error("Database error while fetching block relationships", ['error' => $e->getMessage()]);
+            return ['blockedid' => [], 'blockerid' => []];
         }
     }
 
