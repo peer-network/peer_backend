@@ -437,7 +437,6 @@ type Blocked {
 
 type UserBlocked {
   status: String
-  counter: Int!
   ResponseCode: String
   affectedRows: Blocked
 }
