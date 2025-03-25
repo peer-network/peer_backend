@@ -469,9 +469,6 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.UserBlocked Resolvers');
                     return $root['status'] ?? '';
                 },
-                'counter' => function (array $root): int {
-                    return $root['counter'] ?? 0;
-                },
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
@@ -1227,7 +1224,7 @@ class GraphQLSchemaBuilder
         }
 
         if (is_array($response) || !empty($response)) {
-            return $this->createSuccessResponse('Blocklist data prepared successfully.', $response);
+            return $this->createSuccessResponse('Blocklist data prepared successfully.', $response, false);
         }
 
         $this->logger->warning('Query.resolveBlocklist No data found');
