@@ -332,7 +332,7 @@ class WalletMapper
         return $results;
     }
 
-    public function loadWalletById(?array $args = [], string $currentUserId): array|false
+    public function loadWalletById(string $currentUserId, ?array $args = []): array|false
     {
         $this->logger->info('WalletMapper.loadWalletById started');
 
@@ -581,7 +581,7 @@ class WalletMapper
         return $data;
     }
 
-    public function fetchWinsLog(string $userid, ?array $args = [], string $type): array
+    public function fetchWinsLog(string $userid, string $type, ?array $args = []): array
     {
         $this->logger->info("WalletMapper.fetchWinsLog started for type: $type");
 

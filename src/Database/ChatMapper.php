@@ -124,7 +124,7 @@ class ChatMapper
         return false;
     }
 
-    public function loadChatById(?array $args = [], string $currentUserId): Chat|array
+    public function loadChatById(string $currentUserId, ?array $args = []): Chat|array
     {
         $this->logger->info("ChatMapper.loadChatById started");
 
@@ -702,7 +702,7 @@ class ChatMapper
         }
     }
 
-    public function findChatser(?array $args = [], string $currentUserId): array
+    public function findChatser(string $currentUserId, ?array $args = []): array
     {
         $this->logger->info("ChatMapper.findChatser started");
 

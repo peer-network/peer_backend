@@ -2016,7 +2016,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->info('Query.resolveChats started');
-        $chats = $this->chatService->findChatser($args, $this->currentUserId);
+        $chats = $this->chatService->findChatser($args);
         if ($chats) {
             $data = array_map(
                 fn(Chat $chat) => $this->mapChatToArray($chat),
