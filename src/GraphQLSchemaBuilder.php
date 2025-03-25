@@ -443,6 +443,18 @@ class GraphQLSchemaBuilder
                     return $root['updatedat'] ?? '';
                 },
             ],
+            'BlockedUser' => [
+                'blockerid' => function (array $root): string {
+                    $this->logger->info('Query.BlockedUser Resolvers');
+                    return $root['blockerid'] ?? '';
+                },
+                'blockedid' => function (array $root): string {
+                    return $root['blockedid'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ],
             'Blocked' => [
                 'blockerid' => function (array $root): array {
                     $this->logger->info('Query.Blocked Resolvers');
@@ -1117,7 +1129,7 @@ class GraphQLSchemaBuilder
             'tagsearch' => fn(mixed $root, array $args) => $this->resolveTagsearch($args),
             'searchchat' => fn(mixed $root, array $args) => $this->resolveChat($args),
             'getallchats' => fn(mixed $root, array $args) => $this->resolveChats($args),
-            'readMessages' => fn(mixed $root, array $args) => $this->chatService->readChatMessages($args),
+            'readMessages' => fn(mixed $root, array $args) => $this->resolveChatMessages($args),
             'dailyfreestatus' => fn(mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
             'getpercentbeforetransaction' => fn(mixed $root, array $args) => $this->resolveBeforeTransaction($args),
             'refreshmarketcap' => fn(mixed $root, array $args) => $this->resolveMcap(),
@@ -1126,9 +1138,9 @@ class GraphQLSchemaBuilder
             'gemsters' => fn(mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
             'currentliquidity' => fn(mixed $root, array $args) => $this->resolveLiquidity(),
             'getuserinfo' => fn(mixed $root, array $args) => $this->resolveUserInfo(),
-            'fetchwinslog' => fn(mixed $root, array $args) => $this->walletService->callFetchWinsLog($args),
-            'fetchpayslog' => fn(mixed $root, array $args) => $this->walletService->callFetchPaysLog($args),
-            'blockedlist' => fn(mixed $root, array $args) => $this->userInfoService->loadBlocklist($args),
+            'fetchwinslog' => fn(mixed $root, array $args) => $this->resolveFetchWinsLog($args),
+            'fetchpayslog' => fn(mixed $root, array $args) => $this->resolveFetchPaysLog($args),
+            'blockedlist' => fn(mixed $root, array $args) => $this->resolveBlocklist($args),
             'callusermove' => fn(mixed $root, array $args) => $this->walletService->callUserMove(),
             'liquiditypool' => fn(mixed $root, array $args) => $this->resolvePool($args),
             'allfriends' => fn(mixed $root, array $args) => $this->resolveAllFriends($args),
@@ -1190,6 +1202,138 @@ class GraphQLSchemaBuilder
             'userroles' => $this->userRoles,
             'currentuserid' => $this->currentUserId
         ];
+    }
+
+    protected function resolveBlocklist(array $args): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        $this->logger->info('Query.resolveBlocklist started');
+
+        $response = $this->userInfoService->loadBlocklist($args);
+        if (isset($response['status']) && $response['status'] === 'error') {
+            return $response;
+        }
+
+        if (empty($response)) {
+            return $this->createSuccessResponse('No data found for the user.', [], false);
+        }
+
+        if (is_array($response) || !empty($response)) {
+            return $this->createSuccessResponse('Blocklist data prepared successfully.', $response);
+        }
+
+        $this->logger->warning('Query.resolveBlocklist No data found');
+        return $this->respondWithError('No data found.');
+    }
+
+    protected function resolveFetchWinsLog(array $args): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
+
+        if (empty($args)) {
+            return $this->respondWithError('Invalid input');
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        $this->logger->info('Query.resolveFetchWinsLog started');
+
+        $response = $this->walletService->callFetchWinsLog($args);
+        if (isset($response['status']) && $response['status'] === 'error') {
+            return $response;
+        }
+
+        if (empty($response)) {
+            return $this->createSuccessResponse('No records found for the specified date.', [], false);
+        }
+
+        if (is_array($response) || !empty($response)) {
+            return $this->createSuccessResponse('Success get all records for the specified date.', $response);
+        }
+
+        $this->logger->warning('Query.resolveFetchWinsLog No records found');
+        return $this->respondWithError('No records found.');
+    }
+
+    protected function resolveFetchPaysLog(array $args): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
+
+        if (empty($args)) {
+            return $this->respondWithError('Invalid input');
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        $this->logger->info('Query.resolveFetchPaysLog started');
+
+        $response = $this->walletService->callFetchPaysLog($args);
+        if (isset($response['status']) && $response['status'] === 'error') {
+            return $response;
+        }
+
+        if (empty($response)) {
+            return $this->createSuccessResponse('No records found for the specified date.', [], false);
+        }
+
+        if (is_array($response) || !empty($response)) {
+            return $this->createSuccessResponse('Success get all records for the specified date.', $response);
+        }
+
+        $this->logger->warning('Query.resolveFetchPaysLog No records found');
+        return $this->respondWithError('No records found.');
+    }
+
+    protected function resolveChatMessages(array $args): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
+
+        if (empty($args)) {
+            return $this->respondWithError('Invalid input');
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        $this->logger->info('Query.resolveChatMessages started');
+
+        $response = $this->chatService->readChatMessages($args);
+        if (isset($response['status']) && $response['status'] === 'error') {
+            return $response;
+        }
+
+        if (empty($response)) {
+            return $this->createSuccessResponse('No messages found', [], false);
+        }
+
+        if (is_array($response) || !empty($response)) {
+            return $this->createSuccessResponse('Success get all messages', $response, true, 'posts');
+        }
+
+        $this->logger->warning('Query.resolveChatMessages No messages found');
+        return $this->respondWithError('No messages found.');
     }
 
     protected function resolveTestingPool(array $args): ?array
@@ -1429,6 +1573,11 @@ class GraphQLSchemaBuilder
             return $this->respondWithError('No arguments provided.', ['errorCode' => 400]);
         }
 
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
         $comments = $this->commentService->fetchByParentId($args);
         if (isset($comments['status']) && $comments['status'] === 'error') {
             return $comments;
@@ -1481,6 +1630,11 @@ class GraphQLSchemaBuilder
             return $this->respondWithError('Unauthorized');
         }
 
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
         $this->logger->info('Query.resolveTags started');
 
         $tags = $this->tagService->fetchAll($args);
@@ -1501,6 +1655,11 @@ class GraphQLSchemaBuilder
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
         }
 
         $this->logger->info('Query.resolveTagsearch started');
@@ -1628,6 +1787,11 @@ class GraphQLSchemaBuilder
             return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
         }
 
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
         $username = isset($args['username']) ? trim($args['username']) : null;
         $userId = $args['userid'] ?? null;
         $email = $args['email'] ?? null;
@@ -1684,6 +1848,11 @@ class GraphQLSchemaBuilder
             return $this->respondWithError('Unauthorized');
         }
 
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
         $this->logger->info('Query.resolveFollows started');
 
         $results = $this->userService->Follows($args);
@@ -1734,6 +1903,11 @@ class GraphQLSchemaBuilder
             return $this->respondWithError('Unauthorized');
         }
 
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
         $this->logger->info('Query.resolveFriends started');
 
         $results = $this->userService->getFriends($args);
@@ -1774,79 +1948,16 @@ class GraphQLSchemaBuilder
         return $this->respondWithError('No friends found');
     }
 
-    protected function resolveUser(array $args): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
-        }
-
-        if (empty($args)) {
-            return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
-        }
-
-        $username = isset($args['username']) ? trim($args['username']) : null;
-        $userId = $args['uid'] = $args['userid'] ?? null;
-
-        if (empty($username) && empty($userId)) {
-            return $this->respondWithError('At least one of userId or username is required.');
-        }
-
-        if (!empty($username) && !empty($userId)) {
-            return $this->respondWithError('args username and userId arguments not allowed.');
-        }
-
-        if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this->respondWithError('Invalid uuid input');
-        }
-
-        if ($username !== null && strlen($username) < 3 || strlen($username) > 23) {
-            return $this->respondWithError('Username must be between 3 and 23 characters.');
-        }
-
-        if ($username !== null && !preg_match('/^[a-zA-Z0-9]+$/', $username)) {
-            return $this->respondWithError('Username must only contain letters and numbers.');
-        }
-
-        $this->logger->info('Query.resolveUser started');
-
-        $data = $this->userMapper->fetchAll($args, $this->currentUserId);
-
-        if ($data && count($data) > 0) {
-            $daten = array_map(
-                fn(User $user) => $user->getArrayCopy(),
-                $data
-            );
-
-            $this->logger->info('Query.resolveUser successful', ['userCount' => count($daten)]);
-
-            return [
-                'status' => 'success',
-                'counter' => count($data),
-                'ResponseCode' => 'Success getting all users',
-                'affectedRows' => $daten,
-            ];
-        }
-
-        $this->logger->warning('Query.resolveUser No users found');
-        return $this->respondWithError('No users found');
-    }
-
     protected function resolveUsers(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
         }
 
-        $offset = isset($args['offset']) ? (int)$args['offset'] : null;
-        $limit = isset($args['limit']) ? (int)$args['limit'] : null;
-
-		if ($offset !== null && is_int($offset) && $offset < 0 or $offset > 20) 
-		{
-            return $this->respondWithError('Offset must be between 1 and 20 number.');
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
         }
-
-
-		if (isset($args['offset']) && !empty($args['offset'])){}
 
         $this->logger->info('Query.resolveUsers started');
 
@@ -1900,6 +2011,11 @@ class GraphQLSchemaBuilder
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
         }
 
         $this->logger->info('Query.resolveChats started');
@@ -2158,6 +2274,26 @@ class GraphQLSchemaBuilder
         }
 
         return $response;
+    }
+
+    protected function validateOffsetAndLimit($args)
+    {
+        $offset = isset($args['offset']) ? (int)$args['offset'] : null;
+        $limit = isset($args['limit']) ? (int)$args['limit'] : null;
+
+        if ($offset !== null) {
+            if ($offset < 0 || $offset > 200) {
+                return $this->respondWithError('Offset must be between 0 and 200.');
+            }
+        }
+
+        if ($limit !== null) {
+            if ($limit < 1 || $limit > 20) {  
+                return $this->respondWithError('Limit must be between 1 and 20.');
+            }
+        }
+
+        return true;
     }
 
     protected function checkAuthentication(): bool

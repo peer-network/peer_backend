@@ -29,11 +29,11 @@ class ChatMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new Chat($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+            $results = array_map(fn($row) => new Chat($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched chats successfully" : "No chats found",
@@ -86,7 +86,7 @@ class ChatMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['userid' => $userid]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function getPrivateChatBetweenUsers(string $userId1, string $userId2): bool
@@ -114,7 +114,7 @@ class ChatMapper
         $sql = "SELECT * FROM chats WHERE chatid = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new Chat($data);
@@ -135,7 +135,7 @@ class ChatMapper
             $chatExistsSql = "SELECT chatid FROM chats WHERE chatid = :chatid";
             $chatExistsStmt = $this->db->prepare($chatExistsSql);
             $chatExistsStmt->execute(['chatid' => $chatId]);
-            $chatExists = $chatExistsStmt->fetch(PDO::FETCH_ASSOC);
+            $chatExists = $chatExistsStmt->fetch(\PDO::FETCH_ASSOC);
 
             if (!$chatExists) {
                 $this->logger->warning("Chat ID not found", ['chatid' => $chatId]);
@@ -187,7 +187,7 @@ class ChatMapper
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['chatid' => $chatId]);
 
-            $chatRow = $stmt->fetch(PDO::FETCH_ASSOC);
+            $chatRow = $stmt->fetch(\PDO::FETCH_ASSOC);
             if (!$chatRow) {
                 $this->logger->warning("No chat details found for chatid", ['chatid' => $chatId]);
                 return [
@@ -216,8 +216,8 @@ class ChatMapper
                 ";
                 $messageStmt = $this->db->prepare($chatMessagesSql);
                 $messageStmt->bindValue('chatid', $chatId);
-                $messageStmt->bindValue('limit', $messageLimit, PDO::PARAM_INT);
-                $messageStmt->bindValue('offset', $messageOffset, PDO::PARAM_INT);
+                $messageStmt->bindValue('limit', $messageLimit, \PDO::PARAM_INT);
+                $messageStmt->bindValue('offset', $messageOffset, \PDO::PARAM_INT);
             } else {
                 // If messageOffset is not set, fallback to last_seen_message_id logic
                 $lastSeenSql = "
@@ -247,12 +247,12 @@ class ChatMapper
                 ";
                 $messageStmt = $this->db->prepare($chatMessagesSql);
                 $messageStmt->bindValue('chatid', $chatId);
-                $messageStmt->bindValue('lastSeenMessageId', $lastSeenMessageId, PDO::PARAM_INT);
-                $messageStmt->bindValue('limit', $messageLimit, PDO::PARAM_INT);
+                $messageStmt->bindValue('lastSeenMessageId', $lastSeenMessageId, \PDO::PARAM_INT);
+                $messageStmt->bindValue('limit', $messageLimit, \PDO::PARAM_INT);
             }
 
             $messageStmt->execute();
-            $chatMessages = $messageStmt->fetchAll(PDO::FETCH_ASSOC);
+            $chatMessages = $messageStmt->fetchAll(\PDO::FETCH_ASSOC);
 
             if ($chatMessages) {
                 $lastMessage = $chatMessages[0] ?? null;
@@ -276,7 +276,7 @@ class ChatMapper
             ";
             $participantStmt = $this->db->prepare($chatParticipantsSql);
             $participantStmt->execute(['chatid' => $chatId]);
-            $chatParticipants = $participantStmt->fetchAll(PDO::FETCH_ASSOC);
+            $chatParticipants = $participantStmt->fetchAll(\PDO::FETCH_ASSOC);
 
             // Return the simplified response
             return [
@@ -295,7 +295,7 @@ class ChatMapper
                 ]),
             ];
 
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->logger->error("Database error occurred in loadChatById", [
                 'error' => $e->getMessage(),
                 'chatid' => $chatId,
@@ -325,13 +325,13 @@ class ChatMapper
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
-            //$results = array_map(fn($row) => new ChatMessages($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+            //$results = array_map(fn($row) => new ChatMessages($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
             //return $results ?: [];
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        } catch (PDOException $e) {
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        } catch (\PDOException $e) {
             error_log('Database error: ' . $e->getMessage());
             return [];
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             error_log('General error: ' . $e->getMessage());
             return [];
         }
@@ -748,20 +748,20 @@ class ChatMapper
             $stmt = $this->db->prepare($sql);
 
             // Bind values
-            $stmt->bindValue(':currentUserId', $currentUserId, PDO::PARAM_STR);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             if ($from !== null) {
-                $stmt->bindValue(':from', $from, PDO::PARAM_STR);
+                $stmt->bindValue(':from', $from, \PDO::PARAM_STR);
             }
             if ($to !== null) {
-                $stmt->bindValue(':to', $to, PDO::PARAM_STR);
+                $stmt->bindValue(':to', $to, \PDO::PARAM_STR);
             }
 
             $stmt->execute();
 
             $chats = [];
-            while ($chatRow = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            while ($chatRow = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 // Fetch all messages with pagination for the current chatid
                 $messageOffset = max((int)($args['messageOffset'] ?? 0), 0);
                 $messageLimit = min(max((int)($args['messageLimit'] ?? 10), 1), 20);
@@ -782,11 +782,11 @@ class ChatMapper
                     LIMIT :limit OFFSET :offset";
 
                 $messageStmt = $this->db->prepare($chatMessagesSql);
-                $messageStmt->bindValue(':chatid', $chatRow['chatid'], PDO::PARAM_STR);
-                $messageStmt->bindValue(':limit', $messageLimit, PDO::PARAM_INT);
-                $messageStmt->bindValue(':offset', $messageOffset, PDO::PARAM_INT);
+                $messageStmt->bindValue(':chatid', $chatRow['chatid'], \PDO::PARAM_STR);
+                $messageStmt->bindValue(':limit', $messageLimit, \PDO::PARAM_INT);
+                $messageStmt->bindValue(':offset', $messageOffset, \PDO::PARAM_INT);
                 $messageStmt->execute();
-                $chatMessages = $messageStmt->fetchAll(PDO::FETCH_ASSOC);
+                $chatMessages = $messageStmt->fetchAll(\PDO::FETCH_ASSOC);
 
                 // Fetch all participants for the current chatid
                 $chatParticipantsSql = "
@@ -806,9 +806,9 @@ class ChatMapper
                         p.createdat DESC";
 
                 $participantStmt = $this->db->prepare($chatParticipantsSql);
-                $participantStmt->bindValue(':chatid', $chatRow['chatid'], PDO::PARAM_STR);
+                $participantStmt->bindValue(':chatid', $chatRow['chatid'], \PDO::PARAM_STR);
                 $participantStmt->execute();
-                $chatParticipants = $participantStmt->fetchAll(PDO::FETCH_ASSOC);
+                $chatParticipants = $participantStmt->fetchAll(\PDO::FETCH_ASSOC);
 
                 // Build the chat object
                 $chats[] = new Chat([
@@ -830,7 +830,7 @@ class ChatMapper
             );
 
             return $chats;
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->logger->error("Database error occurred in findChatser", [
                 'error' => $e->getMessage(),
                 'sql' => $sql
@@ -853,14 +853,14 @@ class ChatMapper
             $stmt = $this->db->prepare($sql);
 
             // Bind parameters explicitly
-            $stmt->bindValue(':chatid', $chatid, PDO::PARAM_STR);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->bindValue(':chatid', $chatid, \PDO::PARAM_STR);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
 
             $stmt->execute();
 
             $results = [];
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 $results[] = new ChatMessages($row);
             }
 
@@ -877,7 +877,7 @@ class ChatMapper
             }
 
             return $results;
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->logger->error("Database error occurred while fetching messages with pagination", [
                 'chatid' => $chatid,
                 'exception' => $e->getMessage()
@@ -901,9 +901,9 @@ class ChatMapper
             $stmt = $this->db->prepare($query);
 
             // Bind parameters explicitly
-            $stmt->bindValue(':user_id', $user_id, PDO::PARAM_STR);
-            $stmt->bindValue(':chat_id', $chat_id, PDO::PARAM_STR);
-            $stmt->bindValue(':last_seen_message_id', $last_seen_message_id, PDO::PARAM_INT);
+            $stmt->bindValue(':user_id', $user_id, \PDO::PARAM_STR);
+            $stmt->bindValue(':chat_id', $chat_id, \PDO::PARAM_STR);
+            $stmt->bindValue(':last_seen_message_id', $last_seen_message_id, \PDO::PARAM_INT);
 
             $stmt->execute();
 
@@ -912,7 +912,7 @@ class ChatMapper
                 'chat_id' => $chat_id,
                 'last_seen_message_id' => $last_seen_message_id
             ]);
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->logger->error("Failed to update last seen message", [
                 'user_id' => $user_id,
                 'chat_id' => $chat_id,
@@ -942,12 +942,12 @@ class ChatMapper
             $stmt = $this->db->prepare($query);
 
             // Bind parameters explicitly
-            $stmt->bindValue(':chat_id', $chat_id, PDO::PARAM_STR);
-            $stmt->bindValue(':user_id', $user_id, PDO::PARAM_STR);
+            $stmt->bindValue(':chat_id', $chat_id, \PDO::PARAM_STR);
+            $stmt->bindValue(':user_id', $user_id, \PDO::PARAM_STR);
 
             $stmt->execute();
 
-            $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $messages = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             if (!empty($messages)) {
                 $this->logger->info("Fetched unseen messages from chat", [
@@ -963,7 +963,7 @@ class ChatMapper
                 ]);
                 return false;
             }
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->logger->error("Failed to fetch unseen messages from chat", [
                 'user_id' => $user_id,
                 'chat_id' => $chat_id,

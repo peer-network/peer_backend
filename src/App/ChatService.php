@@ -485,13 +485,6 @@ class ChatService
 
     public function readChatMessages(?array $args = []): array
     {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
-        }
-
-        if (empty($args)) {
-            return $this->respondWithError('Invalid input');
-        }
 
         $this->logger->info('ChatService.readChatMessages started');
 

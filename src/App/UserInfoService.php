@@ -123,35 +123,23 @@ class UserInfoService
 
     public function loadBlocklist(?array $args = []): array
     {
-
-        $this->logger->info('UserInfoService.loadLastId started');
+        $this->logger->info('UserInfoService.loadBlocklist started', ['userId' => $this->currentUserId]);
 
         try {
-            $results = $this->userInfoMapper->getBlockedUsers($this->currentUserId);
+            $results = $this->userInfoMapper->getBlockRelations($this->currentUserId);
 
-            if ($results !== false) {
-                $affectedRows = array_map(
-                    static function (UserBlock $result) {
-                        return $result->getArrayCopy();
-                    },
-                    $results
-                );
-
-                $this->logger->info("UserInfoService.loadBlocklist found", ['affectedRows' => $affectedRows]);
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => 'Blocklist data prepared successfully',
-                    'affectedRows' => $affectedRows,
-                ];
+            if (empty($results)) {
+                $this->logger->info("No blocked users found for user ID: {$this->currentUserId}");
+                return $this->respondWithError('No blocked users found for user ID.');
             }
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => 'No data found for the user.',
-            ];
+            $this->logger->info("UserInfoService.loadBlocklist found", ['results' => $results]);
+
+            return $results;
 
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve user data.');
+            $this->logger->error("Error in UserInfoService.loadBlocklist", ['exception' => $e->getMessage()]);
+            return $this->respondWithError('Failed to retrieve user data.');  
         }
     }
 
