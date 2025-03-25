@@ -181,7 +181,6 @@ class UserInfoService
             return [
                 'status' => 'success', 
                 'ResponseCode' => $responseMessage, 
-                //'affectedRows' => $updatedUser->getArrayCopy()
             ];
         } catch (\Exception $e) {
             return $this->respondWithError('Failed to toggle profile privacy.');
