@@ -143,7 +143,7 @@ class WalletService
             return $this->respondWithError('Invalid day parameter provided.');
         }
 
-        return $this->walletMapper->fetchWinsLog($this->currentUserId, $args, 'win');
+        return $this->walletMapper->fetchWinsLog($this->currentUserId, 'win', $args);
     }
 
     public function callFetchPaysLog(?array $args = []): array
@@ -160,7 +160,7 @@ class WalletService
             return $this->respondWithError('Invalid day parameter provided.');
         }
 
-        return $this->walletMapper->fetchWinsLog($this->currentUserId, $args, 'pay');
+        return $this->walletMapper->fetchWinsLog($this->currentUserId, 'pay', $args);
     }
 
     public function callGlobalWins(): array

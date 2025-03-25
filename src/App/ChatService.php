@@ -640,7 +640,7 @@ class ChatService
 
         $this->logger->info('ChatService.findChatser started');
 
-        $results = $this->chatMapper->findChatser($args, $this->currentUserId);
+        $results = $this->chatMapper->findChatser($this->currentUserId, $args);
         $this->logger->info('ChatService.findChatser successfully', ['currentUserId' => $this->currentUserId]);
 
         return $results;

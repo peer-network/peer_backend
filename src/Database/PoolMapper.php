@@ -375,7 +375,7 @@ class PoolMapper
         return $data;
     }
 
-    public function fetchWinsLog(string $userid, ?array $args = [], string $type): array
+    public function fetchWinsLog(string $userid, string $type, ?array $args = []): array
     {
         $this->logger->info("WalletMapper.fetchWinsLog started for type: $type");
 

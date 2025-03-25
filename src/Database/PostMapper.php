@@ -453,7 +453,7 @@ class PostMapper
         }
     }
 
-    public function findPostser(?array $args = [], string $currentUserId): array
+    public function findPostser(string $currentUserId, ?array $args = []): array
     {
         $this->logger->info("PostMapper.findPostser started");
 
