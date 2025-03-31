@@ -53,15 +53,11 @@ class PeerInputFilter
 
         foreach ($this->specification as $field => $rules) {
 
-            //echo "Validating field: $field\n";
-
             if (!isset($this->data[$field]) && empty($rules['required'])) {
-                //$this->errors[$field][] = "$field is required";
                 continue;
             }
 
             if (isset($this->data[$field]) && empty($this->data[$field]) && empty($rules['required'])) {
-                //$this->errors[$field][] = "$field is empty";
                 continue;
             }
 
@@ -77,7 +73,6 @@ class PeerInputFilter
                     if (method_exists($this, $filterName)) {
                         $this->data[$field] = $this->$filterName($this->data[$field], $options);
                     } else {
-                        //$this->errors['filterName'][] = "Filter method $filterName does not exist.";
                         throw new ValidationException("Filter method $filterName does not exist.");
                     }
                 }
@@ -93,14 +88,11 @@ class PeerInputFilter
                             }
                         }
                     } else {
-                        //$this->errors['validatorName'][] = "Validator method $validatorName does not exist.";
                         throw new ValidationException("Validator method $validatorName does not exist.");
                     }
                 }
             }
         }
-
-        //echo "Validation errors: " . json_encode($this->errors) . "\n";
 
         return empty($this->errors);
     }
@@ -116,7 +108,6 @@ class PeerInputFilter
     }
 
     // Filters
-
     protected function StringTrim(string $value, array $options = []): string
     {
         return trim($value);
@@ -175,7 +166,6 @@ class PeerInputFilter
     }
 
     // Validators
-
     protected function Uuid(mixed $value, array $options = []): bool
     {
         if ($value === null || $value === '') {
@@ -196,16 +186,14 @@ class PeerInputFilter
             }
         }
 
-        $dateTime = \DateTime::createFromFormat($format, $value);
+        $dateTime = DateTime::createFromFormat($format, $value);
 
         if ($dateTime) {
             $formatted = $dateTime->format($format);
-            //error_log("Formatted value: $formatted");
 
             $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', function ($matches) {
                 return '.' . str_pad($matches[1], 6, '0');
             }, $formatted);
-            //error_log("Final formatted value after trimming: $formatted");
 
             $value = trim($value);
             $formatted = trim($formatted);
@@ -298,8 +286,7 @@ class PeerInputFilter
 
         $validator = $options['validator'] ?? null;
         if (!$validator || !isset($validator['name'])) {
-            //throw new ValidationException("ArrayValues validator requires a sub-validator.");
-            $this->errors['ArrayValues'][] = "ArrayValues validator requires a sub-validator.";
+            $this->errors['ArrayValues'][] = 'ArrayValues validator requires a sub-validator.';
         }
 
         $validatorName = $validator['name'];
@@ -307,7 +294,6 @@ class PeerInputFilter
 
         foreach ($value as $item) {
             if (!method_exists($this, $validatorName)) {
-                //throw new ValidationException("Validator method $validatorName does not exist.");
                 $this->errors['ArrayValues'][] = "Validator method $validatorName does not exist.";
             }
 
@@ -425,7 +411,7 @@ class PeerInputFilter
         return true;
     }
 
-    private function getBooleanFlags(array $types): int
+    protected function getBooleanFlags(array $types): int
     {
         $flags = 0;
 
@@ -588,7 +574,7 @@ class PeerInputFilter
                isset($profilepost->amountdislikes) && $this->IsNumeric($profilepost->amountdislikes) &&
                isset($profilepost->amountviews) && $this->IsNumeric($profilepost->amountviews) &&
                isset($profilepost->amountcomments) && $this->IsNumeric($profilepost->amountcomments) &&
-               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => \date('Y-m-d H:i:s.u'), 'inclusive' => true]);
+               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function validatePassword(string $value, array $options = []): bool
@@ -603,16 +589,17 @@ class PeerInputFilter
             return false;
         }
 
-        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/', $value)) {
+        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $value)) {
             $this->errors['password'][] = 'Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, and one number.';
             return false;
         }
+
         return true;
     }
 
 	protected function validateUsername(string $value, array $options = []): bool
 	{
-		$forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root']; // Add more as needed
+		$forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
 
 		if ($value === '') {
 			$this->errors['username'][] = 'Could not find mandatory username';
@@ -624,10 +611,10 @@ class PeerInputFilter
 			return false;
 		}
 
-		if (!preg_match('/^[a-zA-Z0-9_]+$/', $value)) {
-			$this->errors['username'][] = 'Username must only contain letters, numbers, and underscores.';
-			return false;
-		}
+        if (!preg_match('/^[a-zA-Z0-9_]{3,23}$/', $value)) {
+            $this->errors['username'][] = 'Username must be 3-20 characters long and only contain letters, numbers, and underscores.';
+            return false;
+        }
 
 		if (!preg_match('/[a-zA-Z]/', $value)) {
 			$this->errors['username'][] = 'Username must contain at least one letter.';
@@ -649,54 +636,113 @@ class PeerInputFilter
             return false;
         }
 
+        $value = trim($value);
+        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+
         if (strlen($value) < 2 || strlen($value) > 53) {
-            $this->errors['tag'][] = "Tag length must be between 2 and 53 characters. Given length: " . strlen($value);
+            $this->errors['tag'][] = 'Tag length must be between 2 and 53 characters.';
             return false;
         }
 
-        if (!preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
-            $this->errors['tag'][] = "Tag contains invalid characters. It must only contain letters (A-Z, a-z). Given value: $value";
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $value)) {
+            $this->errors['tag'][] = 'Tag contains invalid characters.';
             return false;
         }
 
         return true;
     }
 
-    private function validateImage(string $imagePath, array $options = []): array
+    protected function validatePkey(string $value, array $options = []): bool
     {
-        $allowedExtensions = $options['extensions'] ?? ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-        $allowedMimeTypes = $options['mime_types'] ?? ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        $maxFileSize = $options['max_size'] ?? 5 * 1024 * 1024; // 5 MB
+        if ($value === '') {
+            $this->errors['pkey'][] = 'Could not find mandatory pkey';
+            return false;
+        }
 
-        if (!file_exists($imagePath)) {
-            $this->errors['image'][] = 'Image file does not exist.';
+        $value = trim($value);
+        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+
+        if (strlen($value) < 43 || strlen($value) > 44) {
+            $this->errors['pkey'][] = 'Pkey must be between 43 and 44 characters.';
+            return false;
+        }
+
+		if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $value)) {
+			$this->errors['pkey'][] = 'Invalid Solana Public Key.';
+            return false;
+		}
+
+        return true;
+    }
+
+    protected function validatePhoneNumber(string $value, array $options = []): bool
+    {
+        if ($value === '') {
+            $this->errors['phone'][] = 'Phone number is required.';
+            return false;
+        }
+
+        $value = trim($value);
+        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+
+        $pattern = '/^\+?[1-9]\d{0,2}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{1,4}[\s.-]?\d{1,9}$/';
+
+        if (!preg_match($pattern, $value)) {
+            $this->errors['phone'][] = 'Invalid phone number format.';
+            return false;
+        }
+
+        return true;
+    }
+
+    private function validateImage(string $imagePath, array $options = []): bool
+    {
+        $allowedExtensions = $options['extensions'] ?? ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'];
+        $allowedMimeTypes = $options['mime_types'] ?? ['image/webp', 'image/jpeg', 'image/png', 'image/gif', 'image/heic', 'image/heif', 'image/tiff'];
+        $maxFileSize = $options['max_size'] ?? 5 * 1024 * 1024;
+        $maxWidth = $options['max_width'] ?? null;
+        $maxHeight = $options['max_height'] ?? null;
+        $imagePath = __DIR__ . '/../../runtime-data/media' . $imagePath;
+
+        if (!is_readable($imagePath)) {
+            $this->errors['image'][] = 'Image file does not exist or is not readable.' . $imagePath;
+            return false;
+        }
+
+        if (filesize($imagePath) > $maxFileSize) {
+            $this->errors['image'][] = 'File size exceeds the maximum limit.';
             return false;
         }
 
         $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
         if (!in_array($extension, $allowedExtensions, true)) {
-            $this->errors['image'][] = 'Invalid image extension. Allowed extensions: ' . implode(', ', $allowedExtensions);
+            $this->errors['image'][] = 'Invalid image extension.';
             return false;
         }
 
-        $mimeType = mime_content_type($imagePath);
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $imagePath);
+        finfo_close($finfo);
+        
         if (!in_array($mimeType, $allowedMimeTypes, true)) {
-            $this->errors['image'][] = 'Invalid image type. Allowed MIME types: ' . implode(', ', $allowedMimeTypes);
+            $this->errors['image'][] = 'Invalid image type. Allowed MIME types.';
             return false;
         }
 
-        $fileSize = filesize($imagePath);
-        if ($fileSize > $maxFileSize) {
-            $this->errors['image'][] = 'File size exceeds the maximum limit of ' . ($maxFileSize / 1024 / 1024) . ' MB.';
-            return false;
-        }
-
-        $dimensions = getimagesize($imagePath);
-        if (!$dimensions) {
-            $this->errors['image'][] = 'Unable to read image dimensions.';
-            return false;
+        if ($maxWidth !== null || $maxHeight !== null) {
+            [$width, $height] = getimagesize($imagePath);
+            if (!$width || !$height) {
+                $this->errors['image'][] = 'Unable to read image dimensions.';
+                return false;
+            }
+            
+            if (($maxWidth !== null && $width > $maxWidth) || ($maxHeight !== null && $height > $maxHeight)) {
+                $this->errors['image'][] = 'Image dimensions exceed the maximum allowed size.';
+                return false;
+            }
         }
 
         return true;
     }
+
 }

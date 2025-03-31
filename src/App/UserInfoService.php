@@ -123,14 +123,16 @@ class UserInfoService
 
     public function loadBlocklist(?array $args = []): array
     {
-        $this->logger->info('UserInfoService.loadBlocklist started', ['userId' => $this->currentUserId]);
+        $this->logger->info('UserInfoService.loadBlocklist started');
+
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         try {
-            $results = $this->userInfoMapper->getBlockRelations($this->currentUserId);
-
-            if (empty($results)) {
+            $results = $this->userInfoMapper->getBlockRelations($this->currentUserId, $offset, $limit);
+            if (isset($response['status']) && $response['status'] === 'error') {
                 $this->logger->info("No blocked users found for user ID: {$this->currentUserId}");
-                return $this->respondWithError('No blocked users found for user ID.');
+                return $response;
             }
 
             $this->logger->info("UserInfoService.loadBlocklist found", ['results' => $results]);

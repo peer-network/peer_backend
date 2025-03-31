@@ -17,9 +17,11 @@ class Wallet
     protected string $createdat;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->token = $data['token'] ?? '';
         $this->userid = $data['userid'] ?? '';
@@ -142,9 +144,8 @@ class Wallet
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -203,7 +204,6 @@ class Wallet
                 'required' => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];

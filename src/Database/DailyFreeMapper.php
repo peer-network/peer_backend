@@ -12,79 +12,6 @@ class DailyFreeMapper
     {
     }
 
-    public function fetchAll(int $offset, int $limit): array
-    {
-        $this->logger->info("DailyFreeMapper.fetchAll started");
-
-        $sql = "SELECT * FROM dailyfree ORDER BY createdat DESC LIMIT :limit OFFSET :offset";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-            $stmt->execute();
-
-            $results = array_map(fn($row) => new DailyFree($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
-
-            $this->logger->info(
-                $results ? "Fetched dailyfree successfully" : "No dailyfree found",
-                ['count' => count($results)]
-            );
-
-            return $results;
-        } catch (\PDOException $e) {
-            $this->logger->error("Error fetching dailyfree from database", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return [];
-        }
-    }
-
-    public function loadById(string $userid): DailyFree|false
-    {
-        $this->logger->info("DailyFreeMapper.loadById started");
-
-        $sql = "SELECT * FROM dailyfree WHERE userid = :userid";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['userid' => $userid]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if ($data !== false) {
-            $this->logger->info("User found with userid", ['data' => $data]);
-            return new DailyFree($data);
-        }
-
-        $this->logger->warning("No user found with userid", ['userid' => $userid]);
-
-        try {
-            $dailyData = [
-                'userid' => $userid,
-                'liken' => 0,
-                'comments' => 0,
-                'posten' => 0,
-                'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u')
-            ];
-
-            $newUser = new DailyFree($dailyData);
-            $insertedUser = $this->insert($newUser);
-
-            if ($insertedUser === false) {
-                $this->logger->error("Failed to create new user", ['userid' => $userid]);
-                return false;
-            }
-
-            $this->logger->info("New user created successfully", ['userid' => $userid]);
-            return $insertedUser;
-        } catch (\Throwable $e) {
-            $this->logger->error("Unexpected error during user creation", [
-                'userid' => $userid,
-                'error' => $e->getMessage(),
-            ]);
-            return false;
-        }
-    }
-
     public function insert(DailyFree $user): DailyFree|false
     {
         $this->logger->info("DailyFree.insert started");
@@ -164,41 +91,7 @@ class DailyFreeMapper
         }
     }
 
-    public function delete(string $userid): bool
-    {
-        $this->logger->info("DailyFree.delete started");
-
-        try {
-            $query = "DELETE FROM dailyfree WHERE userid = :userid";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->execute();
-
-            $deleted = (bool)$stmt->rowCount();
-
-            if ($deleted) {
-                $this->logger->info("User successfully deleted from database", ['userid' => $userid]);
-            } else {
-                $this->logger->warning("No user found to delete in database", ['userid' => $userid]);
-            }
-
-            return $deleted;
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error during user deletion", [
-                'error' => $e->getMessage(),
-                'userid' => $userid
-            ]);
-            return false;
-        } catch (\Throwable $e) {
-            $this->logger->error("Unexpected error during user deletion", [
-                'error' => $e->getMessage(),
-                'userid' => $userid
-            ]);
-            return false;
-        }
-    }
-
-    public function getUserDailyUsage(string $userId, string $artType): int
+    public function getUserDailyUsage(string $userId, int $artType): int
     {
         $columnMap = [
             LIKE_ => 'liken',
@@ -212,53 +105,38 @@ class DailyFreeMapper
             throw new InvalidArgumentException('Invalid art type provided.');
         }
 
-        $query = "SELECT {$column} 
-                  FROM dailyfree 
-                  WHERE userid = :userId 
-                  AND createdat::date = CURRENT_DATE";
+        try {
+            $query = "SELECT COALESCE($column, 0) AS usage
+                      FROM dailyfree 
+                      WHERE userid = :userId 
+                      AND createdat::date = CURRENT_DATE";
 
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['userId' => $userId]);
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->execute();
 
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        return (int)($result[$column] ?? 0);
-    }
+            return (int)($result['usage'] ?? 0);
 
-    public function getUserDailyUsageWithColumnNames(string $userId): array
-    {
-        $columnMap = [
-            'liken' => 'Likes',
-            'comments' => 'Comments',
-            'posten' => 'Posts',
-        ];
-
-        $query = "SELECT liken, comments, posten 
-                  FROM dailyfree 
-                  WHERE userid = :userId 
-                  AND createdat::date = CURRENT_DATE";
-
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['userId' => $userId]);
-
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if (!$result) {
-            return array_map(fn($label) => ['name' => $label, 'value' => 0], $columnMap);
+        } catch (\PDOException $e) {
+            $this->logger->error('Database error in getUserDailyUsage', ['exception' => $e->getMessage()]);
+            
+            return 0;
+        } catch (\Throwable $e) {
+            $this->logger->error('Unexpected error in getUserDailyUsage', ['exception' => $e->getMessage()]);
+            return 0; 
         }
-
-        return array_map(fn($column, $label) => [
-            'name' => $label,
-            'value' => (int)($result[$column] ?? 0),
-        ], array_keys($columnMap), $columnMap);
     }
 
     public function getUserDailyAvailability(string $userId): array
     {
+        $this->logger->info('DailyFreeMapper.getUserDailyAvailability started', ['userId' => $userId]);
+
         $dailyLimits = [
-            'liken' => 3,      // Daily limit for likes
-            'comments' => 4,   // Daily limit for comments
-            'posten' => 1,     // Daily limit for posts
+            'liken' => 3,
+            'comments' => 4,
+            'posten' => 1,
         ];
 
         $columnMap = [
@@ -267,32 +145,47 @@ class DailyFreeMapper
             'posten' => 'Posts',
         ];
 
-        $query = "SELECT liken, comments, posten 
-                  FROM dailyfree 
-                  WHERE userid = :userId 
-                  AND createdat::date = CURRENT_DATE";
+        try {
+            $query = "SELECT liken, comments, posten 
+                      FROM dailyfree 
+                      WHERE userid = :userId 
+                      AND createdat::date = CURRENT_DATE";
 
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['userId' => $userId]);
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->execute();
 
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if (!$result) {
+            if (!$result) {
+                return array_map(fn($column, $label) => [
+                    'name' => $label,
+                    'used' => 0,
+                    'available' => $dailyLimits[$column],
+                ], array_keys($columnMap), $columnMap);
+            }
+
             return array_map(fn($column, $label) => [
                 'name' => $label,
-                'used' => 0,
-                'available' => $dailyLimits[$column],
+                'used' => (int)($result[$column] ?? 0),
+                'available' => max($dailyLimits[$column] - (int)($result[$column] ?? 0), 0),
             ], array_keys($columnMap), $columnMap);
+        } catch (\PDOException $e) {
+            $this->logger->error('Database error in getUserDailyAvailability', [
+                'userId' => $userId,
+                'exception' => $e->getMessage(),
+            ]);
+            return [];
+        } catch (\Throwable $e) {
+            $this->logger->error('Unexpected error in getUserDailyAvailability', [
+                'userId' => $userId,
+                'exception' => $e->getMessage(),
+            ]);
+            return [];
         }
-
-        return array_map(fn($column, $label) => [
-            'name' => $label,
-            'used' => (int)($result[$column] ?? 0),
-            'available' => max($dailyLimits[$column] - (int)($result[$column] ?? 0), 0),
-        ], array_keys($columnMap), $columnMap);
     }
 
-    public function incrementUserDailyUsage(string $userId, string $artType): bool
+    public function incrementUserDailyUsage(string $userId, int $artType): bool
     {
         $columnMap = [
             LIKE_ => 'liken',
@@ -301,62 +194,31 @@ class DailyFreeMapper
         ];
 
         $column = $columnMap[$artType] ?? null;
-
         if ($column === null) {
-            throw new InvalidArgumentException('Invalid art type provided.');
+            throw new InvalidArgumentException('Invalid action type provided.');
         }
 
         try {
-            $existsQuery = "SELECT createdat::date 
-                            FROM dailyfree 
-                            WHERE userid = :userId";
 
-            $existsStmt = $this->db->prepare($existsQuery);
-            $existsStmt->execute(['userId' => $userId]);
+            $updateQuery = "
+                INSERT INTO dailyfree (userid, liken, comments, posten, createdat)
+                VALUES (:userId, :liken, :comments, :posten, NOW())
+                ON CONFLICT (userid) 
+                DO UPDATE SET 
+                    liken = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.liken + :liken ELSE :liken END,
+                    comments = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.comments + :comments ELSE :comments END,
+                    posten = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.posten + :posten ELSE :posten END,
+                    createdat = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.createdat ELSE NOW() END
+                WHERE dailyfree.userid = :userId
+            ";
 
-            $result = $existsStmt->fetch(\PDO::FETCH_ASSOC);
+            $stmt = $this->db->prepare($updateQuery);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':liken', $artType === LIKE_ ? 1 : 0, PDO::PARAM_INT);
+            $stmt->bindValue(':comments', $artType === COMMENT_ ? 1 : 0, PDO::PARAM_INT);
+            $stmt->bindValue(':posten', $artType === POST_ ? 1 : 0, PDO::PARAM_INT);
 
-            if ($result) {
-                $recordDate = $result['createdat'];
-                $isToday = $recordDate === date('Y-m-d');
-
-                if ($isToday) {
-                    $updateQuery = "UPDATE dailyfree 
-                                    SET $column = $column + 1 
-                                    WHERE userid = :userId 
-                                    AND createdat::date = CURRENT_DATE";
-
-                    $updateStmt = $this->db->prepare($updateQuery);
-                    return $updateStmt->execute(['userId' => $userId]);
-                } else {
-                    $resetQuery = "UPDATE dailyfree 
-                                   SET liken = :liken, comments = :comments, posten = :posten, createdat = NOW()
-                                   WHERE userid = :userId";
-
-                    $resetParams = [
-                        'liken' => $artType === LIKE_ ? 1 : 0,
-                        'comments' => $artType === COMMENT_ ? 1 : 0,
-                        'posten' => $artType === POST_ ? 1 : 0,
-                        'userId' => $userId,
-                    ];
-
-                    $resetStmt = $this->db->prepare($resetQuery);
-                    return $resetStmt->execute($resetParams);
-                }
-            } else {
-                $insertQuery = "INSERT INTO dailyfree (userid, liken, comments, posten, createdat)
-                                VALUES (:userId, :liken, :comments, :posten, NOW())";
-
-                $insertParams = [
-                    'userId' => $userId,
-                    'liken' => $artType === LIKE_ ? 1 : 0,
-                    'comments' => $artType === COMMENT_ ? 1 : 0,
-                    'posten' => $artType === POST_ ? 1 : 0,
-                ];
-
-                $insertStmt = $this->db->prepare($insertQuery);
-                return $insertStmt->execute($insertParams);
-            }
+            return $stmt->execute();
         } catch (\Exception $e) {
             $this->logger->error('Error incrementing user daily usage', [
                 'userId' => $userId,
