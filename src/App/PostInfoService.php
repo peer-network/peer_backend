@@ -49,7 +49,7 @@ class PostInfoService
         try {
             $this->postInfoMapper->update($postInfo);
             return ['status' => 'success', 'ResponseCode' => 'Post info updated successfully',];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->respondWithError('Failed to update post info');
         }
     }

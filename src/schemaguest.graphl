@@ -28,7 +28,7 @@ type HelloResponse {
 }
 
 type RegisterResponse {
-  status: String!
+  status: String
   ResponseCode: String
   userid: ID
 }

@@ -7,10 +7,12 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Services\Base64FileHandler;
+use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 
 class UserService
 {
+    use ResponseHelper;
     protected ?string $currentUserId = null;
     private Base64FileHandler $base64filehandler;
 
@@ -29,23 +31,6 @@ class UserService
         $this->currentUserId = $userId;
     }
 
-    private function generateUUID(): string
-    {
-        return \sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0x0fff) | 0x4000,
-            \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
-        );
-    }
-
-    private static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
-    }
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -55,49 +40,10 @@ class UserService
         return true;
     }
 
-    private function respondWithError(string $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    private function validateUsername(string $username): array
-    {
-        if ($username === '') {
-            return $this->respondWithError('Could not find mandatory username');
-        }
-
-        if (strlen($username) < 3 || strlen($username) > 23) {
-            return $this->respondWithError('Username must be between 3 and 23 characters.');
-        }
-
-        if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
-            return $this->respondWithError('Username must only contain letters, numbers, and underscores.');
-        }
-
-        return ['status' => 'success'];
-    }
-
-    private function validatePkey(string $pkey): array
-    {
-        if ($pkey === '') {
-            return $this->respondWithError('Could not find mandatory pkey');
-        }
-
-        if (strlen($pkey) < 43 || strlen($pkey) > 44) {
-            return $this->respondWithError('Pkey must be between 43 and 44 characters.');
-        }
-
-		if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $pkey)) {
-			return $this->respondWithError('Invalid Solana Public Key.');
-		}
-
-        return ['status' => 'success'];
-    }
-
     private function validatePassword(string $password): array
     {
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
-            return $this->respondWithError(
+            return self::respondWithError(
                 'Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, and one number.'
             );
         }
@@ -114,7 +60,7 @@ class UserService
 
         try {
             return password_verify($inputPassword, $hashedPassword);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Password verification error', ['exception' => $e]);
             return false;
         }
@@ -142,24 +88,20 @@ class UserService
         return null;
     }
 
-    private function validateRequiredFields(array $args, array $requiredFields): array
-    {
-        foreach ($requiredFields as $field) {
-            if (empty($args[$field])) {
-                return $this->respondWithError("$field is required");
-            }
-        }
-        return [];
-    }
-
     public function createUser(array $args): array
     {
         $this->logger->info('UserService.createUser started');
 
         $requiredFields = ['username', 'email', 'password'];
-        $validationErrors = $this->validateRequiredFields($args, $requiredFields);
+        $validationErrors = self::validateRequiredFields($args, $requiredFields);
         if (!empty($validationErrors)) {
             return $validationErrors;
+        }
+
+        $id = self::generateUUID();
+        if (empty($id)) {
+            $this->logger->critical('Failed to generate user ID');
+            return $this->respondWithError('Failed to generate user ID.');
         }
 
         $username = trim($args['username']);
@@ -169,32 +111,12 @@ class UserService
         $mediaFile = isset($args['img']) ? trim($args['img']) : '';
         $isPrivate = (int)($args['isprivate'] ?? 0);
         $invited = $args['invited'] ?? null;
-        $id = $this->generateUUID();
+
         $biography = $args['biography'] ?? '/userData/' . $id . '.txt';
-
-        $usernameValidation = $this->validateUsername($username);
-        if ($usernameValidation['status'] === 'error') {
-            return $usernameValidation;
-        }
-
-        $passwordValidation = $this->validatePassword($password);
-        if ($passwordValidation['status'] === 'error') {
-            return $passwordValidation;
-        }
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return $this->respondWithError('Invalid email format.');
-        }
-
-		if ($pkey !== null && !empty($pkey)) {
-			$validatePkey = $this->validatePkey($pkey);
-			if ($validatePkey['status'] === 'error') {
-				return $validatePkey;
-			}
-		}
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
         if ($this->userMapper->isEmailTaken($email)) {
-            return $this->respondWithError('Email already registered.');
+            return self::respondWithError('Email already registered.');
         }
 
         $slug = $this->generateUniqueSlug($username);
@@ -204,15 +126,20 @@ class UserService
             $args['img'] = $this->uploadMedia($mediaFile, $id, 'profile');
         }
 
-        $args = [
+        $userData = [
             'uid' => $id,
-            'username' => $username,
             'email' => $email,
+            'username' => $username,
             'password' => $password,
-            'biography' => $biography,
-            'isprivate' => $isPrivate,
+            'status' => 0,
+            'verified' => 0,
             'slug' => $slug,
+            'roles_mask' => 0,
+            'ip' => $ip,
             'img' => $args['img'] ?? '/profile/' . $id . '.jpg',
+            'biography' => $biography,
+            'createdat' => $createdat,
+            'updatedat' => $createdat
         ];
 
         $infoData = [
@@ -222,7 +149,8 @@ class UserService
             'amountblocked' => 0,
             'amountfollower' => 0,
             'amountfollowed' => 0,
-            'isprivate' => 0,
+            'amountfriends' => 0,
+            'isprivate' => $isPrivate,
             'invited' => $invited,
             'pkey' => $pkey,
             'updatedat' => $createdat,
@@ -245,21 +173,19 @@ class UserService
         ];
 
         try {
-            $this->userMapper->createUser($args);
+            $user = new User($userData);
+            $this->userMapper->createUser($user);
             unset($args);
 
             $userinfo = new UserInfo($infoData);
-
             $this->userMapper->insertinfo($userinfo);
             unset($infoData, $userinfo);
 
             $userwallet = new Wallett($walletData);
-
             $this->walletMapper->insertt($userwallet);
             unset($walletData, $userwallet);
 
             $createuserDaily = new DailyFree($dailyData);
-
             $this->dailyFreeMapper->insert($createuserDaily);
             unset($dailyData, $createuserDaily);
 
@@ -270,9 +196,9 @@ class UserService
                 'ResponseCode' => 'User registered successfully. Please verify your account.',
                 'userid' => $id,
             ];
-        } catch (\Exception $e) {
-            $this->logger->error('Error registering user.', ['exception' => $e]);
-            return $this->respondWithError('Failed to register user.');
+        } catch (\Throwable $e) {
+            $this->logger->warning('Error registering user.', ['exception' => $e]);
+            return self::respondWithError($e->getMessage());
         }
     }
 
@@ -286,77 +212,52 @@ class UserService
                 $this->logger->info('UserService.uploadMedia mediaPath', ['mediaPath' => $mediaPath]);
 
                 if ($mediaPath === '') {
-                    return $this->respondWithError('Media upload failed');
+                    return self::respondWithError('Media upload failed');
                 }
 
                 if (isset($mediaPath['path'])) {
                     return $mediaPath['path'];
                 } else {
-                    return $this->respondWithError('Media path necessary for upload');
+                    return self::respondWithError('Media path necessary for upload');
                 }
 
             } else {
-                return $this->respondWithError('Media necessary for upload');
+                return self::respondWithError('Media necessary for upload');
             }
 
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error uploading media.', ['exception' => $e]);
         }
 
         return null;
     }
 
-    public function searchUsername(string $username): array|object
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
-        }
-
-        $this->logger->info('searchUsername started.');
-
-        $validationResult = $this->validateUsername($username);
-        if ($validationResult['status'] === 'error') {
-            return $validationResult;
-        }
-
-        try {
-            $user = $this->userMapper->loadByName($username);
-            if (!$user) {
-                return $this->respondWithError('Username not found.');
-            }
-            return $user;
-        } catch (\Exception $e) {
-            $this->logger->error('Error searching username.', ['exception' => $e]);
-            return $this->respondWithError('Failed to search username.');
-        }
-    }
-
     public function verifyAccount(string $userId): array
     {
         if (!self::isValidUUID($userId)) {
-            return $this->respondWithError('Could not find mandatory id.');
+            return self::respondWithError('Could not find mandatory id.');
         }
 
         try {
             return $this->userMapper->verifyAccount($userId);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error verifying account.', ['exception' => $e]);
-            return $this->respondWithError('Failed to verify account.');
+            return self::respondWithError('Failed to verify account.');
         }
     }
 
     public function deleteUnverifiedUsers(): bool
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return self::respondWithError('Unauthorized.');
         }
 
         try {
             $this->userMapper->deleteUnverifiedUsers();
             $this->logger->info('Unverified users deleted.');
             return true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error deleting unverified users.', ['exception' => $e]);
             return false;
         }
@@ -365,11 +266,11 @@ class UserService
     public function setPassword(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return self::respondWithError('Unauthorized');
         }
 
         if (empty($args)) {
-            return $this->respondWithError('Could not find mandatory args');
+            return self::respondWithError('Could not find mandatory args');
         }
 
         $this->logger->info('UserService.setPassword started');
@@ -383,18 +284,18 @@ class UserService
         }
 
         if ($newPassword === $currentPassword) {
-            return $this->respondWithError('New password cannot be the same as the current password.');
+            return self::respondWithError('New password cannot be the same as the current password.');
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
 
         if (!$user) {
             $this->logger->warning('User not found', ['userId' => $this->currentUserId]);
-            return $this->respondWithError('User not found');
+            return self::respondWithError('User not found');
         }
 
         if (!$this->validatePasswordMatch($currentPassword, $user->getPassword())) {
-            return $this->respondWithError('Wrong Actual Password');
+            return self::respondWithError('Wrong Actual Password');
         }
 
         try {
@@ -406,20 +307,20 @@ class UserService
                 'status' => 'success',
                 'ResponseCode' => 'Password update successful',
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to update user password', ['exception' => $e]);
-            return $this->respondWithError('Failed to update user password');
+            return self::respondWithError('Failed to update user password');
         }
     }
 
     public function setEmail(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return self::respondWithError('Unauthorized');
         }
 
         if (empty($args)) {
-            return $this->respondWithError('Could not find mandatory args');
+            return self::respondWithError('Could not find mandatory args');
         }
 
         $this->logger->info('UserService.setEmail started');
@@ -429,26 +330,26 @@ class UserService
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->logger->warning('Invalid email format', ['email' => $email]);
-            return $this->respondWithError('Invalid email format');
+            return self::respondWithError('Invalid email format');
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
             $this->logger->warning('Email already in use', ['email' => $email]);
-            return $this->respondWithError('Email already in use.');
+            return self::respondWithError('Email already in use.');
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
         if (!$user) {
             $this->logger->warning('User not found', ['userId' => $this->currentUserId]);
-            return $this->respondWithError('User not found');
+            return self::respondWithError('User not found');
         }
 
         if ($email === $user->getMail()) {
-            return $this->respondWithError('New email cannot be the same as the current email.');
+            return self::respondWithError('New email cannot be the same as the current email.');
         }
 
         if (!$this->validatePasswordMatch($exPassword, $user->getPassword())) {
-            return $this->respondWithError('Wrong Actual Password');
+            return self::respondWithError('Wrong Actual Password');
         }
 
         try {
@@ -462,20 +363,20 @@ class UserService
                 'ResponseCode' => 'User email updated successfully',
                 'affectedRows' => $affectedRows,
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to update user email', ['exception' => $e]);
-            return $this->respondWithError('Could not update user’s email');
+            return self::respondWithError('Could not update user’s email');
         }
     }
 
     public function setUsername(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return self::respondWithError('Unauthorized');
         }
 
-        if (empty($args)) {
-            return $this->respondWithError('Could not find mandatory args');
+        if (empty($args['username'])) {
+            return self::respondWithError('Could not find mandatory args');
         }
 
         $this->logger->info('UserService.setUsername started');
@@ -483,30 +384,27 @@ class UserService
         $username = trim($args['username'] ?? '');
         $password = $args['password'] ?? null;
 
-        $validationResult = $this->validateUsername($username);
-        if ($validationResult['status'] === 'error') {
-            return $validationResult;
-        }
-
-        $user = $this->userMapper->loadById($this->currentUserId);
-        if (!$user) {
-            return $this->respondWithError('User not found');
-        }
-
-        if ($username === $user->getName()) {
-            return $this->respondWithError('New username cannot be the same as the current username.');
-        }
-
-        if (!$this->validatePasswordMatch($password, $user->getPassword())) {
-            return $this->respondWithError('Wrong Actual Password');
-        }
-
-        $slug = $this->generateUniqueSlug($username);
-        if (!$slug) {
-            return $this->respondWithError('Failed to generate a unique slug after multiple attempts.');
-        }
-
         try {
+            $validationResult = new User(['username' => $username], ['username']);
+
+            $user = $this->userMapper->loadById($this->currentUserId);
+            if (!$user) {
+                return self::respondWithError('User not found');
+            }
+
+            if ($username === $user->getName()) {
+                return self::respondWithError('New username cannot be the same as the current username.');
+            }
+
+            if (!$this->validatePasswordMatch($password, $user->getPassword())) {
+                return self::respondWithError('Wrong Actual Password');
+            }
+
+            $slug = $this->generateUniqueSlug($username);
+            if (!$slug) {
+                return self::respondWithError('Failed to generate a unique slug after multiple attempts.');
+            }
+
             $user->setName($username);
             $user->setSlug($slug);
 
@@ -520,20 +418,20 @@ class UserService
                 'ResponseCode' => 'Username updated successfully',
                 'affectedRows' => $affectedRows,
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to update username', ['exception' => $e]);
-            return $this->respondWithError('Could not update user’s username');
+            return self::respondWithError($e->getMessage());
         }
     }
 
     public function deleteAccount(string $expassword): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return self::respondWithError('Unauthorized');
         }
 
         if (empty($expassword)) {
-            return $this->respondWithError('Could not find mandatory expassword');
+            return self::respondWithError('Could not find mandatory expassword');
         }
 
         $this->logger->info('UserService.deleteAccount started');
@@ -542,11 +440,11 @@ class UserService
 
         $user = $this->userMapper->loadById($userId);
         if (!$user) {
-            return $this->respondWithError('Could not find user');
+            return self::respondWithError('Could not find user');
         }
 
         if (!$this->validatePasswordMatch($expassword, $user->getPassword())) {
-            return $this->respondWithError('Wrong Actual Password');
+            return self::respondWithError('Wrong Actual Password');
         }
 
         try {
@@ -556,16 +454,16 @@ class UserService
                 'status' => 'success',
                 'message' => 'User deleted successfully',
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to delete user', ['exception' => $e]);
-            return $this->respondWithError('Failed to delete user');
+            return self::respondWithError('Failed to delete user');
         }
     }
 
     public function Profile(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return self::respondWithError('Unauthorized');
         }
 
         $userId = $args['userid'] ?? $this->currentUserId;
@@ -575,7 +473,7 @@ class UserService
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID for profile', ['userId' => $userId]);
-            return $this->respondWithError('Could not find mandatory id.');
+            return self::respondWithError('Could not find mandatory id.');
         }
 
         try {
@@ -595,12 +493,12 @@ class UserService
                 'ResponseCode' => 'Profile data prepared successfully',
                 'affectedRows' => $profileData,
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch profile data', [
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return $this->respondWithError('Failed to fetch profile data.');
+            return self::respondWithError('Failed to fetch profile data.');
         }
     }
 
@@ -614,7 +512,7 @@ class UserService
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
-            return $this->respondWithError('Invalid UUID provided for Follows.');
+            return self::respondWithError('Invalid UUID provided for Follows.');
         }
 
         try {
@@ -638,16 +536,16 @@ class UserService
                     )
                 ]
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch followers or following data', ['error' => $e->getMessage()]);
-            return $this->respondWithError('Failed to fetch followers or following data.');
+            return self::respondWithError('Failed to fetch followers or following data.');
         }
     }
 
     public function getFriends(?array $args = []): array|null
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return self::respondWithError('Unauthorized');
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -669,17 +567,17 @@ class UserService
             }
 
             $this->logger->info('No friends found for the user', ['currentUserId' => $this->currentUserId]);
-            return $this->respondWithError('No friends found for the user.');
-        } catch (\Exception $e) {
+            return self::respondWithError('No friends found for the user.');
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
-            return $this->respondWithError('Failed to retrieve friends list.');
+            return self::respondWithError('Failed to retrieve friends list.');
         }
     }
 
     public function getAllFriends(?array $args = []): array|null
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return self::respondWithError('Unauthorized');
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -701,10 +599,10 @@ class UserService
             }
 
             $this->logger->info('No friends found @ all');
-            return $this->respondWithError('No friends found @ all.');
-        } catch (\Exception $e) {
+            return self::respondWithError('No friends found @ all.');
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
-            return $this->respondWithError('Failed to retrieve friends list.');
+            return self::respondWithError('Failed to retrieve friends list.');
         }
     }
 
@@ -726,9 +624,9 @@ class UserService
                 ];
             }
 
-            return $this->respondWithError('No users found for the user.');
-        } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve users list.');
+            return self::respondWithError('No users found for the user.');
+        } catch (\Throwable $e) {
+            return self::respondWithError('Failed to retrieve users list.');
         }
     }
 
@@ -738,7 +636,7 @@ class UserService
         $this->logger->info('UserService.fetchAll started');
 
         try {
-            $users = $this->userMapper->fetchAll($args, $this->currentUserId);
+            $users = $this->userMapper->fetchAll($args);
             $fetchAll = array_map(fn(User $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {
@@ -750,9 +648,9 @@ class UserService
                 ];
             }
 
-            return $this->respondWithError('No users found for the user.');
-        } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve users list.');
+            return self::respondWithError('No users found for the user.');
+        } catch (\Throwable $e) {
+            return self::respondWithError('Failed to retrieve users list.');
         }
     }
 }

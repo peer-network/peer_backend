@@ -111,7 +111,7 @@ class WalletMapper
                     'total_numbersq' => $totalNumbersQ,
                     'transaction_count' => (int)$row['transaction_count'],
                 ];
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
             }
         }
@@ -190,7 +190,7 @@ class WalletMapper
                     'total_numbersq' => $totalNumbersQ,
                     'transaction_count' => (int)$row['transaction_count'],
                 ];
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
             }
         }
@@ -265,7 +265,7 @@ class WalletMapper
                     'total_numbers' => $totalNumbers,
                     'total_numbersq' => $totalNumbersQ,
                 ];
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
             }
         }
@@ -318,7 +318,7 @@ class WalletMapper
             try {
                 $results[] = new Wallet($row);
                 $this->logger->info('Executing SQL query', ['row' => $row]);
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $this->logger->error('Failed to create User object', ['error' => $e->getMessage(), 'data' => $row]);
             }
         }
@@ -409,7 +409,7 @@ class WalletMapper
 
             return $results;
 
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->logger->error('Database error occurred in loadWalletById', [
                 'error' => $e->getMessage(),
             ]);
@@ -573,7 +573,7 @@ class WalletMapper
                     WHERE feedid IS NULL";
             $stmt = $this->db->query($sql);
             $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error fetching post user IDs', ['exception' => $e]);
             return false;
         }
@@ -645,7 +645,7 @@ class WalletMapper
             $result = !empty($rows) ? $rows : [];
 
             return $result;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->respondWithError($e->getMessage());
         }
     }
@@ -661,6 +661,12 @@ class WalletMapper
             return false;
         }
 
+        $id = $this->generateUUID();
+        if (empty($id)) {
+            $this->logger->critical('Failed to generate logwins ID');
+            return $this->respondWithError('Failed to generate logwins ID.');
+        }
+
         $sql = "INSERT INTO logwins 
                 (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
                 VALUES 
@@ -671,7 +677,7 @@ class WalletMapper
 
             $this->logger->info('WalletMapper.insertWinToLog args:', ['userId' => $userId, 'args' => $args]);
 
-            $stmt->bindValue(':token', $args['gemid'] ?? $this->generateUUID(), \PDO::PARAM_STR);
+            $stmt->bindValue(':token', $args['gemid'] ?? $id, \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
             $stmt->bindValue(':postid', $args['postid'], \PDO::PARAM_STR);
             $stmt->bindValue(':fromid', $args['fromid'], \PDO::PARAM_STR);
@@ -801,7 +807,7 @@ class WalletMapper
                     WHERE s.collected = 0";
             $stmt = $this->db->query($sql);
             $entries = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ' . $tableName, ['exception' => $e]);
             return $this->respondWithError($e->getMessage());
         }
@@ -815,6 +821,11 @@ class WalletMapper
             foreach ($entries as $row) {
                 try {
                     $id = $this->generateUUID();
+                    if (empty($id)) {
+                        $this->logger->critical('Failed to generate gems ID');
+                        return $this->respondWithError('Failed to generate gems ID.');
+                    }
+
                     $sql = "INSERT INTO gems (gemid, userid, postid, fromid, gems, whereby, createdat) 
                             VALUES (:gemid, :userid, :postid, :fromid, :gems, :whereby, :createdat)";
                     $stmt = $this->db->prepare($sql);
@@ -829,7 +840,7 @@ class WalletMapper
                     ]);
 
                     $insertCount++;
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $this->logger->error('Error inserting into gems for ' . $tableName, ['exception' => $e]);
                     return $this->respondWithError($e->getMessage());
                 }
@@ -840,7 +851,7 @@ class WalletMapper
                     $quoted_ids = implode(',', $entry_ids);
                     $sql = "UPDATE $tableName SET collected = 1 WHERE userid IN ($quoted_ids)";
                     $this->db->query($sql);
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $this->logger->error('Error updating collected status for ' . $tableName, ['exception' => $e]);
                     return $this->respondWithError($e->getMessage());
                 }
@@ -874,7 +885,7 @@ class WalletMapper
             $stmt = $this->db->query($sql);
             $entries = $stmt->fetch(\PDO::FETCH_ASSOC);
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
             return $this->respondWithError($e->getMessage());
         }
@@ -946,7 +957,7 @@ class WalletMapper
             $stmt = $this->db->query($sql);
             $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             //$this->logger->info('fetching data for ', ['data' => $data]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
             return $this->respondWithError($e->getMessage());
         }
@@ -1007,7 +1018,7 @@ class WalletMapper
 
                 $this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
 
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
                 return $this->respondWithError($e->getMessage());
             }
@@ -1052,6 +1063,10 @@ class WalletMapper
 
             if ($result) {
                 $id = $this->generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return $this->respondWithError('Failed to generate logwins ID.');
+                }
 
                 $args = [
                     'token' => $id,
@@ -1067,6 +1082,10 @@ class WalletMapper
 
             if ($result) {
                 $id = $this->generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return $this->respondWithError('Failed to generate logwins ID.');
+                }
 
                 $args = [
                     'token' => $id,
@@ -1090,14 +1109,14 @@ class WalletMapper
                 ]
             ];
 
-        } catch (PDOException $pdoe) {
+        } catch (\PDOException $pdoe) {
             $this->db->rollBack();
             $this->logger->error('PDOException occurred during transaction', ['exception' => $pdoe]);
             return $this->respondWithError("Database error: " . $pdoe->getMessage());
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->db->rollBack();
-            $this->logger->error('Exception occurred during transaction', ['exception' => $e]);
+            $this->logger->error('Throwable occurred during transaction', ['exception' => $e]);
             return $this->respondWithError("Transaction failed: " . $e->getMessage());
         }
 
@@ -1178,7 +1197,7 @@ class WalletMapper
                     'whereby' => $whereby,
                 ],
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to deduct from wallet.', [
                 'exception' => $e->getMessage(),
                 'params' => [
@@ -1229,7 +1248,7 @@ class WalletMapper
             $stmt->execute();
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error updating liquidity', ['exception' => $e->getMessage(), 'userid' => $userId]);
             return false;
         }
@@ -1339,7 +1358,7 @@ class WalletMapper
                 'limit' => $limit
             ]);
             return [];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Unexpected error while fetching ranked posts', [
                 'error' => $e->getMessage(),
                 'limit' => $limit
@@ -1397,7 +1416,7 @@ class WalletMapper
                     : 'No interactions found for today.',
                 'affectedRows' => array_merge(['totalInteractions' => $totalInteractions, 'totalScore' => $totalScore, 'totalDetails' => $interactionDetails])
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('An error occurred while processing user move', [
                 'userId' => $userId,
                 'error' => $e->getMessage()
@@ -1445,7 +1464,7 @@ class WalletMapper
                 'status' => 'error',
                 'message' => "Database error: " . $e->getMessage()
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Unexpected error fetching entries for $tableName", [
                 'userId' => $userId,
                 'tableName' => $tableName,

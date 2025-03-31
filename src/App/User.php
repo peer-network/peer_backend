@@ -16,16 +16,17 @@ class User
     protected int $slug;
     protected int $roles_mask;
     protected string $ip;
-    protected ?string $biography;
-    protected ?string $img;
-    protected ?string $pkey;
+    protected string $img;
+    protected string $biography;
     protected string $createdat;
     protected string $updatedat;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->uid = $data['uid'] ?? '';
         $this->email = $data['email'] ?? '';
@@ -289,9 +290,8 @@ class User
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -316,7 +316,7 @@ class User
             ],
             'username' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'validateUsername'],
                 ],
@@ -329,7 +329,7 @@ class User
                 ],
             ],
             'status' => [
-                'required' => false,
+                'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],

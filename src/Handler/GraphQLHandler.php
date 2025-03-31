@@ -5,8 +5,8 @@ namespace Fawaz\Handler;
 use Fawaz\GraphQLSchemaBuilder;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Server\StandardServer;
+use GraphQL\Error\FormattedError;
 use GraphQL\Validator\Rules\QueryComplexity;
-use GraphQL\Validator\DocumentValidator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -23,19 +23,30 @@ class GraphQLHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $this->logger->info("GraphQLHandler handle started");
+        $rawBody = (string) $request->getBody();
+        $body = trim($rawBody);
 
-        $PeerFormatter = function ($error) {
-            return [
-                'message' => $error->getMessage(),
-                'locations' => $error->getLocations(),
-                'path' => $error->getPath(),
-            ];
-        };
+        if ($body === '' || $body === 'null') {
+            //$this->logger->error("GraphQL request body is empty, null, spaces.");
+            return $this->errorResponse("Empty or invalid request body. Expected JSON.", 400);
+        }
 
+        $decodedBody = json_decode($body, true);
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($decodedBody)) {
+            //$this->logger->error("Invalid JSON format: " . json_last_error_msg());
+            return $this->errorResponse("Invalid JSON format. Expected a valid JSON object.", 400);
+        }
+
+        if (!isset($decodedBody['query']) || trim($decodedBody['query']) === '') {
+            //$this->logger->error("GraphQL query is missing or contains only whitespace.");
+            return $this->errorResponse("Invalid GraphQL query. Expected a valid query string.", 400);
+        }
+
+        $this->logger->info("GraphQLHandler processing request.");
+
+        //$this->logger->info("Received raw body: " . json_encode($rawBody));
         $authorizationHeader = $request->getHeader('Authorization');
         $bearerToken = null;
-
         if (!empty($authorizationHeader)) {
             $parts = explode(' ', $authorizationHeader[0]);
             if (count($parts) === 2 && strtolower($parts[0]) === 'bearer') {
@@ -44,11 +55,7 @@ class GraphQLHandler implements RequestHandlerInterface
         }
 
         $this->schemaBuilder->setCurrentUserId($bearerToken);
-
         $schema = $this->schemaBuilder->build();
-
-        //$rule = new QueryComplexity(100);
-        //DocumentValidator::addRule($rule);
 
         $context = [
             'request' => $request,
@@ -58,19 +65,25 @@ class GraphQLHandler implements RequestHandlerInterface
         $config = ServerConfig::create()
             ->setSchema($schema)
             ->setContext($context)
-            ->setErrorFormatter($PeerFormatter)
+            ->setErrorFormatter(fn($error) => FormattedError::createFromException($error))
             ->setQueryBatching(true)
             ->setDebugFlag(true);
 
         $server = new StandardServer($config);
         $response = new Response();
-        
         $response = $server->processPsrRequest($request, $response, $response->getBody());
 
         if (!is_null($bearerToken)) {
             $response = $response->withHeader('Authorization', 'Bearer ' . $bearerToken);
         }
 
-        return $response->withHeader('Content-Type', 'application/json', 'charset=UTF-8');
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    private function errorResponse(string $message, int $statusCode): ResponseInterface
+    {
+        $response = new Response($statusCode);
+        $response->getBody()->write(json_encode(['error' => $message]));
+        return $response->withHeader('Content-Type', 'application/json');
     }
 }
