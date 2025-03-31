@@ -69,11 +69,14 @@ class UserInfoMapper
             $query = "UPDATE users_info 
                       SET liquidity = :liquidity, 
                           amountposts = :amountposts, 
-                          amountblocked = :amountblocked, 
                           amountfollower = :amountfollower, 
                           amountfollowed = :amountfollowed, 
                           amountfriends = :amountfriends, 
+                          amountblocked = :amountblocked, 
                           isprivate = :isprivate, 
+                          invited = :invited,
+                          phone = :phone,                          
+                          pkey = :pkey,
                           updatedat = :updatedat 
                       WHERE userid = :userid";
 
@@ -81,11 +84,14 @@ class UserInfoMapper
 
             $stmt->bindValue(':liquidity', $data['liquidity'], \PDO::PARAM_STR);
             $stmt->bindValue(':amountposts', $data['amountposts'], \PDO::PARAM_INT);
-            $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountfollower', $data['amountfollower'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountfollowed', $data['amountfollowed'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT);
+            $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
             $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
+            $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
+            $stmt->bindValue(':phone', $data['phone'], \PDO::PARAM_STR);
+            $stmt->bindValue(':pkey', $data['pkey'], \PDO::PARAM_STR);
             $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
 
@@ -358,10 +364,24 @@ class UserInfoMapper
                 $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
                 $stmt->execute();
 
+                $queryRestoreAccess = "UPDATE chatparticipants 
+                    SET hasaccess = 0 
+                    WHERE userid = :blockedid 
+                    AND hasaccess = 9 
+                    AND chatid IN (
+                        SELECT c.chatid FROM chats c
+                        JOIN chatparticipants cp ON c.chatid = cp.chatid
+                        WHERE cp.userid = :blockerid AND c.ispublic = 0
+                    )";
+                $stmt = $this->db->prepare($queryRestoreAccess);
+                $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
+                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
+                $stmt->execute();
+
                 $action = false;
                 $response = 'User unblocked successfully.';
             } else {
-
+                // Block the user
                 $query = "INSERT INTO user_block_user (blockerid, blockedid) VALUES (:blockerid, :blockedid)";
                 $stmt = $this->db->prepare($query);
                 $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
@@ -373,13 +393,27 @@ class UserInfoMapper
                 $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
                 $stmt->execute();
 
+                $queryBlockAccess = "UPDATE chatparticipants 
+                    SET hasaccess = 9 
+                    WHERE userid = :blockedid 
+                    AND hasaccess = 0 
+                    AND chatid IN (
+                        SELECT c.chatid FROM chats c
+                        JOIN chatparticipants cp ON c.chatid = cp.chatid
+                        WHERE cp.userid = :blockerid AND c.ispublic = 0
+                    )";
+                $stmt = $this->db->prepare($queryBlockAccess);
+                $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
+                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
+                $stmt->execute();
+
                 $action = true;
                 $response = 'User blocked successfully.';
             }
 
             $this->db->commit();
-
             return ['status' => 'success', 'ResponseCode' => $response, 'isBlocked' => $action];
+
         } catch (\PDOException $e) {
             $this->db->rollBack();
             $this->logger->error('Database error in toggleUserBlock', [
@@ -395,16 +429,20 @@ class UserInfoMapper
         }
     }
 
-    public function getBlockRelations(string $myUserId): array
+    public function getBlockRelationss(string $myUserId, int $offset = 0, int $limit = 10): array
     {
         $this->logger->info('Fetching block relationships', ['myUserId' => $myUserId]);
 
         $query = "SELECT blockerid, blockedid, createdat FROM user_block_user 
-                  WHERE blockerid = :myUserId OR blockedid = :myUserId";
+                  WHERE blockerid = :myUserId OR blockedid = :myUserId 
+                  ORDER BY createdat 
+                  DESC LIMIT :limit OFFSET :offset";
 
         try {
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':myUserId', $myUserId, \PDO::PARAM_STR);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
             $stmt->execute();
 
             $blockedBy = []; 
@@ -415,18 +453,21 @@ class UserInfoMapper
                     $blockedBy[] = [
                         'blockerid' => $row['blockerid'],
                         'blockedid' => $row['blockedid'],
-                        'createdat' => $row['createdat'],
+                        'createdat' => (new \DateTime($row['createdat']))->format('Y-m-d H:i:s'),
                     ];
                 } elseif ($row['blockerid'] === $myUserId) {
                     $iBlocked[] = [
                         'blockerid' => $row['blockerid'],
                         'blockedid' => $row['blockedid'],
-                        'createdat' => $row['createdat'],
+                        'createdat' => (new \DateTime($row['createdat']))->format('Y-m-d H:i:s'),
                     ];
                 }
             }
 
-            $this->logger->info("Fetched block relationships", ['blockedByCount' => count($blockedBy), 'iBlockedCount' => count($iBlocked)]);
+            $this->logger->info("Fetched block relationships", [
+                'blockedByCount' => count($blockedBy),
+                'iBlockedCount' => count($iBlocked),
+            ]);
 
             return [
                 'blockedid' => $blockedBy,
@@ -434,7 +475,77 @@ class UserInfoMapper
             ];
         } catch (\PDOException $e) {
             $this->logger->error("Database error while fetching block relationships", ['error' => $e->getMessage()]);
-            return ['blockedid' => [], 'blockerid' => []];
+            return ['blockedBy' => [], 'iBlocked' => []];
+        }
+    }
+
+    public function getBlockRelations(string $myUserId, int $offset = 0, int $limit = 10): array
+    {
+        $this->logger->info('Fetching block relationships', ['myUserId' => $myUserId]);
+
+        $query = "
+            SELECT 
+                ub.blockerid, blocker.slug AS blocker_slug, blocker.img AS blocker_img, blocker.username AS blocker_username, 
+                ub.blockedid, blocked.slug AS blocked_slug, blocked.img AS blocked_img, blocked.username AS blocked_username
+            FROM user_block_user ub
+            JOIN users blocker ON ub.blockerid = blocker.uid
+            JOIN users blocked ON ub.blockedid = blocked.uid
+            WHERE ub.blockerid = :myUserId OR ub.blockedid = :myUserId
+            ORDER BY ub.createdat DESC
+            LIMIT :limit OFFSET :offset";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':myUserId', $myUserId, \PDO::PARAM_STR);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->execute();
+
+            $blockedBy = []; 
+            $iBlocked = []; 
+
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                if ($row['blockedid'] === $myUserId) {
+                    $blockedBy[] = [
+                        'userid' => $row['blockerid'],
+                        'img' => $row['blocker_img'],
+                        'username' => $row['blocker_username'],
+                        'slug' => $row['blocker_slug'],
+                    ];
+                } elseif ($row['blockerid'] === $myUserId) {
+                    $iBlocked[] = [
+                        'userid' => $row['blockedid'],
+                        'img' => $row['blocked_img'],
+                        'username' => $row['blocked_username'],
+                        'slug' => $row['blocked_slug'],
+                    ];
+                }
+            }
+
+            $counter = count($blockedBy) + count($iBlocked); 
+
+            $this->logger->info("Fetched block relationships", [
+                'blockedByCount' => count($blockedBy),
+                'iBlockedCount' => count($iBlocked),
+                'total' => $counter
+            ]);
+
+            return [
+                'status' => 'success',
+                'counter' => $counter,
+                'ResponseCode' => "BlockRelations data prepared successfully",
+                'affectedRows' => [
+                    'blockedBy' => $blockedBy,
+                    'iBlocked' => $iBlocked
+                ]
+            ];
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error while fetching block relationships", ['error' => $e->getMessage()]);
+            return [
+                'status' => 'error',
+                'ResponseCode' => "Database error while fetching block relationships",
+                'affectedRows' => []
+            ];
         }
     }
 

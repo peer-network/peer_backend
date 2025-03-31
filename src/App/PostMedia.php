@@ -13,9 +13,11 @@ class PostMedia
     protected string $options;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->postid = $data['postid'] ?? '';
         $this->contenttype = $data['contenttype'] ?? 'text';
@@ -70,9 +72,8 @@ class PostMedia
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -101,7 +102,7 @@ class PostMedia
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
+                        'min' => 0,
                         'max' => 100,
                     ]],
                     ['name' => 'isString'],
@@ -113,7 +114,7 @@ class PostMedia
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 0,
-                        'max' => 200,
+                        'max' => 500,
                     ]],
                     ['name' => 'isString'],
                 ],

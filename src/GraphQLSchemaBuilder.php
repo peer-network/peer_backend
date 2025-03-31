@@ -134,7 +134,7 @@ class GraphQLSchemaBuilder
                 } else {
                     $this->currentUserId = null;
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $this->logger->error('Invalid token', ['exception' => $e]);
                 $this->currentUserId = null;
             }
@@ -343,20 +343,23 @@ class GraphQLSchemaBuilder
                 'amounttrending' => function (array $root): int {
                     return $root['amounttrending'] ?? 0;
                 },
+                'amountfollower' => function (array $root): int {
+                    return $root['amountfollower'] ?? 0;
+                },
+                'amountfollowed' => function (array $root): int {
+                    return $root['amountfollowed'] ?? 0;
+                },
+                'amountfriends' => function (array $root): int {
+                    return $root['amountfriends'] ?? 0;
+                },
+                'amountblocked' => function (array $root): int {
+                    return $root['amountblocked'] ?? 0;
+                },
                 'isfollowed' => function (array $root): bool {
                     return $root['isfollowed'] ?? false;
                 },
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
-                },
-                'amountfollowed' => function (array $root): int {
-                    return $root['amountfollowed'] ?? 0;
-                },
-                'amountfollower' => function (array $root): int {
-                    return $root['amountfollower'] ?? 0;
-                },
-                'amountfriends' => function (array $root): int {
-                    return $root['amountfriends'] ?? 0;
                 },
                 'imageposts' => function (array $root): array {
                     return $root['imageposts'] ?? [];
@@ -444,30 +447,36 @@ class GraphQLSchemaBuilder
                 },
             ],
             'BlockedUser' => [
-                'blockerid' => function (array $root): string {
+                'userid' => function (array $root): string {
                     $this->logger->info('Query.BlockedUser Resolvers');
-                    return $root['blockerid'] ?? '';
+                    return $root['userid'] ?? '';
                 },
-                'blockedid' => function (array $root): string {
-                    return $root['blockedid'] ?? '';
+                'img' => function (array $root): string {
+                    return $root['img'] ?? '';
                 },
-                'createdat' => function (array $root): string {
-                    return $root['createdat'] ?? '';
+                'username' => function (array $root): string {
+                    return $root['username'] ?? '';
+                },
+                'slug' => function (array $root): int {
+                    return $root['slug'] ?? 0;
                 },
             ],
             'Blocked' => [
-                'blockerid' => function (array $root): array {
+                'iBlocked' => function (array $root): array {
                     $this->logger->info('Query.Blocked Resolvers');
-                    return $root['blockerid'] ?? [];
+                    return $root['iBlocked'] ?? [];
                 },
-                'blockedid' => function (array $root): array {
-                    return $root['blockedid'] ?? [];
+                'blockedBy' => function (array $root): array {
+                    return $root['blockedBy'] ?? [];
                 },
             ],
             'UserBlocked' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.UserBlocked Resolvers');
                     return $root['status'] ?? '';
+                },
+                'counter' => function (array $root): int {
+                    return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
@@ -723,6 +732,9 @@ class GraphQLSchemaBuilder
                 },
                 'amountlikes' => function (array $root): int {
                     return $root['amountlikes'] ?? 0;
+                },
+                'amountreplies' => function (array $root): int {
+                    return $root['amountreplies'] ?? 0;
                 },
                 'isliked' => function (array $root): bool {
                     return $root['isliked'] ?? false;
@@ -1219,12 +1231,12 @@ class GraphQLSchemaBuilder
             return $response;
         }
 
-        if (empty($response)) {
+        if (empty($response['counter'])) {
             return $this->createSuccessResponse('No data found for the user.', [], false);
         }
 
         if (is_array($response) || !empty($response)) {
-            return $this->createSuccessResponse('Blocklist data prepared successfully.', $response, false);
+            return $response;
         }
 
         $this->logger->warning('Query.resolveBlocklist No data found');
@@ -1386,6 +1398,10 @@ class GraphQLSchemaBuilder
 
     protected function resolveActionPost(?array $args = []): ?array
     {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
+
         $this->logger->info('Query.resolveActionPost started');
 
 		$postId = $args['postid'] ?? null;
@@ -1551,7 +1567,7 @@ class GraphQLSchemaBuilder
             $this->logger->error("{$action}Post failed after wallet deduction", ['response' => $response]);
             $response['affectedRows'] = $args;
             return $response;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Unexpected error in resolveActionPost', [
                 'exception' => $e->getMessage(),
                 'args' => $args,
@@ -2152,44 +2168,6 @@ class GraphQLSchemaBuilder
         return $comment->getArrayCopy();
     }
 
-    public function fieldResolverr(mixed $source, array $args, mixed $context, ResolveInfo $info): mixed
-    {
-        $fieldName = $info->fieldName;
-        $parentTypeName = $info->parentType->name;
-
-        try {
-            if (isset($this->resolvers[$parentTypeName])) {
-                $resolver = $this->resolvers[$parentTypeName];
-
-                if (is_array($resolver)) {
-                    if (array_key_exists($fieldName, $resolver)) {
-                        $value = $resolver[$fieldName];
-
-                        return is_callable($value) ? $value($source, $args, $context, $info) : $value;
-                    }
-
-                    $this->logger->warning('No child resolver for ' . $fieldName . ' in ' . $parentTypeName);
-                }
-
-                if (is_object($resolver)) {
-                    if (isset($resolver->{$fieldName})) {
-                        $value = $resolver->{$fieldName};
-
-                        return is_callable($value) ? $value($source, $args, $context, $info) : $value;
-                    }
-
-                    $this->logger->warning('No child object resolver for ' . $fieldName . ' in ' . $parentTypeName);
-                }
-            } else {
-                $this->logger->warning('No resolver for ' . $parentTypeName);
-            }
-        } catch (\Throwable $e) {
-            $this->logger->alert($e->getMessage(), ['exception' => (string)$e]);
-            throw $e;
-        }
-        return Executor::defaultFieldResolver($source, $args, $context, $info);
-    }
-
     public function fieldResolver(mixed $source, array $args, mixed $context, ResolveInfo $info): mixed
     {
         $fieldName = $info->fieldName;
@@ -2212,7 +2190,6 @@ class GraphQLSchemaBuilder
                 throw new \RuntimeException("No resolver found for field '{$fieldName}' in type '{$parentTypeName}'.");
             }
 
-            // Prüfen, ob $value eine Funktion ist und die korrekten Parameter erwartet
             if (is_callable($value)) {
                 $refFunc = new \ReflectionFunction($value);
                 $params = $refFunc->getParameters();
@@ -2330,7 +2307,10 @@ class GraphQLSchemaBuilder
     {
         $this->logger->info('Query.ContactUs started');
 
-        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $ip = filter_var($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', FILTER_VALIDATE_IP) ?: '0.0.0.0';
+        if ($ip === '0.0.0.0') {
+            return $this->respondWithError('Could not find mandatory IP');
+        }
 
         if (!$this->contactusMapper->checkRateLimit($ip)) {
             return $this->respondWithError('Too many requests. Please try again later.');
@@ -2428,10 +2408,7 @@ class GraphQLSchemaBuilder
                 ];
             }
 
-        } catch (PDOException $e) {
-            error_log('Database error: ' . $e->getMessage());
-            return $this->respondWithError('Database error occurred');
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             error_log('General error: ' . $e->getMessage());
             return $this->respondWithError('An unexpected error occurred');
         }
@@ -2443,97 +2420,117 @@ class GraphQLSchemaBuilder
     {
         $this->logger->info('Query.login started');
 
-        if (empty($email) || empty($password)) {
-            $this->logger->warning('Email and password are required', ['email' => $email]);
-            return $this->respondWithError('Email and password are required');
+        try {
+            if (empty($email) || empty($password)) {
+                $this->logger->warning('Email and password are required', ['email' => $email]);
+                return $this->respondWithError('Email and password are required');
+            }
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->logger->warning('Invalid email format', ['email' => $email]);
+                return $this->respondWithError('Invalid email format');
+            }
+
+            $user = $this->userMapper->loadByEmail($email);
+
+            if (!$user) {
+                $this->logger->warning('Invalid email or password', ['email' => $email]);
+                return $this->respondWithError('Invalid email or password');
+            }
+
+            if (!$user->getVerified()) {
+                $this->logger->warning('Account not verified', ['email' => $email]);
+                return $this->respondWithError('Account not verified. Please verify your account');
+            }
+
+            if (!$user->verifyPassword($password)) {
+                $this->logger->warning('Invalid password', ['email' => $email]);
+                return $this->respondWithError('Invalid password');
+            }
+
+            $payload = [
+                'iss' => 'peerapp.de',
+                'aud' => 'peerapp.de',
+                'rol' => $user->getRoles(),
+                'uid' => $user->getUserId()
+            ];
+            $this->logger->info('Query.login See my payload:', ['payload' => $payload]);
+
+            $this->userMapper->update($user);
+            $accessToken = $this->tokenService->createAccessToken($payload);
+            $refreshToken = $this->tokenService->createRefreshToken($payload);
+
+            $this->userMapper->saveOrUpdateAccessToken($user->getUserId(), $accessToken);
+            $this->userMapper->saveOrUpdateRefreshToken($user->getUserId(), $refreshToken);
+
+            $this->userMapper->logLoginData($user->getUserId());
+
+            $this->logger->info('Login successful', ['email' => $email]);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 'Login successful',
+                'accessToken' => $accessToken,
+                'refreshToken' => $refreshToken
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Error during login process', [
+                'email' => $email,
+                'exception' => $e->getMessage(),
+                'stackTrace' => $e->getTraceAsString()
+            ]);
+
+            return $this->respondWithError('An error occurred during login.');
         }
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->warning('Invalid email format', ['email' => $email]);
-            return $this->respondWithError('Invalid email format');
-        }
-
-        $user = $this->userMapper->loadByEmail($email);
-
-        if (!$user) {
-            $this->logger->warning('Invalid email or password', ['email' => $email]);
-            return $this->respondWithError('Invalid email or password');
-        }
-
-        if (!$user->getVerified()) {
-            $this->logger->warning('Account not verified', ['email' => $email]);
-            return $this->respondWithError('Account not verified. Please verify your account');
-        }
-
-        if (!$user->verifyPassword($password)) {
-            $this->logger->warning('Invalid password', ['email' => $email]);
-            return $this->respondWithError('Invalid password');
-        }
-
-        $payload = [
-            'iss' => 'peerapp.de',
-            'aud' => 'peerapp.de',
-            'rol' => $user->getRoles(),
-            'uid' => $user->getUserId()
-        ];
-        $this->logger->info('Query.login See my payload:', ['payload' => $payload]);
-
-        $this->userMapper->update($user);
-        $accessToken = $this->tokenService->createAccessToken($payload);
-        $refreshToken = $this->tokenService->createRefreshToken($payload);
-
-        $this->userMapper->saveOrUpdateAccessToken($user->getUserId(), $accessToken);
-        $this->userMapper->saveOrUpdateRefreshToken($user->getUserId(), $refreshToken);
-
-        $this->userMapper->logLoginData($user->getUserId());
-
-        $this->logger->info('Login successful', ['email' => $email]);
-
-        return [
-            'status' => 'success',
-            'ResponseCode' => 'Login successful',
-            'accessToken' => $accessToken,
-            'refreshToken' => $refreshToken
-        ];
     }
 
     protected function refreshToken(string $refreshToken): array
     {
         $this->logger->info('Query.refreshToken started');
 
-        if (empty($refreshToken)) {
-            return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+        try {
+            if (empty($refreshToken)) {
+                return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+            }
+
+            $decodedToken = $this->tokenService->validateToken($refreshToken, true);
+
+            if (!$decodedToken) {
+                return $this->respondWithError('Invalid refresh token');
+            }
+
+            $payload = [
+                'iss' => 'peerapp.de',
+                'aud' => 'peerapp.de',
+                'rol' => $decodedToken->rol,
+                'uid' => $decodedToken->uid
+            ];
+            $this->logger->info('Query.refreshToken See my payload:', ['payload' => $payload]);
+
+            $accessToken = $this->tokenService->createAccessToken($payload);
+            $newRefreshToken = $this->tokenService->createRefreshToken($payload);
+
+            $this->userMapper->saveOrUpdateAccessToken($decodedToken->uid, $accessToken);
+            $this->userMapper->saveOrUpdateRefreshToken($decodedToken->uid, $newRefreshToken);
+
+            $this->userMapper->logLoginData($decodedToken->uid, 'refreshToken');
+
+            $this->logger->info('Token refreshed successfully', ['uid' => $decodedToken->uid]);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 'Token refreshed successfully',
+                'accessToken' => $accessToken,
+                'refreshToken' => $newRefreshToken
+            ];
+
+        } catch (\Throwable $e) {
+            $this->logger->error('Error during refreshToken process', [
+                'exception' => $e->getMessage(),
+                'stackTrace' => $e->getTraceAsString()
+            ]);
+            
+            return $this->respondWithError('An error occurred while refreshing the token.');
         }
-
-        $decodedToken = $this->tokenService->validateToken($refreshToken, true);
-
-        if (!$decodedToken) {
-            return $this->respondWithError('Invalid refresh token');
-        }
-
-        $payload = [
-            'iss' => 'peerapp.de',
-            'aud' => 'peerapp.de',
-            'rol' => $decodedToken->rol,
-            'uid' => $decodedToken->uid
-        ];
-        $this->logger->info('Query.refreshToken See my payload:', ['payload' => $payload]);
-
-        $accessToken = $this->tokenService->createAccessToken($payload);
-        $newRefreshToken = $this->tokenService->createRefreshToken($payload);
-
-        $this->userMapper->saveOrUpdateAccessToken($decodedToken->uid, $accessToken);
-        $this->userMapper->saveOrUpdateRefreshToken($decodedToken->uid, $newRefreshToken);
-
-        $this->userMapper->logLoginData($decodedToken->uid, 'refreshToken');
-
-        $this->logger->info('Token refreshed successfully', ['uid' => $decodedToken->uid]);
-
-        return [
-            'status' => 'success',
-            'ResponseCode' => 'Token refreshed successfully',
-            'accessToken' => $accessToken,
-            'refreshToken' => $newRefreshToken
-        ];
     }
 }

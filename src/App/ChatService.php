@@ -70,6 +70,11 @@ class ChatService
         $this->logger->info('ChatService.createChatWithRecipients started');
 
         $chatId = $this->generateUUID();
+        if (empty($chatId)) {
+            $this->logger->critical('Failed to generate chat ID');
+            return $this->respondWithError('Failed to generate chat ID.');
+        }
+
         $creatorId = $this->currentUserId;
         $name = $args['name'] ?? null;
         $image = $args['image'] ?? null;
@@ -77,7 +82,6 @@ class ChatService
         $maxUsers = 1;
         $public = 1;
 
-        // Validate input parameters
         if (!is_array($recipients) || empty($recipients)) {
             return $this->respondWithError('Invalid input parameters');
         }
@@ -88,7 +92,6 @@ class ChatService
 
         $friends = $this->getFriends();
 
-        // Check if $friends is an array and has follow
         if (!is_array($friends) || empty($friends)) {
             return $this->respondWithError('No friends found or an error occurred in fetching friends');
         }
@@ -138,7 +141,7 @@ class ChatService
                 }
 
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to upload media files', ['exception' => $e]);
             return $this->respondWithError('An error occurred while uploading the media files');
         }
@@ -206,7 +209,7 @@ class ChatService
                 'ResponseCode' => 'Chat and participants created successfully',
                 'affectedRows' => ['chatid' => $chatId],
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to create chat and participants', ['exception' => $e]);
             return $this->respondWithError('Failed to create chat and participants');
         }
@@ -260,13 +263,14 @@ class ChatService
 
         try {
             if (!empty($image)) {
-                $mediaPath = $this->base64filehandler->handleFileUpload($image, 'image', $chatId);
+                $chatImage = $chatId . '-' . uniqid();
+                $mediaPath = $this->base64filehandler->handleFileUpload($image, 'image', $chatImage);
                 $this->logger->info('mediaPath', ['mediaPath' => $mediaPath]);
                 if ($mediaPath !== null) {
                     $image = $mediaPath['path'];
                 }
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to upload media files', ['exception' => $e]);
             return $this->respondWithError('An error occurred while uploading the media files');
         }
@@ -288,7 +292,7 @@ class ChatService
                 'ResponseCode' => 'Successfully updated chat',
                 'affectedRows' => $chat->getArrayCopy()
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to update chat', ['args' => $args, 'exception' => $e]);
             return $this->respondWithError('Failed to update chat');
         }
@@ -331,7 +335,7 @@ class ChatService
                     'ResponseCode' => 'Chat deleted successfully'
                 ];
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to delete chat', ['id' => $id, 'error' => $e->getMessage()]);
             return $this->respondWithError('Failed to delete chatId');
         }
@@ -418,7 +422,7 @@ class ChatService
                 'ResponseCode' => 'Participants added successfully',
                 'affectedRows' => $participants,
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to add participants', ['chatId' => $chatId, 'exception' => $e]);
             return $this->respondWithError('Failed to add participants');
         }
@@ -477,7 +481,7 @@ class ChatService
                 'ResponseCode' => 'Participants removed successfully',
                 'affectedRows' => $participants,
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to remove participants', ['chatId' => $chatId, 'exception' => $e]);
             return $this->respondWithError('Failed to remove participants');
         }
@@ -540,7 +544,7 @@ class ChatService
 
             $this->logger->info('Message added successfully', ['chatId' => $chatId, 'content' => $content]);
             return $result;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to add message', ['chatId' => $chatId, 'exception' => $e]);
             return $this->respondWithError('Failed to add message');
         }
@@ -587,7 +591,7 @@ class ChatService
                 'ResponseCode' => 'Message removed successfully',
                 'affectedRows' => $message,
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to remove message', ['chatId' => $chatId, 'exception' => $e]);
             return $this->respondWithError('Failed to remove message');
         }
@@ -611,25 +615,49 @@ class ChatService
 
     public function loadChatById(?array $args = []): Chat|array
     {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+        try {
+            if (!$this->checkAuthentication()) {
+                throw new ValidationException('Unauthorized');
+            }
+
+            $chatId = $args['chatid'] ?? null;
+
+            if (!self::isValidUUID($chatId)) {
+                throw new ValidationException('MissingChatId');
+            }
+
+            $this->logger->info('ChatService.loadChatById started');
+
+            $result = $this->chatMapper->loadChatById($this->currentUserId, $args);
+
+            if ($result['status'] !== 'success') {
+                throw new ValidationException($result['ResponseCode']);
+            }
+
+            $chatData = $result['data'];
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 'Chat fetched successfullyd',
+                'data' => new Chat([
+                    'chatid' => $chatData['chat']['chatid'],
+                    'creatorid' => $chatData['chat']['creatorid'],
+                    'name' => $chatData['chat']['name'],
+                    'image' => $chatData['chat']['image'],
+                    'ispublic' => (bool) $chatData['chat']['ispublic'],
+                    'createdat' => $chatData['chat']['createdat'],
+                    'updatedat' => $chatData['chat']['updatedat'],
+                    'chatmessages' => $chatData['messages'],
+                    'chatparticipants' => $chatData['participants'],
+                ]),
+            ];
+        } catch (ValidationException $e) {
+            $this->logger->warning("Validation error in loadChatById", ['error' => $e->getMessage()]);
+            return $this->respondWithError($e->getMessage());
+        } catch (\Throwable $e) {
+            $this->logger->error("Unexpected error in loadChatById", ['error' => $e->getMessage()]);
+            return $this->respondWithError('UnexpectedError');
         }
-
-        $chatId = $args['chatid'] ?? null;
-
-        if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError('MissingChatId');
-        }
-
-        $this->logger->info('ChatService.loadChatById started');
-
-        $results = $this->chatMapper->loadChatById($args, $this->currentUserId);
-
-        $this->logger->info("Response received from ChatMapper.loadChatById", [
-            'ResponseCode' => $results['ResponseCode'],
-        ]);
-
-        return $results;
     }
 
     public function findChatser(?array $args = []): array|false
@@ -698,7 +726,7 @@ class ChatService
             ->then(function ($connection) use ($data) {
                 $connection->send(json_encode($data));
                 $connection->close();
-            }, function (\Exception $e) {
+            }, function (\Throwable $e) {
                 $this->logger->error("WebSocket connection error", ['exception' => $e->getMessage()]);
             });
         $loop->run();

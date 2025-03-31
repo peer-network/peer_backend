@@ -184,7 +184,7 @@ class UserMapper
         }
     }
 
-    public function fetchAll(array $args = [], ?string $currentUserId = null): array
+    public function fetchAll(array $args = []): array
     {
         $this->logger->info("UserMapper.fetchAll started");
 
@@ -952,6 +952,7 @@ class UserMapper
 				ui.amountfollower,
 				ui.amountfollowed,
 				ui.amountfriends,
+				ui.amountblocked,
                 COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
@@ -1004,32 +1005,18 @@ class UserMapper
         return $hash;
     }
 
-    public function createUser(array $userData): ?string
+    public function createUser(User $userData): ?string
     {
         $this->logger->info("UserMapper.createUser started");
 
         try {
-            $userid = $userData['uid'] ?? \bin2hex(\random_bytes(16));
+            $userid = $userData->getUserId();
+            $password = $userData->getPassword();
 
-            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            $hashedPassword = method_exists($this, 'setPassword') ? $this->setPassword($password) : \password_hash($password, \PASSWORD_BCRYPT, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
+            $userData->setPassword($hashedPassword);
 
-            $createdat = $updatedat = (new \DateTime())->format('Y-m-d H:i:s.u');
-
-            $hashedPassword = method_exists($this, 'setPassword') ? $this->setPassword($userData['password']) : \password_hash($userData['password'], \PASSWORD_BCRYPT, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
-
-            $userData = array_merge($userData, [
-                'uid' => $userid,
-                'password' => $hashedPassword,
-                'status' => 0,
-                'verified' => 0,
-                'roles_mask' => 0,
-                'ip' => $ip,
-                'createdat' => $createdat,
-                'updatedat' => $updatedat
-            ]);
-
-            $user = new User($userData);
-            $this->insert($user);
+            $this->insert($userData);
 
             $this->logger->info("Inserted new user into database", ['uid' => $userid]);
 
@@ -1048,6 +1035,7 @@ class UserMapper
         $this->logger->info("UserMapper.insert started");
 
         $data = $user->getArrayCopy();
+        $this->logger->info('UserMapper.insert second', ['data' => $data]);
 
         $query = "INSERT INTO users 
                   (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat)
@@ -1102,9 +1090,9 @@ class UserMapper
         $data = $user->getArrayCopy();
 
         $query = "INSERT INTO users_info 
-                  (userid, liquidity, amountposts, amountblocked, amountfollower, amountfollowed, isprivate, invited, updatedat)
+                  (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, pkey, updatedat)
                   VALUES 
-                  (:userid, :liquidity, :amountposts, :amountblocked, :amountfollower, :amountfollowed, :isprivate, :invited, :updatedat)";
+                  (:userid, :liquidity, :amountposts, :amountfollower, :amountfollowed, :amountfriends, :amountblocked, :isprivate, :invited, :pkey, :updatedat)";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -1112,11 +1100,13 @@ class UserMapper
             $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
             $stmt->bindValue(':liquidity', $data['liquidity'], \PDO::PARAM_STR);
             $stmt->bindValue(':amountposts', $data['amountposts'], \PDO::PARAM_INT);
-            $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT); 
             $stmt->bindValue(':amountfollower', $data['amountfollower'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountfollowed', $data['amountfollowed'], \PDO::PARAM_INT);
+            $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT); 
+            $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT); 
             $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
             $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
+            $stmt->bindValue(':pkey', $data['pkey'], \PDO::PARAM_STR);
             $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
 
             $stmt->execute();
@@ -1445,53 +1435,6 @@ class UserMapper
             $this->logger->error("Database error in saveOrUpdateRefreshToken: " . $e->getMessage());
         } catch (\Exception $e) {
             $this->logger->error("Database error in saveOrUpdateRefreshToken: ", ['error' => $e]);
-        }
-    }
-
-    public function toggleUserBlock(string $blockerid, string $blockedid): array
-    {
-        $this->logger->info('UserInfoMapper.toggleUserBlock started', [
-            'blockerid' => $blockerid,
-            'blockedid' => $blockedid
-        ]);
-
-        try {
-            $this->db->beginTransaction();
-            
-            $query = "SELECT COUNT(*) FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
-            $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
-            $stmt->execute();
-            
-            if ($stmt->fetchColumn() > 0) {
-                $query = "DELETE FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
-                $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
-                $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
-                $stmt->execute();
-
-                $action = false;
-                $response = 'User unblocked successfully.';
-            } else {
-                $query = "INSERT INTO user_block_user (blockerid, blockedid) VALUES (:blockerid, :blockedid)";
-                $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
-                $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
-                $stmt->execute();
-
-                $action = true;
-                $response = 'User blocked successfully.';
-            }
-
-            $this->db->commit();
-            $this->logger->info($response, ['blockerid' => $blockerid, 'blockedid' => $blockedid]);
-
-            return ['status' => 'success', 'ResponseCode' => $response, 'isBlocked' => $action];
-        } catch (\Exception $e) {
-            $this->db->rollBack();
-            $this->logger->error('Failed to toggle user block', ['exception' => $e->getMessage()]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user block'];
         }
     }
 

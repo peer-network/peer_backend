@@ -154,7 +154,6 @@ class TagMapper
         } catch (\Throwable $e) {
             $this->logger->error("Error inserting tag into database", [
                 'error' => $e->getMessage(),
-                'data' => $tag->getArrayCopy(),
             ]);
             return false;
         }
@@ -177,7 +176,6 @@ class TagMapper
         } catch (\Throwable $e) {
             $this->logger->error("Error updating tag in database", [
                 'error' => $e->getMessage(),
-                'data' => $tag->getArrayCopy(),
             ]);
             return false;
         }

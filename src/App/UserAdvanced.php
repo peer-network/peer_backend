@@ -31,9 +31,11 @@ class UserAdvanced
     protected ?string $updatedat;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->uid = $data['uid'] ?? '';
         $this->email = $data['email'] ?? '';
@@ -386,9 +388,8 @@ class UserAdvanced
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -413,24 +414,16 @@ class UserAdvanced
             ],
             'username' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 23,
-                    ]],
-                    ['name' => 'isString'],
+                    ['name' => 'validateUsername'],
                 ],
             ],
             'password' => [
                 'required' => true,
                 'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 8,
-                        'max' => 128,
-                    ]],
-                    ['name' => 'isString'],
+                    ['name' => 'validatePassword'],
                 ],
             ],
             'status' => [

@@ -13,14 +13,16 @@ class Post
     protected string $title;
     protected string $contenttype;
     protected string $media;
-    protected string $cover;
+    protected ?string $cover;
     protected string $mediadescription;
     protected string $createdat;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->postid = $data['postid'] ?? '';
         $this->userid = $data['userid'] ?? '';
@@ -28,7 +30,7 @@ class Post
         $this->title = $data['title'] ?? '';
         $this->contenttype = $data['contenttype'] ?? 'text';
         $this->media = $data['media'] ?? '';
-        $this->cover = $data['cover'] ?? '';
+        $this->cover = $data['cover'] ?? null;
         $this->mediadescription = $data['mediadescription'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
@@ -95,9 +97,8 @@ class Post
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -154,7 +155,7 @@ class Post
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
+                        'min' => 0,
                         'max' => 1000,
                     ]],
                     ['name' => 'isString'],
