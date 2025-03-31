@@ -15,9 +15,11 @@ class NewsFeed
     protected ?string $updatedat;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->feedid = $data['feedid'] ?? '';
         $this->creatorid = $data['creatorid'] ?? '';
@@ -125,9 +127,8 @@ class NewsFeed
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             

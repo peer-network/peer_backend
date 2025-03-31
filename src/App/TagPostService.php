@@ -85,18 +85,10 @@ class TagPostService
             $tagPost = new TagPost([
                 'postid' => $postId,
                 'tagid' => $tag->getTagId(),
-                'createdat' => (new DateTime())->format('Y-m-d H:i:s.u'),
+                'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
             ]);
             $this->tagPostMapper->insert($tagPost);
         }
-    }
-
-    private function createTag(string $tagName): Tag
-    {
-        $tagId = $this->generateUUID();
-        $tag = new Tag(['tagid' => $tagId, 'name' => $tagName]);
-        $this->tagMapper->insert($tag);
-        return $tag;
     }
 
     public function createTag(string $tagName): array

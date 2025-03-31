@@ -47,7 +47,14 @@ class TagService
 
     private function isValidTagName(?string $tagName): bool
     {
-        return $tagName && strlen($tagName) >= 2 && strlen($tagName) <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
+        if (empty($tagName)) {
+            return false;
+        }
+
+        $tagName = htmlspecialchars($tagName, ENT_QUOTES, 'UTF-8'); // Schutz vor XSS
+
+        $length = strlen($tagName);
+        return $length >= 2 && $length <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
     }
 
     private function respondWithError(string $message): array
@@ -67,13 +74,10 @@ class TagService
         }
 
         $this->logger->info('TagService.createTag started');
-
-        $tagName = trim($tagName);
-        if (!$this->isValidTagName($tagName)) {
-            return $this->respondWithError('Invalid tagName. Must be 2-50 letters long and contain only letters.');
-        }
+        $tagName = !empty($tagName) ? trim($tagName) : null;
 
         try {
+            $tagValid = new Tag(['name' => $tagName], ['name']);
             $tag = $this->tagMapper->loadByName($tagName);
 
             if ($tag) {
@@ -96,7 +100,9 @@ class TagService
             return $this->createSuccessResponse('Tag created successfully', [$tagData]);
 
         } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to create tag.');
+            return $this->respondWithError($e->getMessage());
+        } catch (ValidationException $e) {
+            return $this->respondWithError($e->getMessage());
         } finally {
             $this->logger->debug('createTag function execution completed');
         }
@@ -125,6 +131,14 @@ class TagService
         $this->logger->info("TagService.loadTag started");
 
         try {
+            if (isset($args['tagname']) && !empty($args['tagname'])) {
+                $tagData = ['name' => $args['tagname']];
+
+                $tag = new Tag($tagData, ['name']);
+            } else {
+                return $this->respondWithError('Tag name are required.');
+            }
+
             $tags = $this->tagMapper->searchByName($args);
 
             if ($tags === false) {
@@ -143,7 +157,7 @@ class TagService
             $this->logger->error("Error occurred in TagService.loadTag", [
                 'error' => $e->getMessage(),
             ]);
-            return $this->respondWithError('An internal error occurred.');
+            return $this->respondWithError($e->getMessage());
         }
     }
 }

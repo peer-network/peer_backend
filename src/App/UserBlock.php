@@ -12,9 +12,11 @@ class UserBlock
     protected string $createdat;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->blockerid = $data['blockerid'] ?? '';
         $this->blockedid = $data['blockedid'] ?? '';
@@ -75,9 +77,8 @@ class UserBlock
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -97,7 +98,7 @@ class UserBlock
                 'validators' => [['name' => 'Uuid']],
             ],
             'createdat' => [
-                'required' => false,
+                'required' => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],

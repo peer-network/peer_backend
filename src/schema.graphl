@@ -17,6 +17,7 @@ type Query {
   follows(userid: ID, offset: Int, limit: Int): UserFollows!
   friends(offset: Int, limit: Int): UserFriends!
   getuserinfo: GetUserinforesponse!
+  blockedlist(offset: Int, limit: Int): UserBlocked!
   getallposts(filterBy: [FilterType!], IgnorList: IgnoredList, sortBy: SortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, postOffset: Int, postLimit: Int, commentOffset: Int, commentLimit: Int): GetAllPostResponse!
   getpostinfo(postid: ID!): GetPostinforesponse!
   getcommentinfo(commentid: ID!): GetCommentinforesponse!
@@ -30,7 +31,6 @@ type Query {
   currentliquidity: CurrentLiquidity!
   fetchwinslog(day: DayType!, offset: Int, limit: Int): UserLogWins!
   fetchpayslog(day: DayType!, offset: Int, limit: Int): UserLogWins!
-  blockedlist(offset: Int, limit: Int): UserBlocked!
   callusermove: StandardResponse!
 }
 
@@ -349,7 +349,8 @@ type Profile {
   amounttrending: Int
   amountfollowed: Int
   amountfollower: Int
-  amountfriends: Int!
+  amountfriends: Int
+  amountblocked: Int
   imageposts: [ProfilPostMed!]
   textposts: [ProfilPostMed!]
   videoposts: [ProfilPostMed!]
@@ -384,18 +385,20 @@ type UserFollows {
 }
 
 type BlockedUser {
-  blockerid: String
-  blockedid: String
-  createdat: Date
+  userid: String
+  img: String
+  username: String
+  slug: Int
 }
 
 type Blocked {
-  blockerid: [BlockedUser!]
-  blockedid: [BlockedUser!]
+  iBlocked: [BlockedUser!]
+  blockedBy: [BlockedUser!]
 }
 
 type UserBlocked {
   status: String
+  counter: Int!
   ResponseCode: String
   affectedRows: Blocked
 }
@@ -462,6 +465,7 @@ type Comment {
   content: String!
   createdat: Date!
   amountlikes: Int!
+  amountreplies: Int!
   isliked: Boolean!
   user: ProfilUser!
 }
@@ -490,7 +494,7 @@ input CreatePostInput {
 
 input CreateChatInput {
   name: String!
-  image: String!
+  image: String
   recipients: [String!]!
 }
 

@@ -32,6 +32,7 @@ CREATE TABLE users_info (
     amountblocked INTEGER DEFAULT 0 NOT NULL,
     isprivate SMALLINT DEFAULT 0 NOT NULL,
     invited UUID DEFAULT NULL,
+    phone VARCHAR(21) DEFAULT NULL,
     pkey VARCHAR(44) DEFAULT NULL,
     updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_users_info_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
@@ -117,13 +118,13 @@ CREATE TABLE IF NOT EXISTS posts (
     postid UUID PRIMARY KEY,
     userid UUID NOT NULL,
     feedid UUID DEFAULT NULL,
-    title VARCHAR(63) NOT NULL,
     contenttype VARCHAR(13) NOT NULL DEFAULT 'text' CHECK (contenttype IN ('image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery', 'secretgallery')),
+    title VARCHAR(63) NOT NULL,
     mediadescription VARCHAR (500) DEFAULT NULL,
-    status SMALLINT DEFAULT 10 NOT NULL,
     media TEXT NOT NULL,
     cover TEXT DEFAULT NULL,
     options TEXT DEFAULT NULL,
+    status SMALLINT DEFAULT 10 NOT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_posts_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
     CONSTRAINT fk_posts_feedid FOREIGN KEY (feedid) REFERENCES newsfeed(feedid) ON DELETE CASCADE
@@ -155,8 +156,8 @@ CREATE INDEX idx_post_info_userid ON post_info(userid);
 CREATE TABLE IF NOT EXISTS posts_media (
     postid UUID NOT NULL,
     contenttype VARCHAR(13) NOT NULL DEFAULT 'text' CHECK (contenttype IN ('image', 'text', 'video', 'audio', 'cover')),
-    media VARCHAR(100) NOT NULL,
-    options VARCHAR(250) DEFAULT NULL,
+    media VARCHAR(500) NOT NULL,
+    options VARCHAR(500) DEFAULT NULL,
     CONSTRAINT fk_posts_media_postid FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE,
     PRIMARY KEY (postid, media)
 );
@@ -282,7 +283,7 @@ CREATE TABLE IF NOT EXISTS logwins (
     userid UUID NOT NULL,
     postid UUID DEFAULT NULL,
     fromid UUID DEFAULT NULL,
-    gems NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    gems NUMERIC(30,10) DEFAULT NULL,
     numbers NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
     numbersq NUMERIC(64) DEFAULT 0 NOT NULL,
     whereby INTEGER DEFAULT 0  NOT NULL,

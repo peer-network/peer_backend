@@ -20,15 +20,18 @@ class Profile
     protected ?int $amountfollower;
     protected ?int $amountfollowed;
     protected ?int $amountfriends;
+    protected ?int $amountblocked;
     protected ?array $imageposts = [];
     protected ?array $textposts = [];
     protected ?array $videoposts = [];
     protected ?array $audioposts = [];
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->uid = $data['uid'] ?? '';
         $this->username = $data['username'] ?? '';
@@ -43,6 +46,7 @@ class Profile
         $this->amountfollower = $data['amountfollower'] ?? 0;
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
         $this->amountfriends = $data['amountfriends'] ?? 0;
+        $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->imageposts = isset($data['imageposts']) && is_array($data['imageposts']) ? $data['imageposts'] : [];
         $this->textposts = isset($data['textposts']) && is_array($data['textposts']) ? $data['textposts'] : [];
         $this->videoposts = isset($data['videoposts']) && is_array($data['videoposts']) ? $data['videoposts'] : [];
@@ -66,6 +70,7 @@ class Profile
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
             'amountfriends' => $this->amountfriends,
+            'amountblocked' => $this->amountblocked,
             'imageposts' => $this->imageposts,
             'textposts' => $this->textposts,
             'videoposts' => $this->videoposts,
@@ -109,9 +114,8 @@ class Profile
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -128,13 +132,9 @@ class Profile
             ],
             'username' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
                 'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 23,
-                    ]],
-                    ['name' => 'isString'],
+                    ['name' => 'validateUsername'],
                 ],
             ],
             'status' => [
@@ -202,6 +202,11 @@ class Profile
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountfriends' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountblocked' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],

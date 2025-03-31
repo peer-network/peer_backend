@@ -82,7 +82,7 @@ class JWTService
             return $decodedToken;
 
         } catch (ExpiredException $e) {
-            $this->logger->info('Token has expired', ['exception' => $e->getMessage(), 'token' => $token]);
+            //$this->logger->info('Token has expired', ['exception' => $e->getMessage(), 'token' => $token]);
             return null;
 
         } catch (\Exception $e) {

@@ -53,7 +53,7 @@ class PostService
         return $d && $d->format($format) === $date;
     }
 
-    private function respondWithError(string $responseCode, array $extraData = []): array
+    private function respondWithError(string $responseCode): array
     {
         return ['status' => 'error', 'ResponseCode' => $responseCode];
     }
@@ -99,6 +99,11 @@ class PostService
         $this->logger->info('PostService.createPost started');
 
         $postId = $this->generateUUID();
+        if (empty($postId)) {
+            $this->logger->critical('Failed to generate post ID');
+            return $this->respondWithError('Failed to generate post ID.');
+        }
+
         $createdAt = (new \DateTime())->format('Y-m-d H:i:s.u');
 
         $postData = [
@@ -134,7 +139,7 @@ class PostService
                 }
 
                 if (!empty($mediaPath['path'])) {
-                    $postData['media'] = $mediaPath['path'];
+                    $postData['media'] = $this->argsToJsString($mediaPath['path']);
                 } else {
                     return $this->respondWithError('Media upload failed.');
                 }
@@ -142,13 +147,13 @@ class PostService
                 return $this->respondWithError('Media necessary for upload.');
             }
 
-            // Cover Upload (Audio & Video)
+            // Cover Upload Nur (Audio & Video)
             if ($this->isValidCover($args)) {
                 $coverPath = $this->base64filehandler->handleUploads($args['cover'], 'cover', $postId);
                 $this->logger->info('PostService.createPost coverPath', ['coverPath' => $coverPath]);
 
                 if (!empty($coverPath['path'])) {
-                    $postData['cover'] = $coverPath['path'];
+                    $postData['cover'] = $this->argsToJsString($coverPath['path']);
                 } else {
                     return $this->respondWithError('Cover upload failed.');
                 }
@@ -157,6 +162,35 @@ class PostService
             // Post speichern
             $post = new Post($postData);
             $this->postMapper->insert($post);
+
+            if (isset($mediaPath['path']) && !empty($mediaPath['path'])) {
+                // Media Posts_media
+                foreach ($mediaPath['path'] as $media) {
+                    $postMed = [
+                        'postid' => $postId,
+                        'contenttype' => $args['contenttype'],
+                        'media' => $media['path'],
+                        'options' => $this->argsToJsString($media['options']),
+                    ];
+
+                    $postMedia = new PostMedia($postMed);
+                    $this->postMapper->insertmed($postMedia);
+                }
+            }
+
+            if (isset($coverPath['path']) && !empty($coverPath['path'])) {
+                // Cover Posts_media
+                $coverDecoded = $coverPath['path'];
+                $coverMed = [
+                    'postid' => $postId,
+                    'contenttype' => 'cover',
+                    'media' => $coverDecoded['path'],
+                    'options' => $this->argsToJsString($coverDecoded['options']),
+                ];
+
+                $coverMedia = new PostMedia($coverMed);
+                $this->postMapper->insertmed($coverMedia);
+            }
 
             // Tags speichern
             if (!empty($args['tags']) && is_array($args['tags'])) {
@@ -170,7 +204,7 @@ class PostService
 
             return $this->createSuccessResponse('Post created successfully', $post->getArrayCopy());
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);
             return $this->respondWithError($e->getMessage());
         }
@@ -191,14 +225,14 @@ class PostService
     {
         $maxTags = 10;
         if (count($tags) > $maxTags) {
-            throw new \Exception('Maximum tag limit exceeded');
+            throw new \Throwable('Maximum tag limit exceeded');
         }
 
         foreach ($tags as $tagName) {
-            $tagName = trim($tagName);
+            $tagName = !empty($tagName) ? trim((string) $tagName) : '';
             
-            if (strlen($tagName) < 2 || strlen($tagName) > 53 || !preg_match('/^[a-zA-Z0-9-]+$/', $tagName)) {
-                throw new \Exception('Invalid tag name');
+            if (strlen($tagName) < 2 || strlen($tagName) > 53 || !preg_match('/^[a-zA-Z0-9_-]+$/', $tagName)) {
+                throw new \Throwable('Invalid tag name');
             }
 
             $tag = $this->tagMapper->loadByName($tagName);
@@ -211,32 +245,35 @@ class PostService
             
             if (!$tag) {
                 $this->logger->error('Failed to load or create tag', ['tagName' => $tagName]);
-                throw new \Exception('Failed to load or create tag: ' . $tagName);
+                throw new \Throwable('Failed to load or create tag: ' . $tagName);
             }
 
             $tagPost = new TagPost([
                 'postid' => $postId,
-                'tagid' => $tag->getTagId(), // This is now guaranteed to be an object
+                'tagid' => $tag->getTagId(), 
                 'createdat' => $createdAt,
             ]);
 
             try {
                 $this->tagPostMapper->insert($tagPost);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $this->logger->error('Failed to insert tag-post relationship', [
                     'postid' => $postId,
                     'tagName' => $tagName,
                     'exception' => $e->getMessage(),
                 ]);
-                throw new \Exception('Failed to insert tag-post relationship: ' . $tagName);
+                throw new \Throwable('Failed to insert tag-post relationship: ' . $tagName);
             }
         }
     }
 
-    private function createTag(string $tagName): Tag|false
+    private function createTag(string $tagName): Tag|false|array
     {
         $tagId = 0;
-        $tag = new Tag(['tagid' => $tagId, 'name' => $tagName]);
+        $tagData = ['tagid' => $tagId, 'name' => $tagName];
+
+        $tag = new Tag($tagData);
+
         $tag = $this->tagMapper->insert($tag);
         return $tag;
     }
@@ -372,7 +409,7 @@ class PostService
                 'ResponseCode' => 'Chat feeds fetched successfully',
                 'affectedRows' => $result,
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch chat feeds', ['feedid' => $feedid, 'exception' => $e]);
             return $this->respondWithError('Failed to fetch chat feeds.');
         }
@@ -434,7 +471,7 @@ class PostService
                     'ResponseCode' => 'Post deleted successfully',
                 ];
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->respondWithError('Failed to delete post.');
         }
 
