@@ -494,16 +494,13 @@ class ChatService
 
         $results = $this->chatMapper->getChatMessages($args);
 
-        return [
-            'status' => 'success',
-            'ResponseCode' => 'Getting Messages successfully',
-            'affectedRows' => $results,
-        ];
+        return $results;
     }
 
     public function addMessage(string $chatId, string $content): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('Unauthorized access attempt in addMessage', ['chatId' => $chatId]);
             return $this->respondWithError('Unauthorized');
         }
 
@@ -516,36 +513,42 @@ class ChatService
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError('Invalid UUID input');
         }
 
-        $this->logger->info('ChatService.addMessage started');
+        $this->logger->info('ChatService.addMessage started', ['chatId' => $chatId]);
 
         $chat = $this->chatMapper->loadById($chatId);
+        
+        if (is_array($chat) && isset($chat['status']) && $chat['status'] === 'error') {
+            return $chat; // Immediately return if chat is invalid
+        }
 
-        if (!$chat) {
-            return $this->respondWithError('Invalid chatId');
+        if ($chat->getIsPublic() === 9) {
+            return $this->respondWithError('ChatId Suspended.');
         }
 
         try {
             $messageData = [
                 'messid' => 0,
-                'chatid' => $chatId,
-                'userid' => $this->currentUserId,
-                'content' => $content,
+                'chatid'    => $chatId,
+                'userid'    => $this->currentUserId,
+                'content'   => $content,
                 'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
             ];
+
             $message = new ChatMessages($messageData);
             $result = $this->chatMapper->insertMess($message);
 
             if ($result['status'] === 'error') {
+                $this->logger->error('Failed to insert message', ['chatId' => $chatId, 'error' => $result]);
                 return $result;
             }
 
             $this->logger->info('Message added successfully', ['chatId' => $chatId, 'content' => $content]);
             return $result;
         } catch (\Throwable $e) {
-            $this->logger->error('Failed to add message', ['chatId' => $chatId, 'exception' => $e]);
+            $this->logger->error('Failed to add message', ['chatId' => $chatId, 'exception' => $e->getMessage()]);
             return $this->respondWithError('Failed to add message');
         }
     }

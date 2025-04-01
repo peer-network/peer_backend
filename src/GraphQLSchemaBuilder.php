@@ -105,10 +105,10 @@ class GraphQLSchemaBuilder
             $schema = 'admin_schema.graphl';
         }
 
-		if (empty($schema)){
-			$this->logger->error('Invalid schema', ['schema' => $schema]);
-			return $this->respondWithError('Invalid schema parameter provided.');
-		}
+        if (empty($schema)){
+            $this->logger->error('Invalid schema', ['schema' => $schema]);
+            return $this->respondWithError('Invalid schema parameter provided.');
+        }
 
         $contents = \file_get_contents(__DIR__ . '/' . $schema);
         $schema = BuildSchema::build($contents);
@@ -903,6 +903,9 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.AddChatmessageResponse Resolvers');
                     return $root['status'] ?? '';
                 },
+                'counter' => function (array $root): int {
+                    return $root['counter'] ?? 0;
+                },
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
@@ -1338,7 +1341,7 @@ class GraphQLSchemaBuilder
         }
 
         if (is_array($response) || !empty($response)) {
-            return $this->createSuccessResponse('Success get all messages', $response, true, 'posts');
+            return $this->createSuccessResponse('Success get all messages', $response, true);
         }
 
         $this->logger->warning('Query.resolveChatMessages No messages found');
@@ -1404,7 +1407,7 @@ class GraphQLSchemaBuilder
 
         $this->logger->info('Query.resolveActionPost started');
 
-		$postId = $args['postid'] ?? null;
+        $postId = $args['postid'] ?? null;
         $action = $args['action'] = strtolower($args['action'] ?? 'LIKE');
         $args['fromid'] = $this->currentUserId;
 
@@ -1474,9 +1477,9 @@ class GraphQLSchemaBuilder
                     elseif ($action === 'like') 
                     {
                         $response = $this->postInfoService->likePost($postId);
-						if (isset($response['status']) && $response['status'] === 'error') {
-							return $response;
-						}
+                        if (isset($response['status']) && $response['status'] === 'error') {
+                            return $response;
+                        }
                     }
                     else 
                     {
@@ -1513,9 +1516,9 @@ class GraphQLSchemaBuilder
             if ($action === 'comment') 
             {
                 $response = $this->commentService->createComment($args);
-				if (isset($response['status']) && $response['status'] === 'error') {
-					return $response;
-				}
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    return $response;
+                }
             }
             elseif ($action === 'post') 
             {
@@ -1583,7 +1586,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($args)) {
-            return $this->respondWithError('No arguments provided.', ['errorCode' => 400]);
+            return $this->respondWithError('No arguments provided.');
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1597,7 +1600,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($comments)) {
-            return $this->createSuccessResponse('No comments found', [], false);
+            return $this->createSuccessResponse('Parent ID exists, but has no child comments.', [], false);
         }
 
         $results = array_map(fn(CommentAdvanced $comment) => $comment->getArrayCopy(), $comments);
