@@ -291,6 +291,7 @@ type Chatinfo {
 
 type AddChatmessageResponse {
   status: String!
+  counter: Int!
   ResponseCode: String
   affectedRows: [Chatmessageinfo]
 }

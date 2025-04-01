@@ -202,6 +202,7 @@ class CommentService
         $this->logger->info("CommentService.fetchByParentId started");
 
         $results = $this->commentMapper->fetchByParentId($parentId, $this->currentUserId, $offset, $limit);
+
         return $results;
     }
 

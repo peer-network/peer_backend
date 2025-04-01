@@ -180,12 +180,12 @@ class PostService
 
             if (isset($coverPath['path']) && !empty($coverPath['path'])) {
                 // Cover Posts_media
-                $coverDecoded = $coverPath['path'];
+                $coverDecoded = $coverPath['path'] ?? null;
                 $coverMed = [
                     'postid' => $postId,
                     'contenttype' => 'cover',
-                    'media' => $coverDecoded['path'],
-                    'options' => $this->argsToJsString($coverDecoded['options']),
+                    'media' => $coverDecoded[0]['path'],
+                    'options' => $this->argsToJsString($coverDecoded[0]['options']),
                 ];
 
                 $coverMedia = new PostMedia($coverMed);
