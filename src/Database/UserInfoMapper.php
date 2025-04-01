@@ -217,6 +217,41 @@ class UserInfoMapper
         }
     }
 
+    private function fetchFriends(string $userid): array
+    {
+        $this->logger->info("UserInfoMapper.fetchFriends started", ['userid' => $userid]);
+
+        try {
+            $sql = "SELECT u.uid, u.username, u.slug, u.updatedat, u.biography, u.img 
+                    FROM follows f1 
+                    INNER JOIN follows f2 ON f1.followedid = f2.followerid 
+                    INNER JOIN users u ON f1.followedid = u.uid 
+                    WHERE f1.followerid = :userid 
+                    AND f2.followedid = :userid";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
+            $stmt->execute();
+
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Throwable $e) {
+            $this->logger->error("Database error in fetchFriends: " . $e->getMessage(), ['userid' => $userid]);
+            return [];
+        }
+    }
+
+    private function getFriends(string $currentUserId): array|null
+    {
+        $this->logger->info('UserInfoMapper.getFriends started');
+        $users = $this->fetchFriends($currentUserId);
+
+        if ($users) {
+            return $users;
+        } 
+
+        return null;
+    }
+
     public function toggleUserFollow(string $followerid, string $followeduserid): array
     {
         $this->logger->info('UserInfoMapper.toggleUserFollow started');
@@ -258,6 +293,7 @@ class UserInfoMapper
                 $response = 'Follow successful.';
             }
 
+            $this->updateChatsStatus($followerid, $followeduserid);
             $this->updateFriendsCount($followerid);
             $this->updateFriendsCount($followeduserid);
 
@@ -303,6 +339,50 @@ class UserInfoMapper
 
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+        $stmt->execute();
+    }
+
+    private function updateChatsStatus(string $followerid, string $followeduserid): void
+    {
+        $friends = $this->getFriends($followerid);
+
+        if (!is_array($friends) || empty($friends)) {
+            throw new \InvalidArgumentException('NO FRIENDS FOUND OR AN ERROR OCCURRED IN FETCHING FRIENDS');
+        }
+
+        $friendIds = array_column($friends, 'uid');
+        $this->logger->info('friendIds', ['friendIds' => $friendIds]);
+
+        if (!in_array($followeduserid, $friendIds)) {
+
+            $queryRestoreAccess = "UPDATE chats 
+                SET ispublic = 9
+                WHERE ispublic = 0 
+                AND chatid IN (
+                    SELECT c.chatid FROM chats c
+                    JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
+                    JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
+                    WHERE cp1.userid = :followerid 
+                    AND cp2.userid = :followeduserid
+            )";
+
+        } else {
+
+            $queryRestoreAccess = "UPDATE chats 
+                SET ispublic = 0
+                WHERE ispublic = 9 
+                AND chatid IN (
+                    SELECT c.chatid FROM chats c
+                    JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
+                    JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
+                    WHERE cp1.userid = :followerid 
+                    AND cp2.userid = :followeduserid
+            )";
+        }
+
+        $stmt = $this->db->prepare($queryRestoreAccess);
+        $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
+        $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
         $stmt->execute();
     }
 
@@ -363,21 +443,22 @@ class UserInfoMapper
                 $stmt = $this->db->prepare($queryUpdateBlocker);
                 $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
                 $stmt->execute();
-
-                $queryRestoreAccess = "UPDATE chatparticipants 
-                    SET hasaccess = 0 
-                    WHERE userid = :blockedid 
-                    AND hasaccess = 9 
+/*
+                $queryRestoreAccess = "UPDATE chats 
+                    SET ispublic = 0
+                    WHERE ispublic = 9 
                     AND chatid IN (
                         SELECT c.chatid FROM chats c
-                        JOIN chatparticipants cp ON c.chatid = cp.chatid
-                        WHERE cp.userid = :blockerid AND c.ispublic = 0
+                        JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
+                        JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
+                        WHERE cp1.userid = :blockedid 
+                        AND cp2.userid = :blockerid
                     )";
                 $stmt = $this->db->prepare($queryRestoreAccess);
                 $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
                 $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
                 $stmt->execute();
-
+*/
                 $action = false;
                 $response = 'User unblocked successfully.';
             } else {
@@ -392,21 +473,22 @@ class UserInfoMapper
                 $stmt = $this->db->prepare($queryUpdateBlocker);
                 $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
                 $stmt->execute();
-
-                $queryBlockAccess = "UPDATE chatparticipants 
-                    SET hasaccess = 9 
-                    WHERE userid = :blockedid 
-                    AND hasaccess = 0 
+/*
+                $queryBlockAccess = "UPDATE chats 
+                    SET ispublic = 9
+                    WHERE ispublic = 0 
                     AND chatid IN (
                         SELECT c.chatid FROM chats c
-                        JOIN chatparticipants cp ON c.chatid = cp.chatid
-                        WHERE cp.userid = :blockerid AND c.ispublic = 0
+                        JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
+                        JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
+                        WHERE cp1.userid = :blockedid 
+                        AND cp2.userid = :blockerid
                     )";
                 $stmt = $this->db->prepare($queryBlockAccess);
                 $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
                 $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
                 $stmt->execute();
-
+*/
                 $action = true;
                 $response = 'User blocked successfully.';
             }

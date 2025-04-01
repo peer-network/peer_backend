@@ -705,7 +705,7 @@ class PeerInputFilter
         $imagePath = __DIR__ . '/../../runtime-data/media' . $imagePath;
 
         if (!is_readable($imagePath)) {
-            $this->errors['image'][] = 'Image file does not exist or is not readable.' . $imagePath;
+            $this->errors['image'][] = 'Image file does not exist or is not readable.';
             return false;
         }
 
