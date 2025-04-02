@@ -72,7 +72,7 @@ sudo service postgresql restart
 # These commands will add the schema and some optional data to the Database peer:
 # From project-root directory:
 psql -U postgres -d peer -f sql/structure.psql
-psql -U postgres -d peer -f sql/optional_data.psql
+# psql -U postgres -d peer -f sql/optional_data.psql
 
 # Access database:
 psql -U postgres -d peer
