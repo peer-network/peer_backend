@@ -482,6 +482,39 @@ class UserMapper
         }
     }
 
+    public function loadByIdMAin(string $id, int $roles_mask = 0): User|false
+    {
+        $this->logger->info("UserMapper.loadById started");
+
+        try {
+            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
+                    FROM users 
+                    WHERE uid = :id AND roles_mask = :roles_mask AND status = 0";
+            
+            $stmt = $this->db->prepare($sql);
+            
+            $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
+            $stmt->bindValue(':roles_mask', $roles_mask, \PDO::PARAM_INT);
+            
+            $stmt->execute();
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($data !== false) {
+                return new User($data);
+            }
+
+            $this->logger->warning("No user found with id", ['id' => $id]);
+            return false;
+
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error occurred", ['error' => $e->getMessage()]);
+            return false;
+        } catch (\Exception $e) {
+            $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
     public function loadById(string $id): User|false
     {
         $this->logger->info("UserMapper.loadById started");

@@ -86,8 +86,7 @@ class PostInfoService
         $this->logger->info('PostInfoService.likePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
-
-        if (!$postInfo) {
+        if ($postInfo === null) {
             return $this->respondWithError('Post not found');
         }
 
@@ -123,8 +122,7 @@ class PostInfoService
         $this->logger->info('PostInfoService.dislikePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
-
-        if (!$postInfo) {
+        if ($postInfo === null) {
             return $this->respondWithError('Post not found');
         }
 
@@ -160,8 +158,7 @@ class PostInfoService
         $this->logger->info('PostInfoService.reportPost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
-
-        if (!$postInfo) {
+        if ($postInfo === null) {
             return $this->respondWithError('Post not found');
         }
 
@@ -197,8 +194,7 @@ class PostInfoService
         $this->logger->info('PostInfoService.viewPost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
-
-        if (!$postInfo) {
+        if ($postInfo === null) {
             return $this->respondWithError('Post not found');
         }
 
@@ -234,8 +230,7 @@ class PostInfoService
         $this->logger->info('PostInfoService.sharePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
-
-        if (!$postInfo) {
+        if ($postInfo === null) {
             return $this->respondWithError('Post not found');
         }
 
@@ -288,7 +283,7 @@ class PostInfoService
         return $this->postInfoMapper->togglePostSaved($this->currentUserId, $postId);
     }
 
-    public function findPostInfo(string $postId): array|false
+    public function findPostInfo(string $postId): array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError('Unauthorized');
@@ -297,8 +292,7 @@ class PostInfoService
         $this->logger->info("PostInfoService.findPostInfo started");
 
         $postinfo = $this->postInfoMapper->loadById($postId);
-
-        if (!$postinfo) {
+        if ($postinfo === null) {
             return $this->respondWithError('PostInfo not found.');
         }
 

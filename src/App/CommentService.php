@@ -167,11 +167,13 @@ class CommentService
             $commentResponse['user'] = $this->userMapper->loadUserInfoById($this->currentUserId);
 
             $this->logger->info('Comment created successfully', ['commentResponse' => $commentResponse]);
+			$response = [$commentResponse];
 
             return [
                 'status' => 'success',
+				'counter' => count($response),
                 'ResponseCode' => 'Comment saved successfully',
-                'affectedRows' => [$commentResponse],
+                'affectedRows' => $response,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Error occurred while creating comment', [
@@ -227,4 +229,8 @@ class CommentService
         return $results;
     }
 
+    public function fetchAllByPostIdetaild(string $postId, int $offset = 0, int $limit = 10): array
+    {
+        return $this->commentMapper->fetchAllByPostIdetaild($postId, $this->currentUserId, $offset, $limit);
+    }
 }

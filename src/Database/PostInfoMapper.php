@@ -17,7 +17,7 @@ class PostInfoMapper
         return $userid === $currentUserId;
     }
 
-    public function loadById(string $postid): PostInfo|false
+    public function loadById(string $postid): ?PostInfo
     {
         $this->logger->info("PostInfoMapper.loadById started");
 
@@ -30,7 +30,7 @@ class PostInfoMapper
             return new PostInfo($data);
         }
 
-        return false;
+        return null;
     }
 
     public function isUserExistById(string $id): bool

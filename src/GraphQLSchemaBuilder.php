@@ -15,18 +15,11 @@ const OTHERSHARED_=13;// whereby SHAREN POSTER
 const FREELIKE_=30;// whereby FREELIKE
 const FREECOMMENT_=31;// whereby FREECOMMENT
 const FREEPOST_=32;// whereby FREEPOST
-const TESTER_=99;// whereby TESTER
-const FEEWHERBY_= 100;// whereby FEEWHERBY
 // DAILY FREE
 const DAILYFREEPOST=1;
 const DAILYFREELIKE=3;
 const DAILYFREECOMMENT=4;
-// POSTER WIN
-const RECEIVELIKE=5;
-const RECEIVEDISLIKE=4;
-const RECEIVECOMMENT=2;
-const RECEIVEPOSTVIEW=0.25;
-const RECEIVEINVITATION=1; // invitater become 1% from any transaction to liquiditypool
+const DAILYFREEDISLIKE=0;
 // USER PAY
 const PRICELIKE=3;
 const PRICEDISLIKE=5;
@@ -39,6 +32,7 @@ use Fawaz\App\Comment;
 use Fawaz\App\CommentAdvanced;
 use Fawaz\App\CommentInfoService;
 use Fawaz\App\CommentService;
+use Fawaz\App\ContactusService;
 use Fawaz\App\DailyFreeService;
 use Fawaz\App\McapService;
 use Fawaz\App\PoolService;
@@ -52,9 +46,9 @@ use Fawaz\App\UserService;
 use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
-use Fawaz\Database\ContactusMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\JWTService;
+use Fawaz\Services\MailerService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
@@ -72,7 +66,7 @@ class GraphQLSchemaBuilder
         protected UserMapper $userMapper,
         protected TagService $tagService,
         protected CommentMapper $commentMapper,
-        protected ContactusMapper $contactusMapper,
+        protected ContactusService $contactusService,
         protected DailyFreeService $dailyFreeService,
         protected McapService $mcapService,
         protected UserService $userService,
@@ -124,7 +118,7 @@ class GraphQLSchemaBuilder
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
                 if ($decodedToken) {
-                    $user = $this->userMapper->loadById($decodedToken->uid);
+                    $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
                     if ($user) {
                         $this->currentUserId = $decodedToken->uid;
                         $this->userRoles = $decodedToken->rol;
@@ -184,6 +178,12 @@ class GraphQLSchemaBuilder
                 },
                 'userroles' => function (array $root): int {
                     return $root['userroles'] ?? 0;
+                },
+                'currentVersion' => function (array $root): string {
+                    return $root['currentVersion'] ?? '1.2.0';
+                },
+                'wikiLink' => function (array $root): string {
+                    return $root['wikiLink'] ?? 'https://github.com/peer-network/peer_backend/wiki/Backend-Version-Update-1.2.0';
                 },
             ],
             'RegisterResponse' => [
@@ -1235,7 +1235,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response['counter'])) {
-            return $this->createSuccessResponse('No data found for the user.', [], false);
+            return $this->createSuccessResponse('No blocked list for this user.', [], false);
         }
 
         if (is_array($response) || !empty($response)) {
@@ -1428,7 +1428,7 @@ class GraphQLSchemaBuilder
             'like' => DAILYFREELIKE,
             'comment' => DAILYFREECOMMENT,
             'post' => DAILYFREEPOST,
-            'dislike' => 0,
+            'dislike' => DAILYFREEDISLIKE,
         ];
 
         $actionPrices = [
@@ -1999,6 +1999,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
         }
 
+
         $chatid = $args['chatid'] ?? null;
 
         if (!self::isValidUUID($chatid)) {
@@ -2078,19 +2079,14 @@ class GraphQLSchemaBuilder
 
         if (!empty($postId)) {
             $posts = $this->postInfoService->findPostInfo($postId);
-
-            if ($posts === false) {
-                return $this->respondWithError('No post found for the provided postId.');
-            }
+			if (isset($posts['status']) && $posts['status'] === 'error') {
+				return $posts;
+			}
         } else {
             return $this->respondWithError('Unable to locate a post with the provided information.');
         }
 
-        return [
-            'status' => 'success',
-            'ResponseCode' => 'Successfully retrieved post info.',
-            'affectedRows' => $posts,
-        ];
+		return $this->createSuccessResponse('Successfully retrieved post info.', $posts);
     }
 
     protected function resolveCommentInfo(string $commentId): ?array
@@ -2134,9 +2130,31 @@ class GraphQLSchemaBuilder
             return $this->respondWithError('Unauthorized');
         }
 
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
         $this->logger->info('Query.resolvePosts started');
 
         $posts = $this->postService->findPostser($args);
+        if (isset($posts['status']) && $posts['status'] === 'error') {
+            return $posts;
+        }
+
+        $commentOffset = isset($args['commentOffset']) ? (int)$args['commentOffset'] : null;
+        $commentLimit = isset($args['commentLimit']) ? (int)$args['commentLimit'] : null;
+        if ($commentOffset !== null) {
+            if ($offset < 0 || $offset > 200) {
+                return $this->respondWithError('Offset must be between 0 and 200.');
+            }
+        }
+
+        if ($commentLimit !== null) {
+            if ($limit < 1 || $limit > 20) {  
+                return $this->respondWithError('Limit must be between 1 and 20.');
+            }
+        }
 
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
@@ -2157,7 +2175,7 @@ class GraphQLSchemaBuilder
     {
         $postArray = $post->getArrayCopy();
         
-        $comments = $this->commentMapper->fetchAllByPostIdetaild($post->getPostId(), $this->currentUserId, $commentOffset, $commentLimit);
+        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit);
         
         $postArray['comments'] = array_map(
             fn(CommentAdvanced $comment) => $this->fetchCommentWithoutReplies($comment),
@@ -2257,6 +2275,10 @@ class GraphQLSchemaBuilder
     {
         $offset = isset($args['offset']) ? (int)$args['offset'] : null;
         $limit = isset($args['limit']) ? (int)$args['limit'] : null;
+        $commentOffset = isset($args['commentOffset']) ? (int)$args['commentOffset'] : null;
+        $commentLimit = isset($args['commentLimit']) ? (int)$args['commentLimit'] : null;
+        $messageOffset = isset($args['messageOffset']) ? (int)$args['messageOffset'] : null;
+        $messageLimit = isset($args['messageLimit']) ? (int)$args['messageLimit'] : null;
 
         if ($offset !== null) {
             if ($offset < 0 || $offset > 200) {
@@ -2267,6 +2289,30 @@ class GraphQLSchemaBuilder
         if ($limit !== null) {
             if ($limit < 1 || $limit > 20) {  
                 return $this->respondWithError('Limit must be between 1 and 20.');
+            }
+        }
+
+        if ($commentOffset !== null) {
+            if ($commentOffset < 0 || $commentOffset > 200) {
+                return $this->respondWithError('Comment offset must be between 0 and 200.');
+            }
+        }
+
+        if ($commentLimit !== null) {
+            if ($commentLimit < 1 || $commentLimit > 20) {  
+                return $this->respondWithError('Comment limit must be between 1 and 20.');
+            }
+        }
+
+        if ($messageOffset !== null) {
+            if ($messageOffset < 0 || $messageOffset > 200) {
+                return $this->respondWithError('Message offset must be between 0 and 200.');
+            }
+        }
+
+        if ($messageLimit !== null) {
+            if ($messageLimit < 1 || $messageLimit > 20) {  
+                return $this->respondWithError('Message limit must be between 1 and 20.');
             }
         }
 
@@ -2282,30 +2328,6 @@ class GraphQLSchemaBuilder
         return true;
     }
 
-    protected function validateRequiredFields(array $args, array $requiredFields): array
-    {
-        foreach ($requiredFields as $field) {
-            if (empty($args[$field])) {
-                return $this->respondWithError("$field is required");
-            }
-        }
-        return [];
-    }
-
-    protected function validateDate($date, $format = 'Y-m-d') {
-        $d = DateTime::createFromFormat($format, $date);
-        return $d && $d->format($format) === $date;
-    }
-
-    protected function validateCaptcha(string $token): bool
-    {
-        $secret = 'Peer_And_Only_Peer';
-        $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$secret}&response={$token}");
-        $result = json_decode($response, true);
-
-        return $result['success'] && $result['score'] > 0.5;
-    }
-
     protected function ContactUs(?array $args = []): array
     {
         $this->logger->info('Query.ContactUs started');
@@ -2315,7 +2337,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError('Could not find mandatory IP');
         }
 
-        if (!$this->contactusMapper->checkRateLimit($ip)) {
+        if (!$this->contactusService->checkRateLimit($ip)) {
             return $this->respondWithError('Too many requests. Please try again later.');
         }
 
@@ -2353,7 +2375,7 @@ class GraphQLSchemaBuilder
         try {
             $contact = new \Fawaz\App\Contactus($args);
 
-            $insertedContact = $this->contactusMapper->insert($contact);
+            $insertedContact = $this->contactusService->insert($contact);
 
             if (!$insertedContact) {
                 return $this->respondWithError('Failed to insert contact.');

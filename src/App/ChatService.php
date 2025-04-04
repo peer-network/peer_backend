@@ -469,8 +469,12 @@ class ChatService
             foreach ($participants as $participantId) {
 
                 if (!self::isValidUUID($participantId)) {
-                    continue;
+					return $this->respondWithError('Wrong user ID.');
                 }
+
+				if (!$this->chatMapper->isParticipantExist($chatId, $participantId)) {
+					return $this->respondWithError('User are not a participant');
+				}
 
                 $this->chatMapper->deleteParticipant($chatId, $participantId);
             }

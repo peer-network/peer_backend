@@ -52,6 +52,8 @@ return static function(string $appEnv) {
         'rateLimiter' => $_ENV['LIMITER_RATE'],
         'timeLimiter' => $_ENV['LIMITER_TIME'],
         'rateLimiterpath' => __DIR__ . '/../../' . $_ENV['RATE_LIMITER'],
+		'mailapilink' => $_ENV['MAIL_API_LINK'],
+		'mailapikey' => $_ENV['MAIL_API_KEY']
     ];
 
     if ($appEnv === 'DEVELOPMENT') {
