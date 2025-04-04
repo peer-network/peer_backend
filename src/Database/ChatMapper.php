@@ -49,6 +49,30 @@ class ChatMapper
         }
     }
 
+    public function isParticipantExist(string $chatid, string $currentUserId): bool
+    {
+        $this->logger->info("ChatMapper.isParticipantExist started", [
+            'chatid' => $chatid,
+            'currentUserId' => $currentUserId
+        ]);
+
+        try {
+            $sql = "SELECT COUNT(*) FROM chatparticipants WHERE chatid = :chatid AND userid = :currentUserId";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':chatid', $chatid, \PDO::PARAM_STR);
+            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
+            $stmt->execute();
+
+            return (bool) $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            $this->logger->error("Database error: " . $e->getMessage(), [
+                'chatid' => $chatid,
+                'currentUserId' => $currentUserId
+            ]);
+            return false;
+        }
+    }
+
     public function isPrivate(string $chatid): bool
     {
         $this->logger->info("ChatMapper.isPrivate started", ['chatid' => $chatid]);

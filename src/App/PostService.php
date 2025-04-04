@@ -10,10 +10,12 @@ use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
 use Fawaz\Services\FileUploadDispatcher;
+use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 
 class PostService
 {
+	use ResponseHelper;
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -29,18 +31,6 @@ class PostService
     public function setCurrentUserId(string $userid): void
     {
         $this->currentUserId = $userid;
-    }
-
-    private function generateUUID(): string
-    {
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000,
-            mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-        );
     }
 
     public static function isValidUUID(string $uuid): bool
@@ -98,7 +88,7 @@ class PostService
 
         $this->logger->info('PostService.createPost started');
 
-        $postId = $this->generateUUID();
+        $postId = self::generateUUID();
         if (empty($postId)) {
             $this->logger->critical('Failed to generate post ID');
             return $this->respondWithError('Failed to generate post ID.');
@@ -384,6 +374,9 @@ class PostService
         $this->logger->info("PostService.findPostser started");
 
         $results = $this->postMapper->findPostser($this->currentUserId, $args);
+		if (empty($results)) {
+			return $this->respondWithError('Invalid ID provided.');
+		}
 
         return $results;
     }

@@ -18,7 +18,7 @@ type Query {
   friends(offset: Int, limit: Int): UserFriends!
   getuserinfo: GetUserinforesponse!
   blockedlist(offset: Int, limit: Int): UserBlocked!
-  getallposts(filterBy: [FilterType!], IgnorList: IgnoredList, sortBy: SortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, postOffset: Int, postLimit: Int, commentOffset: Int, commentLimit: Int): GetAllPostResponse!
+  getallposts(filterBy: [FilterType!], IgnorList: IgnoredList, sortBy: SortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): GetAllPostResponse!
   getpostinfo(postid: ID!): GetPostinforesponse!
   getcommentinfo(commentid: ID!): GetCommentinforesponse!
   parentcomments(parent: ID!, offset: Int, limit: Int): CommentResponse!
@@ -149,9 +149,12 @@ type StandardResponse {
 }
 
 type HelloResponse {
+  currentuserid: ID
   userroles: Int
-  currentuserid: String
+  currentVersion: String
+  wikiLink: String
 }
+
 
 type LogWins {
   from: String

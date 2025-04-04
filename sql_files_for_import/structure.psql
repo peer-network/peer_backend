@@ -468,6 +468,14 @@ CREATE TABLE IF NOT EXISTS user_post_shares (
 -- CREATE INDEX idx_user_post_shares_userid ON user_post_shares(userid);
 -- CREATE INDEX idx_user_post_shares_postid ON user_post_shares(postid);
 
+-- Table: Versionierung
+CREATE TABLE IF NOT EXISTS versions (
+    versid UUID PRIMARY KEY,
+    version NUMERIC(2,3) DEFAULT 0.0 NOT NULL,
+    wikiLink TEXT DEFAULT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
 -- Table: user_post_views
 CREATE TABLE IF NOT EXISTS user_post_views (
     userid UUID NOT NULL,
