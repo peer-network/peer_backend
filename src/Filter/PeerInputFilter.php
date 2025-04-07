@@ -159,7 +159,7 @@ class PeerInputFilter
     protected function FloatSanitize(mixed $value, array $options = []): float
     {
         if (!is_numeric($value)) {
-            $this->errors['value'][] = "Value is not a valid float.";
+            $this->errors['value'][] = 20247;
         }
 
         return (float)$value;
@@ -213,7 +213,7 @@ class PeerInputFilter
         $inclusive = $options['inclusive'] ?? false;
 
         if ($max === null) {
-            $this->errors['Max'][] = "The 'max' option is required for the LessThan validator.";
+            $this->errors['Max'][] = 20248;
             return false;
         }
 
@@ -221,12 +221,12 @@ class PeerInputFilter
         $maxDateTime = DateTime::createFromFormat('Y-m-d H:i:s.u', $max);
 
         if ($valueDateTime === false) {
-            $this->errors['valueDateTime'][] = "Invalid date format (with milliseconds) for 'value' in LessThan validator.";
+            $this->errors['valueDateTime'][] = 20249;
             return false;
         }
 
         if ($maxDateTime === false) {
-            $this->errors['maxDateTime'][] = "Invalid date format (with milliseconds) for 'max' in LessThan validator.";
+            $this->errors['maxDateTime'][] = 20250;
             return false;
         }
 
@@ -239,7 +239,7 @@ class PeerInputFilter
     protected function validateIntRange(mixed $value, array $options = []): bool
     {
         if (!is_numeric($value) || (int)$value != $value) {
-            $this->errors['int_range'][] = 'Value must be an integer.';
+            $this->errors['int_range'][] = 20244;
             return false;
         }
 
@@ -248,12 +248,12 @@ class PeerInputFilter
         $max = $options['max'] ?? PHP_INT_MAX;
 
         if ($value < $min) {
-            $this->errors['int_range'][] = "Value must be at least $min.";
+            $this->errors['int_range'][] = 20245;
             return false;
         }
 
         if ($value > $max) {
-            $this->errors['int_range'][] = "Value must be at most $max.";
+            $this->errors['int_range'][] = 20246;
             return false;
         }
 
@@ -602,17 +602,17 @@ class PeerInputFilter
 		$forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
 
 		if ($value === '') {
-			$this->errors['username'][] = 'Could not find mandatory username';
+			$this->errors['username'][] = 20202;
 			return false;
 		}
 
 		if (strlen($value) < 3 || strlen($value) > 23) {
-			$this->errors['username'][] = 'Username must be between 3 and 23 characters.';
+			$this->errors['username'][] = 20202;
 			return false;
 		}
 
         if (!preg_match('/^[a-zA-Z0-9_]{3,23}$/', $value)) {
-            $this->errors['username'][] = 'Username must be 3-20 characters long and only contain letters, numbers, and underscores.';
+            $this->errors['username'][] = 20202;
             return false;
         }
 
