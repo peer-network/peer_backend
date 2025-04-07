@@ -1219,7 +1219,7 @@ class GraphQLSchemaBuilder
     protected function resolveBlocklist(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1249,11 +1249,11 @@ class GraphQLSchemaBuilder
     protected function resolveFetchWinsLog(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('Invalid input');
+            return $this->respondWithError(30101);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1269,11 +1269,11 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
-            return $this->createSuccessResponse('No records found for the specified date.', [], false);
+            return $this->createSuccessResponse(21202, [], false);
         }
 
         if (is_array($response) || !empty($response)) {
-            return $this->createSuccessResponse('Success get all records for the specified date.', $response);
+            return $this->createSuccessResponse(11203, $response);
         }
 
         $this->logger->warning('Query.resolveFetchWinsLog No records found');
@@ -1283,11 +1283,11 @@ class GraphQLSchemaBuilder
     protected function resolveFetchPaysLog(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('Invalid input');
+            return $this->respondWithError(30101);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1303,11 +1303,11 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
-            return $this->createSuccessResponse('No records found for the specified date.', [], false);
+            return $this->createSuccessResponse(21202, [], false);
         }
 
         if (is_array($response) || !empty($response)) {
-            return $this->createSuccessResponse('Success get all records for the specified date.', $response);
+            return $this->createSuccessResponse(11203, $response);
         }
 
         $this->logger->warning('Query.resolveFetchPaysLog No records found');
@@ -1317,11 +1317,11 @@ class GraphQLSchemaBuilder
     protected function resolveChatMessages(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('Invalid input');
+            return $this->respondWithError(30101);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1341,7 +1341,7 @@ class GraphQLSchemaBuilder
         }
 
         if (is_array($response) || !empty($response)) {
-            return $this->createSuccessResponse('Success get all messages', $response, true);
+            return $this->createSuccessResponse(11807, $response, true);
         }
 
         $this->logger->warning('Query.resolveChatMessages No messages found');
@@ -1351,7 +1351,7 @@ class GraphQLSchemaBuilder
     protected function resolveTestingPool(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('Query.resolvePool started');
@@ -1371,13 +1371,13 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolvePool No transactions found');
-        return $this->respondWithError('No transactions found.');
+        return $this->respondWithError(41201);
     }
 
     protected function resolvePool(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('Query.resolvePool started');
@@ -1396,13 +1396,13 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolvePool No transactions found');
-        return $this->respondWithError('No transactions found.');
+        return $this->respondWithError(41201);
     }
 
     protected function resolveActionPost(?array $args = []): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('Query.resolveActionPost started');
@@ -1421,7 +1421,7 @@ class GraphQLSchemaBuilder
         $paidActions = ['like', 'dislike', 'comment', 'post'];
 
         if (!in_array($action, $paidActions, true)) {
-            return $this->respondWithError('Invalid action parameter provided.');
+            return $this->respondWithError(30105);
         }
 
         $dailyLimits = [
@@ -1448,7 +1448,7 @@ class GraphQLSchemaBuilder
         // Validations
         if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
             $this->logger->error('Invalid action parameter', ['action' => $action]);
-            return $this->respondWithError('Invalid action parameter provided.');
+            return $this->respondWithError(30105);
         }
 
         $limit = $dailyLimits[$action];
@@ -1483,7 +1483,7 @@ class GraphQLSchemaBuilder
                     }
                     else 
                     {
-                        return $this->respondWithError('Invalid action parameter provided.');
+                        return $this->respondWithError(30105);
                     }
 
                     if (isset($response['status']) && $response['status'] === 'success') {
@@ -1510,7 +1510,7 @@ class GraphQLSchemaBuilder
 
             if ($balance < $price) {
                 $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
-                return $this->respondWithError('Insufficient_balance: Not enough balance to perform this action.');
+                return $this->respondWithError(51301);
             }
 
             if ($action === 'comment') 
@@ -1549,7 +1549,7 @@ class GraphQLSchemaBuilder
             }
             else 
             {
-                return $this->respondWithError('Invalid action parameter provided.');
+                return $this->respondWithError(30105);
             }
 
             if (isset($response['status']) && $response['status'] === 'success') {
@@ -1563,7 +1563,7 @@ class GraphQLSchemaBuilder
                     return $this->respondWithError($deducted['ResponseCode']);
                 }
 
-                $response['ResponseCode'] = $response['ResponseCode'] . " | Paid " . ucfirst($action) . " | Wallet-Balance = " . ($balance - $price);
+                $response['ResponseCode'] = 11301;
                 return $response;
             }
 
@@ -1575,18 +1575,18 @@ class GraphQLSchemaBuilder
                 'exception' => $e->getMessage(),
                 'args' => $args,
             ]);
-            return $this->respondWithError('An unexpected error occurred.');
+            return $this->respondWithError(41203);
         }
     }
 
     protected function resolveComments(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('No arguments provided.');
+            return $this->respondWithError(30104);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1609,17 +1609,17 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse('Success get comments', $results);
         }
 
-        return $this->respondWithError('No comments found');
+        return $this->respondWithError(21601);
     }
 
     protected function resolvePostComments(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('No arguments provided.');
+            return $this->respondWithError(30104);
         }
 
         $comments = $this->commentService->fetchAllByPostId($args);
@@ -1637,13 +1637,13 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse('Success get comments', $comments);
         }
 
-        return $this->respondWithError('No comments found');
+        return $this->respondWithError(21601);
     }
 
     protected function resolveTags(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1664,13 +1664,13 @@ class GraphQLSchemaBuilder
             return $tags;
         }
 
-        return $this->respondWithError('No tags found');
+        return $this->respondWithError(21701);
     }
 
     protected function resolveTagsearch(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1690,23 +1690,23 @@ class GraphQLSchemaBuilder
             return $data;
         }
 
-        return $this->respondWithError('No tags found');
+        return $this->respondWithError(21701);
     }
 
     protected function resolveBeforeTransaction(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args['tokenAmount'])) {
-            return $this->respondWithError('No input arguments provided. Please provide valid input parameters.');
+            return $this->respondWithError(20242);
         }
 
         $tokenAmount = (int)$args['tokenAmount'] ?? 0;
 
         if ($tokenAmount < 10) {
-            return $this->respondWithError('TokenAmount must be more then 10 token.');
+            return $this->respondWithError(20243);
         }
 
         $results = $this->walletService->getPercentBeforeTransaction($this->currentUserId, $tokenAmount);
@@ -1721,13 +1721,13 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->info('Query.resolveBeforeTransaction', $results);
-        return $this->respondWithError('Failed to process request');
+        return $this->respondWithError(40301);
     }
 
     protected function resolveLiquidity(): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('Query.resolveLiquidity started');
@@ -1744,13 +1744,13 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveLiquidity Failed to find liquidity');
-        return $this->respondWithError('Failed to find liquidity');
+        return $this->respondWithError(41201);
     }
 
     protected function resolveMcap(): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('Query.resolveMcap started');
@@ -1767,13 +1767,13 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveMcap Failed to find mcaps');
-        return $this->respondWithError('Failed to find mcaps');
+        return $this->respondWithError(41202);
     }
 
     protected function resolveUserInfo(): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('Query.resolveUserInfo started');
@@ -1789,18 +1789,18 @@ class GraphQLSchemaBuilder
             return $this->respondWithError($results['ResponseCode']);
         }
 
-        $this->logger->warning('Query.resolveUserInfo Failed to find mcaps');
-        return $this->respondWithError('Failed to find mcaps');
+        $this->logger->warning('Query.resolveUserInfo Failed to find INFO');
+        return $this->respondWithError(41001);
     }
 
     protected function resolveSearchUser(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+            return $this->respondWithError(30101);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1816,23 +1816,23 @@ class GraphQLSchemaBuilder
         $ip = $args['ip'] ?? null;
 
         if (empty($args['username']) && empty($args['userid']) && empty($args['email']) && !isset($args['status']) && !isset($args['verified']) && !isset($args['ip'])) {
-            return $this->respondWithError('At least one of userId or username is required');
+            return $this->respondWithError(30102);
         }
 
         if (!empty($username) && !empty($userId)) {
-            return $this->respondWithError('args username and userId arguments not allowed');
+            return $this->respondWithError(30104);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
         if ($username !== null && strlen($username) < 3 || strlen($username) > 23) {
-            return $this->respondWithError('Username must be between 3 and 23 characters');
+            return $this->respondWithError(20202);
         }
 
         if ($username !== null && !preg_match('/^[a-zA-Z0-9]+$/', $username)) {
-            return $this->respondWithError('Username must only contain letters and numbers');
+            return $this->respondWithError(20202);
         }
 
         if (!empty($userId)) {
@@ -1855,13 +1855,13 @@ class GraphQLSchemaBuilder
             return $data;
         }
 
-        return $this->respondWithError('No users founds');
+        return $this->respondWithError(21001);
     }
 
     protected function resolveFollows(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1883,17 +1883,17 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveFollows User not found');
-        return $this->respondWithError('User not found');
+        return $this->respondWithError(21001);
     }
 
     protected function resolveProfile(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (isset($args['userid']) && !self::isValidUUID($args['userid'])) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
         $this->logger->info('Query.resolveProfile started');
@@ -1910,13 +1910,13 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveProfile User not found');
-        return $this->respondWithError('User not found');
+        return $this->respondWithError(21001);
     }
 
     protected function resolveFriends(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1938,13 +1938,13 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveFriends Users not found');
-        return $this->respondWithError('No friends found');
+        return $this->respondWithError(21101);
     }
 
     protected function resolveAllFriends(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('Query.resolveAllFriends started');
@@ -1961,13 +1961,13 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveAllFriends No friends found');
-        return $this->respondWithError('No friends found');
+        return $this->respondWithError(21101);
     }
 
     protected function resolveUsers(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -1986,24 +1986,24 @@ class GraphQLSchemaBuilder
         return $results;
 
         $this->logger->warning('Query.resolveUsers No users found');
-        return $this->respondWithError('No users found');
+        return $this->respondWithError(21001);
     }
 
     protected function resolveChat(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+            return $this->respondWithError(30101);
         }
 
 
         $chatid = $args['chatid'] ?? null;
 
         if (!self::isValidUUID($chatid)) {
-            return $this->respondWithError('InvalidChatId');
+            return $this->respondWithError(20218);
         }
 
         $this->logger->info('Query.resolveChat started');
@@ -2027,7 +2027,7 @@ class GraphQLSchemaBuilder
     protected function resolveChats(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -2045,12 +2045,12 @@ class GraphQLSchemaBuilder
             return [
                 'status' => 'success',
                 'counter' => count($data),
-                'ResponseCode' => 'Success get all chats',
+                'ResponseCode' => 11801,
                 'affectedRows' => $data,
             ];
         }
 
-        return $this->respondWithError('No chats found for this userid');
+        return $this->respondWithError(21801);
     }
 
     protected function mapChatToArray(Chat $chat): array
@@ -2062,15 +2062,15 @@ class GraphQLSchemaBuilder
     protected function resolvePostInfo(string $postId): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized access. Please authenticate.');
+            return $this->respondWithError(60501);
         }
 
         if (empty($postId)) {
-            return $this->respondWithError('No arguments provided. Please provide valid postId parameters.');
+            return $this->respondWithError(30101);
         }
 
         if (!empty($postId) && !self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postid format. Please provide a valid UUID.');
+            return $this->respondWithError(20209);
         }
 
         $this->logger->info('Query.resolvePostInfo started');
@@ -2083,24 +2083,24 @@ class GraphQLSchemaBuilder
 				return $posts;
 			}
         } else {
-            return $this->respondWithError('Unable to locate a post with the provided information.');
+            return $this->respondWithError(21504);
         }
 
-		return $this->createSuccessResponse('Successfully retrieved post info.', $posts);
+		return $this->createSuccessResponse(11502, $posts);
     }
 
     protected function resolveCommentInfo(string $commentId): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized access. Please authenticate.');
+            return $this->respondWithError(60501);
         }
 
         if (empty($commentId)) {
-            return $this->respondWithError('No arguments provided. Please provide valid commentId parameters.');
+            return $this->respondWithError(30101);
         }
 
         if (!empty($commentId) && !self::isValidUUID($commentId)) {
-            return $this->respondWithError('Invalid commentId format. Please provide a valid UUID.');
+            return $this->respondWithError(20217);
         }
 
         $this->logger->info('Query.resolveCommentInfo started');
@@ -2111,15 +2111,15 @@ class GraphQLSchemaBuilder
             $comments = $this->commentInfoService->findCommentInfo($commentId);
 
             if ($comments === false) {
-                return $this->respondWithError('No comment found for the provided commentId.');
+                return $this->respondWithError(21505);
             }
         } else {
-            return $this->respondWithError('Unable to locate a comment with the provided information.');
+            return $this->respondWithError(21506);
         }
 
         return [
             'status' => 'success',
-            'ResponseCode' => 'Successfully retrieved comment info.',
+            'ResponseCode' => 11602,
             'affectedRows' => $comments,
         ];
     }
@@ -2127,7 +2127,7 @@ class GraphQLSchemaBuilder
     protected function resolvePosts(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -2166,7 +2166,7 @@ class GraphQLSchemaBuilder
         return [
             'status' => 'success',
             'counter' => count($data),
-            'ResponseCode' => 'Success get all posts',
+            'ResponseCode' => 11501,
             'affectedRows' => $data,
         ];
     }
@@ -2247,7 +2247,7 @@ class GraphQLSchemaBuilder
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
-    protected function respondWithError(string $message): array
+    protected function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
@@ -2282,37 +2282,37 @@ class GraphQLSchemaBuilder
 
         if ($offset !== null) {
             if ($offset < 0 || $offset > 200) {
-                return $this->respondWithError('Offset must be between 0 and 200.');
+                return $this->respondWithError(20203);
             }
         }
 
         if ($limit !== null) {
             if ($limit < 1 || $limit > 20) {  
-                return $this->respondWithError('Limit must be between 1 and 20.');
+                return $this->respondWithError(20204);
             }
         }
 
         if ($commentOffset !== null) {
             if ($commentOffset < 0 || $commentOffset > 200) {
-                return $this->respondWithError('Comment offset must be between 0 and 200.');
+                return $this->respondWithError(20215);
             }
         }
 
         if ($commentLimit !== null) {
             if ($commentLimit < 1 || $commentLimit > 20) {  
-                return $this->respondWithError('Comment limit must be between 1 and 20.');
+                return $this->respondWithError(20216);
             }
         }
 
         if ($messageOffset !== null) {
             if ($messageOffset < 0 || $messageOffset > 200) {
-                return $this->respondWithError('Message offset must be between 0 and 200.');
+                return $this->respondWithError(20219);
             }
         }
 
         if ($messageLimit !== null) {
             if ($messageLimit < 1 || $messageLimit > 20) {  
-                return $this->respondWithError('Message limit must be between 1 and 20.');
+                return $this->respondWithError(20220);
             }
         }
 
@@ -2338,12 +2338,12 @@ class GraphQLSchemaBuilder
         }
 
         if (!$this->contactusService->checkRateLimit($ip)) {
-            return $this->respondWithError('Too many requests. Please try again later.');
+            return $this->respondWithError(30302);
         }
 
         if (empty($args)) {
             $this->logger->error('Mandatory args missing.');
-            return $this->respondWithError('Could not find mandatory args');
+            return $this->respondWithError(30101);
         }
 
         $email = isset($args['email']) ? trim($args['email']) : null;
@@ -2353,23 +2353,23 @@ class GraphQLSchemaBuilder
         $args['createdat'] = (new \DateTime())->format('Y-m-d H:i:s.u');
 
         if (empty($email) || empty($name) || empty($message)) {
-            return $this->respondWithError('Email, Name, and Message are required');
+            return $this->respondWithError(30101);
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return $this->respondWithError('Invalid email format');
+            return $this->respondWithError(30103);
         }
 
         if (strlen($name) < 3 || strlen($name) > 33) {
-            return $this->respondWithError('Name must be between 3 and 33 characters.');
+            return $this->respondWithError(20202);
         }
 
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $name)) {
-            return $this->respondWithError('Name must only contain letters, numbers, and underscores.');
+            return $this->respondWithError(20202);
         }
 
         if (strlen($message) < 3 || strlen($message) > 500) {
-            return $this->respondWithError('Message must be between 3 and 500 characters.');
+            return $this->respondWithError(30103);
         }
 
         try {
@@ -2378,14 +2378,14 @@ class GraphQLSchemaBuilder
             $insertedContact = $this->contactusService->insert($contact);
 
             if (!$insertedContact) {
-                return $this->respondWithError('Failed to insert contact.');
+                return $this->respondWithError(30401);
             }
 
             $this->logger->info('Contact successfully created.', ['contact' => $insertedContact->getArrayCopy()]);
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Contact successfully created',
+                'ResponseCode' => 10401,
                 'affectedRows' => $insertedContact->getArrayCopy(),
             ];
         } catch (\Throwable $e) {
@@ -2393,18 +2393,18 @@ class GraphQLSchemaBuilder
                 'error' => $e->getMessage(),
                 'args' => $args,
             ]);
-            return $this->respondWithError('An unexpected error occurred. Please try again later.');
+            return $this->respondWithError(30401);
         }
     }
 
     protected function verifiedAccount(string $userid = null): array
     {
         if ($userid === null) {
-            return $this->respondWithError('Empty userid');
+            return $this->respondWithError(30101);
         }
 
         if (!self::isValidUUID($userid)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
         $this->logger->info('Query.verifiedAccount started');
@@ -2412,14 +2412,14 @@ class GraphQLSchemaBuilder
         try {
             $user = $this->userMapper->loadById($userid);
             if (!$user) {
-                return $this->respondWithError('Invalid userid');
+                return $this->respondWithError(30103);
             }
 
             if ($user->getVerified() == 1) {
                 $this->logger->info('Account is already verified', ['userid' => $userid]);
                 return [
                     'status' => 'success',
-                    'ResponseCode' => 'Account was already verified'
+                    'ResponseCode' => 20701
                 ];
             }
 
@@ -2429,16 +2429,15 @@ class GraphQLSchemaBuilder
 
                 return [
                     'status' => 'success',
-                    'ResponseCode' => 'Account freshly verified successfully'
+                    'ResponseCode' => 10701
                 ];
             }
 
         } catch (\Throwable $e) {
-            error_log('General error: ' . $e->getMessage());
-            return $this->respondWithError('An unexpected error occurred');
+            return $this->respondWithError(40701);
         }
 
-        return $this->respondWithError('Failed to verify account');
+        return $this->respondWithError(40701);
     }
 
     protected function login(string $email, string $password): array
@@ -2448,29 +2447,29 @@ class GraphQLSchemaBuilder
         try {
             if (empty($email) || empty($password)) {
                 $this->logger->warning('Email and password are required', ['email' => $email]);
-                return $this->respondWithError('Email and password are required');
+                return $this->respondWithError(30801);
             }
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $this->logger->warning('Invalid email format', ['email' => $email]);
-                return $this->respondWithError('Invalid email format');
+                return $this->respondWithError(30801);
             }
 
             $user = $this->userMapper->loadByEmail($email);
 
             if (!$user) {
                 $this->logger->warning('Invalid email or password', ['email' => $email]);
-                return $this->respondWithError('Invalid email or password');
+                return $this->respondWithError(30801);
             }
 
             if (!$user->getVerified()) {
                 $this->logger->warning('Account not verified', ['email' => $email]);
-                return $this->respondWithError('Account not verified. Please verify your account');
+                return $this->respondWithError(60801);
             }
 
             if (!$user->verifyPassword($password)) {
                 $this->logger->warning('Invalid password', ['email' => $email]);
-                return $this->respondWithError('Invalid password');
+                return $this->respondWithError(30801);
             }
 
             $payload = [
@@ -2494,7 +2493,7 @@ class GraphQLSchemaBuilder
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Login successful',
+                'ResponseCode' => 10801,
                 'accessToken' => $accessToken,
                 'refreshToken' => $refreshToken
             ];
@@ -2505,7 +2504,7 @@ class GraphQLSchemaBuilder
                 'stackTrace' => $e->getTraceAsString()
             ]);
 
-            return $this->respondWithError('An error occurred during login.');
+            return $this->respondWithError(40801);
         }
     }
 
@@ -2515,13 +2514,13 @@ class GraphQLSchemaBuilder
 
         try {
             if (empty($refreshToken)) {
-                return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+                return $this->respondWithError(30101);
             }
 
             $decodedToken = $this->tokenService->validateToken($refreshToken, true);
 
             if (!$decodedToken) {
-                return $this->respondWithError('Invalid refresh token');
+                return $this->respondWithError(30901);
             }
 
             $payload = [
@@ -2544,7 +2543,7 @@ class GraphQLSchemaBuilder
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Token refreshed successfully',
+                'ResponseCode' => 30901,
                 'accessToken' => $accessToken,
                 'refreshToken' => $newRefreshToken
             ];
@@ -2555,7 +2554,7 @@ class GraphQLSchemaBuilder
                 'stackTrace' => $e->getTraceAsString()
             ]);
             
-            return $this->respondWithError('An error occurred while refreshing the token.');
+            return $this->respondWithError(40901);
         }
     }
 }

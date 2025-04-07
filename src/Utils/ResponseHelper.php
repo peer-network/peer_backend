@@ -16,7 +16,7 @@ trait ResponseHelper
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return self::respondWithError("$field is required");
+                return self::respondWithError(30301);
             }
         }
         return [];
