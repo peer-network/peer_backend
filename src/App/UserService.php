@@ -116,7 +116,7 @@ class UserService
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
         if ($this->userMapper->isEmailTaken($email)) {
-            return self::respondWithError('Email already registered.');
+            return self::respondWithError(20601);
         }
 
         $slug = $this->generateUniqueSlug($username);
@@ -193,12 +193,12 @@ class UserService
             $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'User registered successfully. Please verify your account.',
+                'ResponseCode' => 10601,
                 'userid' => $id,
             ];
         } catch (\Throwable $e) {
             $this->logger->warning('Error registering user.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError(40601);
         }
     }
 
@@ -243,14 +243,14 @@ class UserService
             return $this->userMapper->verifyAccount($userId);
         } catch (\Throwable $e) {
             $this->logger->error('Error verifying account.', ['exception' => $e]);
-            return self::respondWithError('Failed to verify account.');
+            return self::respondWithError(40701);
         }
     }
 
     public function deleteUnverifiedUsers(): bool
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized.');
+            return self::respondWithError(60501);
         }
 
         try {
@@ -266,7 +266,7 @@ class UserService
     public function setPassword(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         if (empty($args)) {
@@ -284,7 +284,7 @@ class UserService
         }
 
         if ($newPassword === $currentPassword) {
-            return self::respondWithError('New password cannot be the same as the current password.');
+            return self::respondWithError(21002);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
@@ -295,7 +295,7 @@ class UserService
         }
 
         if (!$this->validatePasswordMatch($currentPassword, $user->getPassword())) {
-            return self::respondWithError('Wrong Actual Password');
+            return self::respondWithError(31001);
         }
 
         try {
@@ -305,18 +305,18 @@ class UserService
             $this->logger->info('User password updated successfully', ['userId' => $this->currentUserId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Password update successful',
+                'ResponseCode' => 11005,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update user password', ['exception' => $e]);
-            return self::respondWithError('Failed to update user password');
+            return self::respondWithError(41004);
         }
     }
 
     public function setEmail(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         if (empty($args)) {
@@ -335,7 +335,7 @@ class UserService
 
         if ($this->userMapper->isEmailTaken($email)) {
             $this->logger->warning('Email already in use', ['email' => $email]);
-            return self::respondWithError('Email already in use.');
+            return self::respondWithError(21003);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
@@ -345,11 +345,11 @@ class UserService
         }
 
         if ($email === $user->getMail()) {
-            return self::respondWithError('New email cannot be the same as the current email.');
+            return self::respondWithError(21004);
         }
 
         if (!$this->validatePasswordMatch($exPassword, $user->getPassword())) {
-            return self::respondWithError('Wrong Actual Password');
+            return self::respondWithError(31001);
         }
 
         try {
@@ -360,19 +360,19 @@ class UserService
             $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId, 'email' => $email]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'User email updated successfully',
+                'ResponseCode' => 11006,
                 'affectedRows' => $affectedRows,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update user email', ['exception' => $e]);
-            return self::respondWithError('Could not update user’s email');
+            return self::respondWithError(41005);
         }
     }
 
     public function setUsername(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         if (empty($args['username'])) {
@@ -393,11 +393,11 @@ class UserService
             }
 
             if ($username === $user->getName()) {
-                return self::respondWithError('New username cannot be the same as the current username.');
+                return self::respondWithError(21005);
             }
 
             if (!$this->validatePasswordMatch($password, $user->getPassword())) {
-                return self::respondWithError('Wrong Actual Password');
+                return self::respondWithError(31001);
             }
 
             $slug = $this->generateUniqueSlug($username);
@@ -415,19 +415,19 @@ class UserService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Username updated successfully',
+                'ResponseCode' => 11007,
                 'affectedRows' => $affectedRows,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update username', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError(41006);
         }
     }
 
     public function deleteAccount(string $expassword): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         if (empty($expassword)) {
@@ -444,7 +444,7 @@ class UserService
         }
 
         if (!$this->validatePasswordMatch($expassword, $user->getPassword())) {
-            return self::respondWithError('Wrong Actual Password');
+            return self::respondWithError(31001);
         }
 
         try {
@@ -463,7 +463,7 @@ class UserService
     public function Profile(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         $userId = $args['userid'] ?? $this->currentUserId;
@@ -490,7 +490,7 @@ class UserService
             $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Profile data prepared successfully',
+                'ResponseCode' => 11008,
                 'affectedRows' => $profileData,
             ];
         } catch (\Throwable $e) {
@@ -498,7 +498,7 @@ class UserService
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return self::respondWithError('Failed to fetch profile data.');
+            return self::respondWithError(41007);
         }
     }
 
@@ -524,7 +524,7 @@ class UserService
             return [
                 'status' => 'success',
                 'counter' => $counter,
-                'ResponseCode' => 'Follows data prepared successfully',
+                'ResponseCode' => 11101,
                 'affectedRows' => [
                     'followers' => array_map(
                         fn(ProfilUser $follower) => $follower->getArrayCopy(),
@@ -538,14 +538,14 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch followers or following data', ['error' => $e->getMessage()]);
-            return self::respondWithError('Failed to fetch followers or following data.');
+            return self::respondWithError(41104);
         }
     }
 
     public function getFriends(?array $args = []): array|null
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -561,7 +561,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($users),
-                    'ResponseCode' => 'Friends data prepared successfully',
+                    'ResponseCode' => 11102,
                     'affectedRows' => $users,
                 ];
             }
@@ -577,7 +577,7 @@ class UserService
     public function getAllFriends(?array $args = []): array|null
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -619,7 +619,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 'Users data prepared successfully',
+                    'ResponseCode' => 11009,
                     'affectedRows' => $fetchAll,
                 ];
             }
