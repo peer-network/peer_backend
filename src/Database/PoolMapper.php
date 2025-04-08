@@ -123,7 +123,7 @@ class PoolMapper
 
         $success = [
             'status' => 'success',
-            'ResponseCode' => 'Gems transactions prepared successfully.',
+            'ResponseCode' => 11207,
             'affectedRows' => $entries
         ];
 
