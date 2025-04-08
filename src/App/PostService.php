@@ -195,8 +195,8 @@ class PostService
             return $this->createSuccessResponse(11508, $post->getArrayCopy());
 
         } catch (\Throwable $e) {
-            $this->logger->error(41508, ['exception' => $e]);
-            return $this->respondWithError($e->getMessage());
+            $this->logger->error('Failed to create post', ['exception' => $e]);
+            return $this->respondWithError(40301);
         }
     }
 
