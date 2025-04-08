@@ -100,9 +100,9 @@ class TagService
             return $this->createSuccessResponse('Tag created successfully', [$tagData]);
 
         } catch (\Throwable $e) {
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         } catch (ValidationException $e) {
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         } finally {
             $this->logger->debug('createTag function execution completed');
         }
@@ -157,7 +157,7 @@ class TagService
             $this->logger->error("Error occurred in TagService.loadTag", [
                 'error' => $e->getMessage(),
             ]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
     }
 }
