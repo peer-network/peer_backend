@@ -646,7 +646,7 @@ class WalletMapper
 
             return $result;
         } catch (\Throwable $e) {
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
     }
 
@@ -809,7 +809,7 @@ class WalletMapper
             $entries = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ' . $tableName, ['exception' => $e]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
 
         $insertCount = 0; 
@@ -842,7 +842,7 @@ class WalletMapper
                     $insertCount++;
                 } catch (\Throwable $e) {
                     $this->logger->error('Error inserting into gems for ' . $tableName, ['exception' => $e]);
-                    return $this->respondWithError($e->getMessage());
+                    return $this->respondWithError(40301);
                 }
             }
 
@@ -853,7 +853,7 @@ class WalletMapper
                     $this->db->query($sql);
                 } catch (\Throwable $e) {
                     $this->logger->error('Error updating collected status for ' . $tableName, ['exception' => $e]);
-                    return $this->respondWithError($e->getMessage());
+                    return $this->respondWithError(40301);
                 }
             }
         }
@@ -887,7 +887,7 @@ class WalletMapper
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
 
         $success = [
@@ -959,7 +959,7 @@ class WalletMapper
             //$this->logger->info('fetching data for ', ['data' => $data]);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
 
         if (empty($data)) {
@@ -1020,7 +1020,7 @@ class WalletMapper
 
             } catch (\Throwable $e) {
                 $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
-                return $this->respondWithError($e->getMessage());
+                return $this->respondWithError(40301);
             }
 
             return [
