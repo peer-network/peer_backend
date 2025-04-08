@@ -597,37 +597,37 @@ class PeerInputFilter
         return true;
     }
 
-	protected function validateUsername(string $value, array $options = []): bool
-	{
-		$forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
+    protected function validateUsername(string $value, array $options = []): bool
+    {
+        $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
 
-		if ($value === '') {
-			$this->errors['username'][] = 20202;
-			return false;
-		}
+        if ($value === '') {
+            $this->errors['username'][] = 20202;
+            return false;
+        }
 
-		if (strlen($value) < 3 || strlen($value) > 23) {
-			$this->errors['username'][] = 20202;
-			return false;
-		}
+        if (strlen($value) < 3 || strlen($value) > 23) {
+            $this->errors['username'][] = 20202;
+            return false;
+        }
 
         if (!preg_match('/^[a-zA-Z0-9_]{3,23}$/', $value)) {
             $this->errors['username'][] = 20202;
             return false;
         }
 
-		if (!preg_match('/[a-zA-Z]/', $value)) {
-			$this->errors['username'][] = 20202;
-			return false;
-		}
+        if (!preg_match('/[a-zA-Z]/', $value)) {
+            $this->errors['username'][] = 20202;
+            return false;
+        }
 
-		if (in_array(strtolower($value), $forbiddenUsernames, true)) {
-			$this->errors['username'][] = 31002;
-			return false;
-		}
+        if (in_array(strtolower($value), $forbiddenUsernames, true)) {
+            $this->errors['username'][] = 31002;
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     protected function validateTagName(string $value, array $options = []): bool
     {
@@ -667,10 +667,10 @@ class PeerInputFilter
             return false;
         }
 
-		if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $value)) {
-			$this->errors['pkey'][] = 'Invalid Solana Public Key.';
+        if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $value)) {
+            $this->errors['pkey'][] = 'Invalid Solana Public Key.';
             return false;
-		}
+        }
 
         return true;
     }
