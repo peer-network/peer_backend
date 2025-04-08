@@ -243,7 +243,7 @@ class PoolMapper
             return [
                 'status' => 'success',
                 'counter' => count($args) -1,
-                'ResponseCode' => 'Records found for ' . $day,
+                'ResponseCode' => 11208,
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
         }
