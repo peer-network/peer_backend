@@ -77,11 +77,11 @@ class CommentService
     public function createComment(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+            return $this->respondWithError(30101);
         }
 
         $this->logger->info('CommentService.createComment started');
@@ -97,11 +97,11 @@ class CommentService
         $parentId = isset($args['parentid']) ? trim($args['parentid']) : null;
 
         if (!$this->validateUUID($postId)) {
-            return $this->respondWithError('Invalid post ID', ['postid' => $postId]);
+            return $this->respondWithError(31501, ['postid' => $postId]);
         }
 
         if ($parentId !== null && !$this->validateUUID($parentId)) {
-			return $this->respondWithError('Invalid parent ID', ['parentId' => $parentId]);
+			return $this->respondWithError(31603, ['parentId' => $parentId]);
         }
 
         if ($content === '') {
@@ -137,7 +137,7 @@ class CommentService
 
             $postInfo = $this->postInfoMapper->loadById($postId);
             if (!$postInfo) {
-                return $this->respondWithError('Post not found');
+                return $this->respondWithError(31602);
             }
 
             $postInfo->setComments($postInfo->getComments() + 1);
@@ -172,7 +172,7 @@ class CommentService
             return [
                 'status' => 'success',
 				'counter' => count($response),
-                'ResponseCode' => 'Comment saved successfully',
+                'ResponseCode' => 11605,
                 'affectedRows' => $response,
             ];
         } catch (\Throwable $e) {
@@ -180,7 +180,7 @@ class CommentService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError('Failed to create comment');
+            return $this->respondWithError(41602);
         } finally {
             $this->logger->debug('createComment function execution completed');
         }
@@ -189,7 +189,7 @@ class CommentService
     public function fetchByParentId(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $parentId = $args['parent'] ?? null;
@@ -198,7 +198,7 @@ class CommentService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if ($parentId !== null && !self::isValidUUID($parentId)) {
-            return $this->respondWithError('Invalid uuid input.');
+            return $this->respondWithError(31501);
         }
 
         $this->logger->info("CommentService.fetchByParentId started");
@@ -211,7 +211,7 @@ class CommentService
     public function fetchAllByPostId(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $postId = $args['postid'] ?? null;
@@ -220,7 +220,7 @@ class CommentService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid uuid input.');
+            return $this->respondWithError(31501);
         }
 
         $this->logger->info("CommentService.fetchAllByPostId started");
