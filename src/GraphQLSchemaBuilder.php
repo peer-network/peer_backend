@@ -2142,20 +2142,6 @@ class GraphQLSchemaBuilder
             return $posts;
         }
 
-        $commentOffset = isset($args['commentOffset']) ? (int)$args['commentOffset'] : null;
-        $commentLimit = isset($args['commentLimit']) ? (int)$args['commentLimit'] : null;
-        if ($commentOffset !== null) {
-            if ($offset < 0 || $offset > 200) {
-                return $this->respondWithError('Offset must be between 0 and 200.');
-            }
-        }
-
-        if ($commentLimit !== null) {
-            if ($limit < 1 || $limit > 20) {  
-                return $this->respondWithError('Limit must be between 1 and 20.');
-            }
-        }
-
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
