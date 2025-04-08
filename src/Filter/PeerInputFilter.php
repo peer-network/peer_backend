@@ -737,7 +737,7 @@ class PeerInputFilter
             }
             
             if (($maxWidth !== null && $width > $maxWidth) || ($maxHeight !== null && $height > $maxHeight)) {
-                $this->errors['image'][] = 'Image dimensions exceed the maximum allowed size.';
+                $this->errors['image'][] = 21521;
                 return false;
             }
         }
