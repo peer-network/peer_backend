@@ -1235,7 +1235,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response['counter'])) {
-            return $this->createSuccessResponse('No blocked list for this user.', [], false);
+            return $this->createSuccessResponse(21103, [], false);
         }
 
         if (is_array($response) || !empty($response)) {
@@ -1243,7 +1243,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveBlocklist No data found');
-        return $this->respondWithError('No data found.');
+        return $this->respondWithError(41105);
     }
 
     protected function resolveFetchWinsLog(array $args): ?array
@@ -1277,7 +1277,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveFetchWinsLog No records found');
-        return $this->respondWithError('No records found.');
+        return $this->respondWithError(21202);
     }
 
     protected function resolveFetchPaysLog(array $args): ?array
@@ -1311,7 +1311,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveFetchPaysLog No records found');
-        return $this->respondWithError('No records found.');
+        return $this->respondWithError(21202);
     }
 
     protected function resolveChatMessages(array $args): ?array
@@ -1337,7 +1337,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
-            return $this->createSuccessResponse('No messages found', [], false);
+            return $this->createSuccessResponse(21806, [], false);
         }
 
         if (is_array($response) || !empty($response)) {
@@ -1345,7 +1345,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveChatMessages No messages found');
-        return $this->respondWithError('No messages found.');
+        return $this->respondWithError(21806);
     }
 
     protected function resolveTestingPool(array $args): ?array
