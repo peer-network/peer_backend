@@ -40,7 +40,7 @@ class CommentInfoService
     public function deleteCommentInfo(string $commentId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('60501');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
@@ -50,7 +50,7 @@ class CommentInfoService
         $this->logger->info('CommentInfoService.deleteCommentInfo started');
 
         if ($this->commentInfoMapper->delete($commentId)) {
-            return ['status' => 'success', 'ResponseCode' => '11606'];
+            return ['status' => 'success', 'ResponseCode' => 11606];
         } else {
             return $this->respondWithError('41603');
         }
@@ -59,7 +59,7 @@ class CommentInfoService
     public function countLikes(string $commentId): int
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('60501');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
@@ -71,7 +71,7 @@ class CommentInfoService
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentInfo) {
-            return $this->respondWithError('31601');
+            return $this->respondWithError(31601);
         }
 
         return $this->commentInfoMapper->countLikes($commentId);
@@ -80,7 +80,7 @@ class CommentInfoService
     public function likeComment(string $commentId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('60501');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
@@ -92,17 +92,17 @@ class CommentInfoService
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentInfo) {
-            return $this->respondWithError('31601');
+            return $this->respondWithError(31601);
         }
 
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
-            return $this->respondWithError('21602');
+            return $this->respondWithError(21602);
         }
 
         $exists = $this->commentInfoMapper->addUserActivity('likeComment', $this->currentUserId, $commentId);
 
         if (!$exists) {
-            return $this->respondWithError('21603');
+            return $this->respondWithError(21603);
         }
 
         $commentInfo->setLikes($commentInfo->getLikes() + 1);
@@ -110,7 +110,7 @@ class CommentInfoService
 
         return [
             'status' => 'success',
-            'ResponseCode' => '11603',
+            'ResponseCode' => 11603,
             'affectedRows' => $commentInfo->getLikes(),
         ];
     }
@@ -118,7 +118,7 @@ class CommentInfoService
     public function reportComment(string $commentId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('60501');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
@@ -130,17 +130,17 @@ class CommentInfoService
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentInfo) {
-            return $this->respondWithError('31601');
+            return $this->respondWithError(31601);
         }
 
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
-            return $this->respondWithError('21604');
+            return $this->respondWithError(21604);
         }
 
         $exists = $this->commentInfoMapper->addUserActivity('reportComment', $this->currentUserId, $commentId);
 
         if (!$exists) {
-            return $this->respondWithError('21605');
+            return $this->respondWithError(21605);
         }
 
         $commentInfo->setReports($commentInfo->getReports() + 1);
@@ -148,7 +148,7 @@ class CommentInfoService
 
         return [
             'status' => 'success',
-            'ResponseCode' => '11604',
+            'ResponseCode' => 11604,
             'affectedRows' => $commentInfo->getReports(),
         ];
     }
@@ -156,7 +156,7 @@ class CommentInfoService
     public function findCommentInfo(string $commentId): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('60501');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info("CommentInfoService.findCommentInfo started");
