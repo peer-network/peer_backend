@@ -125,160 +125,6 @@ class WalletMapper
         return $results;
     }
 
-    public function fetchPooll(array $args = []): array
-    {
-        $this->logger->info('WalletMapper.fetchPool started');
-
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = max((int)($args['limit'] ?? 20), 1);
-
-        $conditions = ["whereby < 100"];
-        $queryParams = [];
-
-        foreach ($args as $field => $value) {
-            if (in_array($field, ['userid', 'postid', 'fromid', 'whereby'], true)) {
-                $conditions[] = "$field = :$field";
-                $queryParams[$field] = $value;
-            }
-        }
-
-        $whereClause = implode(" AND ", $conditions);
-
-        $sumSql = "SELECT SUM(numbers) AS overall_total_numbers FROM wallet WHERE $whereClause";
-
-        $sumStmt = $this->db->prepare($sumSql);
-        foreach ($queryParams as $param => $value) {
-            $sumStmt->bindValue(":$param", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
-        }
-        $sumStmt->execute();
-        $overallSums = $sumStmt->fetch(\PDO::FETCH_ASSOC);
-
-        $overallTotalNumbers = (float)($overallSums['overall_total_numbers'] ?? 0);
-        $overallTotalNumbersq = (int)$this->decimalToQ64_96($overallTotalNumbers);
-
-        $sql = "SELECT postid, 
-                       SUM(numbers) AS total_numbers, 
-                       COUNT(*) AS transaction_count
-                FROM wallet 
-                WHERE $whereClause 
-                GROUP BY postid 
-                ORDER BY total_numbers DESC 
-                LIMIT :limit OFFSET :offset";
-
-        $stmt = $this->db->prepare($sql);
-        foreach ($queryParams as $param => $value) {
-            $stmt->bindValue(":$param", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
-        }
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        $results = [
-            'overall_total_numbers' => $overallTotalNumbers,
-            'overall_total_numbersq' => $overallTotalNumbersq,
-            'posts' => []
-        ];
-
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            try {
-                $totalNumbers = (float)$row['total_numbers'];
-                $totalNumbersQ = (int)$this->decimalToQ64_96($totalNumbers);
-
-                $results['posts'][] = [
-                    'postid' => $row['postid'],
-                    'total_numbers' => $totalNumbers,
-                    'total_numbersq' => $totalNumbersQ,
-                    'transaction_count' => (int)$row['transaction_count'],
-                ];
-            } catch (\Throwable $e) {
-                $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
-            }
-        }
-
-        if (!empty($results['posts'])) {
-            $this->logger->info('Fetched all transactions from database', ['count' => count($results['posts'])]);
-        } else {
-            $this->logger->warning('No transactions found in database');
-        }
-
-        return $results;
-    }
-
-    public function fetchPool1(array $args = []): array
-    {
-        $this->logger->info('WalletMapper.fetchPool started');
-
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = max((int)($args['limit'] ?? 20), 1);
-
-        $sumSql = "SELECT SUM(numbers) AS overall_total_numbers FROM wallet WHERE whereby < 100";
-
-        $sumStmt = $this->db->prepare($sumSql);
-        $sumStmt->execute();
-        $overallSums = $sumStmt->fetch(\PDO::FETCH_ASSOC);
-
-        $overallTotalNumbers = (float)($overallSums['overall_total_numbers'] ?? 0);
-        $overallTotalNumbersq = $this->decimalToQ64_96($overallTotalNumbers); // Convert using Q64_96
-
-        $sql = "SELECT postid, SUM(numbers) AS total_numbers FROM wallet WHERE whereby < 100";
-
-        $conditions = [];
-        $queryParams = [];
-
-        foreach ($args as $field => $value) {
-            if (in_array($field, ['userid', 'postid', 'fromid', 'whereby'], true)) {
-                $conditions[] = "$field = :$field";
-                $queryParams[$field] = $value;
-            }
-        }
-
-        if ($conditions) {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        }
-
-        $sql .= " GROUP BY postid ORDER BY total_numbers DESC LIMIT :limit OFFSET :offset";
-
-        $stmt = $this->db->prepare($sql);
-
-        foreach ($queryParams as $param => $value) {
-            $stmt->bindValue(":$param", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
-        }
-
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-
-        $stmt->execute();
-
-        $results = [
-            'overall_total_numbers' => $overallTotalNumbers,
-            'overall_total_numbersq' => $overallTotalNumbersq,
-            'posts' => []
-        ];
-
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            try {
-                $totalNumbers = (float)$row['total_numbers'];
-                $totalNumbersQ = $this->decimalToQ64_96($totalNumbers); // Convert using Q64_96
-
-                $results['posts'][] = [
-                    'postid' => $row['postid'],
-                    'total_numbers' => $totalNumbers,
-                    'total_numbersq' => $totalNumbersQ,
-                ];
-            } catch (\Throwable $e) {
-                $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
-            }
-        }
-
-        if (!empty($results['posts'])) {
-            $this->logger->info('Fetched all transactions from database', ['count' => count($results['posts'])]);
-        } else {
-            $this->logger->warning('No transactions found in database');
-        }
-
-        return $results;
-    }
-
     public function fetchAll(array $args = []): array
     {
         $this->logger->info('WalletMapper.fetchAll started');
@@ -1189,7 +1035,7 @@ class WalletMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Wallet deduction successful: ' . $text,
+                'ResponseCode' => 11209,
                 'affectedRows' => [
                     'userId' => $userId,
                     'postId' => $postId,
@@ -1207,7 +1053,7 @@ class WalletMapper
                     'whereby' => $whereby,
                 ],
             ]);
-            return $this->respondWithError('Failed to deduct from wallet:' . $e->getMessage());
+            return $this->respondWithError(41206);
         }
     }
 
@@ -1307,63 +1153,6 @@ class WalletMapper
             $this->db->rollBack();
             $this->logger->error('Database error in saveWalletEntry: ' . $e->getMessage());
             throw new \RuntimeException('Unable to save wallet entry');
-        }
-    }
-
-    public function getRankedPosts($limit = 10)
-    {
-        try {
-            $sql = "
-                WITH post_totals AS (
-                    SELECT
-                        w.postid,
-                        SUM(w.numbers) AS total_numbers
-                    FROM logwins w
-                    GROUP BY w.postid
-                ),
-                ranked_posts AS (
-                    SELECT
-                        pt.postid,
-                        pt.total_numbers,
-                        pi.likes,
-                        pi.dislikes,
-                        pi.views,
-                        pi.saves,
-                        pi.shares,
-                        pi.comments,
-                        p.title,
-                        p.contenttype,
-                        RANK() OVER (ORDER BY pt.total_numbers DESC) AS rank
-                    FROM post_totals pt
-                    LEFT JOIN post_info pi ON pt.postid = pi.postid
-                    LEFT JOIN posts p ON pt.postid = p.postid
-                )
-                SELECT *
-                FROM ranked_posts
-                WHERE rank <= :limit
-                ORDER BY rank ASC";
-
-            $stmt = $this->db->prepare($sql);
-
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-
-            $stmt->execute();
-
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        } catch (\PDOException $e) {
-            $this->logger->error('Database error while fetching ranked posts', [
-                'error' => $e->getMessage(),
-                'sql' => $sql,
-                'limit' => $limit
-            ]);
-            return [];
-        } catch (\Throwable $e) {
-            $this->logger->error('Unexpected error while fetching ranked posts', [
-                'error' => $e->getMessage(),
-                'limit' => $limit
-            ]);
-            return [];
         }
     }
 
