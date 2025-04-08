@@ -70,7 +70,7 @@ class TagService
     public function createTag(string $tagName): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('TagService.createTag started');
@@ -119,10 +119,10 @@ class TagService
             $tags = $this->tagMapper->fetchAll($offset, $limit);
             $result = array_map(fn(Tag $tag) => $tag->getArrayCopy(), $tags);
 
-            return $this->createSuccessResponse('Tags fetched successfully', $result);
+            return $this->createSuccessResponse(11701, $result);
 
         } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to fetch tags.');
+            return $this->respondWithError(41702);
         }
     }
 
@@ -142,7 +142,7 @@ class TagService
             $tags = $this->tagMapper->searchByName($args);
 
             if ($tags === false) {
-                return $this->respondWithError('Failed to fetch tags from database.');
+                return $this->respondWithError(41702);
             }
 
             $this->logger->info("TagService.loadTag successfully fetched tags", [
@@ -151,7 +151,7 @@ class TagService
 
             $result = array_map(fn(Tag $tag) => $tag->getArrayCopy(), $tags);
 
-            return $this->createSuccessResponse('Tags fetched successfully', $result);
+            return $this->createSuccessResponse(11701, $result);
 
         } catch (\Throwable $e) {
             $this->logger->error("Error occurred in TagService.loadTag", [
