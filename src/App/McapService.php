@@ -77,13 +77,13 @@ class McapService
                 $success = [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 'Users data prepared successfully',
+                    'ResponseCode' => 11009,
                     'affectedRows' => $fetchAll,
                 ];
                 return $success;
             }
 
-            return $this->respondWithError('No users found.');
+            return $this->respondWithError(21001);
         } catch (\Exception $e) {
             return $this->respondWithError('Failed to retrieve users list.');
         }
