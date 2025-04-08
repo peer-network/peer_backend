@@ -725,14 +725,14 @@ class PeerInputFilter
         finfo_close($finfo);
         
         if (!in_array($mimeType, $allowedMimeTypes, true)) {
-            $this->errors['image'][] = 'Invalid image type. Allowed MIME types.';
+            $this->errors['image'][] = 21519;
             return false;
         }
 
         if ($maxWidth !== null || $maxHeight !== null) {
             [$width, $height] = getimagesize($imagePath);
             if (!$width || !$height) {
-                $this->errors['image'][] = 'Unable to read image dimensions.';
+                $this->errors['image'][] = 25120;
                 return false;
             }
             
