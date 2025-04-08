@@ -73,11 +73,11 @@ class PostService
     public function createPost(array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+            return $this->respondWithError(30101);
         }
 
         foreach (['title', 'media', 'contenttype'] as $field) {
@@ -114,7 +114,7 @@ class PostService
             }
 
             if (!$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
-                return $this->respondWithError('No access to the newsfeed.');
+                return $this->respondWithError(21516);
             }
         }
 
@@ -192,10 +192,10 @@ class PostService
                 $this->insertPostMetadata($postId, $this->currentUserId);
             }
 
-            return $this->createSuccessResponse('Post created successfully', $post->getArrayCopy());
+            return $this->createSuccessResponse(11508, $post->getArrayCopy());
 
         } catch (\Throwable $e) {
-            $this->logger->error('Failed to create post', ['exception' => $e]);
+            $this->logger->error(41508, ['exception' => $e]);
             return $this->respondWithError($e->getMessage());
         }
     }
@@ -287,7 +287,7 @@ class PostService
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info("PostService.fetchAll started");
@@ -314,7 +314,7 @@ class PostService
     public function findPostser(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $from = $args['from'] ?? null;
@@ -328,7 +328,7 @@ class PostService
         $userId = $args['userid'] ?? null;
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postid format provided.');
+            return $this->respondWithError(31501);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
@@ -399,12 +399,12 @@ class PostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Chat feeds fetched successfully',
+                'ResponseCode' => 11808,
                 'affectedRows' => $result,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch chat feeds', ['feedid' => $feedid, 'exception' => $e]);
-            return $this->respondWithError('Failed to fetch chat feeds.');
+            return $this->respondWithError(41807);
         }
     }
 
@@ -438,14 +438,14 @@ class PostService
         }
 
         if (!self::isValidUUID($id)) {
-            return $this->respondWithError('Invalid postId');
+            return $this->respondWithError(20209);
         }
 
         $this->logger->info('PostService.deletePost started');
 
         $posts = $this->postMapper->loadById($id);
         if (!$posts) {
-            return $this->respondWithError('PostId not found.');
+            return $this->respondWithError(21516);
         }
 
         $post = $posts->getArrayCopy();
