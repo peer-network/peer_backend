@@ -632,7 +632,7 @@ class PeerInputFilter
     protected function validateTagName(string $value, array $options = []): bool
     {
         if ($value === '') {
-            $this->errors['tag'][] = 'Tag is empty. It must have a value.';
+            $this->errors['tag'][] = 30101;
             return false;
         }
 
@@ -640,12 +640,12 @@ class PeerInputFilter
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
         if (strlen($value) < 2 || strlen($value) > 53) {
-            $this->errors['tag'][] = 'Tag length must be between 2 and 53 characters.';
+            $this->errors['tag'][] = 30103;
             return false;
         }
 
         if (!preg_match('/^[a-zA-Z0-9_-]+$/', $value)) {
-            $this->errors['tag'][] = 'Tag contains invalid characters.';
+            $this->errors['tag'][] = 30103;
             return false;
         }
 
