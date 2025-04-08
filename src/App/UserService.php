@@ -198,7 +198,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->warning('Error registering user.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError(40301);
         }
     }
 
@@ -420,7 +420,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update username', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError(40301);
         }
     }
 
