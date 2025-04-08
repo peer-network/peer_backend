@@ -52,7 +52,7 @@ class CommentInfoService
         if ($this->commentInfoMapper->delete($commentId)) {
             return ['status' => 'success', 'ResponseCode' => 11606];
         } else {
-            return $this->respondWithError('41603');
+            return $this->respondWithError(41603);
         }
     }
 
