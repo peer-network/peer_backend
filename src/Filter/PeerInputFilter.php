@@ -617,12 +617,12 @@ class PeerInputFilter
         }
 
 		if (!preg_match('/[a-zA-Z]/', $value)) {
-			$this->errors['username'][] = 'Username must contain at least one letter.';
+			$this->errors['username'][] = 20202;
 			return false;
 		}
 
 		if (in_array(strtolower($value), $forbiddenUsernames, true)) {
-			$this->errors['username'][] = 'This username is not allowed.';
+			$this->errors['username'][] = 31002;
 			return false;
 		}
 
