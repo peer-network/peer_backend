@@ -297,7 +297,7 @@ class PostInfoMapper
                 'postid' => $postid,
                 'exception' => $e->getMessage(),
             ]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle post save'];
+            return ['status' => 'error', 'ResponseCode' => 41502];
         }
     }
 
@@ -345,7 +345,7 @@ class PostInfoMapper
                 'followeduserid' => $followeduserid,
                 'exception' => $e->getMessage(),
             ]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user follow.'];
+            return ['status' => 'error', 'ResponseCode' => 41103];
         }
     }
 
