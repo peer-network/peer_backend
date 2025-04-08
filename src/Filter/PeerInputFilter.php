@@ -710,13 +710,13 @@ class PeerInputFilter
         }
 
         if (filesize($imagePath) > $maxFileSize) {
-            $this->errors['image'][] = 'File size exceeds the maximum limit.';
+            $this->errors['image'][] = 21517;
             return false;
         }
 
         $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
         if (!in_array($extension, $allowedExtensions, true)) {
-            $this->errors['image'][] = 'Invalid image extension.';
+            $this->errors['image'][] = 21518;
             return false;
         }
 
