@@ -1606,7 +1606,7 @@ class GraphQLSchemaBuilder
         $results = array_map(fn(CommentAdvanced $comment) => $comment->getArrayCopy(), $comments);
 
         if (is_array($results) || !empty($results)) {
-            return $this->createSuccessResponse('Success get comments', $results);
+            return $this->createSuccessResponse(11607, $results);
         }
 
         return $this->respondWithError(21601);
