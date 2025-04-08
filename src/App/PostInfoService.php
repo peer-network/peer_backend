@@ -41,7 +41,7 @@ class PostInfoService
     public function updatePostInfo(PostInfo $postInfo): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('PostInfoService.updatePostInfo started');
@@ -57,11 +57,11 @@ class PostInfoService
     public function deletePostInfo(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postId');
+            return $this->respondWithError(31501);
         }
 
         $this->logger->info('PostInfoService.deletePostInfo started');
@@ -76,28 +76,28 @@ class PostInfoService
     public function likePost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postId');
+            return $this->respondWithError(31501);
         }
 
         $this->logger->info('PostInfoService.likePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
         if ($postInfo === null) {
-            return $this->respondWithError('Post not found');
+            return $this->respondWithError(31602);
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
-            return $this->respondWithError('Post owner cannot like their own post');
+            return $this->respondWithError(21507);
         }
 
         $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
 
         if (!$exists) {
-            return $this->respondWithError('Already liked');
+            return $this->respondWithError(21508);
         }
 
         $postInfo->setLikes($postInfo->getLikes() + 1);
@@ -105,35 +105,35 @@ class PostInfoService
 
         return [
             'status' => 'success',
-            'ResponseCode' => 'Successfully liked',
+            'ResponseCode' => 11503,
         ];
     }
 
     public function dislikePost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postId');
+            return $this->respondWithError(31501);
         }
 
         $this->logger->info('PostInfoService.dislikePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
         if ($postInfo === null) {
-            return $this->respondWithError('Post not found');
+            return $this->respondWithError(31602);
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
-            return $this->respondWithError('Post owner cannot dislike their own post');
+            return $this->respondWithError(21509    );
         }
 
         $exists = $this->postInfoMapper->addUserActivity('dislikePost', $this->currentUserId, $postId);
 
         if (!$exists) {
-            return $this->respondWithError('Already disliked');
+            return $this->respondWithError(21510);
         }
 
         $postInfo->setDislikes($postInfo->getDislikes() + 1);
@@ -141,35 +141,35 @@ class PostInfoService
 
         return [
             'status' => 'success',
-            'ResponseCode' => 'Successfully disliked',
+            'ResponseCode' => 11504,
         ];
     }
 
     public function reportPost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postId');
+            return $this->respondWithError(31501);
         }
 
         $this->logger->info('PostInfoService.reportPost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
         if ($postInfo === null) {
-            return $this->respondWithError('Post not found');
+            return $this->respondWithError(31602);
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
-            return $this->respondWithError('Post owner cannot report their own post');
+            return $this->respondWithError(21511);
         }
 
         $exists = $this->postInfoMapper->addUserActivity('reportPost', $this->currentUserId, $postId);
 
         if (!$exists) {
-            return $this->respondWithError('Already report');
+            return $this->respondWithError(21512);
         }
 
         $postInfo->setReports($postInfo->getReports() + 1);
@@ -177,35 +177,35 @@ class PostInfoService
 
         return [
             'status' => 'success',
-            'ResponseCode' => 'Successfully report',
+            'ResponseCode' => 11505,
         ];
     }
 
     public function viewPost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postId');
+            return $this->respondWithError(31501);
         }
 
         $this->logger->info('PostInfoService.viewPost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
         if ($postInfo === null) {
-            return $this->respondWithError('Post not found');
+            return $this->respondWithError(31602);
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
-            return $this->respondWithError('Post owner cannot views their own post');
+            return $this->respondWithError(21513);
         }
 
         $exists = $this->postInfoMapper->addUserActivity('viewPost', $this->currentUserId, $postId);
 
         if (!$exists) {
-            return $this->respondWithError('Already viewed');
+            return $this->respondWithError(21514);
         }
 
         $postInfo->setViews($postInfo->getViews() + 1);
@@ -213,31 +213,31 @@ class PostInfoService
 
         return [
             'status' => 'success',
-            'ResponseCode' => 'Successfully viewed',
+            'ResponseCode' => 11506,
         ];
     }
 
     public function sharePost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postId');
+            return $this->respondWithError(31501);
         }
 
         $this->logger->info('PostInfoService.sharePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
         if ($postInfo === null) {
-            return $this->respondWithError('Post not found');
+            return $this->respondWithError(31602);
         }
 
         $exists = $this->postInfoMapper->addUserActivity('sharePost', $this->currentUserId, $postId);
 
         if (!$exists) {
-            return $this->respondWithError('Already shared');
+            return $this->respondWithError(21515);
         }
 
         $postInfo->setShares($postInfo->getShares() + 1);
@@ -245,18 +245,18 @@ class PostInfoService
 
         return [
             'status' => 'success',
-            'ResponseCode' => 'Successfully shared',
+            'ResponseCode' => 11507,
         ];
     }
 
     public function toggleUserFollow(string $followedUserId): array 
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError('Invalid');
+            return $this->respondWithError(31501);
         }
 
         $this->logger->info('PostInfoService.toggleUserFollow started');
@@ -271,11 +271,11 @@ class PostInfoService
     public function savePost(string $postId): array 
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postId');
+            return $this->respondWithError(31501);
         }
 
         $this->logger->info('PostInfoService.savePost started');
@@ -286,7 +286,7 @@ class PostInfoService
     public function findPostInfo(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info("PostInfoService.findPostInfo started");
