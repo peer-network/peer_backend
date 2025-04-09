@@ -193,7 +193,7 @@ class UserService
             $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'User registered successfully. Please verify your account.',
+                'ResponseCode' => 10601,
                 'userid' => $id,
             ];
         } catch (\Throwable $e) {
@@ -305,7 +305,7 @@ class UserService
             $this->logger->info('User password updated successfully', ['userId' => $this->currentUserId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Password update successful',
+                'ResponseCode' => 11005,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update user password', ['exception' => $e]);
@@ -316,7 +316,7 @@ class UserService
     public function setEmail(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         if (empty($args)) {
@@ -360,7 +360,7 @@ class UserService
             $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId, 'email' => $email]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'User email updated successfully',
+                'ResponseCode' => 11006,
                 'affectedRows' => $affectedRows,
             ];
         } catch (\Throwable $e) {
@@ -372,7 +372,7 @@ class UserService
     public function setUsername(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         if (empty($args['username'])) {
@@ -389,15 +389,15 @@ class UserService
 
             $user = $this->userMapper->loadById($this->currentUserId);
             if (!$user) {
-                return self::respondWithError('User not found');
+                return self::respondWithError(21001);
             }
 
             if ($username === $user->getName()) {
-                return self::respondWithError('New username cannot be the same as the current username.');
+                return self::respondWithError(21005);
             }
 
             if (!$this->validatePasswordMatch($password, $user->getPassword())) {
-                return self::respondWithError('Wrong Actual Password');
+                return self::respondWithError(31001);
             }
 
             $slug = $this->generateUniqueSlug($username);
@@ -415,7 +415,7 @@ class UserService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Username updated successfully',
+                'ResponseCode' => 11007,
                 'affectedRows' => $affectedRows,
             ];
         } catch (\Throwable $e) {
@@ -427,7 +427,7 @@ class UserService
     public function deleteAccount(string $expassword): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         if (empty($expassword)) {
@@ -463,7 +463,7 @@ class UserService
     public function Profile(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         $userId = $args['userid'] ?? $this->currentUserId;
@@ -473,7 +473,7 @@ class UserService
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID for profile', ['userId' => $userId]);
-            return self::respondWithError('Could not find mandatory id.');
+            return self::respondWithError(30102);
         }
 
         try {
@@ -490,7 +490,7 @@ class UserService
             $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Profile data prepared successfully',
+                'ResponseCode' => 11008,
                 'affectedRows' => $profileData,
             ];
         } catch (\Throwable $e) {
@@ -498,7 +498,7 @@ class UserService
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return self::respondWithError('Failed to fetch profile data.');
+            return self::respondWithError(41007);
         }
     }
 
@@ -524,7 +524,7 @@ class UserService
             return [
                 'status' => 'success',
                 'counter' => $counter,
-                'ResponseCode' => 'Follows data prepared successfully',
+                'ResponseCode' => 11101,
                 'affectedRows' => [
                     'followers' => array_map(
                         fn(ProfilUser $follower) => $follower->getArrayCopy(),
@@ -545,7 +545,7 @@ class UserService
     public function getFriends(?array $args = []): array|null
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -561,7 +561,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($users),
-                    'ResponseCode' => 'Friends data prepared successfully',
+                    'ResponseCode' => 11102,
                     'affectedRows' => $users,
                 ];
             }
@@ -577,7 +577,7 @@ class UserService
     public function getAllFriends(?array $args = []): array|null
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -619,7 +619,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 'Users data prepared successfully',
+                    'ResponseCode' => 11009,
                     'affectedRows' => $fetchAll,
                 ];
             }

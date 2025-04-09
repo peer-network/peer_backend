@@ -321,7 +321,7 @@ class ChatMapper
             $this->logger->error("Database error occurred in loadChatById", [
                 'error' => $e->getMessage(),
             ]);
-            return $this->respondWithError('DatabaseError');
+            return $this->respondWithError(40302);
         }
     }
 
@@ -467,7 +467,7 @@ class ChatMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Participant successfully inserted.',
+                'ResponseCode' => 11802,
                 'affectedRows' => new ChatParticipants($data)
             ];
         } catch (\Throwable $e) {
@@ -505,7 +505,7 @@ class ChatMapper
 
             if (!$participantExists) {
                 $this->logger->warning("User is not a participant of the chat", ['userid' => $userid]);
-                return $this->respondWithError('You are not allowed to write messages');
+                return $this->respondWithError(21804);
             }
 
             $query = "INSERT INTO chatmessages (chatid, userid, content, createdat) 
@@ -530,7 +530,7 @@ class ChatMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Message successfully inserted.',
+                'ResponseCode' => 11803,
                 'affectedRows' => [$data]
             ];
         } catch (\Throwable $e) {
