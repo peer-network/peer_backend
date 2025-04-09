@@ -74,7 +74,7 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError('Invalid user ID.');
         }
 
         if ($this->currentUserId === $followedUserId) {
@@ -84,11 +84,11 @@ class UserInfoService
         $this->logger->info('UserInfoService.toggleUserFollow started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
-            return $this->respondWithError(31103);
+            return $this->respondWithError('Follower user not found.');
         }
 
         if (!$this->userInfoMapper->isUserExistById($followedUserId)) {
-            return $this->respondWithError(31105);
+            return $this->respondWithError('Followed user not found.');
         }
 
         return $this->userInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
@@ -101,11 +101,11 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($blockedUserId)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError('Invalid user ID.');
         }
 
         if ($this->currentUserId === $blockedUserId) {
-            return $this->respondWithError(31104);
+            return $this->respondWithError('Cannot block yourself.');
         }
 
         $this->logger->info('UserInfoService.toggleUserBlock started');

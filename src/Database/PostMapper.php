@@ -461,8 +461,8 @@ class PostMapper
     {
         $this->logger->info("PostMapper.findPostser started");
 
-        $offset = max((int)($args['postOffset'] ?? 0), 0);
-        $limit = min(max((int)($args['postLimit'] ?? 10), 1), 20);
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $from = $args['from'] ?? null;
         $to = $args['to'] ?? null;
@@ -616,40 +616,44 @@ class PostMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
 
             $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                $row['tags'] = json_decode($row['tags'], true) ?? [];
-                $results[] = new PostAdvanced([
-                    'postid' => $row['postid'],
-                    'userid' => $row['userid'],
-                    'contenttype' => $row['contenttype'],
-                    'title' => $row['title'],
-                    'media' => $row['media'],
-                    'cover' => $row['cover'],
-                    'mediadescription' => $row['mediadescription'],
-                    'createdat' => $row['createdat'],
-                    'amountlikes' => (int)$row['amountlikes'],
-                    'amountviews' => (int)$row['amountviews'],
-                    'amountcomments' => (int)$row['amountcomments'],
-                    'amountdislikes' => (int)$row['amountdislikes'],
-                    'amounttrending' => (int)$row['amounttrending'],
-                    'isliked' => (bool)$row['isliked'],
-                    'isviewed' => (bool)$row['isviewed'],
-                    'isreported' => (bool)$row['isreported'],
-                    'isdisliked' => (bool)$row['isdisliked'],
-                    'issaved' => (bool)$row['issaved'],
-                    'tags' => $row['tags'],
-                    'user' => [
-                        'uid' => $row['userid'],
-                        'username' => $row['username'],
-                        'slug' => $row['slug'],
-                        'img' => $row['userimg'],
-                        'isfollowed' => (bool)$row['isfollowed'],
-                        'isfollowing' => (bool)$row['isfollowing'],
-                    ],
-                ]);
+			if ($stmt->execute($params)) {
+				//$this->logger->info("Get post successfully");
+				while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+					$row['tags'] = json_decode($row['tags'], true) ?? [];
+					$results[] = new PostAdvanced([
+						'postid' => $row['postid'],
+						'userid' => $row['userid'],
+						'contenttype' => $row['contenttype'],
+						'title' => $row['title'],
+						'media' => $row['media'],
+						'cover' => $row['cover'],
+						'mediadescription' => $row['mediadescription'],
+						'createdat' => $row['createdat'],
+						'amountlikes' => (int)$row['amountlikes'],
+						'amountviews' => (int)$row['amountviews'],
+						'amountcomments' => (int)$row['amountcomments'],
+						'amountdislikes' => (int)$row['amountdislikes'],
+						'amounttrending' => (int)$row['amounttrending'],
+						'isliked' => (bool)$row['isliked'],
+						'isviewed' => (bool)$row['isviewed'],
+						'isreported' => (bool)$row['isreported'],
+						'isdisliked' => (bool)$row['isdisliked'],
+						'issaved' => (bool)$row['issaved'],
+						'tags' => $row['tags'],
+						'user' => [
+							'uid' => $row['userid'],
+							'username' => $row['username'],
+							'slug' => $row['slug'],
+							'img' => $row['userimg'],
+							'isfollowed' => (bool)$row['isfollowed'],
+							'isfollowing' => (bool)$row['isfollowing'],
+						],
+					]);
+				}
+            } else {
+                //$this->logger->warning("Failed to Get post info"]);
             }
 
             return $results;

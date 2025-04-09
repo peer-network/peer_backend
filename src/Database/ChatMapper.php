@@ -47,6 +47,33 @@ class ChatMapper
             ]);
             return false;
         }
+<<<<<<< HEAD
+=======
+    }
+
+    public function isParticipantExist(string $chatid, string $currentUserId): bool
+    {
+        $this->logger->info("ChatMapper.isParticipantExist started", [
+            'chatid' => $chatid,
+            'currentUserId' => $currentUserId
+        ]);
+
+        try {
+            $sql = "SELECT COUNT(*) FROM chatparticipants WHERE chatid = :chatid AND userid = :currentUserId";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':chatid', $chatid, \PDO::PARAM_STR);
+            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
+            $stmt->execute();
+
+            return (bool) $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            $this->logger->error("Database error: " . $e->getMessage(), [
+                'chatid' => $chatid,
+                'currentUserId' => $currentUserId
+            ]);
+            return false;
+        }
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
     }
 
     public function isPrivate(string $chatid): bool
@@ -141,7 +168,11 @@ class ChatMapper
             return $this->respondWithError('Invalid chatId');
         } catch (\Throwable $e) {  
             $this->logger->error("Database error: " . $e->getMessage(), ['id' => $id]);
+<<<<<<< HEAD
             return $this->respondWithError($e->getMessage());
+=======
+            return $this->respondWithError(40301);
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
         }
     }
 
@@ -448,7 +479,11 @@ class ChatMapper
             ];
         } catch (\Throwable $e) {
             $this->logger->error("Error inserting participant", ['exception' => $e->getMessage()]);
+<<<<<<< HEAD
             return $this->respondWithError($e->getMessage());
+=======
+            return $this->respondWithError(40301);
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
         }
     }
 
@@ -513,7 +548,11 @@ class ChatMapper
             $this->logger->error("Error inserting message", [
                 'exception' => $e->getMessage()
             ]);
+<<<<<<< HEAD
             return $this->respondWithError($e->getMessage());
+=======
+            return $this->respondWithError(40301);
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
         }
     }
 

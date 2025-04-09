@@ -112,6 +112,7 @@ class WalletMapper
                     'transaction_count' => (int)$row['transaction_count'],
                 ];
             } catch (\Throwable $e) {
+<<<<<<< HEAD
                 $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
             }
         }
@@ -266,6 +267,8 @@ class WalletMapper
                     'total_numbersq' => $totalNumbersQ,
                 ];
             } catch (\Throwable $e) {
+=======
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
                 $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
             }
         }
@@ -587,12 +590,12 @@ class WalletMapper
 
         if (empty($userid)) {
             $this->logger->error('UserID is missing');
-            return $this->respondWithError('UserID is required.');
+            return $this->respondWithError(30101);
         }
 
         if (!in_array($type, ['win', 'pay'], true)) {
             $this->logger->error('Type is not provided');
-            return $this->respondWithError('Invalid type parameter provided.');
+            return $this->respondWithError(30105);
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -646,7 +649,11 @@ class WalletMapper
 
             return $result;
         } catch (\Throwable $e) {
+<<<<<<< HEAD
             return $this->respondWithError($e->getMessage());
+=======
+            return $this->respondWithError(40301);
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
         }
     }
 
@@ -664,7 +671,11 @@ class WalletMapper
         $id = $this->generateUUID();
         if (empty($id)) {
             $this->logger->critical('Failed to generate logwins ID');
+<<<<<<< HEAD
             return $this->respondWithError('Failed to generate logwins ID.');
+=======
+            return $this->respondWithError(41401);
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
         }
 
         $sql = "INSERT INTO logwins 
@@ -786,11 +797,11 @@ class WalletMapper
 
         if ($totalInserts > 0) {
             $sourceList = implode(', ', $winSources);
-            $success = ['status' => 'success', 'ResponseCode' => "Successfully added $totalInserts gems across wins from: $sourceList."];
+            $success = ['status' => 'success', 'ResponseCode' => 11206];
             return $success;
         }
 
-        $success = ['status' => 'success', 'ResponseCode' => 'No gems added to database across all wins.'];
+        $success = ['status' => 'success', 'ResponseCode' => 21205];
         return $success;
     }
 
@@ -809,7 +820,7 @@ class WalletMapper
             $entries = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ' . $tableName, ['exception' => $e]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
 
         $insertCount = 0; 
@@ -823,7 +834,11 @@ class WalletMapper
                     $id = $this->generateUUID();
                     if (empty($id)) {
                         $this->logger->critical('Failed to generate gems ID');
+<<<<<<< HEAD
                         return $this->respondWithError('Failed to generate gems ID.');
+=======
+                        return $this->respondWithError(41401);
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
                     }
 
                     $sql = "INSERT INTO gems (gemid, userid, postid, fromid, gems, whereby, createdat) 
@@ -842,7 +857,7 @@ class WalletMapper
                     $insertCount++;
                 } catch (\Throwable $e) {
                     $this->logger->error('Error inserting into gems for ' . $tableName, ['exception' => $e]);
-                    return $this->respondWithError($e->getMessage());
+                    return $this->respondWithError(40301);
                 }
             }
 
@@ -853,7 +868,7 @@ class WalletMapper
                     $this->db->query($sql);
                 } catch (\Throwable $e) {
                     $this->logger->error('Error updating collected status for ' . $tableName, ['exception' => $e]);
-                    return $this->respondWithError($e->getMessage());
+                    return $this->respondWithError(40301);
                 }
             }
         }
@@ -887,12 +902,12 @@ class WalletMapper
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
 
         $success = [
             'status' => 'success',
-            'ResponseCode' => 'Gems data prepared successfully.',
+            'ResponseCode' => 11207,
             'affectedRows' => $entries
         ];
 
@@ -919,7 +934,7 @@ class WalletMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            return $this->respondWithError("Invalid day parameter.");
+            return $this->respondWithError(30105);
         }
 
         $whereCondition = $dayOptions[$day];
@@ -959,11 +974,11 @@ class WalletMapper
             //$this->logger->info('fetching data for ', ['data' => $data]);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
 
         if (empty($data)) {
-            return $this->respondWithError('No records found for ' . $day);
+            return $this->respondWithError(21206);
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
@@ -1020,13 +1035,13 @@ class WalletMapper
 
             } catch (\Throwable $e) {
                 $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
-                return $this->respondWithError($e->getMessage());
+                return $this->respondWithError(40301);
             }
 
             return [
                 'status' => 'success',
                 'counter' => count($args) -1,
-                'ResponseCode' => 'Records found for ' . $day,
+                'ResponseCode' => 11208,
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
         }
@@ -1041,7 +1056,7 @@ class WalletMapper
 
         if ($account <= $tokenAmount) {
             $this->logger->warning('Insufficient funds for the transaction', ['userid' => $userId, 'accountBalance' => $account, 'tokenAmount' => $tokenAmount]);
-            return $this->respondWithError('Don\'t have sufficient funds for this transaction');
+            return $this->respondWithError(51401);
         }
 
         try {
@@ -1052,7 +1067,7 @@ class WalletMapper
 
             if (!$result || !$result['invited']) {
                 $this->logger->warning('No inviter found for the given user', ['userid' => $userId]);
-                return $this->respondWithError('No inviter found for the given user.');
+                return $this->respondWithError(11401);
             }
 
             $inviterId = $result['invited'];
@@ -1065,7 +1080,11 @@ class WalletMapper
                 $id = $this->generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
+<<<<<<< HEAD
                     return $this->respondWithError('Failed to generate logwins ID.');
+=======
+                    return $this->respondWithError(41401);
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
                 }
 
                 $args = [
@@ -1084,7 +1103,11 @@ class WalletMapper
                 $id = $this->generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
+<<<<<<< HEAD
                     return $this->respondWithError('Failed to generate logwins ID.');
+=======
+                    return $this->respondWithError(41401);
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
                 }
 
                 $args = [
@@ -1101,7 +1124,7 @@ class WalletMapper
 
             return [
                 'status' => 'success', 
-                'ResponseCode' => "Transaction successful: 1% transferred to inviter.",
+                'ResponseCode' => 11402,
                 'affectedRows' => [
                     'inviterId' => $inviterId,
                     'tosend' => $tosend,
@@ -1112,15 +1135,19 @@ class WalletMapper
         } catch (\PDOException $pdoe) {
             $this->db->rollBack();
             $this->logger->error('PDOException occurred during transaction', ['exception' => $pdoe]);
-            return $this->respondWithError("Database error: " . $pdoe->getMessage());
+            return $this->respondWithError(40302);
 
         } catch (\Throwable $e) {
             $this->db->rollBack();
             $this->logger->error('Throwable occurred during transaction', ['exception' => $e]);
+<<<<<<< HEAD
             return $this->respondWithError("Transaction failed: " . $e->getMessage());
+=======
+            return $this->respondWithError(41401);
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
         }
 
-        return $this->respondWithError('Unknown error occurred.');
+        return $this->respondWithError(40301);
     }
 
     public function deductFromWallets(string $userId, ?array $args = []): array
@@ -1141,7 +1168,7 @@ class WalletMapper
 
         if (!isset($mapping[$art])) {
             $this->logger->error('Invalid art type provided.', ['art' => $art]);
-            return $this->respondWithError('Invalid action type.');
+            return $this->respondWithError(30105);
         }
 
         $price = $mapping[$art]['price'];
@@ -1156,7 +1183,7 @@ class WalletMapper
                 'Balance' => $currentBalance,
                 'requiredAmount' => $price,
             ]);
-            return $this->respondWithError('Insufficient_balance: Not enough balance to perform this action.');
+            return $this->respondWithError(51301);
         }
 
         $args = [
@@ -1189,7 +1216,7 @@ class WalletMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Wallet deduction successful: ' . $text,
+                'ResponseCode' => 11209,
                 'affectedRows' => [
                     'userId' => $userId,
                     'postId' => $postId,
@@ -1207,7 +1234,7 @@ class WalletMapper
                     'whereby' => $whereby,
                 ],
             ]);
-            return $this->respondWithError('Failed to deduct from wallet:' . $e->getMessage());
+            return $this->respondWithError(41206);
         }
     }
 
@@ -1310,6 +1337,7 @@ class WalletMapper
         }
     }
 
+<<<<<<< HEAD
     public function getRankedPosts($limit = 10)
     {
         try {
@@ -1367,6 +1395,8 @@ class WalletMapper
         }
     }
 
+=======
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
     public function callUserMove(string $userId): array
     {
         try {
@@ -1412,8 +1442,8 @@ class WalletMapper
             return [
                 'status' => 'success',
                 'ResponseCode' => $totalInteractions > 0
-                    ? "Successfully counted $totalInteractions interactions with a total factor score of $totalScore from: " . implode(', ', $winSources) . "."
-                    : 'No interactions found for today.',
+                    ? 11205
+                    : 21204,
                 'affectedRows' => array_merge(['totalInteractions' => $totalInteractions, 'totalScore' => $totalScore, 'totalDetails' => $interactionDetails])
             ];
         } catch (\Throwable $e) {
@@ -1424,7 +1454,7 @@ class WalletMapper
 
             return [
                 'status' => 'error',
-                'ResponseCode' => 'An unexpected error occurred while processing the user move.',
+                'ResponseCode' => 41205,
                 'affectedRows' => []
             ];
         }

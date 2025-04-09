@@ -344,46 +344,61 @@ class UserInfoMapper
 
     private function updateChatsStatus(string $followerid, string $followeduserid): void
     {
-        $friends = $this->getFriends($followerid);
+        $this->logger->info('UserInfoMapper.fetchFriends started', ['userid' => $followerid]);
 
-        if (!is_array($friends) || empty($friends)) {
-            throw new \InvalidArgumentException('NO FRIENDS FOUND OR AN ERROR OCCURRED IN FETCHING FRIENDS');
+        try {
+            $friends = $this->getFriends($followerid);
+
+            if (!is_array($friends) || empty($friends)) {
+                throw new \InvalidArgumentException('NO FRIENDS FOUND OR AN ERROR OCCURRED IN FETCHING FRIENDS');
+            }
+
+            $friendIds = array_column($friends, 'uid');
+            $this->logger->info('Fetched friend IDs', ['friendIds' => $friendIds]);
+
+            if (!in_array($followeduserid, $friendIds)) {
+                $queryRestoreAccess = "UPDATE chats 
+                    SET ispublic = 9
+                    WHERE ispublic = 0 
+                    AND chatid IN (
+                        SELECT c.chatid FROM chats c
+                        JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
+                        JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
+                        WHERE cp1.userid = :followerid 
+                        AND cp2.userid = :followeduserid
+                )";
+                $this->logger->info('Setting chat visibility to 9 (private)', ['followerid' => $followerid, 'followeduserid' => $followeduserid]);
+            } else {
+                $queryRestoreAccess = "UPDATE chats 
+                    SET ispublic = 0
+                    WHERE ispublic = 9 
+                    AND chatid IN (
+                        SELECT c.chatid FROM chats c
+                        JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
+                        JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
+                        WHERE cp1.userid = :followerid 
+                        AND cp2.userid = :followeduserid
+                )";
+                $this->logger->info('Restoring chat visibility to 0 (public)', ['followerid' => $followerid, 'followeduserid' => $followeduserid]);
+            }
+
+            $stmt = $this->db->prepare($queryRestoreAccess);
+            $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
+            $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
+            $stmt->execute();
+
+            $this->logger->info('Query.setFollowUserResponse Resolvers', ['uid' => $followerid]);
+        } catch (\InvalidArgumentException $e) {
+            $this->logger->error('Failed to toggle user follow', [
+                'exception' => $e->getMessage(),
+                'uid' => $followerid
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('Unexpected error in updateChatsStatus', [
+                'exception' => $e->getMessage(),
+                'uid' => $followerid
+            ]);
         }
-
-        $friendIds = array_column($friends, 'uid');
-        $this->logger->info('friendIds', ['friendIds' => $friendIds]);
-
-        if (!in_array($followeduserid, $friendIds)) {
-
-            $queryRestoreAccess = "UPDATE chats 
-                SET ispublic = 9
-                WHERE ispublic = 0 
-                AND chatid IN (
-                    SELECT c.chatid FROM chats c
-                    JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
-                    JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
-                    WHERE cp1.userid = :followerid 
-                    AND cp2.userid = :followeduserid
-            )";
-
-        } else {
-
-            $queryRestoreAccess = "UPDATE chats 
-                SET ispublic = 0
-                WHERE ispublic = 9 
-                AND chatid IN (
-                    SELECT c.chatid FROM chats c
-                    JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
-                    JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
-                    WHERE cp1.userid = :followerid 
-                    AND cp2.userid = :followeduserid
-            )";
-        }
-
-        $stmt = $this->db->prepare($queryRestoreAccess);
-        $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-        $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
-        $stmt->execute();
     }
 
     public function isUserExistById(string $userId): bool
@@ -508,56 +523,6 @@ class UserInfoMapper
                 'error' => $e->getMessage()
             ]);
             return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user block'];
-        }
-    }
-
-    public function getBlockRelationss(string $myUserId, int $offset = 0, int $limit = 10): array
-    {
-        $this->logger->info('Fetching block relationships', ['myUserId' => $myUserId]);
-
-        $query = "SELECT blockerid, blockedid, createdat FROM user_block_user 
-                  WHERE blockerid = :myUserId OR blockedid = :myUserId 
-                  ORDER BY createdat 
-                  DESC LIMIT :limit OFFSET :offset";
-
-        try {
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':myUserId', $myUserId, \PDO::PARAM_STR);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->execute();
-
-            $blockedBy = []; 
-            $iBlocked = []; 
-
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                if ($row['blockedid'] === $myUserId) {
-                    $blockedBy[] = [
-                        'blockerid' => $row['blockerid'],
-                        'blockedid' => $row['blockedid'],
-                        'createdat' => (new \DateTime($row['createdat']))->format('Y-m-d H:i:s'),
-                    ];
-                } elseif ($row['blockerid'] === $myUserId) {
-                    $iBlocked[] = [
-                        'blockerid' => $row['blockerid'],
-                        'blockedid' => $row['blockedid'],
-                        'createdat' => (new \DateTime($row['createdat']))->format('Y-m-d H:i:s'),
-                    ];
-                }
-            }
-
-            $this->logger->info("Fetched block relationships", [
-                'blockedByCount' => count($blockedBy),
-                'iBlockedCount' => count($iBlocked),
-            ]);
-
-            return [
-                'blockedid' => $blockedBy,
-                'blockerid' => $iBlocked
-            ];
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error while fetching block relationships", ['error' => $e->getMessage()]);
-            return ['blockedBy' => [], 'iBlocked' => []];
         }
     }
 

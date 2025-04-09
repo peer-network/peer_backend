@@ -118,12 +118,12 @@ class PoolMapper
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
 
         $success = [
             'status' => 'success',
-            'ResponseCode' => 'Gems transactions prepared successfully.',
+            'ResponseCode' => 11207,
             'affectedRows' => $entries
         ];
 
@@ -150,7 +150,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            return $this->respondWithError("Invalid day parameter.");
+            return $this->respondWithError(20223);
         }
 
         $whereCondition = $dayOptions[$day];
@@ -187,11 +187,11 @@ class PoolMapper
             $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
 
         if (empty($data)) {
-            return $this->respondWithError('No records found for ' . $day);
+            return $this->respondWithError(21202); //'No records found for ' . $day
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
@@ -243,7 +243,7 @@ class PoolMapper
             return [
                 'status' => 'success',
                 'counter' => count($args) -1,
-                'ResponseCode' => 'Records found for ' . $day,
+                'ResponseCode' => 11208,
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
         }

@@ -25,6 +25,8 @@ scalar JSON
 
 type HelloResponse {
   currentuserid: ID
+  currentVersion: String
+  wikiLink: String
 }
 
 type RegisterResponse {

@@ -159,7 +159,7 @@ class PeerInputFilter
     protected function FloatSanitize(mixed $value, array $options = []): float
     {
         if (!is_numeric($value)) {
-            $this->errors['value'][] = "Value is not a valid float.";
+            $this->errors['value'][] = 20247;
         }
 
         return (float)$value;
@@ -213,7 +213,7 @@ class PeerInputFilter
         $inclusive = $options['inclusive'] ?? false;
 
         if ($max === null) {
-            $this->errors['Max'][] = "The 'max' option is required for the LessThan validator.";
+            $this->errors['Max'][] = 20248;
             return false;
         }
 
@@ -221,12 +221,12 @@ class PeerInputFilter
         $maxDateTime = DateTime::createFromFormat('Y-m-d H:i:s.u', $max);
 
         if ($valueDateTime === false) {
-            $this->errors['valueDateTime'][] = "Invalid date format (with milliseconds) for 'value' in LessThan validator.";
+            $this->errors['valueDateTime'][] = 20249;
             return false;
         }
 
         if ($maxDateTime === false) {
-            $this->errors['maxDateTime'][] = "Invalid date format (with milliseconds) for 'max' in LessThan validator.";
+            $this->errors['maxDateTime'][] = 20250;
             return false;
         }
 
@@ -239,7 +239,7 @@ class PeerInputFilter
     protected function validateIntRange(mixed $value, array $options = []): bool
     {
         if (!is_numeric($value) || (int)$value != $value) {
-            $this->errors['int_range'][] = 'Value must be an integer.';
+            $this->errors['int_range'][] = 20244;
             return false;
         }
 
@@ -248,12 +248,12 @@ class PeerInputFilter
         $max = $options['max'] ?? PHP_INT_MAX;
 
         if ($value < $min) {
-            $this->errors['int_range'][] = "Value must be at least $min.";
+            $this->errors['int_range'][] = 20245;
             return false;
         }
 
         if ($value > $max) {
-            $this->errors['int_range'][] = "Value must be at most $max.";
+            $this->errors['int_range'][] = 20246;
             return false;
         }
 
@@ -597,42 +597,52 @@ class PeerInputFilter
         return true;
     }
 
+<<<<<<< HEAD
 	protected function validateUsername(string $value, array $options = []): bool
 	{
 		$forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
+=======
+    protected function validateUsername(string $value, array $options = []): bool
+    {
+        $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
 
-		if ($value === '') {
-			$this->errors['username'][] = 'Could not find mandatory username';
-			return false;
-		}
-
-		if (strlen($value) < 3 || strlen($value) > 23) {
-			$this->errors['username'][] = 'Username must be between 3 and 23 characters.';
-			return false;
-		}
-
-        if (!preg_match('/^[a-zA-Z0-9_]{3,23}$/', $value)) {
-            $this->errors['username'][] = 'Username must be 3-20 characters long and only contain letters, numbers, and underscores.';
+        if ($value === '') {
+            $this->errors['username'][] = 20202;
             return false;
         }
 
-		if (!preg_match('/[a-zA-Z]/', $value)) {
-			$this->errors['username'][] = 'Username must contain at least one letter.';
-			return false;
-		}
+        if (strlen($value) < 3 || strlen($value) > 23) {
+            $this->errors['username'][] = 20202;
+            return false;
+        }
 
-		if (in_array(strtolower($value), $forbiddenUsernames, true)) {
-			$this->errors['username'][] = 'This username is not allowed.';
-			return false;
-		}
+        if (!preg_match('/^[a-zA-Z0-9_]{3,23}$/', $value)) {
+<<<<<<< HEAD
+            $this->errors['username'][] = 'Username must be 3-20 characters long and only contain letters, numbers, and underscores.';
+=======
+            $this->errors['username'][] = 20202;
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
+            return false;
+        }
 
-		return true;
-	}
+        if (!preg_match('/[a-zA-Z]/', $value)) {
+            $this->errors['username'][] = 20202;
+            return false;
+        }
+
+        if (in_array(strtolower($value), $forbiddenUsernames, true)) {
+            $this->errors['username'][] = 31002;
+            return false;
+        }
+
+        return true;
+    }
 
     protected function validateTagName(string $value, array $options = []): bool
     {
         if ($value === '') {
-            $this->errors['tag'][] = 'Tag is empty. It must have a value.';
+            $this->errors['tag'][] = 30101;
             return false;
         }
 
@@ -640,12 +650,20 @@ class PeerInputFilter
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
         if (strlen($value) < 2 || strlen($value) > 53) {
+<<<<<<< HEAD
             $this->errors['tag'][] = 'Tag length must be between 2 and 53 characters.';
+=======
+            $this->errors['tag'][] = 30103;
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
             return false;
         }
 
         if (!preg_match('/^[a-zA-Z0-9_-]+$/', $value)) {
+<<<<<<< HEAD
             $this->errors['tag'][] = 'Tag contains invalid characters.';
+=======
+            $this->errors['tag'][] = 30103;
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
             return false;
         }
 
@@ -667,10 +685,17 @@ class PeerInputFilter
             return false;
         }
 
+<<<<<<< HEAD
 		if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $value)) {
 			$this->errors['pkey'][] = 'Invalid Solana Public Key.';
             return false;
 		}
+=======
+        if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $value)) {
+            $this->errors['pkey'][] = 'Invalid Solana Public Key.';
+            return false;
+        }
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
 
         return true;
     }
@@ -710,13 +735,21 @@ class PeerInputFilter
         }
 
         if (filesize($imagePath) > $maxFileSize) {
+<<<<<<< HEAD
             $this->errors['image'][] = 'File size exceeds the maximum limit.';
+=======
+            $this->errors['image'][] = 21517;
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
             return false;
         }
 
         $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
         if (!in_array($extension, $allowedExtensions, true)) {
+<<<<<<< HEAD
             $this->errors['image'][] = 'Invalid image extension.';
+=======
+            $this->errors['image'][] = 21518;
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
             return false;
         }
 
@@ -725,19 +758,31 @@ class PeerInputFilter
         finfo_close($finfo);
         
         if (!in_array($mimeType, $allowedMimeTypes, true)) {
+<<<<<<< HEAD
             $this->errors['image'][] = 'Invalid image type. Allowed MIME types.';
+=======
+            $this->errors['image'][] = 21519;
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
             return false;
         }
 
         if ($maxWidth !== null || $maxHeight !== null) {
             [$width, $height] = getimagesize($imagePath);
             if (!$width || !$height) {
+<<<<<<< HEAD
                 $this->errors['image'][] = 'Unable to read image dimensions.';
+=======
+                $this->errors['image'][] = 25120;
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
                 return false;
             }
             
             if (($maxWidth !== null && $width > $maxWidth) || ($maxHeight !== null && $height > $maxHeight)) {
+<<<<<<< HEAD
                 $this->errors['image'][] = 'Image dimensions exceed the maximum allowed size.';
+=======
+                $this->errors['image'][] = 21521;
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
                 return false;
             }
         }

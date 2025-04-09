@@ -66,7 +66,7 @@ class TagPostService
     public function handleTags(array $tags, string $postId, int $maxTags = 10): void
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $maxTags = min(max((int)($maxTags ?? 5), 1), 10);
@@ -94,7 +94,7 @@ class TagPostService
     public function createTag(string $tagName): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('TagService.createTag started');
@@ -133,7 +133,7 @@ class TagPostService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError('Failed to create tag.');
+            return $this->respondWithError(41701);
         } finally {
             $this->logger->debug('createTag function execution completed');
         }
@@ -157,7 +157,7 @@ class TagPostService
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('TagPostService.fetchAll started');

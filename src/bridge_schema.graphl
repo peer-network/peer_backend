@@ -31,7 +31,9 @@ type StandardResponse {
 }
 
 type HelloResponse {
-  currentuserid: String
+  currentuserid: ID
+  currentVersion: String
+  wikiLink: String
 }
 
 type GenericResponse {

@@ -178,7 +178,7 @@ class McapMapper
                     ':capid' => $insertedId
                 ]);
             } catch (\PDOException $e) {
-                return $this->respondWithError($e->getMessage());
+                return $this->respondWithError(40301);
             }
 
             $result = [
@@ -195,7 +195,7 @@ class McapMapper
                 'affectedRows' => $result
             ];
         } catch (\PDOException $e) {
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
     }
 
@@ -234,7 +234,7 @@ class McapMapper
             } catch (\PDOException $e) {
                 $this->db->rollBack();
                 $this->logger->error('Database Exception.', ['exception' => $e]);
-                return $this->respondWithError($e->getMessage());
+                return $this->respondWithError(40301);
             }
 
             return [

@@ -51,8 +51,14 @@ return static function(string $appEnv) {
         'refreshTokenValidity' => $_ENV['REFRESH_TOKEN_EXPIRY'], // 1 week
         'rateLimiter' => $_ENV['LIMITER_RATE'],
         'timeLimiter' => $_ENV['LIMITER_TIME'],
+<<<<<<< HEAD
         // 'rateLimiterpath' => __DIR__ . '/../../' . $_ENV['RATE_LIMITER'],
         'rateLimiterpath' => __DIR__ . '/../../' . getenv('RATE_LIMITER'),
+=======
+        'rateLimiterpath' => __DIR__ . '/../../' . $_ENV['RATE_LIMITER'],
+		'mailapilink' => $_ENV['MAIL_API_LINK'],
+		'mailapikey' => $_ENV['MAIL_API_KEY']
+>>>>>>> d7bbeacf7ace4c44d22028e36c9d67477851a214
     ];
 
     if ($appEnv === 'DEVELOPMENT') {

@@ -17,7 +17,7 @@ class PostInfoMapper
         return $userid === $currentUserId;
     }
 
-    public function loadById(string $postid): PostInfo|false
+    public function loadById(string $postid): ?PostInfo
     {
         $this->logger->info("PostInfoMapper.loadById started");
 
@@ -30,7 +30,7 @@ class PostInfoMapper
             return new PostInfo($data);
         }
 
-        return false;
+        return null;
     }
 
     public function isUserExistById(string $id): bool
@@ -297,7 +297,7 @@ class PostInfoMapper
                 'postid' => $postid,
                 'exception' => $e->getMessage(),
             ]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle post save'];
+            return ['status' => 'error', 'ResponseCode' => 41502];
         }
     }
 
@@ -345,7 +345,7 @@ class PostInfoMapper
                 'followeduserid' => $followeduserid,
                 'exception' => $e->getMessage(),
             ]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user follow.'];
+            return ['status' => 'error', 'ResponseCode' => 41103];
         }
     }
 
