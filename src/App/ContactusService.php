@@ -83,19 +83,19 @@ class ContactusService
     public function loadById(string $type, string $value): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!in_array($type, ['id', 'name'], true)) {
-            return $this->respondWithError('Invalid type provided.');
+            return $this->respondWithError(30105);
         }
 
         if (empty($value)) {
-            return $this->respondWithError('At least one of id or name is required.');
+            return $this->respondWithError(30102);
         }
 
         if ($type === 'id' && !self::isValidUUID($value)) {
-            return $this->respondWithError('Invalid ID provided.');
+            return $this->respondWithError(30105);
         }
 
         $this->logger->info("ContactusService.loadById started", [
@@ -127,18 +127,18 @@ class ContactusService
                 'value' => $value,
             ]);
 
-            return $this->respondWithError('An internal error occurred.');
+            return $this->respondWithError(40301);
         }
     }
 
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('args is required.');
+            return $this->respondWithError(30101);
         }
 
         $this->logger->info("ContactusService.fetchAll started", [
@@ -167,7 +167,7 @@ class ContactusService
                 'args' => $args,
             ]);
 
-            return $this->respondWithError('An internal error occurred.');
+            return $this->respondWithError(40301);
         }
     }
 }

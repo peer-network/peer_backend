@@ -1017,12 +1017,12 @@ class WalletMapper
         try {
             $results = $this->insertWinToLog($userId, $args);
             if ($results === false) {
-                return $this->respondWithError('Failed to deduct from wallet.');
+                return $this->respondWithError(41206);
             }
 
             $results = $this->insertWinToPool($userId, $args);
             if ($results === false) {
-                return $this->respondWithError('Failed to deduct from wallet.');
+                return $this->respondWithError(41206);
             }
 
             $this->logger->info('Wallet deduction successful.', [
