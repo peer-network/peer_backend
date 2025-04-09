@@ -114,7 +114,7 @@ class TagPostService
             $tagId = $this->generateUUID();
             if (empty($tagId)) {
                 $this->logger->critical('Failed to generate tag ID');
-                return $this->respondWithError('Failed to generate tag ID.');
+                return $this->respondWithError(41701);
             }
 
             $tagData = ['tagid' => $tagId, 'name' => $tagName];

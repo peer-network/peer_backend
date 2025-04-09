@@ -87,7 +87,7 @@ class ChatService
         }
 
         if (count($recipients) < $maxUsers) {
-            return $this->respondWithError('No participants found');
+            return $this->respondWithError(31808);
         }
 
         $friends = $this->getFriends();
@@ -206,7 +206,7 @@ class ChatService
             $this->logger->info('Chat and participants created successfully', ['chatId' => $chatId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Chat and participants created successfully',
+                'ResponseCode' => 11804,
                 'affectedRows' => ['chatid' => $chatId],
             ];
         } catch (\Throwable $e) {
@@ -246,7 +246,7 @@ class ChatService
         }
 
         if (empty($name) && empty($image)) {
-            return $this->respondWithError('Could not find mandatory name & image');
+            return $this->respondWithError(31809);
         }
 
         if (!self::isValidUUID($chatId)) {
@@ -289,7 +289,7 @@ class ChatService
             $this->logger->info('Chat updated successfully', ['chatid' => $chatId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Successfully updated chat',
+                'ResponseCode' => 11805,
                 'affectedRows' => $chat->getArrayCopy()
             ];
         } catch (\Throwable $e) {
@@ -482,7 +482,7 @@ class ChatService
             $this->logger->info('Participants removed successfully', ['chatId' => $chatId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Participants removed successfully',
+                'ResponseCode' => 11806,
                 'affectedRows' => $participants,
             ];
         } catch (\Throwable $e) {
@@ -720,7 +720,7 @@ class ChatService
 
         return [
             'status' => 'success',
-            'ResponseCode' => 'Getting Messages successfully',
+            'ResponseCode' => 11807,
             'affectedRows' => $results,
         ];
     }
