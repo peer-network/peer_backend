@@ -55,7 +55,7 @@ class UserInfoService
                 $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
                 $success = [
                     'status' => 'success',
-                    'ResponseCode' => 'Userinfo data prepared successfully',
+                    'ResponseCode' => 11002,
                     'affectedRows' => $affectedRows,
                 ];
                 return $success;
@@ -63,14 +63,14 @@ class UserInfoService
 
             return $this->respondWithError('No data found for the user.');
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve user data.');
+            return $this->respondWithError(41001);
         }
     }
 
     public function toggleUserFollow(string $followedUserId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($followedUserId)) {
@@ -78,7 +78,7 @@ class UserInfoService
         }
 
         if ($this->currentUserId === $followedUserId) {
-            return $this->respondWithError('Cannot follow yourself.');
+            return $this->respondWithError(21104);
         }
 
         $this->logger->info('UserInfoService.toggleUserFollow started');
@@ -97,7 +97,7 @@ class UserInfoService
     public function toggleUserBlock(string $blockedUserId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($blockedUserId)) {
@@ -141,7 +141,7 @@ class UserInfoService
 
         } catch (\Exception $e) {
             $this->logger->error("Error in UserInfoService.loadBlocklist", ['exception' => $e->getMessage()]);
-            return $this->respondWithError('Failed to retrieve user data.');  
+            return $this->respondWithError(41008);  
         }
     }
 
@@ -180,7 +180,7 @@ class UserInfoService
     public function updateBio(string $biography): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (trim($biography) === '' || strlen($biography) < 3 || strlen($biography) > 5000) {
@@ -215,7 +215,7 @@ class UserInfoService
 
             $user->setBiography($mediaPathFile);
             $updatedUser = $this->userInfoMapper->updateUsers($user);
-            $responseMessage = 'User biography updated successfully';
+            $responseMessage = 11003;
 
             $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
 
@@ -225,14 +225,14 @@ class UserInfoService
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error updating biography', ['exception' => $e]);
-            return $this->respondWithError('Failed to update biography.');
+            return $this->respondWithError(41002);
         }
     }
 
     public function setProfilePicture(string $mediaFile, string $contentType = 'image'): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (trim($mediaFile) === '') {
@@ -266,7 +266,7 @@ class UserInfoService
 
             $user->setProfilePicture($mediaPathFile);
             $updatedUser = $this->userInfoMapper->updateUsers($user);
-            $responseMessage = 'Profile picture updated successfully';
+            $responseMessage = 11004;
 
             $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
 
@@ -276,7 +276,7 @@ class UserInfoService
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error setting profile picture', ['exception' => $e]);
-            return $this->respondWithError('Failed to update profile picture');
+            return $this->respondWithError(41003);
         }
     }
 }
