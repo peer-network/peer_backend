@@ -193,12 +193,12 @@ class UserService
             $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'User registered successfully. Please verify your account.',
+                'ResponseCode' => 10601,
                 'userid' => $id,
             ];
         } catch (\Throwable $e) {
             $this->logger->warning('Error registering user.', ['exception' => $e]);
-            return self::respondWithError(40301);
+            return self::respondWithError(40601);
         }
     }
 
@@ -415,12 +415,12 @@ class UserService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Username updated successfully',
+                'ResponseCode' => 11007,
                 'affectedRows' => $affectedRows,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update username', ['exception' => $e]);
-            return self::respondWithError(40301);
+            return self::respondWithError(41006);
         }
     }
 
