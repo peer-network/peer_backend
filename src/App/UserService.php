@@ -193,7 +193,7 @@ class UserService
             $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 10601,
+                'ResponseCode' => 'User registered successfully. Please verify your account.',
                 'userid' => $id,
             ];
         } catch (\Throwable $e) {
@@ -415,7 +415,7 @@ class UserService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11007,
+                'ResponseCode' => 'Username updated successfully',
                 'affectedRows' => $affectedRows,
             ];
         } catch (\Throwable $e) {
