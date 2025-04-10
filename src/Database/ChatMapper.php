@@ -165,7 +165,7 @@ class ChatMapper
             return $this->respondWithError('Invalid chatId');
         } catch (\Throwable $e) {  
             $this->logger->error("Database error: " . $e->getMessage(), ['id' => $id]);
-            return $this->respondWithError(40301);
+            return $this->respondWithError(40302);
         }
     }
 
@@ -472,7 +472,7 @@ class ChatMapper
             ];
         } catch (\Throwable $e) {
             $this->logger->error("Error inserting participant", ['exception' => $e->getMessage()]);
-            return $this->respondWithError(40301);
+            return $this->respondWithError(41804);
         }
     }
 
@@ -537,7 +537,7 @@ class ChatMapper
             $this->logger->error("Error inserting message", [
                 'exception' => $e->getMessage()
             ]);
-            return $this->respondWithError(40301);
+            return $this->respondWithError(41801);
         }
     }
 
