@@ -469,12 +469,12 @@ class ChatService
             foreach ($participants as $participantId) {
 
                 if (!self::isValidUUID($participantId)) {
-					return $this->respondWithError(20201);
+                    return $this->respondWithError(20201);
                 }
 
-				if (!$this->chatMapper->isParticipantExist($chatId, $participantId)) {
-					return $this->respondWithError(31810);
-				}
+                if (!$this->chatMapper->isParticipantExist($chatId, $participantId)) {
+                    return $this->respondWithError(31810);
+                }
 
                 $this->chatMapper->deleteParticipant($chatId, $participantId);
             }
