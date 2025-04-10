@@ -304,7 +304,7 @@ class UserInfoMapper
         } catch (\Exception $e) {
             $this->db->rollBack();
             $this->logger->error('Failed to toggle user follow', ['exception' => $e]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user follow'];
+            return ['status' => 'error', 'ResponseCode' => 41103];
         }
     }
 

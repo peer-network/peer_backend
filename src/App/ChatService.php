@@ -332,7 +332,7 @@ class ChatService
                 $this->logger->info('Chat deleted successfully', ['chatId' => $chatId]);
                 return [
                     'status' => 'success',
-                    'ResponseCode' => 'Chat deleted successfully'
+                    'ResponseCode' => 11809
                 ];
             }
         } catch (\Throwable $e) {
@@ -645,7 +645,7 @@ class ChatService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Chat fetched successfullyd',
+                'ResponseCode' => 11808,
                 'data' => new Chat([
                     'chatid' => $chatData['chat']['chatid'],
                     'creatorid' => $chatData['chat']['creatorid'],
