@@ -316,7 +316,7 @@ class UserService
     public function setEmail(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         if (empty($args)) {
@@ -372,7 +372,7 @@ class UserService
     public function setUsername(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         if (empty($args['username'])) {
@@ -389,15 +389,15 @@ class UserService
 
             $user = $this->userMapper->loadById($this->currentUserId);
             if (!$user) {
-                return self::respondWithError('User not found');
+                return self::respondWithError(21001);
             }
 
             if ($username === $user->getName()) {
-                return self::respondWithError('New username cannot be the same as the current username.');
+                return self::respondWithError(21005);
             }
 
             if (!$this->validatePasswordMatch($password, $user->getPassword())) {
-                return self::respondWithError('Wrong Actual Password');
+                return self::respondWithError(31001);
             }
 
             $slug = $this->generateUniqueSlug($username);
@@ -427,7 +427,7 @@ class UserService
     public function deleteAccount(string $expassword): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         if (empty($expassword)) {
@@ -463,7 +463,7 @@ class UserService
     public function Profile(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         $userId = $args['userid'] ?? $this->currentUserId;
@@ -473,7 +473,7 @@ class UserService
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID for profile', ['userId' => $userId]);
-            return self::respondWithError('Could not find mandatory id.');
+            return self::respondWithError(30102);
         }
 
         try {
@@ -498,7 +498,7 @@ class UserService
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return self::respondWithError('Failed to fetch profile data.');
+            return self::respondWithError(41007);
         }
     }
 
@@ -545,7 +545,7 @@ class UserService
     public function getFriends(?array $args = []): array|null
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -577,7 +577,7 @@ class UserService
     public function getAllFriends(?array $args = []): array|null
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);

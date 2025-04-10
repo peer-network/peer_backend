@@ -72,7 +72,7 @@ class ChatService
         $chatId = $this->generateUUID();
         if (empty($chatId)) {
             $this->logger->critical('Failed to generate chat ID');
-            return $this->respondWithError('Failed to generate chat ID.');
+            return $this->respondWithError(41401);
         }
 
         $creatorId = $this->currentUserId;
@@ -509,7 +509,7 @@ class ChatService
         }
 
         if (empty($chatId) || empty($content)) {
-            return $this->respondWithError('Could not find mandatory input');
+            return $this->respondWithError(30102);
         }
 
         if (strlen($content) < 1 || strlen($content) > 500) {
