@@ -882,4 +882,27 @@ class ChatMapper
             return false;
         }
     }
+
+    public function loadMessageById(int $id): array|false
+    {
+        $this->logger->info("ChatMapper.loadMessageById started", ['id' => $id]);
+
+        try {
+            $sql = "SELECT * FROM chatmessages WHERE messid = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
+            $stmt->execute();
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($data) {
+                return $data;
+            }
+
+            $this->logger->warning("No chat message found with id", ['id' => $id]);
+            return false;
+        } catch (\Throwable $e) {  
+            $this->logger->error("Database error: " . $e->getMessage(), ['id' => $id]);
+            return false;
+        }
+    }
 }

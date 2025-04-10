@@ -191,15 +191,16 @@ class UserService
 
             $this->userMapper->logLoginDaten($id);
             $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
-            return [
-                'status' => 'success',
-                'ResponseCode' => 10601,
-                'userid' => $id,
-            ];
         } catch (\Throwable $e) {
             $this->logger->warning('Error registering user.', ['exception' => $e]);
-            return self::respondWithError(40601);
+            return self::respondWithError($e->getMessage());
         }
+
+		return [
+			'status' => 'success',
+			'ResponseCode' => 10601,
+			'userid' => $id,
+		];
     }
 
     private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
