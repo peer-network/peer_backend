@@ -72,7 +72,7 @@ class ChatService
         $chatId = $this->generateUUID();
         if (empty($chatId)) {
             $this->logger->critical('Failed to generate chat ID');
-            return $this->respondWithError('Failed to generate chat ID.');
+            return $this->respondWithError(41808);
         }
 
         $creatorId = $this->currentUserId;
@@ -100,7 +100,7 @@ class ChatService
 
         foreach ($recipients as $recipientId) {
             if (!in_array($recipientId, $friendIds)) {
-                return $this->respondWithError(21103);
+                return $this->respondWithError(31101);
             }
         }
 
@@ -133,11 +133,11 @@ class ChatService
                     if (isset($mediaPath['path'])) {
                         $image = $mediaPath['path'];
                     } else {
-                        return $this->respondWithError('Media path necessary for upload');
+                        return $this->respondWithError(31006);
                     }
 
                 } else {
-                    return $this->respondWithError('Media necessary for upload');
+                    return $this->respondWithError(31007); 
                 }
 
             }
@@ -337,10 +337,10 @@ class ChatService
             }
         } catch (\Throwable $e) {
             $this->logger->error('Failed to delete chat', ['id' => $id, 'error' => $e->getMessage()]);
-            return $this->respondWithError('Failed to delete chatId');
+            return $this->respondWithError(41809);
         }
 
-        return $this->respondWithError('Failed to delete chatId');
+        return $this->respondWithError(41809);
     }
 
     public function addParticipants(array $args): array
@@ -386,7 +386,7 @@ class ChatService
 
         foreach ($participants as $recipientId) {
             if (!in_array($recipientId, $friendIds)) {
-                return $this->respondWithError(21103);
+                return $this->respondWithError(31101);
             }
         }
 
@@ -419,7 +419,7 @@ class ChatService
             $this->logger->info('Participants added successfully', ['chatId' => $chatId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Participants added successfully',
+                'ResponseCode' => 11802,
                 'affectedRows' => $participants,
             ];
         } catch (\Throwable $e) {
@@ -473,7 +473,7 @@ class ChatService
                 }
 
 				if (!$this->chatMapper->isParticipantExist($chatId, $participantId)) {
-					return $this->respondWithError('User are not a participant');
+					return $this->respondWithError(31810);
 				}
 
                 $this->chatMapper->deleteParticipant($chatId, $participantId);
@@ -509,11 +509,11 @@ class ChatService
         }
 
         if (empty($chatId) || empty($content)) {
-            return $this->respondWithError('Could not find mandatory input');
+            return $this->respondWithError(30102);
         }
 
         if (strlen($content) < 1 || strlen($content) > 500) {
-            return $this->respondWithError('Content must be between 1 and 500 characters.');
+            return $this->respondWithError(20252);
         }
 
         if (!self::isValidUUID($chatId)) {
@@ -529,7 +529,7 @@ class ChatService
         }
 
         if ($chat->getIsPublic() === 9) {
-            return $this->respondWithError('ChatId Suspended.');
+            return $this->respondWithError(41809);
         }
 
         try {
@@ -564,7 +564,7 @@ class ChatService
         }
 
         if (empty($chatId) || empty($messageId)) {
-            return $this->respondWithError('Could not find mandatory input');
+            return $this->respondWithError(30102);
         }
 
         if (!self::isValidUUID($chatId)) {
