@@ -582,7 +582,7 @@ class ChatService
         $message = $this->chatMapper->loadMessageById($messageId);
 
         if ($message === false) {
-            return $this->respondWithError('Invalid messageId');
+            return $this->respondWithError(31810);
         }
 
         if ($message['userid'] !== $this->currentUserId && !$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
@@ -600,7 +600,7 @@ class ChatService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to remove message', ['chatId' => $chatId, 'exception' => $e]);
-            return $this->respondWithError('Failed to remove message');
+            return $this->respondWithError(41810);
         }
     }
 
@@ -645,7 +645,7 @@ class ChatService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11808,
+                'ResponseCode' => 11810,
                 'data' => new Chat([
                     'chatid' => $chatData['chat']['chatid'],
                     'creatorid' => $chatData['chat']['creatorid'],
