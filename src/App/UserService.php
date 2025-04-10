@@ -198,7 +198,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->warning('Error registering user.', ['exception' => $e]);
-            return self::respondWithError(40301);
+            return self::respondWithError(40601);
         }
     }
 
@@ -218,7 +218,7 @@ class UserService
                 if (isset($mediaPath['path'])) {
                     return $mediaPath['path'];
                 } else {
-                    return self::respondWithError('Media path necessary for upload');
+                    return self::respondWithError(30305);
                 }
 
             } else {
@@ -420,7 +420,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update username', ['exception' => $e]);
-            return self::respondWithError(40301);
+            return self::respondWithError(41006);
         }
     }
 
@@ -643,7 +643,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 'Users data prepared successfully',
+                    'ResponseCode' => 11009,
                     'affectedRows' => $fetchAll,
                 ];
             }
