@@ -58,9 +58,9 @@ class McapService
                 return $success;
             }
 
-            return $this->respondWithError('No mcaps found for the user.');
+            return $this->respondWithError(31201);
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve mcaps list.');
+            return $this->respondWithError(41206);
         }
     }
 
@@ -85,7 +85,7 @@ class McapService
 
             return $this->respondWithError(21001);
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve users list.');
+            return $this->respondWithError(41207);
         }
     }
 }
