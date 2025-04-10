@@ -116,7 +116,7 @@ class UserService
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
         if ($this->userMapper->isEmailTaken($email)) {
-            return self::respondWithError('Email already registered.');
+            return self::respondWithError(20601);
         }
 
         $slug = $this->generateUniqueSlug($username);
@@ -243,14 +243,14 @@ class UserService
             return $this->userMapper->verifyAccount($userId);
         } catch (\Throwable $e) {
             $this->logger->error('Error verifying account.', ['exception' => $e]);
-            return self::respondWithError('Failed to verify account.');
+            return self::respondWithError(40701);
         }
     }
 
     public function deleteUnverifiedUsers(): bool
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized.');
+            return self::respondWithError(60501);
         }
 
         try {
@@ -266,7 +266,7 @@ class UserService
     public function setPassword(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError('Unauthorized');
+            return self::respondWithError(60501);
         }
 
         if (empty($args)) {
@@ -284,7 +284,7 @@ class UserService
         }
 
         if ($newPassword === $currentPassword) {
-            return self::respondWithError('New password cannot be the same as the current password.');
+            return self::respondWithError(21002);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
@@ -295,7 +295,7 @@ class UserService
         }
 
         if (!$this->validatePasswordMatch($currentPassword, $user->getPassword())) {
-            return self::respondWithError('Wrong Actual Password');
+            return self::respondWithError(31001);
         }
 
         try {
@@ -309,7 +309,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update user password', ['exception' => $e]);
-            return self::respondWithError('Failed to update user password');
+            return self::respondWithError(41004);
         }
     }
 
@@ -335,7 +335,7 @@ class UserService
 
         if ($this->userMapper->isEmailTaken($email)) {
             $this->logger->warning('Email already in use', ['email' => $email]);
-            return self::respondWithError('Email already in use.');
+            return self::respondWithError(21003);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
@@ -345,11 +345,11 @@ class UserService
         }
 
         if ($email === $user->getMail()) {
-            return self::respondWithError('New email cannot be the same as the current email.');
+            return self::respondWithError(21004);
         }
 
         if (!$this->validatePasswordMatch($exPassword, $user->getPassword())) {
-            return self::respondWithError('Wrong Actual Password');
+            return self::respondWithError(31001);
         }
 
         try {
@@ -365,7 +365,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update user email', ['exception' => $e]);
-            return self::respondWithError('Could not update user’s email');
+            return self::respondWithError(41005);
         }
     }
 
@@ -444,7 +444,7 @@ class UserService
         }
 
         if (!$this->validatePasswordMatch($expassword, $user->getPassword())) {
-            return self::respondWithError('Wrong Actual Password');
+            return self::respondWithError(31001);
         }
 
         try {
@@ -538,7 +538,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch followers or following data', ['error' => $e->getMessage()]);
-            return self::respondWithError('Failed to fetch followers or following data.');
+            return self::respondWithError(41104);
         }
     }
 
