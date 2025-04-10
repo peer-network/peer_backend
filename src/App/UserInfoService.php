@@ -55,7 +55,7 @@ class UserInfoService
                 $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
                 $success = [
                     'status' => 'success',
-                    'ResponseCode' => 'Userinfo data prepared successfully',
+                    'ResponseCode' => 11002,
                     'affectedRows' => $affectedRows,
                 ];
                 return $success;
@@ -206,11 +206,11 @@ class UserInfoService
                 if (!empty($mediaPath['path'])) {
                     $mediaPathFile = $mediaPath['path'];
                 } else {
-                    return $this->respondWithError('Media path necessary for upload.');
+                    return $this->respondWithError(30305);
                 }
 
             } else {
-                return $this->respondWithError('Media necessary for upload.');
+                return $this->respondWithError(30306);
             }
 
             $user->setBiography($mediaPathFile);
@@ -257,11 +257,11 @@ class UserInfoService
                 if (!empty($mediaPath['path'])) {
                     $mediaPathFile = $mediaPath['path'];
                 } else {
-                    return $this->respondWithError('Media path necessary for upload.');
+                    return $this->respondWithError(30305);
                 }
 
             } else {
-                return $this->respondWithError('Media necessary for upload.');
+                return $this->respondWithError(30306);
             }
 
             $user->setProfilePicture($mediaPathFile);
@@ -276,7 +276,7 @@ class UserInfoService
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error setting profile picture', ['exception' => $e]);
-            return $this->respondWithError('Failed to update profile picture');
+            return $this->respondWithError(41003);
         }
     }
 }

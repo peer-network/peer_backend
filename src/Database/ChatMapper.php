@@ -467,7 +467,7 @@ class ChatMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Participant successfully inserted.',
+                'ResponseCode' => 11802,
                 'affectedRows' => new ChatParticipants($data)
             ];
         } catch (\Throwable $e) {
@@ -530,7 +530,7 @@ class ChatMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Message successfully inserted.',
+                'ResponseCode' => 11803,
                 'affectedRows' => [$data]
             ];
         } catch (\Throwable $e) {

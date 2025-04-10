@@ -134,7 +134,7 @@ class PostService
                     return $this->respondWithError('Media upload failed.');
                 }
             } else {
-                return $this->respondWithError('Media necessary for upload.');
+                return $this->respondWithError(30306);
             }
 
             // Cover Upload Nur (Audio & Video)

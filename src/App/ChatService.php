@@ -133,7 +133,7 @@ class ChatService
                     if (isset($mediaPath['path'])) {
                         $image = $mediaPath['path'];
                     } else {
-                        return $this->respondWithError('Media path necessary for upload');
+                        return $this->respondWithError(30305);
                     }
 
                 } else {
@@ -332,15 +332,15 @@ class ChatService
                 $this->logger->info('Chat deleted successfully', ['chatId' => $chatId]);
                 return [
                     'status' => 'success',
-                    'ResponseCode' => 'Chat deleted successfully'
+                    'ResponseCode' => 11809
                 ];
             }
         } catch (\Throwable $e) {
             $this->logger->error('Failed to delete chat', ['id' => $id, 'error' => $e->getMessage()]);
-            return $this->respondWithError('Failed to delete chatId');
+            return $this->respondWithError(41809);
         }
 
-        return $this->respondWithError('Failed to delete chatId');
+        return $this->respondWithError(41809);
     }
 
     public function addParticipants(array $args): array
@@ -419,7 +419,7 @@ class ChatService
             $this->logger->info('Participants added successfully', ['chatId' => $chatId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Participants added successfully',
+                'ResponseCode' => 11802,
                 'affectedRows' => $participants,
             ];
         } catch (\Throwable $e) {
@@ -645,7 +645,7 @@ class ChatService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Chat fetched successfullyd',
+                'ResponseCode' => 11808,
                 'data' => new Chat([
                     'chatid' => $chatData['chat']['chatid'],
                     'creatorid' => $chatData['chat']['creatorid'],
