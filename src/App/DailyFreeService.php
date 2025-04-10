@@ -56,7 +56,7 @@ class DailyFreeService
             if ($affectedRows !== false) {
                 return [
                     'status' => 'success',
-                    'ResponseCode' => 'DailyFree data prepared successfully',
+                    'ResponseCode' => 11303,
                     'affectedRows' => $affectedRows,
                 ];
             }

@@ -193,7 +193,7 @@ class UserService
             $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'User registered successfully. Please verify your account.',
+                'ResponseCode' => 10601,
                 'userid' => $id,
             ];
         } catch (\Throwable $e) {
@@ -218,7 +218,7 @@ class UserService
                 if (isset($mediaPath['path'])) {
                     return $mediaPath['path'];
                 } else {
-                    return self::respondWithError('Media path necessary for upload');
+                    return self::respondWithError(30305);
                 }
 
             } else {
@@ -305,7 +305,7 @@ class UserService
             $this->logger->info('User password updated successfully', ['userId' => $this->currentUserId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Password update successful',
+                'ResponseCode' => 11005,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update user password', ['exception' => $e]);
@@ -360,7 +360,7 @@ class UserService
             $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId, 'email' => $email]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'User email updated successfully',
+                'ResponseCode' => 11006,
                 'affectedRows' => $affectedRows,
             ];
         } catch (\Throwable $e) {
@@ -415,7 +415,7 @@ class UserService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Username updated successfully',
+                'ResponseCode' => 11007,
                 'affectedRows' => $affectedRows,
             ];
         } catch (\Throwable $e) {
@@ -490,7 +490,7 @@ class UserService
             $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Profile data prepared successfully',
+                'ResponseCode' => 11008,
                 'affectedRows' => $profileData,
             ];
         } catch (\Throwable $e) {
@@ -524,7 +524,7 @@ class UserService
             return [
                 'status' => 'success',
                 'counter' => $counter,
-                'ResponseCode' => 'Follows data prepared successfully',
+                'ResponseCode' => 11101,
                 'affectedRows' => [
                     'followers' => array_map(
                         fn(ProfilUser $follower) => $follower->getArrayCopy(),
@@ -561,7 +561,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($users),
-                    'ResponseCode' => 'Friends data prepared successfully',
+                    'ResponseCode' => 11102,
                     'affectedRows' => $users,
                 ];
             }
@@ -619,7 +619,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 'Users data prepared successfully',
+                    'ResponseCode' => 11009,
                     'affectedRows' => $fetchAll,
                 ];
             }
@@ -643,7 +643,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 'Users data prepared successfully',
+                    'ResponseCode' => 11009,
                     'affectedRows' => $fetchAll,
                 ];
             }
