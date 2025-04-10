@@ -68,7 +68,7 @@ class CommentService
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return $this->respondWithError("$field is required");
+                return $this->respondWithError(30102);
             }
         }
         return [];
@@ -105,7 +105,7 @@ class CommentService
         }
 
         if ($content === '') {
-            return $this->respondWithError('Content is required');
+            return $this->respondWithError(30101);
         }
 
         if ($parentId !== null) {

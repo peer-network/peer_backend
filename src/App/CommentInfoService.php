@@ -63,7 +63,7 @@ class CommentInfoService
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(30103);
         }
 
         $this->logger->info('CommentInfoService.countLikes started');

@@ -82,7 +82,7 @@ class PostService
 
         foreach (['title', 'media', 'contenttype'] as $field) {
             if (empty($args[$field])) {
-                return $this->respondWithError("$field is required");
+                return $this->respondWithError(30102);
             }
         }
 
@@ -134,7 +134,7 @@ class PostService
                     return $this->respondWithError('Media upload failed.');
                 }
             } else {
-                return $this->respondWithError(30306);
+                return $this->respondWithError(30101);
             }
 
             // Cover Upload Nur (Audio & Video)
@@ -332,7 +332,7 @@ class PostService
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this->respondWithError('Invalid userid format provided.');
+            return $this->respondWithError(30103);
         }
 
         if ($title !== null && strlen($title) < 2 || strlen($title) > 33) {
@@ -340,17 +340,17 @@ class PostService
         }
 
         if ($from !== null && !self::validateDate($from)) {
-            return $this->respondWithError('Invalid from date format provided.');
+            return $this->respondWithError(30103);
         }
 
         if ($to !== null && !self::validateDate($to)) {
-            return $this->respondWithError('Invalid to date format provided.');
+            return $this->respondWithError(30103);
         }
 
         if ($tag !== null) {
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
-                return $this->respondWithError('Invalid tag format provided.');
+                return $this->respondWithError(30103);
             }
         }
 
@@ -360,14 +360,14 @@ class PostService
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
             if (!empty($invalidTypes)) {
-                return $this->respondWithError('Invalid type parameter(s) provided.');
+                return $this->respondWithError(30103);
             }
         }
 
         if ($Ignorlist !== null) {
             $Ignorlisten = ['YES', 'NO'];
             if (!in_array($Ignorlist, $Ignorlisten, true)) {
-                return $this->respondWithError('Invalid Ignorlist parameter provided.');
+                return $this->respondWithError(30103);
             }
         }
 
@@ -384,7 +384,7 @@ class PostService
     public function getChatFeedsByID(string $feedid): ?array
     {
         if (!$this->checkAuthentication() || !self::isValidUUID($feedid)) {
-            return $this->respondWithError('Invalid feed ID');
+            return $this->respondWithError(30103);
         }
 
         $this->logger->info("PostService.getChatFeedsByID started");
