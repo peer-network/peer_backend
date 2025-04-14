@@ -196,11 +196,7 @@ class PoolMapper
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
 
-        $args = [
-            'winstatus' => [
-                'totalGems' => $totalGems,
-            ]
-        ];
+        $args = [];
 
         foreach ($data as $row) {
             $userId = (string)$row['userid'];
@@ -208,9 +204,7 @@ class PoolMapper
             if (!isset($args[$userId])) {
                 $args[$userId] = [
                     'userid' => $userId,
-                    'gems' => $row['total_numbers'],
-                    'percentage' => $row['percentage'],
-                    'details' => []
+                    'gems' => $row['total_numbers']
                 ];
             }
 
@@ -229,13 +223,6 @@ class PoolMapper
             }
 
             $whereby = $mapping[$whereby]['text'];
-
-            $args[$userId]['details'][] = [
-                'gemid' => $row['gemid'],
-                'gems' => $row['gems'],
-                'whereby' => $whereby,
-                'createdat' => $row['createdat']
-            ];
         }
 
         if (!empty($data)) {
