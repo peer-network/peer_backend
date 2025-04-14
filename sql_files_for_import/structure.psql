@@ -304,14 +304,26 @@ CREATE TABLE IF NOT EXISTS mcap (
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
--- Table: password_resets
-CREATE TABLE IF NOT EXISTS password_resets (
-    id BIGSERIAL PRIMARY KEY,
+-- Table: token_holders
+CREATE TABLE IF NOT EXISTS token_holders (
+    token VARCHAR(128) PRIMARY KEY,
     userid UUID NOT NULL,
-    token VARCHAR(255) NOT NULL,
-    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	email VARCHAR(249) NOT NULL,
+    expires INTEGER NOT NULL CHECK (expires >= 0),
+    collected SMALLINT DEFAULT 0 NOT NULL,
     FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
 );
+CREATE INDEX IF NOT EXISTS token_holders_email_expires ON token_holders (email, expires);
+
+-- Table: password_resets
+CREATE TABLE IF NOT EXISTS password_resets (
+    userid UUID PRIMARY KEY,
+    token VARCHAR(128) NOT NULL,
+    expires INTEGER NOT NULL CHECK (expires >= 0),
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS password_resets_expires ON password_resets (userid, expires);
 
 -- Table: tags
 CREATE TABLE IF NOT EXISTS tags (
