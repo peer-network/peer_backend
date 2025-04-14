@@ -218,10 +218,10 @@ class DailyFreeMapper
             ";
 
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
-            $stmt->bindValue(':liken', $artType === LIKE_ ? 1 : 0, PDO::PARAM_INT);
-            $stmt->bindValue(':comments', $artType === COMMENT_ ? 1 : 0, PDO::PARAM_INT);
-            $stmt->bindValue(':posten', $artType === POST_ ? 1 : 0, PDO::PARAM_INT);
+            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':liken', $artType === LIKE_ ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':comments', $artType === COMMENT_ ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':posten', $artType === POST_ ? 1 : 0, \PDO::PARAM_INT);
 
             $success = $stmt->execute();
 
@@ -266,10 +266,10 @@ class DailyFreeMapper
             ";
 
             $stmt = $this->db->prepare($updateQuery);
-            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
-            $stmt->bindValue(':liken', $artType === LIKE_ ? 1 : 0, PDO::PARAM_INT);
-            $stmt->bindValue(':comments', $artType === COMMENT_ ? 1 : 0, PDO::PARAM_INT);
-            $stmt->bindValue(':posten', $artType === POST_ ? 1 : 0, PDO::PARAM_INT);
+            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':liken', $artType === LIKE_ ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':comments', $artType === COMMENT_ ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':posten', $artType === POST_ ? 1 : 0, \PDO::PARAM_INT);
 
             return $stmt->execute();
         } catch (\Exception $e) {

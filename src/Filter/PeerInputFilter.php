@@ -62,7 +62,7 @@ class PeerInputFilter
             }
 
             if (!isset($this->data[$field]) && !empty($rules['required'])) {
-                //$this->errors[$field][] = "$field is required";
+                //$this->errors[$field][] = 30101;
                 continue;
             }
 
@@ -82,7 +82,7 @@ class PeerInputFilter
                     $options = $validator['options'] ?? [];
                     if (method_exists($this, $validatorName)) {
                         if (!$this->$validatorName($this->data[$field], $options)) {
-                            //$this->errors[$field][] = "$field failed validation for $validatorName";
+                            //$this->errors[$field][] = 40301;
                             if (!empty($validator['break_chain_on_failure'])) {
                                 break;
                             }
