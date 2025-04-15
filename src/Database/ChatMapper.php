@@ -605,8 +605,8 @@ class ChatMapper
             $this->logger->error("Error deleting chat from database", [
                 'exception' => $e->getMessage()
             ]);
+            
             throw new \RuntimeException("Failed to delete chat: " . $e->getMessage());
-
         }
     }
 
