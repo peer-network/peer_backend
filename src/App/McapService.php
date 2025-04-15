@@ -52,7 +52,7 @@ class McapService
                 $this->logger->info("McapService.loadLastId mcap found", ['affectedRows' => $affectedRows]);
                 $success = [
                     'status' => 'success',
-                    'ResponseCode' => 'Mcap data prepared successfully',
+                    'ResponseCode' => 11021,
                     'affectedRows' => $affectedRows,
                 ];
                 return $success;

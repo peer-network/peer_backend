@@ -110,7 +110,7 @@ class CommentService
 
         if ($parentId !== null) {
             if (!$this->commentMapper->isParentTopLevel($parentId)) {
-                return $this->respondWithError('Parent comment must be top level.');
+                return $this->respondWithError(41604);
             }
         }
 
@@ -118,7 +118,7 @@ class CommentService
             $commentId = $this->generateUUID();
             if (empty($commentId)) {
                 $this->logger->critical('Failed to generate comment ID');
-                return $this->respondWithError('Failed to generate comment ID.');
+                return $this->respondWithError(41602);
             }
 
             $commentData = [
@@ -132,7 +132,7 @@ class CommentService
             $result = $this->commentMapper->insert($comment);
 
             if (!$result) {
-                return $this->respondWithError('Failed to insert comment');
+                return $this->respondWithError(41602);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);

@@ -235,7 +235,7 @@ class PoolMapper
             ];
         }
 
-        return $this->respondWithError('Don\'t have any transaction in gems');
+        return $this->respondWithError(40301);
     }
 
     private function decimalToQ64_96(float $value): string
