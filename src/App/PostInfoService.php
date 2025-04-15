@@ -67,7 +67,7 @@ class PostInfoService
         $this->logger->info('PostInfoService.deletePostInfo started');
 
         if ($this->postInfoMapper->delete($postId)) {
-            return ['status' => 'success', 'ResponseCode' => 'Post deleted successfully',];
+            return ['status' => 'success', 'ResponseCode' => 11510,];
         } else {
             return $this->respondWithError('Failed to delete post');
         }
@@ -256,7 +256,7 @@ class PostInfoService
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(20201);
         }
 
         $this->logger->info('PostInfoService.toggleUserFollow started');

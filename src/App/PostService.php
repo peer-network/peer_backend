@@ -461,7 +461,7 @@ class PostService
                 $this->logger->info('Post deleted successfully', ['postid' => $postid]);
                 return [
                     'status' => 'success',
-                    'ResponseCode' => 'Post deleted successfully',
+                    'ResponseCode' => 11510,
                 ];
             }
         } catch (\Throwable $e) {
