@@ -595,7 +595,7 @@ class ChatService
             $this->logger->info('Message removed successfully', ['chatId' => $chatId, 'messageId' => $messageId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Message removed successfully',
+                'ResponseCode' => 11809,
                 'affectedRows' => $message,
             ];
         } catch (\Throwable $e) {
