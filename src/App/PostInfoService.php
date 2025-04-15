@@ -48,9 +48,9 @@ class PostInfoService
 
         try {
             $this->postInfoMapper->update($postInfo);
-            return ['status' => 'success', 'ResponseCode' => 'Post info updated successfully',];
+            return ['status' => 'success', 'ResponseCode' => 11509,];
         } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to update post info');
+            return $this->respondWithError(41509);
         }
     }
 
@@ -69,7 +69,7 @@ class PostInfoService
         if ($this->postInfoMapper->delete($postId)) {
             return ['status' => 'success', 'ResponseCode' => 11510,];
         } else {
-            return $this->respondWithError('Failed to delete post');
+            return $this->respondWithError(41510);
         }
     }
 
@@ -262,7 +262,7 @@ class PostInfoService
         $this->logger->info('PostInfoService.toggleUserFollow started');
 
         if (!$this->postInfoMapper->isUserExistById($followedUserId)) {
-            return $this->respondWithError('User not found');
+            return $this->respondWithError(31105);
         }
 
         return $this->postInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
@@ -293,7 +293,7 @@ class PostInfoService
 
         $postinfo = $this->postInfoMapper->loadById($postId);
         if ($postinfo === null) {
-            return $this->respondWithError('PostInfo not found.');
+            return $this->respondWithError(31602);
         }
 
         $results = $postinfo->getArrayCopy();

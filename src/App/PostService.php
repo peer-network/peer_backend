@@ -91,7 +91,7 @@ class PostService
         $postId = self::generateUUID();
         if (empty($postId)) {
             $this->logger->critical('Failed to generate post ID');
-            return $this->respondWithError('Failed to generate post ID.');
+            return $this->respondWithError(41511);
         }
 
         $createdAt = (new \DateTime())->format('Y-m-d H:i:s.u');
@@ -110,7 +110,7 @@ class PostService
 
         if ($postData['feedid']) {
             if (!$this->postMapper->isNewsFeedExist($postData['feedid'])) {
-                return $this->respondWithError('Invalid newsfeed ID.');
+                return $this->respondWithError(41512);
             }
 
             if (!$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
@@ -125,13 +125,13 @@ class PostService
                 $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                 if (!empty($mediaPath['error'])) {
-                    return $this->respondWithError('Invalid Base64 code: ' . json_encode($mediaPath['error']));
+                    return $this->respondWithError(20251);
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $postData['media'] = $this->argsToJsString($mediaPath['path']);
                 } else {
-                    return $this->respondWithError('Media upload failed.');
+                    return $this->respondWithError(41009);
                 }
             } else {
                 return $this->respondWithError(30101);
@@ -145,7 +145,7 @@ class PostService
                 if (!empty($coverPath['path'])) {
                     $postData['cover'] = $this->argsToJsString($coverPath['path']);
                 } else {
-                    return $this->respondWithError('Cover upload failed.');
+                    return $this->respondWithError(40306);
                 }
             }
 
@@ -222,7 +222,7 @@ class PostService
             $tagName = !empty($tagName) ? trim((string) $tagName) : '';
             
             if (strlen($tagName) < 2 || strlen($tagName) > 53 || !preg_match('/^[a-zA-Z0-9_-]+$/', $tagName)) {
-                throw new \Throwable('Invalid tag name');
+                throw new \Throwable(20255);
             }
 
             $tag = $this->tagMapper->loadByName($tagName);
@@ -235,7 +235,7 @@ class PostService
             
             if (!$tag) {
                 $this->logger->error('Failed to load or create tag', ['tagName' => $tagName]);
-                throw new \Throwable('Failed to load or create tag: ' . $tagName);
+                throw new \Throwable(41701);
             }
 
             $tagPost = new TagPost([
@@ -252,7 +252,7 @@ class PostService
                     'tagName' => $tagName,
                     'exception' => $e->getMessage(),
                 ]);
-                throw new \Throwable('Failed to insert tag-post relationship: ' . $tagName);
+                throw new \Throwable(41703);
             }
         }
     }
@@ -300,14 +300,14 @@ class PostService
             $result = array_map(fn(Post $post) => $post->getArrayCopy(), $posts);
 
             $this->logger->info("Posts fetched successfully", ['count' => count($result)]);
-            return $this->createSuccessResponse('Posts fetched successfully', [$result]);
+            return $this->createSuccessResponse(11502, [$result]);
 
         } catch (\Throwable $e) {
             $this->logger->error("Error fetching Posts", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError('Failed to fetch posts.');
+            return $this->respondWithError(41513);
         }
     }
 
@@ -336,7 +336,7 @@ class PostService
         }
 
         if ($title !== null && strlen($title) < 2 || strlen($title) > 33) {
-            return $this->respondWithError('Title must be between 2 and 30 characters.');
+            return $this->respondWithError(20256);
         }
 
         if ($from !== null && !self::validateDate($from)) {
@@ -465,9 +465,9 @@ class PostService
                 ];
             }
         } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to delete post.');
+            return $this->respondWithError(41510);
         }
 
-        return $this->respondWithError('Failed to delete post.');
+        return $this->respondWithError(41510);
     }
 }
