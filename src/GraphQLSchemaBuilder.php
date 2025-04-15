@@ -1365,7 +1365,7 @@ class GraphQLSchemaBuilder
             return [
                 'status' => 'success',
                 'counter' => count($response['posts']),
-                'ResponseCode' => 'Success get all liquidity.',
+                'ResponseCode' => 11204,
                 'affectedRows' => $response,
             ];
         }
@@ -1392,7 +1392,7 @@ class GraphQLSchemaBuilder
         }
 
         if (is_array($response) || !empty($response)) {
-            return $this->createSuccessResponse('Success get all liquidity', $response, true, 'posts');
+            return $this->createSuccessResponse(11204, $response, true, 'posts');
         }
 
         $this->logger->warning('Query.resolvePool No transactions found');
@@ -1600,7 +1600,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($comments)) {
-            return $this->createSuccessResponse('Parent ID exists, but has no child comments.', [], false);
+            return $this->createSuccessResponse(21606, [], false);
         }
 
         $results = array_map(fn(CommentAdvanced $comment) => $comment->getArrayCopy(), $comments);
@@ -1628,13 +1628,13 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($comments)) {
-            return $this->createSuccessResponse('No comments found', [], false);
+            return $this->createSuccessResponse(21601, [], false);
         }
 
         if (is_array($comments) || !empty($comments)) {
             $this->logger->info('Query.resolveTags successful');
 
-            return $this->createSuccessResponse('Success get comments', $comments);
+            return $this->createSuccessResponse(11601, $comments);
         }
 
         return $this->respondWithError(21601);
