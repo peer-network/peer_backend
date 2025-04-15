@@ -207,6 +207,24 @@ class GraphQLSchemaBuilder
                     return $root['ResponseCode'] ?? '';
                 },
             ],
+            'requestPasswordReset' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.requestPasswordReset Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+            ],
+            'resetPassword' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.resetPassword Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+            ],
             'User' => [
                 'id' => function (array $root): string {
                     $this->logger->info('Query.User Resolvers');
@@ -1169,6 +1187,8 @@ class GraphQLSchemaBuilder
         return [
             'register' => fn(mixed $root, array $args) => $this->userService->createUser($args['input']),
             'verifiedAccount' => fn(mixed $root, array $args) => $this->verifiedAccount($args['userid']),
+            'requestPasswordReset' => fn(mixed $root, array $args) => $this->userService->requestPasswordReset($args['email']),
+            'resetPassword' => fn(mixed $root, array $args) => $this->userService->resetPassword($args['token'], $args['newPassword']),
             'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
             'updateName' => fn(mixed $root, array $args) => $this->userService->setUsername($args),

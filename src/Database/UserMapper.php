@@ -9,6 +9,7 @@ use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
 use Fawaz\App\UserAdvanced;
 use Psr\Log\LoggerInterface;
+use Fawaz\Mail\PasswordRestMail;
 
 class UserMapper
 {
@@ -1500,4 +1501,326 @@ class UserMapper
             return null;
         }
     }
+
+    /**
+     * Handles a password reset request by inserting or updating reset attempts.
+     * 
+     * @param string $userId
+     * @param string $token
+     * 
+     * @return array
+     */
+    public function resetPasswordRequest(string $userId, string $email): array
+    {
+        $this->logger->info("UserMapper.resetPasswordRequest started");
+
+        $createdAt = $this->getCurrentTimestamp();
+        $expiresAt = $this->getFutureTimestamp('+1 hour');
+
+        try {
+            $passwordAttempt = $this->checkForPasswordResetExpiry($userId);
+            $token = bin2hex(random_bytes(32));
+
+            if (!$passwordAttempt) {
+                $this->createResetRequest($userId, $token, $createdAt, $expiresAt);
+
+                $data = [
+                    'code' => $token,
+                ];
+                $this->sendPasswordResetEmail($email, $data);
+                
+                return $this->genericSuccessResponse();
+            }
+
+            // Check for rate limiting: 1st attempt 
+            if ($this->isFirstAttemptTooSoon($passwordAttempt)) {
+                return $this->rateLimitResponse(1);
+            }
+
+            // 2nd attempt 
+            if ($this->isSecondAttemptTooSoon($passwordAttempt)) {
+                return $this->rateLimitResponse(10, $passwordAttempt['last_attempt']);
+            }
+
+            // Too many attempts made without using the token
+            if ($passwordAttempt['attempt_count'] >= 3 && !$passwordAttempt['used']) {
+                return $this->tooManyAttemptsResponse();
+            }
+
+            $this->updateAttempt($passwordAttempt);
+
+            if(isset($passwordAttempt['token'])){
+                $token = $passwordAttempt['token'];
+                $data = [
+                    'code' => $token,
+                ];
+                $this->sendPasswordResetEmail($email, $data);
+            }
+            return $this->genericSuccessResponse();
+
+        } catch (\Exception $e) {
+            $this->logger->error('Unexpected error during password reset request', [
+                'error' => $e->getMessage(),
+                'userId' => $userId,
+                'created_at' => $createdAt,
+                'expires_at' => $expiresAt,
+            ]);
+            return $this->genericSuccessResponse();
+        }
+    }
+
+    /**
+     * Send Actual email to Email.
+    */
+    private function sendPasswordResetEmail(string $email, array $data): void {
+        (new PasswordRestMail($data))->send($email);
+    }
+
+    /**
+     * Inserts a new password reset request.
+     */
+    private function createResetRequest(string $userId, string $token, string $createdAt, string $expiresAt): array
+    {
+        $sql = "
+            INSERT INTO password_reset_requests 
+            (user_id, token, attempt_count, created_at, last_attempt, expires_at)  
+            VALUES (:user_id, :token, :attempt_count, :created_at, :last_attempt, :expires_at)";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':user_id', $userId);
+        $stmt->bindValue(':token', $token);
+        $stmt->bindValue(':attempt_count', 1);
+        $stmt->bindValue(':created_at', $createdAt);
+        $stmt->bindValue(':last_attempt', $createdAt);
+        $stmt->bindValue(':expires_at', $expiresAt);
+        $stmt->execute();
+
+        return [];
+    }
+
+    /**
+     * Updates an existing reset attempt, incrementing the attempt count.
+     */
+    private function updateAttempt(array $attempt): bool
+    {
+        $sql = "
+            UPDATE password_reset_requests 
+            SET attempt_count = :attempt_count, last_attempt = :last_attempt 
+            WHERE id = :id";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':attempt_count', $attempt['attempt_count'] + 1, \PDO::PARAM_INT);
+        $stmt->bindValue(':last_attempt', $this->getCurrentTimestamp());
+        $stmt->bindValue(':id', $attempt['id']);
+        $stmt->execute();
+
+        return true;
+    }
+
+    /**
+     * Checks for an active (unexpired and unused) password reset request.
+     */
+    private function checkForPasswordResetExpiry(string $userId): array|bool
+    {
+        $this->logger->info("UserMapper.checkForPasswordResetExpiry started");
+
+        try {
+            $sql = "
+                SELECT * FROM password_reset_requests 
+                WHERE user_id = :user_id AND expires_at >= :now AND used = false";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':user_id', $userId);
+            $stmt->bindValue(':now', $this->getCurrentTimestamp());
+            $stmt->execute();
+
+            $data =  $stmt->fetch(\PDO::FETCH_ASSOC);
+            return $data;
+        } catch (\Exception $e) {
+            $this->logger->error("Error checking reset request", ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
+     * Determines if the first request is being retried too soon.
+     */
+    private function isFirstAttemptTooSoon(array $attempt): bool
+    {
+        return $attempt['attempt_count'] === 1 
+            && !$attempt['used'] 
+            && time() < strtotime($attempt['created_at'] . ' +1 minute');
+    }
+
+    /**
+     * Determines if the second request is being retried too soon.
+     */
+    private function isSecondAttemptTooSoon(array $attempt): bool
+    {
+        return $attempt['attempt_count'] === 2 
+            && !$attempt['used'] 
+            && time() < strtotime($attempt['last_attempt'] . ' +10 minutes');
+    }
+
+    /**
+     * Returns a response indicating the user should retry after a delay.
+     */
+    private function rateLimitResponse(int $waitMinutes, ?string $lastAttempt = null): array
+    {
+        if ($lastAttempt) {
+            $remaining = ceil((strtotime($lastAttempt . " +{$waitMinutes} minutes") - time()) / 60);
+            return [
+                'status' => 'error',
+                'ResponseCode' => "Email delivery failed - Please try again after {$remaining} minute(s)"
+            ];
+        }
+
+        return [
+            'status' => 'error',
+            'ResponseCode' => "Email delivery failed - Please try again after {$waitMinutes} minute(s)"
+        ];
+    }
+
+    /**
+     * Returns a response when user has made too many attempts.
+     */
+    private function tooManyAttemptsResponse(): array
+    {
+        return [
+            'status' => 'error',
+            'ResponseCode' => 'Email delivery failed - Please contact support team at peernetworkpse@gmail.com'
+        ];
+    }
+
+    /**
+     * Standard success response (avoids revealing account existence).
+     */
+    private function genericSuccessResponse(): array
+    {
+        return [
+            'status' => 'success',
+            'ResponseCode' => 'An email will be sent to your mail address if an account associated with it exists.'
+        ];
+    }
+
+    /**
+     * Returns the current timestamp in microsecond precision.
+     */
+    private function getCurrentTimestamp(): string
+    {
+        return date("Y-m-d H:i:s.u");
+    }
+
+    /**
+     * Returns a timestamp relative to now (e.g., +1 hour).
+     */
+    private function getFutureTimestamp(string $modifier): string
+    {
+        return date("Y-m-d H:i:s.u", strtotime($modifier));
+    }
+
+    /**
+     * Check for valid password reset token and update password.
+     *
+     * @param string $token
+     * @param string $newPassword
+     *
+     * @return array|bool
+     */
+    public function checkForValidPasswordResetToken(string $token, string $newPassword): array|bool
+    {
+        $this->logger->info("UserMapper.checkForPasswordResetToken started");
+
+        try {
+            $request = $this->getPasswordResetRequest($token);
+
+            if (!$request) {
+                $this->deletePasswordResetToken($token);
+
+                return [
+                    'status' => 'error',
+                    'ResponseCode' => 'Invalid or expired reset token. Please try again.'
+                ];
+            }
+
+            $hashedPassword = method_exists($this, 'setPassword') ? $this->setPassword($newPassword) : \password_hash($newPassword, \PASSWORD_BCRYPT, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
+
+            $this->updateUserPassword($request['user_id'], $hashedPassword);
+            $this->deletePasswordResetToken($token);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 'Password reset successfully.'
+            ];
+
+        } catch (\Exception $e) {
+            $this->logger->error("An error occurred while resetting password", [
+                'error' => $e->getMessage()
+            ]);
+
+            return [
+                'status' => 'error',
+                'ResponseCode' => 'Something went wrong. Please try again later.'
+            ];
+        }
+    }
+
+    /**
+     * Fetch password reset request by token if valid and not expired.
+     *
+     * @param string $token
+     * @return array|null
+     */
+    private function getPasswordResetRequest(string $token): ?array
+    {
+        $sql = "
+            SELECT * FROM password_reset_requests 
+            WHERE token = :token 
+            AND expires_at >= :current_time 
+            AND used = false
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':token', $token, \PDO::PARAM_STR);
+        $stmt->bindValue(':current_time', $this->getCurrentTimestamp(), \PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /**
+     * Delete password reset token from database.
+     *
+     * @param string $token
+     * @return void
+     */
+    private function deletePasswordResetToken(string $token): void
+    {
+        $sql = "DELETE FROM password_reset_requests WHERE token = :token";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':token', $token, \PDO::PARAM_STR);
+        $stmt->execute();
+    }
+
+    /**
+     * Update the user's password in the database.
+     *
+     * @param string $userId
+     * @param string $hashedPassword
+     * @return bool
+     */
+    private function updateUserPassword(string $userId, string $hashedPassword): bool
+    {
+        $sql = "
+            UPDATE users 
+            SET password = :password 
+            WHERE uid = :uid
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':password', $hashedPassword, \PDO::PARAM_STR);
+        $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+        return $stmt->execute();
+    }
+
 }

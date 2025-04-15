@@ -654,4 +654,72 @@ class UserService
             return self::respondWithError('Failed to retrieve users list.');
         }
     }
+
+    /**
+     * Reset password token request for NON logged in user
+     * 
+     * Generate Token for reset password and store on 
+     * 
+     * @param string $email
+     * 
+     * @return array
+     */
+    public function requestPasswordReset(string $email): array
+    {
+        $this->logger->info('UserService.requestPasswordReset started');
+
+        try {
+            
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->logger->warning('Invalid email format', ['email' => $email]);
+                return self::respondWithError(30104);
+            }
+            $user = $this->userMapper->loadByEmail($email);
+
+            if (!$user) {
+                $this->logger->warning('Invalid user', ['email' => $email]);
+                return ['status' => 'success', 'ResponseCode' => 'An email will be send to your mail address if an account associated with it exists.'];
+            }
+
+            $response = $this->userMapper->resetPasswordRequest($user->getUserId(), $email);
+
+            return $response;
+        } catch (\Throwable $e) {
+            $this->logger->info('UserService.requestPasswordReset Error ' .  $e->getMessage());
+        }
+        return ['status' => 'success', 'ResponseCode' => 'An email will be send to your mail address if an account associated with it exists.'];
+    }
+
+    /**
+     * Update password for NON logged in user
+     * 
+     * Get sent Token and New password to update it 
+     * 
+     * @param string $token
+     * @param string $newPassword
+     * 
+     * @return array
+     */
+    public function resetPassword(string $token, string $newPassword): array
+    {
+        $this->logger->info('UserService.resetPassword started');
+
+        try {
+            $passwordValidation = $this->validatePassword($newPassword);
+
+            if ($passwordValidation['status'] === 'error') {
+                return $passwordValidation;
+            }
+
+            return $this->userMapper->checkForValidPasswordResetToken($token, $newPassword);
+
+        } catch (\Throwable $e) {
+            $this->logger->info('UserService.requestPasswordReset Error ' .  $e->getMessage());
+            return [
+                'status' => 'error',
+                'ResponseCode' => 'Something went wrong. Please try again later.'
+            ];
+        }
+    }
+
 }
