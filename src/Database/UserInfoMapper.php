@@ -277,7 +277,7 @@ class UserInfoMapper
                 $this->updateFollowCounts($followeduserid, -1, "amountfollower");
 
                 $action = false;
-                $response = 'Unfollow successful.';
+                $response = 11103;
             } else {
 
                 $query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
@@ -290,7 +290,7 @@ class UserInfoMapper
                 $this->updateFollowCounts($followeduserid, 1, "amountfollower");
 
                 $action = true;
-                $response = 'Follow successful.';
+                $response = 11104;
             }
 
             $this->updateChatsStatus($followerid, $followeduserid);
@@ -460,7 +460,7 @@ class UserInfoMapper
                 $stmt->execute();
 
                 $action = false;
-                $response = 'User unblocked successfully.';
+                $response = '11103';
             } else {
                 // Block the user
                 $query = "INSERT INTO user_block_user (blockerid, blockedid) VALUES (:blockerid, :blockedid)";
@@ -475,7 +475,7 @@ class UserInfoMapper
                 $stmt->execute();
 
                 $action = true;
-                $response = 'User blocked successfully.';
+                $response = '11102';
             }
 
             $this->db->commit();
@@ -486,13 +486,13 @@ class UserInfoMapper
             $this->logger->error('Database error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user block'];
+            return ['status' => 'error', 'ResponseCode' => 41106];
         } catch (\Exception $e) {
             $this->db->rollBack();
             $this->logger->error('Unexpected error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user block'];
+            return ['status' => 'error', 'ResponseCode' => 41106];
         }
     }
 
