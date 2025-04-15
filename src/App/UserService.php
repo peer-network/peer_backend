@@ -219,7 +219,7 @@ class UserService
                 if (isset($mediaPath['path'])) {
                     return $mediaPath['path'];
                 } else {
-                    return self::respondWithError(30305);
+                    return self::respondWithError(40306);
                 }
 
             } else {

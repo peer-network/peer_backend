@@ -206,11 +206,11 @@ class UserInfoService
                 if (!empty($mediaPath['path'])) {
                     $mediaPathFile = $mediaPath['path'];
                 } else {
-                    return $this->respondWithError(30305);
+                    return $this->respondWithError(40306);
                 }
 
             } else {
-                return $this->respondWithError(30306);
+                return $this->respondWithError(40307);
             }
 
             $user->setBiography($mediaPathFile);
@@ -257,11 +257,11 @@ class UserInfoService
                 if (!empty($mediaPath['path'])) {
                     $mediaPathFile = $mediaPath['path'];
                 } else {
-                    return $this->respondWithError(30305);
+                    return $this->respondWithError(40306);
                 }
 
             } else {
-                return $this->respondWithError(30306);
+                return $this->respondWithError(40307);
             }
 
             $user->setProfilePicture($mediaPathFile);
