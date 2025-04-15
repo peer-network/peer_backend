@@ -16,7 +16,7 @@ class ContactusMapper
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->logger->warning('Invalid email format in checkLimit', ['email' => $email]);
-            throw new \InvalidArgumentException('Invalid email format.');
+            throw new \InvalidArgumentException(20224);
         }
 
         try {
