@@ -1514,7 +1514,7 @@ class UserMapper
     {
         $this->logger->info("UserMapper.resetPasswordRequest started");
 
-        $createdAt = $this->getCurrentTimestamp();
+        $updatedAt = $this->getCurrentTimestamp();
         $expiresAt = $this->getFutureTimestamp('+1 hour');
 
         try {
@@ -1522,7 +1522,7 @@ class UserMapper
             $token = bin2hex(random_bytes(32));
 
             if (!$passwordAttempt) {
-                $this->createResetRequest($userId, $token, $createdAt, $expiresAt);
+                $this->createResetRequest($userId, $token, $updatedAt, $expiresAt);
 
                 $data = [
                     'code' => $token,
@@ -1543,7 +1543,7 @@ class UserMapper
             }
 
             // Too many attempts made without using the token
-            if ($passwordAttempt['attempt_count'] >= 3 && !$passwordAttempt['used']) {
+            if ($passwordAttempt['attempt_count'] >= 3 && !$passwordAttempt['collected']) {
                 return $this->tooManyAttemptsResponse();
             }
 
@@ -1562,7 +1562,7 @@ class UserMapper
             $this->logger->error('Unexpected error during password reset request', [
                 'error' => $e->getMessage(),
                 'userId' => $userId,
-                'created_at' => $createdAt,
+                'updatedat' => $updatedAt,
                 'expires_at' => $expiresAt,
             ]);
             return $this->genericSuccessResponse();
@@ -1579,19 +1579,19 @@ class UserMapper
     /**
      * Inserts a new password reset request.
      */
-    private function createResetRequest(string $userId, string $token, string $createdAt, string $expiresAt): array
+    private function createResetRequest(string $userId, string $token, string $updatedAt, string $expiresAt): array
     {
         $sql = "
             INSERT INTO password_reset_requests 
-            (user_id, token, attempt_count, created_at, last_attempt, expires_at)  
-            VALUES (:user_id, :token, :attempt_count, :created_at, :last_attempt, :expires_at)";
+            (user_id, token, attempt_count, updatedat, last_attempt, expires_at)  
+            VALUES (:user_id, :token, :attempt_count, :updatedat, :last_attempt, :expires_at)";
         
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':user_id', $userId);
         $stmt->bindValue(':token', $token);
         $stmt->bindValue(':attempt_count', 1);
-        $stmt->bindValue(':created_at', $createdAt);
-        $stmt->bindValue(':last_attempt', $createdAt);
+        $stmt->bindValue(':updatedat', $updatedAt);
+        $stmt->bindValue(':last_attempt', $updatedAt);
         $stmt->bindValue(':expires_at', $expiresAt);
         $stmt->execute();
 
@@ -1627,7 +1627,7 @@ class UserMapper
         try {
             $sql = "
                 SELECT * FROM password_reset_requests 
-                WHERE user_id = :user_id AND expires_at >= :now AND used = false";
+                WHERE user_id = :user_id AND expires_at >= :now AND collected = false";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':user_id', $userId);
@@ -1648,8 +1648,8 @@ class UserMapper
     private function isFirstAttemptTooSoon(array $attempt): bool
     {
         return $attempt['attempt_count'] === 1 
-            && !$attempt['used'] 
-            && time() < strtotime($attempt['created_at'] . ' +1 minute');
+            && !$attempt['collected'] 
+            && time() < strtotime($attempt['updatedat'] . ' +1 minute');
     }
 
     /**
@@ -1658,7 +1658,7 @@ class UserMapper
     private function isSecondAttemptTooSoon(array $attempt): bool
     {
         return $attempt['attempt_count'] === 2 
-            && !$attempt['used'] 
+            && !$attempt['collected'] 
             && time() < strtotime($attempt['last_attempt'] . ' +10 minutes');
     }
 
@@ -1777,7 +1777,7 @@ class UserMapper
             SELECT * FROM password_reset_requests 
             WHERE token = :token 
             AND expires_at >= :current_time 
-            AND used = false
+            AND collected = false
         ";
 
         $stmt = $this->db->prepare($sql);
