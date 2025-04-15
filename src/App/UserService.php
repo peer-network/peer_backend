@@ -441,7 +441,7 @@ class UserService
 
         $user = $this->userMapper->loadById($userId);
         if (!$user) {
-            return self::respondWithError(20001);
+            return self::respondWithError(21001);
         }
 
         if (!$this->validatePasswordMatch($expassword, $user->getPassword())) {
