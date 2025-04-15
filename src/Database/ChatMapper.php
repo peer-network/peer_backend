@@ -576,7 +576,7 @@ class ChatMapper
                 'exception' => $e->getMessage()
             ]);
 
-            throw new \RuntimeException(41803);
+            throw new \RuntimeException("Failed to update chat: " . $e->getMessage());
         }
     }
 
@@ -605,8 +605,8 @@ class ChatMapper
             $this->logger->error("Error deleting chat from database", [
                 'exception' => $e->getMessage()
             ]);
+            throw new \RuntimeException("Failed to delete chat: " . $e->getMessage());
 
-            throw new \RuntimeException(41811);
         }
     }
 
@@ -637,7 +637,7 @@ class ChatMapper
                 'exception' => $e->getMessage()
             ]);
 
-            throw new \RuntimeException(41805);
+            throw new \RuntimeException("Failed to delete participant from chat: " . $e->getMessage());
         }
     }
 
@@ -668,7 +668,7 @@ class ChatMapper
                 'exception' => $e->getMessage()
             ]);
 
-            throw new \RuntimeException(41810);
+            throw new \RuntimeException("Failed to delete message from chat: " . $e->getMessage());
         }
     }
 

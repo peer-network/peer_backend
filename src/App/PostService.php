@@ -222,7 +222,7 @@ class PostService
             $tagName = !empty($tagName) ? trim((string) $tagName) : '';
             
             if (strlen($tagName) < 2 || strlen($tagName) > 53 || !preg_match('/^[a-zA-Z0-9_-]+$/', $tagName)) {
-                throw new \Throwable(20255);
+                throw new \Throwable('Invalid tag name');
             }
 
             $tag = $this->tagMapper->loadByName($tagName);
@@ -235,7 +235,7 @@ class PostService
             
             if (!$tag) {
                 $this->logger->error('Failed to load or create tag', ['tagName' => $tagName]);
-                throw new \Throwable(41701);
+                throw new \Throwable('Failed to load or create tag: ' . $tagName);
             }
 
             $tagPost = new TagPost([
@@ -252,7 +252,7 @@ class PostService
                     'tagName' => $tagName,
                     'exception' => $e->getMessage(),
                 ]);
-                throw new \Throwable(41703);
+                throw new \Throwable('Failed to insert tag-post relationship: ' . $tagName);
             }
         }
     }
