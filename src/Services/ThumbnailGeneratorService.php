@@ -37,12 +37,16 @@ class ThumbnailGeneratorService
             ".000 -vframes 1 " . escapeshellarg($fullPath);
         shell_exec($command);
 
-        if (!file_exists($fullPath)) {
+        // Check if file was actually created and is not empty
+        if (!file_exists($fullPath) || filesize($fullPath) === 0) {
+            \Log::warning('Generated thumbnail is missing or empty: ' . $fullPath);
             return null;
         }
 
         [$width, $height] = getimagesize($fullPath);
         $size = filesize($fullPath);
+
+        \Log::info('Thumbnail saved to: ' . $fullPath);
 
         return [
             'path' => '/media/cover/' . $filename,
