@@ -74,7 +74,7 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError(20201);
         }
 
         if ($this->currentUserId === $followedUserId) {
@@ -84,11 +84,11 @@ class UserInfoService
         $this->logger->info('UserInfoService.toggleUserFollow started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
-            return $this->respondWithError(31103);
+            return $this->respondWithError(21001);
         }
 
         if (!$this->userInfoMapper->isUserExistById($followedUserId)) {
-            return $this->respondWithError(31105);
+            return $this->respondWithError(31003);
         }
 
         return $this->userInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
@@ -101,7 +101,7 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($blockedUserId)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError(20201);
         }
 
         if ($this->currentUserId === $blockedUserId) {
@@ -111,7 +111,7 @@ class UserInfoService
         $this->logger->info('UserInfoService.toggleUserBlock started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
-            return $this->respondWithError(31106);
+            return $this->respondWithError(21001);
         }
 
         if (!$this->userInfoMapper->isUserExistById($blockedUserId)) {
@@ -192,7 +192,7 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError(30101);
+                return $this->respondWithError(21001);
             }
 
             if (!empty($biography)) {
@@ -236,7 +236,7 @@ class UserInfoService
         }
 
         if (trim($mediaFile) === '') {
-            return $this->respondWithError(31008);
+            return $this->respondWithError(31102);
         }
 
         $this->logger->info('UserInfoService.setProfilePicture started');
@@ -244,7 +244,7 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError(30101);
+                return $this->respondWithError(21001);
             }
 
             if (!empty($mediaFile)) {
