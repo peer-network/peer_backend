@@ -43,7 +43,9 @@ class UserService
     private function validatePassword(string $password): array
     {
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
-            return self::respondWithError(20226);
+            return self::respondWithError(
+                20226
+            );
         }
 
         return ['status' => 'success'];
@@ -189,15 +191,16 @@ class UserService
 
             $this->userMapper->logLoginDaten($id);
             $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
-            return [
-                'status' => 'success',
-                'ResponseCode' => 10601,
-                'userid' => $id,
-            ];
         } catch (\Throwable $e) {
             $this->logger->warning('Error registering user.', ['exception' => $e]);
-            return self::respondWithError(40601);
+            return self::respondWithError($e->getMessage());
         }
+
+		return [
+			'status' => 'success',
+			'ResponseCode' => 10601,
+			'userid' => $id,
+		];
     }
 
     private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
@@ -234,7 +237,7 @@ class UserService
     public function verifyAccount(string $userId): array
     {
         if (!self::isValidUUID($userId)) {
-            return self::respondWithError(30101);
+            return self::respondWithError(20201);
         }
 
         try {
@@ -289,7 +292,7 @@ class UserService
 
         if (!$user) {
             $this->logger->warning('User not found', ['userId' => $this->currentUserId]);
-            return self::respondWithError(30101);
+            return self::respondWithError(21001);
         }
 
         if (!$this->validatePasswordMatch($currentPassword, $user->getPassword())) {
@@ -328,7 +331,7 @@ class UserService
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->logger->warning('Invalid email format', ['email' => $email]);
-            return self::respondWithError(30101);
+            return self::respondWithError(20224);
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
@@ -438,7 +441,7 @@ class UserService
 
         $user = $this->userMapper->loadById($userId);
         if (!$user) {
-            return self::respondWithError(30101);
+            return self::respondWithError(21001);
         }
 
         if (!$this->validatePasswordMatch($expassword, $user->getPassword())) {
@@ -450,11 +453,11 @@ class UserService
             $this->logger->info('User deleted successfully', ['userId' => $userId]);
             return [
                 'status' => 'success',
-                'message' => 'User deleted successfully',
+                'message' => 11010,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to delete user', ['exception' => $e]);
-            return self::respondWithError(30101);
+            return self::respondWithError(41011);
         }
     }
 
@@ -471,7 +474,7 @@ class UserService
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID for profile', ['userId' => $userId]);
-            return self::respondWithError(30101);
+            return self::respondWithError(30102);
         }
 
         try {
@@ -591,7 +594,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($users),
-                    'ResponseCode' => 'All friends data prepared successfully',
+                    'ResponseCode' => 11102,
                     'affectedRows' => $users,
                 ];
             }
@@ -624,7 +627,7 @@ class UserService
 
             return self::respondWithError(21001);
         } catch (\Throwable $e) {
-            return self::respondWithError(41008);
+            return self::respondWithError(41207);
         }
     }
 
@@ -641,14 +644,14 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 'Users data prepared successfully',
+                    'ResponseCode' => 11009,
                     'affectedRows' => $fetchAll,
                 ];
             }
 
             return self::respondWithError(21001);
         } catch (\Throwable $e) {
-            return self::respondWithError(41008);
+            return self::respondWithError(41207);
         }
     }
 }

@@ -162,10 +162,10 @@ class ChatMapper
             }
 
             $this->logger->warning("No chat found with id", ['id' => $id]);
-            return $this->respondWithError('Invalid chatId');
+            return $this->respondWithError(21802);
         } catch (\Throwable $e) {  
             $this->logger->error("Database error: " . $e->getMessage(), ['id' => $id]);
-            return $this->respondWithError(40301);
+            return $this->respondWithError(40302);
         }
     }
 
@@ -183,7 +183,7 @@ class ChatMapper
 
             if (!$chatExists) {
                 $this->logger->warning("Chat ID not found", ['chatid' => $chatId]);
-                return $this->respondWithError('Chat ID not found');
+                return $this->respondWithError(21802);
             }
 
             $isParticipantSql = "
@@ -205,7 +205,7 @@ class ChatMapper
                     'chatid' => $chatId,
                     'currentUserId' => $currentUserId,
                 ]);
-                return $this->respondWithError('AccessDenied');
+                return $this->respondWithError(31801);
             }
 
             $sql = "
@@ -226,7 +226,7 @@ class ChatMapper
             $chatRow = $stmt->fetch(\PDO::FETCH_ASSOC);
             if (!$chatRow) {
                 $this->logger->warning("No chat details found for chatid", ['chatid' => $chatId]);
-                return $this->respondWithError('ChatNotFound');
+                return $this->respondWithError(21802);
             }
 
             $messageLimit = min(max((int)($args['messageLimit'] ?? 10), 1), 20);
@@ -309,7 +309,7 @@ class ChatMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Chat fetched successfully',
+                'ResponseCode' => 11810,
                 'data' => [
                     'chat' => $chatRow,
                     'messages' => $chatMessages,
@@ -321,7 +321,7 @@ class ChatMapper
             $this->logger->error("Database error occurred in loadChatById", [
                 'error' => $e->getMessage(),
             ]);
-            return $this->respondWithError('DatabaseError');
+            return $this->respondWithError(40302);
         }
     }
 
@@ -349,7 +349,7 @@ class ChatMapper
             $this->logger->error("General error in getChatMessages", [
                 'error' => $e->getMessage(),
             ]);
-            return $this->respondWithError('General error: ' . $e->getMessage());
+            return $this->respondWithError(40301);
         }
     }
 
@@ -437,7 +437,7 @@ class ChatMapper
 
             if (!$userExists) {
                 $this->logger->warning("User does not exist in users", ['userid' => $userid]);
-                return $this->respondWithError('User does not exist in users');
+                return $this->respondWithError(21001);
             }
 
             $participantExistsQuery = "SELECT COUNT(*) FROM chatparticipants WHERE chatid = :chatid AND userid = :userid";
@@ -449,7 +449,7 @@ class ChatMapper
 
             if ($participantExists) {
                 $this->logger->warning("Participant already exists", ['userid' => $userid]);
-                return $this->respondWithError('Participant already exists');
+                return $this->respondWithError(21803);
             }
 
             $query = "INSERT INTO chatparticipants (chatid, userid, hasaccess, createdat) 
@@ -467,12 +467,12 @@ class ChatMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Participant successfully inserted.',
+                'ResponseCode' => 11802,
                 'affectedRows' => new ChatParticipants($data)
             ];
         } catch (\Throwable $e) {
             $this->logger->error("Error inserting participant", ['exception' => $e->getMessage()]);
-            return $this->respondWithError(40301);
+            return $this->respondWithError(41804);
         }
     }
 
@@ -493,7 +493,7 @@ class ChatMapper
 
             if (!$userExists) {
                 $this->logger->warning("User did not exist in users", ['userid' => $userid]);
-                return $this->respondWithError('User does not exist in users');
+                return $this->respondWithError(21001);
             }
 
             $participantExistsQuery = "SELECT COUNT(*) FROM chatparticipants WHERE chatid = :chatid AND userid = :userid";
@@ -505,7 +505,7 @@ class ChatMapper
 
             if (!$participantExists) {
                 $this->logger->warning("User is not a participant of the chat", ['userid' => $userid]);
-                return $this->respondWithError('You are not allowed to write messages');
+                return $this->respondWithError(21804);
             }
 
             $query = "INSERT INTO chatmessages (chatid, userid, content, createdat) 
@@ -530,14 +530,14 @@ class ChatMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Message successfully inserted.',
+                'ResponseCode' => 11803,
                 'affectedRows' => [$data]
             ];
         } catch (\Throwable $e) {
             $this->logger->error("Error inserting message", [
                 'exception' => $e->getMessage()
             ]);
-            return $this->respondWithError(40301);
+            return $this->respondWithError(41801);
         }
     }
 
@@ -605,7 +605,7 @@ class ChatMapper
             $this->logger->error("Error deleting chat from database", [
                 'exception' => $e->getMessage()
             ]);
-
+            
             throw new \RuntimeException("Failed to delete chat: " . $e->getMessage());
         }
     }
@@ -879,6 +879,29 @@ class ChatMapper
                 'exception' => $e->getMessage(),
             ]);
 
+            return false;
+        }
+    }
+
+    public function loadMessageById(int $id): array|false
+    {
+        $this->logger->info("ChatMapper.loadMessageById started", ['id' => $id]);
+
+        try {
+            $sql = "SELECT * FROM chatmessages WHERE messid = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
+            $stmt->execute();
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($data) {
+                return $data;
+            }
+
+            $this->logger->warning("No chat message found with id", ['id' => $id]);
+            return false;
+        } catch (\Throwable $e) {  
+            $this->logger->error("Database error: " . $e->getMessage(), ['id' => $id]);
             return false;
         }
     }

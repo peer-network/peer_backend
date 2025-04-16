@@ -234,7 +234,7 @@ class McapMapper
             } catch (\PDOException $e) {
                 $this->db->rollBack();
                 $this->logger->error('Database Exception.', ['exception' => $e]);
-                return $this->respondWithError(40301);
+                return $this->respondWithError(40302);
             }
 
             return [

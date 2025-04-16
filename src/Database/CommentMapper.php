@@ -236,7 +236,7 @@ class CommentMapper
 			$parentExists = $parentStmt->fetchColumn();
 
 			if (!$parentExists) {
-				return $this->respondWithError('Parent ID does not exist.');
+				return $this->respondWithError(41605);
 			}
 
 			// Fetch child comments
@@ -324,7 +324,7 @@ class CommentMapper
 			return $comments;
 		} catch (\Throwable $e) {
 			$this->logger->error("Error in fetchByParentId", ['message' => $e->getMessage()]);
-			return $this->respondWithError('An error occurred while fetching comments.');
+			return $this->respondWithError(41606);
 		}
 	}
 

@@ -42,7 +42,7 @@ type Query {
   testingpool(offset: Int, limit: Int): GenericResponse!
   postcomments(postid: ID!, offset: Int, limit: Int): GenericResponse!
   dailygemstatus: StandardResponse!
-  dailygemsresults(day: DayFilterType!): GenericResponse!
+  dailygemsresults(day: DayType!): StandardResponse!
 }
 
 type Mutation {

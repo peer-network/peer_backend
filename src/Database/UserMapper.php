@@ -45,15 +45,7 @@ class UserMapper
                 'actionType' => $actionType
             ]);
 
-        } catch (\PDOException $e) {
-            $this->logger->error('Database error occurred while logging login data', [
-                'error' => $e->getMessage(),
-                'userId' => $userId,
-                'ip' => $ip,
-                'browser' => $browser,
-                'actionType' => $actionType
-            ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Unexpected error occurred while logging login data', [
                 'error' => $e->getMessage(),
                 'userId' => $userId,
@@ -136,7 +128,7 @@ class UserMapper
                 'userId' => $userId,
                 'ip' => $ip
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('An unexpected error occurred while logging login data', [
                 'error' => $e->getMessage(),
                 'userId' => $userId,
@@ -175,7 +167,7 @@ class UserMapper
 
             return null;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to get location from IP', [
                 'ip' => $ip,
                 'error' => $e->getMessage()
@@ -271,7 +263,7 @@ class UserMapper
                         'createdat' => $row['createdat'],
                         'updatedat' => $row['updatedat'],
                     ]);
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $this->logger->error("Failed to map user data", ['error' => $e->getMessage(), 'data' => $row]);
                 }
             }
@@ -284,10 +276,7 @@ class UserMapper
 
             return $results;
 
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error occurred", ['error' => $e->getMessage()]);
-            return [];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
             return [];
         }
@@ -423,7 +412,7 @@ class UserMapper
                         'createdat' => $row['createdat'],
                         'updatedat' => $row['updatedat'],
                     ]);
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $this->logger->error("Failed to map user data", ['error' => $e->getMessage(), 'data' => $row]);
                 }
             }
@@ -436,10 +425,7 @@ class UserMapper
 
             return $results;
 
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error occurred", ['error' => $e->getMessage()]);
-            return [];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
             return [];
         }
@@ -473,10 +459,7 @@ class UserMapper
 
             return $results;
 
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error occurred", ['error' => $e->getMessage()]);
-            return [];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
             return [];
         }
@@ -506,10 +489,7 @@ class UserMapper
             $this->logger->warning("No user found with id", ['id' => $id]);
             return false;
 
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error occurred", ['error' => $e->getMessage()]);
-            return false;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
             return false;
         }
@@ -538,10 +518,7 @@ class UserMapper
             $this->logger->warning("No user found with id", ['id' => $id]);
             return false;
 
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error occurred", ['error' => $e->getMessage()]);
-            return false;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
             return false;
         }
@@ -567,10 +544,7 @@ class UserMapper
             $this->logger->warning("No user found with email", ['email' => $email]);
             return false;
 
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error occurred", ['error' => $e->getMessage()]);
-            return false;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
             return false;
         }
@@ -594,10 +568,7 @@ class UserMapper
 
             $this->logger->warning("No user found with id", ['id' => $id]);
             return false;
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error while loading user info", ['id' => $id, 'error' => $e->getMessage()]);
-            return false;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("General error while loading user info", ['id' => $id, 'error' => $e->getMessage()]);
             return false;
         }
@@ -615,10 +586,7 @@ class UserMapper
 
             $this->logger->info("User existence check", ['id' => $id, 'exists' => $exists]);
             return $exists;
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error while checking if user exists", ['id' => $id, 'error' => $e->getMessage()]);
-            return false;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("General error while checking if user exists", ['id' => $id, 'error' => $e->getMessage()]);
             return false;
         }
@@ -635,10 +603,7 @@ class UserMapper
 
             $this->logger->info("Email availability check", ['email' => $email, 'isTaken' => $isTaken]);
             return $isTaken;
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error while checking email", ['email' => $email, 'error' => $e->getMessage()]);
-            return false;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("General error while checking email", ['email' => $email, 'error' => $e->getMessage()]);
             return false;
         }
@@ -656,10 +621,7 @@ class UserMapper
 
             $this->logger->info("Name and slug existence check", ['username' => $username, 'slug' => $slug, 'exists' => $exists]);
             return $exists;
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error while checking name and slug", ['username' => $username, 'slug' => $slug, 'error' => $e->getMessage()]);
-            return false;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("General error while checking name and slug", ['username' => $username, 'slug' => $slug, 'error' => $e->getMessage()]);
             return false;
         }
@@ -689,10 +651,7 @@ class UserMapper
             }
 
             return $isVerified;
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error while verifying account", ['uid' => $uid, 'error' => $e->getMessage()]);
-            return false;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("General error while verifying account", ['uid' => $uid, 'error' => $e->getMessage()]);
             return false;
         }
@@ -722,7 +681,7 @@ class UserMapper
             }
 
             return $isDeactivated;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Error deactivating account", ['uid' => $uid, 'error' => $e->getMessage()]);
             return false;
         }
@@ -743,7 +702,7 @@ class UserMapper
             $this->logger->info("Fetched post count", ['userid' => $userid, 'postCount' => $postCount]);
 
             return $postCount;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Error fetching post count", ['userid' => $userid, 'error' => $e->getMessage()]);
             return 0;
         }
@@ -785,7 +744,7 @@ class UserMapper
             }
 
             return $friends ?: null;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Database error in fetchFriends", ['error' => $e->getMessage()]);
             return null;
         }
@@ -843,7 +802,7 @@ class UserMapper
             );
 
             return $users;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Database error in fetchFollowers", ['error' => $e->getMessage()]);
             return [];
         }
@@ -901,7 +860,7 @@ class UserMapper
             );
 
             return $users;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Database error in fetchFollowing", ['error' => $e->getMessage()]);
             return [];
         }
@@ -920,7 +879,7 @@ class UserMapper
             
             $stmt->execute();
             return (bool) $stmt->fetchColumn();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Database error in isFollowing", ['error' => $e->getMessage()]);
             return false;
         }
@@ -939,7 +898,7 @@ class UserMapper
             
             $stmt->execute();
             return (bool) $stmt->fetchColumn();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Database error in isFollowed", ['error' => $e->getMessage()]);
             return false;
         }
@@ -965,7 +924,7 @@ class UserMapper
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             return $data ?: ['amountfollower' => 0, 'amountfollowed' => 0, 'isfollowing' => false, 'isfollowed' => false];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Database error in fetchFollowCounts", ['error' => $e->getMessage()]);
             return ['amountfollower' => 0, 'amountfollowed' => 0, 'isfollowing' => false, 'isfollowed' => false];
         }
@@ -1009,7 +968,7 @@ class UserMapper
 
             $this->logger->warning("No user found with ID", ['userid' => $userid]);
             return false;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Database error in fetchProfileData", ['error' => $e->getMessage()]);
             return false;
         }
@@ -1054,7 +1013,7 @@ class UserMapper
             $this->logger->info("Inserted new user into database", ['uid' => $userid]);
 
             return $userid;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Error creating user", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -1097,17 +1056,7 @@ class UserMapper
             $this->logger->info("Inserted new user into database", ['uid' => $data['uid']]);
 
             return new User($data);
-        } catch (\PDOException $e) {
-            $this->logger->error(
-                "UserMapper.insert: Exception occurred while inserting user",
-                [
-                    'uid' => $data['uid'] ?? null,
-                    'exception' => $e->getMessage(),
-                ]
-            );
-
-            throw new \RuntimeException("Failed to insert user into database: " . $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("UserMapper.insert: Exception occurred while inserting user", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -1147,17 +1096,7 @@ class UserMapper
             $this->logger->info("Inserted new user into database", ['userid' => $data['userid']]);
 
             return new UserInfo($data);
-        } catch (\PDOException $e) {
-            $this->logger->error(
-                "UserMapper.insert: Exception occurred while inserting UserInfo",
-                [
-                    'userid' => $data['userid'] ?? null,
-                    'exception' => $e->getMessage(),
-                ]
-            );
-
-            throw new \RuntimeException("Failed to insert UserInfo into database: " . $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("UserMapper.insert: Exception occurred while inserting user", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -1205,17 +1144,7 @@ class UserMapper
             $this->logger->info("Updated user in database", ['uid' => $data['uid']]);
 
             return new User($data);
-        } catch (\PDOException $e) {
-            $this->logger->error(
-                "UserMapper.update: Exception occurred while updating user",
-                [
-                    'uid' => $data['uid'] ?? null,
-                    'exception' => $e->getMessage(),
-                ]
-            );
-
-            throw new \RuntimeException("Failed to update user in database: " . $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("UserMapper.update: Exception occurred while updating user", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -1250,17 +1179,7 @@ class UserMapper
             $this->logger->info("Updated password in database", ['uid' => $data['uid']]);
 
             return new User($data); 
-        } catch (\PDOException $e) {
-            $this->logger->error(
-                "UserMapper.updatePass: Exception occurred while updating password",
-                [
-                    'uid' => $data['uid'] ?? null,
-                    'exception' => $e->getMessage(),
-                ]
-            );
-
-            throw new \RuntimeException("Failed to update password in database: " . $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("UserMapper.updatePass: Exception occurred while updating password", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -1308,17 +1227,7 @@ class UserMapper
             $this->logger->info("Updated profile in database", ['uid' => $data['uid']]);
 
             return new User($data);
-        } catch (\PDOException $e) {
-            $this->logger->error(
-                "UserMapper.updateProfil: Exception occurred while updating profile",
-                [
-                    'uid' => $data['uid'] ?? null,
-                    'exception' => $e->getMessage(),
-                ]
-            );
-
-            throw new \RuntimeException("Failed to update profile in database: " . $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("UserMapper.updateProfil: Exception occurred while updating profile", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -1343,17 +1252,7 @@ class UserMapper
             $this->logger->info("Deleted user in database", ['id' => $id]);
 
             return (bool)$stmt->rowCount(); 
-        } catch (\PDOException $e) {
-            $this->logger->error(
-                "UserMapper.delete: Exception occurred while deleting user",
-                [
-                    'id' => $id,
-                    'exception' => $e->getMessage(),
-                ]
-            );
-
-            throw new \RuntimeException("Failed to delete user from database: " . $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("UserMapper.delete: Exception occurred while deleting user", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -1388,7 +1287,7 @@ class UserMapper
             } else {
                 $this->logger->info("No unverified users found in database");
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Error deleting unverified users", ['error' => $e]);
         }
     }
@@ -1425,9 +1324,7 @@ class UserMapper
             $stmt->execute();
 
             $this->logger->info("Access token successfully saved or updated for user: $userid");
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error in saveOrUpdateAccessToken: " . $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Database error in saveOrUpdateAccessToken: ", ['error' => $e]);
         }
     }
@@ -1464,9 +1361,7 @@ class UserMapper
             $stmt->execute();
 
             $this->logger->info("Refresh token successfully saved or updated for user: $userid");
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error in saveOrUpdateRefreshToken: " . $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Database error in saveOrUpdateRefreshToken: ", ['error' => $e]);
         }
     }
@@ -1492,12 +1387,61 @@ class UserMapper
             $stmt->execute();
 
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error in fetchFriends: " . $e->getMessage());
-            return null;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Database error in fetchFriends: ', ['exception' => $e->getMessage()]);
             return null;
+        }
+    }
+
+    public function loadTokenById(string $id): bool
+    {
+        $this->logger->info("UserMapper.loadTokenById started");
+		$time = (int)\time();
+
+        try {
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM refresh_tokens WHERE userid = :id AND expiresat > :expiresat");
+            $stmt->bindParam(':id', $id);
+			$stmt->bindParam(':expiresat', $time, \PDO::PARAM_INT);
+            $stmt->execute();
+            $exists = $stmt->fetchColumn() > 0;
+
+            $this->logger->info("Refresh_token existence check", ['exists' => $exists]);
+            return $exists;
+        } catch (\Throwable $e) {
+            $this->logger->error("General error while checking if refresh_token exists", ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public function insertoken(array $args): void
+    {
+        $this->logger->info("UserMapper.insertoken started");
+
+        $this->logger->info('UserMapper.insertoken second', ['args' => $args]);
+
+        $query = "INSERT INTO token_holders 
+                  (token, userid, email, expires)
+                  VALUES 
+                  (:token, :userid, :email, :expires)";
+
+        try {
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindValue(':token', $args['token'], \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $args['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':email', $args['email'], \PDO::PARAM_STR);
+            $stmt->bindValue(':expires', $args['expires'], \PDO::PARAM_INT);
+
+            $stmt->execute();
+
+            $this->logger->info("Inserted new token into database", ['userid' => $args['userid']]);
+
+        } catch (\Throwable $e) {
+            $this->logger->error("UserMapper.insertoken: Exception occurred while inserting token", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new \RuntimeException("Failed to insert token into database: " . $e->getMessage());
         }
     }
 }

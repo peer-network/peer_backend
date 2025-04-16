@@ -87,17 +87,17 @@ class TagService
             $tagId = $this->generateUUID();
             if (empty($tagId)) {
                 $this->logger->critical('Failed to generate tag ID');
-                return $this->respondWithError('Failed to generate tag ID.');
+                return $this->respondWithError(41704);
             }
 
             $tagData = ['tagid' => $tagId, 'name' => $tagName];
             $tag = new Tag($tagData);
 
             if (!$this->tagMapper->insert($tag)) {
-                return $this->respondWithError('Failed to insert tag into database.');
+                return $this->respondWithError(41703);
             }
 
-            return $this->createSuccessResponse('Tag created successfully', [$tagData]);
+            return $this->createSuccessResponse(11702, [$tagData]);
 
         } catch (\Throwable $e) {
             return $this->respondWithError(40301);
@@ -136,7 +136,7 @@ class TagService
 
                 $tag = new Tag($tagData, ['name']);
             } else {
-                return $this->respondWithError('Tag name are required.');
+                return $this->respondWithError(30101);
             }
 
             $tags = $this->tagMapper->searchByName($args);
