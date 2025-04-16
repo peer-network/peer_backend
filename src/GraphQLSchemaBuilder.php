@@ -1388,7 +1388,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
-            return $this->createSuccessResponse('No fetchPool found', [], false);
+            return $this->createSuccessResponse(41214, [], false);
         }
 
         if (is_array($response) || !empty($response)) {
@@ -2320,7 +2320,7 @@ class GraphQLSchemaBuilder
 
         $ip = filter_var($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', FILTER_VALIDATE_IP) ?: '0.0.0.0';
         if ($ip === '0.0.0.0') {
-            return $this->respondWithError('Could not find mandatory IP');
+            return $this->respondWithError(20257);
         }
 
         if (!$this->contactusService->checkRateLimit($ip)) {

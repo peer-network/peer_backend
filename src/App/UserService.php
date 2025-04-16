@@ -421,7 +421,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update username', ['exception' => $e]);
-            return self::respondWithError(41006);
+            return self::respondWithError(20202);
         }
     }
 

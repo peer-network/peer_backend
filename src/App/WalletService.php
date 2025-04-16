@@ -97,7 +97,7 @@ class WalletService
             $wallets = $this->walletMapper->loadWalletById($args, $this->currentUserId);
 
             if ($wallets === false) {
-                return $this->respondWithError('Failed to fetch wallets from database.');
+                return $this->respondWithError(41216);
             }
 
             $walletData = array_map(

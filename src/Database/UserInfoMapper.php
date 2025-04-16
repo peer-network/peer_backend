@@ -550,7 +550,7 @@ class UserInfoMapper
             return [
                 'status' => 'success',
                 'counter' => $counter,
-                'ResponseCode' => "BlockRelations data prepared successfully",
+                'ResponseCode' => 11107,
                 'affectedRows' => [
                     'blockedBy' => $blockedBy,
                     'iBlocked' => $iBlocked
@@ -560,7 +560,7 @@ class UserInfoMapper
             $this->logger->error("Database error while fetching block relationships", ['error' => $e->getMessage()]);
             return [
                 'status' => 'error',
-                'ResponseCode' => "Database error while fetching block relationships",
+                'ResponseCode' => 41108,
                 'affectedRows' => []
             ];
         }
@@ -627,7 +627,7 @@ class UserInfoMapper
 
             return [
                 'status' => 'success',
-                'message' => 'User stats updated successfully',
+                'message' => 11010,
                 'updated_data' => $updates
             ];
         } catch (\PDOException $e) {
@@ -636,14 +636,14 @@ class UserInfoMapper
                 'userid' => $userid,
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'message' => 'Failed to update user stats'];
+            return ['status' => 'error', 'message' => 41012];
         } catch (\Exception $e) {
             $this->db->rollBack();
             $this->logger->error('Unexpected error in updateUserInfoStats', [
                 'userid' => $userid,
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'message' => 'Failed to update user stats'];
+            return ['status' => 'error', 'message' => 41012];
         }
     }
 }
