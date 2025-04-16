@@ -27,11 +27,11 @@ enum DayType {
 type StandardResponse {
   status: String!
   ResponseCode: String
-  affectedRows: DATEN
+  data: DATEN
 }
 
 type HelloResponse {
-  currentuserid: ID
+  currentUserId: ID
   currentVersion: String
   wikiLink: String
 }
@@ -40,5 +40,5 @@ type GenericResponse {
   status: String!
   counter: Int!
   ResponseCode: String
-  affectedRows: DATEN
+  data: DATEN
 }

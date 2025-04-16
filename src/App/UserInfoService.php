@@ -61,7 +61,7 @@ class UserInfoService
                 return $success;
             }
 
-            return $this->respondWithError('No data found for the user.');
+            return $this->respondWithError(21001);
         } catch (\Exception $e) {
             return $this->respondWithError(41001);
         }
@@ -74,7 +74,7 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError('Invalid user ID.');
+            return $this->respondWithError(30103);
         }
 
         if ($this->currentUserId === $followedUserId) {
@@ -84,11 +84,11 @@ class UserInfoService
         $this->logger->info('UserInfoService.toggleUserFollow started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
-            return $this->respondWithError('Follower user not found.');
+            return $this->respondWithError(31103);
         }
 
         if (!$this->userInfoMapper->isUserExistById($followedUserId)) {
-            return $this->respondWithError('Followed user not found.');
+            return $this->respondWithError(31105);
         }
 
         return $this->userInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
@@ -101,21 +101,21 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($blockedUserId)) {
-            return $this->respondWithError('Invalid user ID.');
+            return $this->respondWithError(30103);
         }
 
         if ($this->currentUserId === $blockedUserId) {
-            return $this->respondWithError('Cannot block yourself.');
+            return $this->respondWithError(31104);
         }
 
         $this->logger->info('UserInfoService.toggleUserBlock started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
-            return $this->respondWithError('Blocker user not found.');
+            return $this->respondWithError(31106);
         }
 
         if (!$this->userInfoMapper->isUserExistById($blockedUserId)) {
-            return $this->respondWithError('Blocked user not found.');
+            return $this->respondWithError(31106);
         }
 
         return $this->userInfoMapper->toggleUserBlock($this->currentUserId, $blockedUserId);
@@ -148,7 +148,7 @@ class UserInfoService
     public function toggleProfilePrivacy(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('UserInfoService.toggleProfilePrivacy started');
@@ -156,7 +156,7 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadInfoById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError('User not found.');
+                return $this->respondWithError(21001);
             }
 
             $newIsPrivate = !$user->getIsPrivate();
@@ -184,7 +184,7 @@ class UserInfoService
         }
 
         if (trim($biography) === '' || strlen($biography) < 3 || strlen($biography) > 5000) {
-            return $this->respondWithError('Biography must be between 3 and 5000 characters.');
+            return $this->respondWithError(20228);
         }
 
         $this->logger->info('UserInfoService.updateBio started');
@@ -192,7 +192,7 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError('User not found.');
+                return $this->respondWithError(30101);
             }
 
             if (!empty($biography)) {
@@ -200,17 +200,17 @@ class UserInfoService
                 $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
 
                 if ($mediaPath === '') {
-                    return $this->respondWithError('Biography upload failed.');
+                    return $this->respondWithError(41009);
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $mediaPathFile = $mediaPath['path'];
                 } else {
-                    return $this->respondWithError('Media path necessary for upload.');
+                    return $this->respondWithError(40306);
                 }
 
             } else {
-                return $this->respondWithError('Media necessary for upload.');
+                return $this->respondWithError(40307);
             }
 
             $user->setBiography($mediaPathFile);
@@ -236,7 +236,7 @@ class UserInfoService
         }
 
         if (trim($mediaFile) === '') {
-            return $this->respondWithError('No media file provided');
+            return $this->respondWithError(31008);
         }
 
         $this->logger->info('UserInfoService.setProfilePicture started');
@@ -244,24 +244,24 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError('User not found.');
+                return $this->respondWithError(30101);
             }
 
             if (!empty($mediaFile)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $this->currentUserId, 'profile');
 
                 if ($mediaPath === '') {
-                    return $this->respondWithError('Profile upload failed.');
+                    return $this->respondWithError(41009);
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $mediaPathFile = $mediaPath['path'];
                 } else {
-                    return $this->respondWithError('Media path necessary for upload.');
+                    return $this->respondWithError(40306);
                 }
 
             } else {
-                return $this->respondWithError('Media necessary for upload.');
+                return $this->respondWithError(40307);
             }
 
             $user->setProfilePicture($mediaPathFile);
