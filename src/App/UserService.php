@@ -193,7 +193,7 @@ class UserService
             $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
         } catch (\Throwable $e) {
             $this->logger->warning('Error registering user.', ['exception' => $e]);
-            return self::respondWithError(40601);
+            return self::respondWithError($e->getMessage());
         }
 
 		return [

@@ -82,7 +82,7 @@ class PostService
 
         foreach (['title', 'media', 'contenttype'] as $field) {
             if (empty($args[$field])) {
-                return $this->respondWithError("$field is required");
+                return $this->respondWithError(30102);
             }
         }
 
@@ -91,7 +91,7 @@ class PostService
         $postId = self::generateUUID();
         if (empty($postId)) {
             $this->logger->critical('Failed to generate post ID');
-            return $this->respondWithError('Failed to generate post ID.');
+            return $this->respondWithError(41511);
         }
 
         $createdAt = (new \DateTime())->format('Y-m-d H:i:s.u');
@@ -110,7 +110,7 @@ class PostService
 
         if ($postData['feedid']) {
             if (!$this->postMapper->isNewsFeedExist($postData['feedid'])) {
-                return $this->respondWithError('Invalid newsfeed ID.');
+                return $this->respondWithError(41512);
             }
 
             if (!$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
@@ -125,16 +125,16 @@ class PostService
                 $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                 if (!empty($mediaPath['error'])) {
-                    return $this->respondWithError('Invalid Base64 code: ' . json_encode($mediaPath['error']));
+                    return $this->respondWithError(20251);
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $postData['media'] = $this->argsToJsString($mediaPath['path']);
                 } else {
-                    return $this->respondWithError('Media upload failed.');
+                    return $this->respondWithError(41009);
                 }
             } else {
-                return $this->respondWithError('Media necessary for upload.');
+                return $this->respondWithError(30101);
             }
 
             // Cover Upload Nur (Audio & Video)
@@ -145,7 +145,7 @@ class PostService
                 if (!empty($coverPath['path'])) {
                     $postData['cover'] = $this->argsToJsString($coverPath['path']);
                 } else {
-                    return $this->respondWithError('Cover upload failed.');
+                    return $this->respondWithError(40306);
                 }
             }
 
@@ -196,7 +196,7 @@ class PostService
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);
-            return $this->respondWithError(40301);
+            return $this->respondWithError(41508);
         }
     }
 
@@ -300,14 +300,14 @@ class PostService
             $result = array_map(fn(Post $post) => $post->getArrayCopy(), $posts);
 
             $this->logger->info("Posts fetched successfully", ['count' => count($result)]);
-            return $this->createSuccessResponse('Posts fetched successfully', [$result]);
+            return $this->createSuccessResponse(11502, [$result]);
 
         } catch (\Throwable $e) {
             $this->logger->error("Error fetching Posts", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError('Failed to fetch posts.');
+            return $this->respondWithError(41513);
         }
     }
 
@@ -332,25 +332,25 @@ class PostService
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this->respondWithError('Invalid userid format provided.');
+            return $this->respondWithError(30103);
         }
 
         if ($title !== null && strlen($title) < 2 || strlen($title) > 33) {
-            return $this->respondWithError('Title must be between 2 and 30 characters.');
+            return $this->respondWithError(20256);
         }
 
         if ($from !== null && !self::validateDate($from)) {
-            return $this->respondWithError('Invalid from date format provided.');
+            return $this->respondWithError(30103);
         }
 
         if ($to !== null && !self::validateDate($to)) {
-            return $this->respondWithError('Invalid to date format provided.');
+            return $this->respondWithError(30103);
         }
 
         if ($tag !== null) {
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
-                return $this->respondWithError('Invalid tag format provided.');
+                return $this->respondWithError(30103);
             }
         }
 
@@ -360,14 +360,14 @@ class PostService
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
             if (!empty($invalidTypes)) {
-                return $this->respondWithError('Invalid type parameter(s) provided.');
+                return $this->respondWithError(30103);
             }
         }
 
         if ($Ignorlist !== null) {
             $Ignorlisten = ['YES', 'NO'];
             if (!in_array($Ignorlist, $Ignorlisten, true)) {
-                return $this->respondWithError('Invalid Ignorlist parameter provided.');
+                return $this->respondWithError(30103);
             }
         }
 
@@ -384,7 +384,7 @@ class PostService
     public function getChatFeedsByID(string $feedid): ?array
     {
         if (!$this->checkAuthentication() || !self::isValidUUID($feedid)) {
-            return $this->respondWithError('Invalid feed ID');
+            return $this->respondWithError(30103);
         }
 
         $this->logger->info("PostService.getChatFeedsByID started");
@@ -461,13 +461,13 @@ class PostService
                 $this->logger->info('Post deleted successfully', ['postid' => $postid]);
                 return [
                     'status' => 'success',
-                    'ResponseCode' => 'Post deleted successfully',
+                    'ResponseCode' => 11510,
                 ];
             }
         } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to delete post.');
+            return $this->respondWithError(41510);
         }
 
-        return $this->respondWithError('Failed to delete post.');
+        return $this->respondWithError(41510);
     }
 }

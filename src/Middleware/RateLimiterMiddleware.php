@@ -33,7 +33,7 @@ class RateLimiterMiddleware implements MiddlewareInterface
         $this->logger->info("RateLimiterMiddleware: IP $ipAddress");
 
         if (!$this->rateLimiter->isAllowed($ipAddress)) {
-            $this->logger->warn("Rate limit exceeded for IP: $ipAddress");
+            $this->logger->warning("Rate limit exceeded for IP: $ipAddress");
 
             $response = new Response();
             $response->getBody()->write(json_encode([
