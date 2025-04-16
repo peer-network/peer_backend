@@ -460,7 +460,7 @@ class UserInfoMapper
                 $stmt->execute();
 
                 $action = false;
-                $response = '11103';
+                $response = 11106;
             } else {
                 // Block the user
                 $query = "INSERT INTO user_block_user (blockerid, blockedid) VALUES (:blockerid, :blockedid)";
@@ -475,7 +475,7 @@ class UserInfoMapper
                 $stmt->execute();
 
                 $action = true;
-                $response = '11102';
+                $response = 11105;
             }
 
             $this->db->commit();

@@ -2529,7 +2529,7 @@ class GraphQLSchemaBuilder
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 30901,
+                'ResponseCode' => 10901,
                 'accessToken' => $accessToken,
                 'refreshToken' => $newRefreshToken
             ];
