@@ -118,7 +118,7 @@ class CommentService
             $commentId = $this->generateUUID();
             if (empty($commentId)) {
                 $this->logger->critical('Failed to generate comment ID');
-                return $this->respondWithError(41602);
+                return $this->respondWithError(41607);
             }
 
             $commentData = [

@@ -219,7 +219,7 @@ class PoolMapper
             ];
 
             if (!isset($mapping[$whereby])) {
-                return $this->respondWithError('Invalid action type.');
+                return $this->respondWithError(41221);
             }
 
             $whereby = $mapping[$whereby]['text'];

@@ -602,7 +602,7 @@ class WalletMapper
     public function callGlobalWins(): array
     {
         if (!TABLESTOGEMS) {
-            return $this->respondWithError('TABLESTOGEMS');
+            return $this->respondWithError(41215);
         }
 
         $wins = [

@@ -473,7 +473,7 @@ class ChatService
                 }
 
                 if (!$this->chatMapper->isParticipantExist($chatId, $participantId)) {
-                    return $this->respondWithError(31810);
+                    return $this->respondWithError(21001);
                 }
 
                 $this->chatMapper->deleteParticipant($chatId, $participantId);
