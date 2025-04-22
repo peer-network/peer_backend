@@ -1394,85 +1394,18 @@ class UserMapper
         }
     }
 
-    /**
-     * Handles a password reset request by inserting or updating reset attempts.
-     * 
-     * @param string $userId
-     * @param string $token
-     * 
-     * @return array
-     */
-    public function resetPasswordRequest(string $userId, string $email): array
-    {
-        $this->logger->info("UserMapper.resetPasswordRequest started");
-
-        $updatedAt = $this->getCurrentTimestamp();
-        $expiresAt = $this->getFutureTimestamp('+1 hour');
-
-        try {
-            $passwordAttempt = $this->checkForPasswordResetExpiry($userId);
-            $token = bin2hex(random_bytes(32));
-
-            if (!$passwordAttempt) {
-                $this->createResetRequest($userId, $token, $updatedAt, $expiresAt);
-
-                $data = [
-                    'code' => $token,
-                ];
-                $this->sendPasswordResetEmail($email, $data);
-                
-                return $this->genericSuccessResponse();
-            }
-
-            // Check for rate limiting: 1st attempt 
-            if ($this->isFirstAttemptTooSoon($passwordAttempt)) {
-                return $this->rateLimitResponse(1);
-            }
-
-            // 2nd attempt 
-            if ($this->isSecondAttemptTooSoon($passwordAttempt)) {
-                return $this->rateLimitResponse(10, $passwordAttempt['last_attempt']);
-            }
-
-            // Too many attempts made without using the token
-            if ($passwordAttempt['attempt_count'] >= 3 && !$passwordAttempt['collected']) {
-                return $this->tooManyAttemptsResponse();
-            }
-
-            $this->updateAttempt($passwordAttempt);
-
-            if(isset($passwordAttempt['token'])){
-                $token = $passwordAttempt['token'];
-                $data = [
-                    'code' => $token,
-                ];
-
-                $this->sendPasswordResetEmail($email, $data);
-            }
-            return $this->genericSuccessResponse();
-
-        } catch (\Exception $e) {
-            $this->logger->error('Unexpected error during password reset request', [
-                'error' => $e->getMessage(),
-                'userId' => $userId,
-                'updatedat' => $updatedAt,
-                'expires_at' => $expiresAt,
-            ]);
-            return $this->genericSuccessResponse();
-        }
-    }
 
     /**
      * Send Actual email to Email.
     */
-    private function sendPasswordResetEmail(string $email, array $data): void {
+    public function sendPasswordResetEmail(string $email, array $data): void {
         (new PasswordRestMail($data))->send($email);
     }
 
     /**
      * Inserts a new password reset request.
      */
-    private function createResetRequest(string $userId, string $token, string $updatedAt, string $expiresAt): array
+    public function createResetRequest(string $userId, string $token, string $updatedAt, string $expiresAt): array
     {
         $sql = "
             INSERT INTO password_reset_requests 
@@ -1494,7 +1427,7 @@ class UserMapper
     /**
      * Updates an existing reset attempt, incrementing the attempt count.
      */
-    private function updateAttempt(array $attempt): bool
+    public function updateAttempt(array $attempt): bool
     {
         $sql = "
             UPDATE password_reset_requests 
@@ -1513,7 +1446,7 @@ class UserMapper
     /**
      * Checks for an active (unexpired and unused) password reset request.
      */
-    private function checkForPasswordResetExpiry(string $userId): array|bool
+    public function checkForPasswordResetExpiry(string $userId): array|bool
     {
         $this->logger->info("UserMapper.checkForPasswordResetExpiry started");
 
@@ -1558,7 +1491,7 @@ class UserMapper
     /**
      * Determines if the first request is being retried too soon.
      */
-    private function isFirstAttemptTooSoon(array $attempt): bool
+    public function isFirstAttemptTooSoon(array $attempt): bool
     {
         return $attempt['attempt_count'] === 1 
             && !$attempt['collected'] 
@@ -1568,7 +1501,7 @@ class UserMapper
     /**
      * Determines if the second request is being retried too soon.
      */
-    private function isSecondAttemptTooSoon(array $attempt): bool
+    public function isSecondAttemptTooSoon(array $attempt): bool
     {
         return $attempt['attempt_count'] === 2 
             && !$attempt['collected'] 
@@ -1578,7 +1511,7 @@ class UserMapper
     /**
      * Returns a response indicating the user should retry after a delay.
      */
-    private function rateLimitResponse(int $waitMinutes, ?string $lastAttempt = null): array
+    public function rateLimitResponse(int $waitMinutes, ?string $lastAttempt = null): array
     {
         if ($lastAttempt) {
             $remaining = ceil((strtotime($lastAttempt . " +{$waitMinutes} minutes") - time()) / 60);
@@ -1597,22 +1530,11 @@ class UserMapper
     /**
      * Returns a response when user has made too many attempts.
      */
-    private function tooManyAttemptsResponse(): array
+    public function tooManyAttemptsResponse(): array
     {
         return [
             'status' => 'error',
             'ResponseCode' => 'Email delivery failed - Please contact support team at peernetworkpse@gmail.com'
-        ];
-    }
-
-    /**
-     * Standard success response (avoids revealing account existence).
-     */
-    private function genericSuccessResponse(): array
-    {
-        return [
-            'status' => 'success',
-            'ResponseCode' => 'An email will be sent to your mail address if an account associated with it exists.'
         ];
     }
 
@@ -1624,13 +1546,6 @@ class UserMapper
         return date("Y-m-d H:i:s.u");
     }
 
-    /**
-     * Returns a timestamp relative to now (e.g., +1 hour).
-     */
-    private function getFutureTimestamp(string $modifier): string
-    {
-        return date("Y-m-d H:i:s.u", strtotime($modifier));
-    }
 
     /**
      * Fetch password reset request by token if valid and not expired.
@@ -1669,26 +1584,6 @@ class UserMapper
         $stmt->execute();
     }
 
-    /**
-     * Update the user's password in the database.
-     *
-     * @param string $userId
-     * @param string $hashedPassword
-     * @return bool
-     */
-    private function updateUserPassword(string $userId, string $hashedPassword): bool
-    {
-        $sql = "
-            UPDATE users 
-            SET password = :password 
-            WHERE uid = :uid
-        ";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':password', $hashedPassword, \PDO::PARAM_STR);
-        $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
-        return $stmt->execute();
-    }
 
     public function insertoken(array $args): void
     {

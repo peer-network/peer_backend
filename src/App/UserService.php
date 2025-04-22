@@ -668,27 +668,106 @@ class UserService
     {
         $this->logger->info('UserService.requestPasswordReset started');
 
-        try {
-            
-            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $this->logger->warning('Invalid email format', ['email' => $email]);
-                return self::respondWithError(30104);
-            }
-            $user = $this->userMapper->loadByEmail($email);
+        $updatedAt = $this->getCurrentTimestamp();
+        $expiresAt = $this->getFutureTimestamp('+1 hour');
 
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->logger->warning('Invalid email format', ['email' => $email]);
+            return self::respondWithError(30104);
+        }
+
+        try {
+
+            $user = $this->userMapper->loadByEmail($email);
+            
             if (!$user) {
                 $this->logger->warning('Invalid user', ['email' => $email]);
-                return ['status' => 'success', 'ResponseCode' => 'An email will be send to your mail address if an account associated with it exists.'];
+                return $this->genericPasswordResetSuccessResponse();
             }
 
-            $response = $this->userMapper->resetPasswordRequest($user->getUserId(), $email);
+            $userId = $user->getUserId();
 
-            return $response;
-        } catch (\Throwable $e) {
-            $this->logger->info('UserService.requestPasswordReset Error ' .  $e->getMessage());
+            $passwordAttempt = $this->userMapper->checkForPasswordResetExpiry($userId);
+            $token = bin2hex(random_bytes(32));
+
+            if (!$passwordAttempt) {
+                $this->userMapper->createResetRequest($userId, $token, $updatedAt, $expiresAt);
+
+                $data = [
+                    'code' => $token,
+                ];
+                $this->userMapper->sendPasswordResetEmail($email, $data);
+                
+                return $this->genericPasswordResetSuccessResponse();
+            }
+
+            // Check for rate limiting: 1st attempt 
+            if ($this->userMapper->isFirstAttemptTooSoon($passwordAttempt)) {
+                return $this->userMapper->rateLimitResponse(1);
+            }
+
+            // 2nd attempt 
+            if ($this->userMapper->isSecondAttemptTooSoon($passwordAttempt)) {
+                return $this->userMapper->rateLimitResponse(10, $passwordAttempt['last_attempt']);
+            }
+
+            // Too many attempts made without using the token
+            if ($passwordAttempt['attempt_count'] >= 3 && !$passwordAttempt['collected']) {
+                return $this->userMapper->tooManyAttemptsResponse();
+            }
+
+            $this->userMapper->updateAttempt($passwordAttempt);
+
+            if(isset($passwordAttempt['token'])){
+                $token = $passwordAttempt['token'];
+                $data = [
+                    'code' => $token,
+                ];
+
+                $this->userMapper->sendPasswordResetEmail($email, $data);
+            }
+            return $this->genericPasswordResetSuccessResponse();
+
+        } catch (\Exception $e) {
+            $this->logger->error('Unexpected error during password reset request', [
+                'error' => $e->getMessage(),
+                'userId' => $userId,
+                'updatedat' => $updatedAt,
+                'expires_at' => $expiresAt,
+            ]);
         }
-        return ['status' => 'success', 'ResponseCode' => 'An email will be send to your mail address if an account associated with it exists.'];
+        return $this->genericPasswordResetSuccessResponse();
+
     }
+    
+    /**
+     * Standard success response (avoids revealing account existence).
+     */
+    public function genericPasswordResetSuccessResponse(): array
+    {
+        return [
+            'status' => 'success',
+            'ResponseCode' => 'An email will be sent to your mail address if an account associated with it exists.'
+        ];
+    }
+
+
+    /**
+     * Returns the current timestamp in microsecond precision.
+     */
+    private function getCurrentTimestamp(): string
+    {
+        return date("Y-m-d H:i:s.u");
+    }
+
+    /**
+     * Returns a timestamp relative to now (e.g., +1 hour).
+     */
+    private function getFutureTimestamp(string $modifier): string
+    {
+        return date("Y-m-d H:i:s.u", strtotime($modifier));
+    }
+
 
     /**
      * Update password for NON logged in user
@@ -697,6 +776,10 @@ class UserService
      * 
      * @param string $token
      * @param string $newPassword
+     * 
+     * Response: 11005; Success: Password updated successfully.
+     * Response: 21001; Information Not Found: No users found. Please refine your search or try a different query.
+     * Response: 41004; Unexpected Error: Failed to update password. Please try again later or contact support.
      * 
      * @return array
      */
@@ -712,24 +795,27 @@ class UserService
             return $passwordValidation;
         }
 
-        $request = $this->userMapper->getPasswordResetRequest($args['token']);
-
-        if (!$request) {
-            $this->userMapper->deletePasswordResetToken($args['token']);
-
-            return [
-                'status' => 'error',
-                'ResponseCode' => 'Invalid or expired reset token. Please try again.'
-            ];
-        }
-        $user = $this->userMapper->loadById($request['user_id']);
-
-        if (!$user) {
-            $this->logger->warning('User not found', ['userId' => $request['user_id']]);
-            return self::respondWithError(21001);
-        }
-
         try {
+            $newUser = new User();
+            $newUser->setPassword($newPassword);
+            $newUser->validatePass($args);
+
+            $request = $this->userMapper->getPasswordResetRequest($args['token']);
+
+            if (!$request) {
+                $this->userMapper->deletePasswordResetToken($args['token']);
+                return [
+                    'status' => 'error',
+                    'ResponseCode' => 'Invalid or expired reset token. Please try again.'
+                ];
+            }
+            $user = $this->userMapper->loadById($request['user_id']);
+
+            if (!$user) {
+                $this->logger->warning('User not found', ['userId' => $request['user_id']]);
+                return self::respondWithError(21001);
+            }
+
             $user->validatePass($args);
             $this->userMapper->updatePass($user);
 
