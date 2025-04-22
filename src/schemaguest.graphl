@@ -12,7 +12,7 @@ type Mutation {
   verifiedAccount(userid: ID!): verifiedAccount!
   login(email: String!, password: String!): AuthPayload!
   requestPasswordReset(email: String!): StandardResponse
-  resetPassword(token: String!, newPassword: String!): StandardResponse
+  resetPassword(token: String!, password: String!): StandardResponse
   refreshToken(refreshToken: String!): AuthPayload!
   contactus(name: String!, email: String!, message: String!): StandardResponse!
 }

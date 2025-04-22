@@ -62,7 +62,8 @@ class PeerInputFilter
             }
 
             if (!isset($this->data[$field]) && !empty($rules['required'])) {
-                //$this->errors[$field][] = "$field is required";
+                //$this->errors[$field][] = 30101;
+				$this->errors[$field][] = "$field is required";
                 continue;
             }
 
@@ -82,7 +83,8 @@ class PeerInputFilter
                     $options = $validator['options'] ?? [];
                     if (method_exists($this, $validatorName)) {
                         if (!$this->$validatorName($this->data[$field], $options)) {
-                            //$this->errors[$field][] = "$field failed validation for $validatorName";
+                            //$this->errors[$field][] = 40301;
+							$this->errors[$field][] = "$field failed validation for $validatorName";
                             if (!empty($validator['break_chain_on_failure'])) {
                                 break;
                             }
@@ -203,7 +205,7 @@ class PeerInputFilter
             }
         }
 
-        $this->errors['Date'][] = "Invalid date format. Expected format: $format. Received: $value";
+        $this->errors['Date'][] = 20258;
         return false;
     }
 
@@ -286,7 +288,7 @@ class PeerInputFilter
 
         $validator = $options['validator'] ?? null;
         if (!$validator || !isset($validator['name'])) {
-            $this->errors['ArrayValues'][] = 'ArrayValues validator requires a sub-validator.';
+            $this->errors['ArrayValues'][] = 40301;
         }
 
         $validatorName = $validator['name'];
@@ -580,17 +582,17 @@ class PeerInputFilter
     protected function validatePassword(string $value, array $options = []): bool
     {
         if ($value === '') {
-            $this->errors['password'][] = 'Could not find mandatory password';
+            $this->errors['password'][] = 30101;
             return false;
         }
 
         if (strlen($value) < 8 || strlen($value) > 128) {
-            $this->errors['password'][] = 'Password must be between 8 and 128 characters.';
+            $this->errors['password'][] = 20226;
             return false;
         }
 
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $value)) {
-            $this->errors['password'][] = 'Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, and one number.';
+            $this->errors['password'][] = 20226;
             return false;
         }
 
@@ -655,7 +657,7 @@ class PeerInputFilter
     protected function validatePkey(string $value, array $options = []): bool
     {
         if ($value === '') {
-            $this->errors['pkey'][] = 'Could not find mandatory pkey';
+            $this->errors['pkey'][] = 30103;
             return false;
         }
 
@@ -663,12 +665,12 @@ class PeerInputFilter
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
         if (strlen($value) < 43 || strlen($value) > 44) {
-            $this->errors['pkey'][] = 'Pkey must be between 43 and 44 characters.';
+            $this->errors['pkey'][] = 20254;
             return false;
         }
 
         if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $value)) {
-            $this->errors['pkey'][] = 'Invalid Solana Public Key.';
+            $this->errors['pkey'][] = 20254;
             return false;
         }
 
@@ -678,7 +680,7 @@ class PeerInputFilter
     protected function validatePhoneNumber(string $value, array $options = []): bool
     {
         if ($value === '') {
-            $this->errors['phone'][] = 'Phone number is required.';
+            $this->errors['phone'][] = 30103;
             return false;
         }
 
@@ -688,7 +690,7 @@ class PeerInputFilter
         $pattern = '/^\+?[1-9]\d{0,2}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{1,4}[\s.-]?\d{1,9}$/';
 
         if (!preg_match($pattern, $value)) {
-            $this->errors['phone'][] = 'Invalid phone number format.';
+            $this->errors['phone'][] = 20253;
             return false;
         }
 
@@ -705,7 +707,7 @@ class PeerInputFilter
         $imagePath = __DIR__ . '/../../runtime-data/media' . $imagePath;
 
         if (!is_readable($imagePath)) {
-            $this->errors['image'][] = 'Image file does not exist or is not readable.';
+            $this->errors['image'][] = 41508;
             return false;
         }
 

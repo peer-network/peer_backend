@@ -18,8 +18,5 @@
         "james-heinrich/getid3": "^1.9"
     },
     "config": {
-    },
-    "require-dev": {
-        "vimeo/psalm": "^6.9"
     }
 }

@@ -107,7 +107,7 @@ class ContactusService
             $exist = ($type === 'id') ? $this->contactUsMapper->loadById($value) : $this->contactUsMapper->loadByName($value);
 
             if ($exist === null) {
-                return $this->respondWithError('Failed to fetch contact from database.');
+                return $this->respondWithError(40401);
             }
 
             $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $exist);
@@ -149,7 +149,7 @@ class ContactusService
             $exist = $this->contactUsMapper->fetchAll($args);
 
             if ($exist === null) {
-                return $this->respondWithError('Failed to fetch contact from database.');
+                return $this->respondWithError(40401);
             }
 
             $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $exist);

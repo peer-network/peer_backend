@@ -114,7 +114,7 @@ class WalletService
             $success = [
                 'status' => 'success',
                 'counter' => count($walletData),
-                'ResponseCode' => 'Successfully fetched wallets',
+                'ResponseCode' => 11209,
                 'affectedRows' => $walletData
             ];
 

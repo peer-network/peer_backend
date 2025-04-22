@@ -44,7 +44,7 @@ class UserService
     {
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
             return self::respondWithError(
-                'Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, and one number.'
+                20226
             );
         }
 
@@ -101,7 +101,7 @@ class UserService
         $id = self::generateUUID();
         if (empty($id)) {
             $this->logger->critical('Failed to generate user ID');
-            return $this->respondWithError('Failed to generate user ID.');
+            return $this->respondWithError(40602);
         }
 
         $username = trim($args['username']);
@@ -213,17 +213,17 @@ class UserService
                 $this->logger->info('UserService.uploadMedia mediaPath', ['mediaPath' => $mediaPath]);
 
                 if ($mediaPath === '') {
-                    return self::respondWithError('Media upload failed');
+                    return self::respondWithError(41009);
                 }
 
                 if (isset($mediaPath['path'])) {
                     return $mediaPath['path'];
                 } else {
-                    return self::respondWithError(30305);
+                    return self::respondWithError(40306);
                 }
 
             } else {
-                return self::respondWithError('Media necessary for upload');
+                return self::respondWithError(40307);
             }
 
 
@@ -237,7 +237,7 @@ class UserService
     public function verifyAccount(string $userId): array
     {
         if (!self::isValidUUID($userId)) {
-            return self::respondWithError('Could not find mandatory id.');
+            return self::respondWithError(20201);
         }
 
         try {
@@ -271,7 +271,7 @@ class UserService
         }
 
         if (empty($args)) {
-            return self::respondWithError('Could not find mandatory args');
+            return self::respondWithError(30101);
         }
 
         $this->logger->info('UserService.setPassword started');
@@ -292,7 +292,7 @@ class UserService
 
         if (!$user) {
             $this->logger->warning('User not found', ['userId' => $this->currentUserId]);
-            return self::respondWithError('User not found');
+            return self::respondWithError(21001);
         }
 
         if (!$this->validatePasswordMatch($currentPassword, $user->getPassword())) {
@@ -321,7 +321,7 @@ class UserService
         }
 
         if (empty($args)) {
-            return self::respondWithError('Could not find mandatory args');
+            return self::respondWithError(30101);
         }
 
         $this->logger->info('UserService.setEmail started');
@@ -331,7 +331,7 @@ class UserService
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->logger->warning('Invalid email format', ['email' => $email]);
-            return self::respondWithError('Invalid email format');
+            return self::respondWithError(20224);
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
@@ -342,7 +342,7 @@ class UserService
         $user = $this->userMapper->loadById($this->currentUserId);
         if (!$user) {
             $this->logger->warning('User not found', ['userId' => $this->currentUserId]);
-            return self::respondWithError('User not found');
+            return self::respondWithError(21001);
         }
 
         if ($email === $user->getMail()) {
@@ -377,7 +377,7 @@ class UserService
         }
 
         if (empty($args['username'])) {
-            return self::respondWithError('Could not find mandatory args');
+            return self::respondWithError(30101);
         }
 
         $this->logger->info('UserService.setUsername started');
@@ -403,7 +403,7 @@ class UserService
 
             $slug = $this->generateUniqueSlug($username);
             if (!$slug) {
-                return self::respondWithError('Failed to generate a unique slug after multiple attempts.');
+                return self::respondWithError(41010);
             }
 
             $user->setName($username);
@@ -432,7 +432,7 @@ class UserService
         }
 
         if (empty($expassword)) {
-            return self::respondWithError('Could not find mandatory expassword');
+            return self::respondWithError(30101);
         }
 
         $this->logger->info('UserService.deleteAccount started');
@@ -441,7 +441,7 @@ class UserService
 
         $user = $this->userMapper->loadById($userId);
         if (!$user) {
-            return self::respondWithError('Could not find user');
+            return self::respondWithError(21001);
         }
 
         if (!$this->validatePasswordMatch($expassword, $user->getPassword())) {
@@ -453,11 +453,11 @@ class UserService
             $this->logger->info('User deleted successfully', ['userId' => $userId]);
             return [
                 'status' => 'success',
-                'message' => 'User deleted successfully',
+                'message' => 11010,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to delete user', ['exception' => $e]);
-            return self::respondWithError('Failed to delete user');
+            return self::respondWithError(41011);
         }
     }
 
@@ -513,7 +513,7 @@ class UserService
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
-            return self::respondWithError('Invalid UUID provided for Follows.');
+            return self::respondWithError(20201);
         }
 
         try {
@@ -568,10 +568,10 @@ class UserService
             }
 
             $this->logger->info('No friends found for the user', ['currentUserId' => $this->currentUserId]);
-            return self::respondWithError('No friends found for the user.');
+            return self::respondWithError(21001);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
-            return self::respondWithError('Failed to retrieve friends list.');
+            return self::respondWithError(41107);
         }
     }
 
@@ -594,16 +594,16 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($users),
-                    'ResponseCode' => 'All friends data prepared successfully',
+                    'ResponseCode' => 11102,
                     'affectedRows' => $users,
                 ];
             }
 
             $this->logger->info('No friends found @ all');
-            return self::respondWithError('No friends found @ all.');
+            return self::respondWithError(21001);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
-            return self::respondWithError('Failed to retrieve friends list.');
+            return self::respondWithError(41107);
         }
     }
 
@@ -625,9 +625,9 @@ class UserService
                 ];
             }
 
-            return self::respondWithError('No users found for the user.');
+            return self::respondWithError(21001);
         } catch (\Throwable $e) {
-            return self::respondWithError('Failed to retrieve users list.');
+            return self::respondWithError(41207);
         }
     }
 
@@ -649,9 +649,9 @@ class UserService
                 ];
             }
 
-            return self::respondWithError('No users found for the user.');
+            return self::respondWithError(21001);
         } catch (\Throwable $e) {
-            return self::respondWithError('Failed to retrieve users list.');
+            return self::respondWithError(41207);
         }
     }
 
@@ -700,25 +700,49 @@ class UserService
      * 
      * @return array
      */
-    public function resetPassword(string $token, string $newPassword): array
+    public function resetPassword(?array $args): array
     {
         $this->logger->info('UserService.resetPassword started');
 
-        try {
-            $passwordValidation = $this->validatePassword($newPassword);
+        $newPassword = $args['password'] ?? null;
 
-            if ($passwordValidation['status'] === 'error') {
-                return $passwordValidation;
-            }
+        $passwordValidation = $this->validatePassword($newPassword);
 
-            return $this->userMapper->checkForValidPasswordResetToken($token, $newPassword);
+        if ($passwordValidation['status'] === 'error') {
+            return $passwordValidation;
+        }
 
-        } catch (\Throwable $e) {
-            $this->logger->info('UserService.requestPasswordReset Error ' .  $e->getMessage());
+        $request = $this->userMapper->getPasswordResetRequest($args['token']);
+
+        if (!$request) {
+            $this->userMapper->deletePasswordResetToken($args['token']);
+
             return [
                 'status' => 'error',
-                'ResponseCode' => 'Something went wrong. Please try again later.'
+                'ResponseCode' => 'Invalid or expired reset token. Please try again.'
             ];
+        }
+        $user = $this->userMapper->loadById($request['user_id']);
+
+        if (!$user) {
+            $this->logger->warning('User not found', ['userId' => $request['user_id']]);
+            return self::respondWithError(21001);
+        }
+
+        try {
+            $user->validatePass($args);
+            $this->userMapper->updatePass($user);
+
+            $this->userMapper->deletePasswordResetToken($args['token']);
+
+            $this->logger->info('User password updated successfully', ['userId' => $this->currentUserId]);
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11005,
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to update user password', ['exception' => $e]);
+            return self::respondWithError(41004);
         }
     }
 

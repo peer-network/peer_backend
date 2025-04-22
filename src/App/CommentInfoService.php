@@ -44,7 +44,7 @@ class CommentInfoService
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
         $this->logger->info('CommentInfoService.deleteCommentInfo started');
@@ -84,7 +84,7 @@ class CommentInfoService
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
         $this->logger->info('CommentInfoService.likeComment started');
@@ -122,7 +122,7 @@ class CommentInfoService
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
         $this->logger->info('CommentInfoService.reportComment started');
@@ -164,7 +164,7 @@ class CommentInfoService
         $commentinfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentinfo) {
-            return $this->respondWithError('Commentinfo not found.');
+            return $this->respondWithError(31601);
         }
 
         $results = $commentinfo->getArrayCopy();
