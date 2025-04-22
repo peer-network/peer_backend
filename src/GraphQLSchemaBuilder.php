@@ -1235,7 +1235,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response['counter'])) {
-            return $this->createSuccessResponse(21103, [], false);
+            return $this->createSuccessResponse(11107, [], false);
         }
 
         if (is_array($response) || !empty($response)) {
@@ -1563,7 +1563,7 @@ class GraphQLSchemaBuilder
                     return $this->respondWithError($deducted['ResponseCode']);
                 }
 
-                $response['ResponseCode'] = 11301;
+                $response['ResponseCode'] = 11508;
                 return $response;
             }
 

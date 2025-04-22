@@ -568,7 +568,7 @@ class UserService
             }
 
             $this->logger->info('No friends found for the user', ['currentUserId' => $this->currentUserId]);
-            return self::respondWithError(21001);
+            return self::respondWithError(21101);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
             return self::respondWithError(41107);
@@ -600,7 +600,7 @@ class UserService
             }
 
             $this->logger->info('No friends found @ all');
-            return self::respondWithError(21001);
+            return self::respondWithError(21101);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
             return self::respondWithError(41107);
