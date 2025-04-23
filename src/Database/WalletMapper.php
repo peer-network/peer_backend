@@ -43,9 +43,9 @@ class WalletMapper
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
-	private string $poolWallet;
-	private string $burnWallet;
-	private string $peerWallet;
+    private string $poolWallet;
+    private string $burnWallet;
+    private string $peerWallet;
 
     public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
     {
@@ -65,16 +65,16 @@ class WalletMapper
         }
 
         $liqpool = $this->pool->returnAccounts()['response'];
-		if (!is_array($liqpool) || !isset($liqpool['pool']) || !isset($liqpool['peer']) || !isset($liqpool['burn'])) {
+        if (!is_array($liqpool) || !isset($liqpool['pool']) || !isset($liqpool['peer']) || !isset($liqpool['burn'])) {
             $this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
             return self::respondWithError(30102);
         }
 
-		$this->poolWallet = $liqpool['pool'];
-		$this->burnWallet = $liqpool['burn'];
-		$this->peerWallet = $liqpool['peer'];
+        $this->poolWallet = $liqpool['pool'];
+        $this->burnWallet = $liqpool['burn'];
+        $this->peerWallet = $liqpool['peer'];
 
-		$this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
+        $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
 
         $currentBalance = $this->getUserWalletBalance($userId);
         if (empty($currentBalance)) {
@@ -139,9 +139,9 @@ class WalletMapper
                 $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
                 $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
-				$this->logger->info('Invited By', [
-					'invited' => $inviterId,
-				]);
+                $this->logger->info('Invited By', [
+                    'invited' => $inviterId,
+                ]);
             }
 
         } catch (\Throwable $e) {
@@ -1180,7 +1180,7 @@ class WalletMapper
     public function deductFromWallets(string $userId, ?array $args = []): array
     {
         $this->logger->info('WalletMapper.deductFromWallets started');
-		$this->logger->info('deductFromWallets commenrs args.', ['args' => $args]);
+        $this->logger->info('deductFromWallets commenrs args.', ['args' => $args]);
 
         $postId = $args['postid'] ?? null;
         $art = $args['art'] ?? null;
