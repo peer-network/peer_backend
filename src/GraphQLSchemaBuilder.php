@@ -1221,7 +1221,7 @@ class GraphQLSchemaBuilder
     {
         $this->logger->info('Query.createUser started');
 
-        $response = $this->userService->createUser($args, $callable);
+        $response = $this->userService->createUser($args);
         if (isset($response['status']) && $response['status'] === 'error') {
             return $response;
         }
