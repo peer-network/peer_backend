@@ -7,6 +7,7 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Services\Base64FileHandler;
+use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 
@@ -21,7 +22,8 @@ class UserService
         protected DailyFreeMapper $dailyFreeMapper,
         protected UserMapper $userMapper,
         protected PostMapper $postMapper,
-        protected WalletMapper $walletMapper
+        protected WalletMapper $walletMapper,
+		protected Mailer $mailer
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -88,6 +90,37 @@ class UserService
         return null;
     }
 
+    private function createPayload(string $email, string $username, string $verificationCode): array
+    {
+        $email = isset($email) ? trim($email) : '';
+        $username = isset($username) ? trim($username) : '';
+        $verificationCode = isset($verificationCode) ? trim($verificationCode) : '';
+
+		if (empty($email) || empty($username) || empty($verificationCode)){
+			return self::respondWithError(40701);
+		}
+
+		$payload = [
+			"to" => [
+				[
+					"email" => $email,
+					"name" => $username
+				]
+			],
+			"templateId" => 1,
+			"params" => [
+				"verification_code" => $verificationCode
+			]
+		];
+
+        try {
+            return $payload;
+        } catch (\Throwable $e) {
+            $this->logger->error('Error create payload.', ['exception' => $e]);
+            return self::respondWithError('Error create payload.');
+        }
+    }
+
     public function createUser(array $args): array
     {
         $this->logger->info('UserService.createUser started');
@@ -104,21 +137,22 @@ class UserService
             return $this->respondWithError(40602);
         }
 
-        $username = trim($args['username']);
-        $email = trim($args['email']);
-        $password = $args['password'];
         $pkey = $args['pkey'] ?? null;
         $mediaFile = isset($args['img']) ? trim($args['img']) : '';
         $isPrivate = (int)($args['isprivate'] ?? 0);
         $invited = $args['invited'] ?? null;
+		$bin2hex = bin2hex(random_bytes(64));
+		$expiresat = (int)\time()+1800;
 
         $biography = $args['biography'] ?? '/userData/' . $id . '.txt';
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
+        $email = trim($args['email']);
         if ($this->userMapper->isEmailTaken($email)) {
             return self::respondWithError(20601);
         }
 
+        $username = trim($args['username']);
         $slug = $this->generateUniqueSlug($username);
         $createdat = (new \DateTime())->format('Y-m-d H:i:s.u');
 
@@ -126,11 +160,21 @@ class UserService
             $args['img'] = $this->uploadMedia($mediaFile, $id, 'profile');
         }
 
+        $verificationData = [
+            'token' => $bin2hex,
+            'userid' => $id,
+            'attempt' => 1,
+            'expiresat' => $expiresat,
+			'updatedat' => (new \DateTime())->format('Y-m-d H:i:s.u')
+        ];
+
+		$this->logger->info('UserService.createUser.verificationData started', ['verificationData' => $verificationData]);
+
         $userData = [
             'uid' => $id,
             'email' => $email,
             'username' => $username,
-            'password' => $password,
+            'password' => $args['password'],
             'status' => 0,
             'verified' => 0,
             'slug' => $slug,
@@ -176,25 +220,52 @@ class UserService
             $user = new User($userData);
             $this->userMapper->createUser($user);
             unset($args);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Error registering User::User.', ['exception' => $e]);
+            return self::respondWithError($e->getMessage());
+        }
 
+        try {
+            $toInsert = new Tokenize($verificationData);
+			$this->userMapper->insertoken($toInsert);
+            unset($verificationData, $toInsert);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Error registering User::Tokenize.', ['exception' => $e]);
+            return self::respondWithError($e->getMessage());
+        }
+
+        try {
             $userinfo = new UserInfo($infoData);
             $this->userMapper->insertinfo($userinfo);
             unset($infoData, $userinfo);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Error registering User::UserInfo.', ['exception' => $e]);
+            return self::respondWithError($e->getMessage());
+        }
 
+        try {
             $userwallet = new Wallett($walletData);
             $this->walletMapper->insertt($userwallet);
             unset($walletData, $userwallet);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Error registering User::Wallett.', ['exception' => $e]);
+            return self::respondWithError($e->getMessage());
+        }
 
+        try {
             $createuserDaily = new DailyFree($dailyData);
             $this->dailyFreeMapper->insert($createuserDaily);
             unset($dailyData, $createuserDaily);
-
-            $this->userMapper->logLoginDaten($id);
-            $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering user.', ['exception' => $e]);
+            $this->logger->warning('Error registering User::DailyFree.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());
         }
+
+        $this->userMapper->logLoginDaten($id);
+        $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
+
+		$payload = $this->createPayload($email, $username, $bin2hex);
+		$this->mailer->sendViaAPI($payload);
 
 		return [
 			'status' => 'success',
@@ -206,7 +277,6 @@ class UserService
     private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
     {
         try {
-
 
             if (!empty($mediaFile)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $userId, $folder);
