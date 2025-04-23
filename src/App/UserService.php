@@ -141,7 +141,7 @@ class UserService
         $mediaFile = isset($args['img']) ? trim($args['img']) : '';
         $isPrivate = (int)($args['isprivate'] ?? 0);
         $invited = $args['invited'] ?? null;
-		$bin2hex = bin2hex(random_bytes(64));
+		$bin2hex = bin2hex(random_bytes(32));
 		$expiresat = (int)\time()+1800;
 
         $biography = $args['biography'] ?? '/userData/' . $id . '.txt';
