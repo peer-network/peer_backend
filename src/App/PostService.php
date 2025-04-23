@@ -375,7 +375,7 @@ class PostService
 
         $results = $this->postMapper->findPostser($this->currentUserId, $args);
 		if (empty($results)) {
-			return $this->respondWithError('Invalid ID provided.');
+			return $this->respondWithError(21517);
 		}
 
         return $results;

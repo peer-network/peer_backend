@@ -78,7 +78,7 @@ class UserInfoService
         }
 
         if ($this->currentUserId === $followedUserId) {
-            return $this->respondWithError(21104);
+            return $this->respondWithError(31102);
         }
 
         $this->logger->info('UserInfoService.toggleUserFollow started');

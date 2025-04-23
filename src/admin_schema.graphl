@@ -69,6 +69,7 @@ type Mutation {
   createPost(action: PostenType!, input: CreatePostInput!): PostResponse!
   createComment(action: CommentsType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolveActionPost(action: ActionType!, postid: ID!): DefaultResponse!
+  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse!
 }
 
 scalar Decimal

@@ -143,13 +143,13 @@ class McapMapper
 
             if ($numberoftokens === 0 || $numberofgems === 0) {
                 $this->logger->info("numberoftokens or numberofgems is empty.", ['numberoftokens' => $numberoftokens, 'numberofgems' => $numberofgems]);
-                return $this->respondWithError('numberoftokens or numberofgems is empty.');
+                return $this->respondWithError(21207);
             }
 
             $resultLastData = $this->refreshMarketData();
             if ($resultLastData['status'] !== 'success') {
                 $this->logger->info(resultLastData['ResponseCode'], ['resultLastData' => $resultLastData]);
-                return $this->respondWithError('refreshMarketData failed.');
+                return $this->respondWithError(41217);
             }
 
             $insertedId = $resultLastData['affectedRows']['insertedId'] ?? null;
@@ -158,7 +158,7 @@ class McapMapper
 
             if ($insertedId === null) {
                 $this->logger->info("Inserted ID is missing from refreshMarketData response.", ['insertedId' => $insertedId]);
-                return $this->respondWithError('Inserted ID is missing from refreshMarketData response.');
+                return $this->respondWithError(41218);
             }
 
             $numberoftokens += $daytokens;
@@ -208,16 +208,16 @@ class McapMapper
             $priceInfo = @file_get_contents($url);
 
             if ($priceInfo === false) {
-                return $this->respondWithError('Unable to connect to the site.');
+                return $this->respondWithError(41219);
             }
 
             $array = json_decode($priceInfo, true);
             if (json_last_error() !== JSON_ERROR_NONE || $array === null) {
-                return $this->respondWithError('Failed to decode JSON response.');
+                return $this->respondWithError(41220);
             }
 
             if (empty($array['data']['ETH/EUR']['bestAsk'])) {
-                return $this->respondWithError('Missing market data for ETH/EUR.');
+                return $this->respondWithError(21208);
             }
 
             $coverage = (float) $array['data']['ETH/EUR']['bestAsk'];
@@ -239,12 +239,12 @@ class McapMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'refresh Market Data successfully',
+                'ResponseCode' => 11210,
                 'affectedRows' => ['coverage' => $coverage, 'daytokens' => $daytokens, 'insertedId' => $insertedId]
             ];
         } catch (\Exception $e) {
             $this->logger->error('Connection Exception.', ['exception' => $e]);
-            return $this->respondWithError('Connection Exception.');
+            return $this->respondWithError(40301);
         }
     }
 }

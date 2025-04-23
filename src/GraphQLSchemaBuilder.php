@@ -119,6 +119,7 @@ class GraphQLSchemaBuilder
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
                 if ($decodedToken) {
                     $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
+					//$user = $this->userMapper->loadTokenById($decodedToken->uid);
                     if ($user) {
                         $this->currentUserId = $decodedToken->uid;
                         $this->userRoles = $decodedToken->rol;
@@ -1167,7 +1168,7 @@ class GraphQLSchemaBuilder
     {
 
         return [
-            'register' => fn(mixed $root, array $args) => $this->userService->createUser($args['input']),
+            'register' => fn(mixed $root, array $args) => $this->createUser($args['input']),
             'verifiedAccount' => fn(mixed $root, array $args) => $this->verifiedAccount($args['userid']),
             'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
@@ -1195,6 +1196,7 @@ class GraphQLSchemaBuilder
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveActionPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
+            'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
         ];
     }
 
@@ -1216,6 +1218,23 @@ class GraphQLSchemaBuilder
         ];
     }
 
+    protected function createUser(array $args): ?array
+    {
+        $this->logger->info('Query.createUser started');
+
+        $response = $this->userService->createUser($args, $callable);
+        if (isset($response['status']) && $response['status'] === 'error') {
+            return $response;
+        }
+
+        if (!empty($response)) {
+            return $response;
+        }
+
+        $this->logger->warning('Query.createUser No data found');
+        return $this->respondWithError(41105);
+    }
+
     protected function resolveBlocklist(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
@@ -1235,7 +1254,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response['counter'])) {
-            return $this->createSuccessResponse(21103, [], false);
+            return $this->createSuccessResponse(11107, [], false);
         }
 
         if (is_array($response) || !empty($response)) {
@@ -1388,7 +1407,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
-            return $this->createSuccessResponse('No fetchPool found', [], false);
+            return $this->createSuccessResponse(41214, [], false);
         }
 
         if (is_array($response) || !empty($response)) {
@@ -1563,7 +1582,7 @@ class GraphQLSchemaBuilder
                     return $this->respondWithError($deducted['ResponseCode']);
                 }
 
-                $response['ResponseCode'] = 11301;
+                $response['ResponseCode'] = 11508;
                 return $response;
             }
 
@@ -2257,10 +2276,12 @@ class GraphQLSchemaBuilder
         return $response;
     }
 
-    protected function validateOffsetAndLimit($args)
+    protected function validateOffsetAndLimit(array $args = []): ?array
     {
         $offset = isset($args['offset']) ? (int)$args['offset'] : null;
         $limit = isset($args['limit']) ? (int)$args['limit'] : null;
+        $postOffset = isset($args['postOffset']) ? (int)$args['postOffset'] : null;
+        $postLimit = isset($args['postLimit']) ? (int)$args['postLimit'] : null;
         $commentOffset = isset($args['commentOffset']) ? (int)$args['commentOffset'] : null;
         $commentLimit = isset($args['commentLimit']) ? (int)$args['commentLimit'] : null;
         $messageOffset = isset($args['messageOffset']) ? (int)$args['messageOffset'] : null;
@@ -2274,6 +2295,18 @@ class GraphQLSchemaBuilder
 
         if ($limit !== null) {
             if ($limit < 1 || $limit > 20) {  
+                return $this->respondWithError(20204);
+            }
+        }
+
+        if ($postOffset !== null) {
+            if ($postOffset < 0 || $postOffset > 200) {
+                return $this->respondWithError(20203);
+            }
+        }
+
+        if ($postLimit !== null) {
+            if ($postLimit < 1 || $postLimit > 20) {  
                 return $this->respondWithError(20204);
             }
         }
@@ -2302,7 +2335,7 @@ class GraphQLSchemaBuilder
             }
         }
 
-        return true;
+        return null;
     }
 
     protected function checkAuthentication(): bool
@@ -2320,7 +2353,7 @@ class GraphQLSchemaBuilder
 
         $ip = filter_var($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', FILTER_VALIDATE_IP) ?: '0.0.0.0';
         if ($ip === '0.0.0.0') {
-            return $this->respondWithError('Could not find mandatory IP');
+            return $this->respondWithError(20257);
         }
 
         if (!$this->contactusService->checkRateLimit($ip)) {
@@ -2529,7 +2562,7 @@ class GraphQLSchemaBuilder
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 30901,
+                'ResponseCode' => 10901,
                 'accessToken' => $accessToken,
                 'refreshToken' => $newRefreshToken
             ];
