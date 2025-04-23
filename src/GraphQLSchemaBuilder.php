@@ -48,7 +48,6 @@ use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\JWTService;
-use Fawaz\Services\MailerService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
@@ -119,7 +118,7 @@ class GraphQLSchemaBuilder
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
                 if ($decodedToken) {
                     $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
-					//$user = $this->userMapper->loadTokenById($decodedToken->uid);
+                    //$user = $this->userMapper->loadTokenById($decodedToken->uid);
                     if ($user) {
                         $this->currentUserId = $decodedToken->uid;
                         $this->userRoles = $decodedToken->rol;
@@ -2098,14 +2097,14 @@ class GraphQLSchemaBuilder
 
         if (!empty($postId)) {
             $posts = $this->postInfoService->findPostInfo($postId);
-			if (isset($posts['status']) && $posts['status'] === 'error') {
-				return $posts;
-			}
+            if (isset($posts['status']) && $posts['status'] === 'error') {
+                return $posts;
+            }
         } else {
             return $this->respondWithError(21504);
         }
 
-		return $this->createSuccessResponse(11502, $posts);
+        return $this->createSuccessResponse(11502, $posts);
     }
 
     protected function resolveCommentInfo(string $commentId): ?array
