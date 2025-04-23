@@ -58,21 +58,23 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.transferToken started');
 
-        $status = $this->pool->returnAccounts()['status'];
-        if ($status === 'error') {
-            $this->logger->warning('Incorrect returning Accounts', ['Error' => $status]);
-            return self::respondWithError(40701);
-        }
+		$accountsResult = $this->pool->returnAccounts();
 
-        $liqpool = $this->pool->returnAccounts()['response'];
-        if (!is_array($liqpool) || !isset($liqpool['pool']) || !isset($liqpool['peer']) || !isset($liqpool['burn'])) {
-            $this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
-            return self::respondWithError(30102);
-        }
+		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
+			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
+			return self::respondWithError(40701);
+		}
 
-        $this->poolWallet = $liqpool['pool'];
-        $this->burnWallet = $liqpool['burn'];
-        $this->peerWallet = $liqpool['peer'];
+		$liqpool = $accountsResult['response'] ?? null;
+
+		if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
+			$this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
+			return self::respondWithError(30102);
+		}
+
+		$this->poolWallet = $liqpool['pool'];
+		$this->burnWallet = $liqpool['burn'];
+		$this->peerWallet = $liqpool['peer'];
 
         $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
 
