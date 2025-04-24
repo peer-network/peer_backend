@@ -751,7 +751,7 @@ class PeerInputFilter
         $imagePath = __DIR__ . '/../../runtime-data/media' . $imagePath;
 
         if (!is_readable($imagePath)) {
-            $this->errors['image'][] = 41508;
+            $this->errors['image'][] = 20263;
             return false;
         }
 
