@@ -121,7 +121,7 @@ class WalletMapper
 
         if ((string)$row === $userId) {
             $this->logger->warning('Send and Receive Same Wallet Error.');
-            return self::respondWithError(41222);
+            return self::respondWithError(31202);
         }
 
         $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE);
