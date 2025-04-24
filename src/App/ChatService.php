@@ -582,7 +582,7 @@ class ChatService
         $message = $this->chatMapper->loadMessageById($messageId);
 
         if ($message === false) {
-            return $this->respondWithError(31810);
+            return $this->respondWithError(21001);
         }
 
         if ($message['userid'] !== $this->currentUserId && !$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
