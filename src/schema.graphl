@@ -32,6 +32,8 @@ type Query {
   fetchwinslog(day: DayType!, offset: Int, limit: Int): UserLogWins!
   fetchpayslog(day: DayType!, offset: Int, limit: Int): UserLogWins!
   callusermove: StandardResponse!
+  getReferralInfo: ReferralInfoResponse!
+  referralList(offset: Int, limit: Int): ReferralListResponse!
 }
 
 type Mutation {
@@ -480,6 +482,23 @@ type CommentResponse {
   affectedRows: [Comment]
 }
 
+type ReferralInfoResponse {
+  status: String
+  ResponseCode: String
+  referralUuid: ID
+  referralLink: String
+}
+type ReferralListResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String!
+  affectedRows: ReferralUsers!
+}
+
+type ReferralUsers {
+  invitedBy: ProfilUser
+  iInvited: [ProfilUser!]!
+}
 input RegisterInput {
   email: String!
   password: String!

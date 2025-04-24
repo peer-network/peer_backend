@@ -52,6 +52,32 @@ CREATE TABLE IF NOT EXISTS follows (
 CREATE INDEX idx_follows_followerid ON follows(followerid);
 CREATE INDEX idx_follows_followedid ON follows(followedid);
 
+-- Table: user_referral
+CREATE TABLE IF NOT EXISTS user_referral (
+    id SERIAL PRIMARY KEY,
+    inviter_uuid UUID NOT NULL,
+    invitee_uuid UUID UNIQUE NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    
+    CONSTRAINT fk_user_referral_inviter FOREIGN KEY (inviter_uuid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_referral_invitee FOREIGN KEY (invitee_uuid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX idx_user_referral_inviter ON user_referral(inviter_uuid);
+CREATE INDEX idx_user_referral_invitee ON user_referral(invitee_uuid);
+
+-- Table: user_referral_info
+CREATE TABLE IF NOT EXISTS user_referral_info (
+    id SERIAL PRIMARY KEY,
+    user_uuid UUID UNIQUE NOT NULL,
+    referral_link TEXT NOT NULL,
+    qr_code_url TEXT DEFAULT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    referral_uuid UUID UNIQUE NOT NULL,
+    
+    CONSTRAINT fk_user_referral_info_user FOREIGN KEY (user_uuid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX idx_user_referral_info_user_uuid ON user_referral_info(user_uuid);
+
 -- Table: access_tokens
 CREATE TABLE IF NOT EXISTS access_tokens (
     userid UUID PRIMARY KEY,

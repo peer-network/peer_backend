@@ -5,6 +5,7 @@ schema {
 
 type Query {
   hello: HelloResponse
+  referralList(offset: Int, limit: Int): ReferralListResponse!
 }
 
 type Mutation {
@@ -46,10 +47,31 @@ type AuthPayload {
   accessToken: String
   refreshToken: String
 }
+type ReferralListResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String!
+  affectedRows: ReferralUsers!
+}
+
+type ReferralUsers {
+  invitedBy: ProfilUser
+  iInvited: [ProfilUser!]!
+}
+
+type ProfilUser {
+  id: ID!
+  username: String
+  slug: Int
+  img: String
+  isfollowed: Boolean
+  isfollowing: Boolean
+}
 
 input RegisterInput {
   email: String!
   password: String!
   username: String!
   pkey: String
+  referralUuid: ID
 }

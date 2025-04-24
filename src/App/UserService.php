@@ -91,7 +91,7 @@ class UserService
     public function createUser(array $args): array
     {
         $this->logger->info('UserService.createUser started');
-
+    
         $requiredFields = ['username', 'email', 'password'];
         $validationErrors = self::validateRequiredFields($args, $requiredFields);
         if (!empty($validationErrors)) {
@@ -103,7 +103,7 @@ class UserService
             $this->logger->critical('Failed to generate user ID');
             return $this->respondWithError('Failed to generate user ID.');
         }
-
+    
         $username = trim($args['username']);
         $email = trim($args['email']);
         $password = $args['password'];
@@ -111,21 +111,33 @@ class UserService
         $mediaFile = isset($args['img']) ? trim($args['img']) : '';
         $isPrivate = (int)($args['isprivate'] ?? 0);
         $invited = $args['invited'] ?? null;
-
+    
         $biography = $args['biography'] ?? '/userData/' . $id . '.txt';
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-
+    
+        $referralUuid = $args['referralUuid'] ?? null;
+        $inviter = null;
+    
+        if (!empty($referralUuid)) {
+            $inviter = $this->userMapper->loadById($referralUuid);
+    
+            if (empty($inviter)) {
+                $this->logger->warning('Invalid referral UUID provided.', ['referralUuid' => $referralUuid]);
+                return self::respondWithError('INVALID_REFERRAL_UUID');
+            }
+        }
+    
         if ($this->userMapper->isEmailTaken($email)) {
             return self::respondWithError(20601);
         }
-
+    
         $slug = $this->generateUniqueSlug($username);
         $createdat = (new \DateTime())->format('Y-m-d H:i:s.u');
-
+    
         if ($mediaFile !== '') {
             $args['img'] = $this->uploadMedia($mediaFile, $id, 'profile');
         }
-
+    
         $userData = [
             'uid' => $id,
             'email' => $email,
@@ -141,7 +153,7 @@ class UserService
             'createdat' => $createdat,
             'updatedat' => $createdat
         ];
-
+    
         $infoData = [
             'userid' => $id,
             'liquidity' => 0.0,
@@ -155,7 +167,7 @@ class UserService
             'pkey' => $pkey,
             'updatedat' => $createdat,
         ];
-
+    
         $walletData = [
             'userid' => $id,
             'liquidity' => 0.0,
@@ -163,7 +175,7 @@ class UserService
             'updatedat' => $createdat,
             'createdat' => $createdat,
         ];
-
+    
         $dailyData = [
             'userid' => $id,
             'liken' => 0,
@@ -171,36 +183,61 @@ class UserService
             'posten' => 0,
             'createdat' => $createdat
         ];
-
+    
         try {
             $user = new User($userData);
             $this->userMapper->createUser($user);
-            unset($args);
-
+        
             $userinfo = new UserInfo($infoData);
             $this->userMapper->insertinfo($userinfo);
-            unset($infoData, $userinfo);
-
+        
+            $referralLink = $this->userMapper->generateReferralLink($id);
+            $this->userMapper->insertReferralInfo($id, $referralLink);
+        
+            if (!empty($inviter)) {
+                $this->userMapper->storeReferral($inviter->getUserId(), $id);
+            }
+        
             $userwallet = new Wallett($walletData);
             $this->walletMapper->insertt($userwallet);
-            unset($walletData, $userwallet);
-
+        
             $createuserDaily = new DailyFree($dailyData);
             $this->dailyFreeMapper->insert($createuserDaily);
-            unset($dailyData, $createuserDaily);
-
+        
             $this->userMapper->logLoginDaten($id);
             $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
         } catch (\Throwable $e) {
             $this->logger->warning('Error registering user.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());
         }
+        
+        
+    
+        $this->logger->info('Final user registration return payload', [
+            'referral_link' => $referralLink,
+        ]);
+    
+        return [
+            'status' => 'success',
+            'ResponseCode' => 10601,
+            'userid' => $id,
+        ];
+    }
+    
 
-		return [
-			'status' => 'success',
-			'ResponseCode' => 10601,
-			'userid' => $id,
-		];
+    public function referralList(string $userId, int $offset = 0, int $limit = 20): array
+    {
+        $data = $this->userMapper->getReferralRelations($userId, $offset, $limit);
+
+        return [
+            'status' => 'success',
+            'ResponseCode' => 'REFERRAL_LIST_LOADED',
+            'counter' => count($data['iInvited']),
+            'affectedRows' => [
+                'invitedBy' => $data['invitedBy'],
+                'iInvited' => $data['iInvited']
+            ],
+        ];
     }
 
     private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
