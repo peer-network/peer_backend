@@ -118,12 +118,12 @@ class PoolMapper
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
 
         $success = [
             'status' => 'success',
-            'ResponseCode' => 'Gems transactions prepared successfully.',
+            'ResponseCode' => 11207,
             'affectedRows' => $entries
         ];
 
@@ -150,7 +150,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            return $this->respondWithError("Invalid day parameter.");
+            return $this->respondWithError(20223);
         }
 
         $whereCondition = $dayOptions[$day];
@@ -187,20 +187,16 @@ class PoolMapper
             $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         }
 
         if (empty($data)) {
-            return $this->respondWithError('No records found for ' . $day);
+            return $this->respondWithError(21202); //'No records found for ' . $day
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
 
-        $args = [
-            'winstatus' => [
-                'totalGems' => $totalGems,
-            ]
-        ];
+        $args = [];
 
         foreach ($data as $row) {
             $userId = (string)$row['userid'];
@@ -208,9 +204,7 @@ class PoolMapper
             if (!isset($args[$userId])) {
                 $args[$userId] = [
                     'userid' => $userId,
-                    'gems' => $row['total_numbers'],
-                    'percentage' => $row['percentage'],
-                    'details' => []
+                    'gems' => $row['total_numbers']
                 ];
             }
 
@@ -225,17 +219,10 @@ class PoolMapper
             ];
 
             if (!isset($mapping[$whereby])) {
-                return $this->respondWithError('Invalid action type.');
+                return $this->respondWithError(41221);
             }
 
             $whereby = $mapping[$whereby]['text'];
-
-            $args[$userId]['details'][] = [
-                'gemid' => $row['gemid'],
-                'gems' => $row['gems'],
-                'whereby' => $whereby,
-                'createdat' => $row['createdat']
-            ];
         }
 
         if (!empty($data)) {
@@ -243,12 +230,12 @@ class PoolMapper
             return [
                 'status' => 'success',
                 'counter' => count($args) -1,
-                'ResponseCode' => 'Records found for ' . $day,
+                'ResponseCode' => 11208,
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
         }
 
-        return $this->respondWithError('Don\'t have any transaction in gems');
+        return $this->respondWithError(40301);
     }
 
     private function decimalToQ64_96(float $value): string

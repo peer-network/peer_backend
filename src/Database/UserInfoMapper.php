@@ -217,6 +217,41 @@ class UserInfoMapper
         }
     }
 
+    private function fetchFriends(string $userid): array
+    {
+        $this->logger->info("UserInfoMapper.fetchFriends started", ['userid' => $userid]);
+
+        try {
+            $sql = "SELECT u.uid, u.username, u.slug, u.updatedat, u.biography, u.img 
+                    FROM follows f1 
+                    INNER JOIN follows f2 ON f1.followedid = f2.followerid 
+                    INNER JOIN users u ON f1.followedid = u.uid 
+                    WHERE f1.followerid = :userid 
+                    AND f2.followedid = :userid";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
+            $stmt->execute();
+
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Throwable $e) {
+            $this->logger->error("Database error in fetchFriends: " . $e->getMessage(), ['userid' => $userid]);
+            return [];
+        }
+    }
+
+    private function getFriends(string $currentUserId): array|null
+    {
+        $this->logger->info('UserInfoMapper.getFriends started');
+        $users = $this->fetchFriends($currentUserId);
+
+        if ($users) {
+            return $users;
+        } 
+
+        return null;
+    }
+
     public function toggleUserFollow(string $followerid, string $followeduserid): array
     {
         $this->logger->info('UserInfoMapper.toggleUserFollow started');
@@ -242,7 +277,7 @@ class UserInfoMapper
                 $this->updateFollowCounts($followeduserid, -1, "amountfollower");
 
                 $action = false;
-                $response = 'Unfollow successful.';
+                $response = 11103;
             } else {
 
                 $query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
@@ -255,9 +290,10 @@ class UserInfoMapper
                 $this->updateFollowCounts($followeduserid, 1, "amountfollower");
 
                 $action = true;
-                $response = 'Follow successful.';
+                $response = 11104;
             }
 
+            $this->updateChatsStatus($followerid, $followeduserid);
             $this->updateFriendsCount($followerid);
             $this->updateFriendsCount($followeduserid);
 
@@ -268,7 +304,7 @@ class UserInfoMapper
         } catch (\Exception $e) {
             $this->db->rollBack();
             $this->logger->error('Failed to toggle user follow', ['exception' => $e]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user follow'];
+            return ['status' => 'error', 'ResponseCode' => 41103];
         }
     }
 
@@ -304,6 +340,65 @@ class UserInfoMapper
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
         $stmt->execute();
+    }
+
+    private function updateChatsStatus(string $followerid, string $followeduserid): void
+    {
+        $this->logger->info('UserInfoMapper.fetchFriends started', ['userid' => $followerid]);
+
+        try {
+            $friends = $this->getFriends($followerid);
+
+            if (!is_array($friends) || empty($friends)) {
+                throw new \InvalidArgumentException('NO FRIENDS FOUND OR AN ERROR OCCURRED IN FETCHING FRIENDS');
+            }
+
+            $friendIds = array_column($friends, 'uid');
+            $this->logger->info('Fetched friend IDs', ['friendIds' => $friendIds]);
+
+            if (!in_array($followeduserid, $friendIds)) {
+                $queryRestoreAccess = "UPDATE chats 
+                    SET ispublic = 9
+                    WHERE ispublic = 0 
+                    AND chatid IN (
+                        SELECT c.chatid FROM chats c
+                        JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
+                        JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
+                        WHERE cp1.userid = :followerid 
+                        AND cp2.userid = :followeduserid
+                )";
+                $this->logger->info('Setting chat visibility to 9 (private)', ['followerid' => $followerid, 'followeduserid' => $followeduserid]);
+            } else {
+                $queryRestoreAccess = "UPDATE chats 
+                    SET ispublic = 0
+                    WHERE ispublic = 9 
+                    AND chatid IN (
+                        SELECT c.chatid FROM chats c
+                        JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
+                        JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
+                        WHERE cp1.userid = :followerid 
+                        AND cp2.userid = :followeduserid
+                )";
+                $this->logger->info('Restoring chat visibility to 0 (public)', ['followerid' => $followerid, 'followeduserid' => $followeduserid]);
+            }
+
+            $stmt = $this->db->prepare($queryRestoreAccess);
+            $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
+            $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
+            $stmt->execute();
+
+            $this->logger->info('Query.setFollowUserResponse Resolvers', ['uid' => $followerid]);
+        } catch (\InvalidArgumentException $e) {
+            $this->logger->error('Failed to toggle user follow', [
+                'exception' => $e->getMessage(),
+                'uid' => $followerid
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('Unexpected error in updateChatsStatus', [
+                'exception' => $e->getMessage(),
+                'uid' => $followerid
+            ]);
+        }
     }
 
     public function isUserExistById(string $userId): bool
@@ -364,22 +459,8 @@ class UserInfoMapper
                 $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
                 $stmt->execute();
 
-                $queryRestoreAccess = "UPDATE chatparticipants 
-                    SET hasaccess = 0 
-                    WHERE userid = :blockedid 
-                    AND hasaccess = 9 
-                    AND chatid IN (
-                        SELECT c.chatid FROM chats c
-                        JOIN chatparticipants cp ON c.chatid = cp.chatid
-                        WHERE cp.userid = :blockerid AND c.ispublic = 0
-                    )";
-                $stmt = $this->db->prepare($queryRestoreAccess);
-                $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
-                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
-                $stmt->execute();
-
                 $action = false;
-                $response = 'User unblocked successfully.';
+                $response = 11106;
             } else {
                 // Block the user
                 $query = "INSERT INTO user_block_user (blockerid, blockedid) VALUES (:blockerid, :blockedid)";
@@ -393,22 +474,8 @@ class UserInfoMapper
                 $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
                 $stmt->execute();
 
-                $queryBlockAccess = "UPDATE chatparticipants 
-                    SET hasaccess = 9 
-                    WHERE userid = :blockedid 
-                    AND hasaccess = 0 
-                    AND chatid IN (
-                        SELECT c.chatid FROM chats c
-                        JOIN chatparticipants cp ON c.chatid = cp.chatid
-                        WHERE cp.userid = :blockerid AND c.ispublic = 0
-                    )";
-                $stmt = $this->db->prepare($queryBlockAccess);
-                $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
-                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
-                $stmt->execute();
-
                 $action = true;
-                $response = 'User blocked successfully.';
+                $response = 11105;
             }
 
             $this->db->commit();
@@ -419,63 +486,13 @@ class UserInfoMapper
             $this->logger->error('Database error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user block'];
+            return ['status' => 'error', 'ResponseCode' => 41106];
         } catch (\Exception $e) {
             $this->db->rollBack();
             $this->logger->error('Unexpected error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user block'];
-        }
-    }
-
-    public function getBlockRelationss(string $myUserId, int $offset = 0, int $limit = 10): array
-    {
-        $this->logger->info('Fetching block relationships', ['myUserId' => $myUserId]);
-
-        $query = "SELECT blockerid, blockedid, createdat FROM user_block_user 
-                  WHERE blockerid = :myUserId OR blockedid = :myUserId 
-                  ORDER BY createdat 
-                  DESC LIMIT :limit OFFSET :offset";
-
-        try {
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':myUserId', $myUserId, \PDO::PARAM_STR);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->execute();
-
-            $blockedBy = []; 
-            $iBlocked = []; 
-
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                if ($row['blockedid'] === $myUserId) {
-                    $blockedBy[] = [
-                        'blockerid' => $row['blockerid'],
-                        'blockedid' => $row['blockedid'],
-                        'createdat' => (new \DateTime($row['createdat']))->format('Y-m-d H:i:s'),
-                    ];
-                } elseif ($row['blockerid'] === $myUserId) {
-                    $iBlocked[] = [
-                        'blockerid' => $row['blockerid'],
-                        'blockedid' => $row['blockedid'],
-                        'createdat' => (new \DateTime($row['createdat']))->format('Y-m-d H:i:s'),
-                    ];
-                }
-            }
-
-            $this->logger->info("Fetched block relationships", [
-                'blockedByCount' => count($blockedBy),
-                'iBlockedCount' => count($iBlocked),
-            ]);
-
-            return [
-                'blockedid' => $blockedBy,
-                'blockerid' => $iBlocked
-            ];
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error while fetching block relationships", ['error' => $e->getMessage()]);
-            return ['blockedBy' => [], 'iBlocked' => []];
+            return ['status' => 'error', 'ResponseCode' => 41106];
         }
     }
 
@@ -533,7 +550,7 @@ class UserInfoMapper
             return [
                 'status' => 'success',
                 'counter' => $counter,
-                'ResponseCode' => "BlockRelations data prepared successfully",
+                'ResponseCode' => 11107,
                 'affectedRows' => [
                     'blockedBy' => $blockedBy,
                     'iBlocked' => $iBlocked
@@ -543,7 +560,7 @@ class UserInfoMapper
             $this->logger->error("Database error while fetching block relationships", ['error' => $e->getMessage()]);
             return [
                 'status' => 'error',
-                'ResponseCode' => "Database error while fetching block relationships",
+                'ResponseCode' => 41108,
                 'affectedRows' => []
             ];
         }
@@ -610,7 +627,7 @@ class UserInfoMapper
 
             return [
                 'status' => 'success',
-                'message' => 'User stats updated successfully',
+                'message' => 11010,
                 'updated_data' => $updates
             ];
         } catch (\PDOException $e) {
@@ -619,14 +636,14 @@ class UserInfoMapper
                 'userid' => $userid,
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'message' => 'Failed to update user stats'];
+            return ['status' => 'error', 'message' => 41012];
         } catch (\Exception $e) {
             $this->db->rollBack();
             $this->logger->error('Unexpected error in updateUserInfoStats', [
                 'userid' => $userid,
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'message' => 'Failed to update user stats'];
+            return ['status' => 'error', 'message' => 41012];
         }
     }
 }

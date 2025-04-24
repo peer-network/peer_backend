@@ -60,11 +60,11 @@ class ChatService
     public function createChatWithRecipients(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('Invalid input');
+            return $this->respondWithError(30103);
         }
 
         $this->logger->info('ChatService.createChatWithRecipients started');
@@ -72,7 +72,7 @@ class ChatService
         $chatId = $this->generateUUID();
         if (empty($chatId)) {
             $this->logger->critical('Failed to generate chat ID');
-            return $this->respondWithError('Failed to generate chat ID.');
+            return $this->respondWithError(41808);
         }
 
         $creatorId = $this->currentUserId;
@@ -83,24 +83,24 @@ class ChatService
         $public = 1;
 
         if (!is_array($recipients) || empty($recipients)) {
-            return $this->respondWithError('Invalid input parameters');
+            return $this->respondWithError(30103);
         }
 
         if (count($recipients) < $maxUsers) {
-            return $this->respondWithError('No participants found');
+            return $this->respondWithError(31808);
         }
 
         $friends = $this->getFriends();
 
         if (!is_array($friends) || empty($friends)) {
-            return $this->respondWithError('No friends found or an error occurred in fetching friends');
+            return $this->respondWithError(21101);
         }
 
         $friendIds = array_column($friends, 'uid');
 
         foreach ($recipients as $recipientId) {
             if (!in_array($recipientId, $friendIds)) {
-                return $this->respondWithError('RECIPIENT IS NOT A FRIEND');
+                return $this->respondWithError(31101);
             }
         }
 
@@ -113,7 +113,7 @@ class ChatService
 
             $recipientId = $recipients[0];
             if ($this->chatMapper->getPrivateChatBetweenUsers($creatorId, $recipientId)) {
-                return $this->respondWithError('already chat exists with this userId.');
+                return $this->respondWithError(21805);
             }
         }
 
@@ -127,23 +127,23 @@ class ChatService
                     $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                     if ($mediaPath === '') {
-                        return $this->respondWithError('Media upload failed');
+                        return $this->respondWithError(40304);
                     }
 
                     if (isset($mediaPath['path'])) {
                         $image = $mediaPath['path'];
                     } else {
-                        return $this->respondWithError('Media path necessary for upload');
+                        return $this->respondWithError(31006);
                     }
 
                 } else {
-                    return $this->respondWithError('Media necessary for upload');
+                    return $this->respondWithError(31007); 
                 }
 
             }
         } catch (\Throwable $e) {
             $this->logger->error('Failed to upload media files', ['exception' => $e]);
-            return $this->respondWithError('An error occurred while uploading the media files');
+            return $this->respondWithError(40304);
         }
 
         try {
@@ -206,23 +206,23 @@ class ChatService
             $this->logger->info('Chat and participants created successfully', ['chatId' => $chatId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Chat and participants created successfully',
+                'ResponseCode' => 11804,
                 'affectedRows' => ['chatid' => $chatId],
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create chat and participants', ['exception' => $e]);
-            return $this->respondWithError('Failed to create chat and participants');
+            return $this->respondWithError(41802);
         }
     }
 
     public function updateChat(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('Invalid input');
+            return $this->respondWithError(30103);
         }
 
         $this->logger->info('ChatService.updateChat started');
@@ -232,7 +232,7 @@ class ChatService
         foreach ($requiredFields as $field) {
             if (!isset($args[$field]) || empty($args[$field])) {
                 $this->logger->warning("$field is required", ['args' => $args]);
-                return $this->respondWithError('$field is required.');
+                return $this->respondWithError(30101);
             }
         }
 
@@ -242,23 +242,23 @@ class ChatService
 
         // Validate args parameters
         if ($chatId === null) {
-            return $this->respondWithError('Invalid input parameters');
+            return $this->respondWithError(30103);
         }
 
         if (empty($name) && empty($image)) {
-            return $this->respondWithError('Could not find mandatory name & image');
+            return $this->respondWithError(31809);
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
         if (!$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
-            return $this->respondWithError('Unauthorized: You can only update your own chats');
+            return $this->respondWithError(31802);
         }
 
         if ($this->chatMapper->isPrivate($chatId)) {
-            return $this->respondWithError('Not Allowed: Only public chats can be updated');
+            return $this->respondWithError(31803);
         }
 
         try {
@@ -272,13 +272,13 @@ class ChatService
             }
         } catch (\Throwable $e) {
             $this->logger->error('Failed to upload media files', ['exception' => $e]);
-            return $this->respondWithError('An error occurred while uploading the media files');
+            return $this->respondWithError(40304);
         }
 
         try {
             $chat = $this->chatMapper->loadById($chatId);
             if (!$chat) {
-                return $this->respondWithError('Invalid chatId');
+                return $this->respondWithError(20218);
             }
 
             $chat->setName($name);
@@ -289,40 +289,40 @@ class ChatService
             $this->logger->info('Chat updated successfully', ['chatid' => $chatId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Successfully updated chat',
+                'ResponseCode' => 11805,
                 'affectedRows' => $chat->getArrayCopy()
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update chat', ['args' => $args, 'exception' => $e]);
-            return $this->respondWithError('Failed to update chat');
+            return $this->respondWithError(41803);
         }
     }
 
     public function deleteChat(string $id): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($id)) {
-            return $this->respondWithError('Invalid input');
+            return $this->respondWithError(30103);
         }
 
         if (!self::isValidUUID($id)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
         $this->logger->info('ChatService.deleteChat started');
 
         $chats = $this->chatMapper->loadById($id);
         if (!$chats) {
-            return $this->respondWithError('Invalid chatId ' . $id);
+            return $this->respondWithError(20218 . $id);
         }
 
         $chat = $chats->getArrayCopy();
 
         if ($chat['creatorid'] !== $this->currentUserId && !$this->chatMapper->isCreator($id, $this->currentUserId)) {
-            return $this->respondWithError('Unauthorized: You can only delete your own chats');
+            return $this->respondWithError(31804);
         }
 
         try {
@@ -332,25 +332,25 @@ class ChatService
                 $this->logger->info('Chat deleted successfully', ['chatId' => $chatId]);
                 return [
                     'status' => 'success',
-                    'ResponseCode' => 'Chat deleted successfully'
+                    'ResponseCode' => 11809
                 ];
             }
         } catch (\Throwable $e) {
             $this->logger->error('Failed to delete chat', ['id' => $id, 'error' => $e->getMessage()]);
-            return $this->respondWithError('Failed to delete chatId');
+            return $this->respondWithError(41809);
         }
 
-        return $this->respondWithError('Failed to delete chatId');
+        return $this->respondWithError(41809);
     }
 
     public function addParticipants(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('Invalid input');
+            return $this->respondWithError(30103);
         }
 
         $this->logger->info('ChatService.addParticipants started');
@@ -360,39 +360,39 @@ class ChatService
 
         // Validate input parameters
         if ($chatId === null || !is_array($participants) || empty($participants)) {
-            return $this->respondWithError('Invalid input parameters');
+            return $this->respondWithError(30103);
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
         if (!$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
-            return $this->respondWithError('Unauthorized: You can only add to your own chats');
+            return $this->respondWithError(31804);
         }
 
         if ($this->chatMapper->isPrivate($chatId)) {
-            return $this->respondWithError('Not Allowed: Only public chats can add participants');
+            return $this->respondWithError(31805);
         }
 
         $friends = $this->getFriends();
 
         // Check if $friends is an array and has follow
         if (!is_array($friends) || empty($friends)) {
-            return $this->respondWithError('No friends found or an error occurred in fetching friends');
+            return $this->respondWithError(21101);
         }
 
         $friendIds = array_column($friends, 'uid');
 
         foreach ($participants as $recipientId) {
             if (!in_array($recipientId, $friendIds)) {
-                return $this->respondWithError('RECIPIENT IS NOT A FRIEND');
+                return $this->respondWithError(31101);
             }
         }
 
         $chat = $this->chatMapper->loadById($chatId);
         if (!$chat) {
-            return $this->respondWithError('Invalid chatId');
+            return $this->respondWithError(20218);
         }
 
         try {
@@ -419,23 +419,23 @@ class ChatService
             $this->logger->info('Participants added successfully', ['chatId' => $chatId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Participants added successfully',
+                'ResponseCode' => 11802,
                 'affectedRows' => $participants,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to add participants', ['chatId' => $chatId, 'exception' => $e]);
-            return $this->respondWithError('Failed to add participants');
+            return $this->respondWithError(41804);
         }
     }
 
     public function removeParticipants(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('Invalid input');
+            return $this->respondWithError(30103);
         }
 
         $this->logger->info('ChatService.removeParticipants started');
@@ -445,31 +445,35 @@ class ChatService
 
         // Validate input parameters
         if ($chatId === null || !is_array($participants) || empty($participants)) {
-            return $this->respondWithError('Invalid input parameters');
+            return $this->respondWithError(30103);
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
         if (!$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
-            return $this->respondWithError('Unauthorized: You can only remove in your own chats');
+            return $this->respondWithError(31806);
         }
 
         if ($this->chatMapper->isPrivate($chatId)) {
-            return $this->respondWithError('Not Allowed: Only public chats can remove participants');
+            return $this->respondWithError(31807);
         }
 
         $chat = $this->chatMapper->loadById($chatId);
         if (!$chat) {
-            return $this->respondWithError('Invalid chatId');
+            return $this->respondWithError(20218);
         }
 
         try {
             foreach ($participants as $participantId) {
 
                 if (!self::isValidUUID($participantId)) {
-                    continue;
+                    return $this->respondWithError(20201);
+                }
+
+                if (!$this->chatMapper->isParticipantExist($chatId, $participantId)) {
+                    return $this->respondWithError(21001);
                 }
 
                 $this->chatMapper->deleteParticipant($chatId, $participantId);
@@ -478,12 +482,12 @@ class ChatService
             $this->logger->info('Participants removed successfully', ['chatId' => $chatId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Participants removed successfully',
+                'ResponseCode' => 11806,
                 'affectedRows' => $participants,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to remove participants', ['chatId' => $chatId, 'exception' => $e]);
-            return $this->respondWithError('Failed to remove participants');
+            return $this->respondWithError(41805);
         }
     }
 
@@ -494,74 +498,77 @@ class ChatService
 
         $results = $this->chatMapper->getChatMessages($args);
 
-        return [
-            'status' => 'success',
-            'ResponseCode' => 'Getting Messages successfully',
-            'affectedRows' => $results,
-        ];
+        return $results;
     }
 
     public function addMessage(string $chatId, string $content): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            $this->logger->warning('Unauthorized access attempt in addMessage', ['chatId' => $chatId]);
+            return $this->respondWithError(60501);
         }
 
         if (empty($chatId) || empty($content)) {
-            return $this->respondWithError('Could not find mandatory input');
+            return $this->respondWithError(30102);
         }
 
         if (strlen($content) < 1 || strlen($content) > 500) {
-            return $this->respondWithError('Content must be between 1 and 500 characters.');
+            return $this->respondWithError(20252);
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
-        $this->logger->info('ChatService.addMessage started');
+        $this->logger->info('ChatService.addMessage started', ['chatId' => $chatId]);
 
         $chat = $this->chatMapper->loadById($chatId);
+        
+        if (is_array($chat) && isset($chat['status']) && $chat['status'] === 'error') {
+            return $chat; // Immediately return if chat is invalid
+        }
 
-        if (!$chat) {
-            return $this->respondWithError('Invalid chatId');
+        if ($chat->getIsPublic() === 9) {
+            return $this->respondWithError(41809);
         }
 
         try {
             $messageData = [
                 'messid' => 0,
-                'chatid' => $chatId,
-                'userid' => $this->currentUserId,
-                'content' => $content,
+                'chatid'    => $chatId,
+                'userid'    => $this->currentUserId,
+                'content'   => $content,
                 'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
             ];
+
             $message = new ChatMessages($messageData);
             $result = $this->chatMapper->insertMess($message);
 
             if ($result['status'] === 'error') {
+                $this->logger->error('Failed to insert message', ['chatId' => $chatId, 'error' => $result]);
                 return $result;
             }
 
             $this->logger->info('Message added successfully', ['chatId' => $chatId, 'content' => $content]);
             return $result;
         } catch (\Throwable $e) {
-            $this->logger->error('Failed to add message', ['chatId' => $chatId, 'exception' => $e]);
-            return $this->respondWithError('Failed to add message');
+            $this->logger->error('Failed to add message', ['chatId' => $chatId, 'exception' => $e->getMessage()]);
+            return $this->respondWithError(41806);
         }
     }
 
     public function removeMessage(string $chatId, int $messageId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($chatId) || empty($messageId)) {
-            return $this->respondWithError('Could not find mandatory input');
+            return $this->respondWithError(30102);
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError('Invalid uuid input');
+            return $this->respondWithError(20201);
         }
 
         $this->logger->info('ChatService.removeMessage started');
@@ -569,17 +576,17 @@ class ChatService
         $chat = $this->chatMapper->loadById($chatId);
 
         if (!$chat) {
-            return $this->respondWithError('Invalid chatId');
+            return $this->respondWithError(20218);
         }
 
         $message = $this->chatMapper->loadMessageById($messageId);
 
         if ($message === false) {
-            return $this->respondWithError('Invalid messageId');
+            return $this->respondWithError(21001);
         }
 
         if ($message['userid'] !== $this->currentUserId && !$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
-            return $this->respondWithError('Unauthorized: You can only remove your own messages or in your own chats.');
+            return $this->respondWithError(31806);
         }
 
         try {
@@ -588,19 +595,19 @@ class ChatService
             $this->logger->info('Message removed successfully', ['chatId' => $chatId, 'messageId' => $messageId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Message removed successfully',
+                'ResponseCode' => 11809,
                 'affectedRows' => $message,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to remove message', ['chatId' => $chatId, 'exception' => $e]);
-            return $this->respondWithError('Failed to remove message');
+            return $this->respondWithError(41810);
         }
     }
 
     public function getFriends(): array|null
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('ChatService.getFriends started');
@@ -638,7 +645,7 @@ class ChatService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Chat fetched successfullyd',
+                'ResponseCode' => 11810,
                 'data' => new Chat([
                     'chatid' => $chatData['chat']['chatid'],
                     'creatorid' => $chatData['chat']['creatorid'],
@@ -653,17 +660,17 @@ class ChatService
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in loadChatById", ['error' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(40301);
         } catch (\Throwable $e) {
             $this->logger->error("Unexpected error in loadChatById", ['error' => $e->getMessage()]);
-            return $this->respondWithError('UnexpectedError');
+            return $this->respondWithError(40301);
         }
     }
 
     public function findChatser(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('ChatService.findChatser started');
@@ -677,7 +684,7 @@ class ChatService
     public function setChatMessages(string $chatId, string $content): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $messageData = [
@@ -699,7 +706,7 @@ class ChatService
     public function getChatMessages(string $chatId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $results = $this->chatMapper->getChatMessages($chatId);
@@ -713,7 +720,7 @@ class ChatService
 
         return [
             'status' => 'success',
-            'ResponseCode' => 'Getting Messages successfully',
+            'ResponseCode' => 11807,
             'affectedRows' => $results,
         ];
     }

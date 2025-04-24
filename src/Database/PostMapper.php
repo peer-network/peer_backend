@@ -461,8 +461,8 @@ class PostMapper
     {
         $this->logger->info("PostMapper.findPostser started");
 
-        $offset = max((int)($args['postOffset'] ?? 0), 0);
-        $limit = min(max((int)($args['postLimit'] ?? 10), 1), 20);
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $from = $args['from'] ?? null;
         $to = $args['to'] ?? null;
@@ -616,40 +616,44 @@ class PostMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
 
             $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                $row['tags'] = json_decode($row['tags'], true) ?? [];
-                $results[] = new PostAdvanced([
-                    'postid' => $row['postid'],
-                    'userid' => $row['userid'],
-                    'contenttype' => $row['contenttype'],
-                    'title' => $row['title'],
-                    'media' => $row['media'],
-                    'cover' => $row['cover'],
-                    'mediadescription' => $row['mediadescription'],
-                    'createdat' => $row['createdat'],
-                    'amountlikes' => (int)$row['amountlikes'],
-                    'amountviews' => (int)$row['amountviews'],
-                    'amountcomments' => (int)$row['amountcomments'],
-                    'amountdislikes' => (int)$row['amountdislikes'],
-                    'amounttrending' => (int)$row['amounttrending'],
-                    'isliked' => (bool)$row['isliked'],
-                    'isviewed' => (bool)$row['isviewed'],
-                    'isreported' => (bool)$row['isreported'],
-                    'isdisliked' => (bool)$row['isdisliked'],
-                    'issaved' => (bool)$row['issaved'],
-                    'tags' => $row['tags'],
-                    'user' => [
-                        'uid' => $row['userid'],
-                        'username' => $row['username'],
-                        'slug' => $row['slug'],
-                        'img' => $row['userimg'],
-                        'isfollowed' => (bool)$row['isfollowed'],
-                        'isfollowing' => (bool)$row['isfollowing'],
-                    ],
-                ]);
+			if ($stmt->execute($params)) {
+				//$this->logger->info("Get post successfully");
+				while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+					$row['tags'] = json_decode($row['tags'], true) ?? [];
+					$results[] = new PostAdvanced([
+						'postid' => $row['postid'],
+						'userid' => $row['userid'],
+						'contenttype' => $row['contenttype'],
+						'title' => $row['title'],
+						'media' => $row['media'],
+						'cover' => $row['cover'],
+						'mediadescription' => $row['mediadescription'],
+						'createdat' => $row['createdat'],
+						'amountlikes' => (int)$row['amountlikes'],
+						'amountviews' => (int)$row['amountviews'],
+						'amountcomments' => (int)$row['amountcomments'],
+						'amountdislikes' => (int)$row['amountdislikes'],
+						'amounttrending' => (int)$row['amounttrending'],
+						'isliked' => (bool)$row['isliked'],
+						'isviewed' => (bool)$row['isviewed'],
+						'isreported' => (bool)$row['isreported'],
+						'isdisliked' => (bool)$row['isdisliked'],
+						'issaved' => (bool)$row['issaved'],
+						'tags' => $row['tags'],
+						'user' => [
+							'uid' => $row['userid'],
+							'username' => $row['username'],
+							'slug' => $row['slug'],
+							'img' => $row['userimg'],
+							'isfollowed' => (bool)$row['isfollowed'],
+							'isfollowing' => (bool)$row['isfollowing'],
+						],
+					]);
+				}
+            } else {
+                //$this->logger->warning("Failed to Get post info"]);
             }
 
             return $results;
@@ -657,228 +661,6 @@ class PostMapper
             $this->logger->error("Database error in findPostser", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-            ]);
-            return [];
-        } catch (\Exception $e) {
-            $this->logger->error('Database error in findPostser', [
-                'error' => $e->getMessage(),
-            ]);
-            return [];
-        }
-    }
-
-    public function findPostserr(string $currentUserId, ?array $args = []): array
-    {
-        $this->logger->info("PostMapper.findPostser started");
-
-        $offset = max((int)($args['postOffset'] ?? 0), 0);
-        $limit = min(max((int)($args['postLimit'] ?? 10), 1), 20);
-
-        $from = $args['from'] ?? null;
-        $to = $args['to'] ?? null;
-        $filterBy = $args['filterBy'] ?? [];
-        $Ignorlist = $args['IgnorList'] ?? 'NO';
-        $sortBy = $args['sortBy'] ?? null;
-        $title = $args['title'] ?? null;
-        $tag = $args['tag'] ?? null; 
-        $postId = $args['postid'] ?? null;
-        $userId = $args['userid'] ?? null;
-
-        $whereClauses = ["p.feedid IS NULL"];
-        $params = ['currentUserId' => $currentUserId];
-
-        $trendlimit = 4;
-        $trenddays = 17;
-
-        if ($postId !== null) {
-            $whereClauses[] = "p.postid = :postId";
-            $params['postId'] = $postId;
-        }
-
-        if ($userId !== null) {
-            $whereClauses[] = "p.userid = :userId";
-            $params['userId'] = $userId;
-        }
-
-        if ($title !== null) {
-            $whereClauses[] = "p.title ILIKE :title";
-            $params['title'] = '%' . $title . '%';
-        }
-
-        if ($from !== null) {
-            $whereClauses[] = "p.createdat >= :from";
-            $params['from'] = $from;
-        }
-
-        if ($to !== null) {
-            $whereClauses[] = "p.createdat <= :to";
-            $params['to'] = $to;
-        }
-
-        if ($tag !== null) {
-            if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
-                $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
-                return [];
-            }
-            $whereClauses[] = "t.name = :tag";
-            $params['tag'] = $tag;
-        }
-
-        if (!empty($filterBy) && is_array($filterBy)) {
-            $validTypes = [];
-            $userFilters = [];
-
-            $mapping = [
-                'IMAGE' => 'image',
-                'AUDIO' => 'audio',
-                'VIDEO' => 'video',
-                'TEXT' => 'text',
-            ];
-
-            $userMapping = [
-                'FOLLOWED' => "p.userid IN (SELECT followedid FROM follows WHERE followerid = :currentUserId)",
-                'FOLLOWER' => "p.userid IN (SELECT followerid FROM follows WHERE followedid = :currentUserId)",
-            ];
-
-            foreach ($filterBy as $type) {
-                if (isset($mapping[$type])) {
-                    $validTypes[] = $mapping[$type]; 
-                } elseif (isset($userMapping[$type])) {
-                    $userFilters[] = $userMapping[$type]; 
-                }
-            }
-
-            if (!empty($validTypes)) {
-                $placeholders = implode(", ", array_map(fn($k) => ":filter$k", array_keys($validTypes)));
-                $whereClauses[] = "p.contenttype IN ($placeholders)";
-
-                foreach ($validTypes as $key => $value) {
-                    $params["filter$key"] = $value;
-                }
-            }
-
-            if (!empty($userFilters)) {
-                $whereClauses[] = "(" . implode(" OR ", $userFilters) . ")";
-            }
-        }
-
-        if (!empty($Ignorlist) && $Ignorlist === 'YES') {
-            $whereClauses[] = "p.userid NOT IN (SELECT blockedid FROM user_block_user WHERE blockerid = :currentUserId)";
-        }
-
-        $orderBy = match ($sortBy) {
-            'NEWEST' => "p.createdat DESC",
-            'FOLLOWER' => "isfollowing DESC, p.createdat DESC",
-            'FOLLOWED' => "isfollowed DESC, p.createdat DESC",
-            'TRENDING' => "amounttrending DESC, p.createdat DESC",
-            'LIKES' => "amountlikes DESC, p.createdat DESC",
-            'DISLIKES' => "amountdislikes DESC, p.createdat DESC",
-            'VIEWS' => "amountviews DESC, p.createdat DESC",
-            'COMMENTS' => "amountcomments DESC, p.createdat DESC",
-            default => "p.createdat DESC",
-        };
-
-        $sql = sprintf(
-            "SELECT 
-                p.postid, 
-                p.userid, 
-                p.contenttype, 
-                p.title, 
-                p.mediadescription, 
-                p.createdat, 
-                u.username, 
-                u.slug, 
-                u.img AS userimg,
-                COALESCE(
-                    JSONB_AGG(DISTINCT jsonb_build_object(
-                        'media', pm.media,
-                        'options', pm.options
-                    )) FILTER (WHERE pm.contenttype = 'cover'),
-                    '[]'::jsonb
-                ) AS cover,
-                COALESCE(
-                    JSONB_AGG(DISTINCT jsonb_build_object(
-                        'media', pm.media,
-                        'options', pm.options
-                    )) FILTER (WHERE pm.contenttype != 'cover'),
-                    '[]'::jsonb
-                ) AS media,
-                COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
-                (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) as amountlikes,
-                (SELECT COUNT(*) FROM user_post_dislikes WHERE postid = p.postid) as amountdislikes,
-                (SELECT COUNT(*) FROM user_post_views WHERE postid = p.postid) as amountviews,
-                (SELECT COUNT(*) FROM comments WHERE postid = p.postid) as amountcomments,
-                COALESCE((
-                    SELECT SUM(w.numbers)
-                    FROM logwins w
-                    WHERE w.postid = p.postid
-                      AND w.createdat >= NOW() - INTERVAL '$trenddays days'
-                ), 0) AS amounttrending,
-                EXISTS (SELECT 1 FROM user_post_likes WHERE postid = p.postid AND userid = :currentUserId) as isliked,
-                EXISTS (SELECT 1 FROM user_post_views WHERE postid = p.postid AND userid = :currentUserId) as isviewed,
-                EXISTS (SELECT 1 FROM user_post_reports WHERE postid = p.postid AND userid = :currentUserId) as isreported,
-                EXISTS (SELECT 1 FROM user_post_dislikes WHERE postid = p.postid AND userid = :currentUserId) as isdisliked,
-                EXISTS (SELECT 1 FROM user_post_saves WHERE postid = p.postid AND userid = :currentUserId) as issaved,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = p.userid AND followerid = :currentUserId) as isfollowed,
-                EXISTS (SELECT 1 FROM follows WHERE followerid = p.userid AND followedid = :currentUserId) as isfollowing
-            FROM posts p
-            JOIN users u ON p.userid = u.uid
-            LEFT JOIN posts_media pm ON p.postid = pm.postid
-            LEFT JOIN post_tags pt ON p.postid = pt.postid
-            LEFT JOIN tags t ON pt.tagid = t.tagid
-            WHERE %s
-            GROUP BY p.postid, u.username, u.slug, u.img
-            ORDER BY %s
-            LIMIT :limit OFFSET :offset",
-            implode(" AND ", $whereClauses),
-            $orderBy
-        );
-
-        $params['limit'] = $limit;
-        $params['offset'] = $offset;
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-
-            $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                $row['tags'] = json_decode($row['tags'], true) ?? [];
-                $results[] = new PostAdvanced([
-                    'postid' => $row['postid'],
-                    'userid' => $row['userid'],
-                    'contenttype' => $row['contenttype'],
-                    'title' => $row['title'],
-                    'media' => $row['media'],
-                    'cover' => $row['cover'],
-                    'mediadescription' => $row['mediadescription'],
-                    'createdat' => $row['createdat'],
-                    'amountlikes' => (int)$row['amountlikes'],
-                    'amountviews' => (int)$row['amountviews'],
-                    'amountcomments' => (int)$row['amountcomments'],
-                    'amountdislikes' => (int)$row['amountdislikes'],
-                    'amounttrending' => (int)$row['amounttrending'],
-                    'isliked' => (bool)$row['isliked'],
-                    'isviewed' => (bool)$row['isviewed'],
-                    'isreported' => (bool)$row['isreported'],
-                    'isdisliked' => (bool)$row['isdisliked'],
-                    'issaved' => (bool)$row['issaved'],
-                    'tags' => $row['tags'],
-                    'user' => [
-                        'uid' => $row['userid'],
-                        'username' => $row['username'],
-                        'slug' => $row['slug'],
-                        'img' => $row['userimg'],
-                        'isfollowed' => (bool)$row['isfollowed'],
-                        'isfollowing' => (bool)$row['isfollowing'],
-                    ],
-                ]);
-            }
-
-            return $results;
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error in findPostser", [
-                'error' => $e->getMessage(),
             ]);
             return [];
         } catch (\Exception $e) {

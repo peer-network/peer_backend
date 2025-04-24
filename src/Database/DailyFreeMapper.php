@@ -187,6 +187,59 @@ class DailyFreeMapper
 
     public function incrementUserDailyUsage(string $userId, int $artType): bool
     {
+        $this->logger->info('DailyFreeMapper.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
+
+        $columnMap = [
+            LIKE_ => 'liken',
+            COMMENT_ => 'comments',
+            POST_ => 'posten',
+        ];
+
+        if (!isset($columnMap[$artType])) {
+            $this->logger->error('Invalid art type provided', ['artType' => $artType]);
+            throw new InvalidArgumentException('Invalid art type provided.');
+        }
+
+        $column = $columnMap[$artType];
+
+        try {
+            $this->db->beginTransaction();
+
+            $query = "
+                INSERT INTO dailyfree (userid, liken, comments, posten, createdat)
+                VALUES (:userId, :liken, :comments, :posten, NOW())
+                ON CONFLICT (userid) 
+                DO UPDATE 
+                SET 
+                    liken = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.liken ELSE 0 END + :liken,
+                    comments = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.comments ELSE 0 END + :comments,
+                    posten = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.posten ELSE 0 END + :posten,
+                    createdat = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.createdat ELSE NOW() END
+            ";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':liken', $artType === LIKE_ ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':comments', $artType === COMMENT_ ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':posten', $artType === POST_ ? 1 : 0, \PDO::PARAM_INT);
+
+            $success = $stmt->execute();
+
+            $this->db->commit();
+            return $success;
+        } catch (\PDOException $e) {
+            $this->db->rollBack();
+            $this->logger->error('Database error in incrementUserDailyUsage', ['exception' => $e->getMessage()]);
+            return false;
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            $this->logger->error('Unexpected error in incrementUserDailyUsage', ['exception' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public function incrementUserDailyUsagee(string $userId, int $artType): bool
+    {
         $columnMap = [
             LIKE_ => 'liken',
             COMMENT_ => 'comments',
@@ -213,10 +266,10 @@ class DailyFreeMapper
             ";
 
             $stmt = $this->db->prepare($updateQuery);
-            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
-            $stmt->bindValue(':liken', $artType === LIKE_ ? 1 : 0, PDO::PARAM_INT);
-            $stmt->bindValue(':comments', $artType === COMMENT_ ? 1 : 0, PDO::PARAM_INT);
-            $stmt->bindValue(':posten', $artType === POST_ ? 1 : 0, PDO::PARAM_INT);
+            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':liken', $artType === LIKE_ ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':comments', $artType === COMMENT_ ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':posten', $artType === POST_ ? 1 : 0, \PDO::PARAM_INT);
 
             return $stmt->execute();
         } catch (\Exception $e) {

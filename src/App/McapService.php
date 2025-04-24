@@ -52,15 +52,15 @@ class McapService
                 $this->logger->info("McapService.loadLastId mcap found", ['affectedRows' => $affectedRows]);
                 $success = [
                     'status' => 'success',
-                    'ResponseCode' => 'Mcap data prepared successfully',
+                    'ResponseCode' => 11021,
                     'affectedRows' => $affectedRows,
                 ];
                 return $success;
             }
 
-            return $this->respondWithError('No mcaps found for the user.');
+            return $this->respondWithError(31201);
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve mcaps list.');
+            return $this->respondWithError(41206);
         }
     }
 
@@ -77,15 +77,15 @@ class McapService
                 $success = [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 'Users data prepared successfully',
+                    'ResponseCode' => 11009,
                     'affectedRows' => $fetchAll,
                 ];
                 return $success;
             }
 
-            return $this->respondWithError('No users found.');
+            return $this->respondWithError(21001);
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve users list.');
+            return $this->respondWithError(41207);
         }
     }
 }

@@ -55,40 +55,40 @@ class UserInfoService
                 $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
                 $success = [
                     'status' => 'success',
-                    'ResponseCode' => 'Userinfo data prepared successfully',
+                    'ResponseCode' => 11002,
                     'affectedRows' => $affectedRows,
                 ];
                 return $success;
             }
 
-            return $this->respondWithError('No data found for the user.');
+            return $this->respondWithError(21001);
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve user data.');
+            return $this->respondWithError(41001);
         }
     }
 
     public function toggleUserFollow(string $followedUserId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError('Invalid user ID.');
+            return $this->respondWithError(20201);
         }
 
         if ($this->currentUserId === $followedUserId) {
-            return $this->respondWithError('Cannot follow yourself.');
+            return $this->respondWithError(31102);
         }
 
         $this->logger->info('UserInfoService.toggleUserFollow started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
-            return $this->respondWithError('Follower user not found.');
+            return $this->respondWithError(21001);
         }
 
         if (!$this->userInfoMapper->isUserExistById($followedUserId)) {
-            return $this->respondWithError('Followed user not found.');
+            return $this->respondWithError(31003);
         }
 
         return $this->userInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
@@ -97,25 +97,25 @@ class UserInfoService
     public function toggleUserBlock(string $blockedUserId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($blockedUserId)) {
-            return $this->respondWithError('Invalid user ID.');
+            return $this->respondWithError(20201);
         }
 
         if ($this->currentUserId === $blockedUserId) {
-            return $this->respondWithError('Cannot block yourself.');
+            return $this->respondWithError(31104);
         }
 
         $this->logger->info('UserInfoService.toggleUserBlock started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
-            return $this->respondWithError('Blocker user not found.');
+            return $this->respondWithError(21001);
         }
 
         if (!$this->userInfoMapper->isUserExistById($blockedUserId)) {
-            return $this->respondWithError('Blocked user not found.');
+            return $this->respondWithError(31106);
         }
 
         return $this->userInfoMapper->toggleUserBlock($this->currentUserId, $blockedUserId);
@@ -141,14 +141,14 @@ class UserInfoService
 
         } catch (\Exception $e) {
             $this->logger->error("Error in UserInfoService.loadBlocklist", ['exception' => $e->getMessage()]);
-            return $this->respondWithError('Failed to retrieve user data.');  
+            return $this->respondWithError(41008);  
         }
     }
 
     public function toggleProfilePrivacy(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('UserInfoService.toggleProfilePrivacy started');
@@ -156,7 +156,7 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadInfoById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError('User not found.');
+                return $this->respondWithError(21001);
             }
 
             $newIsPrivate = !$user->getIsPrivate();
@@ -180,11 +180,11 @@ class UserInfoService
     public function updateBio(string $biography): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (trim($biography) === '' || strlen($biography) < 3 || strlen($biography) > 5000) {
-            return $this->respondWithError('Biography must be between 3 and 5000 characters.');
+            return $this->respondWithError(20228);
         }
 
         $this->logger->info('UserInfoService.updateBio started');
@@ -192,7 +192,7 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError('User not found.');
+                return $this->respondWithError(21001);
             }
 
             if (!empty($biography)) {
@@ -200,22 +200,22 @@ class UserInfoService
                 $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
 
                 if ($mediaPath === '') {
-                    return $this->respondWithError('Biography upload failed.');
+                    return $this->respondWithError(41009);
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $mediaPathFile = $mediaPath['path'];
                 } else {
-                    return $this->respondWithError('Media path necessary for upload.');
+                    return $this->respondWithError(40306);
                 }
 
             } else {
-                return $this->respondWithError('Media necessary for upload.');
+                return $this->respondWithError(40307);
             }
 
             $user->setBiography($mediaPathFile);
             $updatedUser = $this->userInfoMapper->updateUsers($user);
-            $responseMessage = 'User biography updated successfully';
+            $responseMessage = 11003;
 
             $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
 
@@ -225,18 +225,18 @@ class UserInfoService
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error updating biography', ['exception' => $e]);
-            return $this->respondWithError('Failed to update biography.');
+            return $this->respondWithError(41002);
         }
     }
 
     public function setProfilePicture(string $mediaFile, string $contentType = 'image'): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (trim($mediaFile) === '') {
-            return $this->respondWithError('No media file provided');
+            return $this->respondWithError(31102);
         }
 
         $this->logger->info('UserInfoService.setProfilePicture started');
@@ -244,29 +244,29 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError('User not found.');
+                return $this->respondWithError(21001);
             }
 
             if (!empty($mediaFile)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $this->currentUserId, 'profile');
 
                 if ($mediaPath === '') {
-                    return $this->respondWithError('Profile upload failed.');
+                    return $this->respondWithError(41009);
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $mediaPathFile = $mediaPath['path'];
                 } else {
-                    return $this->respondWithError('Media path necessary for upload.');
+                    return $this->respondWithError(40306);
                 }
 
             } else {
-                return $this->respondWithError('Media necessary for upload.');
+                return $this->respondWithError(40307);
             }
 
             $user->setProfilePicture($mediaPathFile);
             $updatedUser = $this->userInfoMapper->updateUsers($user);
-            $responseMessage = 'Profile picture updated successfully';
+            $responseMessage = 11004;
 
             $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
 
@@ -276,7 +276,7 @@ class UserInfoService
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error setting profile picture', ['exception' => $e]);
-            return $this->respondWithError('Failed to update profile picture');
+            return $this->respondWithError(41003);
         }
     }
 }

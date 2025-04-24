@@ -10,10 +10,12 @@ use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
 use Fawaz\Services\FileUploadDispatcher;
+use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 
 class PostService
 {
+	use ResponseHelper;
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -29,18 +31,6 @@ class PostService
     public function setCurrentUserId(string $userid): void
     {
         $this->currentUserId = $userid;
-    }
-
-    private function generateUUID(): string
-    {
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000,
-            mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-        );
     }
 
     public static function isValidUUID(string $uuid): bool
@@ -83,25 +73,25 @@ class PostService
     public function createPost(array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError('No arguments provided. Please provide valid input parameters.');
+            return $this->respondWithError(30101);
         }
 
         foreach (['title', 'media', 'contenttype'] as $field) {
             if (empty($args[$field])) {
-                return $this->respondWithError("$field is required");
+                return $this->respondWithError(30102);
             }
         }
 
         $this->logger->info('PostService.createPost started');
 
-        $postId = $this->generateUUID();
+        $postId = self::generateUUID();
         if (empty($postId)) {
             $this->logger->critical('Failed to generate post ID');
-            return $this->respondWithError('Failed to generate post ID.');
+            return $this->respondWithError(41511);
         }
 
         $createdAt = (new \DateTime())->format('Y-m-d H:i:s.u');
@@ -120,11 +110,11 @@ class PostService
 
         if ($postData['feedid']) {
             if (!$this->postMapper->isNewsFeedExist($postData['feedid'])) {
-                return $this->respondWithError('Invalid newsfeed ID.');
+                return $this->respondWithError(41512);
             }
 
             if (!$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
-                return $this->respondWithError('No access to the newsfeed.');
+                return $this->respondWithError(21516);
             }
         }
 
@@ -135,16 +125,16 @@ class PostService
                 $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                 if (!empty($mediaPath['error'])) {
-                    return $this->respondWithError('Invalid Base64 code: ' . json_encode($mediaPath['error']));
+                    return $this->respondWithError(20251);
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $postData['media'] = $this->argsToJsString($mediaPath['path']);
                 } else {
-                    return $this->respondWithError('Media upload failed.');
+                    return $this->respondWithError(41009);
                 }
             } else {
-                return $this->respondWithError('Media necessary for upload.');
+                return $this->respondWithError(30101);
             }
 
             // Cover Upload Nur (Audio & Video)
@@ -155,7 +145,7 @@ class PostService
                 if (!empty($coverPath['path'])) {
                     $postData['cover'] = $this->argsToJsString($coverPath['path']);
                 } else {
-                    return $this->respondWithError('Cover upload failed.');
+                    return $this->respondWithError(40306);
                 }
             }
 
@@ -180,12 +170,12 @@ class PostService
 
             if (isset($coverPath['path']) && !empty($coverPath['path'])) {
                 // Cover Posts_media
-                $coverDecoded = $coverPath['path'];
+                $coverDecoded = $coverPath['path'] ?? null;
                 $coverMed = [
                     'postid' => $postId,
                     'contenttype' => 'cover',
-                    'media' => $coverDecoded['path'],
-                    'options' => $this->argsToJsString($coverDecoded['options']),
+                    'media' => $coverDecoded[0]['path'],
+                    'options' => $this->argsToJsString($coverDecoded[0]['options']),
                 ];
 
                 $coverMedia = new PostMedia($coverMed);
@@ -202,11 +192,11 @@ class PostService
                 $this->insertPostMetadata($postId, $this->currentUserId);
             }
 
-            return $this->createSuccessResponse('Post created successfully', $post->getArrayCopy());
+            return $this->createSuccessResponse(11508, $post->getArrayCopy());
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);
-            return $this->respondWithError($e->getMessage());
+            return $this->respondWithError(20263);
         }
     }
 
@@ -297,7 +287,7 @@ class PostService
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info("PostService.fetchAll started");
@@ -310,21 +300,21 @@ class PostService
             $result = array_map(fn(Post $post) => $post->getArrayCopy(), $posts);
 
             $this->logger->info("Posts fetched successfully", ['count' => count($result)]);
-            return $this->createSuccessResponse('Posts fetched successfully', [$result]);
+            return $this->createSuccessResponse(11502, [$result]);
 
         } catch (\Throwable $e) {
             $this->logger->error("Error fetching Posts", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError('Failed to fetch posts.');
+            return $this->respondWithError(41513);
         }
     }
 
     public function findPostser(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $from = $args['from'] ?? null;
@@ -338,29 +328,29 @@ class PostService
         $userId = $args['userid'] ?? null;
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postid format provided.');
+            return $this->respondWithError(31501);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this->respondWithError('Invalid userid format provided.');
+            return $this->respondWithError(30103);
         }
 
         if ($title !== null && strlen($title) < 2 || strlen($title) > 33) {
-            return $this->respondWithError('Title must be between 2 and 30 characters.');
+            return $this->respondWithError(20256);
         }
 
         if ($from !== null && !self::validateDate($from)) {
-            return $this->respondWithError('Invalid from date format provided.');
+            return $this->respondWithError(30103);
         }
 
         if ($to !== null && !self::validateDate($to)) {
-            return $this->respondWithError('Invalid to date format provided.');
+            return $this->respondWithError(30103);
         }
 
         if ($tag !== null) {
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
-                return $this->respondWithError('Invalid tag format provided.');
+                return $this->respondWithError(30103);
             }
         }
 
@@ -370,20 +360,23 @@ class PostService
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
             if (!empty($invalidTypes)) {
-                return $this->respondWithError('Invalid type parameter(s) provided.');
+                return $this->respondWithError(30103);
             }
         }
 
         if ($Ignorlist !== null) {
             $Ignorlisten = ['YES', 'NO'];
             if (!in_array($Ignorlist, $Ignorlisten, true)) {
-                return $this->respondWithError('Invalid Ignorlist parameter provided.');
+                return $this->respondWithError(30103);
             }
         }
 
         $this->logger->info("PostService.findPostser started");
 
         $results = $this->postMapper->findPostser($this->currentUserId, $args);
+		if (empty($results)) {
+			return $this->respondWithError(21517);
+		}
 
         return $results;
     }
@@ -391,7 +384,7 @@ class PostService
     public function getChatFeedsByID(string $feedid): ?array
     {
         if (!$this->checkAuthentication() || !self::isValidUUID($feedid)) {
-            return $this->respondWithError('Invalid feed ID');
+            return $this->respondWithError(30103);
         }
 
         $this->logger->info("PostService.getChatFeedsByID started");
@@ -406,12 +399,12 @@ class PostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Chat feeds fetched successfully',
+                'ResponseCode' => 11808,
                 'affectedRows' => $result,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch chat feeds', ['feedid' => $feedid, 'exception' => $e]);
-            return $this->respondWithError('Failed to fetch chat feeds.');
+            return $this->respondWithError(41807);
         }
     }
 
@@ -445,14 +438,14 @@ class PostService
         }
 
         if (!self::isValidUUID($id)) {
-            return $this->respondWithError('Invalid postId');
+            return $this->respondWithError(20209);
         }
 
         $this->logger->info('PostService.deletePost started');
 
         $posts = $this->postMapper->loadById($id);
         if (!$posts) {
-            return $this->respondWithError('PostId not found.');
+            return $this->respondWithError(21516);
         }
 
         $post = $posts->getArrayCopy();
@@ -468,13 +461,13 @@ class PostService
                 $this->logger->info('Post deleted successfully', ['postid' => $postid]);
                 return [
                     'status' => 'success',
-                    'ResponseCode' => 'Post deleted successfully',
+                    'ResponseCode' => 11510,
                 ];
             }
         } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to delete post.');
+            return $this->respondWithError(41510);
         }
 
-        return $this->respondWithError('Failed to delete post.');
+        return $this->respondWithError(41510);
     }
 }

@@ -5,6 +5,8 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
+use Fawaz\Services\LiquidityPool;
+use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 
 const TABLESTOGEMS = true;
@@ -15,41 +17,289 @@ const DISLIKE_=3;
 const COMMENT_=4;
 const POST_=5;
 const INVITATION_=11;
+
 const RECEIVELIKE=5;
 const RECEIVEDISLIKE=4;
 const RECEIVECOMMENT=2;
 const RECEIVEPOSTVIEW=0.25;
-const RECEIVEINVITATION=0.01;
+
 const PRICELIKE=3;
 const PRICEDISLIKE=5;
 const PRICECOMMENT=0.5;
 const PRICEPOST=20;
 
+const DIRECTDEBIT_=14;
+const CREDIT_=15;
+const TRANSFER_=18;
+
+const INVTFEE=0.01;
+const POOLFEE=0.01;
+const PEERFEE=0.02;
+const BURNFEE=0.01;
+
 class WalletMapper
 {
+    use ResponseHelper;
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
+    private string $poolWallet;
+    private string $burnWallet;
+    private string $peerWallet;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
     {
     }
 
-    protected function respondWithError(string $message): array
+    // Transfer Token From Wallet To Wallets
+    public function transferToken(string $userId, array $args = []): ?array
     {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
+        \ignore_user_abort(true);
 
-    private function generateUUID(): string
-    {
-        return \sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0x0fff) | 0x4000,
-            \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
-        );
+        $this->logger->info('WalletMapper.transferToken started');
+
+		$accountsResult = $this->pool->returnAccounts();
+
+		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
+			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
+			return self::respondWithError(40701);
+		}
+
+		$liqpool = $accountsResult['response'] ?? null;
+
+		if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
+			$this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
+			return self::respondWithError(30102);
+		}
+
+		$this->poolWallet = $liqpool['pool'];
+		$this->burnWallet = $liqpool['burn'];
+		$this->peerWallet = $liqpool['peer'];
+
+        $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
+
+        $currentBalance = $this->getUserWalletBalance($userId);
+        if (empty($currentBalance)) {
+            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+                'Balance' => $currentBalance,
+            ]);
+            return self::respondWithError(51301);
+        }
+
+        $recipient = (string) $args['recipient'];
+        if (!self::isValidUUID($recipient)) {
+            $this->logger->warning('Incorrect recipientId Exception.', [
+                'recipient' => $recipient,
+                'Balance' => $currentBalance,
+            ]);
+            return self::respondWithError(20201);
+        }
+
+        $numberoftokens = (float) $args['numberoftokens'];
+        if ($numberoftokens <= 0) {
+            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+                'numberoftokens' => $numberoftokens,
+                'Balance' => $currentBalance,
+            ]);
+            return self::respondWithError(51301);
+        }
+
+        try {
+            $sql = "SELECT uid FROM users WHERE uid = :uid";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':uid', $recipient);
+            $stmt->execute();
+            $row = $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            return self::respondWithError($e->getMessage());
+        }
+
+        if (empty($row)) {
+            $this->logger->warning('Unknown Id Exception.');
+            return self::respondWithError(21001);
+        }
+
+        if ((string)$row === $userId) {
+            $this->logger->warning('Send and Receive Same Wallet Error.');
+            return self::respondWithError(31202);
+        }
+
+        $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE);
+        $feeAmount = round((float)$numberoftokens * POOLFEE, 2);
+        $peerAmount = round((float)$numberoftokens * PEERFEE, 2);
+        $burnAmount = round((float)$numberoftokens * BURNFEE, 2);
+        $countAmount = $feeAmount + $peerAmount + $burnAmount;
+
+        try {
+            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['userid' => $userId]);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (isset($result['invited']) && !empty($result['invited'])) {
+                $inviterId = $result['invited'];
+                $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
+                $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
+                $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
+                $this->logger->info('Invited By', [
+                    'invited' => $inviterId,
+                ]);
+            }
+
+        } catch (\Throwable $e) {
+            return self::respondWithError($e->getMessage());
+        }
+
+        if ($currentBalance < $requiredAmount) {
+            $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
+                'userId' => $userId,
+                'Balance' => $currentBalance,
+                'requiredAmount' => $requiredAmount,
+            ]);
+            return self::respondWithError(51301);
+        }
+
+        try {
+            // 1. SENDER: Debit From Account
+            if ($numberoftokens) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => -abs($numberoftokens),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->insertWinToLog($userId, $args);
+                $this->insertWinToPool($userId, $args);
+            }
+
+            // 2. RECIPIENT: Credit To Account
+            if ($numberoftokens) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($numberoftokens),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->insertWinToLog($row, $args);
+                $this->insertWinToPool($row, $args);
+            }
+
+            if (isset($result['invited']) && !empty($result['invited'])) {
+                // 3 . INVITER: Fees To inviter Account (if exist)
+                if ($inviterWin) {
+                    $id = self::generateUUID();
+                    if (empty($id)) {
+                        $this->logger->critical('Failed to generate logwins ID');
+                        return self::respondWithError(41401);
+                    }
+
+                    $args = [
+                        'token' => $id,
+                        'fromid' => $userId,
+                        'numbers' => abs($inviterWin),
+                        'whereby' => TRANSFER_,
+                    ];
+
+                    $this->insertWinToLog($inviterId, $args);
+                    $this->insertWinToPool($inviterId, $args);
+                }
+            }
+
+            // 4. SENDER: Deduct Fees From Sender
+            if ($countAmount) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => -abs($countAmount),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->insertWinToLog($userId, $args);
+                $this->insertWinToPool($userId, $args);
+            }
+
+            // 5. POOLWALLET: Fee To Account
+            if ($feeAmount) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($feeAmount),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->insertWinToLog($this->poolWallet, $args);
+                $this->insertWinToPool($this->poolWallet, $args);
+            }
+
+            // 6. PEERWALLET: Fee To Account
+            if ($peerAmount) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($peerAmount),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->insertWinToLog($this->peerWallet, $args);
+                $this->insertWinToPool($this->peerWallet, $args);
+            }
+
+            // 7. BURNWALLET: Fee Burning Tokens
+            if ($burnAmount) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($burnAmount),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->insertWinToLog($this->burnWallet, $args);
+                $this->insertWinToPool($this->burnWallet, $args);
+            }
+
+            return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
+
+        } catch (\Throwable $e) {
+            return self::respondWithError($e->getMessage());
+        }
     }
 
     public function fetchPool(array $args = []): array
@@ -110,160 +360,6 @@ class WalletMapper
                     'total_numbers' => $totalNumbers,
                     'total_numbersq' => $totalNumbersQ,
                     'transaction_count' => (int)$row['transaction_count'],
-                ];
-            } catch (\Throwable $e) {
-                $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
-            }
-        }
-
-        if (!empty($results['posts'])) {
-            $this->logger->info('Fetched all transactions from database', ['count' => count($results['posts'])]);
-        } else {
-            $this->logger->warning('No transactions found in database');
-        }
-
-        return $results;
-    }
-
-    public function fetchPooll(array $args = []): array
-    {
-        $this->logger->info('WalletMapper.fetchPool started');
-
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = max((int)($args['limit'] ?? 20), 1);
-
-        $conditions = ["whereby < 100"];
-        $queryParams = [];
-
-        foreach ($args as $field => $value) {
-            if (in_array($field, ['userid', 'postid', 'fromid', 'whereby'], true)) {
-                $conditions[] = "$field = :$field";
-                $queryParams[$field] = $value;
-            }
-        }
-
-        $whereClause = implode(" AND ", $conditions);
-
-        $sumSql = "SELECT SUM(numbers) AS overall_total_numbers FROM wallet WHERE $whereClause";
-
-        $sumStmt = $this->db->prepare($sumSql);
-        foreach ($queryParams as $param => $value) {
-            $sumStmt->bindValue(":$param", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
-        }
-        $sumStmt->execute();
-        $overallSums = $sumStmt->fetch(\PDO::FETCH_ASSOC);
-
-        $overallTotalNumbers = (float)($overallSums['overall_total_numbers'] ?? 0);
-        $overallTotalNumbersq = (int)$this->decimalToQ64_96($overallTotalNumbers);
-
-        $sql = "SELECT postid, 
-                       SUM(numbers) AS total_numbers, 
-                       COUNT(*) AS transaction_count
-                FROM wallet 
-                WHERE $whereClause 
-                GROUP BY postid 
-                ORDER BY total_numbers DESC 
-                LIMIT :limit OFFSET :offset";
-
-        $stmt = $this->db->prepare($sql);
-        foreach ($queryParams as $param => $value) {
-            $stmt->bindValue(":$param", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
-        }
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        $results = [
-            'overall_total_numbers' => $overallTotalNumbers,
-            'overall_total_numbersq' => $overallTotalNumbersq,
-            'posts' => []
-        ];
-
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            try {
-                $totalNumbers = (float)$row['total_numbers'];
-                $totalNumbersQ = (int)$this->decimalToQ64_96($totalNumbers);
-
-                $results['posts'][] = [
-                    'postid' => $row['postid'],
-                    'total_numbers' => $totalNumbers,
-                    'total_numbersq' => $totalNumbersQ,
-                    'transaction_count' => (int)$row['transaction_count'],
-                ];
-            } catch (\Throwable $e) {
-                $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
-            }
-        }
-
-        if (!empty($results['posts'])) {
-            $this->logger->info('Fetched all transactions from database', ['count' => count($results['posts'])]);
-        } else {
-            $this->logger->warning('No transactions found in database');
-        }
-
-        return $results;
-    }
-
-    public function fetchPool1(array $args = []): array
-    {
-        $this->logger->info('WalletMapper.fetchPool started');
-
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = max((int)($args['limit'] ?? 20), 1);
-
-        $sumSql = "SELECT SUM(numbers) AS overall_total_numbers FROM wallet WHERE whereby < 100";
-
-        $sumStmt = $this->db->prepare($sumSql);
-        $sumStmt->execute();
-        $overallSums = $sumStmt->fetch(\PDO::FETCH_ASSOC);
-
-        $overallTotalNumbers = (float)($overallSums['overall_total_numbers'] ?? 0);
-        $overallTotalNumbersq = $this->decimalToQ64_96($overallTotalNumbers); // Convert using Q64_96
-
-        $sql = "SELECT postid, SUM(numbers) AS total_numbers FROM wallet WHERE whereby < 100";
-
-        $conditions = [];
-        $queryParams = [];
-
-        foreach ($args as $field => $value) {
-            if (in_array($field, ['userid', 'postid', 'fromid', 'whereby'], true)) {
-                $conditions[] = "$field = :$field";
-                $queryParams[$field] = $value;
-            }
-        }
-
-        if ($conditions) {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        }
-
-        $sql .= " GROUP BY postid ORDER BY total_numbers DESC LIMIT :limit OFFSET :offset";
-
-        $stmt = $this->db->prepare($sql);
-
-        foreach ($queryParams as $param => $value) {
-            $stmt->bindValue(":$param", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
-        }
-
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-
-        $stmt->execute();
-
-        $results = [
-            'overall_total_numbers' => $overallTotalNumbers,
-            'overall_total_numbersq' => $overallTotalNumbersq,
-            'posts' => []
-        ];
-
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            try {
-                $totalNumbers = (float)$row['total_numbers'];
-                $totalNumbersQ = $this->decimalToQ64_96($totalNumbers); // Convert using Q64_96
-
-                $results['posts'][] = [
-                    'postid' => $row['postid'],
-                    'total_numbers' => $totalNumbers,
-                    'total_numbersq' => $totalNumbersQ,
                 ];
             } catch (\Throwable $e) {
                 $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
@@ -409,30 +505,12 @@ class WalletMapper
 
             return $results;
 
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Database error occurred in loadWalletById', [
                 'error' => $e->getMessage(),
             ]);
             return false;
         }
-    }
-
-    public function loadById(string $userid): Wallet|false
-    {
-        $this->logger->info('WalletMapper.loadById started');
-
-        $sql = "SELECT * FROM wallet WHERE userid = :userid";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['userid' => $userid]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if ($data !== false) {
-            return new Wallet($data);
-        }
-
-        $this->logger->warning('No transaction found with', ['userid' => $userid]);
-
-        return false;
     }
 
     public function loadLiquidityById(string $userid): float
@@ -481,7 +559,7 @@ class WalletMapper
             $this->logger->info('Inserted new transaction into database', ['data' => $data]);
 
             return new Wallet($data);
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to insert transaction into database', [
                 'data' => $data,
                 'exception' => $e->getMessage(),
@@ -515,7 +593,7 @@ class WalletMapper
             $this->logger->info('Inserted new transaction into database', ['data' => $data]);
 
             return new Wallett($data);
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to insert transaction into database', [
                 'data' => $data,
                 'exception' => $e->getMessage(),
@@ -563,36 +641,18 @@ class WalletMapper
         return $token;
     }
 
-    public function fetchPostUsersID(): array|false
-    {
-        $this->logger->info('WalletMapper.fetchPostUsersID started');
-
-        try {
-            $sql = "SELECT postid, userid 
-                    FROM posts 
-                    WHERE feedid IS NULL";
-            $stmt = $this->db->query($sql);
-            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\Throwable $e) {
-            $this->logger->error('Error fetching post user IDs', ['exception' => $e]);
-            return false;
-        }
-
-        return $data;
-    }
-
     public function fetchWinsLog(string $userid, string $type, ?array $args = []): array
     {
         $this->logger->info("WalletMapper.fetchWinsLog started for type: $type");
 
         if (empty($userid)) {
             $this->logger->error('UserID is missing');
-            return $this->respondWithError('UserID is required.');
+            return self::respondWithError(30101);
         }
 
         if (!in_array($type, ['win', 'pay'], true)) {
             $this->logger->error('Type is not provided');
-            return $this->respondWithError('Invalid type parameter provided.');
+            return self::respondWithError(30105);
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -646,7 +706,7 @@ class WalletMapper
 
             return $result;
         } catch (\Throwable $e) {
-            return $this->respondWithError($e->getMessage());
+            return self::respondWithError($e->getMessage());
         }
     }
 
@@ -656,15 +716,16 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.insertWinToLog started');
 
-        if (empty($args['postid'])) {
-            $this->logger->error('postid is missing', ['userId' => $userId, 'args' => $args]);
-            return false;
-        }
+        $postId = $args['postid'] ?? null;
+        $fromId = $args['fromid'] ?? null;
+        $gems = $args['gems'] ?? 0.0;
+        $numBers = $args['numbers'] ?? 0;
+        $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
 
-        $id = $this->generateUUID();
+        $id = self::generateUUID();
         if (empty($id)) {
             $this->logger->critical('Failed to generate logwins ID');
-            return $this->respondWithError('Failed to generate logwins ID.');
+            return self::respondWithError(41401);
         }
 
         $sql = "INSERT INTO logwins 
@@ -675,28 +736,26 @@ class WalletMapper
         try {
             $stmt = $this->db->prepare($sql);
 
-            $this->logger->info('WalletMapper.insertWinToLog args:', ['userId' => $userId, 'args' => $args]);
-
             $stmt->bindValue(':token', $args['gemid'] ?? $id, \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':postid', $args['postid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':fromid', $args['fromid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':gems', $args['gems'], \PDO::PARAM_STR);
-            $stmt->bindValue(':numbers', $args['numbers'], \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($args['numbers']), \PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
+            $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
+            $stmt->bindValue(':gems', $gems, \PDO::PARAM_STR);
+            $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
-            $stmt->bindValue(':createdat', $args['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
             $stmt->execute();
-            //$this->saveWalletEntry($userId, $args['numbers']);
+            //$this->saveWalletEntry($userId, $numBers);
 
             $this->logger->info('Inserted into logwins successfully', [
                 'userId' => $userId,
-                'postid' => $args['postid']
+                'postid' => $postId
             ]);
 
             return true;
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to insert into logwins', [
                 'userId' => $userId,
                 'exception' => $e->getMessage()
@@ -712,10 +771,10 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.insertWinToPool started');
 
-        if (empty($args['postid'])) {
-            $this->logger->error('postid is missing', ['userId' => $userId, 'args' => $args]);
-            return false;
-        }
+        $postId = $args['postid'] ?? null;
+        $fromId = $args['fromid'] ?? null;
+        $numBers = $args['numbers'] ?? 0;
+        $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
 
         $sql = "INSERT INTO wallet 
                 (token, userid, postid, fromid, numbers, numbersq, whereby, createdat) 
@@ -727,23 +786,24 @@ class WalletMapper
 
             $stmt->bindValue(':token', $this->getPeerToken(), \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':postid', $args['postid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':fromid', $args['fromid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':numbers', $args['numbers'], \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($args['numbers']), \PDO::PARAM_INT); // 29 char precision
+            $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
+            $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
+            $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
-            $stmt->bindValue(':createdat', $args['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
             $stmt->execute();
-            $this->saveWalletEntry($userId, $args['numbers']);
+
+            $this->saveWalletEntry($userId, $numBers);
 
             $this->logger->info('Inserted into wallet successfully', [
                 'userId' => $userId,
-                'postid' => $args['postid']
+                'postid' => $postId
             ]);
 
             return true;
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to insert into wallet', [
                 'userId' => $userId,
                 'exception' => $e->getMessage()
@@ -756,7 +816,7 @@ class WalletMapper
     public function callGlobalWins(): array
     {
         if (!TABLESTOGEMS) {
-            return $this->respondWithError('TABLESTOGEMS');
+            return self::respondWithError(41215);
         }
 
         $wins = [
@@ -786,11 +846,11 @@ class WalletMapper
 
         if ($totalInserts > 0) {
             $sourceList = implode(', ', $winSources);
-            $success = ['status' => 'success', 'ResponseCode' => "Successfully added $totalInserts gems across wins from: $sourceList."];
+            $success = ['status' => 'success', 'ResponseCode' => 11206];
             return $success;
         }
 
-        $success = ['status' => 'success', 'ResponseCode' => 'No gems added to database across all wins.'];
+        $success = ['status' => 'success', 'ResponseCode' => 21205];
         return $success;
     }
 
@@ -809,7 +869,7 @@ class WalletMapper
             $entries = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ' . $tableName, ['exception' => $e]);
-            return $this->respondWithError($e->getMessage());
+            return self::respondWithError(41208);
         }
 
         $insertCount = 0; 
@@ -820,10 +880,10 @@ class WalletMapper
 
             foreach ($entries as $row) {
                 try {
-                    $id = $this->generateUUID();
+                    $id = self::generateUUID();
                     if (empty($id)) {
                         $this->logger->critical('Failed to generate gems ID');
-                        return $this->respondWithError('Failed to generate gems ID.');
+                        return self::respondWithError(41401);
                     }
 
                     $sql = "INSERT INTO gems (gemid, userid, postid, fromid, gems, whereby, createdat) 
@@ -842,7 +902,7 @@ class WalletMapper
                     $insertCount++;
                 } catch (\Throwable $e) {
                     $this->logger->error('Error inserting into gems for ' . $tableName, ['exception' => $e]);
-                    return $this->respondWithError($e->getMessage());
+                    return self::respondWithError(41210);
                 }
             }
 
@@ -853,7 +913,7 @@ class WalletMapper
                     $this->db->query($sql);
                 } catch (\Throwable $e) {
                     $this->logger->error('Error updating collected status for ' . $tableName, ['exception' => $e]);
-                    return $this->respondWithError($e->getMessage());
+                    return self::respondWithError(41211);
                 }
             }
         }
@@ -887,12 +947,12 @@ class WalletMapper
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());
+            return self::respondWithError(41208);
         }
 
         $success = [
             'status' => 'success',
-            'ResponseCode' => 'Gems data prepared successfully.',
+            'ResponseCode' => 11207,
             'affectedRows' => $entries
         ];
 
@@ -906,7 +966,7 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.getTimeSortedMatch started');
 
-        $dayOptions = [
+        $dayOptionsRaw = [
             "D0" => "createdat::date = CURRENT_DATE",
             "D1" => "createdat::date = CURRENT_DATE - INTERVAL '1 day'",
             "D2" => "createdat::date = CURRENT_DATE - INTERVAL '2 day'",
@@ -918,11 +978,13 @@ class WalletMapper
             "Y0" => "EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE)"
         ];
 
-        if (!array_key_exists($day, $dayOptions)) {
-            return $this->respondWithError("Invalid day parameter.");
+        if (!array_key_exists($day, $dayOptionsRaw)) {
+            return self::respondWithError(30105);
         }
 
-        $whereCondition = $dayOptions[$day];
+        $whereConditionRaw = $dayOptionsRaw[$day];
+
+        $whereConditionAliased = preg_replace('/\b(createdat)\b/', 'g.$1', $whereConditionRaw);
 
         $sql = "
             WITH user_sums AS (
@@ -930,7 +992,7 @@ class WalletMapper
                     userid,
                     GREATEST(SUM(gems), 0) AS total_numbers
                 FROM gems
-                WHERE {$whereCondition} AND collected = 0
+                WHERE {$whereConditionRaw} AND collected = 0
                 GROUP BY userid
             ),
             total_sum AS (
@@ -950,7 +1012,7 @@ class WalletMapper
             FROM gems g
             JOIN user_sums us ON g.userid = us.userid
             CROSS JOIN total_sum ts
-            WHERE us.total_numbers > 0 AND g.collected = 0 AND g.{$whereCondition};
+            WHERE us.total_numbers > 0 AND g.collected = 0 AND {$whereConditionAliased};
         ";
 
         try {
@@ -959,11 +1021,11 @@ class WalletMapper
             //$this->logger->info('fetching data for ', ['data' => $data]);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());
+            return self::respondWithError(41209);
         }
 
         if (empty($data)) {
-            return $this->respondWithError('No records found for ' . $day);
+            return self::respondWithError(21206);
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
@@ -1020,13 +1082,13 @@ class WalletMapper
 
             } catch (\Throwable $e) {
                 $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
-                return $this->respondWithError($e->getMessage());
+                return self::respondWithError(41212);
             }
 
             return [
                 'status' => 'success',
                 'counter' => count($args) -1,
-                'ResponseCode' => 'Records found for ' . $day,
+                'ResponseCode' => 11208,
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
         }
@@ -1041,7 +1103,7 @@ class WalletMapper
 
         if ($account <= $tokenAmount) {
             $this->logger->warning('Insufficient funds for the transaction', ['userid' => $userId, 'accountBalance' => $account, 'tokenAmount' => $tokenAmount]);
-            return $this->respondWithError('Don\'t have sufficient funds for this transaction');
+            return self::respondWithError(51401);
         }
 
         try {
@@ -1052,20 +1114,20 @@ class WalletMapper
 
             if (!$result || !$result['invited']) {
                 $this->logger->warning('No inviter found for the given user', ['userid' => $userId]);
-                return $this->respondWithError('No inviter found for the given user.');
+                return self::respondWithError(11401);
             }
 
             $inviterId = $result['invited'];
             $this->logger->info('Inviter found', ['inviterId' => $inviterId]);
 
-            $percent = round((float)$tokenAmount * RECEIVEINVITATION, 2);
+            $percent = round((float)$tokenAmount * INVTFEE, 2);
             $tosend = round((float)$tokenAmount - $percent, 2);
 
             if ($result) {
-                $id = $this->generateUUID();
+                $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
-                    return $this->respondWithError('Failed to generate logwins ID.');
+                    return self::respondWithError(41401);
                 }
 
                 $args = [
@@ -1081,10 +1143,10 @@ class WalletMapper
             }
 
             if ($result) {
-                $id = $this->generateUUID();
+                $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
-                    return $this->respondWithError('Failed to generate logwins ID.');
+                    return self::respondWithError(41401);
                 }
 
                 $args = [
@@ -1101,7 +1163,7 @@ class WalletMapper
 
             return [
                 'status' => 'success', 
-                'ResponseCode' => "Transaction successful: 1% transferred to inviter.",
+                'ResponseCode' => 11402,
                 'affectedRows' => [
                     'inviterId' => $inviterId,
                     'tosend' => $tosend,
@@ -1109,24 +1171,18 @@ class WalletMapper
                 ]
             ];
 
-        } catch (\PDOException $pdoe) {
-            $this->db->rollBack();
-            $this->logger->error('PDOException occurred during transaction', ['exception' => $pdoe]);
-            return $this->respondWithError("Database error: " . $pdoe->getMessage());
-
         } catch (\Throwable $e) {
-            $this->db->rollBack();
             $this->logger->error('Throwable occurred during transaction', ['exception' => $e]);
-            return $this->respondWithError("Transaction failed: " . $e->getMessage());
+            return self::respondWithError(41401);
         }
 
-        return $this->respondWithError('Unknown error occurred.');
+        return self::respondWithError(41401);
     }
 
     public function deductFromWallets(string $userId, ?array $args = []): array
     {
         $this->logger->info('WalletMapper.deductFromWallets started');
-		$this->logger->info('deductFromWallets commenrs args.', ['args' => $args]);
+        $this->logger->info('deductFromWallets commenrs args.', ['args' => $args]);
 
         $postId = $args['postid'] ?? null;
         $art = $args['art'] ?? null;
@@ -1141,7 +1197,7 @@ class WalletMapper
 
         if (!isset($mapping[$art])) {
             $this->logger->error('Invalid art type provided.', ['art' => $art]);
-            return $this->respondWithError('Invalid action type.');
+            return self::respondWithError(30105);
         }
 
         $price = $mapping[$art]['price'];
@@ -1156,7 +1212,7 @@ class WalletMapper
                 'Balance' => $currentBalance,
                 'requiredAmount' => $price,
             ]);
-            return $this->respondWithError('Insufficient_balance: Not enough balance to perform this action.');
+            return self::respondWithError(51301);
         }
 
         $args = [
@@ -1171,12 +1227,12 @@ class WalletMapper
         try {
             $results = $this->insertWinToLog($userId, $args);
             if ($results === false) {
-                return $this->respondWithError('Failed to deduct from wallet.');
+                return self::respondWithError(41206);
             }
 
             $results = $this->insertWinToPool($userId, $args);
             if ($results === false) {
-                return $this->respondWithError('Failed to deduct from wallet.');
+                return self::respondWithError(41206);
             }
 
             $this->logger->info('Wallet deduction successful.', [
@@ -1189,7 +1245,7 @@ class WalletMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Wallet deduction successful: ' . $text,
+                'ResponseCode' => 11209,
                 'affectedRows' => [
                     'userId' => $userId,
                     'postId' => $postId,
@@ -1207,7 +1263,7 @@ class WalletMapper
                     'whereby' => $whereby,
                 ],
             ]);
-            return $this->respondWithError('Failed to deduct from wallet:' . $e->getMessage());
+            return self::respondWithError(41206);
         }
     }
 
@@ -1269,8 +1325,8 @@ class WalletMapper
             $userExists = $stmt->fetchColumn(); 
 
             if (!$userExists) {
-                $newLiquidity = $liquidity;
-                $liquiditq = $this->decimalToQ64_96($newLiquidity);
+                $newLiquidity = abs($liquidity);
+                $liquiditq = abs($this->decimalToQ64_96($newLiquidity));
 
                 $query = "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
                           VALUES (:userid, :liquidity, :liquiditq, :updatedat)";
@@ -1283,8 +1339,8 @@ class WalletMapper
                 $stmt->execute();
             } else {
                 $currentBalance = $this->getUserWalletBalance($userId);
-                $newLiquidity = $currentBalance + $liquidity;
-                $liquiditq = $this->decimalToQ64_96($newLiquidity);
+                $newLiquidity = abs($currentBalance + $liquidity);
+                $liquiditq = abs($this->decimalToQ64_96($newLiquidity));
 
                 $query = "UPDATE wallett
                           SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
@@ -1303,67 +1359,10 @@ class WalletMapper
             $this->updateUserLiquidity($userId, $newLiquidity);
 
             return $newLiquidity;
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             $this->db->rollBack();
             $this->logger->error('Database error in saveWalletEntry: ' . $e->getMessage());
             throw new \RuntimeException('Unable to save wallet entry');
-        }
-    }
-
-    public function getRankedPosts($limit = 10)
-    {
-        try {
-            $sql = "
-                WITH post_totals AS (
-                    SELECT
-                        w.postid,
-                        SUM(w.numbers) AS total_numbers
-                    FROM logwins w
-                    GROUP BY w.postid
-                ),
-                ranked_posts AS (
-                    SELECT
-                        pt.postid,
-                        pt.total_numbers,
-                        pi.likes,
-                        pi.dislikes,
-                        pi.views,
-                        pi.saves,
-                        pi.shares,
-                        pi.comments,
-                        p.title,
-                        p.contenttype,
-                        RANK() OVER (ORDER BY pt.total_numbers DESC) AS rank
-                    FROM post_totals pt
-                    LEFT JOIN post_info pi ON pt.postid = pi.postid
-                    LEFT JOIN posts p ON pt.postid = p.postid
-                )
-                SELECT *
-                FROM ranked_posts
-                WHERE rank <= :limit
-                ORDER BY rank ASC";
-
-            $stmt = $this->db->prepare($sql);
-
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-
-            $stmt->execute();
-
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        } catch (\PDOException $e) {
-            $this->logger->error('Database error while fetching ranked posts', [
-                'error' => $e->getMessage(),
-                'sql' => $sql,
-                'limit' => $limit
-            ]);
-            return [];
-        } catch (\Throwable $e) {
-            $this->logger->error('Unexpected error while fetching ranked posts', [
-                'error' => $e->getMessage(),
-                'limit' => $limit
-            ]);
-            return [];
         }
     }
 
@@ -1412,8 +1411,8 @@ class WalletMapper
             return [
                 'status' => 'success',
                 'ResponseCode' => $totalInteractions > 0
-                    ? "Successfully counted $totalInteractions interactions with a total factor score of $totalScore from: " . implode(', ', $winSources) . "."
-                    : 'No interactions found for today.',
+                    ? 11205
+                    : 21204,
                 'affectedRows' => array_merge(['totalInteractions' => $totalInteractions, 'totalScore' => $totalScore, 'totalDetails' => $interactionDetails])
             ];
         } catch (\Throwable $e) {
@@ -1424,7 +1423,7 @@ class WalletMapper
 
             return [
                 'status' => 'error',
-                'ResponseCode' => 'An unexpected error occurred while processing the user move.',
+                'ResponseCode' => 41205,
                 'affectedRows' => []
             ];
         }
@@ -1506,5 +1505,4 @@ class WalletMapper
     {
         return bcadd($qValue1, $qValue2);
     }
-
 }

@@ -98,12 +98,12 @@ class PostMedia
                 ],
             ],
             'media' => [
-                'required' => true,
+                'required' => false,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 0,
-                        'max' => 100,
+                        'max' => 1000,
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -114,7 +114,7 @@ class PostMedia
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 0,
-                        'max' => 500,
+                        'max' => 1000,
                     ]],
                     ['name' => 'isString'],
                 ],

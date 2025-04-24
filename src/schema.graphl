@@ -18,7 +18,7 @@ type Query {
   friends(offset: Int, limit: Int): UserFriends!
   getuserinfo: GetUserinforesponse!
   blockedlist(offset: Int, limit: Int): UserBlocked!
-  getallposts(filterBy: [FilterType!], IgnorList: IgnoredList, sortBy: SortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, postOffset: Int, postLimit: Int, commentOffset: Int, commentLimit: Int): GetAllPostResponse!
+  getallposts(filterBy: [FilterType!], IgnorList: IgnoredList, sortBy: SortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): GetAllPostResponse!
   getpostinfo(postid: ID!): GetPostinforesponse!
   getcommentinfo(commentid: ID!): GetCommentinforesponse!
   parentcomments(parent: ID!, offset: Int, limit: Int): CommentResponse!
@@ -58,6 +58,7 @@ type Mutation {
   createPost(action: PostenType!, input: CreatePostInput!): PostResponse!
   createComment(action: CommentsType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolveActionPost(action: ActionType!, postid: ID!): DefaultResponse!
+  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse!
 }
 
 scalar Decimal
@@ -131,7 +132,9 @@ type StandardResponse {
 }
 
 type HelloResponse {
-  currentuserid: String
+  currentuserid: ID
+  currentVersion: String
+  wikiLink: String
 }
 
 type LogWins {
@@ -291,6 +294,7 @@ type Chatinfo {
 
 type AddChatmessageResponse {
   status: String!
+  counter: Int!
   ResponseCode: String
   affectedRows: [Chatmessageinfo]
 }

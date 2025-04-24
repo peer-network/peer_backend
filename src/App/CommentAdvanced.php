@@ -14,6 +14,7 @@ class CommentAdvanced
     protected string $content;
     protected string $createdat;
     protected ?int $amountlikes;
+    protected ?int $amountreplies;
     protected ?bool $isliked;
     protected ?array $user = [];
     
@@ -32,6 +33,7 @@ class CommentAdvanced
         $this->content = $data['content'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->amountlikes = $data['amountlikes'] ?? 0;
+        $this->amountreplies = $data['amountreplies'] ?? 0;
         $this->isliked = $data['isliked'] ?? false;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
     }
@@ -47,6 +49,7 @@ class CommentAdvanced
             'content' => $this->content,
             'createdat' => $this->createdat,
             'amountlikes' => $this->amountlikes,
+            'amountreplies' => $this->amountreplies,
             'isliked' => $this->isliked,
             'user' => $this->user,
         ];
@@ -170,6 +173,11 @@ class CommentAdvanced
                 ],
             ],
             'amountlikes' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountreplies' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],

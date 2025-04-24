@@ -5,7 +5,7 @@ schema {
 type Query {
   hello: HelloResponse!
   dailygemstatus: StandardResponse!
-  dailygemsresults(day: DayType!): GenericResponse!
+  dailygemsresults(day: DayType!): StandardResponse!
 }
 
 scalar Decimal
@@ -31,7 +31,9 @@ type StandardResponse {
 }
 
 type HelloResponse {
-  currentuserid: String
+  currentuserid: ID
+  currentVersion: String
+  wikiLink: String
 }
 
 type GenericResponse {

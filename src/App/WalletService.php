@@ -41,7 +41,7 @@ class WalletService
     public function fetchPool(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info("WalletService.fetchPool started");
@@ -53,7 +53,7 @@ class WalletService
     public function fetchAll(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info("WalletService.fetchAll started");
@@ -72,7 +72,7 @@ class WalletService
     public function fetchWalletById(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $userId = $this->currentUserId;
@@ -80,15 +80,15 @@ class WalletService
         $fromId = $args['fromid'] ?? null;
 
         if ($postId === null && $fromId === null && !self::isValidUUID($userId)) {
-            return $this->respondWithError('At least one of postid, or fromid is required.');
+            return $this->respondWithError(30102);
         }
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postid provided.');
+            return $this->respondWithError(31501);
         }
 
         if ($fromId !== null && !self::isValidUUID($fromId)) {
-            return $this->respondWithError('Invalid fromid provided.');
+            return $this->respondWithError(30105);
         }
 
         $this->logger->info("WalletService.fetchWalletById started");
@@ -97,7 +97,7 @@ class WalletService
             $wallets = $this->walletMapper->loadWalletById($args, $this->currentUserId);
 
             if ($wallets === false) {
-                return $this->respondWithError('Failed to fetch wallets from database.');
+                return $this->respondWithError(41216);
             }
 
             $walletData = array_map(
@@ -114,7 +114,7 @@ class WalletService
             $success = [
                 'status' => 'success',
                 'counter' => count($walletData),
-                'ResponseCode' => 'Successfully fetched wallets',
+                'ResponseCode' => 11209,
                 'affectedRows' => $walletData
             ];
 
@@ -125,14 +125,14 @@ class WalletService
                 'error' => $e->getMessage(),
                 'args' => $args,
             ]);
-            return $this->respondWithError('An internal error occurred.');
+            return $this->respondWithError(40301);
         }
     }
 
     public function callFetchWinsLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -140,7 +140,7 @@ class WalletService
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
-            return $this->respondWithError('Invalid day parameter provided.');
+            return $this->respondWithError(30105);
         }
 
         return $this->walletMapper->fetchWinsLog($this->currentUserId, 'win', $args);
@@ -149,7 +149,7 @@ class WalletService
     public function callFetchPaysLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -157,7 +157,7 @@ class WalletService
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
-            return $this->respondWithError('Invalid day parameter provided.');
+            return $this->respondWithError(30105);
         }
 
         return $this->walletMapper->fetchWinsLog($this->currentUserId, 'pay', $args);
@@ -166,7 +166,7 @@ class WalletService
     public function callGlobalWins(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         return $this->walletMapper->callGlobalWins();
@@ -175,7 +175,7 @@ class WalletService
     public function callGemster(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         return $this->walletMapper->getTimeSorted();
@@ -184,14 +184,14 @@ class WalletService
     public function callGemsters(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
-            return $this->respondWithError('Invalid day parameter provided.');
+            return $this->respondWithError(30105);
         }
 
         return $this->walletMapper->getTimeSortedMatch($day);
@@ -214,15 +214,15 @@ class WalletService
             if ($results !== false && $results !== 0.0) {
                 $success = [
                     'status' => 'success',
-                    'ResponseCode' => 'Liquidity data prepared successfully',
+                    'ResponseCode' => 11204,
                     'affectedRows' => ['currentliquidity' => $results],
                 ];
                 return $success;
             }
 
-            return $this->respondWithError('No liquidity found for the user.');
+            return $this->respondWithError(21203);
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve liquidity list.');
+            return $this->respondWithError(41204);
         }
     }
 
@@ -256,7 +256,7 @@ class WalletService
             }
 
         } catch (\Exception $e) {
-            return $this->respondWithError('Unknown Error.');
+            return $this->respondWithError(40301);
         }
     }
 
@@ -271,6 +271,27 @@ class WalletService
                 'ResponseCode' => $response['ResponseCode'],
                 'affectedRows' => $response['affectedRows'],
             ];
+
+        } catch (\Exception $e) {
+            return $this->respondWithError(41205);
+        }
+    }
+
+    public function transferToken(array $args): array
+    {
+        $this->logger->info('WalletService.transferToken started');
+
+        try {
+            $response = $this->walletMapper->transferToken($this->currentUserId, $args);
+            if ($response['status'] === 'error') {
+                return $response;
+            } else {
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => $response['ResponseCode'],
+                    'affectedRows' => [],
+                ];
+            }
 
         } catch (\Exception $e) {
             return $this->respondWithError('Unknown Error.');

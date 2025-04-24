@@ -17,7 +17,7 @@ class PostInfoMapper
         return $userid === $currentUserId;
     }
 
-    public function loadById(string $postid): PostInfo|false
+    public function loadById(string $postid): ?PostInfo
     {
         $this->logger->info("PostInfoMapper.loadById started");
 
@@ -30,7 +30,7 @@ class PostInfoMapper
             return new PostInfo($data);
         }
 
-        return false;
+        return null;
     }
 
     public function isUserExistById(string $id): bool
@@ -260,7 +260,7 @@ class PostInfoMapper
             if ($isSaved) {
                 // Delete the save record
                 $query = "DELETE FROM user_post_saves WHERE userid = :userid AND postid = :postid";
-                $action = 'unsaved';
+                $action = 11511;
                 $issaved = false;
 
                 // Decrement the save count in `post_info`
@@ -271,7 +271,7 @@ class PostInfoMapper
             } else {
                 // Insert a new save record
                 $query = "INSERT INTO user_post_saves (userid, postid) VALUES (:userid, :postid)";
-                $action = 'saved';
+                $action = 11512;
                 $issaved = true;
 
                 // Increment the save count in `post_info`
@@ -297,7 +297,7 @@ class PostInfoMapper
                 'postid' => $postid,
                 'exception' => $e->getMessage(),
             ]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle post save'];
+            return ['status' => 'error', 'ResponseCode' => 41502];
         }
     }
 
@@ -320,12 +320,12 @@ class PostInfoMapper
             if ($isFollowing) {
                 // Unfollow: delete the relationship
                 $query = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-                $action = 'unfollowed';
+                $action = 11103;
                 $isfollowing = false;
             } else {
                 // Follow: insert the relationship
                 $query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
-                $action = 'followed';
+                $action = 11104;
                 $isfollowing = true;
             }
 
@@ -345,7 +345,7 @@ class PostInfoMapper
                 'followeduserid' => $followeduserid,
                 'exception' => $e->getMessage(),
             ]);
-            return ['status' => 'error', 'ResponseCode' => 'Failed to toggle user follow.'];
+            return ['status' => 'error', 'ResponseCode' => 41103];
         }
     }
 
