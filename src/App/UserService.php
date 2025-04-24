@@ -147,6 +147,15 @@ class UserService
         $biography = $args['biography'] ?? '/userData/' . $id . '.txt';
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
+        if (!empty($referralUuid)) {
+            $inviter = $this->userMapper->loadById($referralUuid);
+
+            if (empty($inviter)) {
+                $this->logger->warning('Invalid referral UUID provided.', ['referralUuid' => $referralUuid]);
+                return self::respondWithError('INVALID_REFERRAL_UUID');
+            }
+        }
+
         $email = trim($args['email']);
         if ($this->userMapper->isEmailTaken($email)) {
             return self::respondWithError(20601);
@@ -244,6 +253,18 @@ class UserService
         }
 
         try {
+            $referralLink = $this->userMapper->generateReferralLink($id);
+            $this->userMapper->insertReferralInfo($id, $referralLink);
+        
+            if (!empty($inviter)) {
+                $this->userMapper->storeReferral($inviter->getUserId(), $id);
+            }
+        } catch (\Throwable $e) {
+            $this->logger->warning('Error handling referral info.', ['exception' => $e]);
+            return self::respondWithError($e->getMessage());
+        } 
+
+        try {
             $userwallet = new Wallett($walletData);
             $this->walletMapper->insertt($userwallet);
             unset($walletData, $userwallet);
@@ -272,6 +293,21 @@ class UserService
 			'ResponseCode' => 10601,
 			'userid' => $id,
 		];
+    }
+
+    public function referralList(string $userId, int $offset = 0, int $limit = 20): array
+    {
+        $data = $this->userMapper->getReferralRelations($userId, $offset, $limit);
+
+        return [
+            'status' => 'success',
+            'ResponseCode' => 'REFERRAL_LIST_LOADED',
+            'counter' => count($data['iInvited']),
+            'affectedRows' => [
+                'invitedBy' => $data['invitedBy'],
+                'iInvited' => $data['iInvited']
+            ],
+        ];
     }
 
     private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
