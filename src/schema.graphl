@@ -44,18 +44,18 @@ type Mutation {
   toggleUserFollowStatus(userid: ID!): FollowStatusResponse!
   toggleBlockUserStatus(userid: ID!): DefaultResponse!
   deleteAccount(password: String!): DefaultResponse!
-  createChat(input: CreateChatInput!): AddChatResponse!
+  createChat(input: ChatInput!): AddChatResponse!
   updateChatInformations(input: UpdateChatInput!): AddChatResponse!
-  addChatParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
-  removeChatParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
+  addChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
+  removeChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
   sendChatMessage(chatid: ID!, content: String!): AddChatmessageResponse!
   deleteChatMessage(chatid: ID!, messid: Int!): DefaultResponse!
   deleteChat(id: ID!): DefaultResponse!
-  createChatFeed(input: CreateFeedInput!): AddPostResponse!
+  createChatFeed(input: FeedInput!): AddPostResponse!
   likeComment(commentid: ID!): DefaultResponse!
   reportComment(commentid: ID!): DefaultResponse!
   deletePost(id: ID!): DefaultResponse!
-  createPost(action: PostType!, input: CreatePostInput!): PostResponse!
+  createPost(action: PostType!, input: PostInput!): PostResponse!
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
 }
@@ -480,13 +480,13 @@ type CommentResponse {
   affectedRows: [Comment]
 }
 
-input RegisterInput {
+input RegistrationInput {
   email: String!
   password: String!
   username: String!
 }
 
-input CreatePostInput {
+input PostInput {
   title: String!
   mediadescription: String
   contenttype: ContentType!
@@ -495,7 +495,7 @@ input CreatePostInput {
   listTags: [String!]
 }
 
-input CreateChatInput {
+input ChatInput {
   name: String!
   image: String
   recipients: [String!]!
@@ -507,12 +507,12 @@ input UpdateChatInput {
   image: String
 }
 
-input CreateChatParticipantsInput {
+input ChatParticipantsInput {
   chatid: ID!
   recipients: [String!]!
 }
 
-input CreateFeedInput {
+input FeedInput {
   feedid: ID!
   title: String!
   media: String!
