@@ -602,7 +602,7 @@ class GraphQLSchemaBuilder
                     return $root['createdat'] ?? '';
                 },
                 'listTags' => function (array $root): array {
-                    return $root['tags'] ?? [];
+                    return $root['listTags'] ?? [];
                 },
                 'user' => function (array $root): array {
                     return $root['user'] ?? [];
@@ -986,9 +986,9 @@ class GraphQLSchemaBuilder
                 },
             ],
             'CurrentLiquidity' => [
-                'currentliquidity' => function (array $root): float {
-                    $this->logger->info('Query.currentliquidity Resolvers');
-                    return $root['currentliquidity'] ?? 0.0;
+                'getCurrentBalance' => function (array $root): float {
+                    $this->logger->info('Query.getCurrentBalance Resolvers');
+                    return $root['getCurrentBalance'] ?? 0.0;
                 },
             ],
             'UserInfo' => [
@@ -1653,15 +1653,15 @@ class GraphQLSchemaBuilder
 
         $this->logger->info('Query.resolveTags started');
 
-        $tags = $this->tagService->fetchAll($args);
-        if (isset($tags['status']) && $tags['status'] === 'success') {
+        $listTags = $this->tagService->fetchAll($args);
+        if (isset($listTags['status']) && $listTags['status'] === 'success') {
             $this->logger->info('Query.resolveTags successful');
 
-            return $tags;
+            return $listTags;
         }
 
-        if (isset($tags['status']) && $tags['status'] === 'error') {
-            return $tags;
+        if (isset($listTags['status']) && $listTags['status'] === 'error') {
+            return $listTags;
         }
 
         return $this->respondWithError(21701);
@@ -1960,7 +1960,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError($results['ResponseCode']);
         }
 
-        $this->logger->warning('Query.resolveAllFriends No friends found');
+        $this->logger->warning('Query.resolveAllFriends No listFriends found');
         return $this->respondWithError(21101);
     }
 

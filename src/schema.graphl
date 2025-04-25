@@ -166,7 +166,7 @@ type DailyFreeResponse {
 }
 
 type CurrentLiquidity {
-  currentliquidity: Decimal
+  getCurrentBalance: Decimal
 }
 
 type UserInfoResponse {
