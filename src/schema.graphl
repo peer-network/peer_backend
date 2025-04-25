@@ -55,9 +55,9 @@ type Mutation {
   likeComment(commentid: ID!): DefaultResponse!
   reportComment(commentid: ID!): DefaultResponse!
   deletePost(id: ID!): DefaultResponse!
-  createPost(action: PostenType!, input: CreatePostInput!): PostResponse!
-  createComment(action: CommentsType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
-  resolvePostAction(action: ActionType!, postid: ID!): DefaultResponse!
+  createPost(action: PostType!, input: CreatePostInput!): PostResponse!
+  createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
+  resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
 }
 
 scalar Decimal
@@ -65,7 +65,7 @@ scalar DATEN
 scalar Date
 scalar TagList
 
-enum ActionType {
+enum PostActionType {
   LIKE
   DISLIKE
   REPORT
@@ -74,19 +74,19 @@ enum ActionType {
   SAVE
 }
 
-enum PostenType {
+enum PostType {
   POST
 }
 
-enum CommentsType {
+enum CommentType {
   COMMENT
 }
 
-enum ContenType {
-  image
-  audio
-  video
-  text
+enum ContentType {
+  IMAGE
+  AUDIO
+  VIDEO
+  TEXT
 }
 
 enum PostFilterType {
@@ -489,7 +489,7 @@ input RegisterInput {
 input CreatePostInput {
   title: String!
   mediadescription: String
-  contenttype: ContenType!
+  contenttype: ContentType!
   media: [String!]
   cover: [String!]
   listTags: [String!]
