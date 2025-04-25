@@ -11,7 +11,7 @@ type Subscription {
 
 type Query {
   hello: HelloResponse!
-  searchUser(userid: ID, eMail: String, username: String, status: Int, verified: Int, ip: String, offset: Int, limit: Int): UserListResponse!
+  searchUser(userid: ID, email: String, username: String, status: Int, verified: Int, ip: String, offset: Int, limit: Int): UserListResponse!
   listUsers(offset: Int, limit: Int): UserListResponse!
   getProfile(userid: ID, postLimit: Int): ProfileInfo!
   listFollowRelations(userid: ID, offset: Int, limit: Int): FollowRelationsResponse!

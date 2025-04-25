@@ -48,7 +48,7 @@ type AuthPayload {
 }
 
 input RegistrationInput {
-  eMail: String!
+  email: String!
   password: String!
   username: String!
   pkey: String
