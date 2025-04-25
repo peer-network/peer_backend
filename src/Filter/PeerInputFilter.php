@@ -62,8 +62,7 @@ class PeerInputFilter
             }
 
             if (!isset($this->data[$field]) && !empty($rules['required'])) {
-                //$this->errors[$field][] = 30101;
-				$this->errors[$field][] = "$field is required";
+                $this->errors[$field][] = $field;
                 continue;
             }
 
@@ -83,8 +82,7 @@ class PeerInputFilter
                     $options = $validator['options'] ?? [];
                     if (method_exists($this, $validatorName)) {
                         if (!$this->$validatorName($this->data[$field], $options)) {
-                            //$this->errors[$field][] = 40301;
-							$this->errors[$field][] = "$field failed validation for $validatorName";
+                            $this->errors[$field][] = $field;
                             if (!empty($validator['break_chain_on_failure'])) {
                                 break;
                             }
@@ -697,7 +695,53 @@ class PeerInputFilter
         return true;
     }
 
-    private function validateImage(string $imagePath, array $options = []): bool
+	protected function validateResetToken(string $value, array $options = []): bool
+	{
+		if ($value === '') {
+			$this->errors['reset_token'][] = 'Reset token is required.';
+			return false;
+		}
+
+		$value = trim($value);
+		$value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+
+		if (strlen($value) !== 64) {
+			$this->errors['reset_token'][] = 'Reset token must be exactly 64 characters.';
+			return false;
+		}
+
+		if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
+			$this->errors['reset_token'][] = 'Invalid reset token format.';
+			return false;
+		}
+
+		return true;
+	}
+
+	protected function validateActivationToken(string $value, array $options = []): bool
+	{
+		if ($value === '') {
+			$this->errors['activation_token'][] = 'Activation token is required.';
+			return false;
+		}
+
+		$value = trim($value);
+		$value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+
+		if (strlen($value) !== 64) {
+			$this->errors['activation_token'][] = 'Activation token must be exactly 64 characters.';
+			return false;
+		}
+
+		if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
+			$this->errors['activation_token'][] = 'Invalid activation token format.';
+			return false;
+		}
+
+		return true;
+	}
+
+    protected function validateImage(string $imagePath, array $options = []): bool
     {
         $allowedExtensions = $options['extensions'] ?? ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'];
         $allowedMimeTypes = $options['mime_types'] ?? ['image/webp', 'image/jpeg', 'image/png', 'image/gif', 'image/heic', 'image/heif', 'image/tiff'];
@@ -707,7 +751,7 @@ class PeerInputFilter
         $imagePath = __DIR__ . '/../../runtime-data/media' . $imagePath;
 
         if (!is_readable($imagePath)) {
-            $this->errors['image'][] = 41508;
+            $this->errors['image'][] = 20263;
             return false;
         }
 
@@ -746,5 +790,4 @@ class PeerInputFilter
 
         return true;
     }
-
 }

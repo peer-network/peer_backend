@@ -18,35 +18,58 @@ class Mailer
         $this->logger = $logger;
     }
 
-    public function sendViaAPI(array $payload): array
-    {
+	public function sendViaAPI(array $payload): array
+	{
+		$mailApiLink = $this->envi['mailapilink'] ?? '';
+		$mailApiKey = $this->envi['mailapikey'] ?? '';
 
-		$mailApiLink = $this->envi['mailapilink'];
-		$mailApiKey = $this->envi['mailapikey'];
-		$this->logger->info("Payload:", ['payload' => $payload]);
+		// Basic validation
+		if (empty($mailApiLink) || empty($mailApiKey)) {
+			$this->logger->error('Mailer config missing', ['link' => $mailApiLink, 'key' => $mailApiKey]);
+			return ['status' => 'error', 'message' => 'Mailer config missing'];
+		}
 
-        $ch = curl_init($mailApiLink);
+		$this->logger->info("Sending mail with payload:", ['payload' => $payload]);
 
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'api-key: ' . $mailApiKey,
-            'Accept: application/json',
-            'Content-Type: application/json',
-        ]);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$ch = curl_init($mailApiLink);
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_setopt_array($ch, [
+			CURLOPT_POST => 1,
+			CURLOPT_POSTFIELDS => json_encode($payload),
+			CURLOPT_HTTPHEADER => [
+				'api-key: ' . $mailApiKey,
+				'Accept: application/json',
+				'Content-Type: application/json',
+			],
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_TIMEOUT => 15,
+		]);
 
-        if ($response === false) {
-            $error = curl_error($ch);
-            $this->logger->error("Brevo API Error: $error");
-            curl_close($ch);
-            return ['status' => 'error', 'message' => $error];
-        }
+		$response = curl_exec($ch);
+		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$curlError = curl_error($ch);
+		curl_close($ch);
 
-        curl_close($ch);
-        return ['status' => $httpCode == 201 ? 'success' : 'error', 'response' => json_decode($response, true)];
-    }
+		// Log full response
+		$this->logger->info('Mailer response', [
+			'httpCode' => $httpCode,
+			'response' => $response,
+			'error' => $curlError
+		]);
+
+		if ($response === false || $httpCode >= 400) {
+			return [
+				'status' => 'error',
+				'message' => $curlError ?: "HTTP $httpCode",
+				'response' => $response
+			];
+		}
+
+		$decodedResponse = json_decode($response, true);
+
+		return [
+			'status' => ($httpCode === 201 || $httpCode === 202) ? 'success' : 'error',
+			'response' => $decodedResponse
+		];
+	}
 }

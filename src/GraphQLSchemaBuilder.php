@@ -48,7 +48,6 @@ use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\JWTService;
-use Fawaz\Services\MailerService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
@@ -119,6 +118,7 @@ class GraphQLSchemaBuilder
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
                 if ($decodedToken) {
                     $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
+                    //$user = $this->userMapper->loadTokenById($decodedToken->uid);
                     if ($user) {
                         $this->currentUserId = $decodedToken->uid;
                         $this->userRoles = $decodedToken->rol;
@@ -1167,7 +1167,7 @@ class GraphQLSchemaBuilder
     {
 
         return [
-            'register' => fn(mixed $root, array $args) => $this->userService->createUser($args['input']),
+            'register' => fn(mixed $root, array $args) => $this->createUser($args['input']),
             'verifiedAccount' => fn(mixed $root, array $args) => $this->verifiedAccount($args['userid']),
             'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
@@ -1195,6 +1195,7 @@ class GraphQLSchemaBuilder
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
+            'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
         ];
     }
 
@@ -1214,6 +1215,23 @@ class GraphQLSchemaBuilder
             'userroles' => $this->userRoles,
             'currentuserid' => $this->currentUserId
         ];
+    }
+
+    protected function createUser(array $args): ?array
+    {
+        $this->logger->info('Query.createUser started');
+
+        $response = $this->userService->createUser($args);
+        if (isset($response['status']) && $response['status'] === 'error') {
+            return $response;
+        }
+
+        if (!empty($response)) {
+            return $response;
+        }
+
+        $this->logger->warning('Query.createUser No data found');
+        return $this->respondWithError(41105);
     }
 
     protected function resolveBlocklist(array $args): ?array
@@ -2079,14 +2097,14 @@ class GraphQLSchemaBuilder
 
         if (!empty($postId)) {
             $posts = $this->postInfoService->findPostInfo($postId);
-			if (isset($posts['status']) && $posts['status'] === 'error') {
-				return $posts;
-			}
+            if (isset($posts['status']) && $posts['status'] === 'error') {
+                return $posts;
+            }
         } else {
             return $this->respondWithError(21504);
         }
 
-		return $this->createSuccessResponse(11502, $posts);
+        return $this->createSuccessResponse(11502, $posts);
     }
 
     protected function resolveCommentInfo(string $commentId): ?array
@@ -2257,10 +2275,12 @@ class GraphQLSchemaBuilder
         return $response;
     }
 
-    protected function validateOffsetAndLimit($args)
+    protected function validateOffsetAndLimit(array $args = []): ?array
     {
         $offset = isset($args['offset']) ? (int)$args['offset'] : null;
         $limit = isset($args['limit']) ? (int)$args['limit'] : null;
+        $postOffset = isset($args['postOffset']) ? (int)$args['postOffset'] : null;
+        $postLimit = isset($args['postLimit']) ? (int)$args['postLimit'] : null;
         $commentOffset = isset($args['commentOffset']) ? (int)$args['commentOffset'] : null;
         $commentLimit = isset($args['commentLimit']) ? (int)$args['commentLimit'] : null;
         $messageOffset = isset($args['messageOffset']) ? (int)$args['messageOffset'] : null;
@@ -2274,6 +2294,18 @@ class GraphQLSchemaBuilder
 
         if ($limit !== null) {
             if ($limit < 1 || $limit > 20) {  
+                return $this->respondWithError(20204);
+            }
+        }
+
+        if ($postOffset !== null) {
+            if ($postOffset < 0 || $postOffset > 200) {
+                return $this->respondWithError(20203);
+            }
+        }
+
+        if ($postLimit !== null) {
+            if ($postLimit < 1 || $postLimit > 20) {  
                 return $this->respondWithError(20204);
             }
         }
@@ -2302,7 +2334,7 @@ class GraphQLSchemaBuilder
             }
         }
 
-        return true;
+        return null;
     }
 
     protected function checkAuthentication(): bool
