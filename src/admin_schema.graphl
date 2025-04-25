@@ -46,29 +46,29 @@ type Query {
 }
 
 type Mutation {
-  updateName(username: String!, password: String!): DefaultResponse!
-  updateMail(email: String!, password: String!): DefaultResponse!
+  updateUsername(username: String!, password: String!): DefaultResponse!
+  updateEmail(email: String!, password: String!): DefaultResponse!
   updatePassword(password: String!, expassword: String!): DefaultResponse!
   toggleProfilePrivacy: DefaultResponse!
-  updateBiography(biography: String!): DefaultResponse!
-  updateProfilePicture(img: String!): DefaultResponse!
-  userFollow(userid: ID!): setFollowUseresponse!
-  userBlock(userid: ID!): DefaultResponse!
+  updateBio(biography: String!): DefaultResponse!
+  updateProfileImage(img: String!): DefaultResponse!
+  toggleUserFollowStatus(userid: ID!): setFollowUseresponse!
+  toggleBlockUserStatus(userid: ID!): DefaultResponse!
   deleteAccount(password: String!): DefaultResponse!
   createChat(input: CreateChatInput!): AddChatResponse!
-  updateChat(input: UpdateChatInput!): AddChatResponse!
-  addParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
-  remParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
-  addMessage(chatid: ID!, content: String!): AddChatmessageResponse!
-  remMessage(chatid: ID!, messid: Int!): DefaultResponse!
+  updateChatInformations(input: UpdateChatInput!): AddChatResponse!
+  addChatParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
+  removeChatParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
+  sendChatMessage(chatid: ID!, content: String!): AddChatmessageResponse!
+  deleteChatMessage(chatid: ID!, messid: Int!): DefaultResponse!
   deleteChat(id: ID!): DefaultResponse!
-  createFeed(input: CreateFeedInput!): AddPostResponse!
+  createChatFeed(input: CreateFeedInput!): AddPostResponse!
   likeComment(commentid: ID!): DefaultResponse!
   reportComment(commentid: ID!): DefaultResponse!
   deletePost(id: ID!): DefaultResponse!
   createPost(action: PostenType!, input: CreatePostInput!): PostResponse!
   createComment(action: CommentsType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
-  resolveActionPost(action: ActionType!, postid: ID!): DefaultResponse!
+  resolvePostAction(action: ActionType!, postid: ID!): DefaultResponse!
 }
 
 scalar Decimal
