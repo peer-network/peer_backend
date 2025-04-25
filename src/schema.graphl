@@ -41,7 +41,7 @@ type Mutation {
   toggleProfilePrivacy: DefaultResponse!
   updateBio(biography: String!): DefaultResponse!
   updateProfileImage(img: String!): DefaultResponse!
-  toggleUserFollowStatus(userid: ID!): setFollowUseresponse!
+  toggleUserFollowStatus(userid: ID!): FollowStatusResponse!
   toggleBlockUserStatus(userid: ID!): DefaultResponse!
   deleteAccount(password: String!): DefaultResponse!
   createChat(input: CreateChatInput!): AddChatResponse!
@@ -156,10 +156,10 @@ type UserLogWins {
 type GetDailyResponse {
   status: String!
   ResponseCode: String!
-  affectedRows: [DailyResponse]
+  affectedRows: [DailyFreeResponse]
 }
 
-type DailyResponse {
+type DailyFreeResponse {
   name: String!
   used: Int!
   available: Int!
@@ -172,10 +172,10 @@ type CurrentLiquidity {
 type UserInfoResponse {
   status: String!
   ResponseCode: String!
-  affectedRows: GetUserInfo
+  affectedRows: UserInfo
 }
 
-type GetUserInfo {
+type UserInfo {
   userid: ID!
   liquidity: Decimal!
   amountposts: Int!
@@ -189,10 +189,10 @@ type GetUserInfo {
 type PostInfoResponse {
   status: String!
   ResponseCode: String!
-  affectedRows: GetPostInfo
+  affectedRows: PostInfo
 }
 
-type GetPostInfo {
+type PostInfo {
   likes: Int!
   dislikes: Int!
   reports: Int!
@@ -205,10 +205,10 @@ type GetPostInfo {
 type CommentInfoResponse {
   status: String!
   ResponseCode: String!
-  affectedRows: GetCommentInfo
+  affectedRows: CommentInfo
 }
 
-type GetCommentInfo {
+type CommentInfo {
   likes: Int!
   reports: Int!
   comments: Int!
@@ -247,13 +247,13 @@ type ChatParticipant {
   hasaccess: Int!
 }
 
-type setFollowUseresponse {
+type FollowStatusResponse {
   status: String!
   ResponseCode: String
   isfollowing: Boolean
 }
 
-type ProfilPostMed {
+type ProfilePostMedia {
   id: ID!
   title: String
   contenttype: String!
@@ -295,10 +295,10 @@ type AddChatmessageResponse {
   status: String!
   counter: Int!
   ResponseCode: String
-  affectedRows: [Chatmessageinfo]
+  affectedRows: [ChatMessageInfo]
 }
 
-type Chatmessageinfo {
+type ChatMessageInfo {
   messid: ID
   chatid: ID
   userid: ID
@@ -321,7 +321,7 @@ type Userinfo {
   updatedat: Date!
 }
 
-type UserFriends {
+type UserFriendsResponse {
   status: String!
   counter: Int!
   ResponseCode: String
@@ -354,10 +354,10 @@ type Profile {
   amountfollower: Int
   amountfriends: Int
   amountblocked: Int
-  imageposts: [ProfilPostMed!]
-  textposts: [ProfilPostMed!]
-  videoposts: [ProfilPostMed!]
-  audioposts: [ProfilPostMed!]
+  imageposts: [ProfilePostMedia!]
+  textposts: [ProfilePostMedia!]
+  videoposts: [ProfilePostMedia!]
+  audioposts: [ProfilePostMedia!]
 }
 
 type ProfileInfo {
@@ -375,7 +375,7 @@ type ProfileUser {
   isfollowing: Boolean
 }
 
-type Followes {
+type FollowRelations {
   followers: [ProfileUser!]
   following: [ProfileUser!]
 }
@@ -384,7 +384,7 @@ type FollowRelationsResponse {
   status: String
   counter: Int!
   ResponseCode: String
-  affectedRows: Followes
+  affectedRows: FollowRelations
 }
 
 type BlockedUser {
@@ -394,7 +394,7 @@ type BlockedUser {
   slug: Int
 }
 
-type Blocked {
+type BlockedUsers {
   iBlocked: [BlockedUser!]
   blockedBy: [BlockedUser!]
 }
@@ -403,7 +403,7 @@ type BlockedUsersResponse {
   status: String
   counter: Int!
   ResponseCode: String
-  affectedRows: Blocked
+  affectedRows: BlockedUsers
 }
 
 type UserListResponse {
@@ -430,7 +430,7 @@ type PostResponse {
   affectedRows: Post
 }
 
-type GetAllPostResponse {
+type PostListResponse {
   status: String!
   counter: Int!
   ResponseCode: String

@@ -268,9 +268,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'GetUserInfo' => [
+            'UserInfo' => [
                 'postid' => function (array $root): string {
-                    $this->logger->info('Query.GetUserInfo Resolvers');
+                    $this->logger->info('Query.UserInfo Resolvers');
                     return $root['postid'] ?? '';
                 },
                 'userid' => function (array $root): string {
@@ -386,9 +386,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'ProfilPostMed' => [
+            'ProfilePostMedia' => [
                 'id' => function (array $root): string {
-                    $this->logger->info('Query.ProfilPostMed Resolvers');
+                    $this->logger->info('Query.ProfilePostMedia Resolvers');
                     return $root['postid'] ?? '';
                 },
                 'title' => function (array $root): string {
@@ -461,9 +461,9 @@ class GraphQLSchemaBuilder
                     return $root['slug'] ?? 0;
                 },
             ],
-            'Blocked' => [
+            'BlockedUsers' => [
                 'iBlocked' => function (array $root): array {
-                    $this->logger->info('Query.Blocked Resolvers');
+                    $this->logger->info('Query.BlockedUsers Resolvers');
                     return $root['iBlocked'] ?? [];
                 },
                 'blockedBy' => function (array $root): array {
@@ -485,9 +485,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'Followes' => [
+            'FollowRelations' => [
                 'followers' => function (array $root): array {
-                    $this->logger->info('Query.Followes Resolvers');
+                    $this->logger->info('Query.FollowRelations Resolvers');
                     return $root['followers'] ?? [];
                 },
                 'following' => function (array $root): array {
@@ -509,9 +509,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'UserFriends' => [
+            'UserFriendsResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.UserFriends Resolvers');
+                    $this->logger->info('Query.UserFriendsResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -536,9 +536,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'setFollowUseresponse' => [
+            'FollowStatusResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.setFollowUseresponse Resolvers');
+                    $this->logger->info('Query.FollowStatusResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -623,9 +623,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'GetPostInfo' => [
+            'PostInfo' => [
                 'userid' => function (array $root): string {
-                    $this->logger->info('Query.GetPostInfo Resolvers');
+                    $this->logger->info('Query.PostInfo Resolvers');
                     return $root['userid'] ?? '';
                 },
                 'likes' => function (array $root): int {
@@ -650,9 +650,9 @@ class GraphQLSchemaBuilder
                     return $root['comments'] ?? 0;
                 },
             ],
-            'GetAllPostResponse' => [
+            'PostListResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.GetAllPostResponse Resolvers');
+                    $this->logger->info('Query.PostListResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -755,7 +755,7 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'GetCommentInfo' => [
+            'CommentInfo' => [
                 'userid' => function (array $root): string {
                     return $root['userid'] ?? '';
                 },
@@ -853,9 +853,9 @@ class GraphQLSchemaBuilder
                     return $root['chatid'] ?? '';
                 },
             ],
-            'Chatmessageinfo' => [
+            'ChatMessageInfo' => [
                 'messid' => function (array $root): int {
-                    $this->logger->info('Query.Chatmessageinfo Resolvers');
+                    $this->logger->info('Query.ChatMessageInfo Resolvers');
                     return $root['messid'] ?? 0;
                 },
                 'userid' => function (array $root): string {
@@ -973,9 +973,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'DailyResponse' => [
+            'DailyFreeResponse' => [
                 'name' => function (array $root): string {
-                    $this->logger->info('Query.DailyResponse Resolvers');
+                    $this->logger->info('Query.DailyFreeResponse Resolvers');
                     return $root['name'] ?? '';
                 },
                 'used' => function (array $root): int {
@@ -991,9 +991,9 @@ class GraphQLSchemaBuilder
                     return $root['currentliquidity'] ?? 0.0;
                 },
             ],
-            'GetUserInfo' => [
+            'UserInfo' => [
                 'userid' => function (array $root): string {
-                    $this->logger->info('Query.GetUserInfo Resolvers');
+                    $this->logger->info('Query.UserInfo Resolvers');
                     return $root['userid'] ?? '';
                 },
                 'liquidity' => function (array $root): float {
@@ -1053,7 +1053,7 @@ class GraphQLSchemaBuilder
             ],
             'LogWins' => [
                 'from' => function (array $root): string {
-                    $this->logger->info('Query.GetUserInfo Resolvers');
+                    $this->logger->info('Query.UserInfo Resolvers');
                     return $root['from'] ?? '';
                 },
                 'token' => function (array $root): string {
