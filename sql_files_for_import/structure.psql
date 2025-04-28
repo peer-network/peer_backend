@@ -518,6 +518,27 @@ CREATE TABLE IF NOT EXISTS wallet (
 );
 CREATE INDEX idx_wallet_userid ON wallet(userid);
 
+
+-- Table: notifications
+CREATE TABLE IF NOT EXISTS notifications (
+    notificationId UUID PRIMARY KEY,
+    notificationClass VARCHAR(100) NOT NULL,
+    data TEXT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Table: notification_recipients
+CREATE TABLE IF NOT EXISTS notification_recipients (
+    notificationId UUID NOT NULL,
+    senderId UUID NULL,
+    receiverId UUID NULL,
+    isRead SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_notificationId FOREIGN KEY (notificationId) REFERENCES notifications(notificationId) ON DELETE CASCADE,
+    CONSTRAINT fk_senderId FOREIGN KEY (senderId) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_receiverId FOREIGN KEY (receiverId) REFERENCES users(uid) ON DELETE CASCADE
+);
+
 -- Table: wallett
 CREATE TABLE IF NOT EXISTS wallett (
     userid UUID PRIMARY KEY,
