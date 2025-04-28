@@ -198,9 +198,9 @@ class GraphQLSchemaBuilder
                     return $root['userid'] ?? '';
                 },
             ],
-            'verifiedAccount' => [
+            'verifyAccount' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.verifiedAccount Resolvers');
+                    $this->logger->info('Query.verifyAccount Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -1168,7 +1168,7 @@ class GraphQLSchemaBuilder
 
         return [
             'register' => fn(mixed $root, array $args) => $this->createUser($args['input']),
-            'verifiedAccount' => fn(mixed $root, array $args) => $this->verifiedAccount($args['userid']),
+            'verifyAccount' => fn(mixed $root, array $args) => $this->verifyAccount($args['userid']),
             'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
             'updateUsername' => fn(mixed $root, array $args) => $this->userService->setUsername($args),
@@ -2415,7 +2415,7 @@ class GraphQLSchemaBuilder
         }
     }
 
-    protected function verifiedAccount(string $userid = null): array
+    protected function verifyAccount(string $userid = null): array
     {
         if ($userid === null) {
             return $this->respondWithError(30101);
@@ -2425,7 +2425,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(20201);
         }
 
-        $this->logger->info('Query.verifiedAccount started');
+        $this->logger->info('Query.verifyAccount started');
 
         try {
             $user = $this->userMapper->loadById($userid);
@@ -2442,7 +2442,7 @@ class GraphQLSchemaBuilder
             }
 
             if ($this->userMapper->verifyAccount($userid)) {
-                $this->userMapper->logLoginData($userid, 'verifiedAccount');
+                $this->userMapper->logLoginData($userid, 'verifyAccount');
                 $this->logger->info('Account verified successfully', ['userid' => $userid]);
 
                 return [
