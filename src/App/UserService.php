@@ -301,7 +301,7 @@ class UserService
 
         return [
             'status' => 'success',
-            'ResponseCode' => 'REFERRAL_LIST_LOADED',
+            'ResponseCode' => 00000,
             'counter' => count($data['iInvited']),
             'affectedRows' => [
                 'invitedBy' => $data['invitedBy'],
