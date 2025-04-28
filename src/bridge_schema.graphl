@@ -5,14 +5,14 @@ schema {
 type Query {
   hello: HelloResponse!
   dailygemstatus: StandardResponse!
-  dailygemsresults(day: DayType!): StandardResponse!
+  dailygemsresults(day: DayFilterType!): StandardResponse!
 }
 
 scalar Decimal
 scalar DATEN
 scalar Date
 
-enum DayType {
+enum DayFilterType {
   D0
   D1
   D2

@@ -11,62 +11,62 @@ type Subscription {
 
 type Query {
   hello: HelloResponse!
-  searchuser(userid: ID, username: String, offset: Int, limit: Int): UserSearchResponse!
-  getallusers(offset: Int, limit: Int): UserSearchResponse!
-  profile(userid: ID, postLimit: Int): ProfileInfo!
-  follows(userid: ID, offset: Int, limit: Int): UserFollows!
-  friends(offset: Int, limit: Int): UserFriends!
-  getuserinfo: GetUserinforesponse!
-  blockedlist(offset: Int, limit: Int): UserBlocked!
-  getallposts(filterBy: [FilterType!], IgnorList: IgnoredList, sortBy: SortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): GetAllPostResponse!
-  getpostinfo(postid: ID!): GetPostinforesponse!
-  getcommentinfo(commentid: ID!): GetCommentinforesponse!
-  parentcomments(parent: ID!, offset: Int, limit: Int): CommentResponse!
-  tags(offset: Int, limit: Int): TagSearchResponse!
-  tagsearch(tagname: String!, offset: Int, limit: Int): TagSearchResponse!
-  searchchat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse!
-  getallchats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
-  readMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
-  dailyfreestatus: GetDailyResponse!
-  currentliquidity: CurrentLiquidity!
-  fetchwinslog(day: DayType!, offset: Int, limit: Int): UserLogWins!
-  fetchpayslog(day: DayType!, offset: Int, limit: Int): UserLogWins!
-  callusermove: StandardResponse!
+  searchUser(userid: ID, username: String, offset: Int, limit: Int): UserListResponse!
+  listUsers (offset: Int, limit: Int): UserListResponse!
+  getProfile(userid: ID, postLimit: Int): ProfileInfo!
+  listFollowRelations(userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
+  listFriends(offset: Int, limit: Int): FollowRelationsResponse!
+  getUserInfo: UserInfoResponse!
+  listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
+  listPosts(filterBy: [PostFilterType!], IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): BlockedUsersResponse!
+  getPostInfo(postid: ID!): PostInfoResponse!
+  getCommentInfo(commentId: ID!): CommentInfoResponse!
+  listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
+  listTags(offset: Int, limit: Int): TagSearchResponse!
+  searchTags(tagName: String!, offset: Int, limit: Int): TagSearchResponse!
+  getChat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse!
+  listChats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
+  listChatMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
+  getDailyFreeStatus: GetDailyResponse!
+  balance: CurrentLiquidity!
+  listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
+  listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
+  listTodaysInteractions: StandardResponse!
 }
 
 type Mutation {
-  updateName(username: String!, password: String!): DefaultResponse!
-  updateMail(email: String!, password: String!): DefaultResponse!
+  updateUsername(username: String!, password: String!): DefaultResponse!
+  updateEmail(email: String!, password: String!): DefaultResponse!
   updatePassword(password: String!, expassword: String!): DefaultResponse!
-  updatePrivateProfile: DefaultResponse!
-  updateBiography(biography: String!): DefaultResponse!
-  updateProfilePicture(img: String!): DefaultResponse!
-  userFollow(userid: ID!): setFollowUseresponse!
-  userBlock(userid: ID!): DefaultResponse!
+  toggleProfilePrivacy: DefaultResponse!
+  updateBio(biography: String!): DefaultResponse!
+  updateProfileImage(img: String!): DefaultResponse!
+  toggleUserFollowStatus(userid: ID!): FollowStatusResponse!
+  toggleBlockUserStatus(userid: ID!): DefaultResponse!
   deleteAccount(password: String!): DefaultResponse!
-  createChat(input: CreateChatInput!): AddChatResponse!
-  updateChat(input: UpdateChatInput!): AddChatResponse!
-  addParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
-  remParticipants(input: CreateChatParticipantsInput!): AddChatResponse!
-  addMessage(chatid: ID!, content: String!): AddChatmessageResponse!
-  remMessage(chatid: ID!, messid: Int!): DefaultResponse!
+  createChat(input: ChatInput!): AddChatResponse!
+  updateChatInformations(input: UpdateChatInput!): AddChatResponse!
+  addChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
+  removeChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
+  sendChatMessage(chatid: ID!, content: String!): AddChatmessageResponse!
+  deleteChatMessage(chatid: ID!, messid: Int!): DefaultResponse!
   deleteChat(id: ID!): DefaultResponse!
-  createFeed(input: CreateFeedInput!): AddPostResponse!
+  createChatFeed(input: FeedInput!): AddPostResponse!
   likeComment(commentid: ID!): DefaultResponse!
   reportComment(commentid: ID!): DefaultResponse!
   deletePost(id: ID!): DefaultResponse!
-  createPost(action: PostenType!, input: CreatePostInput!): PostResponse!
-  createComment(action: CommentsType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
-  resolveActionPost(action: ActionType!, postid: ID!): DefaultResponse!
+  createPost(action: PostType!, input: PostInput!): PostResponse!
+  createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
+  resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse!
 }
 
 scalar Decimal
 scalar DATEN
 scalar Date
-scalar Tags
+scalar TagList
 
-enum ActionType {
+enum PostActionType {
   LIKE
   DISLIKE
   REPORT
@@ -75,22 +75,22 @@ enum ActionType {
   SAVE
 }
 
-enum PostenType {
+enum PostType {
   POST
 }
 
-enum CommentsType {
+enum CommentType {
   COMMENT
 }
 
-enum ContenType {
-  image
-  audio
-  video
-  text
+enum ContentType {
+  IMAGE
+  AUDIO
+  VIDEO
+  TEXT
 }
 
-enum FilterType {
+enum PostFilterType {
   IMAGE
   AUDIO
   VIDEO
@@ -99,12 +99,12 @@ enum FilterType {
   FOLLOWER
 }
 
-enum IgnoredList {
+enum IgnoreOption {
   YES
   NO
 }
 
-enum SortType {
+enum PostSortType {
   NEWEST
   TRENDING
   LIKES
@@ -113,7 +113,7 @@ enum SortType {
   COMMENTS
 }
 
-enum DayType {
+enum DayFilterType {
   D0
   D1
   D2
@@ -157,26 +157,26 @@ type UserLogWins {
 type GetDailyResponse {
   status: String!
   ResponseCode: String!
-  affectedRows: [DailyResponse]
+  affectedRows: [DailyFreeResponse]
 }
 
-type DailyResponse {
+type DailyFreeResponse {
   name: String!
   used: Int!
   available: Int!
 }
 
 type CurrentLiquidity {
-  currentliquidity: Decimal
+  getCurrentBalance: Decimal
 }
 
-type GetUserinforesponse {
+type UserInfoResponse {
   status: String!
   ResponseCode: String!
-  affectedRows: GetUserInfo
+  affectedRows: UserInfo
 }
 
-type GetUserInfo {
+type UserInfo {
   userid: ID!
   liquidity: Decimal!
   amountposts: Int!
@@ -187,13 +187,13 @@ type GetUserInfo {
   updatedat: Date
 }
 
-type GetPostinforesponse {
+type PostInfoResponse {
   status: String!
   ResponseCode: String!
-  affectedRows: GetPostInfo
+  affectedRows: PostInfo
 }
 
-type GetPostInfo {
+type PostInfo {
   likes: Int!
   dislikes: Int!
   reports: Int!
@@ -203,13 +203,13 @@ type GetPostInfo {
   comments: Int!
 }
 
-type GetCommentinforesponse {
+type CommentInfoResponse {
   status: String!
   ResponseCode: String!
-  affectedRows: GetCommentInfo
+  affectedRows: CommentInfo
 }
 
-type GetCommentInfo {
+type CommentInfo {
   likes: Int!
   reports: Int!
   comments: Int!
@@ -248,13 +248,13 @@ type ChatParticipant {
   hasaccess: Int!
 }
 
-type setFollowUseresponse {
+type FollowStatusResponse {
   status: String!
   ResponseCode: String
   isfollowing: Boolean
 }
 
-type ProfilPostMed {
+type ProfilePostMedia {
   id: ID!
   title: String
   contenttype: String!
@@ -296,10 +296,10 @@ type AddChatmessageResponse {
   status: String!
   counter: Int!
   ResponseCode: String
-  affectedRows: [Chatmessageinfo]
+  affectedRows: [ChatMessageInfo]
 }
 
-type Chatmessageinfo {
+type ChatMessageInfo {
   messid: ID
   chatid: ID
   userid: ID
@@ -322,7 +322,7 @@ type Userinfo {
   updatedat: Date!
 }
 
-type UserFriends {
+type UserFriendsResponse {
   status: String!
   counter: Int!
   ResponseCode: String
@@ -355,10 +355,10 @@ type Profile {
   amountfollower: Int
   amountfriends: Int
   amountblocked: Int
-  imageposts: [ProfilPostMed!]
-  textposts: [ProfilPostMed!]
-  videoposts: [ProfilPostMed!]
-  audioposts: [ProfilPostMed!]
+  imageposts: [ProfilePostMedia!]
+  textposts: [ProfilePostMedia!]
+  videoposts: [ProfilePostMedia!]
+  audioposts: [ProfilePostMedia!]
 }
 
 type ProfileInfo {
@@ -367,7 +367,7 @@ type ProfileInfo {
   affectedRows: Profile
 }
 
-type ProfilUser {
+type ProfileUser {
   id: ID!
   username: String
   slug: Int
@@ -376,16 +376,16 @@ type ProfilUser {
   isfollowing: Boolean
 }
 
-type Followes {
-  followers: [ProfilUser!]
-  following: [ProfilUser!]
+type FollowRelations {
+  followers: [ProfileUser!]
+  following: [ProfileUser!]
 }
 
-type UserFollows {
+type FollowRelationsResponse {
   status: String
   counter: Int!
   ResponseCode: String
-  affectedRows: Followes
+  affectedRows: FollowRelations
 }
 
 type BlockedUser {
@@ -395,19 +395,19 @@ type BlockedUser {
   slug: Int
 }
 
-type Blocked {
+type BlockedUsers {
   iBlocked: [BlockedUser!]
   blockedBy: [BlockedUser!]
 }
 
-type UserBlocked {
+type BlockedUsersResponse {
   status: String
   counter: Int!
   ResponseCode: String
-  affectedRows: Blocked
+  affectedRows: BlockedUsers
 }
 
-type UserSearchResponse {
+type UserListResponse {
   status: String!
   counter: Int!
   ResponseCode: String
@@ -431,7 +431,7 @@ type PostResponse {
   affectedRows: Post
 }
 
-type GetAllPostResponse {
+type PostListResponse {
   status: String!
   counter: Int!
   ResponseCode: String
@@ -445,19 +445,19 @@ type Post {
   media: String!
   cover: String!
   mediadescription: String!
-  createdat: Date!
-  amountlikes: Int!
-  amountviews: Int!
-  amountcomments: Int!
-  amountdislikes: Int!
-  amounttrending: Int!
-  isliked: Boolean!
-  isviewed: Boolean!
-  isreported: Boolean!
-  isdisliked: Boolean!
-  issaved: Boolean!
-  tags: Tags!
-  user: ProfilUser!
+  createdAt: Date!
+  likeCount: Int!
+  viewScore: Int!
+  commentCount: Int!
+  dislikeCount: Int!
+  trendingScore: Int!
+  isLiked: Boolean!
+  isViewed: Boolean!
+  isReported: Boolean!
+  isDisliked: Boolean!
+  isSaved: Boolean!
+  listTags: TagList!
+  user: ProfileUser!
   comments: [Comment!]!
 }
 
@@ -471,7 +471,7 @@ type Comment {
   amountlikes: Int!
   amountreplies: Int!
   isliked: Boolean!
-  user: ProfilUser!
+  user: ProfileUser!
 }
 
 type CommentResponse {
@@ -481,22 +481,22 @@ type CommentResponse {
   affectedRows: [Comment]
 }
 
-input RegisterInput {
+input RegistrationInput {
   email: String!
   password: String!
   username: String!
 }
 
-input CreatePostInput {
+input PostInput {
   title: String!
   mediadescription: String
-  contenttype: ContenType!
+  contenttype: ContentType!
   media: [String!]
   cover: [String!]
-  tags: [String!]
+  listTags: [String!]
 }
 
-input CreateChatInput {
+input ChatInput {
   name: String!
   image: String
   recipients: [String!]!
@@ -508,12 +508,12 @@ input UpdateChatInput {
   image: String
 }
 
-input CreateChatParticipantsInput {
+input ChatParticipantsInput {
   chatid: ID!
   recipients: [String!]!
 }
 
-input CreateFeedInput {
+input FeedInput {
   feedid: ID!
   title: String!
   media: String!
