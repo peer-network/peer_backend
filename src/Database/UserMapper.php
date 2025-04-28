@@ -1129,6 +1129,21 @@ class UserMapper
 
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
+        if (!$result) {
+            $this->logger->info("No referral info found. Generating new referral for user.", [
+                'userId' => $userId,
+            ]);
+    
+        $referralLink = $this->generateReferralLink($userId);
+        $this->insertReferralInfo($userId, $referralLink);
+    
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':user_uuid', $userId, \PDO::PARAM_STR);
+        $stmt->execute();
+    
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
         $this->logger->info("Referral info query result", [
             'result' => $result
         ]);

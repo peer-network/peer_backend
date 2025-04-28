@@ -54,10 +54,10 @@ CREATE INDEX idx_follows_followedid ON follows(followedid);
 
 -- Table: user_referral_info
 CREATE TABLE IF NOT EXISTS user_referral_info (
-    id SERIAL PRIMARY KEY,
+    uid UUID PRIMARY KEY,
     user_uuid UUID UNIQUE NOT NULL,
-    referral_link TEXT NOT NULL,
-    qr_code_url TEXT DEFAULT NULL,
+    referral_link VARCHAR(255) NOT NULL,
+    qr_code_url VARCHAR(255) DEFAULT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     referral_uuid UUID UNIQUE NOT NULL,
 
