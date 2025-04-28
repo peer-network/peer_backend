@@ -328,29 +328,29 @@ class PostService
         $userId = $args['userid'] ?? null;
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(20209);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError(20201);
         }
 
         if ($title !== null && strlen($title) < 2 || strlen($title) > 33) {
-            return $this->respondWithError(20256);
+            return $this->respondWithError(20210);
         }
 
         if ($from !== null && !self::validateDate($from)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError(20212);
         }
 
         if ($to !== null && !self::validateDate($to)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError(20213);
         }
 
         if ($tag !== null) {
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
-                return $this->respondWithError(30103);
+                return $this->respondWithError(20211);
             }
         }
 
@@ -375,7 +375,7 @@ class PostService
 
         $results = $this->postMapper->findPostser($this->currentUserId, $args);
 		if (empty($results)) {
-			return $this->respondWithError(21517);
+			return $this->respondWithError(20236);
 		}
 
         return $results;
