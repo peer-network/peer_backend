@@ -1129,7 +1129,7 @@ class UserMapper
 
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if (!$result) {
+        if (!$result || empty($result['referral_uuid']) || empty($result['referral_link'])) {
             $this->logger->info("No referral info found. Generating new referral for user.", [
                 'userId' => $userId,
             ]);
