@@ -140,7 +140,9 @@ class UserService
         $pkey = $args['pkey'] ?? null;
         $mediaFile = isset($args['img']) ? trim($args['img']) : '';
         $isPrivate = (int)($args['isprivate'] ?? 0);
-        $invited = $args['invited'] ?? null;
+        $referralUuid = $args['referralUuid'] ?? null;
+        $invited = null;
+
 		$bin2hex = bin2hex(random_bytes(32));
 		$expiresat = (int)\time()+1800;
 
@@ -149,11 +151,13 @@ class UserService
 
         if (!empty($referralUuid)) {
             $inviter = $this->userMapper->loadById($referralUuid);
-
+    
             if (empty($inviter)) {
                 $this->logger->warning('Invalid referral UUID provided.', ['referralUuid' => $referralUuid]);
                 return self::respondWithError('INVALID_REFERRAL_UUID');
             }
+    
+            $invited = $inviter->getUserId();
         }
 
         $email = trim($args['email']);
@@ -255,14 +259,10 @@ class UserService
         try {
             $referralLink = $this->userMapper->generateReferralLink($id);
             $this->userMapper->insertReferralInfo($id, $referralLink);
-        
-            if (!empty($inviter)) {
-                $this->userMapper->storeReferral($inviter->getUserId(), $id);
-            }
         } catch (\Throwable $e) {
             $this->logger->warning('Error handling referral info.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());
-        } 
+        }
 
         try {
             $userwallet = new Wallett($walletData);

@@ -1143,10 +1143,10 @@ class UserMapper
         ]);
 
         $query = "
-            SELECT u.uid, u.username, u.slug, u.img
-            FROM user_referral ur
-            JOIN users u ON ur.inviter_uuid = u.uid
-            WHERE ur.invitee_uuid = :invitee_uuid
+        SELECT u.uid, u.username, u.slug, u.img
+        FROM users_info ui
+        JOIN users u ON ui.invited = u.uid
+        WHERE ui.userid = :invitee_uuid
         ";
 
         $stmt = $this->db->prepare($query);
@@ -1164,94 +1164,58 @@ class UserMapper
             'inviter_uuid' => $inviterUuid,
             'invitee_uuid' => $inviteeUuid,
         ]);
-
-        $query = "SELECT COUNT(*) FROM user_referral WHERE invitee_uuid = :invitee_uuid";
-        $stmtCheck = $this->db->prepare($query);
-        $stmtCheck->bindValue(':invitee_uuid', $inviteeUuid, \PDO::PARAM_STR);
-        $stmtCheck->execute();
-
-        if ($stmtCheck->fetchColumn() > 0) {
-            $this->logger->info("Referral already exists for this invitee", [
-                'invitee_uuid' => $inviteeUuid,
-            ]);
-            return;
-        }
-
-        $query = "INSERT INTO user_referral (inviter_uuid, invitee_uuid, createdat)
-                  VALUES (:inviter_uuid, :invitee_uuid, :createdat)";
-
-        $timestamp = (new \DateTime())->format('Y-m-d H:i:s');
-
+    
         try {
+            $query = "UPDATE users_info SET invited = :inviter_uuid WHERE userid = :invitee_uuid";
+    
             $stmt = $this->db->prepare($query);
-
             $stmt->bindValue(':inviter_uuid', $inviterUuid, \PDO::PARAM_STR);
             $stmt->bindValue(':invitee_uuid', $inviteeUuid, \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $timestamp, \PDO::PARAM_STR);
-
+    
             $stmt->execute();
-
-            $this->logger->info("Referral inserted successfully", [
-                'inviter_uuid' => $inviterUuid,
+    
+            $this->logger->info("Referral successfully stored in users_info", [
                 'invitee_uuid' => $inviteeUuid,
+                'invited_by' => $inviterUuid
             ]);
         } catch (\PDOException $e) {
             $this->logger->error("UserMapper.storeReferral: PDOException", [
-                'exception' => $e->getMessage()
+                'error' => $e->getMessage()
             ]);
-            throw new \RuntimeException("Failed to insert referral: " . $e->getMessage());
+            throw new \RuntimeException("Failed to update invited field: " . $e->getMessage());
         } catch (\Exception $e) {
             $this->logger->error("UserMapper.storeReferral: Exception", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error' => $e->getMessage()
             ]);
-            throw new \RuntimeException("Failed to insert referral: " . $e->getMessage());
+            throw new \RuntimeException("Failed to update invited field: " . $e->getMessage());
         }
     }
 
     public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array 
     {
-        $this->logger->info('UserMapper.getReferralRelations started'); 
-
-        $sql = "
-        SELECT 
-            u2.uid as inviteeId, 
-            u2.username as inviteeUsername,
-            u2.slug as inviteeSlug,
-            u2.img as inviteeImg
-        FROM user_referral ur 
-        JOIN users u2 ON ur.invitee_uuid = u2.uid 
-        WHERE ur.inviter_uuid = :userId 
-        LIMIT :limit OFFSET :offset
-    ";  
-
-        try { 
-            $stmt = $this->db->prepare($sql); 
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR); 
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT); 
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT); 
-            $stmt->execute(); 
-
-            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC); 
-
-            $result = [ 
-                'iInvited' => [] 
-            ]; 
-
-            foreach ($data as $row) { 
-                $result['iInvited'][] = [
-                    'id' => $row['inviteeId'], 
-                    'username' => $row['inviteeUsername'],
-                    'slug' => (int) $row['inviteeSlug'],
-                    'img' => $row['inviteeImg'],
-                ]; 
-            }            
-
-            return $result; 
-        } catch (\PDOException $e) { 
-            $this->logger->error('Error fetching referral relations', ['exception' => $e->getMessage()]); 
-            return []; 
-        } 
+        $query = "
+            SELECT u.uid, u.username, u.slug, u.img
+            FROM users_info ui
+            JOIN users u ON ui.userid = u.uid
+            WHERE ui.invited = :userId
+            LIMIT :limit OFFSET :offset
+        ";
+    
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':userId', $userId);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+    
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return [
+            'iInvited' => array_map(fn($row) => [
+                'id' => $row['uid'],
+                'username' => $row['username'],
+                'slug' => (int)$row['slug'],
+                'img' => $row['img'],
+            ], $data)
+        ];
     }
 
     public function generateReferralLink(string $referralUuid): string
