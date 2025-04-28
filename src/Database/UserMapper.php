@@ -1028,6 +1028,18 @@ class UserMapper
         }
     }
 
+    private function generateUUID(): string
+    {
+        return \sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0x0fff) | 0x4000,
+            \mt_rand(0, 0x3fff) | 0x8000,
+            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+        );
+    }
+
     public function insert(User $user): User
     {
         $this->logger->info("UserMapper.insert started");
@@ -1090,9 +1102,11 @@ class UserMapper
             }
 
             $referralUuid = $userId;
-            $query = "INSERT INTO user_referral_info (user_uuid, referral_link, referral_uuid) 
-                      VALUES (:user_uuid, :referral_link, :referral_uuid)";
+            $generateUUID = $this->generateUUID();
+            $query = "INSERT INTO user_referral_info (uid, user_uuid, referral_link, referral_uuid) 
+                      VALUES (:uid, :user_uuid, :referral_link, :referral_uuid)";
             $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':uid', $generateUUID, \PDO::PARAM_STR);
             $stmt->bindValue(':user_uuid', $userId, \PDO::PARAM_STR);
             $stmt->bindValue(':referral_link', $link, \PDO::PARAM_STR);
             $stmt->bindValue(':referral_uuid', $referralUuid, \PDO::PARAM_STR);
