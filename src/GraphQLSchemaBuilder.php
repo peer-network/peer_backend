@@ -619,8 +619,8 @@ class GraphQLSchemaBuilder
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 },
-                'listTags' => function (array $root): array {
-                    return $root['listTags'] ?? [];
+                'tags' => function (array $root): array {
+                    return $root['tags'] ?? [];
                 },
                 'user' => function (array $root): array {
                     return $root['user'] ?? [];
@@ -1155,7 +1155,7 @@ class GraphQLSchemaBuilder
             'getPostInfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
             'getCommentInfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentId']),
             'listChildComments' => fn(mixed $root, array $args) => $this->resolveComments($args),
-            'listTags' => fn(mixed $root, array $args) => $this->resolveTags($args),
+            'tags' => fn(mixed $root, array $args) => $this->resolveTags($args),
             'searchTags' => fn(mixed $root, array $args) => $this->resolveTagsearch($args),
             'getChat' => fn(mixed $root, array $args) => $this->resolveChat($args),
             'listChats' => fn(mixed $root, array $args) => $this->resolveChats($args),
@@ -1691,15 +1691,15 @@ class GraphQLSchemaBuilder
 
         $this->logger->info('Query.resolveTags started');
 
-        $listTags = $this->tagService->fetchAll($args);
-        if (isset($listTags['status']) && $listTags['status'] === 'success') {
+        $tags = $this->tagService->fetchAll($args);
+        if (isset($tags['status']) && $tags['status'] === 'success') {
             $this->logger->info('Query.resolveTags successful');
 
-            return $listTags;
+            return $tags;
         }
 
-        if (isset($listTags['status']) && $listTags['status'] === 'error') {
-            return $listTags;
+        if (isset($tags['status']) && $tags['status'] === 'error') {
+            return $tags;
         }
 
         return $this->respondWithError(21701);
