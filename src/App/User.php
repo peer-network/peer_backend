@@ -323,7 +323,6 @@ class User
             ],
             'password' => [
                 'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'validatePassword'],
                 ],

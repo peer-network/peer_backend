@@ -43,6 +43,11 @@ return static function(string $appEnv) {
             'path' => __DIR__ . '/../../' . $_ENV['LOGGER_PATH'] . date('Y-m-d') . '.log',
             'level' => constant('Monolog\Logger::' . $_ENV['LOGGER_LEVEL']),
         ],
+        'liquidity' => [
+            'peer' => $_ENV['PEER_BANK'] ?? '',
+            'pool' => $_ENV['LIQUIDITY_POOL'] ?? '',
+            'burn' => $_ENV['BURN_ACCOUNT'] ?? '',
+        ],
         'privateKeyPath' => __DIR__ . '/../../' . $_ENV['PRIVATE_KEY_PATH'],
         'publicKeyPath' => __DIR__ . '/../../' . $_ENV['PUBLIC_KEY_PATH'],
         'refreshPrivateKeyPath' => __DIR__ . '/../../' . $_ENV['REFRESH_PRIVATE_KEY_PATH'],

@@ -97,7 +97,7 @@ class WalletService
             $wallets = $this->walletMapper->loadWalletById($args, $this->currentUserId);
 
             if ($wallets === false) {
-                return $this->respondWithError('Failed to fetch wallets from database.');
+                return $this->respondWithError(41216);
             }
 
             $walletData = array_map(
@@ -274,6 +274,27 @@ class WalletService
 
         } catch (\Exception $e) {
             return $this->respondWithError(41205);
+        }
+    }
+
+    public function transferToken(array $args): array
+    {
+        $this->logger->info('WalletService.transferToken started');
+
+        try {
+            $response = $this->walletMapper->transferToken($this->currentUserId, $args);
+            if ($response['status'] === 'error') {
+                return $response;
+            } else {
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => $response['ResponseCode'],
+                    'affectedRows' => [],
+                ];
+            }
+
+        } catch (\Exception $e) {
+            return $this->respondWithError('Unknown Error.');
         }
     }
 }

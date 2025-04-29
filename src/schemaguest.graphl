@@ -8,8 +8,8 @@ type Query {
 }
 
 type Mutation {
-  register(input: RegisterInput!): RegisterResponse!
-  verifiedAccount(userid: ID!): verifiedAccount!
+  register(input: RegistrationInput!): RegisterResponse!
+  verifyAccount(userid: ID!): verifyAccount!
   login(email: String!, password: String!): AuthPayload!
   requestPasswordReset(email: String!): StandardResponse
   resetPassword(token: String!, password: String!): StandardResponse
@@ -37,7 +37,7 @@ type RegisterResponse {
   userid: ID
 }
 
-type verifiedAccount {
+type verifyAccount {
   status: String!
   ResponseCode: String
 }
@@ -49,7 +49,7 @@ type AuthPayload {
   refreshToken: String
 }
 
-input RegisterInput {
+input RegistrationInput {
   email: String!
   password: String!
   username: String!

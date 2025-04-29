@@ -7,7 +7,6 @@ srcc
 .htaccess
 index.php
 psalm.xml
-composer.json
 composer.lock
 keys/*.key
 runtime-data/media/audio/*

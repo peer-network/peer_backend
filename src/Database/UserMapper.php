@@ -8,6 +8,7 @@ use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
 use Fawaz\App\UserAdvanced;
+use Fawaz\App\Tokenize;
 use Psr\Log\LoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
 
@@ -764,7 +765,7 @@ class UserMapper
                 SELECT 
                     f.followerid AS uid, 
                     u.username, 
-					u.slug,
+                    u.slug,
                     u.img,
                     EXISTS (
                         SELECT 1 
@@ -822,7 +823,7 @@ class UserMapper
                 SELECT 
                     f.followedid AS uid, 
                     u.username, 
-					u.slug,
+                    u.slug,
                     u.img,
                     EXISTS (
                         SELECT 1 
@@ -941,11 +942,11 @@ class UserMapper
                 u.status,
                 u.img,
                 u.biography,
-				ui.amountposts,
-				ui.amountfollower,
-				ui.amountfollowed,
-				ui.amountfriends,
-				ui.amountblocked,
+                ui.amountposts,
+                ui.amountfollower,
+                ui.amountfollowed,
+                ui.amountfriends,
+                ui.amountblocked,
                 COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
@@ -1471,12 +1472,12 @@ class UserMapper
     public function loadTokenById(string $id): bool
     {
         $this->logger->info("UserMapper.loadTokenById started");
-		$time = (int)\time();
+        $time = (int)\time();
 
         try {
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM refresh_tokens WHERE userid = :id AND expiresat > :expiresat");
             $stmt->bindParam(':id', $id);
-			$stmt->bindParam(':expiresat', $time, \PDO::PARAM_INT);
+            $stmt->bindParam(':expiresat', $time, \PDO::PARAM_INT);
             $stmt->execute();
             $exists = $stmt->fetchColumn() > 0;
 
@@ -1585,35 +1586,38 @@ class UserMapper
     }
 
 
-    public function insertoken(array $args): void
+    // public function insertoken(array $args): void
+    public function insertoken(Tokenize $data): ?Tokenize
     {
         $this->logger->info("UserMapper.insertoken started");
 
-        $this->logger->info('UserMapper.insertoken second', ['args' => $args]);
+        $data = $data->getArrayCopy();
+        $this->logger->info('UserMapper.insertoken second', ['data' => $data]);
 
         $query = "INSERT INTO token_holders 
-                  (token, userid, email, expires)
+                  (token, userid, expiresat)
                   VALUES 
-                  (:token, :userid, :email, :expires)";
+                  (:token, :userid, :expiresat)";
 
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':token', $args['token'], \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $args['userid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':email', $args['email'], \PDO::PARAM_STR);
-            $stmt->bindValue(':expires', $args['expires'], \PDO::PARAM_INT);
+            $stmt->bindValue(':token', $data['token'], \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':expiresat', $data['expiresat'], \PDO::PARAM_INT);
 
             $stmt->execute();
 
-            $this->logger->info("Inserted new token into database", ['userid' => $args['userid']]);
+            $this->logger->info("Inserted new token into database", ['userid' => $data['userid']]);
+            return new Tokenize($data);
 
         } catch (\Throwable $e) {
             $this->logger->error("UserMapper.insertoken: Exception occurred while inserting token", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            throw new \RuntimeException("Failed to insert token into database: " . $e->getMessage());
+            return null;
         }
+        return null;
     }
 }
