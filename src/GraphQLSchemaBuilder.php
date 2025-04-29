@@ -1004,9 +1004,9 @@ class GraphQLSchemaBuilder
                 },
             ],
             'CurrentLiquidity' => [
-                'getCurrentBalance' => function (array $root): float {
-                    $this->logger->info('Query.getCurrentBalance Resolvers');
-                    return $root['getCurrentBalance'] ?? 0.0;
+                'currentliquidity' => function (array $root): float {
+                    $this->logger->info('Query.currentliquidity Resolvers');
+                    return $root['currentliquidity'] ?? 0.0;
                 },
             ],
             'UserInfo' => [
