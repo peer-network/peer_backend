@@ -32,6 +32,8 @@ type Query {
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listTodaysInteractions: StandardResponse!
+    getReferralInfo: ReferralInfoResponse!
+  referralList(offset: Int, limit: Int): ReferralListResponse!
 }
 
 type Mutation {
@@ -481,30 +483,28 @@ type CommentResponse {
   affectedRows: [Comment]
 }
 
-
 type ReferralInfoResponse {
   status: String
   ResponseCode: String
   referralUuid: ID
   referralLink: String
 }
-
 type ReferralListResponse {
   status: String!
   counter: Int!
   ResponseCode: String!
   affectedRows: ReferralUsers!
 }
-
 type ReferralUsers {
-  invitedBy: ProfilUser
-  iInvited: [ProfilUser!]!
+  invitedBy: ProfileUser
+  iInvited: [ProfileUser!]!
 }
 
 input RegistrationInput {
   email: String!
   password: String!
   username: String!
+  referralUuid: ID
 }
 
 input PostInput {
