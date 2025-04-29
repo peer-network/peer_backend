@@ -75,5 +75,4 @@ input RegistrationInput {
   password: String!
   username: String!
   pkey: String
-  referralUuid: ID
 }
