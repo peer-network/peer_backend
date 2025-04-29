@@ -84,10 +84,10 @@ enum CommentType {
 }
 
 enum ContentType {
-  IMAGE
-  AUDIO
-  VIDEO
-  TEXT
+  image
+  audio
+  video
+  text
 }
 
 enum PostFilterType {
@@ -167,7 +167,7 @@ type DailyFreeResponse {
 }
 
 type CurrentLiquidity {
-  getCurrentBalance: Decimal
+  currentliquidity: Decimal
 }
 
 type UserInfoResponse {
@@ -445,18 +445,18 @@ type Post {
   media: String!
   cover: String!
   mediadescription: String!
-  createdAt: Date!
-  likeCount: Int!
-  viewScore: Int!
-  commentCount: Int!
-  dislikeCount: Int!
-  trendingScore: Int!
-  isLiked: Boolean!
-  isViewed: Boolean!
-  isReported: Boolean!
-  isDisliked: Boolean!
-  isSaved: Boolean!
-  listTags: TagList!
+ createdat: Date!
+  amountlikes: Int!
+  amountviews: Int!
+  amountcomments: Int!
+  amountdislikes: Int!
+  amounttrending: Int!
+  isliked: Boolean!
+  isviewed: Boolean!
+  isreported: Boolean!
+  isdisliked: Boolean!
+  issaved: Boolean!
+  tags: TagList!
   user: ProfileUser!
   comments: [Comment!]!
 }
@@ -493,7 +493,7 @@ input PostInput {
   contenttype: ContentType!
   media: [String!]
   cover: [String!]
-  listTags: [String!]
+  tags: [String!]
 }
 
 input ChatInput {
