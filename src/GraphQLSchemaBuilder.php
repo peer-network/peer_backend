@@ -1185,7 +1185,6 @@ class GraphQLSchemaBuilder
     {
 
         return [
-            'register' => fn(mixed $root, array $args) => $this->userService->createUser($args['input']),
             'requestPasswordReset' => fn(mixed $root, array $args) => $this->userService->requestPasswordReset($args['email']),
             'resetPassword' => fn(mixed $root, array $args) => $this->userService->resetPassword($args),
             'register' => fn(mixed $root, array $args) => $this->createUser($args['input']),
