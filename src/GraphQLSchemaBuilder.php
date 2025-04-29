@@ -1155,7 +1155,7 @@ class GraphQLSchemaBuilder
             'getPostInfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
             'getCommentInfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentId']),
             'listChildComments' => fn(mixed $root, array $args) => $this->resolveComments($args),
-            'tags' => fn(mixed $root, array $args) => $this->resolveTags($args),
+            'listTags' => fn(mixed $root, array $args) => $this->resolveTags($args),
             'searchTags' => fn(mixed $root, array $args) => $this->resolveTagsearch($args),
             'getChat' => fn(mixed $root, array $args) => $this->resolveChat($args),
             'listChats' => fn(mixed $root, array $args) => $this->resolveChats($args),

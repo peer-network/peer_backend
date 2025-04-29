@@ -38,7 +38,6 @@ type Mutation {
   updateUsername(username: String!, password: String!): DefaultResponse!
   updateEmail(email: String!, password: String!): DefaultResponse!
   updatePassword(password: String!, expassword: String!): DefaultResponse!
-  toggleProfilePrivacy: DefaultResponse!
   updateBio(biography: String!): DefaultResponse!
   updateProfileImage(img: String!): DefaultResponse!
   toggleUserFollowStatus(userid: ID!): FollowStatusResponse!
