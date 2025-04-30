@@ -2450,7 +2450,7 @@ class GraphQLSchemaBuilder
         try {
             $user = $this->userMapper->loadById($userid);
             if (!$user) {
-                return $this->respondWithError(30103);
+                return $this->respondWithError(20201);
             }
 
             if ($user->getVerified() == 1) {
