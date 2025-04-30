@@ -28,21 +28,21 @@ type Query {
   listChats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
   listChatMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
   getDailyFreeStatus: GetDailyResponse!
-  listTodaysInteractions: StandardResponse!
+  listTodaysInteractions: ListTodaysInteractionsResponse!
   allfriends(offset: Int, limit: Int): AllUserFriends!
   balance: CurrentLiquidity!
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
-  getpercentbeforetransaction(tokenAmount: Int!): StandardResponse!
-  refreshmarketcap: StandardResponse!
+  getpercentbeforetransaction(tokenAmount: Int!): GetPercentBeforeTransactionResponse!
+  refreshmarketcap: RefreshMarketCapResponse!
   globalwins: DefaultResponse!
-  gemster: StandardResponse!
-  gemsters(day: DayFilterType!): GenericResponse!
-  liquiditypool(userid: ID, postid: ID, fromid: ID, whereby: Int, offset: Int, limit: Int): GenericResponse!
-  testingpool(offset: Int, limit: Int): GenericResponse!
-  postcomments(postid: ID!, offset: Int, limit: Int): GenericResponse!
-  dailygemstatus: StandardResponse!
-  dailygemsresults(day: DayFilterType!): StandardResponse!
+  gemster: GemsterResponse!
+  gemsters(day: DayFilterType!): GemstersResponse!
+  liquiditypool(userid: ID, postid: ID, fromid: ID, whereby: Int, offset: Int, limit: Int): LiquidityPoolResponse!
+  testingpool(offset: Int, limit: Int): TestingPoolResponse!
+  postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
+  dailygemstatus: DailyGemStatusResponse!
+  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
 }
 
 type Mutation {
@@ -133,6 +133,70 @@ enum DayFilterType {
   W0
   M0
   Y0
+}
+
+type GemstersResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: DATEN
+}
+
+type LiquidityPoolResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: DATEN
+}
+  
+type TestingPoolResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: DATEN
+}
+
+type PostCommentsResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: DATEN
+}
+
+type ListTodaysInteractionsResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DATEN
+}
+
+type GetPercentBeforeTransactionResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DATEN
+}
+
+type RefreshMarketCapResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DATEN
+}
+
+type GemsterResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DATEN
+}
+
+type DailyGemStatusResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DATEN
+}
+
+type DailyGemsResultsResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DATEN
 }
 
 type GenericResponse {

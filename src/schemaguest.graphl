@@ -7,6 +7,8 @@ type Query {
   hello: HelloResponse
 }
 
+scalar JSON
+
 type Mutation {
   register(input: RegistrationInput!): RegisterResponse!
   verifyAccount(userid: ID!): verifyAccount!
@@ -17,13 +19,24 @@ type Mutation {
   contactus(name: String!, email: String!, message: String!): StandardResponse!
 }
 
-type StandardResponse {
+
+type RequestPasswordResetResponse {
   status: String!
   ResponseCode: String
   affectedRows: JSON
 }
 
-scalar JSON
+type ResetPasswordResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: JSON
+}
+
+type ContactusResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: JSON
+}
 
 type HelloResponse {
   currentuserid: ID
