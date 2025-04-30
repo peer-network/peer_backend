@@ -39,7 +39,7 @@ type DailyGemStatusResponse {
 type DailyGemsResultsResponse {
   status: String!
   ResponseCode: String
-  data: DATEN
+  affectedRows: DATEN
 }
 
 type StandardResponse {
