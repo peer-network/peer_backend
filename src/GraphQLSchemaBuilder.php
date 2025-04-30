@@ -218,33 +218,6 @@ class GraphQLSchemaBuilder
                     return $root['userid'] ?? '';
                 },
             ],
-            'verifyAccount' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.verifyAccount Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-            ],
-            'requestPasswordReset' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.requestPasswordReset Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-            ],
-            'resetPassword' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.resetPassword Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-            ],
             'User' => [
                 'id' => function (array $root): string {
                     $this->logger->info('Query.User Resolvers');
@@ -1142,30 +1115,6 @@ class GraphQLSchemaBuilder
                 },
             ],
             'DailyGemsResultsResponse' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.StandardResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-                'affectedRows' => function (array $root): array {
-                    return $root['affectedRows'] ?? [];
-                },
-            ],
-            'RequestPasswordResetResponse' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.StandardResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-                'affectedRows' => function (array $root): array {
-                    return $root['affectedRows'] ?? [];
-                },
-            ],
-            'ResetPasswordResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';

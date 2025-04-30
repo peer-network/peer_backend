@@ -7,7 +7,6 @@ type Query {
   hello: HelloResponse
 }
 
-scalar JSON
 scalar Decimal
 
 type Mutation {
@@ -27,19 +26,6 @@ type ContactusResponsePayload {
   message: String,
   ip: String,
   createdat: String
-}
- 
-
-type RequestPasswordResetResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: JSON
-}
-
-type ResetPasswordResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: JSON
 }
 
 type ContactusResponse {
