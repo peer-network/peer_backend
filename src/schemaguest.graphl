@@ -8,17 +8,27 @@ type Query {
 }
 
 scalar JSON
+scalar Decimal
 
 type Mutation {
   register(input: RegistrationInput!): RegisterResponse!
   verifyAccount(userid: ID!): DefaultResponse!
   login(email: String!, password: String!): AuthPayload!
-  requestPasswordReset(email: String!): RequestPasswordResetResponse
-  resetPassword(token: String!, password: String!): ResetPasswordResponse
+  requestPasswordReset(email: String!): DefaultResponse!
+  resetPassword(token: String!, password: String!): DefaultResponse
   refreshToken(refreshToken: String!): AuthPayload!
   contactus(name: String!, email: String!, message: String!): ContactusResponse!
 }
 
+type ContactusResponsePayload {
+  msgid: Decimal,
+  email: String,
+  name: String,
+  message: String,
+  ip: String,
+  createdat: String
+}
+ 
 
 type RequestPasswordResetResponse {
   status: String!
@@ -35,7 +45,7 @@ type ResetPasswordResponse {
 type ContactusResponse {
   status: String!
   ResponseCode: String
-  affectedRows: JSON
+  affectedRows: ContactusResponsePayload
 }
 
 type HelloResponse {

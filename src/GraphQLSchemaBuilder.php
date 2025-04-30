@@ -171,6 +171,26 @@ class GraphQLSchemaBuilder
             'Query' => $this->buildQueryResolvers(),
             'Mutation' => $this->buildMutationResolvers(),
             'Subscription' => $this->buildSubscriptionResolvers(),
+            'ContactusResponsePayload' => [
+                'msgid' => function (array $root): int {
+                    return $root['msgid'] ?? 0;
+                },
+                'email' => function (array $root): string {
+                    return $root['email'] ?? '';
+                },
+                'name' => function (array $root): string {
+                    return $root['name'] ?? '';
+                },
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+                'ip' => function (array $root): string {
+                    return $root['ip'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ],
             'HelloResponse' => [
                 'currentuserid' => function (array $root): string {
                     $this->logger->info('Query.HelloResponse Resolvers');
