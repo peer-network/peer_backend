@@ -186,6 +186,8 @@ type DailyFreeResponse {
 }
 
 type CurrentLiquidity {
+  status: String!
+  ResponseCode: String!
   currentliquidity: Decimal
 }
 

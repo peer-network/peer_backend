@@ -1004,6 +1004,13 @@ class GraphQLSchemaBuilder
                 },
             ],
             'CurrentLiquidity' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.CurrentLiquidity Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
                 'currentliquidity' => function (array $root): float {
                     $this->logger->info('Query.currentliquidity Resolvers');
                     return $root['currentliquidity'] ?? 0.0;
@@ -1773,8 +1780,7 @@ class GraphQLSchemaBuilder
         $results = $this->walletService->loadLiquidityById($this->currentUserId);
         if (isset($results['status']) && $results['status'] === 'success') {
             $this->logger->info('Query.resolveLiquidity successful');
-
-            return $results['affectedRows'];
+            return $results;
         }
 
         if (isset($results['status']) && $results['status'] === 'error') {
