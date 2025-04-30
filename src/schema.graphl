@@ -15,7 +15,7 @@ type Query {
   listUsers (offset: Int, limit: Int): UserListResponse!
   getProfile(userid: ID, postLimit: Int): ProfileInfo!
   listFollowRelations(userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
-  listFriends(offset: Int, limit: Int): FollowRelationsResponse!
+  listFriends(offset: Int, limit: Int): UserFriendsResponse!
   getUserInfo: UserInfoResponse!
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
   listPosts(filterBy: [PostFilterType!], IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
