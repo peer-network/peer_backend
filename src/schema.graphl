@@ -10,29 +10,73 @@ type Subscription {
 }
 
 type Query {
+  "Returns basic service info (e.g., current user ID and version)"
   hello: HelloResponse!
-  searchUser(userid: ID, username: String, offset: Int, limit: Int): UserListResponse!
-  listUsers (offset: Int, limit: Int): UserListResponse!
-  getProfile(userid: ID, postLimit: Int): ProfileInfo!
-  listFollowRelations(userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
-  listFriends(offset: Int, limit: Int): UserFriendsResponse!
+
+  "Search for users using filters like username or user ID"
+  searchUser(input: SearchUserInput!): UserListResponse!
+
+  "List all users with pagination support"
+  listUsers(input: PaginationInput!): UserListResponse!
+
+  "Retrieve a user's public profile and posts"
+  getProfile(input: GetProfileInput!): ProfileInfo!
+
+  "List followers and followings of a user with pagination"
+  listFollowRelations(input: ListFollowRelationsInput!): FollowRelationsResponse!
+
+  "List friends of the current user with pagination"
+  listFriends(input: PaginationInput!): UserFriendsResponse!
+
+  "Returns detailed user stats for the currently logged-in user"
   getUserInfo: UserInfoResponse!
-  listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
-  listPosts(filterBy: [PostFilterType!], IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
+
+  "List users blocked by or blocking the current user"
+  listBlockedUsers(input: PaginationInput!): BlockedUsersResponse!
+
+  "List posts using filters like tags, sort type, date range, and pagination"
+  listPosts(input: ListPostsInput!): PostListResponse!
+
+  "Get engagement summary of a specific post"
   getPostInfo(postid: ID!): PostInfoResponse!
+
+  "Get engagement summary of a specific comment"
   getCommentInfo(commentId: ID!): CommentInfoResponse!
-  listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
-  listTags(offset: Int, limit: Int): TagSearchResponse!
-  searchTags(tagName: String!, offset: Int, limit: Int): TagSearchResponse!
-  getChat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse!
-  listChats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
-  listChatMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
+
+  "List child comments of a given comment with pagination"
+  listChildComments(input: ListChildCommentsInput!): CommentResponse!
+
+  "List all tags with pagination"
+  listTags(input: PaginationInput!): TagSearchResponse!
+
+  "Search for tags by name with pagination"
+  searchTags(input: SearchTagsInput!): TagSearchResponse!
+
+  "Get detailed info about a specific chat, including messages and participants"
+  getChat(input: GetChatInput!): ChatResponse!
+
+  "List all chats of the current user with pagination and filters"
+  listChats(input: ListChatsInput!): ChatResponse!
+
+  "List messages of a chat with pagination"
+  listChatMessages(input: ListChatMessagesInput!): AddChatmessageResponse!
+
+  "Check daily free interaction quota (e.g., free posts or actions)"
   getDailyFreeStatus: GetDailyResponse!
+
+  "Get current token liquidity balance"
   balance: CurrentLiquidity!
-  listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
-  listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
+
+  "List the user's win logs by day filter and pagination"
+  listWinLogs(input: DayPaginatedInput!): UserLogWins!
+
+  "List the user's token transfer logs by day filter and pagination"
+  listPaymentLogs(input: DayPaginatedInput!): UserLogWins!
+
+  "Returns a summary of today's interactions"
   listTodaysInteractions: StandardResponse!
 }
+
 
 type Mutation {
   updateUsername(username: String!, password: String!): DefaultResponse!
@@ -520,4 +564,128 @@ input FeedInput {
   media: String!
   mediadescription: String
   contenttype: String!
+}
+input SearchUserInput {
+  "User ID (UUID)"
+  userid: ID
+  "Username (3–23 chars, must include letters)"
+  username: String
+  "Pagination offset (0–PHP_INT_MAX)"
+  offset: Int
+  "Pagination limit (1–20)"
+  limit: Int
+}
+
+input PaginationInput {
+  "Pagination offset (0–PHP_INT_MAX)"
+  offset: Int
+  "Pagination limit (1–20)"
+  limit: Int
+}
+
+input GetProfileInput {
+  "User ID (UUID)"
+  userid: ID
+  "Number of posts to fetch (1–20)"
+  postLimit: Int
+}
+
+input ListFollowRelationsInput {
+  "User ID (UUID)"
+  userid: ID
+  "Pagination offset (0–PHP_INT_MAX)"
+  offset: Int
+  "Pagination limit (1–20)"
+  limit: Int
+}
+
+input ListPostsInput {
+  "Post filter criteria (IMAGE, AUDIO, TEXT, VIDEO, FOLLOWED, FOLLOWER)"
+  filterBy: [PostFilterType!]
+  "Apply ignore list (YES/NO)"
+  IgnorList: IgnoreOption
+  "Sorting (NEWEST, TRENDING, LIKES, etc.)"
+  sortBy: PostSortType
+  "User ID"
+  userid: ID
+  "Post ID"
+  postid: ID
+  "Title search (2–63 chars)"
+  title: String
+  "Tag to search (2–53 chars)"
+  tag: String
+  "From date (YYYY-MM-DD)"
+  from: Date
+  "To date (YYYY-MM-DD)"
+  to: Date
+  "Post offset (0–PHP_INT_MAX)"
+  offset: Int
+  "Post limit (1–20)"
+  limit: Int
+  "Comment offset (0–PHP_INT_MAX)"
+  commentOffset: Int
+  "Comment limit (1–20)"
+  commentLimit: Int
+}
+
+input ListChildCommentsInput {
+  "Parent comment ID (UUID)"
+  parent: ID!
+  "Pagination offset (0–PHP_INT_MAX)"
+  offset: Int
+  "Pagination limit (1–20)"
+  limit: Int
+}
+
+input SearchTagsInput {
+  "Tag to search (2–53 chars)"
+  tagName: String!
+  "Pagination offset (0–PHP_INT_MAX)"
+  offset: Int
+  "Pagination limit (1–20)"
+  limit: Int
+}
+
+input GetChatInput {
+  "Chat ID (UUID)"
+  chatid: ID!
+  "Chat message offset (0–PHP_INT_MAX)"
+  messageOffset: Int
+  "Chat message limit (1–20)"
+  messageLimit: Int
+}
+
+input ListChatsInput {
+  "Sort by parameter (current options: newest)"
+  sortBy: String
+  "From date (YYYY-MM-DD)"
+  from: Date
+  "To date (YYYY-MM-DD)"
+  to: Date
+  "Pagination offset (0–PHP_INT_MAX)"
+  offset: Int
+  "Pagination limit (1–20)"
+  limit: Int
+  "Message offset (0–PHP_INT_MAX)"
+  messageOffset: Int
+  "Message limit (1–20)"
+  messageLimit: Int
+}
+
+input ListChatMessagesInput {
+  "Chat ID (UUID)"
+  chatid: ID!
+  "Message offset (0–PHP_INT_MAX)"
+  offset: Int
+  "Message limit (1–20)"
+  limit: Int
+}
+
+input DayPaginatedInput {
+  "Day filter (D0–D5, W0, M0, Y0)"
+  day: DayFilterType!
+  "Pagination offset (0–PHP_INT_MAX)"
+  offset: Int
+  "Pagination limit (1–20)"
+  limit: Int
 }

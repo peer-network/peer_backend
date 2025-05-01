@@ -1150,43 +1150,108 @@ class GraphQLSchemaBuilder
 
     protected function buildQueryResolvers(): array
     {
-
         return [
-            'hello' => fn(mixed $root, array $args, mixed $context) => $this->resolveHello($root, $args, $context),
-            'searchUser' => fn(mixed $root, array $args) => $this->resolveSearchUser($args),
-            'listUsers' => fn(mixed $root, array $args) => $this->resolveUsers($args),
-            'getProfile' => fn(mixed $root, array $args) => $this->resolveProfile($args),
-            'listFollowRelations' => fn(mixed $root, array $args) => $this->resolveFollows($args),
-            'listFriends' => fn(mixed $root, array $args) => $this->resolveFriends($args),
-            'listPosts' => fn(mixed $root, array $args) => $this->resolvePosts($args),
-            'getPostInfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
-            'getCommentInfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentId']),
-            'listChildComments' => fn(mixed $root, array $args) => $this->resolveComments($args),
-            'listTags' => fn(mixed $root, array $args) => $this->resolveTags($args),
-            'searchTags' => fn(mixed $root, array $args) => $this->resolveTagsearch($args),
-            'getChat' => fn(mixed $root, array $args) => $this->resolveChat($args),
-            'listChats' => fn(mixed $root, array $args) => $this->resolveChats($args),
-            'listChatMessages' => fn(mixed $root, array $args) => $this->resolveChatMessages($args),
-            'getDailyFreeStatus' => fn(mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
-            'getpercentbeforetransaction' => fn(mixed $root, array $args) => $this->resolveBeforeTransaction($args),
-            'refreshmarketcap' => fn(mixed $root, array $args) => $this->resolveMcap(),
-            'globalwins' => fn(mixed $root, array $args) => $this->walletService->callGlobalWins(),
-            'gemster' => fn(mixed $root, array $args) => $this->walletService->callGemster(),
-            'gemsters' => fn(mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
-            'balance' => fn(mixed $root, array $args) => $this->resolveLiquidity(),
-            'getUserInfo' => fn(mixed $root, array $args) => $this->resolveUserInfo(),
-            'listWinLogs' => fn(mixed $root, array $args) => $this->resolveFetchWinsLog($args),
-            'listPaymentLogs' => fn(mixed $root, array $args) => $this->resolveFetchPaysLog($args),
-            'listBlockedUsers' => fn(mixed $root, array $args) => $this->resolveBlocklist($args),
-            'listTodaysInteractions' => fn(mixed $root, array $args) => $this->walletService->callUserMove(),
-            'liquiditypool' => fn(mixed $root, array $args) => $this->resolvePool($args),
-            'allfriends' => fn(mixed $root, array $args) => $this->resolveAllFriends($args),
-            'testingpool' => fn(mixed $root, array $args) => $this->resolveTestingPool($args),
-            'postcomments' => fn(mixed $root, array $args) => $this->resolvePostComments($args),
-            'dailygemstatus' => fn(mixed $root, array $args) => $this->poolService->callGemster(),
-            'dailygemsresults' => fn(mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
+            'hello' => fn(mixed $root, array $args, mixed $context) =>
+                $this->resolveHello($root, $args, $context),
+
+            'searchUser' => fn(mixed $root, array $args) =>
+                $this->resolveSearchUser($args['input']),
+    
+            'listUsers' => fn(mixed $root, array $args) =>
+                $this->resolveUsers($args['input']),
+    
+            'getProfile' => fn(mixed $root, array $args) =>
+                $this->resolveProfile($args['input']),
+    
+            'listFollowRelations' => fn(mixed $root, array $args) =>
+                $this->resolveFollows($args['input']),
+    
+            'listFriends' => fn(mixed $root, array $args) =>
+                $this->resolveFriends($args['input']),
+    
+            'listPosts' => fn(mixed $root, array $args) =>
+                $this->resolvePosts($args['input']),
+    
+            'getPostInfo' => fn(mixed $root, array $args) =>
+                $this->resolvePostInfo($args['postid']),
+    
+            'getCommentInfo' => fn(mixed $root, array $args) =>
+                $this->resolveCommentInfo($args['commentId']),
+    
+            'listChildComments' => fn(mixed $root, array $args) =>
+                $this->resolveComments($args['input']),
+    
+            'listTags' => fn(mixed $root, array $args) =>
+                $this->resolveTags($args['input']),
+    
+            'searchTags' => fn(mixed $root, array $args) =>
+                $this->resolveTagsearch($args['input']),
+    
+            'getChat' => fn(mixed $root, array $args) =>
+                $this->resolveChat($args['input']),
+    
+            'listChats' => fn(mixed $root, array $args) =>
+                $this->resolveChats($args['input']),
+    
+            'listChatMessages' => fn(mixed $root, array $args) =>
+                $this->resolveChatMessages($args['input']),
+    
+            'getDailyFreeStatus' => fn(mixed $root, array $args) =>
+                $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
+    
+            'getpercentbeforetransaction' => fn(mixed $root, array $args) =>
+                $this->resolveBeforeTransaction($args),
+    
+            'refreshmarketcap' => fn(mixed $root, array $args) =>
+                $this->resolveMcap(),
+    
+            'globalwins' => fn(mixed $root, array $args) =>
+                $this->walletService->callGlobalWins(),
+    
+            'gemster' => fn(mixed $root, array $args) =>
+                $this->walletService->callGemster(),
+    
+            'gemsters' => fn(mixed $root, array $args) =>
+                $this->walletService->callGemsters($args['day']),
+    
+            'balance' => fn(mixed $root, array $args) =>
+                $this->resolveLiquidity(),
+    
+            'getUserInfo' => fn(mixed $root, array $args) =>
+                $this->resolveUserInfo(),
+    
+            'listWinLogs' => fn(mixed $root, array $args) =>
+                $this->resolveFetchWinsLog($args['input']),
+    
+            'listPaymentLogs' => fn(mixed $root, array $args) =>
+                $this->resolveFetchPaysLog($args['input']),
+    
+            'listBlockedUsers' => fn(mixed $root, array $args) =>
+                $this->resolveBlocklist($args['input']),
+    
+            'listTodaysInteractions' => fn(mixed $root, array $args) =>
+                $this->walletService->callUserMove(),
+    
+            'liquiditypool' => fn(mixed $root, array $args) =>
+                $this->resolvePool($args),
+    
+            'allfriends' => fn(mixed $root, array $args) =>
+                $this->resolveAllFriends($args),
+    
+            'testingpool' => fn(mixed $root, array $args) =>
+                $this->resolveTestingPool($args),
+    
+            'postcomments' => fn(mixed $root, array $args) =>
+                $this->resolvePostComments($args),
+    
+            'dailygemstatus' => fn(mixed $root, array $args) =>
+                $this->poolService->callGemster(),
+    
+            'dailygemsresults' => fn(mixed $root, array $args) =>
+                $this->poolService->callGemsters($args['day']),
         ];
     }
+    
 
     protected function buildMutationResolvers(): array
     {
@@ -2323,7 +2388,7 @@ class GraphQLSchemaBuilder
         $messageLimit = isset($args['messageLimit']) ? (int)$args['messageLimit'] : null;
 
         if ($offset !== null) {
-            if ($offset < 0 || $offset > 200) {
+            if ($offset < 0 || $offset > PHP_INT_MAX) {
                 return $this->respondWithError(20203);
             }
         }
@@ -2335,7 +2400,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($postOffset !== null) {
-            if ($postOffset < 0 || $postOffset > 200) {
+            if ($postOffset < 0 || $postOffset > PHP_INT_MAX) {
                 return $this->respondWithError(20203);
             }
         }
@@ -2347,7 +2412,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($commentOffset !== null) {
-            if ($commentOffset < 0 || $commentOffset > 200) {
+            if ($commentOffset < 0 || $commentOffset > PHP_INT_MAX) {
                 return $this->respondWithError(20215);
             }
         }
@@ -2359,7 +2424,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($messageOffset !== null) {
-            if ($messageOffset < 0 || $messageOffset > 200) {
+            if ($messageOffset < 0 || $messageOffset > PHP_INT_MAX) {
                 return $this->respondWithError(20219);
             }
         }
