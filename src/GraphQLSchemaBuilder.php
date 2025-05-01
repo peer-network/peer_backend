@@ -198,9 +198,27 @@ class GraphQLSchemaBuilder
                     return $root['userid'] ?? '';
                 },
             ],
-            'verifiedAccount' => [
+            'verifyAccount' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.verifiedAccount Resolvers');
+                    $this->logger->info('Query.verifyAccount Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+            ],
+            'requestPasswordReset' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.requestPasswordReset Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+            ],
+            'resetPassword' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.resetPassword Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -256,9 +274,9 @@ class GraphQLSchemaBuilder
                     return $root['updatedat'] ?? '';
                 },
             ],
-            'GetUserinforesponse' => [
+            'UserInfoResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.GetUserinforesponse Resolvers');
+                    $this->logger->info('Query.UserInfoResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -268,9 +286,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'GetUserInfo' => [
+            'UserInfo' => [
                 'postid' => function (array $root): string {
-                    $this->logger->info('Query.GetUserInfo Resolvers');
+                    $this->logger->info('Query.UserInfo Resolvers');
                     return $root['postid'] ?? '';
                 },
                 'userid' => function (array $root): string {
@@ -298,9 +316,9 @@ class GraphQLSchemaBuilder
                     return $root['comments'] ?? 0;
                 },
             ],
-            'UserSearchResponse' => [
+            'UserListResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.UserSearchResponse Resolvers');
+                    $this->logger->info('Query.UserListResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -386,9 +404,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'ProfilPostMed' => [
+            'ProfilePostMedia' => [
                 'id' => function (array $root): string {
-                    $this->logger->info('Query.ProfilPostMed Resolvers');
+                    $this->logger->info('Query.ProfilePostMedia Resolvers');
                     return $root['postid'] ?? '';
                 },
                 'title' => function (array $root): string {
@@ -404,9 +422,9 @@ class GraphQLSchemaBuilder
                     return $root['createdat'] ?? '';
                 },
             ],
-            'ProfilUser' => [
+            'ProfileUser' => [
                 'id' => function (array $root): string {
-                    $this->logger->info('Query.ProfilUser Resolvers');
+                    $this->logger->info('Query.ProfileUser Resolvers');
                     return $root['uid'] ?? '';
                 },
                 'username' => function (array $root): string {
@@ -461,18 +479,18 @@ class GraphQLSchemaBuilder
                     return $root['slug'] ?? 0;
                 },
             ],
-            'Blocked' => [
+            'BlockedUsers' => [
                 'iBlocked' => function (array $root): array {
-                    $this->logger->info('Query.Blocked Resolvers');
+                    $this->logger->info('Query.BlockedUsers Resolvers');
                     return $root['iBlocked'] ?? [];
                 },
                 'blockedBy' => function (array $root): array {
                     return $root['blockedBy'] ?? [];
                 },
             ],
-            'UserBlocked' => [
+            'BlockedUsersResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.UserBlocked Resolvers');
+                    $this->logger->info('Query.BlockedUsersResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -485,18 +503,18 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'Followes' => [
+            'FollowRelations' => [
                 'followers' => function (array $root): array {
-                    $this->logger->info('Query.Followes Resolvers');
+                    $this->logger->info('Query.FollowRelations Resolvers');
                     return $root['followers'] ?? [];
                 },
                 'following' => function (array $root): array {
                     return $root['following'] ?? [];
                 },
             ],
-            'UserFollows' => [
+            'FollowRelationsResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.UserFollows Resolvers');
+                    $this->logger->info('Query.FollowRelationsResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -509,9 +527,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'UserFriends' => [
+            'UserFriendsResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.UserFriends Resolvers');
+                    $this->logger->info('Query.UserFriendsResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -536,9 +554,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'setFollowUseresponse' => [
+            'FollowStatusResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.setFollowUseresponse Resolvers');
+                    $this->logger->info('Query.FollowStatusResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -611,9 +629,9 @@ class GraphQLSchemaBuilder
                     return $root['comments'] ?? [];
                 },
             ],
-            'GetPostinforesponse' => [
+            'PostInfoResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.GetPostinforesponse Resolvers');
+                    $this->logger->info('Query.PostInfoResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -623,9 +641,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'GetPostInfo' => [
+            'PostInfo' => [
                 'userid' => function (array $root): string {
-                    $this->logger->info('Query.GetPostInfo Resolvers');
+                    $this->logger->info('Query.PostInfo Resolvers');
                     return $root['userid'] ?? '';
                 },
                 'likes' => function (array $root): int {
@@ -650,9 +668,9 @@ class GraphQLSchemaBuilder
                     return $root['comments'] ?? 0;
                 },
             ],
-            'GetAllPostResponse' => [
+            'PostListResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.GetAllPostResponse Resolvers');
+                    $this->logger->info('Query.PostListResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -743,9 +761,9 @@ class GraphQLSchemaBuilder
                     return $root['user'] ?? [];
                 },
             ],
-            'GetCommentinforesponse' => [
+            'CommentInfoResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.GetCommentinforesponse Resolvers');
+                    $this->logger->info('Query.CommentInfoResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -755,7 +773,7 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'GetCommentInfo' => [
+            'CommentInfo' => [
                 'userid' => function (array $root): string {
                     return $root['userid'] ?? '';
                 },
@@ -853,9 +871,9 @@ class GraphQLSchemaBuilder
                     return $root['chatid'] ?? '';
                 },
             ],
-            'Chatmessageinfo' => [
+            'ChatMessageInfo' => [
                 'messid' => function (array $root): int {
-                    $this->logger->info('Query.Chatmessageinfo Resolvers');
+                    $this->logger->info('Query.ChatMessageInfo Resolvers');
                     return $root['messid'] ?? 0;
                 },
                 'userid' => function (array $root): string {
@@ -973,9 +991,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'DailyResponse' => [
+            'DailyFreeResponse' => [
                 'name' => function (array $root): string {
-                    $this->logger->info('Query.DailyResponse Resolvers');
+                    $this->logger->info('Query.DailyFreeResponse Resolvers');
                     return $root['name'] ?? '';
                 },
                 'used' => function (array $root): int {
@@ -986,14 +1004,21 @@ class GraphQLSchemaBuilder
                 },
             ],
             'CurrentLiquidity' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.CurrentLiquidity Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
                 'currentliquidity' => function (array $root): float {
                     $this->logger->info('Query.currentliquidity Resolvers');
                     return $root['currentliquidity'] ?? 0.0;
                 },
             ],
-            'GetUserInfo' => [
+            'UserInfo' => [
                 'userid' => function (array $root): string {
-                    $this->logger->info('Query.GetUserInfo Resolvers');
+                    $this->logger->info('Query.UserInfo Resolvers');
                     return $root['userid'] ?? '';
                 },
                 'liquidity' => function (array $root): float {
@@ -1053,7 +1078,7 @@ class GraphQLSchemaBuilder
             ],
             'LogWins' => [
                 'from' => function (array $root): string {
-                    $this->logger->info('Query.GetUserInfo Resolvers');
+                    $this->logger->info('Query.UserInfo Resolvers');
                     return $root['from'] ?? '';
                 },
                 'token' => function (array $root): string {
@@ -1128,32 +1153,32 @@ class GraphQLSchemaBuilder
 
         return [
             'hello' => fn(mixed $root, array $args, mixed $context) => $this->resolveHello($root, $args, $context),
-            'searchuser' => fn(mixed $root, array $args) => $this->resolveSearchUser($args),
-            'getallusers' => fn(mixed $root, array $args) => $this->resolveUsers($args),
-            'profile' => fn(mixed $root, array $args) => $this->resolveProfile($args),
-            'follows' => fn(mixed $root, array $args) => $this->resolveFollows($args),
-            'friends' => fn(mixed $root, array $args) => $this->resolveFriends($args),
-            'getallposts' => fn(mixed $root, array $args) => $this->resolvePosts($args),
-            'getpostinfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
-            'getcommentinfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentid']),
-            'parentcomments' => fn(mixed $root, array $args) => $this->resolveComments($args),
-            'tags' => fn(mixed $root, array $args) => $this->resolveTags($args),
-            'tagsearch' => fn(mixed $root, array $args) => $this->resolveTagsearch($args),
-            'searchchat' => fn(mixed $root, array $args) => $this->resolveChat($args),
-            'getallchats' => fn(mixed $root, array $args) => $this->resolveChats($args),
-            'readMessages' => fn(mixed $root, array $args) => $this->resolveChatMessages($args),
-            'dailyfreestatus' => fn(mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
+            'searchUser' => fn(mixed $root, array $args) => $this->resolveSearchUser($args),
+            'listUsers' => fn(mixed $root, array $args) => $this->resolveUsers($args),
+            'getProfile' => fn(mixed $root, array $args) => $this->resolveProfile($args),
+            'listFollowRelations' => fn(mixed $root, array $args) => $this->resolveFollows($args),
+            'listFriends' => fn(mixed $root, array $args) => $this->resolveFriends($args),
+            'listPosts' => fn(mixed $root, array $args) => $this->resolvePosts($args),
+            'getPostInfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
+            'getCommentInfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentId']),
+            'listChildComments' => fn(mixed $root, array $args) => $this->resolveComments($args),
+            'listTags' => fn(mixed $root, array $args) => $this->resolveTags($args),
+            'searchTags' => fn(mixed $root, array $args) => $this->resolveTagsearch($args),
+            'getChat' => fn(mixed $root, array $args) => $this->resolveChat($args),
+            'listChats' => fn(mixed $root, array $args) => $this->resolveChats($args),
+            'listChatMessages' => fn(mixed $root, array $args) => $this->resolveChatMessages($args),
+            'getDailyFreeStatus' => fn(mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
             'getpercentbeforetransaction' => fn(mixed $root, array $args) => $this->resolveBeforeTransaction($args),
             'refreshmarketcap' => fn(mixed $root, array $args) => $this->resolveMcap(),
             'globalwins' => fn(mixed $root, array $args) => $this->walletService->callGlobalWins(),
             'gemster' => fn(mixed $root, array $args) => $this->walletService->callGemster(),
             'gemsters' => fn(mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
-            'currentliquidity' => fn(mixed $root, array $args) => $this->resolveLiquidity(),
-            'getuserinfo' => fn(mixed $root, array $args) => $this->resolveUserInfo(),
-            'fetchwinslog' => fn(mixed $root, array $args) => $this->resolveFetchWinsLog($args),
-            'fetchpayslog' => fn(mixed $root, array $args) => $this->resolveFetchPaysLog($args),
-            'blockedlist' => fn(mixed $root, array $args) => $this->resolveBlocklist($args),
-            'callusermove' => fn(mixed $root, array $args) => $this->walletService->callUserMove(),
+            'balance' => fn(mixed $root, array $args) => $this->resolveLiquidity(),
+            'getUserInfo' => fn(mixed $root, array $args) => $this->resolveUserInfo(),
+            'listWinLogs' => fn(mixed $root, array $args) => $this->resolveFetchWinsLog($args),
+            'listPaymentLogs' => fn(mixed $root, array $args) => $this->resolveFetchPaysLog($args),
+            'listBlockedUsers' => fn(mixed $root, array $args) => $this->resolveBlocklist($args),
+            'listTodaysInteractions' => fn(mixed $root, array $args) => $this->walletService->callUserMove(),
             'liquiditypool' => fn(mixed $root, array $args) => $this->resolvePool($args),
             'allfriends' => fn(mixed $root, array $args) => $this->resolveAllFriends($args),
             'testingpool' => fn(mixed $root, array $args) => $this->resolveTestingPool($args),
@@ -1167,34 +1192,36 @@ class GraphQLSchemaBuilder
     {
 
         return [
+            'requestPasswordReset' => fn(mixed $root, array $args) => $this->userService->requestPasswordReset($args['email']),
+            'resetPassword' => fn(mixed $root, array $args) => $this->userService->resetPassword($args),
             'register' => fn(mixed $root, array $args) => $this->createUser($args['input']),
-            'verifiedAccount' => fn(mixed $root, array $args) => $this->verifiedAccount($args['userid']),
+            'verifyAccount' => fn(mixed $root, array $args) => $this->verifyAccount($args['userid']),
             'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
-            'updateName' => fn(mixed $root, array $args) => $this->userService->setUsername($args),
-            'updateMail' => fn(mixed $root, array $args) => $this->userService->setEmail($args),
+            'updateUsername' => fn(mixed $root, array $args) => $this->userService->setUsername($args),
+            'updateEmail' => fn(mixed $root, array $args) => $this->userService->setEmail($args),
             'updatePassword' => fn(mixed $root, array $args) => $this->userService->setPassword($args),
-            'updatePrivateProfile' => fn() => $this->userInfoService->toggleProfilePrivacy(),
-            'updateBiography' => fn(mixed $root, array $args) => $this->userInfoService->updateBio($args['biography']),
-            'updateProfilePicture' => fn(mixed $root, array $args) => $this->userInfoService->setProfilePicture($args['img']),
-            'userFollow' => fn(mixed $root, array $args) => $this->userInfoService->toggleUserFollow($args['userid']),
-            'userBlock' => fn(mixed $root, array $args) => $this->userInfoService->toggleUserBlock($args['userid']),
+            'toggleProfilePrivacy' => fn() => $this->userInfoService->toggleProfilePrivacy(),
+            'updateBio' => fn(mixed $root, array $args) => $this->userInfoService->updateBio($args['biography']),
+            'updateProfileImage' => fn(mixed $root, array $args) => $this->userInfoService->setProfilePicture($args['img']),
+            'toggleUserFollowStatus' => fn(mixed $root, array $args) => $this->userInfoService->toggleUserFollow($args['userid']),
+            'toggleBlockUserStatus' => fn(mixed $root, array $args) => $this->userInfoService->toggleUserBlock($args['userid']),
             'deleteAccount' => fn(mixed $root, array $args) => $this->userService->deleteAccount($args['password']),
             'createChat' => fn(mixed $root, array $args) => $this->chatService->createChatWithRecipients($args['input']),
-            'updateChat' => fn(mixed $root, array $args) => $this->chatService->updateChat($args['input']),
+            'updateChatInformations' => fn(mixed $root, array $args) => $this->chatService->updateChat($args['input']),
             'deleteChat' => fn(mixed $root, array $args) => $this->chatService->deleteChat($args['id']),
-            'addParticipants' => fn(mixed $root, array $args) => $this->chatService->addParticipants($args['input']),
-            'remParticipants' => fn(mixed $root, array $args) => $this->chatService->removeParticipants($args['input']),
-            'createFeed' => fn(mixed $root, array $args) => $this->postService->createPost($args['input']),
-            'addMessage' => fn(mixed $root, array $args) => $this->chatService->addMessage($args['chatid'], $args['content']),
-            'remMessage' => fn(mixed $root, array $args) => $this->chatService->removeMessage($args['chatid'], $args['messid']),
+            'addChatParticipants' => fn(mixed $root, array $args) => $this->chatService->addParticipants($args['input']),
+            'removeChatParticipants' => fn(mixed $root, array $args) => $this->chatService->removeParticipants($args['input']),
+            'createChatFeed' => fn(mixed $root, array $args) => $this->postService->createPost($args['input']),
+            'sendChatMessage' => fn(mixed $root, array $args) => $this->chatService->addMessage($args['chatid'], $args['content']),
+            'deleteChatMessage' => fn(mixed $root, array $args) => $this->chatService->removeMessage($args['chatid'], $args['messid']),
             'deletePost' => fn(mixed $root, array $args) => $this->postService->deletePost($args['id']),
             'likeComment' => fn(mixed $root, array $args) => $this->commentInfoService->likeComment($args['commentid']),
             'reportComment' => fn(mixed $root, array $args) => $this->commentInfoService->reportComment($args['commentid']),
             'contactus' => fn(mixed $root, array $args) => $this->ContactUs($args),
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
-            'resolveActionPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
+            'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
         ];
     }
@@ -1753,8 +1780,7 @@ class GraphQLSchemaBuilder
         $results = $this->walletService->loadLiquidityById($this->currentUserId);
         if (isset($results['status']) && $results['status'] === 'success') {
             $this->logger->info('Query.resolveLiquidity successful');
-
-            return $results['affectedRows'];
+            return $results;
         }
 
         if (isset($results['status']) && $results['status'] === 'error') {
@@ -1978,7 +2004,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError($results['ResponseCode']);
         }
 
-        $this->logger->warning('Query.resolveAllFriends No friends found');
+        $this->logger->warning('Query.resolveAllFriends No listFriends found');
         return $this->respondWithError(21101);
     }
 
@@ -2415,7 +2441,7 @@ class GraphQLSchemaBuilder
         }
     }
 
-    protected function verifiedAccount(string $userid = null): array
+    protected function verifyAccount(string $userid = null): array
     {
         if ($userid === null) {
             return $this->respondWithError(30101);
@@ -2425,12 +2451,12 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(20201);
         }
 
-        $this->logger->info('Query.verifiedAccount started');
+        $this->logger->info('Query.verifyAccount started');
 
         try {
             $user = $this->userMapper->loadById($userid);
             if (!$user) {
-                return $this->respondWithError(30103);
+                return $this->respondWithError(20201);
             }
 
             if ($user->getVerified() == 1) {
@@ -2442,7 +2468,7 @@ class GraphQLSchemaBuilder
             }
 
             if ($this->userMapper->verifyAccount($userid)) {
-                $this->userMapper->logLoginData($userid, 'verifiedAccount');
+                $this->userMapper->logLoginData($userid, 'verifyAccount');
                 $this->logger->info('Account verified successfully', ['userid' => $userid]);
 
                 return [

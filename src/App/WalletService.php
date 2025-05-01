@@ -211,7 +211,7 @@ class WalletService
         try {
             $results = $this->walletMapper->loadLiquidityById($userId);
 
-            if ($results !== false && $results !== 0.0) {
+            if ($results !== false ) {
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 11204,

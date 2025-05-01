@@ -529,4 +529,17 @@ CREATE TABLE IF NOT EXISTS wallett (
 );
 CREATE INDEX idx_wallett_userid ON wallett(userid);
 
+-- Table: password_reset_requests
+CREATE TABLE IF NOT EXISTS password_reset_requests (
+    user_id UUID NOT NULL,
+    token VARCHAR(255) NOT NULL,
+	collected boolean DEFAULT false NOT NULL,
+	attempt_count INTEGER DEFAULT 1 NOT NULL,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    last_attempt TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	expires_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users(uid) ON DELETE CASCADE
+);
+
 COMMIT;
