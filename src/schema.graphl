@@ -17,25 +17,25 @@ type Query {
   searchUser(input: SearchUserInput!): UserListResponse!
 
   "List all users with pagination support"
-  listUsers(input: PaginationInput!): UserListResponse!
+  listUsers(input: PaginationInput): UserListResponse!
 
   "Retrieve a user's public profile and posts"
-  getProfile(input: GetProfileInput!): ProfileInfo!
+  getProfile(input: GetProfileInput): ProfileInfo!
 
   "List followers and followings of a user with pagination"
-  listFollowRelations(input: ListFollowRelationsInput!): FollowRelationsResponse!
+  listFollowRelations(input: ListFollowRelationsInput): FollowRelationsResponse!
 
   "List friends of the current user with pagination"
-  listFriends(input: PaginationInput!): UserFriendsResponse!
+  listFriends(input: PaginationInput): UserFriendsResponse!
 
   "Returns detailed user stats for the currently logged-in user"
   getUserInfo: UserInfoResponse!
 
   "List users blocked by or blocking the current user"
-  listBlockedUsers(input: PaginationInput!): BlockedUsersResponse!
+  listBlockedUsers(input: PaginationInput): BlockedUsersResponse!
 
   "List posts using filters like tags, sort type, date range, and pagination"
-  listPosts(input: ListPostsInput!): PostListResponse!
+  listPosts(input: ListPostsInput): PostListResponse!
 
   "Get engagement summary of a specific post"
   getPostInfo(postid: ID!): PostInfoResponse!
@@ -47,16 +47,16 @@ type Query {
   listChildComments(input: ListChildCommentsInput!): CommentResponse!
 
   "List all tags with pagination"
-  listTags(input: PaginationInput!): TagSearchResponse!
+  listTags(input: PaginationInput): TagSearchResponse!
 
   "Search for tags by name with pagination"
-  searchTags(input: SearchTagsInput!): TagSearchResponse!
+  searchTags(input: SearchTagsInput): TagSearchResponse!
 
   "Get detailed info about a specific chat, including messages and participants"
-  getChat(input: GetChatInput!): ChatResponse!
+  getChat(input: GetChatInput): ChatResponse!
 
   "List all chats of the current user with pagination and filters"
-  listChats(input: ListChatsInput!): ChatResponse!
+  listChats(input: ListChatsInput): ChatResponse!
 
   "List messages of a chat with pagination"
   listChatMessages(input: ListChatMessagesInput!): AddChatmessageResponse!
@@ -77,32 +77,77 @@ type Query {
   listTodaysInteractions: StandardResponse!
 }
 
-
 type Mutation {
-  updateUsername(username: String!, password: String!): DefaultResponse!
-  updateEmail(email: String!, password: String!): DefaultResponse!
-  updatePassword(password: String!, expassword: String!): DefaultResponse!
+  "Change the username (requires current password)"
+  updateUsername(input: UpdateUsernameInput!): DefaultResponse!
+
+  "Change the email address (requires current password)"
+  updateEmail(input: UpdateEmailInput!): DefaultResponse!
+
+  "Change the password (requires current password)"
+  updatePassword(input: UpdatePasswordInput!): DefaultResponse!
+
+  "Update the biography text of the user profile. Must be between 3 and 5000 characters long"
   updateBio(biography: String!): DefaultResponse!
+
+  "Upload or update the profile image (base64-encoded)"
   updateProfileImage(img: String!): DefaultResponse!
+
+  "Follow or unfollow a user"
   toggleUserFollowStatus(userid: ID!): FollowStatusResponse!
+
+  "Block or unblock a user"
   toggleBlockUserStatus(userid: ID!): DefaultResponse!
+
+  "Permanently delete the current account (requires password)"
   deleteAccount(password: String!): DefaultResponse!
+
+  "Create a new chat with specified participants"
   createChat(input: ChatInput!): AddChatResponse!
+
+  "Update the name and/or image of an existing chat"
   updateChatInformations(input: UpdateChatInput!): AddChatResponse!
+
+  "Add one or more participants to an existing chat"
   addChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
+
+  "Remove one or more participants from an existing chat"
   removeChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
-  sendChatMessage(chatid: ID!, content: String!): AddChatmessageResponse!
-  deleteChatMessage(chatid: ID!, messid: Int!): DefaultResponse!
+
+  "Send a message in a chat"
+  sendChatMessage(input: SendChatMessageInput!): AddChatmessageResponse!
+
+  "Delete a specific message from a chat"
+  deleteChatMessage(input: DeleteChatMessageInput!): DefaultResponse!
+
+  "Delete a chat and all its messages"
   deleteChat(id: ID!): DefaultResponse!
+
+  "Create a post for a specific feed (e.g. group or channel)"
   createChatFeed(input: FeedInput!): AddPostResponse!
+
+  "Like a comment"
   likeComment(commentid: ID!): DefaultResponse!
+
+  "Report a comment for moderation"
   reportComment(commentid: ID!): DefaultResponse!
+
+  "Delete a post created by the user"
   deletePost(id: ID!): DefaultResponse!
-  createPost(action: PostType!, input: PostInput!): PostResponse!
-  createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
-  resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
-  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse!
+
+  "Create a new post (image, text, video, or audio)"
+  createPost(input: CreatePostInput!): PostResponse!
+
+  "Create a comment or reply on a post"
+  createComment(input: CreateCommentInput!): CommentResponse!
+
+  "Perform an action on a post (e.g., like, dislike, report, view, etc.)"
+  resolvePostAction(input: ResolvePostActionInput!): DefaultResponse!
+
+  "Transfer tokens to another user"
+  resolveTransfer(input: TokenTransferInput!): DefaultResponse!
 }
+
 
 scalar Decimal
 scalar DATEN
@@ -526,45 +571,6 @@ type CommentResponse {
   affectedRows: [Comment]
 }
 
-input RegistrationInput {
-  email: String!
-  password: String!
-  username: String!
-}
-
-input PostInput {
-  title: String!
-  mediadescription: String
-  contenttype: ContentType!
-  media: [String!]
-  cover: [String!]
-  tags: [String!]
-}
-
-input ChatInput {
-  name: String!
-  image: String
-  recipients: [String!]!
-}
-
-input UpdateChatInput {
-  chatid: ID!
-  name: String
-  image: String
-}
-
-input ChatParticipantsInput {
-  chatid: ID!
-  recipients: [String!]!
-}
-
-input FeedInput {
-  feedid: ID!
-  title: String!
-  media: String!
-  mediadescription: String
-  contenttype: String!
-}
 input SearchUserInput {
   "User ID (UUID)"
   userid: ID
@@ -688,4 +694,124 @@ input DayPaginatedInput {
   offset: Int
   "Pagination limit (1–20)"
   limit: Int
+}
+
+input UpdateUsernameInput {
+  "Username (3–23 characters, must contain a letter; letters, numbers, underscores allowed)"
+  username: String!
+  "Current password (8–128 characters)"
+  password: String!
+}
+
+input UpdateEmailInput {
+  "New email address (valid format)"
+  email: String!
+  "Current password (required to update email)"
+  password: String!
+}
+
+input UpdatePasswordInput {
+  "New password (8–128 characters, must differ from current, include lowercase/uppercase/number)"
+  password: String!
+  "Current password (required to update password)"
+  expassword: String!
+}
+
+input ChatInput {
+  "Chat name (valid string)"
+  name: String!
+  "Chat image (base64, must be valid image)"
+  image: String
+  "List of recipient user IDs"
+  recipients: [String!]!
+}
+
+input UpdateChatInput {
+  "Chat ID (UUID)"
+  chatid: ID!
+  "New chat name (valid string)"
+  name: String
+  "New image (base64, must be valid image)"
+  image: String
+}
+
+input ChatParticipantsInput {
+  "Chat ID (UUID)"
+  chatid: ID!
+  "List of recipient user IDs"
+  recipients: [String!]!
+}
+
+input SendChatMessageInput {
+  "Chat ID (UUID)"
+  chatid: ID!
+  "Message content (1–500 characters)"
+  content: String!
+}
+
+input DeleteChatMessageInput {
+  "Chat ID (UUID)"
+  chatid: ID!
+  "Message ID (Int)"
+  messid: Int!
+}
+
+input FeedInput {
+  "Feed ID"
+  feedid: ID!
+  "Title (2–30 characters)"
+  title: String!
+  "Media (base64, must be valid image/audio/video/text)"
+  media: String!
+  "Media description (3–500 characters)"
+  mediadescription: String
+  "Content type (ENUM: image, audio, video, text)"
+  contenttype: String!
+}
+
+input PostInput {
+  "Title (2–63 characters; letters, numbers, spaces, -, _)"
+  title: String!
+  "Media description (3–500 characters)"
+  mediadescription: String
+  "Content type (ENUM: image, audio, video, text)"
+  contenttype: ContentType!
+  "Media files (base64-encoded strings)"
+  media: [String!]
+  "Cover images (base64-encoded strings)"
+  cover: [String!]
+  "Tags (max 10, each 2–53 characters)"
+  tags: [String!]
+}
+
+input CreatePostInput {
+  "Post type (ENUM: POST)"
+  action: PostType!
+  "Post content input"
+  input: PostInput!
+}
+
+input CreateCommentInput {
+  "Comment type (ENUM: COMMENT)"
+  action: CommentType!
+  "Post ID (UUID)"
+  postid: ID!
+  "Parent comment ID (UUID, optional)"
+  parentid: ID
+  "Comment content"
+  content: String!
+}
+
+input ResolvePostActionInput {
+  "Action (ENUM: LIKE, DISLIKE, REPORT, VIEW, SAVE)"
+  action: PostActionType!
+  "Post ID (UUID)"
+  postid: ID!
+}
+
+input TokenTransferInput {
+  "Recipient user ID (UUID)"
+  recipient: ID!
+  "Token amount (must be more than 10)"
+  numberoftokens: Int!
 }

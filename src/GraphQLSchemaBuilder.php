@@ -1153,24 +1153,24 @@ class GraphQLSchemaBuilder
         return [
             'hello' => fn(mixed $root, array $args, mixed $context) =>
                 $this->resolveHello($root, $args, $context),
-
+    
             'searchUser' => fn(mixed $root, array $args) =>
                 $this->resolveSearchUser($args['input']),
     
             'listUsers' => fn(mixed $root, array $args) =>
-                $this->resolveUsers($args['input']),
+                $this->resolveUsers($args['input'] ?? []),
     
             'getProfile' => fn(mixed $root, array $args) =>
-                $this->resolveProfile($args['input']),
+                $this->resolveProfile($args['input'] ?? []),
     
             'listFollowRelations' => fn(mixed $root, array $args) =>
-                $this->resolveFollows($args['input']),
+                $this->resolveFollows($args['input'] ?? []),
     
             'listFriends' => fn(mixed $root, array $args) =>
-                $this->resolveFriends($args['input']),
+                $this->resolveFriends($args['input'] ?? []),
     
             'listPosts' => fn(mixed $root, array $args) =>
-                $this->resolvePosts($args['input']),
+                $this->resolvePosts($args['input'] ?? []),
     
             'getPostInfo' => fn(mixed $root, array $args) =>
                 $this->resolvePostInfo($args['postid']),
@@ -1182,16 +1182,16 @@ class GraphQLSchemaBuilder
                 $this->resolveComments($args['input']),
     
             'listTags' => fn(mixed $root, array $args) =>
-                $this->resolveTags($args['input']),
+                $this->resolveTags($args['input'] ?? []),
     
             'searchTags' => fn(mixed $root, array $args) =>
                 $this->resolveTagsearch($args['input']),
     
             'getChat' => fn(mixed $root, array $args) =>
-                $this->resolveChat($args['input']),
+                $this->resolveChat($args['input'] ?? []),
     
             'listChats' => fn(mixed $root, array $args) =>
-                $this->resolveChats($args['input']),
+                $this->resolveChats($args['input'] ?? []),
     
             'listChatMessages' => fn(mixed $root, array $args) =>
                 $this->resolveChatMessages($args['input']),
@@ -1227,7 +1227,7 @@ class GraphQLSchemaBuilder
                 $this->resolveFetchPaysLog($args['input']),
     
             'listBlockedUsers' => fn(mixed $root, array $args) =>
-                $this->resolveBlocklist($args['input']),
+                $this->resolveBlocklist($args['input'] ?? []),
     
             'listTodaysInteractions' => fn(mixed $root, array $args) =>
                 $this->walletService->callUserMove(),
@@ -1252,55 +1252,111 @@ class GraphQLSchemaBuilder
         ];
     }
     
-
     protected function buildMutationResolvers(): array
     {
-
         return [
-            'requestPasswordReset' => fn(mixed $root, array $args) => $this->userService->requestPasswordReset($args['email']),
+            'requestPasswordReset' => fn(mixed $root, array $args) =>
+                $this->userService->requestPasswordReset($args['email']),
+    
             'resetPassword' => fn(mixed $root, array $args) =>
                 $this->userService->resetPassword($args['input']),
-            'register' => fn(mixed $root, array $args) => $this->createUser($args['input']),
-            'verifyAccount' => fn(mixed $root, array $args) => $this->verifyAccount($args['userid']),
+    
+            'register' => fn(mixed $root, array $args) =>
+                $this->createUser($args['input']),
+    
+            'verifyAccount' => fn(mixed $root, array $args) =>
+                $this->verifyAccount($args['userid']),
+    
             'login' => fn(mixed $root, array $args) =>
                 $this->login(
                     $args['input']['email'],
                     $args['input']['password']
                 ),
-            'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
-            'updateUsername' => fn(mixed $root, array $args) => $this->userService->setUsername($args),
-            'updateEmail' => fn(mixed $root, array $args) => $this->userService->setEmail($args),
-            'updatePassword' => fn(mixed $root, array $args) => $this->userService->setPassword($args),
-            'toggleProfilePrivacy' => fn() => $this->userInfoService->toggleProfilePrivacy(),
-            'updateBio' => fn(mixed $root, array $args) => $this->userInfoService->updateBio($args['biography']),
-            'updateProfileImage' => fn(mixed $root, array $args) => $this->userInfoService->setProfilePicture($args['img']),
-            'toggleUserFollowStatus' => fn(mixed $root, array $args) => $this->userInfoService->toggleUserFollow($args['userid']),
-            'toggleBlockUserStatus' => fn(mixed $root, array $args) => $this->userInfoService->toggleUserBlock($args['userid']),
-            'deleteAccount' => fn(mixed $root, array $args) => $this->userService->deleteAccount($args['password']),
-            'createChat' => fn(mixed $root, array $args) => $this->chatService->createChatWithRecipients($args['input']),
-            'updateChatInformations' => fn(mixed $root, array $args) => $this->chatService->updateChat($args['input']),
-            'deleteChat' => fn(mixed $root, array $args) => $this->chatService->deleteChat($args['id']),
-            'addChatParticipants' => fn(mixed $root, array $args) => $this->chatService->addParticipants($args['input']),
-            'removeChatParticipants' => fn(mixed $root, array $args) => $this->chatService->removeParticipants($args['input']),
-            'createChatFeed' => fn(mixed $root, array $args) => $this->postService->createPost($args['input']),
-            'sendChatMessage' => fn(mixed $root, array $args) => $this->chatService->addMessage($args['chatid'], $args['content']),
-            'deleteChatMessage' => fn(mixed $root, array $args) => $this->chatService->removeMessage($args['chatid'], $args['messid']),
-            'deletePost' => fn(mixed $root, array $args) => $this->postService->deletePost($args['id']),
-            'likeComment' => fn(mixed $root, array $args) => $this->commentInfoService->likeComment($args['commentid']),
-            'reportComment' => fn(mixed $root, array $args) => $this->commentInfoService->reportComment($args['commentid']),
+    
+            'refreshToken' => fn(mixed $root, array $args) =>
+                $this->refreshToken($args['refreshToken']),
+    
+            'updateUsername' => fn(mixed $root, array $args) =>
+                $this->userService->setUsername($args['input']),
+    
+            'updateEmail' => fn(mixed $root, array $args) =>
+                $this->userService->setEmail($args['input']),
+    
+            'updatePassword' => fn(mixed $root, array $args) =>
+                $this->userService->setPassword($args['input']),
+    
+            'toggleProfilePrivacy' => fn() =>
+                $this->userInfoService->toggleProfilePrivacy(),
+    
+            'updateBio' => fn(mixed $root, array $args) =>
+                $this->userInfoService->updateBio($args['biography']),
+    
+            'updateProfileImage' => fn(mixed $root, array $args) =>
+                $this->userInfoService->setProfilePicture($args['img']),
+    
+            'toggleUserFollowStatus' => fn(mixed $root, array $args) =>
+                $this->userInfoService->toggleUserFollow($args['userid']),
+    
+            'toggleBlockUserStatus' => fn(mixed $root, array $args) =>
+                $this->userInfoService->toggleUserBlock($args['userid']),
+    
+            'deleteAccount' => fn(mixed $root, array $args) =>
+                $this->userService->deleteAccount($args['password']),
+    
+            'createChat' => fn(mixed $root, array $args) =>
+                $this->chatService->createChatWithRecipients($args['input']),
+    
+            'updateChatInformations' => fn(mixed $root, array $args) =>
+                $this->chatService->updateChat($args['input']),
+    
+            'deleteChat' => fn(mixed $root, array $args) =>
+                $this->chatService->deleteChat($args['id']),
+    
+            'addChatParticipants' => fn(mixed $root, array $args) =>
+                $this->chatService->addParticipants($args['input']),
+    
+            'removeChatParticipants' => fn(mixed $root, array $args) =>
+                $this->chatService->removeParticipants($args['input']),
+    
+            'createChatFeed' => fn(mixed $root, array $args) =>
+                $this->postService->createPost($args['input']),
+    
+            'sendChatMessage' => fn(mixed $root, array $args) =>
+                $this->chatService->addMessage($args['input']['chatid'], $args['input']['content']),
+    
+            'deleteChatMessage' => fn(mixed $root, array $args) =>
+                $this->chatService->removeMessage($args['input']['chatid'], $args['input']['messid']),
+    
+            'deletePost' => fn(mixed $root, array $args) =>
+                $this->postService->deletePost($args['id']),
+    
+            'likeComment' => fn(mixed $root, array $args) =>
+                $this->commentInfoService->likeComment($args['commentid']),
+    
+            'reportComment' => fn(mixed $root, array $args) =>
+                $this->commentInfoService->reportComment($args['commentid']),
+    
             'contactus' => fn(mixed $root, array $args) =>
                 $this->ContactUs([
                     'name' => $args['input']['name'],
                     'email' => $args['input']['email'],
                     'message' => $args['input']['message'],
                 ]),
-            'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
-            'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
-            'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
-            'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
+    
+            'createComment' => fn(mixed $root, array $args) =>
+                $this->resolveActionPost($args['input']),
+    
+            'createPost' => fn(mixed $root, array $args) =>
+                $this->resolveActionPost($args['input']),
+    
+            'resolvePostAction' => fn(mixed $root, array $args) =>
+                $this->resolveActionPost($args['input']),
+    
+            'resolveTransfer' => fn(mixed $root, array $args) =>
+                $this->walletService->transferToken($args['input']),
         ];
     }
-
+    
     protected function buildSubscriptionResolvers(): array
     {
         return [
