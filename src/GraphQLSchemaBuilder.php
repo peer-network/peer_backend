@@ -1193,10 +1193,15 @@ class GraphQLSchemaBuilder
 
         return [
             'requestPasswordReset' => fn(mixed $root, array $args) => $this->userService->requestPasswordReset($args['email']),
-            'resetPassword' => fn(mixed $root, array $args) => $this->userService->resetPassword($args),
+            'resetPassword' => fn(mixed $root, array $args) =>
+                $this->userService->resetPassword($args['input']),
             'register' => fn(mixed $root, array $args) => $this->createUser($args['input']),
             'verifyAccount' => fn(mixed $root, array $args) => $this->verifyAccount($args['userid']),
-            'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
+            'login' => fn(mixed $root, array $args) =>
+                $this->login(
+                    $args['input']['email'],
+                    $args['input']['password']
+                ),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
             'updateUsername' => fn(mixed $root, array $args) => $this->userService->setUsername($args),
             'updateEmail' => fn(mixed $root, array $args) => $this->userService->setEmail($args),
@@ -1218,7 +1223,12 @@ class GraphQLSchemaBuilder
             'deletePost' => fn(mixed $root, array $args) => $this->postService->deletePost($args['id']),
             'likeComment' => fn(mixed $root, array $args) => $this->commentInfoService->likeComment($args['commentid']),
             'reportComment' => fn(mixed $root, array $args) => $this->commentInfoService->reportComment($args['commentid']),
-            'contactus' => fn(mixed $root, array $args) => $this->ContactUs($args),
+            'contactus' => fn(mixed $root, array $args) =>
+                $this->ContactUs([
+                    'name' => $args['input']['name'],
+                    'email' => $args['input']['email'],
+                    'message' => $args['input']['message'],
+                ]),
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),

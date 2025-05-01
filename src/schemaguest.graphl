@@ -4,36 +4,57 @@ schema {
 }
 
 type Query {
+  "Returns basic API metadata and optionally user info"
   hello: HelloResponse
 }
 
 type Mutation {
+  "Registers a new user account"
   register(input: RegistrationInput!): RegisterResponse!
+
+  "Verifies a user account using a valid UUID"
   verifyAccount(userid: ID!): verifyAccount!
-  login(email: String!, password: String!): AuthPayload!
+
+  "Logs in a user"
+  login(input: LoginInput!): AuthPayload!
+
+  "Sends a password reset link to a valid email address"
   requestPasswordReset(email: String!): StandardResponse
-  resetPassword(token: String!, password: String!): StandardResponse
+
+  "Resets password using token and new password"
+  resetPassword(input: ResetPasswordInput!): StandardResponse
+
+  "Refreshes tokens using a valid refresh token"
   refreshToken(refreshToken: String!): AuthPayload!
-  contactus(name: String!, email: String!, message: String!): StandardResponse!
+
+  "Sends a contact message"
+  contactus(input: ContactInput!): StandardResponse!
 }
 
 type StandardResponse {
+  "Status of the operation"
   status: String!
+  "Optional response code"
   ResponseCode: String
+  "Affected rows or related data (as JSON)"
   affectedRows: JSON
 }
 
 scalar JSON
 
 type HelloResponse {
+  "Current user ID if available"
   currentuserid: ID
+  "Current version of the API"
   currentVersion: String
+  "Link to documentation or wiki"
   wikiLink: String
 }
 
 type RegisterResponse {
   status: String
   ResponseCode: String
+  "ID of the newly registered user"
   userid: ID
 }
 
@@ -45,13 +66,42 @@ type verifyAccount {
 type AuthPayload {
   status: String!
   ResponseCode: String
+  "JWT access token"
   accessToken: String
+  "JWT refresh token"
   refreshToken: String
 }
 
 input RegistrationInput {
+  "User’s email address. Must be in valid email format."
   email: String!
+  "Password: 8–128 chars, must include uppercase, lowercase and number."
   password: String!
+  "Username: 3–23 chars, must contain letters, may contain numbers and underscores."
   username: String!
+  "Optional Solana public key. 43–44 chars, no 0, O, I, 1."
   pkey: String
+}
+
+input LoginInput {
+  "Email address. Must be valid format."
+  email: String!
+  "Password: 8–128 chars, must include uppercase, lowercase and number."
+  password: String!
+}
+
+input ResetPasswordInput {
+  "Reset token. 64-character string from password reset email."
+  token: String!
+  "New password: 8–128 chars, must include uppercase, lowercase and number."
+  password: String!
+}
+
+input ContactInput {
+  "Sender’s name."
+  name: String!
+  "Email address. Must be valid format."
+  email: String!
+  "Message content. 1–500 characters."
+  message: String!
 }
