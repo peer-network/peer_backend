@@ -1106,7 +1106,7 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'GetPercentBeforeTransactionResponse' => [
+            'PercentBeforeTransactionResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1118,7 +1118,7 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'RefreshMarketCapResponse' => [
+            'PercentBeforeTransactionResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1128,6 +1128,18 @@ class GraphQLSchemaBuilder
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
+                },
+            ],
+            'PercentBeforeTransactionData' => [
+                'inviterId' => function (array $root): string {
+                    $this->logger->info('Query.PercentBeforeTransactionResponse Resolvers');
+                    return $root['inviterId'] ?? '';
+                },
+                'tosend' => function (array $root): float {
+                    return $root['tosend'] ?? 0.0;
+                },
+                'percentTransferred' => function (array $root): float {
+                    return $root['percentTransferred'] ?? 0.0;
                 },
             ],
             'GemsterResponse' => [
@@ -1272,9 +1284,9 @@ class GraphQLSchemaBuilder
                 },
             ],
             'LiquidityPoolData' => [
-                'overallTotalNumbers' => function (array $root): int {
+                'overallTotalNumbers' => function (array $root): float {
                     $this->logger->info('Query.LiquidityPoolData Resolvers');
-                    return $root['overall_total_numbers'] ?? 0;
+                    return $root['overall_total_numbers'] ?? 0.0;
                 },
                 'overallTotalNumbersq' => function (array $root): int {
                     return $root['overall_total_numbersq'] ?? 0;
@@ -1288,8 +1300,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.LiquidityPoolPostData Resolvers');
                     return $root['postid'] ?? '';
                 },
-                'totalNumbers' => function (array $root): int {
-                    return $root['total_numbers'] ?? 0;
+                'totalNumbers' => function (array $root): float {
+                    return $root['total_numbers'] ?? 0.0;
                 },
                 'totalNumbersq' => function (array $root): int {
                     return $root['total_numbersq'] ?? 0;
@@ -1463,6 +1475,36 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'RefreshMarketCapResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.RefreshMarketCapResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'RefreshMarketCapData' => [
+                'NumberOfTokens' => function (array $root): float {
+                    $this->logger->info('Query.RefreshMarketCapData Resolvers');
+                    return $root['NumberOfTokens'] ?? 0.0;
+                },
+                'NumberOfGems' => function (array $root): float {
+                    return $root['NumberOfGems'] ?? 0.0;
+                },
+                'coverage' => function (array $root): float {
+                    return $root['coverage'] ?? 0.0;
+                },
+                'TokenPrice' => function (array $root): float {
+                    return $root['TokenPrice'] ?? 0.0;
+                },  
+                'GemsPrice' => function (array $root): float {
+                    return $root['GemsPrice'] ?? 0.0;
+                },  
+            ]                
         ];
     }
 

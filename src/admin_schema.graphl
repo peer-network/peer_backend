@@ -33,7 +33,7 @@ type Query {
   balance: CurrentLiquidity!
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
-  getpercentbeforetransaction(tokenAmount: Int!): GetPercentBeforeTransactionResponse!
+  getpercentbeforetransaction(tokenAmount: Int!): PercentBeforeTransactionResponse!
   refreshmarketcap: RefreshMarketCapResponse!
   globalwins: DefaultResponse!
   gemster: GemsterResponse!
@@ -230,16 +230,30 @@ type PostSubCommentsData {
   user: [DATEN]
 }
 
-type GetPercentBeforeTransactionResponse {
+type PercentBeforeTransactionResponse {
   status: String!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: PercentBeforeTransactionData
+}
+
+type PercentBeforeTransactionData {
+  inviterId: ID
+  tosend: Decimal
+  percentTransferred: Decimal
 }
 
 type RefreshMarketCapResponse {
   status: String!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: RefreshMarketCapData
+}
+
+type RefreshMarketCapData {
+  NumberOfTokens: Decimal
+  NumberOfGems: Decimal
+  coverage: Decimal
+  TokenPrice: Decimal
+  GemsPrice: Decimal
 }
 
 type DailyGemStatusResponse {
@@ -274,19 +288,6 @@ type DailyGemsResultsData {
 type DailyGemsResultsUserData {
   userid: ID
   gems: Decimal
-}
-
-type GenericResponse {
-  status: String!
-  counter: Int!
-  ResponseCode: String
-  affectedRows: DATEN
-}
-
-type StandardResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: DATEN
 }
 
 type HelloResponse {
