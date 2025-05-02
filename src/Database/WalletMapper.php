@@ -2,6 +2,8 @@
 
 namespace Fawaz\Database;
 
+use Fawaz\App\Models\Transaction;
+use Fawaz\App\Repositories\TransactionRepository;
 use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
@@ -103,6 +105,7 @@ class WalletMapper
             ]);
             return self::respondWithError(51301);
         }
+        $message = isset($args['message']) ? (string) $args['message'] : '';
 
         try {
             $sql = "SELECT uid FROM users WHERE uid = :uid";
@@ -160,6 +163,8 @@ class WalletMapper
         }
 
         try {
+
+            $transUniqueId = self::generateUUID();
             // 1. SENDER: Debit From Account
             if ($numberoftokens) {
                 $id = self::generateUUID();
@@ -196,6 +201,19 @@ class WalletMapper
 
                 $this->insertWinToLog($row, $args);
                 $this->insertWinToPool($row, $args);
+
+                $transObj = [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferSenderToRecipient',
+                    'senderId' => $userId,
+                    'recipientId' => $recipient,
+                    'tokenAmount' => $numberoftokens,
+                    'message' => $message,
+                ];
+                $transactions = new Transaction($transObj);
+
+                $transRepo = new TransactionRepository($this->logger, $this->db);
+                $transRepo->saveTransaction($transactions);
             }
 
             if (isset($result['invited']) && !empty($result['invited'])) {
@@ -216,6 +234,19 @@ class WalletMapper
 
                     $this->insertWinToLog($inviterId, $args);
                     $this->insertWinToPool($inviterId, $args);
+
+                    $transObj = [
+                        'transUniqueId' => $transUniqueId,
+                        'transactionType' => 'transferSenderToInviter',
+                        'senderId' => $userId,
+                        'recipientId' => $inviterId,
+                        'tokenAmount' => $inviterWin,
+                        'message' => $message,
+                    ];
+                    $transactions = new Transaction($transObj);
+    
+                    $transRepo = new TransactionRepository($this->logger, $this->db);
+                    $transRepo->saveTransaction($transactions);
                 }
             }
 
@@ -255,6 +286,19 @@ class WalletMapper
 
                 $this->insertWinToLog($this->poolWallet, $args);
                 $this->insertWinToPool($this->poolWallet, $args);
+
+                $transObj = [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferSenderToPoolWallet',
+                    'senderId' => $userId,
+                    'recipientId' => $this->poolWallet,
+                    'tokenAmount' => $feeAmount,
+                    'message' => $message,
+                ];
+                $transactions = new Transaction($transObj);
+
+                $transRepo = new TransactionRepository($this->logger, $this->db);
+                $transRepo->saveTransaction($transactions);
             }
 
             // 6. PEERWALLET: Fee To Account
@@ -274,6 +318,20 @@ class WalletMapper
 
                 $this->insertWinToLog($this->peerWallet, $args);
                 $this->insertWinToPool($this->peerWallet, $args);
+
+
+                $transObj = [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferSenderToPeerWallet',
+                    'senderId' => $userId,
+                    'recipientId' => $this->peerWallet,
+                    'tokenAmount' => $peerAmount,
+                    'message' => $message,
+                ];
+                $transactions = new Transaction($transObj);
+
+                $transRepo = new TransactionRepository($this->logger, $this->db);
+                $transRepo->saveTransaction($transactions);
             }
 
             // 7. BURNWALLET: Fee Burning Tokens
@@ -293,6 +351,19 @@ class WalletMapper
 
                 $this->insertWinToLog($this->burnWallet, $args);
                 $this->insertWinToPool($this->burnWallet, $args);
+
+                $transObj = [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferSenderToBurnWallet',
+                    'senderId' => $userId,
+                    'recipientId' => $this->burnWallet,
+                    'tokenAmount' => $burnAmount,
+                    'message' => $message,
+                ];
+                $transactions = new Transaction($transObj);
+
+                $transRepo = new TransactionRepository($this->logger, $this->db);
+                $transRepo->saveTransaction($transactions);
             }
 
             return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
