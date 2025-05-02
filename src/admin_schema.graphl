@@ -164,7 +164,6 @@ type GemstersResponse {
   affectedRows: DATEN
 }
 
-
 type GemsterResponse {
   status: String!
   ResponseCode: String
@@ -195,14 +194,40 @@ type TestingPoolResponse {
   status: String!
   counter: Int!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: LiquidityPoolData
 }
 
 type PostCommentsResponse {
   status: String!
   counter: Int!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: [PostCommentsData]
+}
+
+type PostCommentsData {
+  commentid: ID
+  userid: ID
+  postid: ID
+  parentid: ID
+  content: String
+  createdat: Date
+  amountlikes: Decimal
+  isliked: Boolean
+  user: [DATEN]
+  subcomments: [PostSubCommentsData]
+}
+
+type PostSubCommentsData {
+  commentid: ID
+  userid: ID
+  postid: ID
+  parentid: ID
+  content: String
+  createdat: Date
+  amountlikes: Decimal
+  amountreplies: Decimal,
+  isliked: Boolean
+  user: [DATEN]
 }
 
 type GetPercentBeforeTransactionResponse {

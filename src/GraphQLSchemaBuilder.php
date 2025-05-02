@@ -1315,7 +1315,7 @@ class GraphQLSchemaBuilder
             ],
             'PostCommentsResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.GenericResponse Resolvers');
+                    $this->logger->info('Query.PostCommentsResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -1327,6 +1327,72 @@ class GraphQLSchemaBuilder
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
                 },
+            ],
+            'PostCommentsData' => [
+                'commentid' => function (array $root): string {
+                    $this->logger->info('Query.PostCommentsData Resolvers');
+                    return $root['commentid'] ?? '';
+                },
+                'userid' => function (array $root): string {
+                    return $root['userid'] ?? '';
+                },
+                'postid' => function (array $root): string {
+                    return $root['postid'] ?? '';
+                },
+                'parentid' => function (array $root): string {
+                    return $root['parentid'] ?? '';
+                },
+                'content' => function (array $root): string {
+                    return $root['content'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'amountlikes' => function (array $root): int {
+                    return $root['amountlikes'] ?? 0;
+                },
+                'isliked' => function (array $root): bool {
+                    return $root['isliked'] ?? false;
+                },
+                'user' => function (array $root): array {
+                    return $root['user'] ?? [];
+                },
+                'subcomments' => function (array $root): array {
+                    return $root['subcomments'] ?? [];
+                },
+            ],
+            'PostSubCommentsData' => [
+                'commentid' => function (array $root): string {
+                    $this->logger->info('Query.PostSubCommentsData Resolvers');
+                    return $root['commentid'] ?? '';
+                },
+                'userid' => function (array $root): string {
+                    return $root['userid'] ?? '';
+                },
+                'postid' => function (array $root): string {
+                    return $root['postid'] ?? '';
+                },
+                'parentid' => function (array $root): string {
+                    return $root['parentid'] ?? '';
+                },
+                'content' => function (array $root): string {
+                    return $root['content'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'amountlikes' => function (array $root): int {
+                    return $root['amountlikes'] ?? 0;
+                },
+                'amountreplies' => function (array $root): int {
+                    return $root['amountreplies'] ?? 0;
+                },
+                'isliked' => function (array $root): bool {
+                    return $root['isliked'] ?? false;
+                },
+                'user' => function (array $root): array {
+                    return $root['user'] ?? [];
+                }
             ],
             'LogWins' => [
                 'from' => function (array $root): string {
