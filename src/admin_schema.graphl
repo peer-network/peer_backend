@@ -206,13 +206,35 @@ type GemsterResponse {
 type DailyGemStatusResponse {
   status: String!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: DailyGemStatusData
 }
 
 type DailyGemsResultsResponse {
   status: String!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: DailyGemsResultsData
+}
+
+type DailyGemStatusData {
+  d0: Decimal
+  d1: Decimal
+  d2: Decimal
+  d3: Decimal
+  d4: Decimal
+  d5: Decimal
+  w0: Decimal
+  m0: Decimal
+  y0: Decimal
+}
+
+type DailyGemsResultsData {
+  data: [DailyGemsResultsUserData],
+  totalGems: Decimal
+}
+
+type DailyGemsResultsUserData {
+  userid: ID
+  gems: Decimal
 }
 
 type GenericResponse {

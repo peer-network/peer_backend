@@ -9,7 +9,6 @@ type Query {
 }
 
 scalar Decimal
-scalar DATEN
 scalar Date
 
 enum DayFilterType {
@@ -33,17 +32,33 @@ type HelloResponse {
 type DailyGemStatusResponse {
   status: String!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: DailyGemStatusData
+}
+
+type DailyGemStatusData {
+  d0: Decimal
+  d1: Decimal
+  d2: Decimal
+  d3: Decimal
+  d4: Decimal
+  d5: Decimal
+  w0: Decimal
+  m0: Decimal
+  y0: Decimal
 }
 
 type DailyGemsResultsResponse {
   status: String!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: DailyGemsResultsData
 }
 
-type StandardResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: DATEN
+type DailyGemsResultsData {
+  data: [DailyGemsResultsUserData],
+  totalGems: Decimal
+}
+
+type DailyGemsResultsUserData {
+  userid: ID
+  gems: Decimal
 }

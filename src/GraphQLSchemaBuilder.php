@@ -1163,6 +1163,51 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'DailyGemStatusData' => [
+                'd0' => function (array $root): int {
+                    return $root['d0'] ?? 0;
+                },
+                'd1' => function (array $root): int {
+                    return $root['d1'] ?? 0;
+                },
+                'd2' => function (array $root): int {
+                    return $root['d2'] ?? 0;
+                },
+                'd3' => function (array $root): int {
+                    return $root['d3'] ?? 0;
+                },
+                'd4' => function (array $root): int {
+                    return $root['d4'] ?? 0;
+                },
+                'd5' => function (array $root): int {
+                    return $root['d5'] ?? 0;
+                },
+                'w0' => function (array $root): int {
+                    return $root['q0'] ?? 0;
+                },
+                'm0' => function (array $root): int {
+                    return $root['m0'] ?? 0;
+                },
+                'y0' => function (array $root): int {
+                    return $root['y0'] ?? 0;
+                },
+            ],
+            'DailyGemsResultsData' => [
+                'data' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+                'totalGems' => function (array $root): int {
+                    return $root['totalGems'] ?? 0;
+                },
+            ],
+            'DailyGemsResultsUserData' => [
+                'userid' => function (array $root): string {
+                    return $root['userid'] ?? '';
+                },
+                'gems' => function (array $root): int {
+                    return $root['gems'] ?? 0;
+                },
+            ],
             'ContactusResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.StandardResponse Resolvers');
