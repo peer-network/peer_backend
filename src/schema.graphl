@@ -62,7 +62,6 @@ type Mutation {
 
 scalar Decimal
 scalar Date
-scalar TagList
 
 enum PostActionType {
   LIKE
@@ -473,7 +472,7 @@ type Post {
   isreported: Boolean!
   isdisliked: Boolean!
   issaved: Boolean!
-  tags: TagList!
+  tags: [String]!
   user: ProfileUser!
   comments: [Comment!]!
 }
