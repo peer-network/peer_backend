@@ -1138,6 +1138,44 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'ReferralInfoResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ReferralInfoResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'referralUuid' => function (array $root): string {
+                    return $root['referralUuid'] ?? '';
+                },
+                'referralLink' => function (array $root): string {
+                    return $root['referralLink'] ?? '';
+                },
+            ],
+            'ReferralListResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ReferralListResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'counter' => function (array $root): int {
+                    return $root['counter'] ?? 0;
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'ReferralUsers' => [
+                'invitedBy' => function (array $root): ?array {
+                    return $root['invitedBy'] ?? null;
+                },
+                'iInvited' => function (array $root): array {
+                    return $root['iInvited'] ?? [];
+                },
+            ], 
         ];
     }
 
@@ -1178,6 +1216,8 @@ class GraphQLSchemaBuilder
             'postcomments' => fn(mixed $root, array $args) => $this->resolvePostComments($args),
             'dailygemstatus' => fn(mixed $root, array $args) => $this->poolService->callGemster(),
             'dailygemsresults' => fn(mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
+            'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
+            'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
         ];
     }
 
@@ -1350,6 +1390,96 @@ class GraphQLSchemaBuilder
 
         $this->logger->warning('Query.resolveFetchPaysLog No records found');
         return $this->respondWithError(21202);
+    }
+    
+    protected function resolveReferralInfo(): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError('Unauthorized');
+        }
+
+        $this->logger->info('Query.resolveReferralInfo started');
+
+        try {
+            $userId = $this->currentUserId;
+            $this->logger->info('Current userId in resolveReferralInfo', [
+                'userId' => $userId,
+            ]);
+
+
+            $info = $this->userMapper->getReferralInfoByUserId($userId);
+            if (empty($info)) {
+                return $this->respondWithError(00000);
+            }
+
+            $response = [
+                'referralUuid' => $info['referral_uuid'] ?? '', 
+                'referralLink' => $info['referral_link'] ?? '',
+                'status' => 'success',
+                'ResponseCode' => 'Referral info fetched'
+            ];
+
+            return $response;
+        } catch (\Throwable $e) {
+            $this->logger->error('Query.resolveReferralInfo exception', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return $this->respondWithError(00000);
+        }
+    }
+
+    protected function resolveReferralList(array $args): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->info('Query.resolveReferralList started');
+
+        $userId = $this->currentUserId;
+
+        try {
+            $this->logger->info('Current userId in resolveReferralList', ['userId' => $userId]);
+
+            $referralUsers = [
+                'invitedBy' => null,
+                'iInvited' => [],
+            ];
+
+            $inviter = $this->userMapper->getInviterByInvitee($userId);
+            $this->logger->info('Inviter data', ['inviter' => $inviter]);
+
+            if (!empty($inviter)) {
+                $referralUsers['invitedBy'] = $inviter;
+            }
+
+            $referrals = $this->userMapper->getReferralRelations($userId);
+            $this->logger->info('Referral relations', ['referrals' => $referrals]);
+
+            if (!empty($referrals['iInvited'])) {
+                $referralUsers['iInvited'] = $referrals['iInvited'];
+            }
+
+            if (empty($referralUsers['invitedBy']) && empty($referralUsers['iInvited'])) {
+                return $this->createSuccessResponse('No referral data available', $referralUsers, false);
+            }
+
+            $this->logger->info('Returning final referralList response', ['referralUsers' => $referralUsers]);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 'Referral list fetched',
+                'counter' => count($referralUsers['iInvited']),
+                'affectedRows' => $referralUsers
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Query.resolveReferralList exception', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return $this->respondWithError(00000);
+        }
     }
 
     protected function resolveChatMessages(array $args): ?array

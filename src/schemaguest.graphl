@@ -49,9 +49,29 @@ type AuthPayload {
   refreshToken: String
 }
 
+type ProfileUser {
+  id: ID!
+  username: String
+  slug: Int
+  img: String
+  isfollowed: Boolean
+  isfollowing: Boolean
+}
+type ReferralListResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String!
+  affectedRows: ReferralUsers!
+}
+type ReferralUsers {
+  invitedBy: ProfileUser
+  iInvited: [ProfileUser!]!
+}
+
 input RegistrationInput {
   email: String!
   password: String!
   username: String!
   pkey: String
+  referralUuid: ID
 }
