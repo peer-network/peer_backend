@@ -2531,7 +2531,7 @@ class GraphQLSchemaBuilder
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError(20224);
         }
 
         if (strlen($name) < 3 || strlen($name) > 33) {
