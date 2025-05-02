@@ -61,7 +61,6 @@ type Mutation {
 }
 
 scalar Decimal
-scalar DATEN
 scalar Date
 scalar TagList
 
@@ -127,12 +126,24 @@ enum DayFilterType {
 type ListTodaysInteractionsResponse {
   status: String!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: TodaysInteractionsData
 }
-type StandardResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: DATEN
+
+type TodaysInteractionsData {
+  totalInteractions: Decimal
+  totalScore: Decimal
+  totalDetails: TodaysInteractionsDetailsData
+}
+
+type TodaysInteractionsDetailsData {
+  views: Decimal
+  likes: Decimal
+  dislikes: Decimal
+  comments: Decimal
+  viewsScore: Decimal
+  likesScore: Decimal
+  dislikesScore: Decimal
+  commentsScore: Decimal
 }
 
 type HelloResponse {

@@ -171,6 +171,43 @@ class GraphQLSchemaBuilder
             'Query' => $this->buildQueryResolvers(),
             'Mutation' => $this->buildMutationResolvers(),
             'Subscription' => $this->buildSubscriptionResolvers(),
+            'TodaysInteractionsData' => [
+                'totalInteractions' => function (array $root): int {
+                    return $root['totalInteractions'] ?? 0;
+                },
+                'totalScore' => function (array $root): int {
+                    return $root['totalScore'] ?? 0;
+                },
+                'totalDetails' => function (array $root): array {
+                    return $root['totalDetails'] ?? [];
+                },
+            ],
+            'TodaysInteractionsDetailsData' => [
+                'views' => function (array $root): int {
+                    return $root['msgid'] ?? 0;
+                },
+                'likes' => function (array $root): int {
+                    return $root['likes'] ?? 0;
+                },
+                'dislikes' => function (array $root): int {
+                    return $root['dislikes'] ?? 0;
+                },
+                'comments' => function (array $root): int {
+                    return $root['comments'] ?? 0;
+                },
+                'viewsScore' => function (array $root): int {
+                    return $root['viewsScore'] ?? 0;
+                },
+                'likesScore' => function (array $root): int {
+                    return $root['likesScore'] ?? 0;
+                },
+                'dislikesScore' => function (array $root): int {
+                    return $root['dislikesScore'] ?? 0;
+                },
+                'commentsScore' => function (array $root): int {
+                    return $root['commentsScore'] ?? 0;
+                }
+            ],
             'ContactusResponsePayload' => [
                 'msgid' => function (array $root): int {
                     return $root['msgid'] ?? 0;
