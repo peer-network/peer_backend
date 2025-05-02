@@ -2196,7 +2196,7 @@ class GraphQLSchemaBuilder
         return [
             'status' => 'success',
             'counter' => count($data),
-            'ResponseCode' => 11501,
+            'ResponseCode' => empty($data) ? 21518 : 11501,
             'affectedRows' => $data,
         ];
     }
@@ -2401,7 +2401,7 @@ class GraphQLSchemaBuilder
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError(20224);
         }
 
         if (strlen($name) < 3 || strlen($name) > 33) {
