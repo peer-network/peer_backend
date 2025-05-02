@@ -173,6 +173,7 @@ class GraphQLSchemaBuilder
             'Subscription' => $this->buildSubscriptionResolvers(),
             'TodaysInteractionsData' => [
                 'totalInteractions' => function (array $root): int {
+                    $this->logger->info('Query.TodaysInteractionsData Resolvers');
                     return $root['totalInteractions'] ?? 0;
                 },
                 'totalScore' => function (array $root): int {
@@ -184,6 +185,7 @@ class GraphQLSchemaBuilder
             ],
             'TodaysInteractionsDetailsData' => [
                 'views' => function (array $root): int {
+                    $this->logger->info('Query.TodaysInteractionsDetailsData Resolvers');
                     return $root['msgid'] ?? 0;
                 },
                 'likes' => function (array $root): int {
@@ -210,6 +212,7 @@ class GraphQLSchemaBuilder
             ],
             'ContactusResponsePayload' => [
                 'msgid' => function (array $root): int {
+                    $this->logger->info('Query.ContactusResponsePayload Resolvers');
                     return $root['msgid'] ?? 0;
                 },
                 'email' => function (array $root): string {
@@ -1129,7 +1132,7 @@ class GraphQLSchemaBuilder
             ],
             'GemsterResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.StandardResponse Resolvers');
+                    $this->logger->info('Query.GemsterResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -1141,7 +1144,7 @@ class GraphQLSchemaBuilder
             ],
             'DailyGemStatusResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.StandardResponse Resolvers');
+                    $this->logger->info('Query.DailyGemStatusResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -1153,7 +1156,7 @@ class GraphQLSchemaBuilder
             ],
             'DailyGemsResultsResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.StandardResponse Resolvers');
+                    $this->logger->info('Query.DailyGemsResultsResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -1165,6 +1168,7 @@ class GraphQLSchemaBuilder
             ],
             'DailyGemStatusData' => [
                 'd0' => function (array $root): int {
+                    $this->logger->info('Query.DailyGemStatusData Resolvers');
                     return $root['d0'] ?? 0;
                 },
                 'd1' => function (array $root): int {
@@ -1194,6 +1198,7 @@ class GraphQLSchemaBuilder
             ],
             'DailyGemsResultsData' => [
                 'data' => function (array $root): array {
+                    $this->logger->info('Query.DailyGemsResultsData Resolvers');
                     return $root['affectedRows'] ?? [];
                 },
                 'totalGems' => function (array $root): int {
@@ -1202,6 +1207,7 @@ class GraphQLSchemaBuilder
             ],
             'DailyGemsResultsUserData' => [
                 'userid' => function (array $root): string {
+                    $this->logger->info('Query.DailyGemsResultsUserData Resolvers');
                     return $root['userid'] ?? '';
                 },
                 'gems' => function (array $root): int {
@@ -1252,7 +1258,7 @@ class GraphQLSchemaBuilder
             ],
             'LiquidityPoolResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.GenericResponse Resolvers');
+                    $this->logger->info('Query.LiquidityPoolResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'counter' => function (array $root): int {
@@ -1263,6 +1269,33 @@ class GraphQLSchemaBuilder
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
+                },
+            ],
+            'LiquidityPoolData' => [
+                'overallTotalNumbers' => function (array $root): int {
+                    $this->logger->info('Query.LiquidityPoolData Resolvers');
+                    return $root['overall_total_numbers'] ?? 0;
+                },
+                'overallTotalNumbersq' => function (array $root): int {
+                    return $root['overall_total_numbersq'] ?? 0;
+                },
+                'posts' => function (array $root): array {
+                    return $root['posts'] ?? [];
+                },
+            ],
+            'LiquidityPoolPostData' => [
+                'postid' => function (array $root): string {
+                    $this->logger->info('Query.LiquidityPoolPostData Resolvers');
+                    return $root['postid'] ?? '';
+                },
+                'totalNumbers' => function (array $root): int {
+                    return $root['total_numbers'] ?? 0;
+                },
+                'totalNumbersq' => function (array $root): int {
+                    return $root['total_numbersq'] ?? 0;
+                },
+                'transactionCount' => function (array $root): int {
+                    return $root['transaction_count'] ?? 0;
                 },
             ],
             'TestingPoolResponse' => [

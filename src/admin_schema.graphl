@@ -164,13 +164,33 @@ type GemstersResponse {
   affectedRows: DATEN
 }
 
+
+type GemsterResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DailyGemStatusData
+}
+
 type LiquidityPoolResponse {
   status: String!
   counter: Int!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: LiquidityPoolData
 }
-  
+
+type LiquidityPoolData {
+  overallTotalNumbers: Decimal
+  overallTotalNumbersq: Decimal
+  posts: [LiquidityPoolPostData]
+}
+
+type LiquidityPoolPostData {
+  postid: ID
+  totalNumbers: Decimal
+  totalNumbersq: Decimal
+  transactionCount: Decimal
+}
+
 type TestingPoolResponse {
   status: String!
   counter: Int!
@@ -192,12 +212,6 @@ type GetPercentBeforeTransactionResponse {
 }
 
 type RefreshMarketCapResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: DATEN
-}
-
-type GemsterResponse {
   status: String!
   ResponseCode: String
   affectedRows: DATEN
