@@ -105,7 +105,7 @@ class WalletMapper
             ]);
             return self::respondWithError(51301);
         }
-        $message = isset($args['message']) ? (string) $args['message'] : '';
+        $message = isset($args['message']) ? (string) $args['message'] : null;
 
         try {
             $sql = "SELECT uid FROM users WHERE uid = :uid";
@@ -182,6 +182,19 @@ class WalletMapper
 
                 $this->insertWinToLog($userId, $args);
                 $this->insertWinToPool($userId, $args);
+
+                $transObj = [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferDeductSenderToRecipient',
+                    'senderId' => $userId,
+                    'recipientId' => $recipient,
+                    'tokenAmount' => -$numberoftokens,
+                    'message' => $message,
+                ];
+                $transactions = new Transaction($transObj);
+
+                $transRepo = new TransactionRepository($this->logger, $this->db);
+                $transRepo->saveTransaction($transactions);
             }
 
             // 2. RECIPIENT: Credit To Account
@@ -202,13 +215,15 @@ class WalletMapper
                 $this->insertWinToLog($row, $args);
                 $this->insertWinToPool($row, $args);
 
+                $transUniqueIdForDebit = self::generateUUID();
                 $transObj = [
-                    'transUniqueId' => $transUniqueId,
+                    'transUniqueId' => $transUniqueIdForDebit,
                     'transactionType' => 'transferSenderToRecipient',
                     'senderId' => $userId,
                     'recipientId' => $recipient,
                     'tokenAmount' => $numberoftokens,
                     'message' => $message,
+                    'transferAction' => 'CREDIT'
                 ];
                 $transactions = new Transaction($transObj);
 
@@ -241,7 +256,7 @@ class WalletMapper
                         'senderId' => $userId,
                         'recipientId' => $inviterId,
                         'tokenAmount' => $inviterWin,
-                        'message' => $message,
+                        'transferAction' => 'INVITER_FEE'
                     ];
                     $transactions = new Transaction($transObj);
     
@@ -293,7 +308,8 @@ class WalletMapper
                     'senderId' => $userId,
                     'recipientId' => $this->poolWallet,
                     'tokenAmount' => $feeAmount,
-                    'message' => $message,
+                    'transferAction' => 'POOL_FEE'
+
                 ];
                 $transactions = new Transaction($transObj);
 
@@ -326,7 +342,8 @@ class WalletMapper
                     'senderId' => $userId,
                     'recipientId' => $this->peerWallet,
                     'tokenAmount' => $peerAmount,
-                    'message' => $message,
+                    'transferAction' => 'PEER_FEE'
+
                 ];
                 $transactions = new Transaction($transObj);
 
@@ -358,7 +375,7 @@ class WalletMapper
                     'senderId' => $userId,
                     'recipientId' => $this->burnWallet,
                     'tokenAmount' => $burnAmount,
-                    'message' => $message,
+                    'transferAction' => 'BURN_FEE'
                 ];
                 $transactions = new Transaction($transObj);
 

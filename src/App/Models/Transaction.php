@@ -18,7 +18,7 @@ class Transaction
     protected string $transactionType;
     protected string $tokenAmount;
     protected $transferAction;
-    protected string $message;
+    protected ?string $message;
     protected ?string $flag;
     protected ?string $action;
     protected ?string $createdat;
@@ -162,7 +162,7 @@ class Transaction
     /**
      * Getter and Setter methods for message
      */
-    public function getMessage(): string
+    public function getMessage(): string|null
     {
         return $this->message;
     }
