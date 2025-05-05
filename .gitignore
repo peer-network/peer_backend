@@ -21,4 +21,5 @@ runtime-data/media/video/*
 runtime-data/logs/*
 runtime-data/ratelimiter/*
 !/**/placeholder.txt
+!/**/response-codes.json
 *_rate_limiter_storage.json
