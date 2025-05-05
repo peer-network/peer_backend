@@ -1,0 +1,1565 @@
+{
+    "responseCodes": [
+      {
+        "responseCode": "10401",
+        "actualResponseComment": "Success: Contact created successfully",
+        "userFriendlyResponseComment": "Your contact information has been successfully saved."
+      },
+      {
+        "responseCode": "10601",
+        "actualResponseComment": "Success: User registered successfully. Please verify your account and log in",
+        "userFriendlyResponseComment": "Registration complete! Please check your email to verify your account before logging in."
+      },
+      {
+        "responseCode": "10701",
+        "actualResponseComment": "Success: Your account has been verified successfully",
+        "userFriendlyResponseComment": "Account verified! You're all set to start using our services."
+      },
+      {
+        "responseCode": "10801",
+        "actualResponseComment": "Success: Login successful. Welcome back!",
+        "userFriendlyResponseComment": "Welcome back! You've successfully logged in."
+      },
+      {
+        "responseCode": "10901",
+        "actualResponseComment": "Success: Token refreshed successfully. You can continue using your session",
+        "userFriendlyResponseComment": "Session refreshed! You can continue without interruption."
+      },
+      {
+        "responseCode": "11001",
+        "actualResponseComment": "Success: Users retrieved successfully",
+        "userFriendlyResponseComment": "User list loaded successfully."
+      },
+      {
+        "responseCode": "11002",
+        "actualResponseComment": "Success: User information prepared successfully",
+        "userFriendlyResponseComment": "Profile information loaded successfully."
+      },
+      {
+        "responseCode": "11003",
+        "actualResponseComment": "Success: User biography updated successfully",
+        "userFriendlyResponseComment": "Your bio has been updated successfully."
+      },
+      {
+        "responseCode": "11004",
+        "actualResponseComment": "Success: Profile picture updated successfully",
+        "userFriendlyResponseComment": "Profile picture updated successfully!"
+      },
+      {
+        "responseCode": "11005",
+        "actualResponseComment": "Success: Password updated successfully",
+        "userFriendlyResponseComment": "Your password has been changed successfully."
+      },
+      {
+        "responseCode": "11006",
+        "actualResponseComment": "Success: Email updated successfully",
+        "userFriendlyResponseComment": "Your email address has been updated."
+      },
+      {
+        "responseCode": "11007",
+        "actualResponseComment": "Success: Username updated successfully",
+        "userFriendlyResponseComment": "Your username has been changed successfully."
+      },
+      {
+        "responseCode": "11008",
+        "actualResponseComment": "Success: Profile data prepared successfully",
+        "userFriendlyResponseComment": "Profile information loaded successfully."
+      },
+      {
+        "responseCode": "11009",
+        "actualResponseComment": "Success: User data prepared successfully",
+        "userFriendlyResponseComment": "Your account information is ready."
+      },
+      {
+        "responseCode": "11010",
+        "actualResponseComment": "Success: User stats updated successfully",
+        "userFriendlyResponseComment": "Your statistics have been updated."
+      },
+      {
+        "responseCode": "11101",
+        "actualResponseComment": "Success: Follows data prepared successfully",
+        "userFriendlyResponseComment": "Following list loaded successfully."
+      },
+      {
+        "responseCode": "11102",
+        "actualResponseComment": "Success: Friends data prepared successfully",
+        "userFriendlyResponseComment": "Friends list loaded successfully."
+      },
+      {
+        "responseCode": "11103",
+        "actualResponseComment": "Success: Unfollowed successfully",
+        "userFriendlyResponseComment": "You've successfully unfollowed this user."
+      },
+      {
+        "responseCode": "11104",
+        "actualResponseComment": "Success: Followed successfully",
+        "userFriendlyResponseComment": "You're now following this user."
+      },
+      {
+        "responseCode": "11105",
+        "actualResponseComment": "Success: User blocked successfully",
+        "userFriendlyResponseComment": "User has been blocked successfully."
+      },
+      {
+        "responseCode": "11106",
+        "actualResponseComment": "Success: User unblocked successfully",
+        "userFriendlyResponseComment": "User has been unblocked successfully."
+      },
+      {
+        "responseCode": "11107",
+        "actualResponseComment": "Success: Blocked list prepared successfully",
+        "userFriendlyResponseComment": "Blocked users list loaded."
+      },
+      {
+        "responseCode": "11201",
+        "actualResponseComment": "Success: MCAP retrieved successfully",
+        "userFriendlyResponseComment": "Market data loaded successfully."
+      },
+      {
+        "responseCode": "11202",
+        "actualResponseComment": "Success: Token price retrieved successfully. Data is up to date",
+        "userFriendlyResponseComment": "Current token prices loaded."
+      },
+      {
+        "responseCode": "11203",
+        "actualResponseComment": "Success: Records found for the specified date. Displaying relevant data",
+        "userFriendlyResponseComment": "Data for selected date displayed."
+      },
+      {
+        "responseCode": "11204",
+        "actualResponseComment": "Success: Liquidity data prepared successfully. You can now view liquidity details",
+        "userFriendlyResponseComment": "Liquidity information loaded."
+      },
+      {
+        "responseCode": "11205",
+        "actualResponseComment": "Success: Fetching todays interactions with your post successfully",
+        "userFriendlyResponseComment": "Today's post interactions loaded."
+      },
+      {
+        "responseCode": "11206",
+        "actualResponseComment": "Success: Converted all Interactions into Gems successfully",
+        "userFriendlyResponseComment": "Interactions converted to gems."
+      },
+      {
+        "responseCode": "11207",
+        "actualResponseComment": "Success: Gems data prepared successfully",
+        "userFriendlyResponseComment": "Your gems information is ready."
+      },
+      {
+        "responseCode": "11208",
+        "actualResponseComment": "Success: Gems were converted into Tokens successfully",
+        "userFriendlyResponseComment": "Gems successfully converted to tokens."
+      },
+      {
+        "responseCode": "11209",
+        "actualResponseComment": "Success: Successfully fetched wallets",
+        "userFriendlyResponseComment": "Wallet information loaded."
+      },
+      {
+        "responseCode": "11210",
+        "actualResponseComment": "Success: refresh Market Data successfully",
+        "userFriendlyResponseComment": "Market data updated successfully."
+      },
+      {
+        "responseCode": "11211",
+        "actualResponseComment": "Success: Successfully added to wallet",
+        "userFriendlyResponseComment": "Funds added to your wallet."
+      },
+      {
+        "responseCode": "11301",
+        "actualResponseComment": "Success: Payment completed successfully",
+        "userFriendlyResponseComment": "Payment processed successfully."
+      },
+      {
+        "responseCode": "11302",
+        "actualResponseComment": "Success: Your daily free-action applied successfully",
+        "userFriendlyResponseComment": "Daily free action completed."
+      },
+      {
+        "responseCode": "11303",
+        "actualResponseComment": "Success: Daily free data fetched successfully",
+        "userFriendlyResponseComment": "Daily free information loaded."
+      },
+      {
+        "responseCode": "11402",
+        "actualResponseComment": "Success: Transaction successful. 1% of the amount has been transferred to the inviter",
+        "userFriendlyResponseComment": "Transaction complete! A portion has been shared with your inviter."
+      },
+      {
+        "responseCode": "11501",
+        "actualResponseComment": "Success: Success. Retrieved all posts",
+        "userFriendlyResponseComment": "Posts loaded successfully."
+      },
+      {
+        "responseCode": "11502",
+        "actualResponseComment": "Success: Post info retrieved successfully",
+        "userFriendlyResponseComment": "Post details loaded."
+      },
+      {
+        "responseCode": "11503",
+        "actualResponseComment": "Success: Post liked successfully",
+        "userFriendlyResponseComment": "You've liked this post."
+      },
+      {
+        "responseCode": "11504",
+        "actualResponseComment": "Success: You have disliked the post successfully ",
+        "userFriendlyResponseComment": "You've disliked this post."
+      },
+      {
+        "responseCode": "11505",
+        "actualResponseComment": "Success: Post reported successfully ",
+        "userFriendlyResponseComment": "Post reported. Thank you for helping improve our community."
+      },
+      {
+        "responseCode": "11506",
+        "actualResponseComment": "Success: Post viewed successfully ",
+        "userFriendlyResponseComment": "Post viewed."
+      },
+      {
+        "responseCode": "11507",
+        "actualResponseComment": "Success: Post shared successfully ",
+        "userFriendlyResponseComment": "Post shared successfully!"
+      },
+      {
+        "responseCode": "11508",
+        "actualResponseComment": "Success: New post created successfully",
+        "userFriendlyResponseComment": "Your post has been published!"
+      },
+      {
+        "responseCode": "11509",
+        "actualResponseComment": "Success: Post updated successfully",
+        "userFriendlyResponseComment": "Post updated successfully."
+      },
+      {
+        "responseCode": "11510",
+        "actualResponseComment": "Success: Post deleted successfully",
+        "userFriendlyResponseComment": "Post deleted successfully."
+      },
+      {
+        "responseCode": "11511",
+        "actualResponseComment": "Success: Unsaved successfully",
+        "userFriendlyResponseComment": "Post removed from your saved items."
+      },
+      {
+        "responseCode": "11512",
+        "actualResponseComment": "Success: Saved successfully",
+        "userFriendlyResponseComment": "Post added to your saved items."
+      },
+      {
+        "responseCode": "11601",
+        "actualResponseComment": "Success: Retrieved comments successfully",
+        "userFriendlyResponseComment": "Comments loaded successfully."
+      },
+      {
+        "responseCode": "11602",
+        "actualResponseComment": "Success: Comments information retrieved successfully",
+        "userFriendlyResponseComment": "Comment details loaded."
+      },
+      {
+        "responseCode": "11603",
+        "actualResponseComment": "Success: Comment liked successfully",
+        "userFriendlyResponseComment": "You've liked this comment."
+      },
+      {
+        "responseCode": "11604",
+        "actualResponseComment": "Success: Comment reported successfully",
+        "userFriendlyResponseComment": "Comment reported. Thank you for your feedback."
+      },
+      {
+        "responseCode": "11605",
+        "actualResponseComment": "Success: Comment has been saved successfully",
+        "userFriendlyResponseComment": "Comment saved to your collection."
+      },
+      {
+        "responseCode": "11606",
+        "actualResponseComment": "Success: The comment has been removed successfully",
+        "userFriendlyResponseComment": "Comment deleted successfully."
+      },
+      {
+        "responseCode": "11701",
+        "actualResponseComment": "Success: Tags have been fetched successfully",
+        "userFriendlyResponseComment": "Tags loaded successfully."
+      },
+      {
+        "responseCode": "11702",
+        "actualResponseComment": "Success: Tag saved successfully",
+        "userFriendlyResponseComment": "Tag saved successfully."
+      },
+      {
+        "responseCode": "11801",
+        "actualResponseComment": "Success: All chats have been retrieved successfully",
+        "userFriendlyResponseComment": "Your conversations are ready."
+      },
+      {
+        "responseCode": "11802",
+        "actualResponseComment": "Success: Participant added to the group successfully ",
+        "userFriendlyResponseComment": "New member added to the group."
+      },
+      {
+        "responseCode": "11803",
+        "actualResponseComment": "Success: Message added successfully",
+        "userFriendlyResponseComment": "Message sent successfully."
+      },
+      {
+        "responseCode": "11804",
+        "actualResponseComment": "Success: Chat with participants created successfully",
+        "userFriendlyResponseComment": "New conversation started."
+      },
+      {
+        "responseCode": "11805",
+        "actualResponseComment": "Success: Chat updated successfully",
+        "userFriendlyResponseComment": "Conversation updated."
+      },
+      {
+        "responseCode": "11806",
+        "actualResponseComment": "Success: Participant removed from chat successfully",
+        "userFriendlyResponseComment": "Member removed from conversation."
+      },
+      {
+        "responseCode": "11807",
+        "actualResponseComment": "Success: Messages retrieved successfully",
+        "userFriendlyResponseComment": "Messages loaded."
+      },
+      {
+        "responseCode": "11808",
+        "actualResponseComment": "Success: Chat feeds fetched successfully",
+        "userFriendlyResponseComment": "Conversation updates loaded."
+      },
+      {
+        "responseCode": "11809",
+        "actualResponseComment": "Success: Message removed successfully",
+        "userFriendlyResponseComment": "Message deleted."
+      },
+      {
+        "responseCode": "11810",
+        "actualResponseComment": "Success: Chat fetched successfully",
+        "userFriendlyResponseComment": "Conversation loaded."
+      },
+      {
+        "responseCode": "20201",
+        "actualResponseComment": "The 'userid' field (User identifier) must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
+        "userFriendlyResponseComment": "Please provide a valid user ID in the correct format."
+      },
+      {
+        "responseCode": "20202",
+        "actualResponseComment": "The 'username' field (User's display name) must be between 3 and 23 characters long, must contain at least one letter and can contain numbers, and underscores",
+        "userFriendlyResponseComment": "Username must be 3-23 characters with at least one letter. Numbers and underscores are allowed."
+      },
+      {
+        "responseCode": "20203",
+        "actualResponseComment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 200",
+        "userFriendlyResponseComment": "Page offset must be a number between 0 and 200."
+      },
+      {
+        "responseCode": "20204",
+        "actualResponseComment": "The 'limit' field (Number of data objects to retrieve) must be an integer between 1 and 20",
+        "userFriendlyResponseComment": "Please request between 1 and 20 items at a time."
+      },
+      {
+        "responseCode": "20205",
+        "actualResponseComment": "The 'postLimit' field (Number of posts to retrieve) must be an integer between 1 and 20",
+        "userFriendlyResponseComment": "You can load 1 to 20 posts at once."
+      },
+      {
+        "responseCode": "20206",
+        "actualResponseComment": "The 'filterBy' field (Post filter criteria) must be an array containing only valid ENUM options: IMAGE, AUDIO, TEXT, VIDEO, FOLLOWED, FOLLOWER",
+        "userFriendlyResponseComment": "Please select valid filter options from the available choices."
+      },
+      {
+        "responseCode": "20207",
+        "actualResponseComment": "The 'IgnoreList' field (Whether to apply the block list) must be either 'YES' or 'NO' (ENUM options)",
+        "userFriendlyResponseComment": "Please specify either YES or NO for the block list option."
+      },
+      {
+        "responseCode": "20208",
+        "actualResponseComment": "The 'sortBy' field (Sorting order for posts) must be one of the following ENUM options: NEWEST, TRENDING, LIKES, DISLIKES, VIEWS, COMMENTS",
+        "userFriendlyResponseComment": "Please choose a valid sorting option from the menu."
+      },
+      {
+        "responseCode": "20209",
+        "actualResponseComment": "The 'postid' field (Post identifier) must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
+        "userFriendlyResponseComment": "Please provide a valid post ID in the correct format."
+      },
+      {
+        "responseCode": "20210",
+        "actualResponseComment": "The 'title' field (Title of the post to search for) must be between 2 and 63 characters long and can only contain letters, numbers, spaces, dashes (-), and underscores (_)",
+        "userFriendlyResponseComment": "Post titles should be 2-63 characters with letters, numbers, spaces, dashes or underscores."
+      },
+      {
+        "responseCode": "20211",
+        "actualResponseComment": "The 'tag' field (Tags to search for in posts) must be an array of up to five tags, each between 2 and 53 characters long",
+        "userFriendlyResponseComment": "You can search with up to 5 tags, each 2-53 characters long."
+      },
+      {
+        "responseCode": "20212",
+        "actualResponseComment": "The 'from' field (Starting date for data retrieval) must be a valid date in the format YYYY-MM-DD",
+        "userFriendlyResponseComment": "Please enter the start date in YYYY-MM-DD format."
+      },
+      {
+        "responseCode": "20213",
+        "actualResponseComment": "The 'to' field (End date for data retrieval) must be a valid date in the format YYYY-MM-DD",
+        "userFriendlyResponseComment": "Please enter the end date in YYYY-MM-DD format."
+      },
+      {
+        "responseCode": "20214",
+        "actualResponseComment": "The 'postOffset' field (Pagination offset for posts) must be an integer",
+        "userFriendlyResponseComment": "Post offset must be a whole number."
+      },
+      {
+        "responseCode": "20215",
+        "actualResponseComment": "The 'commentOffset' field (Pagination offset for comments) must be an integer",
+        "userFriendlyResponseComment": "Comment offset must be a whole number."
+      },
+      {
+        "responseCode": "20216",
+        "actualResponseComment": "The 'commentLimit' field (Number of comments to retrieve) must be an integer between 1 and 20",
+        "userFriendlyResponseComment": "You can load 1 to 20 comments at once."
+      },
+      {
+        "responseCode": "20217",
+        "actualResponseComment": "The 'commentid' field (Comment identifier) must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
+        "userFriendlyResponseComment": "Please provide a valid comment ID in the correct format."
+      },
+      {
+        "responseCode": "20218",
+        "actualResponseComment": "The 'chatid' field (Chat identifier) must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
+        "userFriendlyResponseComment": "Please provide a valid chat ID in the correct format."
+      },
+      {
+        "responseCode": "20219",
+        "actualResponseComment": "The 'messageOffset' field (Pagination offset for chat messages) must be an integer",
+        "userFriendlyResponseComment": "Message offset must be a whole number."
+      },
+      {
+        "responseCode": "20220",
+        "actualResponseComment": "The 'messageLimit' field (Number of chat messages to retrieve) must be an integer between 1 and 20",
+        "userFriendlyResponseComment": "You can load 1 to 20 messages at once."
+      },
+      {
+        "responseCode": "20221",
+        "actualResponseComment": "The 'searchChatByName' field (Search for chats by name) must be a valid string",
+        "userFriendlyResponseComment": "Please enter a valid chat name to search."
+      },
+      {
+        "responseCode": "20222",
+        "actualResponseComment": "The 'searchChatByUser' field (Find all chats with a specific friend as a participant) must be a valid string",
+        "userFriendlyResponseComment": "Please enter a valid username to search for chats."
+      },
+      {
+        "responseCode": "20223",
+        "actualResponseComment": "The 'day' field (Timeframe selection for data retrieval) must be one of the following ENUM options: D0, D1, D2, D3, D4, D5, W0, M0, Y0",
+        "userFriendlyResponseComment": "Please select a valid timeframe option from the menu."
+      },
+      {
+        "responseCode": "20224",
+        "actualResponseComment": "The 'email' field (User's email address) must be a valid email format",
+        "userFriendlyResponseComment": "Please enter a valid email address."
+      },
+      {
+        "responseCode": "20225",
+        "actualResponseComment": "The 'password' field (User's current password) is required to update the email",
+        "userFriendlyResponseComment": "Please enter your current password to update your email."
+      },
+      {
+        "responseCode": "20226",
+        "actualResponseComment": "The 'password' field (User's new password) must be between 8 and 128 characters long and contain at least one lowercase letter, one uppercase letter, and one number",
+        "userFriendlyResponseComment": "New password must be 8-128 characters with at least one uppercase, one lowercase letter and one number."
+      },
+      {
+        "responseCode": "20227",
+        "actualResponseComment": "The 'expassword' field (User's current password) is required to update the password",
+        "userFriendlyResponseComment": "Please enter your current password to change it."
+      },
+      {
+        "responseCode": "20228",
+        "actualResponseComment": "The 'biography' field (User's biography)must be between 3 and 5000 characters long",
+        "userFriendlyResponseComment": "Bio must be between 3 and 5000 characters."
+      },
+      {
+        "responseCode": "20229",
+        "actualResponseComment": "The 'img' field (User's profile picture) must be a valid image file (JPG, PNG, or GIF) and less than 5MB in size",
+        "userFriendlyResponseComment": "Profile picture must be JPG, PNG or GIF under 5MB."
+      },
+      {
+        "responseCode": "20230",
+        "actualResponseComment": "You are not authorized to perform this action on the specified chat",
+        "userFriendlyResponseComment": "You don't have permission to perform this action in this chat."
+      },
+      {
+        "responseCode": "20231",
+        "actualResponseComment": "The 'input' field must contain valid values for all required fields",
+        "userFriendlyResponseComment": "Please fill in all required fields correctly."
+      },
+      {
+        "responseCode": "20232",
+        "actualResponseComment": "This comment has already been reported",
+        "userFriendlyResponseComment": "You've already reported this comment."
+      },
+      {
+        "responseCode": "20233",
+        "actualResponseComment": "The 'action' field (Action to perform) must be one of the following ENUM options: POST",
+        "userFriendlyResponseComment": "Please select a valid action from the menu."
+      },
+      {
+        "responseCode": "20234",
+        "actualResponseComment": "The 'action' field (Action to perform) must be one of the following ENUM options: LIKE, DISLIKE, REPORT, VIEW, SAVE",
+        "userFriendlyResponseComment": "Please select a valid interaction type from the menu."
+      },
+      {
+        "responseCode": "20235",
+        "actualResponseComment": "The 'password' field (New password) cannot be the same as the current password",
+        "userFriendlyResponseComment": "New password must be different from your current one."
+      },
+      {
+        "responseCode": "20236",
+        "actualResponseComment": "The 'IgnoreList' field must be either 'YES' or 'NO'",
+        "userFriendlyResponseComment": "Please specify either YES or NO for this option."
+      },
+      {
+        "responseCode": "20237",
+        "actualResponseComment": "The 'password' field (User's password) is required to proceed",
+        "userFriendlyResponseComment": "Please enter your password to continue."
+      },
+      {
+        "responseCode": "20238",
+        "actualResponseComment": "The 'biography' field (User's biography) must be provided to update the profile",
+        "userFriendlyResponseComment": "Please enter a bio to update your profile."
+      },
+      {
+        "responseCode": "20239",
+        "actualResponseComment": "The 'img' field (User's profile picture) must be provided to update the image",
+        "userFriendlyResponseComment": "Please select an image to update your profile picture."
+      },
+      {
+        "responseCode": "20240",
+        "actualResponseComment": "The 'recipient' field (Target user for the action) must be provided",
+        "userFriendlyResponseComment": "Please specify who you want to perform this action with."
+      },
+      {
+        "responseCode": "20241",
+        "actualResponseComment": "The 'tokenAmount' field (Amount of tokens to process) must be provided",
+        "userFriendlyResponseComment": "Please specify how many tokens you want to process."
+      },
+      {
+        "responseCode": "20242",
+        "actualResponseComment": "The 'transactionID' field (Transaction identifier) must be provided to validate the process",
+        "userFriendlyResponseComment": "Please provide the transaction ID to continue."
+      },
+      {
+        "responseCode": "20243",
+        "actualResponseComment": "The 'tokenAmount' field (Transaction amount) must be more than 10 tokens",
+        "userFriendlyResponseComment": "Minimum transaction amount is 10 tokens."
+      },
+      {
+        "responseCode": "20244",
+        "actualResponseComment": "The 'value' field must be an integer",
+        "userFriendlyResponseComment": "Please enter a whole number."
+      },
+      {
+        "responseCode": "20245",
+        "actualResponseComment": "The 'value' field must be at least the defined minimum",
+        "userFriendlyResponseComment": "Value must be at least the minimum required."
+      },
+      {
+        "responseCode": "20246",
+        "actualResponseComment": "The 'value' field must be at most the defined maximum",
+        "userFriendlyResponseComment": "Value cannot exceed the maximum allowed."
+      },
+      {
+        "responseCode": "20247",
+        "actualResponseComment": "The 'value' field must be a valid float",
+        "userFriendlyResponseComment": "Please enter a valid decimal number."
+      },
+      {
+        "responseCode": "20248",
+        "actualResponseComment": "The 'max' option is required for the LessThan validator",
+        "userFriendlyResponseComment": "Maximum value setting is required."
+      },
+      {
+        "responseCode": "20249",
+        "actualResponseComment": "The 'max' field must be in a valid date format (YYYY-MM-DD)",
+        "userFriendlyResponseComment": "Maximum date must be in YYYY-MM-DD format."
+      },
+      {
+        "responseCode": "20250",
+        "actualResponseComment": "The 'value' field must be in a valid date format (YYYY-MM-DD)",
+        "userFriendlyResponseComment": "Please enter the date in YYYY-MM-DD format."
+      },
+      {
+        "responseCode": "20251",
+        "actualResponseComment": "The 'image' field does not contain a valid base64 format",
+        "userFriendlyResponseComment": "Image format is invalid. Please upload a proper image file."
+      },
+      {
+        "responseCode": "20252",
+        "actualResponseComment": "The 'message' field must be between 1 and 500 characters long",
+        "userFriendlyResponseComment": "Messages must be 1-500 characters long."
+      },
+      {
+        "responseCode": "20253",
+        "actualResponseComment": "The 'phone number' field must be an integer between 9 and 21",
+        "userFriendlyResponseComment": "Phone number must be 9-21 digits."
+      },
+      {
+        "responseCode": "20254",
+        "actualResponseComment": "The 'Solana Public Key' field must be a String between 43 and 44 (only including Chars and Ints without 0 O I 1)",
+        "userFriendlyResponseComment": "Please enter a valid Solana public key."
+      },
+      {
+        "responseCode": "20255",
+        "actualResponseComment": "The 'tagName' field (Tag identifier) must be between 2 and 53 characters long, must not contain spaces, and may include letters, numbers, special characters, underscores _, and hyphens - (format: valid-tag_name-123)",
+        "userFriendlyResponseComment": "Tags must be 2-53 characters without spaces. Use letters, numbers, underscores or hyphens."
+      },
+      {
+        "responseCode": "20256",
+        "actualResponseComment": "Title must be between 2 and 30 characters. Please adjust and try again",
+        "userFriendlyResponseComment": "Title must be 2-30 characters long."
+      },
+      {
+        "responseCode": "20257",
+        "actualResponseComment": "Invalid IP address. Please enter a valid IPv4 (e.g. 192.168.0.1) or IPv6 (e.g. 2001:0db8:85a3:0000:0000:8a2e:0370:7334) address",
+        "userFriendlyResponseComment": "Please enter a valid IP address."
+      },
+      {
+        "responseCode": "20258",
+        "actualResponseComment": "The date must be in the format 'YYYY-MM-DD' (e.g., 2025-04-02)",
+        "userFriendlyResponseComment": "Please enter the date in YYYY-MM-DD format."
+      },
+      {
+        "responseCode": "20259",
+        "actualResponseComment": "The image you uploaded isn't supported. Please use one of the following file types: JPEG (.jpg), PNG (.png), GIF (.gif), or WebP (.webp)",
+        "userFriendlyResponseComment": "Please upload an image in JPG, PNG, GIF or WebP format."
+      },
+      {
+        "responseCode": "20260",
+        "actualResponseComment": "Information: Invalid image dimensions. Please make sure the file is a valid image and not corrupted",
+        "userFriendlyResponseComment": "The image appears to be invalid or corrupted. Please try another file."
+      },
+      {
+        "responseCode": "20261",
+        "actualResponseComment": "Information: Desired file can not be uploaded due to file size limitations",
+        "userFriendlyResponseComment": "File is too large. Please choose a smaller file."
+      },
+      {
+        "responseCode": "20262",
+        "actualResponseComment": "The 'tag' field (Tags in post creation) must be an array of up to ten tags, each between 2 and 53 characters long",
+        "userFriendlyResponseComment": "You can add up to 10 tags, each 2-53 characters long."
+      },
+      {
+        "responseCode": "20263",
+        "actualResponseComment": "The 'mediadescription' field (Create Post input) must be between 3 and 500 characters long",
+        "userFriendlyResponseComment": "Media description must be 3-500 characters."
+      },
+      {
+        "responseCode": "20264",
+        "actualResponseComment": "The numberoftokens field must be a number (can be fractional), greater than zero, and less than the account balance",
+        "userFriendlyResponseComment": "Token amount must be a positive number within your available balance."
+      },
+      {
+        "responseCode": "20601",
+        "actualResponseComment": "Already Exists: Email is already registered. Please use a different email",
+        "userFriendlyResponseComment": "This email is already in use. Please try another."
+      },
+      {
+        "responseCode": "20701",
+        "actualResponseComment": "Information: Account is already verified. No further action is required",
+        "userFriendlyResponseComment": "Your account is already verified!"
+      },
+      {
+        "responseCode": "21001",
+        "actualResponseComment": "Information Not Found: No users found. Please refine your search or try a different query",
+        "userFriendlyResponseComment": "No users match your search. Try different keywords."
+      },
+      {
+        "responseCode": "21002",
+        "actualResponseComment": "Invalid Action: New password cannot be the same as your current password. Please choose a different password",
+        "userFriendlyResponseComment": "New password must be different from your current one."
+      },
+      {
+        "responseCode": "21003",
+        "actualResponseComment": "Already Exists: Email is already in use. Please use a different email",
+        "userFriendlyResponseComment": "This email is already registered. Please use another."
+      },
+      {
+        "responseCode": "21004",
+        "actualResponseComment": "Invalid Action: New email cannot be the same as your current email. Please choose a different one",
+        "userFriendlyResponseComment": "New email must be different from your current one."
+      },
+      {
+        "responseCode": "21005",
+        "actualResponseComment": "Invalid Action: New username cannot be the same as your current username. Please choose another",
+        "userFriendlyResponseComment": "Please choose a different username from your current one."
+      },
+      {
+        "responseCode": "21101",
+        "actualResponseComment": "Information Not Found: No friends found. You haven't added any friends yet",
+        "userFriendlyResponseComment": "Your friends list is empty. Start connecting with others!"
+      },
+      {
+        "responseCode": "21102",
+        "actualResponseComment": "Information Not Found: No relations found. You may need to follow or be followed to see connections",
+        "userFriendlyResponseComment": "No connections found. Follow others to build your network."
+      },
+      {
+        "responseCode": "21103",
+        "actualResponseComment": "Information: No blocked user found.",
+        "userFriendlyResponseComment": "You haven't blocked any users."
+      },
+      {
+        "responseCode": "21201",
+        "actualResponseComment": "Invalid Action: You can't send fewer than 10 tokens at a time. Please send a higher amount",
+        "userFriendlyResponseComment": "Minimum transfer amount is 10 tokens."
+      },
+      {
+        "responseCode": "21202",
+        "actualResponseComment": "Information Not Found: No records found for the specified date. Please choose a different date",
+        "userFriendlyResponseComment": "No data available for selected date. Try another date."
+      },
+      {
+        "responseCode": "21203",
+        "actualResponseComment": "Information Not Found: No liquidity found for the user. Ensure the user has performed transactions",
+        "userFriendlyResponseComment": "No liquidity data available. User needs transaction history."
+      },
+      {
+        "responseCode": "21204",
+        "actualResponseComment": "Information Not Found: There are not Interactions yet for today",
+        "userFriendlyResponseComment": "No interactions recorded today."
+      },
+      {
+        "responseCode": "21205",
+        "actualResponseComment": "Information Not Found: There were no Interactions that need to be converted into Gems",
+        "userFriendlyResponseComment": "No interactions available for gem conversion."
+      },
+      {
+        "responseCode": "21206",
+        "actualResponseComment": "Information Not Found: There are no Gems for the given day",
+        "userFriendlyResponseComment": "No gems available for selected day."
+      },
+      {
+        "responseCode": "21207",
+        "actualResponseComment": "Information Not Found: numberoftokens or numberofgems is empty",
+        "userFriendlyResponseComment": "Please specify token or gem amounts."
+      },
+      {
+        "responseCode": "21208",
+        "actualResponseComment": "Information not found: Missing market data for ETH/EUR",
+        "userFriendlyResponseComment": "ETH/EUR market data currently unavailable."
+      },
+      {
+        "responseCode": "21209",
+        "actualResponseComment": "Information not found: No transactions found in database",
+        "userFriendlyResponseComment": "No transaction history found."
+      },
+      {
+        "responseCode": "21401",
+        "actualResponseComment": "Information: Since this account has no inviter, you will receive the full 100% of your cashout (minus fees)",
+        "userFriendlyResponseComment": "You'll receive full cashout amount (minus fees) as you have no inviter."
+      },
+      {
+        "responseCode": "21501",
+        "actualResponseComment": "Information Not Found: No post found for the provided post ID. Please check the ID and try again",
+        "userFriendlyResponseComment": "Post not found. Please check the ID."
+      },
+      {
+        "responseCode": "21502",
+        "actualResponseComment": "Information Not Found: No posts found matching the specified title. Try searching with different keywords",
+        "userFriendlyResponseComment": "No posts match your search. Try different keywords."
+      },
+      {
+        "responseCode": "21503",
+        "actualResponseComment": "Information Not Found: No posts found matching the provided tags. Check the tags and try again",
+        "userFriendlyResponseComment": "No posts found with these tags. Try different tags."
+      },
+      {
+        "responseCode": "21504",
+        "actualResponseComment": "Information Not Found: Unable to locate the post. It may have been deleted or does not exist",
+        "userFriendlyResponseComment": "Post not found. It may have been deleted."
+      },
+      {
+        "responseCode": "21505",
+        "actualResponseComment": "Information Not Found: No comment information found for the provided comment ID",
+        "userFriendlyResponseComment": "Comment not found. Please check the ID."
+      },
+      {
+        "responseCode": "21506",
+        "actualResponseComment": "Information Not Found: Unable to locate the comment. Please search with correct keywords",
+        "userFriendlyResponseComment": "Comment not found. Try different search terms."
+      },
+      {
+        "responseCode": "21507",
+        "actualResponseComment": "Not Allowed: Post owners cannot like their own posts",
+        "userFriendlyResponseComment": "You can't like your own posts."
+      },
+      {
+        "responseCode": "21508",
+        "actualResponseComment": "Invalid Action: You have already liked this post",
+        "userFriendlyResponseComment": "You've already liked this post. No need to like it again!"
+        },
+        {
+            "responseCode": "21509",
+            "actualResponseComment": "Not Allowed: Post owners cannot dislike their own posts",
+            "userFriendlyResponseComment": "You can't dislike your own post. Try viewing others' posts instead."
+        },
+        {
+            "responseCode": "21510",
+            "actualResponseComment": "Invalid Action: You have already disliked this post",
+            "userFriendlyResponseComment": "You've already disliked this post. Your opinion has been noted."
+        },
+        {
+            "responseCode": "21511",
+            "actualResponseComment": "Not Allowed: Post owners cannot report their own posts",
+            "userFriendlyResponseComment": "You can't report your own post. If you want to remove it, try deleting instead."
+        },
+        {
+            "responseCode": "21512",
+            "actualResponseComment": "Invalid Action: You have already reported this post. Duplicate reports are not required",
+            "userFriendlyResponseComment": "We've already received your report about this post. Our team will review it shortly."
+        },
+        {
+            "responseCode": "21513",
+            "actualResponseComment": "Not Allowed: As the owner, you are restricted from viewing your own posts",
+            "userFriendlyResponseComment": "You can't view your own post this way. Try checking your profile instead."
+        },
+        {
+            "responseCode": "21514",
+            "actualResponseComment": "Invalid Action: Post already viewed",
+            "userFriendlyResponseComment": "This post has already been counted as viewed by you."
+        },
+        {
+            "responseCode": "21515",
+            "actualResponseComment": "Invalid Action: Post already shared",
+            "userFriendlyResponseComment": "You've already shared this post. No need to share it again!"
+        },
+        {
+            "responseCode": "21516",
+            "actualResponseComment": "PostId not found",
+            "userFriendlyResponseComment": "We couldn't find the post you're looking for. It may have been deleted."
+        },
+        {
+            "responseCode": "21517",
+            "actualResponseComment": "Information not found: Invalid ID provided (empty post results by searching with userId)",
+            "userFriendlyResponseComment": "No posts found for this user. They may not have posted anything yet."
+        },
+        {
+            "responseCode": "21518",
+            "actualResponseComment": "Information Not Found: No posts found. Please try again later or create a post",
+            "userFriendlyResponseComment": "No posts available right now. Be the first to create one!"
+        },
+        {
+            "responseCode": "21601",
+            "actualResponseComment": "Information Not Found: No comments found. Please try again later or add a comment",
+            "userFriendlyResponseComment": "No comments yet. Why not add the first one?"
+        },
+        {
+            "responseCode": "21602",
+            "actualResponseComment": "Not Allowed: The owner of the comment cannot like their own comment",
+            "userFriendlyResponseComment": "You can't like your own comment. Spread the love to others' comments instead!"
+        },
+        {
+            "responseCode": "21603",
+            "actualResponseComment": "Invalid Action: You have already liked this comment",
+            "userFriendlyResponseComment": "You've already liked this comment. Your appreciation has been noted."
+        },
+        {
+            "responseCode": "21604",
+            "actualResponseComment": "Not Allowed: Comment owner cannot report their own comment",
+            "userFriendlyResponseComment": "You can't report your own comment. If you want to remove it, try deleting instead."
+        },
+        {
+            "responseCode": "21605",
+            "actualResponseComment": "Invalid Action: This comment has already been reported",
+            "userFriendlyResponseComment": "This comment has already been reported. Our team will review it shortly."
+        },
+        {
+            "responseCode": "21606",
+            "actualResponseComment": "Information: Parent ID exists, but has no child comments",
+            "userFriendlyResponseComment": "This comment thread doesn't have any replies yet."
+        },
+        {
+            "responseCode": "21701",
+            "actualResponseComment": "Information Not Found: No tags found. Please add tags and try again",
+            "userFriendlyResponseComment": "No tags available. Please create some tags first."
+        },
+        {
+            "responseCode": "21702",
+            "actualResponseComment": "Tag already exists. Please try a different name",
+            "userFriendlyResponseComment": "This tag name is already in use. Please choose a different one."
+        },
+        {
+            "responseCode": "21801",
+            "actualResponseComment": "Information Not Found: No chats found for this user. Start a new conversation to see chats",
+            "userFriendlyResponseComment": "No conversations yet. Start chatting with someone!"
+        },
+        {
+            "responseCode": "21802",
+            "actualResponseComment": "Information Not Found: The specified chat ID does not exist or may have been deleted",
+            "userFriendlyResponseComment": "This conversation doesn't exist or was deleted."
+        },
+        {
+            "responseCode": "21803",
+            "actualResponseComment": "Already Exists: Participant already exists in the group",
+            "userFriendlyResponseComment": "This person is already in the group chat."
+        },
+        {
+            "responseCode": "21804",
+            "actualResponseComment": "Forbidden: You are not allowed to send messages in this chat",
+            "userFriendlyResponseComment": "You don't have permission to message here."
+        },
+        {
+            "responseCode": "21805",
+            "actualResponseComment": "Already Exists: A 1-to-1 chat already exists with this user. Open the existing chat to continue",
+            "userFriendlyResponseComment": "You already have a chat with this person."
+        },
+        {
+            "responseCode": "21806",
+            "actualResponseComment": "Information Not Found: No messages found",
+            "userFriendlyResponseComment": "No messages in this chat yet."
+        },
+        {
+            "responseCode": "30101",
+            "actualResponseComment": "All required fields must be provided",
+            "userFriendlyResponseComment": "Please fill in all required fields."
+        },
+        {
+            "responseCode": "30102",
+            "actualResponseComment": "Some fields cannot be left empty",
+            "userFriendlyResponseComment": "Some information is missing. Please check the form."
+        },
+        {
+            "responseCode": "30103",
+            "actualResponseComment": "Some fields contain invalid input formats",
+            "userFriendlyResponseComment": "Some information is formatted incorrectly."
+        },
+        {
+            "responseCode": "30104",
+            "actualResponseComment": "Some provided fields do not exist",
+            "userFriendlyResponseComment": "Some options aren't available."
+        },
+        {
+            "responseCode": "30105",
+            "actualResponseComment": "Some provided options are invalid",
+            "userFriendlyResponseComment": "Some selections aren't valid."
+        },
+        {
+            "responseCode": "30301",
+            "actualResponseComment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
+            "userFriendlyResponseComment": "We need some information to continue."
+        },
+        {
+            "responseCode": "30302",
+            "actualResponseComment": "Error: Too many requests. Please try again later",
+            "userFriendlyResponseComment": "Too many attempts. Please wait a moment."
+        },
+        {
+            "responseCode": "30303",
+            "actualResponseComment": "A valid JSON object is required to proceed. Please enter valid JSON object",
+            "userFriendlyResponseComment": "We're having trouble understanding your request."
+        },
+        {
+            "responseCode": "30304",
+            "actualResponseComment": "A valid GraphQL query is required to proceed. Please enter valid GraphQL query",
+            "userFriendlyResponseComment": "Your search query needs adjustment."
+        },
+        {
+            "responseCode": "30401",
+            "actualResponseComment": "Unexpected Error: Failed to insert contact. Please check the details and try again",
+            "userFriendlyResponseComment": "Couldn't save contact. Please check the details."
+        },
+        {
+            "responseCode": "30402",
+            "actualResponseComment": "Failure: You cannot contact us without an IP address",
+            "userFriendlyResponseComment": "We need your network information to help."
+        },
+        {
+            "responseCode": "30801",
+            "actualResponseComment": "Invalid Action: Invalid email or password. Please check your credentials and try again",
+            "userFriendlyResponseComment": "Email or password incorrect. Please try again."
+        },
+        {
+            "responseCode": "30901",
+            "actualResponseComment": "Invalid Action: Invalid refresh token. Please log in again or request a new token",
+            "userFriendlyResponseComment": "Your session expired. Please log in again."
+        },
+        {
+            "responseCode": "31001",
+            "actualResponseComment": "Failure: Incorrect password. Please enter the correct current password and try again",
+            "userFriendlyResponseComment": "Wrong password. Please try again."
+        },
+        {
+            "responseCode": "31002",
+            "actualResponseComment": "Invalid Action: This username is not allowed.Please choose a different one",
+            "userFriendlyResponseComment": "This username isn't available. Try another."
+        },
+        {
+            "responseCode": "31101",
+            "actualResponseComment": "Not Allowed: You can only perform this action with users on your friends list",
+            "userFriendlyResponseComment": "This action is only for your friends."
+        },
+        {
+            "responseCode": "31102",
+            "actualResponseComment": "Not Allowed: You cannot follow yourself. Please follow other users instead",
+            "userFriendlyResponseComment": "You can't follow yourself."
+        },
+        {
+            "responseCode": "31103",
+            "actualResponseComment": "Information Not Found: The user you tried to follow does not exist. ",
+            "userFriendlyResponseComment": "This user doesn't exist."
+        },
+        {
+            "responseCode": "31104",
+            "actualResponseComment": "Not Allowed: You cannot block yourself. ",
+            "userFriendlyResponseComment": "You can't block yourself."
+        },
+        {
+            "responseCode": "31105",
+            "actualResponseComment": "Information Not Found: The user you already followed does not exist anymore. ",
+            "userFriendlyResponseComment": "This user is no longer available."
+        },
+        {
+            "responseCode": "31106",
+            "actualResponseComment": "Information Not Found: The user you tried to block does not exist. ",
+            "userFriendlyResponseComment": "This user doesn't exist."
+        },
+        {
+            "responseCode": "31201",
+            "actualResponseComment": "Market capitalization data is not available for the provided UUID",
+            "userFriendlyResponseComment": "Financial data isn't available right now."
+        },
+        {
+            "responseCode": "31202",
+            "actualResponseComment": "Not Allowed: You are not allowed to initiate transfers to your own address",
+            "userFriendlyResponseComment": "You can't transfer to yourself."
+        },
+        {
+            "responseCode": "31601",
+            "actualResponseComment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",
+            "userFriendlyResponseComment": "This comment doesn't exist."
+        },
+        {
+            "responseCode": "31602",
+            "actualResponseComment": "Information Not Found: The post you're trying to comment on does not exist. Please check the post ID and try again",
+            "userFriendlyResponseComment": "The original post was deleted."
+        },
+        {
+            "responseCode": "31603",
+            "actualResponseComment": "Information Not Found: This comment does not exist",
+            "userFriendlyResponseComment": "This comment was removed."
+        },
+        {
+            "responseCode": "31801",
+            "actualResponseComment": "Forbidden: Access denied. You do not have the required permissions for this action",
+            "userFriendlyResponseComment": "You don't have permission for this."
+        },
+        {
+            "responseCode": "31802",
+            "actualResponseComment": "Forbidden: You can only update your own chats",
+            "userFriendlyResponseComment": "You can only edit your conversations."
+        },
+        {
+            "responseCode": "31803",
+            "actualResponseComment": "Not Allowed: Only group chats can be updated. One-on-one chats don't support these features",
+            "userFriendlyResponseComment": "This feature only works in group chats."
+        },
+        {
+            "responseCode": "31804",
+            "actualResponseComment": "Forbidden: You can only add participants to your own chats",
+            "userFriendlyResponseComment": "You can only add people to your chats."
+        },
+        {
+            "responseCode": "31805",
+            "actualResponseComment": "Not Allowed: Only public chats can add participants",
+            "userFriendlyResponseComment": "This chat doesn't allow new members."
+        },
+        {
+            "responseCode": "31806",
+            "actualResponseComment": "Forbidden: You can only remove participants from your own chats",
+            "userFriendlyResponseComment": "You can only remove people from your chats."
+        },
+        {
+            "responseCode": "31807",
+            "actualResponseComment": "Not Allowed: Participants can only be removed from group chats, not from one-on-one chats",
+            "userFriendlyResponseComment": "Can't remove people from private chats."
+        },
+        {
+            "responseCode": "31808",
+            "actualResponseComment": "Information Not Found: Failed to add participants. Invalid input parameters. No participants found. ",
+            "userFriendlyResponseComment": "Couldn't add these people to the chat."
+        },
+        {
+            "responseCode": "31810",
+            "actualResponseComment": "A valid messid is required to proceed. Please enter valid messageId",
+            "userFriendlyResponseComment": "We couldn't identify this message."
+        },
+        {
+            "responseCode": "40301",
+            "actualResponseComment": "Unexpected Error: An unexpected error occurred. Please try again later or contact support",
+            "userFriendlyResponseComment": "Something went wrong. Please try again."
+        },
+        {
+            "responseCode": "40302",
+            "actualResponseComment": "Database Error: A database error occurred. Please try again later or contact support",
+            "userFriendlyResponseComment": "We're having technical issues. Please try later."
+        },
+        {
+            "responseCode": "40303",
+            "actualResponseComment": "Database Error: Error fetching contact from the database. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't retrieve contact information."
+        },
+        {
+            "responseCode": "40304",
+            "actualResponseComment": "Unexpected Error: An error occurred while uploading the media files. Please try again or contact support",
+            "userFriendlyResponseComment": "Couldn't upload your file. Please try again."
+        },
+        {
+            "responseCode": "40305",
+            "actualResponseComment": "Not found!",
+            "userFriendlyResponseComment": "We couldn't find what you're looking for."
+        },
+        {
+            "responseCode": "40306",
+            "actualResponseComment": "Unexpected Error: Media path necessary for upload",
+            "userFriendlyResponseComment": "Please select a file to upload."
+        },
+        {
+            "responseCode": "40307",
+            "actualResponseComment": "Unexpected Error: The uploaded file is empty. Please provide a valid file",
+            "userFriendlyResponseComment": "The file you uploaded is empty."
+        },
+        {
+            "responseCode": "40401",
+            "actualResponseComment": "Unexpected error: Failed to fetch contact from database. ",
+            "userFriendlyResponseComment": "Couldn't retrieve contact details."
+        },
+        {
+            "responseCode": "40601",
+            "actualResponseComment": "Unexpected Error: Failed to register user. Please try again later or contact support",
+            "userFriendlyResponseComment": "Registration failed. Please try again."
+        },
+        {
+            "responseCode": "40602",
+            "actualResponseComment": "Unexpected error: Failed to generate user ID ",
+            "userFriendlyResponseComment": "Couldn't create your account. Please try again."
+        },
+        {
+            "responseCode": "40701",
+            "actualResponseComment": "Unexpected Error: Failed to verify account. Please try again later or contact support",
+            "userFriendlyResponseComment": "Verification failed. Please try again."
+        },
+        {
+            "responseCode": "40801",
+            "actualResponseComment": "Unexpected Error: Unexpected error occurred while trying to log in. Please try again later or contact support",
+            "userFriendlyResponseComment": "Login failed. Please try again."
+        },
+        {
+            "responseCode": "40901",
+            "actualResponseComment": "Unexpected Error: An unexpected error occured while trying to refresh the AccessToken. Please try again later or contact support",
+            "userFriendlyResponseComment": "Session refresh failed. Please log in again."
+        },
+        {
+            "responseCode": "41001",
+            "actualResponseComment": "Unexpected Error: Failed to retrieve user information. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't get user details."
+        },
+        {
+            "responseCode": "41002",
+            "actualResponseComment": "Unexpected Error: Failed to update biography. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't update your bio."
+        },
+        {
+            "responseCode": "41003",
+            "actualResponseComment": "Unexpected Error: Failed to update profile picture. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't update your profile picture."
+        },
+        {
+            "responseCode": "41004",
+            "actualResponseComment": "Unexpected Error: Failed to update password. Please try again later or contact support",
+            "userFriendlyResponseComment": "Password update failed. Please try again."
+        },
+        {
+            "responseCode": "41005",
+            "actualResponseComment": "Unexpected Error: Failed to update email. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't update your email."
+        },
+        {
+            "responseCode": "41006",
+            "actualResponseComment": "Unexpected Error: Failed to update username. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't update your username."
+        },
+        {
+            "responseCode": "41007",
+            "actualResponseComment": "Unexpected Error: Failed to retrieve profile data. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't load profile information."
+        },
+        {
+            "responseCode": "41008",
+            "actualResponseComment": "Unexpected Error: Failed to retrieve user data. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't load user information."
+        },
+        {
+            "responseCode": "41009",
+            "actualResponseComment": "Unexpected error: Media upload failed",
+            "userFriendlyResponseComment": "Couldn't upload your file."
+        },
+        {
+            "responseCode": "41010",
+            "actualResponseComment": "Unexpected Error: Failed to generate a unique slug after multiple attempts",
+            "userFriendlyResponseComment": "Couldn't create a unique identifier."
+        },
+        {
+            "responseCode": "41011",
+            "actualResponseComment": "Unexpected Error: Failed to delete user. ",
+            "userFriendlyResponseComment": "Couldn't delete the account."
+        },
+        {
+            "responseCode": "41012",
+            "actualResponseComment": "Unexpected Error: Failed to update user stats. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't update statistics."
+        },
+        {
+            "responseCode": "41101",
+            "actualResponseComment": "Unexpected Error: Failed to retrieve friends data. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't load your friends list."
+        },
+        {
+            "responseCode": "41102",
+            "actualResponseComment": "Unexpected Error: Failed to retrieve relation data. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't load relationship information."
+        },
+        {
+            "responseCode": "41103",
+            "actualResponseComment": "Unexpected Error: Failed to follow or unfollow the user. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't complete this follow action."
+        },
+        {
+            "responseCode": "41104",
+            "actualResponseComment": "Unexpected Error: Failed to retrieve followers or following data. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't load follower information."
+        },
+        {
+            "responseCode": "41105",
+            "actualResponseComment": "Unexpected Error: Failed to retrieve blocked list. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't load your blocked users."
+        },
+        {
+            "responseCode": "41106",
+            "actualResponseComment": "Unexpected Error: Failed to toggle user block",
+            "userFriendlyResponseComment": "Couldn't complete this block action."
+        },
+        {
+            "responseCode": "41107",
+            "actualResponseComment": "Unexpected error: Failed to retrieve friends list",
+            "userFriendlyResponseComment": "Couldn't load your friends."
+        },
+        {
+            "responseCode": "41108",
+            "actualResponseComment": "Unexpected error: Failed to retrieve blocked list",
+            "userFriendlyResponseComment": "Couldn't load blocked users."
+        },
+        {
+            "responseCode": "41201",
+            "actualResponseComment": "Unexpected Error: Liquidity not found. Please try again later or contact support",
+            "userFriendlyResponseComment": "Financial data unavailable right now."
+        },
+        {
+            "responseCode": "41202",
+            "actualResponseComment": "Unexpected Error: Failed to locate MCAPs. Please try again later or contact support",
+            "userFriendlyResponseComment": "Market data unavailable right now."
+        },
+        {
+            "responseCode": "41203",
+            "actualResponseComment": "Unexpected Error: Failed to retrieve token price.  Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't get current prices."
+        },
+        {
+            "responseCode": "41204",
+            "actualResponseComment": "Unexpected Error: Failed to retrieve liquidity list. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't get financial data."
+        },
+        {
+            "responseCode": "41205",
+            "actualResponseComment": "Unexpected Error: Processing the interactions failed. Please try again or contact support",
+            "userFriendlyResponseComment": "Couldn't complete this transaction."
+        },
+        {
+            "responseCode": "41206",
+            "actualResponseComment": "Unexpected Error: Failed to retrieve the list of market capitalizations. Please try again later",
+            "userFriendlyResponseComment": "Market data unavailable."
+        },
+        {
+            "responseCode": "41207",
+            "actualResponseComment": "Unexpected Error: Unable to retrieve the users list at the moment. Please try again later",
+            "userFriendlyResponseComment": "Couldn't load user list."
+        },
+        {
+            "responseCode": "41208",
+            "actualResponseComment": "Error fetching entries ",
+            "userFriendlyResponseComment": "Couldn't load data."
+        },
+        {
+            "responseCode": "41209",
+            "actualResponseComment": "Error reading gems",
+            "userFriendlyResponseComment": "Couldn't load gem information."
+        },
+        {
+            "responseCode": "41210",
+            "actualResponseComment": "Error inserting into gems",
+            "userFriendlyResponseComment": "Couldn't save gem data."
+        },
+        {
+            "responseCode": "41211",
+            "actualResponseComment": "Error updating collected status ",
+            "userFriendlyResponseComment": "Couldn't update collection status."
+        },
+        {
+            "responseCode": "41212",
+            "actualResponseComment": "None",
+            "userFriendlyResponseComment": "No information available."
+        },
+        {
+            "responseCode": "41213",
+            "actualResponseComment": "Invalid action type",
+            "userFriendlyResponseComment": "This action isn't allowed."
+        },
+        {
+            "responseCode": "41214",
+            "actualResponseComment": "Unexpected Error: No fetchPool found",
+            "userFriendlyResponseComment": "Data source unavailable."
+        },
+        {
+            "responseCode": "41215",
+            "actualResponseComment": "UNEXPECTED ERROR: TABLESTOGEMS",
+            "userFriendlyResponseComment": "Gem conversion failed."
+        },
+        {
+            "responseCode": "41216",
+            "actualResponseComment": "Unexpected Error: Failed to fetch wallets from database",
+            "userFriendlyResponseComment": "Couldn't load wallet information."
+        },
+        {
+            "responseCode": "41217",
+            "actualResponseComment": "Unexpected Error: refreshMarketData failed",
+            "userFriendlyResponseComment": "Market data update failed."
+        },
+        {
+            "responseCode": "41218",
+            "actualResponseComment": "Unexpected Error: Inserted ID is missing from refreshMarketData response",
+            "userFriendlyResponseComment": "Market data incomplete."
+        },
+        {
+            "responseCode": "41219",
+            "actualResponseComment": "Unexpected Error: Unable to connect to the site",
+            "userFriendlyResponseComment": "Couldn't connect to service."
+        },
+        {
+            "responseCode": "41220",
+            "actualResponseComment": "Unexpected Error: Failed to decode JSON response",
+            "userFriendlyResponseComment": "Couldn't understand server response."
+        },
+        {
+            "responseCode": "41221",
+            "actualResponseComment": "Unexpected Error: Invalid action type",
+            "userFriendlyResponseComment": "This action isn't allowed."
+        },
+        {
+            "responseCode": "41401",
+            "actualResponseComment": "Unexpected Error: Failed to create transaction. Please try again later or contact support",
+            "userFriendlyResponseComment": "Transaction failed. Please try again."
+        },
+        {
+            "responseCode": "41501",
+            "actualResponseComment": "Failure: Failed to retrieve post data. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't load the post."
+        },
+        {
+            "responseCode": "41502",
+            "actualResponseComment": "Failure: Failed to save or unsave the post. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't update saved posts."
+        },
+        {
+            "responseCode": "41503",
+            "actualResponseComment": "Unexpected Error: Failed to like this post. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't like this post."
+        },
+        {
+            "responseCode": "41504",
+            "actualResponseComment": "Unexpected Error: Failed to dislike this post. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't dislike this post."
+        },
+        {
+            "responseCode": "41505",
+            "actualResponseComment": "Unexpected Error: Failed to report this post. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't report this post."
+        },
+        {
+            "responseCode": "41506",
+            "actualResponseComment": "Unexpected Error: Failed to view this post. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't load this post."
+        },
+        {
+            "responseCode": "41507",
+            "actualResponseComment": "Unexpected Error: Failed to share this post. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't share this post."
+        },
+        {
+            "responseCode": "41508",
+            "actualResponseComment": "Failure: Unable to create the post due to an error",
+            "userFriendlyResponseComment": "Couldn't create your post."
+        },
+        {
+            "responseCode": "41509",
+            "actualResponseComment": "Failed to update post info",
+            "userFriendlyResponseComment": "Couldn't update the post."
+        },
+        {
+            "responseCode": "41510",
+            "actualResponseComment": "Failed to delete post",
+            "userFriendlyResponseComment": "Couldn't delete the post."
+        },
+        {
+            "responseCode": "41511",
+            "actualResponseComment": "Failed to generate post ID",
+            "userFriendlyResponseComment": "Couldn't create post identifier."
+        },
+        {
+            "responseCode": "41512",
+            "actualResponseComment": "Unable to locate the requested feed",
+            "userFriendlyResponseComment": "Couldn't find this content feed."
+        },
+        {
+            "responseCode": "41513",
+            "actualResponseComment": "Unexpected Error: Failed to fetch posts",
+            "userFriendlyResponseComment": "Couldn't load posts."
+        },
+        {
+            "responseCode": "41601",
+            "actualResponseComment": "Failure: Failed to retrieve Comment Informations. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't load comments."
+        },
+        {
+            "responseCode": "41602",
+            "actualResponseComment": "Failure: Failed to create comment. Please try again later",
+            "userFriendlyResponseComment": "Couldn't post your comment."
+        },
+        {
+            "responseCode": "41603",
+            "actualResponseComment": "Failure: Unable to delete the comment. Please check your permissions or try again later",
+            "userFriendlyResponseComment": "Couldn't delete this comment."
+        },
+        {
+            "responseCode": "41604",
+            "actualResponseComment": "Parent comment must be top level",
+            "userFriendlyResponseComment": "Replies must be to main comments."
+        },
+        {
+            "responseCode": "41605",
+            "actualResponseComment": "Error: Parent ID does not exist. Please provide a valid ID",
+            "userFriendlyResponseComment": "The original comment was deleted."
+        },
+        {
+            "responseCode": "41606",
+            "actualResponseComment": "Unexpected Error: Something went wrong while trying to fetch child comments",
+            "userFriendlyResponseComment": "Couldn't load replies."
+        },
+        {
+            "responseCode": "41607",
+            "actualResponseComment": "Failed to generate comment ID",
+            "userFriendlyResponseComment": "Couldn't create comment identifier."
+        },
+        {
+            "responseCode": "41701",
+            "actualResponseComment": "Failure: The tag could not be created due to an error. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't create this tag."
+        },
+        {
+            "responseCode": "41702",
+            "actualResponseComment": "Failure: Failed to fetch tags from the database. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't load tags."
+        },
+        {
+            "responseCode": "41703",
+            "actualResponseComment": "Unexpected Error: Failed to add the tag. Please try again",
+            "userFriendlyResponseComment": "Couldn't add this tag."
+        },
+        {
+            "responseCode": "41704",
+            "actualResponseComment": "Failed to generate tag ID. Please check the system and try again",
+            "userFriendlyResponseComment": "Couldn't create tag identifier."
+        },
+        {
+            "responseCode": "41801",
+            "actualResponseComment": "Failure: Failed to insert message. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't send your message."
+        },
+        {
+            "responseCode": "41802",
+            "actualResponseComment": "Failure: Failed to create a chat and add participants. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't start this conversation."
+        },
+        {
+            "responseCode": "41803",
+            "actualResponseComment": "Failure: Failed to update chat. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't update the chat."
+        },
+        {
+            "responseCode": "41804",
+            "actualResponseComment": "Failure: Failed to add participants. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't add people to the chat."
+        },
+        {
+            "responseCode": "41805",
+            "actualResponseComment": "Failure: Failed to remove participant from chat. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't remove this person."
+        },
+        {
+            "responseCode": "41806",
+            "actualResponseComment": "Failure: Failed to add message. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't send your message."
+        },
+        {
+            "responseCode": "41807",
+            "actualResponseComment": "Failure: Failed to fetch chat feeds. Please try again later or contact support",
+            "userFriendlyResponseComment": "Couldn't load conversations."
+        },
+        {
+            "responseCode": "41808",
+            "actualResponseComment": "Admin only func: Failed to generate chat ID",
+            "userFriendlyResponseComment": "Administrator action failed."
+        },
+        {
+            "responseCode": "41809",
+            "actualResponseComment": "This conversation is currently suspended and cannot be accessed",
+            "userFriendlyResponseComment": "This chat is temporarily unavailable."
+        },
+        {
+            "responseCode": "41810",
+            "actualResponseComment": "Unexpected error: Failed to remove message",
+            "userFriendlyResponseComment": "Couldn't delete this message."
+        },
+        {
+            "responseCode": "41811",
+            "actualResponseComment": "Failed to delete chat ID (Admin only func)",
+            "userFriendlyResponseComment": "Couldn't delete this chat."
+        },
+        {
+            "responseCode": "51301",
+            "actualResponseComment": "Failure: Your liquidity is too low to perform this action",
+            "userFriendlyResponseComment": "Insufficient funds for this action."
+        },
+        {
+            "responseCode": "51401",
+            "actualResponseComment": "Failure: You don't have sufficient funds for this transaction",
+            "userFriendlyResponseComment": "Not enough money for this transaction."
+        },
+        {
+            "responseCode": "60501",
+            "actualResponseComment": "Unauthorized: You are not logged in. Please log in to proceed",
+            "userFriendlyResponseComment": "Please log in to continue."
+        },
+        {
+            "responseCode": "60801",
+            "actualResponseComment": "Invalid Action: Account not verified. Please check your details and verify your account",
+            "userFriendlyResponseComment": "Please verify your account first."
+        }
+        
+    ]
+}
