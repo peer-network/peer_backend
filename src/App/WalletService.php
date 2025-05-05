@@ -288,7 +288,7 @@ class WalletService
             } else {
                 return [
                     'status' => 'success',
-                    'ResponseCode' => $response['ResponseCode'],
+                    'ResponseCode' => 11211,
                     'affectedRows' => [],
                 ];
             }
