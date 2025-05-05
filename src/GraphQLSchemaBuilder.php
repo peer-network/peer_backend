@@ -2761,7 +2761,7 @@ class GraphQLSchemaBuilder
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError(20224);
         }
 
         if (strlen($name) < 3 || strlen($name) > 33) {
@@ -2816,7 +2816,7 @@ class GraphQLSchemaBuilder
         try {
             $user = $this->userMapper->loadById($userid);
             if (!$user) {
-                return $this->respondWithError(20201);
+                return $this->respondWithError(21001);
             }
 
             if ($user->getVerified() == 1) {

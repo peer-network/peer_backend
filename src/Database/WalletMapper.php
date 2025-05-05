@@ -101,7 +101,7 @@ class WalletMapper
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(51301);
+            return self::respondWithError(20264);
         }
 
         try {
@@ -1114,7 +1114,7 @@ class WalletMapper
 
             if (!$result || !$result['invited']) {
                 $this->logger->warning('No inviter found for the given user', ['userid' => $userId]);
-                return self::respondWithError(11401);
+                return self::respondWithError(21401);
             }
 
             $inviterId = $result['invited'];
