@@ -85,6 +85,26 @@ class TagPostMapper
         return $results;
     }
 
+    public function getTagsByPostId(string $postid): array
+    {
+        $this->logger->info("TagPostMapper.getTagsByPostId started");
+    
+        $sql = "
+            SELECT t.name
+            FROM post_tags tp
+            JOIN tags t ON tp.tagid = t.tagid
+            WHERE tp.postid = :postid
+        ";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['postid' => $postid]);
+    
+        $tags = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+    
+        $this->logger->info("Fetched tag names for postid", ['postid' => $postid, 'tags' => $tags]);
+    
+        return $tags;
+    }
+
     public function insert(TagPost $tagPost): TagPost
     {
         $this->logger->info("TagPostMapper.insert started");
