@@ -191,8 +191,21 @@ class PostService
             if (!$postData['feedid']) {
                 $this->insertPostMetadata($postId, $this->currentUserId);
             }
+            
+            $tagPosts = $this->tagPostMapper->loadByPostId($postId);
+            $tagNames = [];
 
-            return $this->createSuccessResponse(11508, $post->getArrayCopy());
+            foreach ($tagPosts as $tp) {
+                $tag = $this->tagMapper->loadById($tp->getTagId());
+                if ($tag) {
+                    $tagNames[] = $tag->getName();
+                }
+            }
+
+            $data = $post->getArrayCopy();
+            $data['tags'] = $tagNames;
+
+            return $this->createSuccessResponse(11508, $data);
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);
