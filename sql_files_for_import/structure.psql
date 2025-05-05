@@ -55,15 +55,16 @@ CREATE INDEX idx_follows_followedid ON follows(followedid);
 -- Table: user_referral_info
 CREATE TABLE IF NOT EXISTS user_referral_info (
     uid UUID PRIMARY KEY,
-    user_uuid UUID UNIQUE NOT NULL,
     referral_link VARCHAR(255) NOT NULL,
     qr_code_url VARCHAR(255) DEFAULT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     referral_uuid UUID UNIQUE NOT NULL,
 
-    CONSTRAINT fk_user_referral_info_user FOREIGN KEY (user_uuid) REFERENCES users(uid) ON DELETE CASCADE
+    CONSTRAINT fk_user_referral_info_user FOREIGN KEY (uid) REFERENCES users(uid) ON DELETE CASCADE
 );
-CREATE INDEX idx_user_referral_info_user_uuid ON user_referral_info(user_uuid);
+
+CREATE INDEX idx_user_referral_info_uid ON user_referral_info(uid);
+
 
 -- Table: access_tokens
 CREATE TABLE IF NOT EXISTS access_tokens (
