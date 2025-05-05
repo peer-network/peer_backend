@@ -31,7 +31,7 @@ type Query {
   balance: CurrentLiquidity!
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
-  listTodaysInteractions: StandardResponse!
+  listTodaysInteractions: ListTodaysInteractionsResponse!
 }
 
 type Mutation {
@@ -61,9 +61,7 @@ type Mutation {
 }
 
 scalar Decimal
-scalar DATEN
 scalar Date
-scalar TagList
 
 enum PostActionType {
   LIKE
@@ -124,10 +122,27 @@ enum DayFilterType {
   Y0
 }
 
-type StandardResponse {
+type ListTodaysInteractionsResponse {
   status: String!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: TodaysInteractionsData
+}
+
+type TodaysInteractionsData {
+  totalInteractions: Decimal
+  totalScore: Decimal
+  totalDetails: TodaysInteractionsDetailsData
+}
+
+type TodaysInteractionsDetailsData {
+  views: Decimal
+  likes: Decimal
+  dislikes: Decimal
+  comments: Decimal
+  viewsScore: Decimal
+  likesScore: Decimal
+  dislikesScore: Decimal
+  commentsScore: Decimal
 }
 
 type HelloResponse {
@@ -457,7 +472,7 @@ type Post {
   isreported: Boolean!
   isdisliked: Boolean!
   issaved: Boolean!
-  tags: TagList!
+  tags: [String]!
   user: ProfileUser!
   comments: [Comment!]!
 }
