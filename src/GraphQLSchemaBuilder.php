@@ -1268,6 +1268,54 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'GemstersData' => [
+                'totalData' => function (array $root): array {
+                    $this->logger->info('Query.GemstersData Resolvers');
+                    return $root['totalData'] ?? [];
+                },
+                'userData' => function (array $root): array {
+                    return $root['userData'] ?? [];
+                },
+            ],
+            'GemstersTotalData' => [
+                'totalGems' => function (array $root): float {
+                    $this->logger->info('Query.GemstersTotalData Resolvers');
+                    return $root['totalGems'] ?? 0.0;
+                },
+                'gemsintoken' => function (array $root): float {
+                    return $root['gemsintoken'] ?? 0.0;
+                },
+                'bestatigung' => function (array $root): float {
+                    return $root['bestatigung'] ?? 0.0;
+                },
+            ],
+            'GemstersUserData' => [
+                'gemid' => function (array $root): string {
+                    $this->logger->info('Query.GemstersUserData Resolvers');
+                    return $root['gemid'] ?? '';
+                },
+                'userid' => function (array $root): string {
+                    return $root['userid'] ?? '';
+                },
+                'postid' => function (array $root): string {
+                    return $root['postid'] ?? '';
+                },
+                'fromid' => function (array $root): string {
+                    return $root['fromid'] ?? '';
+                },
+                'gems' => function (array $root): float {
+                    return $root['gems'] ?? 0.0;
+                },
+                'numbers' => function (array $root): float {
+                    return $root['numbers'] ?? 0.0;
+                },
+                'whereby' => function (array $root): float {
+                    return $root['whereby'] ?? 0.0;
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                }
+            ],
             'LiquidityPoolResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.LiquidityPoolResponse Resolvers');

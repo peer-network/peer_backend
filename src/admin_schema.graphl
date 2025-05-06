@@ -164,6 +164,28 @@ type GemstersResponse {
   affectedRows: DATEN
 }
 
+type GemstersData {
+  totalData: GemstersTotalData
+  userData: [GemstersUserData] 
+}
+
+type GemstersTotalData {
+  totalGems: Decimal
+  gemsintoken: Decimal
+  bestatigung: Decimal
+}
+
+type GemstersUserData {
+  gemid: ID,
+  userid: ID,
+  postid: ID,
+  fromid: ID,
+  gems: Decimal,
+  numbers: Decimal,
+  whereby: Decimal,
+  createdat: Date
+}
+
 type GemsterResponse {
   status: String!
   ResponseCode: String
