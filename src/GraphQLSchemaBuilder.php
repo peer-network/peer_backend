@@ -1450,7 +1450,7 @@ class GraphQLSchemaBuilder
             $this->logger->info('Current userId in resolveReferralList', ['userId' => $userId]);
 
             $referralUsers = [
-                'invitedBy' => null,
+                'invitedBy' => [],
                 'iInvited' => [],
             ];
 

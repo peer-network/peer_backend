@@ -1181,7 +1181,7 @@ class UserMapper
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         return [
             'iInvited' => array_map(fn($row) => [
-                'id' => $row['uid'],
+                'uid' => $row['uid'],
                 'username' => $row['username'],
                 'slug' => (int)$row['slug'],
                 'img' => $row['img'],
