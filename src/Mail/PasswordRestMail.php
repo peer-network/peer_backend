@@ -3,15 +3,10 @@
 namespace Fawaz\Mail;
 
 use Fawaz\Mail\Interface\EmailInterface;
-use Fawaz\Services\BrevoMailer;
-use Fawaz\Services\Mailer;
-use Psr\Log\LoggerInterface;
+use Fawaz\Services\SmtpMailer;
 
 class PasswordRestMail implements EmailInterface
 {
-    protected $subject = 'Reset Your Password';
-    protected  $mailer;
-
     public function __construct(public $data) {
         
     }
@@ -38,22 +33,9 @@ class PasswordRestMail implements EmailInterface
      */
     public function send(string $email): array
     {
-        $mailData = [
-            "sender" => [
-                "name" => $_ENV['MAIL_FROM_NAME'],
-                "email" => $_ENV['MAIL_FROM_ADDRESS']
-            ],
-            "to" => [
-                [
-                    "email" => $email,
-                    "name" => "User"
-                ]
-            ],
-            "subject" => "Reset Your Password",
-            "htmlContent" => $this->content()
-        ];
-    
-        $mailer = new BrevoMailer();
-        return $mailer->sendViaAPI($mailData);
+        $subject = "Reset Your Password";
+
+        $mailer = new SmtpMailer();
+        return $mailer->sendEmail($email, $subject, $this->content());
     }
 }
