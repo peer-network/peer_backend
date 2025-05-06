@@ -1268,6 +1268,72 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'GemstersData' => [
+                'winStatus' => function (array $root): array {
+                    $this->logger->info('Query.GemstersData Resolvers');
+                    return $root['winStatus'] ?? [];
+                },
+                'userStatus' => function (array $root): array {
+                    return $root['userStatus'] ?? [];
+                },
+            ],
+            'WinStatus' => [
+                'totalGems' => function (array $root): float {
+                    $this->logger->info('Query.WinStatus Resolvers');
+                    return $root['totalGems'] ?? 0.0;
+                },
+                'gemsintoken' => function (array $root): float {
+                    return $root['gemsintoken'] ?? 0.0;
+                },
+                'bestatigung' => function (array $root): float {
+                    return $root['bestatigung'] ?? 0.0;
+                },
+            ],
+            'GemstersUserStatus' => [
+                'userid' => function (array $root): string {
+                    $this->logger->info('Query.GemstersUserStatus Resolvers');
+                    return $root['userid'] ?? '';
+                },
+                'gems' => function (array $root): float {
+                    return $root['gems'] ?? 0.0;
+                },
+                'tokens' => function (array $root): float {
+                    return $root['tokens'] ?? 0.0;
+                },
+                'percentage' => function (array $root): float {
+                    return $root['percentage'] ?? 0.0;
+                },
+                'details' => function (array $root): array {
+                    return $root['details'] ?? [];
+                }
+            ],
+            'GemstersUserStatusDetails' => [
+                'gemid' => function (array $root): string {
+                    $this->logger->info('Query.GemstersUserStatusDetails Resolvers');
+                    return $root['gemid'] ?? '';
+                },
+                'userid' => function (array $root): string {
+                    return $root['userid'] ?? '';
+                },
+                'postid' => function (array $root): string {
+                    return $root['postid'] ?? '';
+                },
+                'fromid' => function (array $root): string {
+                    return $root['fromid'] ?? '';
+                },
+                'gems' => function (array $root): float {
+                    return $root['gems'] ?? 0.0;
+                },
+                'numbers' => function (array $root): float {
+                    return $root['numbers'] ?? 0.0;
+                },
+                'whereby' => function (array $root): float {
+                    return $root['whereby'] ?? 0.0;
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                }
+            ],
             'LiquidityPoolResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.LiquidityPoolResponse Resolvers');
