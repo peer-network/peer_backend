@@ -374,9 +374,6 @@ class PostService
         $this->logger->info("PostService.findPostser started");
 
         $results = $this->postMapper->findPostser($this->currentUserId, $args);
-		if (empty($results)) {
-			return $this->respondWithError(20236);
-		}
 
         return $results;
     }
