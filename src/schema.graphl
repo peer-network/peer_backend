@@ -32,6 +32,7 @@ type Query {
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listTodaysInteractions: StandardResponse!
+  getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
 }
 
 type Mutation {
@@ -145,6 +146,24 @@ type LogWins {
   action: String
   numbers: Decimal
   createdat: String
+}
+
+type Transaction {
+  transactionid: String
+  transuniqueid: String
+  transactiontype: String
+  senderid: String
+  recipientid: String
+  tokenamount: Int
+  transferaction: String
+  message: String
+  flag: String
+}
+
+type TransactionResponse {
+  status: String!
+  ResponseCode: String!
+  affectedRows: [Transaction!]
 }
 
 type UserLogWins {

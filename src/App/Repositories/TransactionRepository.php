@@ -63,9 +63,9 @@ class TransactionRepository
         $this->logger->info("TransactionRepository.saveTransaction started");
 
         $query = "INSERT INTO transactions 
-                  (transactionid, transuniqueid, transactiontype, senderid, recipientid, tokenamount, transferaction, message, flag, action, createdat)
+                  (transactionid, transuniqueid, transactiontype, senderid, recipientid, tokenamount, transferaction, message, createdat)
                   VALUES 
-                  (:transactionId, :transUniqueId, :transactionType, :senderId, :recipientId, :tokenAmount, :transferAction, :message, :flag, :action, :createdat)";
+                  (:transactionId, :transUniqueId, :transactionType, :senderId, :recipientId, :tokenAmount, :transferAction, :message, :createdat)";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -75,11 +75,11 @@ class TransactionRepository
             $stmt->bindValue(':transactionType', $transaction->getTransactionType(), \PDO::PARAM_STR);
             $stmt->bindValue(':senderId', $transaction->getSenderId(), \PDO::PARAM_STR);
             $stmt->bindValue(':recipientId', $transaction->getRecipientId(), \PDO::PARAM_STR);
-            $stmt->bindValue(':tokenAmount', $transaction->getTokenAmount(), \PDO::PARAM_INT);
+            $stmt->bindValue(':tokenAmount', $transaction->getTokenAmount(), \PDO::PARAM_STR);
             $stmt->bindValue(':transferAction', $transaction->geTtransferAction(), \PDO::PARAM_STR);
             $stmt->bindValue(':message', $transaction->getMessage(), \PDO::PARAM_STR);
-            $stmt->bindValue(':flag', $transaction->getFlag(), \PDO::PARAM_STR);
-            $stmt->bindValue(':action', $transaction->getAction(), \PDO::PARAM_STR);
+            // $stmt->bindValue(':flag', $transaction->getFlag(), \PDO::PARAM_STR);
+            // $stmt->bindValue(':action', $transaction->getAction(), \PDO::PARAM_STR);
             $stmt->bindValue(':createdat', $transaction->getCreatedat(), \PDO::PARAM_STR);
             $stmt->execute();
 

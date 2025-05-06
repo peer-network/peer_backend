@@ -1160,6 +1160,7 @@ class GraphQLSchemaBuilder
             'postcomments' => fn(mixed $root, array $args) => $this->resolvePostComments($args),
             'dailygemstatus' => fn(mixed $root, array $args) => $this->poolService->callGemster(),
             'dailygemsresults' => fn(mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
+            'getTransactionHistory' => fn(mixed $root, array $args) => $this->walletService->transcationsHistory($args),
         ];
     }
 

@@ -180,9 +180,10 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->insertWinToLog($userId, $args);
-                $this->insertWinToPool($userId, $args);
+                // $this->insertWinToLog($userId, $args);
+                // $this->insertWinToPool($userId, $args);
 
+                $this->saveWalletEntry($userId, $args['numbers']);
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferDeductSenderToRecipient',
@@ -212,8 +213,9 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->insertWinToLog($row, $args);
-                $this->insertWinToPool($row, $args);
+                // $this->insertWinToLog($row, $args);
+                // $this->insertWinToPool($row, $args);
+                $this->saveWalletEntry($row, $args['numbers']);
 
                 $transUniqueIdForDebit = self::generateUUID();
                 $transObj = [
@@ -247,9 +249,9 @@ class WalletMapper
                         'whereby' => TRANSFER_,
                     ];
 
-                    $this->insertWinToLog($inviterId, $args);
-                    $this->insertWinToPool($inviterId, $args);
-
+                    // $this->insertWinToLog($inviterId, $args);
+                    // $this->insertWinToPool($inviterId, $args);
+                    $this->saveWalletEntry($inviterId, $args['numbers']);
                     $transObj = [
                         'transUniqueId' => $transUniqueId,
                         'transactionType' => 'transferSenderToInviter',
@@ -280,8 +282,10 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->insertWinToLog($userId, $args);
-                $this->insertWinToPool($userId, $args);
+                // $this->insertWinToLog($userId, $args);
+                // $this->insertWinToPool($userId, $args);
+                $this->saveWalletEntry($userId, $args['numbers']);
+
             }
 
             // 5. POOLWALLET: Fee To Account
@@ -299,8 +303,9 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->insertWinToLog($this->poolWallet, $args);
-                $this->insertWinToPool($this->poolWallet, $args);
+                // $this->insertWinToLog($this->poolWallet, $args);
+                // $this->insertWinToPool($this->poolWallet, $args);
+                $this->saveWalletEntry($this->poolWallet, $args['numbers']);
 
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
@@ -332,9 +337,10 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->insertWinToLog($this->peerWallet, $args);
-                $this->insertWinToPool($this->peerWallet, $args);
+                // $this->insertWinToLog($this->peerWallet, $args);
+                // $this->insertWinToPool($this->peerWallet, $args);
 
+                $this->saveWalletEntry($this->peerWallet, $args['numbers']);
 
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
@@ -366,9 +372,9 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->insertWinToLog($this->burnWallet, $args);
-                $this->insertWinToPool($this->burnWallet, $args);
-
+                // $this->insertWinToLog($this->burnWallet, $args);
+                // $this->insertWinToPool($this->burnWallet, $args);
+                $this->saveWalletEntry($this->burnWallet, $args['numbers']);
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferSenderToBurnWallet',
@@ -1593,4 +1599,56 @@ class WalletMapper
     {
         return bcadd($qValue1, $qValue2);
     }
+
+
+    /**
+     * get transcation history of current user.
+     * 
+     * @param userId string
+     * @param offset int
+     * @param limit int
+     * 
+     */
+    public function transcationsHistory(string $userId, int $offset, int $limit): ?array
+    {
+
+        $this->logger->info('Fetching transaction history - WalletMapper.transactionsHistory', ['userId' => $userId]);
+
+        $query = "
+                    SELECT 
+                        *
+                    FROM transactions
+                    WHERE 
+                        senderid = :senderid 
+                        AND transferaction != 'CREDIT'
+                    ORDER BY createdat DESC
+                    LIMIT :limit OFFSET :offset
+                ";
+    
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':senderid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->execute();
+        
+            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC); 
+        
+            return [
+                'status' => 'success',
+                'ResponseCode' => 0000,
+                'affectedRows' => $transactions
+            ];
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error while fetching transactions - WalletMapper.transactionsHistory", ['error' => $e->getMessage()]);
+            
+        }
+        return [
+            'status' => 'error',
+            'ResponseCode' => 0000,
+            'affectedRows' => []
+        ];
+    }
+
+
 }

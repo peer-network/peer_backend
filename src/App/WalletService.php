@@ -297,4 +297,34 @@ class WalletService
             return $this->respondWithError('Unknown Error.');
         }
     }
+
+    /**
+     * Get transcation history with Filter
+     * 
+     * 
+     */
+    
+    public function transcationsHistory(array $args): ?array
+    {
+        $this->logger->info('WalletService.transcationsHistory started');
+
+
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+
+        try {
+            $results = $this->walletMapper->transcationsHistory($this->currentUserId, $offset, $limit);
+
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+                'affectedRows' => $results['affectedRows'],
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in WalletService.transcationsHistory", ['exception' => $e->getMessage()]);
+            return $this->respondWithError(0000);  
+        }
+
+    }
 }
