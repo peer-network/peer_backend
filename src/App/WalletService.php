@@ -94,7 +94,7 @@ class WalletService
         $this->logger->info("WalletService.fetchWalletById started");
 
         try {
-            $wallets = $this->walletMapper->loadWalletById($args, $this->currentUserId);
+            $wallets = $this->walletMapper->loadWalletById($this->currentUserId, $args);
 
             if ($wallets === false) {
                 return $this->respondWithError(41216);
@@ -288,7 +288,7 @@ class WalletService
             } else {
                 return [
                     'status' => 'success',
-                    'ResponseCode' => $response['ResponseCode'],
+                    'ResponseCode' => 11211,
                     'affectedRows' => [],
                 ];
             }
