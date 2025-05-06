@@ -1211,10 +1211,10 @@ class GraphQLSchemaBuilder
             'DailyGemsResultsData' => [
                 'data' => function (array $root): array {
                     $this->logger->info('Query.DailyGemsResultsData Resolvers');
-                    return $root['affectedRows'] ?? [];
+                    return $root['data'] ?? [];
                 },
-                'totalGems' => function (array $root): int {
-                    return $root['totalGems'] ?? 0;
+                'totalGems' => function (array $root): float {
+                    return $root['totalGems'] ?? 0.0;
                 },
             ],
             'DailyGemsResultsUserData' => [
@@ -1222,8 +1222,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.DailyGemsResultsUserData Resolvers');
                     return $root['userid'] ?? '';
                 },
-                'gems' => function (array $root): int {
-                    return $root['gems'] ?? 0;
+                'gems' => function (array $root): float {
+                    return $root['gems'] ?? 0.0;
                 },
             ],
             'ContactusResponse' => [
