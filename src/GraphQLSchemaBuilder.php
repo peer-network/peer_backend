@@ -2031,7 +2031,6 @@ class GraphQLSchemaBuilder
                         }
 
                         $DailyUsage += 1;
-                        $response['ResponseCode'] = $response['ResponseCode'] . " | DailyFree " . ucfirst($action) . " | Quota-remaining = " . ($limit - $DailyUsage);
                         return $response;
                     }
 
