@@ -2556,7 +2556,7 @@ class GraphQLSchemaBuilder
         return [
             'status' => 'success',
             'counter' => count($data),
-            'ResponseCode' => 11501,
+            'ResponseCode' => empty($data) ? 21518 : 11501,
             'affectedRows' => $data,
         ];
     }
