@@ -161,21 +161,29 @@ type GemstersResponse {
   status: String!
   counter: Int!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: GemstersData
 }
 
 type GemstersData {
-  totalData: GemstersTotalData
-  userData: [GemstersUserData] 
+  winStatus: WinStatus
+  userStatus: [GemstersUserStatus] 
 }
 
-type GemstersTotalData {
+type WinStatus {
   totalGems: Decimal
   gemsintoken: Decimal
   bestatigung: Decimal
 }
 
-type GemstersUserData {
+type GemstersUserStatus {
+  userid: ID,
+  gems: Decimal,
+  tokens: Decimal,
+  percentage: Decimal,
+  details: [GemstersUserStatusDetails]
+}
+
+type GemstersUserStatusDetails {
   gemid: ID,
   userid: ID,
   postid: ID,

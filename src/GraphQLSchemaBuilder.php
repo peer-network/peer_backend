@@ -1269,17 +1269,17 @@ class GraphQLSchemaBuilder
                 },
             ],
             'GemstersData' => [
-                'totalData' => function (array $root): array {
+                'winStatus' => function (array $root): array {
                     $this->logger->info('Query.GemstersData Resolvers');
-                    return $root['totalData'] ?? [];
+                    return $root['winStatus'] ?? [];
                 },
-                'userData' => function (array $root): array {
-                    return $root['userData'] ?? [];
+                'userStatus' => function (array $root): array {
+                    return $root['userStatus'] ?? [];
                 },
             ],
-            'GemstersTotalData' => [
+            'WinStatus' => [
                 'totalGems' => function (array $root): float {
-                    $this->logger->info('Query.GemstersTotalData Resolvers');
+                    $this->logger->info('Query.WinStatus Resolvers');
                     return $root['totalGems'] ?? 0.0;
                 },
                 'gemsintoken' => function (array $root): float {
@@ -1289,9 +1289,27 @@ class GraphQLSchemaBuilder
                     return $root['bestatigung'] ?? 0.0;
                 },
             ],
-            'GemstersUserData' => [
+            'GemstersUserStatus' => [
+                'userid' => function (array $root): string {
+                    $this->logger->info('Query.GemstersUserStatus Resolvers');
+                    return $root['userid'] ?? '';
+                },
+                'gems' => function (array $root): float {
+                    return $root['gems'] ?? 0.0;
+                },
+                'tokens' => function (array $root): float {
+                    return $root['tokens'] ?? 0.0;
+                },
+                'percentage' => function (array $root): float {
+                    return $root['percentage'] ?? 0.0;
+                },
+                'details' => function (array $root): array {
+                    return $root['details'] ?? [];
+                }
+            ],
+            'GemstersUserStatusDetails' => [
                 'gemid' => function (array $root): string {
-                    $this->logger->info('Query.GemstersUserData Resolvers');
+                    $this->logger->info('Query.GemstersUserStatusDetails Resolvers');
                     return $root['gemid'] ?? '';
                 },
                 'userid' => function (array $root): string {
