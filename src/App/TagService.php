@@ -131,9 +131,9 @@ class TagService
         $this->logger->info("TagService.loadTag started");
 
         try {
-            if (isset($args['tagname']) && !empty($args['tagname'])) {
-                $tagData = ['name' => $args['tagname']];
 
+            if (isset($args['tagName']) && !empty($args['tagName'])) {
+                $tagData = ['name' => $args['tagName']];
                 $tag = new Tag($tagData, ['name']);
             } else {
                 return $this->respondWithError(30101);
