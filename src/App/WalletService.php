@@ -304,7 +304,7 @@ class WalletService
      * 
      */
     
-    public function transcationsHistory(array $args): ?array
+    public function transcationsHistory(array $args): array
     {
         $this->logger->info('WalletService.transcationsHistory started');
 
@@ -315,11 +315,10 @@ class WalletService
         try {
             $results = $this->walletMapper->transcationsHistory($this->currentUserId, $offset, $limit);
 
-
             return [
                 'status' => 'success',
                 'ResponseCode' => $results['ResponseCode'],
-                'affectedRows' => $results['affectedRows'],
+                'affectedRows' => $results['affectedRows']
             ];
         } catch (\Exception $e) {
             $this->logger->error("Error in WalletService.transcationsHistory", ['exception' => $e->getMessage()]);

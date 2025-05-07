@@ -1120,6 +1120,54 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'TransactionResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'responseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'Transaction' => [
+                'transactionid' => function (array $root): string {
+                    return $root['transactionid'] ?? '';
+                },
+                'transuniqueid' => function (array $root): string {
+                    return $root['transuniqueid'] ?? '';
+                },
+                'transactiontype' => function (array $root): string {
+                    return $root['transactiontype'] ?? '';
+                },
+                'senderid' => function (array $root): string {
+                    return $root['senderid'] ?? '';
+                },
+                'recipientid' => function (array $root): string {
+                    return $root['recipientid'] ?? '';
+                },
+                'tokenamount' => function (array $root): int {
+                    return $root['tokenamount'] ?? 0;
+                },
+                'transferaction' => function (array $root): string {
+                    return $root['transferaction'] ?? '';
+                },
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+                'flag' => function (array $root): string {
+                    return $root['flag'] ?? '';
+                },
+                'timestamp' => function (array $root): string {
+                    return $root['timestamp'] ?? '';
+                },
+                'status' => function (array $root): string {
+                    return $root['status'] ?? '';
+                },
+            ],
+
         ];
     }
 
