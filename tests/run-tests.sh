@@ -1,1 +1,1 @@
-./vendor/bin/phpunit tests/Service/WalletServiceTest.php
+../vendor/bin/phpunit ./Service/WalletServiceTest.php
