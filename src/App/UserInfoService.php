@@ -74,11 +74,11 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if ($this->currentUserId === $followedUserId) {
-            return $this->respondWithError(21104);
+            return $this->respondWithError(31102);
         }
 
         $this->logger->info('UserInfoService.toggleUserFollow started');
@@ -101,7 +101,7 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($blockedUserId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if ($this->currentUserId === $blockedUserId) {
@@ -125,8 +125,8 @@ class UserInfoService
     {
         $this->logger->info('UserInfoService.loadBlocklist started');
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset = max((int) ($args['offset'] ?? 0), 0);
+        $limit = min(max((int) ($args['limit'] ?? 10), 1), 20);
 
         try {
             $results = $this->userInfoMapper->getBlockRelations($this->currentUserId, $offset, $limit);
@@ -141,7 +141,7 @@ class UserInfoService
 
         } catch (\Exception $e) {
             $this->logger->error("Error in UserInfoService.loadBlocklist", ['exception' => $e->getMessage()]);
-            return $this->respondWithError(41008);  
+            return $this->respondWithError(41008);
         }
     }
 
@@ -161,16 +161,16 @@ class UserInfoService
 
             $newIsPrivate = !$user->getIsPrivate();
             $user->setIsPrivate((int) $newIsPrivate);
-            
+
             $updatedUser = $this->userInfoMapper->update($user);
-            
+
             $responseMessage = $newIsPrivate ? 'Profile privacy set to private' : 'Profile privacy set to public';
 
             $this->logger->info('Profile privacy toggled', ['userId' => $this->currentUserId, 'newPrivacy' => $newIsPrivate]);
 
             return [
-                'status' => 'success', 
-                'ResponseCode' => $responseMessage, 
+                'status' => 'success',
+                'ResponseCode' => $responseMessage,
             ];
         } catch (\Exception $e) {
             return $this->respondWithError('Failed to toggle profile privacy.');
@@ -184,7 +184,7 @@ class UserInfoService
         }
 
         if (trim($biography) === '' || strlen($biography) < 3 || strlen($biography) > 5000) {
-            return $this->respondWithError(20228);
+            return $this->respondWithError(30228);
         }
 
         $this->logger->info('UserInfoService.updateBio started');
@@ -220,8 +220,8 @@ class UserInfoService
             $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
 
             return [
-                'status' => 'success', 
-                'ResponseCode' => $responseMessage, 
+                'status' => 'success',
+                'ResponseCode' => $responseMessage,
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error updating biography', ['exception' => $e]);
@@ -271,8 +271,8 @@ class UserInfoService
             $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
 
             return [
-                'status' => 'success', 
-                'ResponseCode' => $responseMessage, 
+                'status' => 'success',
+                'ResponseCode' => $responseMessage,
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error setting profile picture', ['exception' => $e]);

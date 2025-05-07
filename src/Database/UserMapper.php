@@ -8,7 +8,9 @@ use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
 use Fawaz\App\UserAdvanced;
+use Fawaz\App\Tokenize;
 use Psr\Log\LoggerInterface;
+use Fawaz\Mail\PasswordRestMail;
 
 class UserMapper
 {
@@ -763,7 +765,7 @@ class UserMapper
                 SELECT 
                     f.followerid AS uid, 
                     u.username, 
-					u.slug,
+                    u.slug,
                     u.img,
                     EXISTS (
                         SELECT 1 
@@ -821,7 +823,7 @@ class UserMapper
                 SELECT 
                     f.followedid AS uid, 
                     u.username, 
-					u.slug,
+                    u.slug,
                     u.img,
                     EXISTS (
                         SELECT 1 
@@ -940,11 +942,11 @@ class UserMapper
                 u.status,
                 u.img,
                 u.biography,
-				ui.amountposts,
-				ui.amountfollower,
-				ui.amountfollowed,
-				ui.amountfriends,
-				ui.amountblocked,
+                ui.amountposts,
+                ui.amountfollower,
+                ui.amountfollowed,
+                ui.amountfriends,
+                ui.amountblocked,
                 COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
@@ -1008,6 +1010,9 @@ class UserMapper
             $hashedPassword = method_exists($this, 'setPassword') ? $this->setPassword($password) : \password_hash($password, \PASSWORD_BCRYPT, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
             $userData->setPassword($hashedPassword);
 
+            if (!$userData->getReferralUuid()) {
+                $userData->setReferralUuid($userData->getUserId());
+            }
             $this->insert($userData);
 
             $this->logger->info("Inserted new user into database", ['uid' => $userid]);
@@ -1063,6 +1068,130 @@ class UserMapper
             ]);
             throw new \RuntimeException("Failed to insert user into database: " . $e->getMessage());
         }
+    }
+    
+    public function insertReferralInfo(string $userId, string $link): void
+    {
+        $this->logger->info("UserMapper.insertReferralInfo started", [
+            'userId' => $userId,
+            'link' => $link,
+        ]);
+    
+        try {
+            $query = "SELECT 1 FROM user_referral_info WHERE uid = :uid";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+            $stmt->execute();
+    
+            if ($stmt->fetch()) {
+                $this->logger->info("Referral link already exists, skipping insert.", ['userId' => $userId]);
+                return;
+            }
+    
+            $referralUuid = $userId;
+    
+            $query = "INSERT INTO user_referral_info (uid, referral_link, referral_uuid)
+                      VALUES (:uid, :referral_link, :referral_uuid)";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':referral_link', $link, \PDO::PARAM_STR);
+            $stmt->bindValue(':referral_uuid', $referralUuid, \PDO::PARAM_STR);
+            $stmt->execute();
+    
+            $this->logger->info("Referral link inserted successfully.", ['userId' => $userId]);
+        } catch (\PDOException $e) {
+            $this->logger->error("UserMapper.insertReferralInfo: PDOException", ['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            $this->logger->error("UserMapper.insertReferralInfo: Exception", ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function getReferralInfoByUserId(string $userId): ?array
+    {
+        $this->logger->info("UserMapper.getReferralInfoByUserId started", [
+            'userId' => $userId,
+        ]);
+    
+        $query = "SELECT referral_uuid, referral_link FROM user_referral_info WHERE uid = :uid";
+    
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+        $stmt->execute();
+    
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+    
+        if (!$result || empty($result['referral_uuid']) || empty($result['referral_link'])) {
+            $this->logger->info("No referral info found. Generating new referral for user.", [
+                'userId' => $userId,
+            ]);
+    
+            $referralLink = $this->generateReferralLink($userId);
+            $this->insertReferralInfo($userId, $referralLink);
+    
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+            $stmt->execute();
+    
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        }
+    
+        $this->logger->info("Referral info query result", ['result' => $result]);
+    
+        return $result ?: null;
+    }
+
+    public function getInviterByInvitee(string $userId): ?array
+    {
+        $this->logger->info("UserMapper.getInviterByInvitee started", [
+            'invitee_uuid' => $userId,
+        ]);
+
+        $query = "
+        SELECT u.uid, u.username, u.slug, u.img
+        FROM users_info ui
+        JOIN users u ON ui.invited = u.uid
+        WHERE ui.userid = :invitee_uuid
+        ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':invitee_uuid', $userId, \PDO::PARAM_STR);
+        $stmt->execute();
+
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return $result ?: null;
+    }
+
+    public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array 
+    {
+        $query = "
+            SELECT u.uid, u.username, u.slug, u.img
+            FROM users_info ui
+            JOIN users u ON ui.userid = u.uid
+            WHERE ui.invited = :userId
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':userId', $userId);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return [
+            'iInvited' => array_map(fn($row) => [
+                'uid' => $row['uid'],
+                'username' => $row['username'],
+                'slug' => (int)$row['slug'],
+                'img' => $row['img'],
+            ], $data)
+        ];
+    }
+
+    public function generateReferralLink(string $referralUuid): string
+    {
+        return 'https://frontend.getpeer.eu/register.php?referralUuid=' . $referralUuid;
     }
 
     public function insertinfo(UserInfo $user): UserInfo
@@ -1393,15 +1522,89 @@ class UserMapper
         }
     }
 
+
+    /**
+     * Send Actual email to Email.
+    */
+    public function sendPasswordResetEmail(string $email, array $data): void {
+        (new PasswordRestMail($data))->send($email);
+    }
+
+    /**
+     * Inserts a new password reset request.
+     */
+    public function createResetRequest(string $userId, string $token, string $updatedAt, string $expiresAt): array
+    {
+        $sql = "
+            INSERT INTO password_reset_requests 
+            (user_id, token, attempt_count, updatedat, last_attempt, expires_at)  
+            VALUES (:user_id, :token, :attempt_count, :updatedat, :last_attempt, :expires_at)";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':user_id', $userId);
+        $stmt->bindValue(':token', $token);
+        $stmt->bindValue(':attempt_count', 1);
+        $stmt->bindValue(':updatedat', $updatedAt);
+        $stmt->bindValue(':last_attempt', $updatedAt);
+        $stmt->bindValue(':expires_at', $expiresAt);
+        $stmt->execute();
+
+        return [];
+    }
+
+    /**
+     * Updates an existing reset attempt, incrementing the attempt count.
+     */
+    public function updateAttempt(array $attempt): bool
+    {
+        $sql = "
+            UPDATE password_reset_requests 
+            SET attempt_count = :attempt_count, last_attempt = :last_attempt 
+            WHERE token = :token";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':attempt_count', $attempt['attempt_count'] + 1, \PDO::PARAM_INT);
+        $stmt->bindValue(':last_attempt', $this->getCurrentTimestamp());
+        $stmt->bindValue(':token', $attempt['token']);
+        $stmt->execute();
+
+        return true;
+    }
+
+    /**
+     * Checks for an active (unexpired and unused) password reset request.
+     */
+    public function checkForPasswordResetExpiry(string $userId): array|bool
+    {
+        $this->logger->info("UserMapper.checkForPasswordResetExpiry started");
+
+        try {
+            $sql = "
+                SELECT * FROM password_reset_requests 
+                WHERE user_id = :user_id AND expires_at >= :now AND collected = false";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':user_id', $userId);
+            $stmt->bindValue(':now', $this->getCurrentTimestamp());
+            $stmt->execute();
+
+            $data =  $stmt->fetch(\PDO::FETCH_ASSOC);
+            return $data;
+        } catch (\Exception $e) {
+            $this->logger->error("Error checking reset request", ['error' => $e->getMessage()]);
+        }
+        return [];
+    }
+    
     public function loadTokenById(string $id): bool
     {
         $this->logger->info("UserMapper.loadTokenById started");
-		$time = (int)\time();
+        $time = (int)\time();
 
         try {
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM refresh_tokens WHERE userid = :id AND expiresat > :expiresat");
             $stmt->bindParam(':id', $id);
-			$stmt->bindParam(':expiresat', $time, \PDO::PARAM_INT);
+            $stmt->bindParam(':expiresat', $time, \PDO::PARAM_INT);
             $stmt->execute();
             $exists = $stmt->fetchColumn() > 0;
 
@@ -1413,35 +1616,135 @@ class UserMapper
         }
     }
 
-    public function insertoken(array $args): void
+    /**
+     * Determines if the first request is being retried too soon.
+     */
+    public function isFirstAttemptTooSoon(array $attempt): bool
+    {
+        return $attempt['attempt_count'] === 1 
+            && !$attempt['collected'] 
+            && time() < strtotime($attempt['updatedat'] . ' +1 minute');
+    }
+
+    /**
+     * Determines if the second request is being retried too soon.
+     */
+    public function isSecondAttemptTooSoon(array $attempt): bool
+    {
+        return $attempt['attempt_count'] === 2 
+            && !$attempt['collected'] 
+            && time() < strtotime($attempt['last_attempt'] . ' +10 minutes');
+    }
+
+    /**
+     * Returns a response indicating the user should retry after a delay.
+     */
+    public function rateLimitResponse(int $waitMinutes, ?string $lastAttempt = null): array
+    {
+        if ($lastAttempt) {
+            $remaining = ceil((strtotime($lastAttempt . " +{$waitMinutes} minutes") - time()) / 60);
+            return [
+                'status' => 'error',
+                'ResponseCode' => "Email delivery failed - Please try again after {$remaining} minute(s)"
+            ];
+        }
+
+        return [
+            'status' => 'error',
+            'ResponseCode' => "Email delivery failed - Please try again after {$waitMinutes} minute(s)"
+        ];
+    }
+
+    /**
+     * Returns a response when user has made too many attempts.
+     */
+    public function tooManyAttemptsResponse(): array
+    {
+        return [
+            'status' => 'error',
+            'ResponseCode' => 'Email delivery failed - Please contact support team at peernetworkpse@gmail.com'
+        ];
+    }
+
+    /**
+     * Returns the current timestamp in microsecond precision.
+     */
+    private function getCurrentTimestamp(): string
+    {
+        return date("Y-m-d H:i:s.u");
+    }
+
+
+    /**
+     * Fetch password reset request by token if valid and not expired.
+     *
+     * @param string $token
+     * @return array|null
+     */
+    public function getPasswordResetRequest(string $token): ?array
+    {
+        $sql = "
+            SELECT * FROM password_reset_requests 
+            WHERE token = :token 
+            AND expires_at >= :current_time 
+            AND collected = false
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':token', $token, \PDO::PARAM_STR);
+        $stmt->bindValue(':current_time', $this->getCurrentTimestamp(), \PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /**
+     * Delete password reset token from database.
+     *
+     * @param string $token
+     * @return void
+     */
+    public function deletePasswordResetToken(string $token): void
+    {
+        $sql = "DELETE FROM password_reset_requests WHERE token = :token";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':token', $token, \PDO::PARAM_STR);
+        $stmt->execute();
+    }
+
+
+    // public function insertoken(array $args): void
+    public function insertoken(Tokenize $data): ?Tokenize
     {
         $this->logger->info("UserMapper.insertoken started");
 
-        $this->logger->info('UserMapper.insertoken second', ['args' => $args]);
+        $data = $data->getArrayCopy();
+        $this->logger->info('UserMapper.insertoken second', ['data' => $data]);
 
         $query = "INSERT INTO token_holders 
-                  (token, userid, email, expires)
+                  (token, userid, expiresat)
                   VALUES 
-                  (:token, :userid, :email, :expires)";
+                  (:token, :userid, :expiresat)";
 
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':token', $args['token'], \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $args['userid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':email', $args['email'], \PDO::PARAM_STR);
-            $stmt->bindValue(':expires', $args['expires'], \PDO::PARAM_INT);
+            $stmt->bindValue(':token', $data['token'], \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':expiresat', $data['expiresat'], \PDO::PARAM_INT);
 
             $stmt->execute();
 
-            $this->logger->info("Inserted new token into database", ['userid' => $args['userid']]);
+            $this->logger->info("Inserted new token into database", ['userid' => $data['userid']]);
+            return new Tokenize($data);
 
         } catch (\Throwable $e) {
             $this->logger->error("UserMapper.insertoken: Exception occurred while inserting token", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            throw new \RuntimeException("Failed to insert token into database: " . $e->getMessage());
+            return null;
         }
+        return null;
     }
 }

@@ -127,7 +127,7 @@ class PostInfoService
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
-            return $this->respondWithError(21509    );
+            return $this->respondWithError(21509);
         }
 
         $exists = $this->postInfoMapper->addUserActivity('dislikePost', $this->currentUserId, $postId);
@@ -249,14 +249,14 @@ class PostInfoService
         ];
     }
 
-    public function toggleUserFollow(string $followedUserId): array 
+    public function toggleUserFollow(string $followedUserId): array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('PostInfoService.toggleUserFollow started');
@@ -268,7 +268,7 @@ class PostInfoService
         return $this->postInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
     }
 
-    public function savePost(string $postId): array 
+    public function savePost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
@@ -293,7 +293,7 @@ class PostInfoService
 
         $postinfo = $this->postInfoMapper->loadById($postId);
         if ($postinfo === null) {
-            return $this->respondWithError(31602);
+            return $this->respondWithError(21501);
         }
 
         $results = $postinfo->getArrayCopy();

@@ -23,11 +23,14 @@ class TagPostService
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 
@@ -57,7 +60,7 @@ class TagPostService
         }
 
         if (strlen($tagName) < 2 || strlen($tagName) > 50 || !preg_match('/^[a-zA-Z]+$/', $tagName)) {
-            return $this->respondWithError(20255);
+            return $this->respondWithError(30255);
         }
 
         return true;
@@ -69,16 +72,16 @@ class TagPostService
             return $this->respondWithError(60501);
         }
 
-        $maxTags = min(max((int)($maxTags ?? 5), 1), 10);
+        $maxTags = min(max((int) ($maxTags ?? 5), 1), 10);
         if (count($tags) > $maxTags) {
-            return $this->respondWithError(20211);
+            return $this->respondWithError(30211);
         }
 
         foreach ($tags as $tagName) {
             $tagName = trim($tagName);
             // Validate tagName
             if (!$this->isValidTagName($tagName)) {
-                return $this->respondWithError(20255);
+                return $this->respondWithError(30255);
             }
 
             $tag = $this->tagMapper->loadByName($tagName) ?? $this->createTag($tagName);
@@ -101,7 +104,7 @@ class TagPostService
 
         $tagName = trim($tagName);
         if (!$this->isValidTagName($tagName)) {
-            return $this->respondWithError(20255);
+            return $this->respondWithError(30255);
         }
 
         try {
@@ -162,8 +165,8 @@ class TagPostService
 
         $this->logger->info('TagPostService.fetchAll started');
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset = max((int) ($args['offset'] ?? 0), 0);
+        $limit = min(max((int) ($args['limit'] ?? 10), 1), 20);
 
         try {
             $TagPost = $this->tagPostMapper->fetchAll($offset, $limit);

@@ -26,8 +26,8 @@ class PoolMapper
     {
         $this->logger->info('WalletMapper.fetchPool started');
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = max((int)($args['limit'] ?? self::DEFAULT_LIMIT), 1);
+        $offset = max((int) ($args['offset'] ?? 0), 0);
+        $limit = max((int) ($args['limit'] ?? self::DEFAULT_LIMIT), 1);
 
         $conditions = ["whereby < " . self::MAX_WHEREBY];
         $queryParams = [];
@@ -68,18 +68,18 @@ class PoolMapper
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             try {
                 if ($results['overall_total_numbers'] === 0) {
-                    $results['overall_total_numbers'] = (float)($row['overall_total_numbers'] ?? 0);
-                    $results['overall_total_numbersq'] = (int)$this->decimalToQ64_96($results['overall_total_numbers']);
+                    $results['overall_total_numbers'] = (float) ($row['overall_total_numbers'] ?? 0);
+                    $results['overall_total_numbersq'] = (int) $this->decimalToQ64_96($results['overall_total_numbers']);
                 }
 
-                $totalNumbers = (float)$row['total_numbers'];
-                $totalNumbersQ = (int)$this->decimalToQ64_96($totalNumbers);
+                $totalNumbers = (float) $row['total_numbers'];
+                $totalNumbersQ = (int) $this->decimalToQ64_96($totalNumbers);
 
                 $results['posts'][] = [
                     'postid' => $row['postid'],
                     'total_numbers' => $totalNumbers,
                     'total_numbersq' => $totalNumbersQ,
-                    'transaction_count' => (int)$row['transaction_count'],
+                    'transaction_count' => (int) $row['transaction_count'],
                 ];
             } catch (\Throwable $e) {
                 $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
@@ -112,7 +112,7 @@ class PoolMapper
                 COUNT(CASE WHEN EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE) THEN 1 END) AS y0
                 FROM gems
             ";
-            
+
             $stmt = $this->db->query($sql);
             $entries = $stmt->fetch(\PDO::FETCH_ASSOC);
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
@@ -150,7 +150,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            return $this->respondWithError(20223);
+            return $this->respondWithError(30223);
         }
 
         $whereCondition = $dayOptions[$day];
@@ -194,12 +194,12 @@ class PoolMapper
             return $this->respondWithError(21202); //'No records found for ' . $day
         }
 
-        $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
+        $totalGems = isset($data[0]['overall_total']) ? (string) $data[0]['overall_total'] : '0';
 
         $args = [];
 
         foreach ($data as $row) {
-            $userId = (string)$row['userid'];
+            $userId = (string) $row['userid'];
 
             if (!isset($args[$userId])) {
                 $args[$userId] = [
@@ -219,7 +219,7 @@ class PoolMapper
             ];
 
             if (!isset($mapping[$whereby])) {
-                return $this->respondWithError('Invalid action type.');
+                return $this->respondWithError(41221);
             }
 
             $whereby = $mapping[$whereby]['text'];
@@ -229,7 +229,7 @@ class PoolMapper
 
             return [
                 'status' => 'success',
-                'counter' => count($args) -1,
+                'counter' => count($args) - 1,
                 'ResponseCode' => 11208,
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
@@ -241,9 +241,9 @@ class PoolMapper
     private function decimalToQ64_96(float $value): string
     {
         $scaleFactor = bcpow('2', '96');
-        
-        $scaledValue = bcmul((string)$value, $scaleFactor, 0);
-        
+
+        $scaledValue = bcmul((string) $value, $scaleFactor, 0);
+
         return $scaledValue;
     }
 }

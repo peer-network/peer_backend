@@ -30,11 +30,14 @@ class ChatService
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 
@@ -93,7 +96,7 @@ class ChatService
         $friends = $this->getFriends();
 
         if (!is_array($friends) || empty($friends)) {
-            return $this->respondWithError(21101);
+            return $this->respondWithError(31101);
         }
 
         $friendIds = array_column($friends, 'uid');
@@ -137,7 +140,7 @@ class ChatService
                     }
 
                 } else {
-                    return $this->respondWithError(31007); 
+                    return $this->respondWithError(31007);
                 }
 
             }
@@ -250,7 +253,7 @@ class ChatService
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if (!$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
@@ -278,7 +281,7 @@ class ChatService
         try {
             $chat = $this->chatMapper->loadById($chatId);
             if (!$chat) {
-                return $this->respondWithError(20218);
+                return $this->respondWithError(30218);
             }
 
             $chat->setName($name);
@@ -309,14 +312,14 @@ class ChatService
         }
 
         if (!self::isValidUUID($id)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('ChatService.deleteChat started');
 
         $chats = $this->chatMapper->loadById($id);
         if (!$chats) {
-            return $this->respondWithError(20218 . $id);
+            return $this->respondWithError(30218 . $id);
         }
 
         $chat = $chats->getArrayCopy();
@@ -364,7 +367,7 @@ class ChatService
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if (!$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
@@ -392,7 +395,7 @@ class ChatService
 
         $chat = $this->chatMapper->loadById($chatId);
         if (!$chat) {
-            return $this->respondWithError(20218);
+            return $this->respondWithError(30218);
         }
 
         try {
@@ -449,7 +452,7 @@ class ChatService
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if (!$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
@@ -462,18 +465,18 @@ class ChatService
 
         $chat = $this->chatMapper->loadById($chatId);
         if (!$chat) {
-            return $this->respondWithError(20218);
+            return $this->respondWithError(30218);
         }
 
         try {
             foreach ($participants as $participantId) {
 
                 if (!self::isValidUUID($participantId)) {
-                    return $this->respondWithError(20201);
+                    return $this->respondWithError(30201);
                 }
 
                 if (!$this->chatMapper->isParticipantExist($chatId, $participantId)) {
-                    return $this->respondWithError(31810);
+                    return $this->respondWithError(21001);
                 }
 
                 $this->chatMapper->deleteParticipant($chatId, $participantId);
@@ -513,17 +516,17 @@ class ChatService
         }
 
         if (strlen($content) < 1 || strlen($content) > 500) {
-            return $this->respondWithError(20252);
+            return $this->respondWithError(30252);
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('ChatService.addMessage started', ['chatId' => $chatId]);
 
         $chat = $this->chatMapper->loadById($chatId);
-        
+
         if (is_array($chat) && isset($chat['status']) && $chat['status'] === 'error') {
             return $chat; // Immediately return if chat is invalid
         }
@@ -535,9 +538,9 @@ class ChatService
         try {
             $messageData = [
                 'messid' => 0,
-                'chatid'    => $chatId,
-                'userid'    => $this->currentUserId,
-                'content'   => $content,
+                'chatid' => $chatId,
+                'userid' => $this->currentUserId,
+                'content' => $content,
                 'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
             ];
 
@@ -568,7 +571,7 @@ class ChatService
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('ChatService.removeMessage started');
@@ -576,13 +579,13 @@ class ChatService
         $chat = $this->chatMapper->loadById($chatId);
 
         if (!$chat) {
-            return $this->respondWithError(20218);
+            return $this->respondWithError(30218);
         }
 
         $message = $this->chatMapper->loadMessageById($messageId);
 
         if ($message === false) {
-            return $this->respondWithError(31810);
+            return $this->respondWithError(21001);
         }
 
         if ($message['userid'] !== $this->currentUserId && !$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
@@ -615,7 +618,7 @@ class ChatService
 
         if ($users) {
             return $users;
-        } 
+        }
 
         return null;
     }

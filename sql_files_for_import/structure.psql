@@ -52,6 +52,20 @@ CREATE TABLE IF NOT EXISTS follows (
 CREATE INDEX idx_follows_followerid ON follows(followerid);
 CREATE INDEX idx_follows_followedid ON follows(followedid);
 
+-- Table: user_referral_info
+CREATE TABLE IF NOT EXISTS user_referral_info (
+    uid UUID PRIMARY KEY,
+    referral_link VARCHAR(255) NOT NULL,
+    qr_code_url VARCHAR(255) DEFAULT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    referral_uuid UUID UNIQUE NOT NULL,
+
+    CONSTRAINT fk_user_referral_info_user FOREIGN KEY (uid) REFERENCES users(uid) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_user_referral_info_uid ON user_referral_info(uid);
+
+
 -- Table: access_tokens
 CREATE TABLE IF NOT EXISTS access_tokens (
     userid UUID PRIMARY KEY,
@@ -528,5 +542,18 @@ CREATE TABLE IF NOT EXISTS wallett (
     CONSTRAINT fk_wallett_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
 );
 CREATE INDEX idx_wallett_userid ON wallett(userid);
+
+-- Table: password_reset_requests
+CREATE TABLE IF NOT EXISTS password_reset_requests (
+    user_id UUID NOT NULL,
+    token VARCHAR(255) NOT NULL,
+	collected boolean DEFAULT false NOT NULL,
+	attempt_count INTEGER DEFAULT 1 NOT NULL,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    last_attempt TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	expires_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users(uid) ON DELETE CASCADE
+);
 
 COMMIT;

@@ -189,7 +189,27 @@ class CommentMapper
     {
         $this->logger->info("CommentMapper.fetchAllByPostId started");
 
-        $sql = "SELECT * FROM comments WHERE postid = :postid AND parentid IS NULL ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT 
+            c.*, 
+            u.uid,
+            u.username,
+            u.slug,
+            u.img,
+            u.biography,
+            u.updatedat
+        FROM 
+            comments c
+        LEFT JOIN 
+            users u ON c.userid = u.uid
+        WHERE
+            c.postid = :postid AND c.parentid IS NULL  
+        ORDER BY 
+            c.createdat ASC
+        LIMIT 
+            :limit
+        OFFSET
+            :offset";
+
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':postid', $postId, PDO::PARAM_STR);
         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
@@ -198,7 +218,16 @@ class CommentMapper
 
         $comments = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $row['user'] = [
+                'uid' => $row['userid'] ?? '',
+                'username' => $row['username'] ?? '',
+                'slug' => $row['slug'] ?? 0,
+                'img' =>  $row['img'] ?? '',
+                'biography' =>  $row['biography'] ?? '',
+                'updatedat' =>  $row['updatedat'] ?? '',
+            ];
             $comment = new Commented($row);
+            // echo($comment['user']['id']);
             $commentArray = $comment->getArrayCopy();
             $commentArray['subcomments'] = $this->fetchSubComments($comment->getId());
             $comments[] = $commentArray;
@@ -209,13 +238,33 @@ class CommentMapper
 
     private function fetchSubComments(string $parentId): array
     {
-        $sql = "SELECT * FROM comments WHERE parentid = :parentid ORDER BY createdat ASC";
+        // $sql = "SELECT * FROM comments WHERE parentid = :parentid ORDER BY createdat ASC";
+        $sql = "SELECT 
+            c.*, 
+            u.*
+        FROM 
+            comments c
+        LEFT JOIN 
+            users u ON c.userid = u.uid
+        WHERE
+            c.parentid = :parentid
+        ORDER BY 
+            c.createdat ASC";
+            
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':parentid', $parentId, PDO::PARAM_STR);
         $stmt->execute();
 
         $subComments = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $row['user'] = [
+                'uid' => $row['userid'] ?? '',
+                'username' => $row['username'] ?? '',
+                'slug' => $row['slug'] ?? 0,
+                'img' =>  $row['img'] ?? '',
+                'biography' =>  $row['biography'] ?? '',
+                'updatedat' =>  $row['updatedat'] ?? '',
+            ];
             $subComment = new CommentAdvanced($row);
             $subComments[] = $subComment->getArrayCopy();
         }

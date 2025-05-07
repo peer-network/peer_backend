@@ -9,6 +9,7 @@ class User
 {
     protected string $uid;
     protected string $email;
+    protected string $referral_uuid;
     protected string $username;
     protected string $password;
     protected int $status;
@@ -41,6 +42,7 @@ class User
         $this->biography = $data['biography'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
     }
 
     // Array Copy methods
@@ -120,6 +122,16 @@ class User
         $this->uid = $uid;
     }
 
+    public function getReferralUuid(): string
+    {
+        return $this->referral_uuid;
+    }
+
+    public function setReferralUuid(string $referral_uuid): void
+    {
+        $this->referral_uuid = $referral_uuid;
+    }
+    
     public function getSlug(): int
     {
         return $this->slug;
@@ -323,7 +335,6 @@ class User
             ],
             'password' => [
                 'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'validatePassword'],
                 ],

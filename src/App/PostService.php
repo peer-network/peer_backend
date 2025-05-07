@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 
 class PostService
 {
-	use ResponseHelper;
+    use ResponseHelper;
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -26,7 +26,8 @@ class PostService
         protected TagMapper $tagMapper,
         protected TagPostMapper $tagPostMapper,
         protected FileUploadDispatcher $base64filehandler,
-    ) {}
+    ) {
+    }
 
     public function setCurrentUserId(string $userid): void
     {
@@ -38,7 +39,8 @@ class PostService
         return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
     }
 
-    private static function validateDate($date, $format = 'Y-m-d') {
+    private static function validateDate($date, $format = 'Y-m-d')
+    {
         $d = \DateTime::createFromFormat($format, $date);
         return $d && $d->format($format) === $date;
     }
@@ -62,11 +64,13 @@ class PostService
         return true;
     }
 
-    private function argsToJsString($args) {
+    private function argsToJsString($args)
+    {
         return json_encode($args);
     }
 
-    private function argsToString($args) {
+    private function argsToString($args)
+    {
         return serialize($args);
     }
 
@@ -125,7 +129,7 @@ class PostService
                 $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                 if (!empty($mediaPath['error'])) {
-                    return $this->respondWithError(20251);
+                    return $this->respondWithError(30251);
                 }
 
                 if (!empty($mediaPath['path'])) {
@@ -192,11 +196,24 @@ class PostService
                 $this->insertPostMetadata($postId, $this->currentUserId);
             }
 
-            return $this->createSuccessResponse(11508, $post->getArrayCopy());
+            $tagPosts = $this->tagPostMapper->loadByPostId($postId);
+            $tagNames = [];
+
+            foreach ($tagPosts as $tp) {
+                $tag = $this->tagMapper->loadById($tp->getTagId());
+                if ($tag) {
+                    $tagNames[] = $tag->getName();
+                }
+            }
+
+            $data = $post->getArrayCopy();
+            $data['tags'] = $tagNames;
+
+            return $this->createSuccessResponse(11508, $data);
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);
-            return $this->respondWithError(41508);
+            return $this->respondWithError(30263);
         }
     }
 
@@ -220,19 +237,19 @@ class PostService
 
         foreach ($tags as $tagName) {
             $tagName = !empty($tagName) ? trim((string) $tagName) : '';
-            
+
             if (strlen($tagName) < 2 || strlen($tagName) > 53 || !preg_match('/^[a-zA-Z0-9_-]+$/', $tagName)) {
                 throw new \Throwable('Invalid tag name');
             }
 
             $tag = $this->tagMapper->loadByName($tagName);
-            
+
             if (!$tag) {
                 $this->logger->info('get tag name', ['tagName' => $tagName]);
                 unset($tag);
                 $tag = $this->createTag($tagName);
             }
-            
+
             if (!$tag) {
                 $this->logger->error('Failed to load or create tag', ['tagName' => $tagName]);
                 throw new \Throwable('Failed to load or create tag: ' . $tagName);
@@ -240,7 +257,7 @@ class PostService
 
             $tagPost = new TagPost([
                 'postid' => $postId,
-                'tagid' => $tag->getTagId(), 
+                'tagid' => $tag->getTagId(),
                 'createdat' => $createdAt,
             ]);
 
@@ -292,8 +309,8 @@ class PostService
 
         $this->logger->info("PostService.fetchAll started");
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset = max((int) ($args['offset'] ?? 0), 0);
+        $limit = min(max((int) ($args['limit'] ?? 10), 1), 20);
 
         try {
             $posts = $this->postMapper->fetchAll($offset, $limit);
@@ -323,34 +340,34 @@ class PostService
         $Ignorlist = $args['IgnorList'] ?? null;
         $sortBy = $args['sortBy'] ?? null;
         $title = $args['title'] ?? null;
-        $tag = $args['tag'] ?? null; 
+        $tag = $args['tag'] ?? null;
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError(30201);
         }
 
         if ($title !== null && strlen($title) < 2 || strlen($title) > 33) {
-            return $this->respondWithError(20256);
+            return $this->respondWithError(30210);
         }
 
         if ($from !== null && !self::validateDate($from)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError(30212);
         }
 
         if ($to !== null && !self::validateDate($to)) {
-            return $this->respondWithError(30103);
+            return $this->respondWithError(30213);
         }
 
         if ($tag !== null) {
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
-                return $this->respondWithError(30103);
+                return $this->respondWithError(30211);
             }
         }
 
@@ -374,9 +391,6 @@ class PostService
         $this->logger->info("PostService.findPostser started");
 
         $results = $this->postMapper->findPostser($this->currentUserId, $args);
-		if (empty($results)) {
-			return $this->respondWithError('Invalid ID provided.');
-		}
 
         return $results;
     }
@@ -438,7 +452,7 @@ class PostService
         }
 
         if (!self::isValidUUID($id)) {
-            return $this->respondWithError(20209);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info('PostService.deletePost started');
