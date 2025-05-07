@@ -604,7 +604,7 @@ class UserService
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return self::respondWithError(41007);
+            return self::respondWithError(21001);
         }
     }
 
