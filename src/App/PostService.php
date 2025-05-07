@@ -12,6 +12,7 @@ use Fawaz\Database\TagPostMapper;
 use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
+use Fawaz\Config\ContentLimitsPerPost;
 
 class PostService
 {
@@ -70,6 +71,36 @@ class PostService
         return serialize($args);
     }
 
+    private function validateContentCount(array $args): array {
+        if (!isset($args['contenttype']) && empty($args['contenttype']) && !is_string($args['contenttype'])) {
+            return ['success' => false, 'error' => '30206'];
+        }
+        $contenttype = strval($args['contenttype']);
+        if (!isset($args['media']) && empty($args['media']) && !is_array($args['media'])) {
+            return ['success' => false, 'error' => '30102'];
+        }
+
+        $media = $args['media'];
+        $mediaCount = count($media);
+
+        try {
+            $mediaLimitObj = ContentLimitsPerPost::from($contenttype);
+            if (!$mediaLimitObj) {
+                return ['success' => false, 'error' => '40301'];    
+            }
+            $mediaLimit = $mediaLimitObj->limit();
+        } catch (\Throwable $e) {
+            echo($e->getMessage());
+            return ['success' => false, 'error' => '40301'];
+        }
+
+        if ($mediaCount > $mediaLimit) {
+            return ['success' => false, 'error' => '30267'];
+        } else {
+            return ['success' => true, 'error' => null];
+        }
+    }
+
     public function createPost(array $args = []): array
     {
         if (!$this->checkAuthentication()) {
@@ -121,6 +152,12 @@ class PostService
         try {
             // Media Upload
             if ($this->isValidMedia($args['media'])) {
+                
+                $validateContentCountResult = $this->validateContentCount($args);
+                if (isset($validateContentCountResult['error'])) {
+                    return $this->respondWithError($validateContentCountResult['error']);
+                }
+
                 $mediaPath = $this->base64filehandler->handleUploads($args['media'], $args['contenttype'], $postId);
                 $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
