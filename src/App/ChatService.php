@@ -93,7 +93,7 @@ class ChatService
         $friends = $this->getFriends();
 
         if (!is_array($friends) || empty($friends)) {
-            return $this->respondWithError(21101);
+            return $this->respondWithError(31101);
         }
 
         $friendIds = array_column($friends, 'uid');

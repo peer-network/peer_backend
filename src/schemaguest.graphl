@@ -7,23 +7,32 @@ type Query {
   hello: HelloResponse
 }
 
+scalar Decimal
+
 type Mutation {
   register(input: RegistrationInput!): RegisterResponse!
-  verifyAccount(userid: ID!): verifyAccount!
+  verifyAccount(userid: ID!): DefaultResponse!
   login(email: String!, password: String!): AuthPayload!
-  requestPasswordReset(email: String!): StandardResponse
-  resetPassword(token: String!, password: String!): StandardResponse
+  requestPasswordReset(email: String!): DefaultResponse!
+  resetPassword(token: String!, password: String!): DefaultResponse
   refreshToken(refreshToken: String!): AuthPayload!
-  contactus(name: String!, email: String!, message: String!): StandardResponse!
+  contactus(name: String!, email: String!, message: String!): ContactusResponse!
 }
 
-type StandardResponse {
+type ContactusResponsePayload {
+  msgid: Decimal,
+  email: String,
+  name: String,
+  message: String,
+  ip: String,
+  createdat: String
+}
+
+type ContactusResponse {
   status: String!
   ResponseCode: String
-  affectedRows: JSON
+  affectedRows: ContactusResponsePayload
 }
-
-scalar JSON
 
 type HelloResponse {
   currentuserid: ID
@@ -37,7 +46,7 @@ type RegisterResponse {
   userid: ID
 }
 
-type verifyAccount {
+type DefaultResponse {
   status: String!
   ResponseCode: String
 }
@@ -49,9 +58,29 @@ type AuthPayload {
   refreshToken: String
 }
 
+type ProfileUser {
+  id: ID!
+  username: String
+  slug: Int
+  img: String
+  isfollowed: Boolean
+  isfollowing: Boolean
+}
+type ReferralListResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String!
+  affectedRows: ReferralUsers!
+}
+type ReferralUsers {
+  invitedBy: ProfileUser
+  iInvited: [ProfileUser!]!
+}
+
 input RegistrationInput {
   email: String!
   password: String!
   username: String!
   pkey: String
+  referralUuid: ID
 }

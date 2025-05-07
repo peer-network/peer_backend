@@ -94,7 +94,7 @@ class WalletService
         $this->logger->info("WalletService.fetchWalletById started");
 
         try {
-            $wallets = $this->walletMapper->loadWalletById($args, $this->currentUserId);
+            $wallets = $this->walletMapper->loadWalletById($this->currentUserId, $args);
 
             if ($wallets === false) {
                 return $this->respondWithError(41216);
@@ -194,7 +194,32 @@ class WalletService
             return $this->respondWithError(30105);
         }
 
-        return $this->walletMapper->getTimeSortedMatch($day);
+        $gemsters = $this->walletMapper->getTimeSortedMatch($day);
+
+        if (isset($gemsters['affectedRows'])) {
+            $winstatus = $gemsters['affectedRows']['data'][0];
+            unset($gemsters['affectedRows']['data'][0]);
+
+            $userStatus= array_values($gemsters['affectedRows']['data']);
+                    
+            $affectedRows = [
+                'winStatus' => $winstatus ?? [],
+                'userStatus' => $userStatus ?? [],
+            ];  
+            
+            return [
+                'status' => $gemsters['status'],
+                'counter' => $gemsters['counter'] ?? 0,
+                'ResponseCode' => $gemsters['ResponseCode'],        
+                'affectedRows' => $affectedRows
+            ];
+        } 
+        return [
+            'status' => $gemsters['status'],
+            'counter' => 0,
+            'ResponseCode' => $gemsters['ResponseCode'],
+            'affectedRows' => []
+        ];     
     }
 
     public function getPercentBeforeTransaction(string $userId, int $tokenAmount): array
@@ -215,7 +240,7 @@ class WalletService
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 11204,
-                    'affectedRows' => ['currentliquidity' => $results],
+                    'currentliquidity' => $results,
                 ];
                 return $success;
             }
@@ -288,7 +313,7 @@ class WalletService
             } else {
                 return [
                     'status' => 'success',
-                    'ResponseCode' => $response['ResponseCode'],
+                    'ResponseCode' => 11211,
                     'affectedRows' => [],
                 ];
             }

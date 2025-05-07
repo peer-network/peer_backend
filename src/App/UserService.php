@@ -140,12 +140,24 @@ class UserService
         $pkey = $args['pkey'] ?? null;
         $mediaFile = isset($args['img']) ? trim($args['img']) : '';
         $isPrivate = (int)($args['isprivate'] ?? 0);
-        $invited = $args['invited'] ?? null;
+        $referralUuid = $args['referralUuid'] ?? null;
+        $invited = null;
 		$bin2hex = bin2hex(random_bytes(32));
 		$expiresat = (int)\time()+1800;
 
         $biography = $args['biography'] ?? '/userData/' . $id . '.txt';
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+        if (!empty($referralUuid)) {
+            $inviter = $this->userMapper->loadById($referralUuid);
+
+            if (empty($inviter)) {
+                $this->logger->warning('Invalid referral UUID provided.', ['referralUuid' => $referralUuid]);
+                return self::respondWithError(00000);
+            }
+
+            $invited = $inviter->getUserId();
+        }
 
         $email = trim($args['email']);
         if ($this->userMapper->isEmailTaken($email)) {
@@ -244,6 +256,14 @@ class UserService
         }
 
         try {
+            $referralLink = $this->userMapper->generateReferralLink($id);
+            $this->userMapper->insertReferralInfo($id, $referralLink);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Error handling referral info.', ['exception' => $e]);
+            return self::respondWithError(00000);
+        }
+
+        try {
             $userwallet = new Wallett($walletData);
             $this->walletMapper->insertt($userwallet);
             unset($walletData, $userwallet);
@@ -274,6 +294,21 @@ class UserService
 		];
     }
 
+    public function referralList(string $userId, int $offset = 0, int $limit = 20): array
+    {
+        $data = $this->userMapper->getReferralRelations($userId, $offset, $limit);
+
+        return [
+            'status' => 'success',
+            'ResponseCode' => 00000,
+            'counter' => count($data['iInvited']),
+            'affectedRows' => [
+                'invitedBy' => $data['invitedBy'],
+                'iInvited' => $data['iInvited']
+            ],
+        ];
+    }
+    
     private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
     {
         try {

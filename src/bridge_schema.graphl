@@ -4,12 +4,11 @@ schema {
 
 type Query {
   hello: HelloResponse!
-  dailygemstatus: StandardResponse!
-  dailygemsresults(day: DayFilterType!): StandardResponse!
+  dailygemstatus: DailyGemStatusResponse!
+  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
 }
 
 scalar Decimal
-scalar DATEN
 scalar Date
 
 enum DayFilterType {
@@ -24,21 +23,42 @@ enum DayFilterType {
   Y0
 }
 
-type StandardResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: DATEN
-}
-
 type HelloResponse {
   currentuserid: ID
   currentVersion: String
   wikiLink: String
 }
 
-type GenericResponse {
+type DailyGemStatusResponse {
   status: String!
-  counter: Int!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: DailyGemStatusData
+}
+
+type DailyGemStatusData {
+  d0: Decimal
+  d1: Decimal
+  d2: Decimal
+  d3: Decimal
+  d4: Decimal
+  d5: Decimal
+  w0: Decimal
+  m0: Decimal
+  y0: Decimal
+}
+
+type DailyGemsResultsResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DailyGemsResultsData
+}
+
+type DailyGemsResultsData {
+  data: [DailyGemsResultsUserData],
+  totalGems: Decimal
+}
+
+type DailyGemsResultsUserData {
+  userid: ID
+  gems: Decimal
 }

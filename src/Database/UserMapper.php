@@ -1010,6 +1010,9 @@ class UserMapper
             $hashedPassword = method_exists($this, 'setPassword') ? $this->setPassword($password) : \password_hash($password, \PASSWORD_BCRYPT, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
             $userData->setPassword($hashedPassword);
 
+            if (!$userData->getReferralUuid()) {
+                $userData->setReferralUuid($userData->getUserId());
+            }
             $this->insert($userData);
 
             $this->logger->info("Inserted new user into database", ['uid' => $userid]);
@@ -1065,6 +1068,130 @@ class UserMapper
             ]);
             throw new \RuntimeException("Failed to insert user into database: " . $e->getMessage());
         }
+    }
+    
+    public function insertReferralInfo(string $userId, string $link): void
+    {
+        $this->logger->info("UserMapper.insertReferralInfo started", [
+            'userId' => $userId,
+            'link' => $link,
+        ]);
+    
+        try {
+            $query = "SELECT 1 FROM user_referral_info WHERE uid = :uid";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+            $stmt->execute();
+    
+            if ($stmt->fetch()) {
+                $this->logger->info("Referral link already exists, skipping insert.", ['userId' => $userId]);
+                return;
+            }
+    
+            $referralUuid = $userId;
+    
+            $query = "INSERT INTO user_referral_info (uid, referral_link, referral_uuid)
+                      VALUES (:uid, :referral_link, :referral_uuid)";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':referral_link', $link, \PDO::PARAM_STR);
+            $stmt->bindValue(':referral_uuid', $referralUuid, \PDO::PARAM_STR);
+            $stmt->execute();
+    
+            $this->logger->info("Referral link inserted successfully.", ['userId' => $userId]);
+        } catch (\PDOException $e) {
+            $this->logger->error("UserMapper.insertReferralInfo: PDOException", ['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            $this->logger->error("UserMapper.insertReferralInfo: Exception", ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function getReferralInfoByUserId(string $userId): ?array
+    {
+        $this->logger->info("UserMapper.getReferralInfoByUserId started", [
+            'userId' => $userId,
+        ]);
+    
+        $query = "SELECT referral_uuid, referral_link FROM user_referral_info WHERE uid = :uid";
+    
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+        $stmt->execute();
+    
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+    
+        if (!$result || empty($result['referral_uuid']) || empty($result['referral_link'])) {
+            $this->logger->info("No referral info found. Generating new referral for user.", [
+                'userId' => $userId,
+            ]);
+    
+            $referralLink = $this->generateReferralLink($userId);
+            $this->insertReferralInfo($userId, $referralLink);
+    
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+            $stmt->execute();
+    
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        }
+    
+        $this->logger->info("Referral info query result", ['result' => $result]);
+    
+        return $result ?: null;
+    }
+
+    public function getInviterByInvitee(string $userId): ?array
+    {
+        $this->logger->info("UserMapper.getInviterByInvitee started", [
+            'invitee_uuid' => $userId,
+        ]);
+
+        $query = "
+        SELECT u.uid, u.username, u.slug, u.img
+        FROM users_info ui
+        JOIN users u ON ui.invited = u.uid
+        WHERE ui.userid = :invitee_uuid
+        ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':invitee_uuid', $userId, \PDO::PARAM_STR);
+        $stmt->execute();
+
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return $result ?: null;
+    }
+
+    public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array 
+    {
+        $query = "
+            SELECT u.uid, u.username, u.slug, u.img
+            FROM users_info ui
+            JOIN users u ON ui.userid = u.uid
+            WHERE ui.invited = :userId
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':userId', $userId);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return [
+            'iInvited' => array_map(fn($row) => [
+                'uid' => $row['uid'],
+                'username' => $row['username'],
+                'slug' => (int)$row['slug'],
+                'img' => $row['img'],
+            ], $data)
+        ];
+    }
+
+    public function generateReferralLink(string $referralUuid): string
+    {
+        return 'https://frontend.getpeer.eu/register.php?referralUuid=' . $referralUuid;
     }
 
     public function insertinfo(UserInfo $user): UserInfo
