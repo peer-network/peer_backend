@@ -180,8 +180,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                // $this->insertWinToLog($userId, $args);
-                // $this->insertWinToPool($userId, $args);
 
                 $this->saveWalletEntry($userId, $args['numbers']);
                 $transObj = [
@@ -213,8 +211,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                // $this->insertWinToLog($row, $args);
-                // $this->insertWinToPool($row, $args);
                 $this->saveWalletEntry($row, $args['numbers']);
 
                 $transUniqueIdForDebit = self::generateUUID();
@@ -249,8 +245,6 @@ class WalletMapper
                         'whereby' => TRANSFER_,
                     ];
 
-                    // $this->insertWinToLog($inviterId, $args);
-                    // $this->insertWinToPool($inviterId, $args);
                     $this->saveWalletEntry($inviterId, $args['numbers']);
                     $transObj = [
                         'transUniqueId' => $transUniqueId,
@@ -282,8 +276,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                // $this->insertWinToLog($userId, $args);
-                // $this->insertWinToPool($userId, $args);
                 $this->saveWalletEntry($userId, $args['numbers']);
 
             }
@@ -303,8 +295,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                // $this->insertWinToLog($this->poolWallet, $args);
-                // $this->insertWinToPool($this->poolWallet, $args);
                 $this->saveWalletEntry($this->poolWallet, $args['numbers']);
 
                 $transObj = [
@@ -336,9 +326,6 @@ class WalletMapper
                     'numbers' => abs($peerAmount),
                     'whereby' => TRANSFER_,
                 ];
-
-                // $this->insertWinToLog($this->peerWallet, $args);
-                // $this->insertWinToPool($this->peerWallet, $args);
 
                 $this->saveWalletEntry($this->peerWallet, $args['numbers']);
 
@@ -372,8 +359,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                // $this->insertWinToLog($this->burnWallet, $args);
-                // $this->insertWinToPool($this->burnWallet, $args);
                 $this->saveWalletEntry($this->burnWallet, $args['numbers']);
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
