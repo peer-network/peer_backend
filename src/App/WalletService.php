@@ -240,7 +240,7 @@ class WalletService
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 11204,
-                    'affectedRows' => ['currentliquidity' => $results],
+                    'currentliquidity' => $results,
                 ];
                 return $success;
             }
