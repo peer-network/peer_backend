@@ -168,7 +168,7 @@ class PeerInputFilter
     protected function FloatSanitize(mixed $value, array $options = []): float
     {
         if (!is_numeric($value)) {
-            $this->errors['value'][] = 20247;
+            $this->errors['value'][] = 30247;
         }
 
         return (float)$value;
@@ -212,7 +212,7 @@ class PeerInputFilter
             }
         }
 
-        $this->errors['Date'][] = 20258;
+        $this->errors['Date'][] = 30258;
         return false;
     }
 
@@ -222,7 +222,7 @@ class PeerInputFilter
         $inclusive = $options['inclusive'] ?? false;
 
         if ($max === null) {
-            $this->errors['Max'][] = 20248;
+            $this->errors['Max'][] = 30248;
             return false;
         }
 
@@ -230,12 +230,12 @@ class PeerInputFilter
         $maxDateTime = DateTime::createFromFormat('Y-m-d H:i:s.u', $max);
 
         if ($valueDateTime === false) {
-            $this->errors['valueDateTime'][] = 20249;
+            $this->errors['valueDateTime'][] = 30249;
             return false;
         }
 
         if ($maxDateTime === false) {
-            $this->errors['maxDateTime'][] = 20250;
+            $this->errors['maxDateTime'][] = 30250;
             return false;
         }
 
@@ -248,7 +248,7 @@ class PeerInputFilter
     protected function validateIntRange(mixed $value, array $options = []): bool
     {
         if (!is_numeric($value) || (int)$value != $value) {
-            $this->errors['int_range'][] = 20244;
+            $this->errors['int_range'][] = 30244;
             return false;
         }
 
@@ -257,12 +257,12 @@ class PeerInputFilter
         $max = $options['max'] ?? PHP_INT_MAX;
 
         if ($value < $min) {
-            $this->errors['int_range'][] = 20245;
+            $this->errors['int_range'][] = 30245;
             return false;
         }
 
         if ($value > $max) {
-            $this->errors['int_range'][] = 20246;
+            $this->errors['int_range'][] = 30246;
             return false;
         }
 
@@ -271,7 +271,11 @@ class PeerInputFilter
 
     protected function EmailAddress(string $value, array $options = []): bool
     {
-        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+        if (filter_var($value, FILTER_VALIDATE_EMAIL) == false) {
+            $this->errors['email'][] = 30224;
+            return false;
+        }
+        return true;
     }
 
     protected function Digits(string $value, array $options = []): bool
@@ -594,12 +598,12 @@ class PeerInputFilter
         }
 
         if (strlen($value) < 8 || strlen($value) > 128) {
-            $this->errors['password'][] = 20226;
+            $this->errors['password'][] = 30226;
             return false;
         }
 
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $value)) {
-            $this->errors['password'][] = 20226;
+            $this->errors['password'][] = 30226;
             return false;
         }
 
@@ -611,22 +615,22 @@ class PeerInputFilter
         $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
 
         if ($value === '') {
-            $this->errors['username'][] = 20202;
+            $this->errors['username'][] = 30202;
             return false;
         }
 
         if (strlen($value) < 3 || strlen($value) > 23) {
-            $this->errors['username'][] = 20202;
+            $this->errors['username'][] = 30202;
             return false;
         }
 
         if (!preg_match('/^[a-zA-Z0-9_]{3,23}$/', $value)) {
-            $this->errors['username'][] = 20202;
+            $this->errors['username'][] = 30202;
             return false;
         }
 
         if (!preg_match('/[a-zA-Z]/', $value)) {
-            $this->errors['username'][] = 20202;
+            $this->errors['username'][] = 30202;
             return false;
         }
 
@@ -672,12 +676,12 @@ class PeerInputFilter
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
         if (strlen($value) < 43 || strlen($value) > 44) {
-            $this->errors['pkey'][] = 20254;
+            $this->errors['pkey'][] = 30254;
             return false;
         }
 
         if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $value)) {
-            $this->errors['pkey'][] = 20254;
+            $this->errors['pkey'][] = 30254;
             return false;
         }
 
@@ -697,7 +701,7 @@ class PeerInputFilter
         $pattern = '/^\+?[1-9]\d{0,2}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{1,4}[\s.-]?\d{1,9}$/';
 
         if (!preg_match($pattern, $value)) {
-            $this->errors['phone'][] = 20253;
+            $this->errors['phone'][] = 30253;
             return false;
         }
 
@@ -760,7 +764,7 @@ class PeerInputFilter
         $imagePath = __DIR__ . '/../../runtime-data/media' . $imagePath;
 
         if (!is_readable($imagePath)) {
-            $this->errors['image'][] = 20263;
+            $this->errors['image'][] = 30263;
             return false;
         }
 

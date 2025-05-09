@@ -92,7 +92,7 @@ class WalletMapper
                 'recipient' => $recipient,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(20201);
+            return self::respondWithError(30201);
         }
 
         $numberoftokens = (float) $args['numberoftokens'];
@@ -101,7 +101,7 @@ class WalletMapper
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(20264);
+            return self::respondWithError(30264);
         }
 
         try {
