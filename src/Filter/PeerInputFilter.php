@@ -271,7 +271,11 @@ class PeerInputFilter
 
     protected function EmailAddress(string $value, array $options = []): bool
     {
-        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+        if (filter_var($value, FILTER_VALIDATE_EMAIL) == false) {
+            $this->errors['email'][] = 20224;
+            return false;
+        }
+        return true;
     }
 
     protected function Digits(string $value, array $options = []): bool
