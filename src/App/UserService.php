@@ -342,7 +342,7 @@ class UserService
     public function verifyAccount(string $userId): array
     {
         if (!self::isValidUUID($userId)) {
-            return self::respondWithError(20201);
+            return self::respondWithError(30201);
         }
 
         try {
@@ -436,7 +436,7 @@ class UserService
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->logger->warning('Invalid email format', ['email' => $email]);
-            return self::respondWithError(20224);
+            return self::respondWithError(30224);
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
@@ -526,7 +526,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update username', ['exception' => $e]);
-            return self::respondWithError(20202);
+            return self::respondWithError(30202);
         }
     }
 
@@ -618,7 +618,7 @@ class UserService
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
-            return self::respondWithError(20201);
+            return self::respondWithError(30201);
         }
 
         try {

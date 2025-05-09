@@ -74,7 +74,7 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if ($this->currentUserId === $followedUserId) {
@@ -101,7 +101,7 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($blockedUserId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if ($this->currentUserId === $blockedUserId) {
@@ -184,7 +184,7 @@ class UserInfoService
         }
 
         if (trim($biography) === '' || strlen($biography) < 3 || strlen($biography) > 5000) {
-            return $this->respondWithError(20228);
+            return $this->respondWithError(30228);
         }
 
         $this->logger->info('UserInfoService.updateBio started');

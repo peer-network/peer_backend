@@ -209,7 +209,7 @@ class PostService
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);
-            return $this->respondWithError(20263);
+            return $this->respondWithError(30263);
         }
     }
 
@@ -341,29 +341,29 @@ class PostService
         $userId = $args['userid'] ?? null;
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(20209);
+            return $this->respondWithError(30209);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if ($title !== null && strlen($title) < 2 || strlen($title) > 33) {
-            return $this->respondWithError(20210);
+            return $this->respondWithError(30210);
         }
 
         if ($from !== null && !self::validateDate($from)) {
-            return $this->respondWithError(20212);
+            return $this->respondWithError(30212);
         }
 
         if ($to !== null && !self::validateDate($to)) {
-            return $this->respondWithError(20213);
+            return $this->respondWithError(30213);
         }
 
         if ($tag !== null) {
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
-                return $this->respondWithError(20211);
+                return $this->respondWithError(30211);
             }
         }
 
@@ -448,7 +448,7 @@ class PostService
         }
 
         if (!self::isValidUUID($id)) {
-            return $this->respondWithError(20209);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info('PostService.deletePost started');
