@@ -633,6 +633,16 @@ class ChatService
                 throw new ValidationException('MissingChatId');
             }
 
+            // ✅ Check for negative messageOffset
+            if (isset($args['messageOffset']) && $args['messageOffset'] < 0) {
+                throw new ValidationException('InvalidMessageOffset');
+            }
+
+            // ✅ Validate messageLimit
+            if (isset($args['messageLimit']) && (!is_numeric($args['messageLimit']) || $args['messageLimit'] < 0)) {
+                throw new ValidationException('InvalidMessageLimit');
+            }
+
             $this->logger->info('ChatService.loadChatById started');
 
             $result = $this->chatMapper->loadChatById($this->currentUserId, $args);
@@ -645,7 +655,7 @@ class ChatService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 30204,
+                'ResponseCode' => 11810,
                 'data' => new Chat([
                     'chatid' => $chatData['chat']['chatid'],
                     'creatorid' => $chatData['chat']['creatorid'],
