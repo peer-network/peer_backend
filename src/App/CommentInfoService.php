@@ -44,7 +44,7 @@ class CommentInfoService
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('CommentInfoService.deleteCommentInfo started');
@@ -84,7 +84,7 @@ class CommentInfoService
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('CommentInfoService.likeComment started');
@@ -122,7 +122,7 @@ class CommentInfoService
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('CommentInfoService.reportComment started');

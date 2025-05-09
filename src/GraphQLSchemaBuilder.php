@@ -2300,13 +2300,13 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($args['tokenAmount'])) {
-            return $this->respondWithError(20242);
+            return $this->respondWithError(30242);
         }
 
         $tokenAmount = (int)$args['tokenAmount'] ?? 0;
 
         if ($tokenAmount < 10) {
-            return $this->respondWithError(20243);
+            return $this->respondWithError(30243);
         }
 
         $results = $this->walletService->getPercentBeforeTransaction($this->currentUserId, $tokenAmount);
@@ -2423,15 +2423,15 @@ class GraphQLSchemaBuilder
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if ($username !== null && strlen($username) < 3 || strlen($username) > 23) {
-            return $this->respondWithError(20202);
+            return $this->respondWithError(30202);
         }
 
         if ($username !== null && !preg_match('/^[a-zA-Z0-9]+$/', $username)) {
-            return $this->respondWithError(20202);
+            return $this->respondWithError(30202);
         }
 
         if (!empty($userId)) {
@@ -2492,7 +2492,7 @@ class GraphQLSchemaBuilder
         }
 
         if (isset($args['userid']) && !self::isValidUUID($args['userid'])) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('Query.resolveProfile started');
@@ -2606,7 +2606,7 @@ class GraphQLSchemaBuilder
         $chatid = $args['chatid'] ?? null;
 
         if (!self::isValidUUID($chatid)) {
-            return $this->respondWithError(20218);
+            return $this->respondWithError(30218);
         }
 
         $this->logger->info('Query.resolveChat started');
@@ -2673,7 +2673,7 @@ class GraphQLSchemaBuilder
         }
 
         if (!empty($postId) && !self::isValidUUID($postId)) {
-            return $this->respondWithError(20209);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info('Query.resolvePostInfo started');
@@ -2703,7 +2703,7 @@ class GraphQLSchemaBuilder
         }
 
         if (!empty($commentId) && !self::isValidUUID($commentId)) {
-            return $this->respondWithError(20217);
+            return $this->respondWithError(30217);
         }
 
         $this->logger->info('Query.resolveCommentInfo started');
@@ -2873,49 +2873,49 @@ class GraphQLSchemaBuilder
 
         if ($offset !== null) {
             if ($offset < 0 || $offset > 200) {
-                return $this->respondWithError(20203);
+                return $this->respondWithError(30203);
             }
         }
 
         if ($limit !== null) {
             if ($limit < 1 || $limit > 20) {  
-                return $this->respondWithError(20204);
+                return $this->respondWithError(30204);
             }
         }
 
         if ($postOffset !== null) {
             if ($postOffset < 0 || $postOffset > 200) {
-                return $this->respondWithError(20203);
+                return $this->respondWithError(30203);
             }
         }
 
         if ($postLimit !== null) {
             if ($postLimit < 1 || $postLimit > 20) {  
-                return $this->respondWithError(20204);
+                return $this->respondWithError(30204);
             }
         }
 
         if ($commentOffset !== null) {
             if ($commentOffset < 0 || $commentOffset > 200) {
-                return $this->respondWithError(20215);
+                return $this->respondWithError(30215);
             }
         }
 
         if ($commentLimit !== null) {
             if ($commentLimit < 1 || $commentLimit > 20) {  
-                return $this->respondWithError(20216);
+                return $this->respondWithError(30216);
             }
         }
 
         if ($messageOffset !== null) {
             if ($messageOffset < 0 || $messageOffset > 200) {
-                return $this->respondWithError(20219);
+                return $this->respondWithError(30219);
             }
         }
 
         if ($messageLimit !== null) {
             if ($messageLimit < 1 || $messageLimit > 20) {  
-                return $this->respondWithError(20220);
+                return $this->respondWithError(30220);
             }
         }
 
@@ -2937,7 +2937,7 @@ class GraphQLSchemaBuilder
 
         $ip = filter_var($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', FILTER_VALIDATE_IP) ?: '0.0.0.0';
         if ($ip === '0.0.0.0') {
-            return $this->respondWithError(20257);
+            return $this->respondWithError(30257);
         }
 
         if (!$this->contactusService->checkRateLimit($ip)) {
@@ -2960,15 +2960,15 @@ class GraphQLSchemaBuilder
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return $this->respondWithError(20224);
+            return $this->respondWithError(30224);
         }
 
         if (strlen($name) < 3 || strlen($name) > 33) {
-            return $this->respondWithError(20202);
+            return $this->respondWithError(30202);
         }
 
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $name)) {
-            return $this->respondWithError(20202);
+            return $this->respondWithError(30202);
         }
 
         if (strlen($message) < 3 || strlen($message) > 500) {
@@ -3007,7 +3007,7 @@ class GraphQLSchemaBuilder
         }
 
         if (!self::isValidUUID($userid)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('Query.verifyAccount started');
