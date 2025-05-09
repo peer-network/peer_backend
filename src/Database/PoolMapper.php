@@ -150,7 +150,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            return $this->respondWithError(20223);
+            return $this->respondWithError(30223);
         }
 
         $whereCondition = $dayOptions[$day];

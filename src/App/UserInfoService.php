@@ -74,7 +74,7 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if ($this->currentUserId === $followedUserId) {
@@ -101,7 +101,7 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($blockedUserId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if ($this->currentUserId === $blockedUserId) {
@@ -184,7 +184,7 @@ class UserInfoService
         }
 
         if (trim($biography) === '' || strlen($biography) < 3 || strlen($biography) > 5000) {
-            return $this->respondWithError(20228);
+            return $this->respondWithError(30228);
         }
 
         $this->logger->info('UserInfoService.updateBio started');
@@ -200,7 +200,7 @@ class UserInfoService
                 $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
 
                 if ($mediaPath === '') {
-                    return $this->respondWithError(41009);
+                    return $this->respondWithError(30251);
                 }
 
                 if (!empty($mediaPath['path'])) {
@@ -251,7 +251,7 @@ class UserInfoService
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $this->currentUserId, 'profile');
 
                 if ($mediaPath === '') {
-                    return $this->respondWithError(41009);
+                    return $this->respondWithError(30251);
                 }
 
                 if (!empty($mediaPath['path'])) {
