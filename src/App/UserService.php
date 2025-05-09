@@ -318,7 +318,7 @@ class UserService
                 $this->logger->info('UserService.uploadMedia mediaPath', ['mediaPath' => $mediaPath]);
 
                 if ($mediaPath === '') {
-                    return self::respondWithError(41009);
+                    return self::respondWithError(30251);
                 }
 
                 if (isset($mediaPath['path'])) {

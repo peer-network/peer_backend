@@ -125,7 +125,7 @@ class PostService
                 $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                 if (!empty($mediaPath['error'])) {
-                    return $this->respondWithError(20251);
+                    return $this->respondWithError(30251);
                 }
 
                 if (!empty($mediaPath['path'])) {
