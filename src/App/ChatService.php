@@ -645,7 +645,7 @@ class ChatService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11810,
+                'ResponseCode' => 30204,
                 'data' => new Chat([
                     'chatid' => $chatData['chat']['chatid'],
                     'creatorid' => $chatData['chat']['creatorid'],
@@ -660,10 +660,10 @@ class ChatService
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in loadChatById", ['error' => $e->getMessage()]);
-            return $this->respondWithError(20204);
+            return $this->respondWithError(30204);
         } catch (\Throwable $e) {
             $this->logger->error("Unexpected error in loadChatById", ['error' => $e->getMessage()]);
-            return $this->respondWithError(20204);
+            return $this->respondWithError(30204);
         }
     }
 

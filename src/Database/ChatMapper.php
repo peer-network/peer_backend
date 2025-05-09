@@ -309,7 +309,7 @@ class ChatMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11810,
+                'ResponseCode' => 30204,
                 'data' => [
                     'chat' => $chatRow,
                     'messages' => $chatMessages,
