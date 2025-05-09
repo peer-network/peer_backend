@@ -349,7 +349,7 @@ class ChatMapper
             $this->logger->error("General error in getChatMessages", [
                 'error' => $e->getMessage(),
             ]);
-            return $this->respondWithError(20204);
+            return $this->respondWithError(40301);
         }
     }
 

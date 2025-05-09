@@ -660,10 +660,10 @@ class ChatService
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in loadChatById", ['error' => $e->getMessage()]);
-            return $this->respondWithError(30204);
+            return $this->respondWithError(40301);
         } catch (\Throwable $e) {
             $this->logger->error("Unexpected error in loadChatById", ['error' => $e->getMessage()]);
-            return $this->respondWithError(30204);
+            return $this->respondWithError(40301);
         }
     }
 
