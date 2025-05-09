@@ -2598,6 +2598,10 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30101);
         }
 
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
 
         $chatid = $args['chatid'] ?? null;
 
