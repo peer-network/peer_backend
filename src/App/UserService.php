@@ -154,7 +154,7 @@ class UserService
 
             if (empty($inviter)) {
                 $this->logger->warning('Invalid referral UUID provided.', ['referralUuid' => $referralUuid]);
-                return self::respondWithError(00000);
+                return self::respondWithError(31007);
             }
 
             $invited = $inviter->getUserId();
@@ -261,7 +261,7 @@ class UserService
             $this->userMapper->insertReferralInfo($id, $referralLink);
         } catch (\Throwable $e) {
             $this->logger->warning('Error handling referral info.', ['exception' => $e]);
-            return self::respondWithError(00000);
+            return self::respondWithError(41013);
         }
 
         try {
@@ -309,7 +309,7 @@ class UserService
 
         return [
             'status' => 'success',
-            'ResponseCode' => 00000,
+            'ResponseCode' => 11011,
             'counter' => count($data['iInvited']),
             'affectedRows' => [
                 'invitedBy' => $data['invitedBy'],
