@@ -6,6 +6,7 @@ use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
+use Fawaz\Mail\UserWelcomeMail;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
@@ -284,8 +285,16 @@ class UserService
         $this->userMapper->logLoginDaten($id);
         $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
 
-		$payload = $this->createPayload($email, $username, $bin2hex);
-		$this->mailer->sendViaAPI($payload);
+        try {
+            if(isset($id)){
+                $data = [
+                    'username' => $username
+                ];
+                (new UserWelcomeMail($data))->send($email);
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
+        }
 
 		return [
 			'status' => 'success',
@@ -318,7 +327,7 @@ class UserService
                 $this->logger->info('UserService.uploadMedia mediaPath', ['mediaPath' => $mediaPath]);
 
                 if ($mediaPath === '') {
-                    return self::respondWithError(41009);
+                    return self::respondWithError(30251);
                 }
 
                 if (isset($mediaPath['path'])) {
@@ -342,7 +351,7 @@ class UserService
     public function verifyAccount(string $userId): array
     {
         if (!self::isValidUUID($userId)) {
-            return self::respondWithError(20201);
+            return self::respondWithError(30201);
         }
 
         try {
@@ -436,7 +445,7 @@ class UserService
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->logger->warning('Invalid email format', ['email' => $email]);
-            return self::respondWithError(20224);
+            return self::respondWithError(30224);
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
@@ -526,7 +535,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update username', ['exception' => $e]);
-            return self::respondWithError(20202);
+            return self::respondWithError(30202);
         }
     }
 
@@ -604,7 +613,7 @@ class UserService
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return self::respondWithError(41007);
+            return self::respondWithError(21001);
         }
     }
 
@@ -618,7 +627,7 @@ class UserService
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
-            return self::respondWithError(20201);
+            return self::respondWithError(30201);
         }
 
         try {

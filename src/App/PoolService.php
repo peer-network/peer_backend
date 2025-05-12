@@ -68,7 +68,7 @@ class PoolService
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
 
         if (!in_array($day, $dayActions, true)) {
-            return $this->respondWithError(20223);
+            return $this->respondWithError(30223);
         }
 
         return $this->poolMapper->getTimeSortedMatch($day);

@@ -270,259 +270,259 @@
             "comment": "Success: Chat fetched successfully",
             "userFriendlyComment": "Chat loaded successfully."
         },
-        "20201": {
+        "30201": {
             "comment": "The 'userid' field (User identifier) must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
             "userFriendlyComment": "Please provide a valid user ID in the correct format."
         },
-        "20202": {
+        "30202": {
             "comment": "The 'username' field (User's display name) must be between 3 and 23 characters long, must contain at least one letter and can contain numbers, and underscores",
             "userFriendlyComment": "Username must be 3-23 characters with at least one letter. Numbers and underscores are allowed."
         },
-        "20203": {
+        "30203": {
             "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 200",
             "userFriendlyComment": "Page offset must be a number between 0 and 200."
         },
-        "20204": {
+        "30204": {
             "comment": "The 'limit' field (Number of data objects to retrieve) must be an integer between 1 and 20",
             "userFriendlyComment": "Number of items to display must be between 1 and 20."
         },
-        "20205": {
+        "30205": {
             "comment": "The 'postLimit' field (Number of posts to retrieve) must be an integer between 1 and 20",
             "userFriendlyComment": "Number of posts to display must be between 1 and 20."
         },
-        "20206": {
+        "30206": {
             "comment": "The 'filterBy' field (Post filter criteria) must be an array containing only valid ENUM options: IMAGE, AUDIO, TEXT, VIDEO, FOLLOWED, FOLLOWER",
             "userFriendlyComment": "Please select valid filter options from the available choices."
         },
-        "20207": {
+        "30207": {
             "comment": "The 'IgnoreList' field (Whether to apply the block list) must be either 'YES' or 'NO' (ENUM options)",
             "userFriendlyComment": "Please specify either YES or NO for the block list option."
         },
-        "20208": {
+        "30208": {
             "comment": "The 'sortBy' field (Sorting order for posts) must be one of the following ENUM options: NEWEST, TRENDING, LIKES, DISLIKES, VIEWS, COMMENTS",
             "userFriendlyComment": "Please choose a valid sorting option from the available choices."
         },
-        "20209": {
+        "30209": {
             "comment": "The 'postid' field (Post identifier) must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
             "userFriendlyComment": "Please provide a valid post ID in the correct format."
         },
-        "20210": {
+        "30210": {
             "comment": "The 'title' field (Title of the post to search for) must be between 2 and 63 characters long and can only contain letters, numbers, spaces, dashes (-), and underscores (_)",
             "userFriendlyComment": "Post title must be 2-63 characters using letters, numbers, spaces, dashes or underscores."
         },
-        "20211": {
+        "30211": {
             "comment": "The 'tag' field (Tags to search for in posts) must be an array of up to five tags, each between 2 and 53 characters long",
             "userFriendlyComment": "You can search with up to 5 tags, each 2-53 characters long."
         },
-        "20212": {
+        "30212": {
             "comment": "The 'from' field (Starting date for data retrieval) must be a valid date in the format YYYY-MM-DD",
             "userFriendlyComment": "Please enter the start date in YYYY-MM-DD format."
         },
-        "20213": {
+        "30213": {
             "comment": "The 'to' field (End date for data retrieval) must be a valid date in the format YYYY-MM-DD",
             "userFriendlyComment": "Please enter the end date in YYYY-MM-DD format."
         },
-        "20214": {
+        "30214": {
             "comment": "The 'postOffset' field (Pagination offset for posts) must be an integer",
             "userFriendlyComment": "Post offset must be a whole number."
         },
-        "20215": {
+        "30215": {
             "comment": "The 'commentOffset' field (Pagination offset for comments) must be an integer",
             "userFriendlyComment": "Comment offset must be a whole number."
         },
-        "20216": {
+        "30216": {
             "comment": "The 'commentLimit' field (Number of comments to retrieve) must be an integer between 1 and 20",
             "userFriendlyComment": "Number of comments to display must be between 1 and 20."
         },
-        "20217": {
+        "30217": {
             "comment": "The 'commentid' field (Comment identifier) must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
             "userFriendlyComment": "Please provide a valid comment ID in the correct format."
         },
-        "20218": {
+        "30218": {
             "comment": "The 'chatid' field (Chat identifier) must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
             "userFriendlyComment": "Please provide a valid chat ID in the correct format."
         },
-        "20219": {
+        "30219": {
             "comment": "The 'messageOffset' field (Pagination offset for chat messages) must be an integer",
             "userFriendlyComment": "Message offset must be a whole number."
         },
-        "20220": {
+        "30220": {
             "comment": "The 'messageLimit' field (Number of chat messages to retrieve) must be an integer between 1 and 20",
             "userFriendlyComment": "Number of messages to display must be between 1 and 20."
         },
-        "20221": {
+        "30221": {
             "comment": "The 'searchChatByName' field (Search for chats by name) must be a valid string",
             "userFriendlyComment": "Please enter a valid chat name to search."
         },
-        "20222": {
+        "30222": {
             "comment": "The 'searchChatByUser' field (Find all chats with a specific friend as a participant) must be a valid string",
             "userFriendlyComment": "Please enter a valid username to search for chats."
         },
-        "20223": {
+        "30223": {
             "comment": "The 'day' field (Timeframe selection for data retrieval) must be one of the following ENUM options: D0, D1, D2, D3, D4, D5, W0, M0, Y0",
             "userFriendlyComment": "Please select a valid timeframe option from the available choices."
         },
-        "20224": {
+        "30224": {
             "comment": "The 'email' field (User's email address) must be a valid email format",
             "userFriendlyComment": "Please enter a valid email address."
         },
-        "20225": {
+        "30225": {
             "comment": "The 'password' field (User's current password) is required to update the email",
             "userFriendlyComment": "Please enter your current password to update your email."
         },
-        "20226": {
+        "30226": {
             "comment": "The 'password' field (User's new password) must be between 8 and 128 characters long and contain at least one lowercase letter, one uppercase letter, and one number",
             "userFriendlyComment": "New password must be 8-128 characters with at least one uppercase letter, one lowercase letter, and one number."
         },
-        "20227": {
+        "30227": {
             "comment": "The 'expassword' field (User's current password) is required to update the password",
             "userFriendlyComment": "Please enter your current password to set a new one."
         },
-        "20228": {
+        "30228": {
             "comment": "The 'biography' field (User's biography)must be between 3 and 5000 characters long",
             "userFriendlyComment": "Bio must be between 3 and 5000 characters."
         },
-        "20229": {
+        "30229": {
             "comment": "The 'img' field (User's profile picture) must be a valid image file (JPG, PNG, or GIF) and less than 5MB in size",
             "userFriendlyComment": "Profile picture must be JPG, PNG or GIF under 5MB."
         },
-        "20230": {
+        "30230": {
             "comment": "You are not authorized to perform this action on the specified chat",
             "userFriendlyComment": "You don't have permission to perform this action in this chat."
         },
-        "20231": {
+        "30231": {
             "comment": "The 'input' field must contain valid values for all required fields",
             "userFriendlyComment": "Please fill in all required fields with valid information."
         },
-        "20232": {
+        "30232": {
             "comment": "This comment has already been reported",
             "userFriendlyComment": "This comment has already been reported by you."
         },
-        "20233": {
+        "30233": {
             "comment": "The 'action' field (Action to perform) must be one of the following ENUM options: POST",
             "userFriendlyComment": "Please select a valid action from the available options."
         },
-        "20234": {
+        "30234": {
             "comment": "The 'action' field (Action to perform) must be one of the following ENUM options: LIKE, DISLIKE, REPORT, VIEW, SAVE",
             "userFriendlyComment": "Please select a valid interaction type from the available options."
         },
-        "20235": {
+        "30235": {
             "comment": "The 'password' field (New password) cannot be the same as the current password",
             "userFriendlyComment": "New password must be different from your current password."
         },
-        "20236": {
+        "30236": {
             "comment": "The 'IgnoreList' field must be either 'YES' or 'NO'",
             "userFriendlyComment": "Please specify either YES or NO for the ignore list option."
         },
-        "20237": {
+        "30237": {
             "comment": "The 'password' field (User's password) is required to proceed",
             "userFriendlyComment": "Please enter your password to continue."
         },
-        "20238": {
+        "30238": {
             "comment": "The 'biography' field (User's biography) must be provided to update the profile",
             "userFriendlyComment": "Please provide your bio text to update your profile."
         },
-        "20239": {
+        "30239": {
             "comment": "The 'img' field (User's profile picture) must be provided to update the image",
             "userFriendlyComment": "Please select an image to update your profile picture."
         },
-        "20240": {
+        "30240": {
             "comment": "The 'recipient' field (Target user for the action) must be provided",
             "userFriendlyComment": "Please specify who you want to perform this action with."
         },
-        "20241": {
+        "30241": {
             "comment": "The 'tokenAmount' field (Amount of tokens to process) must be provided",
             "userFriendlyComment": "Please enter the amount of tokens you want to process."
         },
-        "20242": {
+        "30242": {
             "comment": "The 'transactionID' field (Transaction identifier) must be provided to validate the process",
             "userFriendlyComment": "Please provide the transaction ID to continue."
         },
-        "20243": {
+        "30243": {
             "comment": "The 'tokenAmount' field (Transaction amount) must be more than 10 tokens",
             "userFriendlyComment": "Minimum transaction amount is 10 tokens."
         },
-        "20244": {
+        "30244": {
             "comment": "The 'value' field must be an integer",
             "userFriendlyComment": "Please enter a whole number."
         },
-        "20245": {
+        "30245": {
             "comment": "The 'value' field must be at least the defined minimum",
             "userFriendlyComment": "Value must be at least the minimum required amount."
         },
-        "20246": {
+        "30246": {
             "comment": "The 'value' field must be at most the defined maximum",
             "userFriendlyComment": "Value cannot exceed the maximum allowed amount."
         },
-        "20247": {
+        "30247": {
             "comment": "The 'value' field must be a valid float",
             "userFriendlyComment": "Please enter a valid decimal number."
         },
-        "20248": {
+        "30248": {
             "comment": "The 'max' option is required for the LessThan validator",
             "userFriendlyComment": "Maximum value limit is required for this field."
         },
-        "20249": {
+        "30249": {
             "comment": "The 'max' field must be in a valid date format (YYYY-MM-DD)",
             "userFriendlyComment": "Please enter the maximum date in YYYY-MM-DD format."
         },
-        "20250": {
+        "30250": {
             "comment": "The 'value' field must be in a valid date format (YYYY-MM-DD)",
             "userFriendlyComment": "Please enter the date in YYYY-MM-DD format."
         },
-        "20251": {
+        "30251": {
             "comment": "The 'image' field does not contain a valid base64 format",
             "userFriendlyComment": "The image format is invalid. Please upload a valid image."
         },
-        "20252": {
+        "30252": {
             "comment": "The 'message' field must be between 1 and 500 characters long",
             "userFriendlyComment": "Message must be between 1 and 500 characters."
         },
-        "20253": {
+        "30253": {
             "comment": "The 'phone number' field must be an integer between 9 and 21",
             "userFriendlyComment": "Phone number must be 9-21 digits long."
         },
-        "20254": {
+        "30254": {
             "comment": "The 'Solana Public Key' field must be a String between 43 and 44 (only including Chars and Ints without 0 O I 1)",
             "userFriendlyComment": "Please enter a valid Solana public key (43-44 characters, excluding 0, O, I, 1)."
         },
-        "20255": {
+        "30255": {
             "comment": "The 'tagName' field (Tag identifier) must be between 2 and 53 characters long, must not contain spaces, and may include letters, numbers, special characters, underscores _, and hyphens - (format: valid-tag_name-123)",
             "userFriendlyComment": "Tag name must be 2-53 characters without spaces. Use letters, numbers, underscores or hyphens."
         },
-        "20256": {
+        "30256": {
             "comment": "Title must be between 2 and 30 characters. Please adjust and try again",
             "userFriendlyComment": "Title must be 2-30 characters long. Please shorten or lengthen your title."
         },
-        "20257": {
+        "30257": {
             "comment": "Invalid IP address. Please enter a valid IPv4 (e.g. 192.168.0.1) or IPv6 (e.g. 2001:0db8:85a3:0000:0000:8a2e:0370:7334) address",
             "userFriendlyComment": "Please enter a valid IP address in IPv4 or IPv6 format."
         },
-        "20258": {
+        "30258": {
             "comment": "The date must be in the format 'YYYY-MM-DD' (e.g., 2025-04-02)",
             "userFriendlyComment": "Please enter the date in YYYY-MM-DD format."
         },
-        "20259": {
+        "30259": {
             "comment": "The image you uploaded isn't supported. Please use one of the following file types: JPEG (.jpg), PNG (.png), GIF (.gif), or WebP (.webp)",
             "userFriendlyComment": "Unsupported image format. Please upload JPG, PNG, GIF or WebP files."
         },
-        "20260": {
+        "30260": {
             "comment": "Information: Invalid image dimensions. Please make sure the file is a valid image and not corrupted",
             "userFriendlyComment": "The image appears to be corrupted or invalid. Please try another file."
         },
-        "20261": {
+        "30261": {
             "comment": "Information: Desired file can not be uploaded due to file size limitations",
             "userFriendlyComment": "File is too large. Please choose a smaller file."
         },
-        "20262": {
+        "30262": {
             "comment": "The 'tag' field (Tags in post creation) must be an array of up to ten tags, each between 2 and 53 characters long",
             "userFriendlyComment": "You can add up to 10 tags, each 2-53 characters long."
         },
-        "20263": {
+        "30263": {
             "comment": "The 'mediadescription' field (Create Post input) must be between 3 and 500 characters long",
             "userFriendlyComment": "Media description must be 3-500 characters long."
         },
-        "20264": {
+        "30264": {
             "comment": "The numberoftokens field must be a number (can be fractional), greater than zero, and less than the account balance",
             "userFriendlyComment": "Token amount must be a positive number and not exceed your balance."
         },
