@@ -8,7 +8,7 @@ enum ContentLimitsPerPost: string {
     case TEXT = 'text';
     case IMAGE = 'image';
 
-    public function limit(): string
+    public function mediaLimit(): int
     {
         return match($this) 
         {
@@ -16,6 +16,16 @@ enum ContentLimitsPerPost: string {
             ContentLimitsPerPost::IMAGE => 5,
             ContentLimitsPerPost::TEXT => 1,
             ContentLimitsPerPost::VIDEO => 2,
+        };
+    }    
+    public function coverLimit(): int
+    {
+        return match($this) 
+        {
+            ContentLimitsPerPost::AUDIO => 1,
+            ContentLimitsPerPost::IMAGE => 1,
+            ContentLimitsPerPost::TEXT => 1,
+            ContentLimitsPerPost::VIDEO => 1,
         };
     }    
 }
