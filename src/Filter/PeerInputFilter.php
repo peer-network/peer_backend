@@ -83,7 +83,7 @@ class PeerInputFilter
                     if (method_exists($this, $validatorName)) {
                         if (!$this->$validatorName($this->data[$field], $options)) {
                             if (isset($this->errors[$field]) && is_array($this->errors[$field])){
-                                if (!empty($this->errors[$field][0])){    
+                                if (!empty($this->errors[$field][0])){
                                     continue;
                                 }
                             } else {
@@ -285,10 +285,17 @@ class PeerInputFilter
 
     protected function StringLength(string $value, array $options = []): bool
     {
-        $min = $options['min'] ?? 0;
-        $max = $options['max'] ?? PHP_INT_MAX;
-        $length = strlen($value);
-        return $length >= $min && $length <= $max;
+        $min =  (int)$options['min'] ?? 0;
+        $max = (int)$options['max'] ?? PHP_INT_MAX;
+        $errorCode = $options['errorCode'] ?? 40301;
+        $length = strlen($value);   
+
+        $validationResult = ($length >= $min && $length <= $max);
+
+        if ($validationResult == false) {
+            $this->errors['content'][] = $errorCode;
+        }
+        return $validationResult;
     }
 
     protected function ArrayValues(mixed $value, array $options = []): bool
