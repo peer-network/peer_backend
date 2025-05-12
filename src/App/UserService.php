@@ -6,6 +6,7 @@ use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
+use Fawaz\Mail\UserWelcomeMail;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
@@ -284,8 +285,16 @@ class UserService
         $this->userMapper->logLoginDaten($id);
         $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
 
-		$payload = $this->createPayload($email, $username, $bin2hex);
-		$this->mailer->sendViaAPI($payload);
+        try {
+            if(isset($id)){
+                $data = [
+                    'username' => $username
+                ];
+                (new UserWelcomeMail($data))->send($email);
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
+        }
 
 		return [
 			'status' => 'success',
