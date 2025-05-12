@@ -293,7 +293,7 @@ class UserService
                 (new UserWelcomeMail($data))->send($email);
             }
         } catch (\Throwable $e) {
-            $this->logger->info('Error occurred while sending email: ' . $e->getMessage());
+            $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
         }
 
 		return [
