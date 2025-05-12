@@ -1842,14 +1842,14 @@ class GraphQLSchemaBuilder
 
             $info = $this->userMapper->getReferralInfoByUserId($userId);
             if (empty($info)) {
-                return $this->respondWithError(00000);
+                return $this->respondWithError(21002);
             }
 
             $response = [
                 'referralUuid' => $info['referral_uuid'] ?? '', 
                 'referralLink' => $info['referral_link'] ?? '',
                 'status' => 'success',
-                'ResponseCode' => 'Referral info fetched'
+                'ResponseCode' => 11011
             ];
 
             return $response;
@@ -1858,7 +1858,7 @@ class GraphQLSchemaBuilder
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return $this->respondWithError(00000);
+            return $this->respondWithError(41013);
         }
     }
 
@@ -1902,7 +1902,7 @@ class GraphQLSchemaBuilder
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 'Referral list fetched',
+                'ResponseCode' => '11011',
                 'counter' => count($referralUsers['iInvited']),
                 'affectedRows' => $referralUsers
             ];
@@ -1911,7 +1911,7 @@ class GraphQLSchemaBuilder
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return $this->respondWithError(00000);
+            return $this->respondWithError(41013);
         }
     }
 
