@@ -1148,8 +1148,24 @@ class WalletMapper
                 'createdat' => $row['createdat']
             ];
 
-            $this->insertWinToLog($userId, end($args[$userId]['details']));
-            $this->insertWinToPool($userId, end($args[$userId]['details']));
+            // Also needs to add records in log_gems in FUTURE
+            $transUniqueId = self::generateUUID();
+            $this->saveWalletEntry($userId, $rowgems2token);
+            $transObj = [
+                'transUniqueId' => $transUniqueId,
+                'transactionType' => 'mint',
+                'senderId' => $userId,
+                'recipientId' => null,
+                'tokenAmount' => $rowgems2token,
+                'message' => 'Airdrop',
+            ];
+            $transactions = new Transaction($transObj);
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+            $transRepo->saveTransaction($transactions);
+
+            
+            // $this->insertWinToLog($userId, end($args[$userId]['details']));
+            // $this->insertWinToPool($userId, end($args[$userId]['details']));
         }
 
         if (!empty($data)) {
@@ -1218,6 +1234,7 @@ class WalletMapper
                     'createdat' => $createdat,
                 ];
 
+                // TRANSACTION TABLE
                 $this->insertWinToLog($userId, $args);
             }
 
@@ -1237,6 +1254,7 @@ class WalletMapper
                     'createdat' => $createdat,
                 ];
 
+                // TRANSACTION TABLE
                 $this->insertWinToLog($inviterId, $args);
             }
 
@@ -1304,11 +1322,13 @@ class WalletMapper
         ];
 
         try {
+            // TRANSACTION TABLE: MAY BE
             $results = $this->insertWinToLog($userId, $args);
             if ($results === false) {
                 return self::respondWithError(41206);
             }
 
+            // TRANSACTION TABLE: MAY BE
             $results = $this->insertWinToPool($userId, $args);
             if ($results === false) {
                 return self::respondWithError(41206);
