@@ -5,9 +5,9 @@ namespace Fawaz\Mail;
 use Fawaz\Mail\Interface\EmailInterface;
 use Fawaz\Services\SmtpMailer;
 
-class UserVerificationMail implements EmailInterface
+class UserWelcomeMail implements EmailInterface
 {
-    public function __construct(public $data) {
+    public function __construct(public array $data){
         
     }
 
@@ -27,7 +27,7 @@ class UserVerificationMail implements EmailInterface
                     <h1 style='color: #d1d5db; font-weight: 600; font-size: 1.125rem; margin: 0;'>Welcome to Peer Network!,</h1>
                 </div>
                  <p style='font-size: 16px;'>Hi <strong>{$this->data['username']}</strong>,</p>
-                 <p style='font-size: 16px;'>We are thrilled to have you as a part of our growing community. Peer Network is more than just a platform, its a movement where your voice earns value.</p>
+                 <p style='font-size: 16px;'>We are thrilled to have you as a part of our growing community. Peer Network is more than just a platform, it is a movement where your voice earns value.</p>
                  <p style='font-size: 16px;'>Here, every post, like, and interaction brings you closer to meaningful rewards through Peer Tokens.</p>
                  <p>Thank You for joining the Journey of Peer Network Login, Start Posting, Earn Tokens and spread the word that Peer is there!</p>
                 <div style='font-size: 12px; color: #777; margin-top: 30px;'>
@@ -56,7 +56,7 @@ class UserVerificationMail implements EmailInterface
      */
     public function send(string $email): array
     {
-        $subject = "You just Registered an Account";
+        $subject = "Welcome to Peer Network - You just Registered an Account";
 
         $mailer = new SmtpMailer();
         return $mailer->sendEmail($email, $subject, $this->content());
