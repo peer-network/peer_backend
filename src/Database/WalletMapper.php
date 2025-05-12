@@ -116,7 +116,7 @@ class WalletMapper
 
         if (empty($row)) {
             $this->logger->warning('Unknown Id Exception.');
-            return self::respondWithError(21001);
+            return self::respondWithError(31003);
         }
 
         if ((string)$row === $userId) {
