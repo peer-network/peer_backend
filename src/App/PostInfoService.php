@@ -256,7 +256,7 @@ class PostInfoService
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('PostInfoService.toggleUserFollow started');
