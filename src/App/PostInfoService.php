@@ -127,7 +127,7 @@ class PostInfoService
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
-            return $this->respondWithError(21509    );
+            return $this->respondWithError(21509);
         }
 
         $exists = $this->postInfoMapper->addUserActivity('dislikePost', $this->currentUserId, $postId);
@@ -237,7 +237,7 @@ class PostInfoService
         $exists = $this->postInfoMapper->addUserActivity('sharePost', $this->currentUserId, $postId);
 
         if (!$exists) {
-            return $this->respondWithError(21515);
+            return $this->respondWithError(31504);
         }
 
         $postInfo->setShares($postInfo->getShares() + 1);
@@ -249,7 +249,7 @@ class PostInfoService
         ];
     }
 
-    public function toggleUserFollow(string $followedUserId): array 
+    public function toggleUserFollow(string $followedUserId): array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
@@ -268,7 +268,7 @@ class PostInfoService
         return $this->postInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
     }
 
-    public function savePost(string $postId): array 
+    public function savePost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);

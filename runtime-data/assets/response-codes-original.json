@@ -1,6 +1,6 @@
 {
     "name": "Original messages from xls table",
-    "createdAt" : 1746434324,
+    "createdAt": 1746434324,
     "data": {
         "10401": "Success: Contact created successfully",
         "10601": "Success: User registered successfully. Please verify your account and log in",
@@ -167,7 +167,7 @@
         "21512": "Invalid Action: You have already reported this post. Duplicate reports are not required",
         "21513": "Not Allowed: As the owner, you are restricted from viewing your own posts",
         "21514": "Invalid Action: Post already viewed",
-        "21515": "Invalid Action: Post already shared",
+        "31504": "Invalid Action: Post already shared",
         "21516": "PostId not found",
         "21517": "Information not found: Invalid ID provided (empty post results by searching with userId)",
         "21518": "Information Not Found: No posts found. Please try again later or create a post",
