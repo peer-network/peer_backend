@@ -1828,7 +1828,7 @@ class GraphQLSchemaBuilder
     protected function resolveReferralInfo(): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('Query.resolveReferralInfo started');
@@ -1902,7 +1902,7 @@ class GraphQLSchemaBuilder
 
             return [
                 'status' => 'success',
-                'ResponseCode' => '11011',
+                'ResponseCode' => 11011,
                 'counter' => count($referralUsers['iInvited']),
                 'affectedRows' => $referralUsers
             ];
@@ -3015,14 +3015,14 @@ class GraphQLSchemaBuilder
         try {
             $user = $this->userMapper->loadById($userid);
             if (!$user) {
-                return $this->respondWithError(21001);
+                return $this->respondWithError(31007);
             }
 
             if ($user->getVerified() == 1) {
                 $this->logger->info('Account is already verified', ['userid' => $userid]);
                 return [
-                    'status' => 'success',
-                    'ResponseCode' => 20701
+                    'status' => 'error',
+                    'ResponseCode' => 30701
                 ];
             }
 
