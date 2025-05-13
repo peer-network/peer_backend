@@ -1208,22 +1208,27 @@ class GraphQLSchemaBuilder
                     return $root['y0'] ?? 0;
                 },
             ],
-            'DailyGemsResultsData' => [
-                'data' => function (array $root): array {
-                    $this->logger->info('Query.DailyGemsResultsData Resolvers');
-                    return $root['data'] ?? [];
-                },
-                'totalGems' => function (array $root): float {
-                    return $root['totalGems'] ?? 0.0;
-                },
-            ],
             'DailyGemsResultsUserData' => [
                 'userid' => function (array $root): string {
                     $this->logger->info('Query.DailyGemsResultsUserData Resolvers');
                     return $root['userid'] ?? '';
                 },
+                'pkey' => function (array $root): string {
+                    return $root['pkey'] ?? '';
+                },
                 'gems' => function (array $root): float {
-                    return $root['gems'] ?? 0.0;
+                    return isset($root['gems']) ? (float)$root['gems'] : 0.0;
+                },
+                'tokenAmount' => function (array $root): float {
+                    return isset($root['tokenAmount']) ? (float)$root['tokenAmount'] : 0.0;
+                },
+            ],
+            'DailyGemsResultsData' => [
+                'totalGems' => function (array $root): float {
+                    return isset($root['totalGems']) ? (float)$root['totalGems'] : 0.0;
+                },
+                'data' => function (array $root): array {
+                    return $root['data'] ?? [];
                 },
             ],
             'ContactusResponse' => [

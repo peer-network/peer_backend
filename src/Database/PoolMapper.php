@@ -159,27 +159,28 @@ class PoolMapper
             WITH user_sums AS (
                 SELECT 
                     userid,
-                    GREATEST(SUM(gems), 0) AS total_numbers
+                    GREATEST(COALESCE(SUM(gems), 0), 0) AS total_numbers
                 FROM gems
                 WHERE {$whereCondition}
                 GROUP BY userid
             ),
             total_sum AS (
-                SELECT SUM(total_numbers) AS overall_total FROM user_sums
+                SELECT COALESCE(SUM(total_numbers), 0) AS overall_total FROM user_sums
             )
             SELECT 
                 g.userid,
-                g.gemid,
-                g.gems,
-                g.whereby,
-                g.createdat,
-                us.total_numbers,
-                (SELECT SUM(total_numbers) FROM user_sums) AS overall_total,
-                (us.total_numbers * 100.0 / ts.overall_total) AS percentage
+                COALESCE(us.total_numbers, 0) AS gems,
+                ui.pkey,
+               COALESCE(w.liquidity, 0) AS tokenAmount,
+                ts.overall_total,
+                COALESCE((us.total_numbers * 100.0 / ts.overall_total), 0) AS percentage
             FROM gems g
             JOIN user_sums us ON g.userid = us.userid
             CROSS JOIN total_sum ts
-            WHERE us.total_numbers > 0 AND g.{$whereCondition};
+            LEFT JOIN users_info ui ON g.userid = ui.userid
+            LEFT JOIN wallett w ON g.userid = w.userid
+            WHERE us.total_numbers > 0 AND g.{$whereCondition}
+            GROUP BY g.userid, us.total_numbers, ui.pkey, w.liquidity, ts.overall_total;
         ";
 
         try {
@@ -203,12 +204,14 @@ class PoolMapper
 
             if (!isset($args[$userId])) {
                 $args[$userId] = [
-                    'userid' => $userId,
-                    'gems' => $row['total_numbers']
+                    'userid'      => $userId,
+                    'gems'        => $row['gems'] ?? 0,
+                    'pkey'        => $row['pkey'] ?? '',
+                    'tokenAmount' => $row['tokenAmount'] ?? 0,
                 ];
             }
 
-            $whereby = $row['whereby'];
+            $whereby = $row['whereby'] ?? null;
 
             $mapping = [
                 1 => ['text' => 'View'],
@@ -218,11 +221,11 @@ class PoolMapper
                 5 => ['text' => 'Post'],
             ];
 
-            if (!isset($mapping[$whereby])) {
-                return $this->respondWithError(41221);
+            if ($whereby !== null && isset($mapping[$whereby])) {
+                $whereby = $mapping[$whereby]['text'];
+            } else {
+                $whereby = 'Unknown';
             }
-
-            $whereby = $mapping[$whereby]['text'];
         }
 
         if (!empty($data)) {
