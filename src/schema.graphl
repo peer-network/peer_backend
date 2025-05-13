@@ -60,7 +60,7 @@ type Mutation {
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Int!, message: String): DefaultResponse!
-  swapTokens(btcAddress: ID!, numberoftokens: Int!, message: String): DefaultResponse!
+  swapTokens(btcAddress: ID!, numberoftokens: Int!, message: String): SwapTokenResponse!
 }
 
 scalar Decimal
@@ -165,6 +165,18 @@ type TransactionResponse {
   status: String!
   responseCode: Int!
   affectedRows: [Transaction!]
+}
+
+type SwapToken {
+  tokenSend: Decimal
+  tokensSubstractedFromWallet: Decimal
+  expectedBtcReturn: Decimal
+}
+
+type SwapTokenResponse {
+  status: String!
+  responseCode: Int!
+  affectedRows: SwapToken!
 }
 
 type UserLogWins {

@@ -347,7 +347,11 @@ class WalletService
                 return [
                     'status' => 'success',
                     'ResponseCode' => $response['ResponseCode'],
-                    'affectedRows' => [],
+                    'affectedRows' => [
+                        'tokenSend' => $response['tokenSend'],
+                        'tokensSubstractedFromWallet' => $response['tokensSubstractedFromWallet'],
+                        'expectedBtcReturn' => $response['expectedBtcReturn'] ?? 0.0
+                    ],
                 ];
             }
 

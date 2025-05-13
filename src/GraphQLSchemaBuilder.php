@@ -1120,6 +1120,29 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'SwapTokenResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'responseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'SwapToken' => [
+                'tokenSend' => function (array $root): float {
+                    return $root['tokenSend'] ?? 0.0;
+                },
+                'tokensSubstractedFromWallet' => function (array $root): float {
+                    return $root['tokensSubstractedFromWallet'] ?? 0.0;
+                },
+                'expectedBtcReturn' => function (array $root): float {
+                    return $root['expectedBtcReturn'] ?? 0.0;
+                },
+            ],
             'TransactionResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.getTransactionHistory Resolvers');

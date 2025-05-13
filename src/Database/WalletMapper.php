@@ -11,6 +11,7 @@ use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
+use Fawaz\Utils\TokenToBtcSwapCalc;
 use Psr\Log\LoggerInterface;
 
 const TABLESTOGEMS = true;
@@ -1808,7 +1809,7 @@ class WalletMapper
                 // PENDING
                 // Store BTC Swap transactions in btc_swap_transactions
                 // count BTC amount
-                $btcAmount = 0.000001;
+                $btcAmount = TokenToBtcSwapCalc::convert($numberoftokens);
                 $transObj = [
                     'transUniqueId' => $transactionId,
                     'transactionType' => 'btcSwapToPool',
@@ -2003,7 +2004,13 @@ class WalletMapper
                 $transRepo->saveTransaction($transactions);
             }
 
-            return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
+            return [
+                'status' => 'success', 
+                'ResponseCode' => 0000,
+                'tokenSend' => $numberoftokens,
+                'tokensSubstractedFromWallet' => $requiredAmount,
+                'expectedBtcReturn' => $btcAmount ?? 0.0
+            ];
 
         } catch (\Throwable $e) {
             return self::respondWithError($e->getMessage());
