@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\Config\Constants\Constants;
 
 class Chat
 {
@@ -182,8 +183,8 @@ class Chat
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 53,
+                        'min' => Constants::$chat::$nameStringLength->min,
+                        'max' => Constants::$chat::$nameStringLength->max,
                     ]],
                     ['name' => 'isString'],
                 ],
