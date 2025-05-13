@@ -326,4 +326,33 @@ class WalletService
         }
 
     }
+
+    
+    /**
+     * Swap Peer Token to BTC of Current User
+     * 
+     * @param args array
+     * 
+     * @return array with Response Object
+     */
+    public function swapTokens(array $args): array
+    {
+        $this->logger->info('WalletService.swapTokens started');
+
+        try {
+            $response = $this->walletMapper->swapTokens($this->currentUserId, $args);
+            if ($response['status'] === 'error') {
+                return $response;
+            } else {
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => $response['ResponseCode'],
+                    'affectedRows' => [],
+                ];
+            }
+
+        } catch (\Exception $e) {
+            return $this->respondWithError('Unknown Error.');
+        }
+    }
 }

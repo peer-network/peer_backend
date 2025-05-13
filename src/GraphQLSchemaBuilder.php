@@ -1245,6 +1245,7 @@ class GraphQLSchemaBuilder
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
+            'swapTokens' => fn(mixed $root, array $args) => $this->walletService->swapTokens($args),
         ];
     }
 

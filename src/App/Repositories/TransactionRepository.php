@@ -23,7 +23,7 @@ class TransactionRepository
     {
         $this->logger->info("TransactionRepository.getTransaction started");
 
-        $query = "SELECT * FROM notifications";
+        $query = "SELECT * FROM transactions";
 
         try {
             $stmt = $this->db->prepare($query);

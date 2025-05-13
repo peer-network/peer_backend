@@ -2,7 +2,9 @@
 
 namespace Fawaz\Database;
 
+use Fawaz\App\Models\BtcSwapTransaction;
 use Fawaz\App\Models\Transaction;
+use Fawaz\App\Repositories\BtcSwapTransactionRepository;
 use Fawaz\App\Repositories\TransactionRepository;
 use PDO;
 use Fawaz\App\Wallet;
@@ -1655,5 +1657,357 @@ class WalletMapper
         ];
     }
 
+
+    /**
+     * get transcation history of current user.
+     * 
+     * @param userId string
+     * @param args array
+     * 
+     */    
+    public function swapTokens(string $userId, array $args = []): ?array
+    {
+        \ignore_user_abort(true);
+
+        $this->logger->info('WalletMapper.swapTokens started');
+
+		$accountsResult = $this->pool->returnAccounts();
+
+		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
+			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
+			return self::respondWithError(40701);
+		}
+
+		$liqpool = $accountsResult['response'] ?? null;
+
+		if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
+			$this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
+			return self::respondWithError(30102);
+		}
+
+		$this->poolWallet = $liqpool['pool'];
+		$this->burnWallet = $liqpool['burn'];
+		$this->peerWallet = $liqpool['peer'];
+
+        $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
+
+        $currentBalance = $this->getUserWalletBalance($userId);
+        if (empty($currentBalance)) {
+            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+                'Balance' => $currentBalance,
+            ]);
+            return self::respondWithError(51301);
+        }
+
+        $recipient = (string) $this->poolWallet;
+
+        $numberoftokens = (float) $args['numberoftokens'];
+       
+        if ($numberoftokens <= 0) {
+            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+                'numberoftokens' => $numberoftokens,
+                'Balance' => $currentBalance,
+            ]);
+            return self::respondWithError(51301);
+        }
+        $message = isset($args['message']) ? (string) $args['message'] : null;
+
+        // try {
+        //     $sql = "SELECT uid FROM users WHERE uid = :uid";
+        //     $stmt = $this->db->prepare($sql);
+        //     $stmt->bindValue(':uid', $recipient);
+        //     $stmt->execute();
+        //     $row = $stmt->fetchColumn();
+        // } catch (\Throwable $e) {
+        //     return self::respondWithError($e->getMessage());
+        // }
+
+        // if (empty($row)) {
+        //     $this->logger->warning('Unknown Id Exception.');
+        //     return self::respondWithError(21001);
+        // }
+
+        // if ((string)$row === $userId) {
+        //     $this->logger->warning('Send and Receive Same Wallet Error.');
+        //     return self::respondWithError(31202);
+        // }
+
+        $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE);
+        $feeAmount = round((float)$numberoftokens * POOLFEE, 2);
+        $peerAmount = round((float)$numberoftokens * PEERFEE, 2);
+        $burnAmount = round((float)$numberoftokens * BURNFEE, 2);
+        $countAmount = $feeAmount + $peerAmount + $burnAmount;
+
+        try {
+            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['userid' => $userId]);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (isset($result['invited']) && !empty($result['invited'])) {
+                $inviterId = $result['invited'];
+                $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
+                $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
+                $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
+                $this->logger->info('Invited By', [
+                    'invited' => $inviterId,
+                ]);
+            }
+
+        } catch (\Throwable $e) {
+            return self::respondWithError($e->getMessage());
+        }
+
+        if ($currentBalance < $requiredAmount) {
+            $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
+                'userId' => $userId,
+                'Balance' => $currentBalance,
+                'requiredAmount' => $requiredAmount,
+            ]);
+            return self::respondWithError(51301);
+        }
+
+        try {
+
+            $btcAddress = $args['btcAddress'];
+            $transUniqueId = self::generateUUID();
+            // 1. SENDER: Debit From Account
+            if ($numberoftokens) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => -abs($numberoftokens),
+                    'whereby' => TRANSFER_,
+                ];
+
+
+                $this->saveWalletEntry($userId, $args['numbers']);
+                $transactionId = self::generateUUID();
+
+                $transObj = [
+                    'transactionId' => $transactionId,
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'btcSwap',
+                    'senderId' => $userId,
+                    'recipientId' => $recipient,
+                    'tokenAmount' => -$numberoftokens,
+                    'message' => $message,
+                ];
+                $transactions = new Transaction($transObj);
+
+                $transRepo = new TransactionRepository($this->logger, $this->db);
+                $transRepo->saveTransaction($transactions);
+
+
+                // PENDING
+                // Store BTC Swap transactions in btc_swap_transactions
+                // count BTC amount
+                $btcAmount = 0.000001;
+                $transObj = [
+                    'transUniqueId' => $transactionId,
+                    'transactionType' => 'btcSwapToPool',
+                    'userId' => $userId,
+                    'btcAddress' => $btcAddress,
+                    'tokenAmount' => $numberoftokens,
+                    'btcAmount' => $btcAmount,
+                    'message' => $message,
+                    'transferAction' => 'CREDIT'
+                ];
+                $btcTransactions = new BtcSwapTransaction($transObj);
+
+                $btcTransRepo = new BtcSwapTransactionRepository($this->logger, $this->db);
+                $btcTransRepo->saveTransaction($btcTransactions);
+            }
+
+            // 2. RECIPIENT: Credit To Account to Pool Account
+            if ($numberoftokens) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($numberoftokens),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->saveWalletEntry($recipient, $args['numbers']);
+
+                $transUniqueIdForDebit = self::generateUUID();
+                $transObj = [
+                    'transUniqueId' => $transUniqueIdForDebit,
+                    'transactionType' => 'btcSwapToPool',
+                    'senderId' => $userId,
+                    'recipientId' => $recipient,
+                    'tokenAmount' => $numberoftokens,
+                    'message' => $message,
+                    'transferAction' => 'CREDIT'
+                ];
+                $transactions = new Transaction($transObj);
+
+                $transRepo = new TransactionRepository($this->logger, $this->db);
+                $transRepo->saveTransaction($transactions);
+
+            }
+
+            if (isset($result['invited']) && !empty($result['invited'])) {
+                // 3 . INVITER: Fees To inviter Account (if exist)
+                if ($inviterWin) {
+                    $id = self::generateUUID();
+                    if (empty($id)) {
+                        $this->logger->critical('Failed to generate logwins ID');
+                        return self::respondWithError(41401);
+                    }
+
+                    $args = [
+                        'token' => $id,
+                        'fromid' => $userId,
+                        'numbers' => abs($inviterWin),
+                        'whereby' => TRANSFER_,
+                    ];
+
+                    $this->saveWalletEntry($inviterId, $args['numbers']);
+                    $transObj = [
+                        'transUniqueId' => $transUniqueId,
+                        'transactionType' => 'transferSenderToInviter',
+                        'senderId' => $userId,
+                        'recipientId' => $inviterId,
+                        'tokenAmount' => $inviterWin,
+                        'transferAction' => 'INVITER_FEE'
+                    ];
+                    $transactions = new Transaction($transObj);
+    
+                    $transRepo = new TransactionRepository($this->logger, $this->db);
+                    $transRepo->saveTransaction($transactions);
+                }
+            }
+
+            // 4. SENDER: Deduct Fees From Sender
+            if ($countAmount) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => -abs($countAmount),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->saveWalletEntry($userId, $args['numbers']);
+            }
+
+            // 5. POOLWALLET: Fee To Account
+            if ($feeAmount) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($feeAmount),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->saveWalletEntry($this->poolWallet, $args['numbers']);
+
+                $transObj = [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferSenderToPoolWallet',
+                    'senderId' => $userId,
+                    'recipientId' => $this->poolWallet,
+                    'tokenAmount' => $feeAmount,
+                    'transferAction' => 'POOL_FEE'
+
+                ];
+                $transactions = new Transaction($transObj);
+
+                $transRepo = new TransactionRepository($this->logger, $this->db);
+                $transRepo->saveTransaction($transactions);
+            }
+
+            // 6. PEERWALLET: Fee To Account
+            if ($peerAmount) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($peerAmount),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->saveWalletEntry($this->peerWallet, $args['numbers']);
+
+                $transObj = [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferSenderToPeerWallet',
+                    'senderId' => $userId,
+                    'recipientId' => $this->peerWallet,
+                    'tokenAmount' => $peerAmount,
+                    'transferAction' => 'PEER_FEE'
+
+                ];
+                $transactions = new Transaction($transObj);
+
+                $transRepo = new TransactionRepository($this->logger, $this->db);
+                $transRepo->saveTransaction($transactions);
+            }
+
+            // 7. BURNWALLET: Fee Burning Tokens
+            if ($burnAmount) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($burnAmount),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->saveWalletEntry($this->burnWallet, $args['numbers']);
+                $transObj = [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferSenderToBurnWallet',
+                    'senderId' => $userId,
+                    'recipientId' => $this->burnWallet,
+                    'tokenAmount' => $burnAmount,
+                    'transferAction' => 'BURN_FEE'
+                ];
+                $transactions = new Transaction($transObj);
+
+                $transRepo = new TransactionRepository($this->logger, $this->db);
+                $transRepo->saveTransaction($transactions);
+            }
+
+            return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
+
+        } catch (\Throwable $e) {
+            return self::respondWithError($e->getMessage());
+        }
+    }
 
 }
