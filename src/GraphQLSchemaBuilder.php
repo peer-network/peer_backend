@@ -3021,8 +3021,8 @@ class GraphQLSchemaBuilder
             if ($user->getVerified() == 1) {
                 $this->logger->info('Account is already verified', ['userid' => $userid]);
                 return [
-                    'status' => 'success',
-                    'ResponseCode' => 20701
+                    'status' => 'error',
+                    'ResponseCode' => 30701
                 ];
             }
 
