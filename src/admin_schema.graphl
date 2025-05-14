@@ -743,6 +743,7 @@ type DailyGemsResultsResponse {
 
 type DailyGemsResultsData {
   data: [DailyGemsResultsUserData]
+  totalGems: Decimal
 }
 
 type DailyGemsResultsUserData {

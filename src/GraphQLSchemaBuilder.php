@@ -1213,6 +1213,9 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.DailyGemsResultsData Resolvers');
                     return $root['data'] ?? [];
                 },
+                'totalGems' => function (array $root): float {
+                    return $root['totalGems'] ?? 0.0;
+                },
             ],
             'DailyGemsResultsUserData' => [
                 'userid' => function (array $root): string {
