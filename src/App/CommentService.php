@@ -132,7 +132,7 @@ class CommentService
             $result = $this->commentMapper->insert($comment);
 
             if (!$result) {
-                return $this->respondWithError(30265);
+                return $this->respondWithError(41602);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
