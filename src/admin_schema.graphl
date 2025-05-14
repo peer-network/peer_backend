@@ -316,6 +316,7 @@ type DailyGemsResultsData {
 
 type DailyGemsResultsUserData {
   userid: ID
+  pkey: ID
   gems: Decimal
 }
 
