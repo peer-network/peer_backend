@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\Config\Constants;
+namespace Fawaz\config\constants;
 
-class ValidationRange {
-    public readonly int $min;
-    public readonly int $max;
+readonly class ValidationRange {
+    public int $min;
+    public int $max;
 
     public function __construct($min, $max) {
-        $this->max = $min;
+        $this->min = $min;
         $this->max = $max;
     }
 }

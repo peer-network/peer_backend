@@ -1,23 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\Config\ResponseCodes;
+namespace Fawaz\config\ResponseCodes;
 
 require_once __DIR__ . '/InputSanitization.php';
-
-interface ResponseCodeSection {
-  public function message(): string;
-  public function code(): int;
-}
+require_once __DIR__ . '/ArgumentFields.php';
 
 class ResponseCodes {
-     /** @var array<string, array<ResponseCodeSection>> */
+    /** @var array<string, ResponseCodeSection> */
     public array $codes;
 
      public function __construct() {
-        $this->codes = [
-            InputSanitization::cases()
-        ];
+        $this->codes = $this->mergeArrays(
+            [ 
+                InputSanitization::cases(), 
+                ArgumentFields::cases()
+            ]
+        );
     }
 
      public function printAllCodes(): void {
@@ -26,6 +25,25 @@ class ResponseCodes {
                 echo $case->name . ": " . $case->value . " - " . $case->message() . "\n";
             }
         }
+    }
+
+    /**
+     * @param array<array<string, ResponseCodeSection>> $arrays
+     * @return array<string, ResponseCodeSection>
+     */
+    private function mergeArrays(array $arrays): array {
+        $merged = [];
+
+        foreach ($arrays as $array) {
+            foreach ($array as $key => $value) {
+                echo $key;
+                echo $value->code();
+                echo $value->message();
+                $merged[$key] = $value;
+            }
+        }
+
+        return $merged;
     }
 }
 
