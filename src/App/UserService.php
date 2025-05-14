@@ -617,7 +617,7 @@ class UserService
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return self::respondWithError(21001);
+            return $this->createSuccessResponse(21001, []);
         }
     }
 
@@ -743,7 +743,7 @@ class UserService
                 ];
             }
 
-            return self::respondWithError(21001);
+            return $this->createSuccessResponse(21001, []);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
