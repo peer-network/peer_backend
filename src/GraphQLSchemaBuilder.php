@@ -2559,9 +2559,13 @@ class GraphQLSchemaBuilder
             return $this->respondWithError($results['ResponseCode']);
         }
 
-        $this->logger->warning('Query.resolveAllFriends No listFriends found');
-        return $this->respondWithError(21101);
-    }
+        $this->logger->info('Query.resolveAllFriends: no friends found');
+return [
+    'status' => 'success',
+    'ResponseCode' => 21101,
+    'data' => null,
+];
+}
 
     protected function resolveUsers(array $args): ?array
     {
