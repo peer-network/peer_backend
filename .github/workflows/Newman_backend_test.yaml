@@ -1,0 +1,292 @@
+name: Newman Test For Postman on the php Backend Directory
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    name: Build And Run Postman Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Fix log directory permissions
+        run: sudo chown -R 33:33 runtime-data/logs
+
+      - name: Create .htaccess for Apache routing
+        run: |
+          mkdir -p public
+          cat <<EOF > public/.htaccess
+          RewriteEngine On
+          RewriteCond %{REQUEST_FILENAME} !-f
+          RewriteRule ^ index.php [QSA,L]
+          EOF
+
+      - name: Create .env Files From Github Secrets and Variables
+        run: |
+          cat <<EOF > .env
+          DB_DRIVER="${{ vars.DB_DRIVER }}"
+          DB_HOST="${{ vars.DB_HOST }}"
+          DB_PORT="${{ vars.DB_PORT }}"
+          DB_DATABASE="${{ vars.DB_DATABASE }}"
+          DB_USERNAME="${{ vars.DB_USERNAME }}"
+          DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+          DB_CHARSET="${{ vars.DB_CHARSET }}"
+          DB_SSLMODE="${{ vars.DB_SSLMODE }}"
+          DB_TIMEOUT="${{ vars.DB_TIMEOUT }}"
+          CONTAINER_PATH="${{ vars.CONTAINER_PATH }}"
+          LOGGER_NAME="${{ vars.LOGGER_NAME }}"
+          LOGGER_PATH="${{ vars.LOGGER_PATH }}"
+          LOGGER_LEVEL="${{ vars.LOGGER_LEVEL }}"
+          APP_ENV="${{ vars.APP_ENV }}"
+          APP_NAME="${{ vars.APP_NAME }}"
+          APP_URL="${{ vars.APP_URL }}"
+          BASE_URL="${{ vars.BASE_URL }}"
+          TIME_ZONE="${{ vars.TIME_ZONE }}"
+          GRAPHQL_ENDPOINT="${{ vars.GRAPHQL_ENDPOINT }}"
+          PRIVATE_KEY_PATH="${{ vars.PRIVATE_KEY_PATH }}"
+          PUBLIC_KEY_PATH="${{ vars.PUBLIC_KEY_PATH }}"
+          REFRESH_PRIVATE_KEY_PATH="${{ vars.REFRESH_PRIVATE_KEY_PATH }}"
+          REFRESH_PUBLIC_KEY_PATH="${{ vars.REFRESH_PUBLIC_KEY_PATH }}"
+          REFRESH_TOKEN_EXPIRY="${{ vars.REFRESH_TOKEN_EXPIRY }}"
+          TOKEN_EXPIRY="${{ vars.TOKEN_EXPIRY }}"
+          LIMITER_RATE="${{ vars.LIMITER_RATE }}"
+          LIMITER_TIME="${{ vars.LIMITER_TIME }}"
+          RATE_LIMITER="${{ vars.RATE_LIMITER }}"
+          MAIL_API_LINK="${{ vars.MAIL_API_LINK }}"
+          MAIL_API_KEY="${{ vars.MAIL_API_KEY }}"
+          MAIL_DRIVER="${{ vars.MAIL_DRIVER }}"
+          MAIL_HOST="${{ vars.MAIL_HOST }}"
+          MAIL_PORT="${{ vars.MAIL_PORT }}"
+          MAIL_USERNAME="${{ vars.MAIL_USERNAME }}"
+          MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}"
+          MAIL_ENCRYPTION="${{ vars.MAIL_ENCRYPTION }}"
+          MAIL_FROM_ADDRESS="${{ vars.MAIL_FROM_ADDRESS }}"
+          MAIL_FROM_NAME="${{ vars.MAIL_FROM_NAME }}"
+          PEER_BANK="${{ vars.PEER_BANK }}"
+          BURN_ACCOUNT="${{ vars.BURN_ACCOUNT }}"
+          LIQUIDITY_POOL="${{ vars.LIQUIDITY_POOL }}"
+          EOF
+      - name: Show .env File (excluding password)
+        run: grep -v DB_PASSWORD .env
+
+      - name: Set Docker Image Tag
+        run: echo "IMAGE_TAG=peer-backend:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Rename SQL init file (for Postgres to run it)
+        run: mv sql_files_for_import/structure.psql sql_files_for_import/init.sql
+
+      - name: Reset Docker volumes (force initdb scripts to run)
+        run: docker compose down -v
+
+      - name: Force DB init by removing the volume
+        run: docker volume rm peer_backend_ci-cd_db-data || true
+
+      - name: Build And Start Docker Containers
+        run: |
+          docker compose -f ./docker-compose.yaml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}
+          docker compose -f ./docker-compose.yaml up -d
+
+      - name: Show Postgres logs (check for errors)
+        run: docker compose logs db
+
+      - name: Check Postgres tables
+        run: docker compose exec db psql -U "${{ vars.DB_USERNAME }}" -d "${{ vars.DB_DATABASE }}" -c '\dt'
+
+      - name: Verify FK constraint from users_info → users
+        run: |
+          docker compose exec db psql -U "${{ vars.DB_USERNAME }}" -d "${{ vars.DB_DATABASE }}" \
+            -c "SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'users_info' AND constraint_type = 'FOREIGN KEY';"
+
+      - name: Verify optional_data.sql was executed (check inserted user)
+        run: |
+          docker compose exec db psql -U "${{ vars.DB_USERNAME }}" -d "${{ vars.DB_DATABASE }}" \
+            -c "SELECT username FROM users WHERE uid = '7e0b2d21-d2b0-4af5-8b73-5f8efc04b11f';"
+
+      - name: Verify all optional users were inserted
+        run: |
+          docker compose exec db psql -U "${{ vars.DB_USERNAME }}" -d "${{ vars.DB_DATABASE }}" \
+            -c "SELECT uid, username FROM users WHERE
+                  email LIKE '%@tester.de'
+                  OR username IN ('burn_account', 'lp_account', 'company_account');"
+
+      - name: List app folder in container
+        run: docker compose run --rm backend ls -R /var/www/html
+
+      - name: Check if .htaccess exists
+        run: docker compose exec backend ls -l /var/www/html/public/.htaccess
+
+      - name: Show .htaccess content
+        run: docker compose exec backend cat /var/www/html/public/.htaccess
+
+      - name: List files in /var/www/html/public
+        run: docker compose run --rm backend ls -R /var/www/html/public
+
+      - name: Manually curl root
+        run: docker compose exec backend curl -i http://localhost
+
+      - name: Manual curl to GraphQL (debug)
+        run: |
+          docker run --rm \
+            --network my-network \
+            curlimages/curl:latest \
+            curl -i http://backend/graphql || echo "❌ GraphQL not reachable"
+
+      - name: Check Running Docker Containers
+        run: docker ps
+
+      - name: Wait For Backend to be Ready
+        run: |
+          TAG=latest
+          for i in {1..120}; do
+            if docker run --rm \
+                --network my-network \
+                curlimages/curl:$TAG \
+                curl -sf http://backend/graphql > /dev/null; then
+              echo "✅ Backend is up!"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Backend did not respond in time."
+          exit 1
+      - name: Debug JWT key presence
+        run: docker compose exec backend ls -l keys
+
+      - name: Manually inspect GraphQL error
+        run: |
+          TAG=latest
+          docker run --rm \
+            --network my-network \
+            curlimages/curl:$TAG \
+            curl -i -X POST http://backend/graphql \
+            -H "Content-Type: application/json" \
+            --data '{"query":"{__typename}"}'
+
+      - name: Test GraphQL Endpoint
+        run: |
+          TAG=latest
+          docker run --rm \
+            --network my-network \
+            curlimages/curl:$TAG \
+            curl -s -X POST http://backend/graphql \
+            -H "Content-Type: application/json" \
+            --data '{"query":"{__typename}"}'
+
+      - name: Check Backend Logs
+        run: |
+          echo "Fetching backend container logs..."
+          docker logs $(docker ps -q -f "name=peer_backend_ci-cd-backend-1")
+
+      - name: Check Backend Connection (using curl directly)
+        run: |
+          TAG=latest
+          docker run --rm \
+            --network my-network \
+            curlimages/curl:$TAG \
+            curl -sf http://backend/graphql
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+       
+      - name: Replace Hardcoded URL in Postman Collection (using jq)
+        run: |
+          jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {
+            raw: "{{BACKEND_URL}}/graphql",
+            protocol: "http",
+            host: ["backend"],
+            path: ["graphql"]
+          }' tests/postman_collection/graphql_postman_collection.json > temp.json
+          mv temp.json tests/postman_collection/graphql_postman_collection.json
+
+      - name: Verify Postman Collection File
+        run: cat tests/postman_collection/graphql_postman_collection.json
+
+      - name: Inject BACKEND_URL into Postman Environment
+        run: |
+          jq '.values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
+            tests/postman_collection/graphql_postman_environment.json > temp_env.json
+          mv temp_env.json tests/postman_collection/graphql_postman_environment.json
+
+      - name: Show updated Postman environment file
+        run:  cat tests/postman_collection/graphql_postman_environment.json
+
+      - name: Run Postman Tests in Newman Container
+        id: newman
+        run: |
+          docker compose -f ./docker-compose.yaml run --rm newman
+        continue-on-error: true
+
+      - name: Show GraphQL error and debug logs
+        run: |
+          echo "🔍 errorlog.txt:"
+          docker compose run --rm backend cat /var/www/html/runtime-data/logs/errorlog.txt || echo "❌ errorlog.txt not found"
+
+          echo -e "\n🔍 graphql_debug.log:"
+          docker compose run --rm backend cat /var/www/html/runtime-data/logs/graphql_debug.log || echo "❌ graphql_debug.log not found"
+
+      - name: List Logs in Backend Container
+        run: docker compose exec backend ls -l /var/www/html/runtime-data/logs
+
+      - name: Show backend application runtime log
+        run: |
+          echo "📄 Showing backend application runtime log..."
+          docker compose exec backend sh <<'EOF'
+            latest_log=$(ls -t /var/www/html/runtime-data/logs/*.log 2>/dev/null | grep -v errorlog.txt | head -n 1)
+            if [ -n "$latest_log" ]; then
+              echo -e "\n===== 📘 $latest_log ====="
+              cat "$latest_log"
+            else
+              echo "❌ No runtime log found"
+            fi
+          EOF
+
+      - name: Show backend error log (errorlog.txt)
+        run: |
+          echo "📄 Contents of errorlog.txt"
+          docker compose exec backend cat /var/www/html/runtime-data/logs/errorlog.txt || echo "❌ Log not found"
+
+      - name: Copy backend logs to host
+        run: |
+          mkdir -p logs/runtime logs/error
+          docker compose cp backend:/var/www/html/runtime-data/logs/errorlog.txt logs/error/errorlog.txt || echo "❌ errorlog.txt not found"
+
+          latest_log=$(docker compose exec backend sh -c 'ls -t /var/www/html/runtime-data/logs/*.log 2>/dev/null | grep -v errorlog.txt | head -n 1')
+          if [ -n "$latest_log" ]; then
+            docker compose cp backend:$latest_log logs/runtime/$(basename $latest_log)
+          else
+            echo "❌ No runtime log found"
+          fi
+
+      - name: Upload backend runtime log for PHP ${{ matrix.php-version }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-runtime-log-${{ matrix.php-version }}
+          path: logs/runtime
+
+      - name: Upload backend error log for PHP ${{ matrix.php-version }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-error-log-${{ matrix.php-version }}
+          path: logs/error/errorlog.txt
+          
+      - name: Upload Newman Report for PHP ${{ matrix.php-version }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker_newman_report-${{ matrix.php-version }}
+          path: ${{ github.workspace }}/newman/reports/report.html
+        continue-on-error: true
+
+      - name: Show Backend Logs on Failure
+        working-directory: .
+        run: docker compose -f docker-compose.yaml logs backend
+
+      - name: List Running containers
+        run: docker ps -a
+      - name: Tear Down Docker Containers
+        if: always()
+        run: docker compose -f ./docker-compose.yaml down
