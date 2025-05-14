@@ -1672,6 +1672,11 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.swapTokens started');
 
+        if (empty($args['btcAddress'])) {
+            $this->logger->warning('BTC Address required');
+            // Please create New Response code message for "BTC Address is required!"
+            return self::respondWithError(0000);
+        }
 		$accountsResult = $this->pool->returnAccounts();
 
 		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
@@ -1712,26 +1717,6 @@ class WalletMapper
             return self::respondWithError(51301);
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
-
-        // try {
-        //     $sql = "SELECT uid FROM users WHERE uid = :uid";
-        //     $stmt = $this->db->prepare($sql);
-        //     $stmt->bindValue(':uid', $recipient);
-        //     $stmt->execute();
-        //     $row = $stmt->fetchColumn();
-        // } catch (\Throwable $e) {
-        //     return self::respondWithError($e->getMessage());
-        // }
-
-        // if (empty($row)) {
-        //     $this->logger->warning('Unknown Id Exception.');
-        //     return self::respondWithError(21001);
-        // }
-
-        // if ((string)$row === $userId) {
-        //     $this->logger->warning('Send and Receive Same Wallet Error.');
-        //     return self::respondWithError(31202);
-        // }
 
         $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE);
         $feeAmount = round((float)$numberoftokens * POOLFEE, 2);
