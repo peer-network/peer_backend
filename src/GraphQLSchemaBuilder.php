@@ -2661,7 +2661,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->info('Query.resolvePostInfo started');
-
+//
         $posts = $this->postInfoService->findPostInfo(postId: $postId);
 
 // if a post has been found, or at least the success status has arrived, give it back as it is.
@@ -2669,13 +2669,13 @@ if (isset($posts['status']) && $posts['status'] === 'success') {
     return $this->createSuccessResponse(message: 11502, data: $posts);
 }
 
-// if not found, return the success status from null.
+// if not found, return the success status from null
 return [
     'status' => 'success',
     'data' => null,
     'ResponseCode' => 21504
 ];
-
+ //
 
         return $this->createSuccessResponse(11502, $posts);
     }
