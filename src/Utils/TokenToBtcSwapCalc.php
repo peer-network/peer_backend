@@ -15,10 +15,9 @@ class TokenToBtcSwapCalc
      *  newBtcPool = k / newTokenPool
      *   btcReceived = btcPool - newBtcPool
      */
-    public static function convert(int $peerTokens): float
+    public static function convert(int $peerTokens, string $tokenPool): float
     {
 
-        $tokenPool = self::getPeerTokenPool();
         $btcPool = self::getBtcPool();
 
         $constantK = $tokenPool * $btcPool;
@@ -32,17 +31,6 @@ class TokenToBtcSwapCalc
         return $btcReceived;
     }
 
-    /**
-     * PENDING
-     * 
-     * Get Peer tokens from Liquidity Pool.
-     * 
-     * Should be calculated dynamically
-     * 
-     */
-    private static function getPeerTokenPool(){
-        return 100000;
-    }
 
     /**
      * PENDING

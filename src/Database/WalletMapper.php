@@ -1790,25 +1790,6 @@ class WalletMapper
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
 
-
-                // PENDING
-                // Store BTC Swap transactions in btc_swap_transactions
-                // count BTC amount
-                $btcAmount = TokenToBtcSwapCalc::convert($numberoftokens);
-                $transObj = [
-                    'transUniqueId' => $transactionId,
-                    'transactionType' => 'btcSwapToPool',
-                    'userId' => $userId,
-                    'btcAddress' => $btcAddress,
-                    'tokenAmount' => $numberoftokens,
-                    'btcAmount' => $btcAmount,
-                    'message' => $message,
-                    'transferAction' => 'CREDIT'
-                ];
-                $btcTransactions = new BtcSwapTransaction($transObj);
-
-                $btcTransRepo = new BtcSwapTransactionRepository($this->logger, $this->db);
-                $btcTransRepo->saveTransaction($btcTransactions);
             }
 
             // 2. RECIPIENT: Credit To Account to Pool Account
@@ -1989,6 +1970,29 @@ class WalletMapper
                 $transRepo->saveTransaction($transactions);
             }
 
+            // Should be placed at last because it should include 1% LP Fees
+            if($numberoftokens && $transactionId){
+                
+                // Store BTC Swap transactions in btc_swap_transactions
+                // count BTC amount
+                $lpAccountToken = $this->getLpToken();
+                $btcAmount = TokenToBtcSwapCalc::convert($numberoftokens, $lpAccountToken);
+                $transObj = [
+                    'transUniqueId' => $transactionId,
+                    'transactionType' => 'btcSwapToPool',
+                    'userId' => $userId,
+                    'btcAddress' => $btcAddress,
+                    'tokenAmount' => $numberoftokens,
+                    'btcAmount' => $btcAmount,
+                    'message' => $message,
+                    'transferAction' => 'CREDIT'
+                ];
+                $btcTransactions = new BtcSwapTransaction($transObj);
+
+                $btcTransRepo = new BtcSwapTransactionRepository($this->logger, $this->db);
+                $btcTransRepo->saveTransaction($btcTransactions);
+            }
+
             return [
                 'status' => 'success', 
                 'ResponseCode' => 0000,
@@ -2001,5 +2005,52 @@ class WalletMapper
             return self::respondWithError($e->getMessage());
         }
     }
+
+
+    /**
+     * get LP account tokens.
+     * 
+     */    
+    public function getLpToken()
+    {
+
+        $this->logger->info("WalletMapper.getLpToken started");
+
+        $query = "SELECT * from wallett WHERE userid = :userId";
+       
+		$accounts = $this->pool->returnAccounts();
+		$liqpool = $accounts['response'] ?? null;
+		$this->poolWallet = $liqpool['pool'];
+
+        try {
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindValue(':userId', $this->poolWallet, \PDO::PARAM_STR);
+            $stmt->execute();
+            $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            $this->logger->info("Inserted new transaction into database");
+
+            return $walletInfo['liquidity'];
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "WalletMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error(
+                "WalletMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage()
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        }
+    }
+
 
 }
