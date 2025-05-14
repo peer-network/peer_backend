@@ -172,7 +172,7 @@ class CommentService
             return [
                 'status' => 'success',
 				'counter' => count($response),
-                'ResponseCode' => 11605,
+                'ResponseCode' => 11608,
                 'affectedRows' => $response,
             ];
         } catch (\Throwable $e) {
