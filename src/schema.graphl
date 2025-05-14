@@ -32,7 +32,6 @@ type Query {
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   getReferralInfo: ReferralInfoResponse!
-  dailygemsresults(day: String!): DailyGemsResultsResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
   listTodaysInteractions: ListTodaysInteractionsResponse!
 }
@@ -515,22 +514,6 @@ type ReferralListResponse {
 type ReferralUsers {
   invitedBy: ProfileUser
   iInvited: [ProfileUser!]!
-}
-
-type DailyGemsResultsResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: DailyGemsResultsData
-}
-
-type DailyGemsResultsData {
-  data: [DailyGemsResultsUserData]
-}
-
-type DailyGemsResultsUserData {
-  userid: ID
-  pkey: ID
-  gems: Decimal
 }
 
 input PostInput {

@@ -159,28 +159,27 @@ class PoolMapper
             WITH user_sums AS (
                 SELECT 
                     userid,
-                    GREATEST(COALESCE(SUM(gems), 0), 0) AS total_numbers
+                    GREATEST(SUM(gems), 0) AS total_numbers
                 FROM gems
                 WHERE {$whereCondition}
                 GROUP BY userid
             ),
             total_sum AS (
-                SELECT COALESCE(SUM(total_numbers), 0) AS overall_total FROM user_sums
+                SELECT SUM(total_numbers) AS overall_total FROM user_sums
             )
             SELECT 
                 g.userid,
-                COALESCE(us.total_numbers, 0) AS gems,
-                ui.pkey,
-               COALESCE(w.liquidity, 0) AS tokenAmount,
-                ts.overall_total,
-                COALESCE((us.total_numbers * 100.0 / ts.overall_total), 0) AS percentage
+                g.gemid,
+                g.gems,
+                g.whereby,
+                g.createdat,
+                us.total_numbers,
+                (SELECT SUM(total_numbers) FROM user_sums) AS overall_total,
+                (us.total_numbers * 100.0 / ts.overall_total) AS percentage
             FROM gems g
             JOIN user_sums us ON g.userid = us.userid
             CROSS JOIN total_sum ts
-            LEFT JOIN users_info ui ON g.userid = ui.userid
-            LEFT JOIN wallett w ON g.userid = w.userid
-            WHERE us.total_numbers > 0 AND g.{$whereCondition}
-            GROUP BY g.userid, us.total_numbers, ui.pkey, w.liquidity, ts.overall_total;
+            WHERE us.total_numbers > 0 AND g.{$whereCondition};
         ";
 
         try {
@@ -195,7 +194,7 @@ class PoolMapper
             return $this->respondWithError(21202); //'No records found for ' . $day
         }
 
-        #$totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
+        $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
 
         $args = [];
 
@@ -204,13 +203,13 @@ class PoolMapper
 
             if (!isset($args[$userId])) {
                 $args[$userId] = [
-                    'userid'      => $userId,
-                    'gems'        => $row['gems'] ?? 0,
-                    'pkey'        => $row['pkey'] ?? '',
+                    'userid' => $userId,
+                    'gems' => $row['total_numbers'],
+                    'pkey' => $row['pkey'] ?? '',
                 ];
             }
 
-            $whereby = $row['whereby'] ?? null;
+            $whereby = $row['whereby'];
 
             $mapping = [
                 1 => ['text' => 'View'],
@@ -220,11 +219,11 @@ class PoolMapper
                 5 => ['text' => 'Post'],
             ];
 
-            if ($whereby !== null && isset($mapping[$whereby])) {
-                $whereby = $mapping[$whereby]['text'];
-            } else {
-                $whereby = 'Unknown';
+            if (!isset($mapping[$whereby])) {
+                return $this->respondWithError(41221);
             }
+
+            $whereby = $mapping[$whereby]['text'];
         }
 
         if (!empty($data)) {
@@ -233,7 +232,7 @@ class PoolMapper
                 'status' => 'success',
                 'counter' => count($args) -1,
                 'ResponseCode' => 11208,
-                'affectedRows' => ['data' => array_values($args)]
+                'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
         }
 

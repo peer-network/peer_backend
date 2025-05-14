@@ -734,3 +734,19 @@ input FeedInput {
   mediadescription: String
   contenttype: String!
 }
+
+type DailyGemsResultsResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DailyGemsResultsData
+}
+
+type DailyGemsResultsData {
+  data: [DailyGemsResultsUserData]
+}
+
+type DailyGemsResultsUserData {
+  userid: ID
+  pkey: ID
+  gems: Decimal
+}
