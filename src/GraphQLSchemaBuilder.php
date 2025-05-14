@@ -1992,7 +1992,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
-            return $this->createSuccessResponse(41214, [], false);
+            return $this->respondWithError(41214, [], false);
         }
 
         if (is_array($response) || !empty($response)) {
