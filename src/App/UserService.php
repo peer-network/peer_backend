@@ -865,7 +865,7 @@ class UserService
     {
         return [
             'status' => 'success',
-            'ResponseCode' => 'An email will be sent to your mail address if an account associated with it exists.'
+            'ResponseCode' => 11901
         ];
     }
 
