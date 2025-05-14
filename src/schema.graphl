@@ -516,13 +516,6 @@ type ReferralUsers {
   iInvited: [ProfileUser!]!
 }
 
-input RegistrationInput {
-  email: String!
-  password: String!
-  username: String!
-  referralUuid: ID
-}
-
 input PostInput {
   title: String!
   mediadescription: String

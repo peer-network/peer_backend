@@ -95,7 +95,7 @@ class CommentService
         $content = trim($args['content']);
         $postId = trim($args['postid']);
         $parentId = isset($args['parentid']) ? trim($args['parentid']) : null;
-
+        
         if (!$this->validateUUID($postId)) {
             return $this->respondWithError(31501, ['postid' => $postId]);
         }
@@ -180,7 +180,7 @@ class CommentService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError(41602);
+            return $this->respondWithError($e->getMessage());
         } finally {
             $this->logger->debug('createComment function execution completed');
         }

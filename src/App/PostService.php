@@ -12,6 +12,7 @@ use Fawaz\Database\TagPostMapper;
 use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
+use Fawaz\Config\ContentLimitsPerPost;
 
 class PostService
 {
@@ -70,6 +71,68 @@ class PostService
         return serialize($args);
     }
 
+
+    private function validateCoverCount(array $args, string $contenttype): array {
+        if (!is_array($args['cover'])) {
+                return ['success' => false, 'error' => '30102'];
+        }
+
+        $covers = $args['cover'];
+        $coversCount = count($covers);
+
+        try {
+            $limitObj = ContentLimitsPerPost::from($contenttype);
+            if (!$limitObj) {
+                return ['success' => false, 'error' => '40301'];    
+            }
+            $coverLimit = $limitObj->coverLimit();
+
+        } catch (\Throwable $e) {
+            echo($e->getMessage());
+            return ['success' => false, 'error' => '40301'];
+        }
+
+        if ($coversCount > $coverLimit) {
+            return ['success' => false, 'error' => '30268'];
+        } else {
+            return ['success' => true, 'error' => null];
+        }
+    }
+
+
+    private function validateContentCount(array $args): array {
+        if (!isset($args['contenttype']) && empty($args['contenttype']) && !is_string($args['contenttype'])) {
+            return ['success' => false, 'error' => '30206'];
+        }
+        $contenttype = strval($args['contenttype']);
+        if (!isset($args['media']) && empty($args['media']) && !is_array($args['media'])) {
+            return ['success' => false, 'error' => '30102'];
+        }
+        if (isset($args['cover']) && !empty($args['cover'])) {
+             return $this->validateCoverCount($args,$contenttype);
+        }
+
+        $media = $args['media'];
+        $mediaCount = count($media);
+
+        try {
+            $mediaLimitObj = ContentLimitsPerPost::from($contenttype);
+            if (!$mediaLimitObj) {
+                return ['success' => false, 'error' => '40301'];    
+            }
+            $mediaLimit = $mediaLimitObj->mediaLimit();
+        } catch (\Throwable $e) {
+            echo($e->getMessage());
+            return ['success' => false, 'error' => '40301'];
+        }
+
+        if ($mediaCount > $mediaLimit) {
+            return ['success' => false, 'error' => '30267'];
+        } else {
+            return ['success' => true, 'error' => null];
+        }
+    }
+
     public function createPost(array $args = []): array
     {
         if (!$this->checkAuthentication()) {
@@ -121,11 +184,17 @@ class PostService
         try {
             // Media Upload
             if ($this->isValidMedia($args['media'])) {
+                
+                $validateContentCountResult = $this->validateContentCount($args);
+                if (isset($validateContentCountResult['error'])) {
+                    return $this->respondWithError($validateContentCountResult['error']);
+                }
+
                 $mediaPath = $this->base64filehandler->handleUploads($args['media'], $args['contenttype'], $postId);
                 $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                 if (!empty($mediaPath['error'])) {
-                    return $this->respondWithError(20251);
+                    return $this->respondWithError(30251);
                 }
 
                 if (!empty($mediaPath['path'])) {
@@ -139,6 +208,11 @@ class PostService
 
             // Cover Upload Nur (Audio & Video)
             if ($this->isValidCover($args)) {
+                $validateContentCountResult = $this->validateContentCount($args);
+                if (isset($validateContentCountResult['error'])) {
+                    return $this->respondWithError($validateContentCountResult['error']);
+                }
+
                 $coverPath = $this->base64filehandler->handleUploads($args['cover'], 'cover', $postId);
                 $this->logger->info('PostService.createPost coverPath', ['coverPath' => $coverPath]);
 
@@ -209,7 +283,7 @@ class PostService
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);
-            return $this->respondWithError(20263);
+            return $this->respondWithError(30263);
         }
     }
 
@@ -341,29 +415,29 @@ class PostService
         $userId = $args['userid'] ?? null;
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(20209);
+            return $this->respondWithError(30209);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if ($title !== null && strlen($title) < 2 || strlen($title) > 33) {
-            return $this->respondWithError(20210);
+            return $this->respondWithError(30210);
         }
 
         if ($from !== null && !self::validateDate($from)) {
-            return $this->respondWithError(20212);
+            return $this->respondWithError(30212);
         }
 
         if ($to !== null && !self::validateDate($to)) {
-            return $this->respondWithError(20213);
+            return $this->respondWithError(30213);
         }
 
         if ($tag !== null) {
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
-                return $this->respondWithError(20211);
+                return $this->respondWithError(30211);
             }
         }
 
@@ -448,7 +522,7 @@ class PostService
         }
 
         if (!self::isValidUUID($id)) {
-            return $this->respondWithError(20209);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info('PostService.deletePost started');
