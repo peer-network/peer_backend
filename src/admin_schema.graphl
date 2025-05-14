@@ -316,6 +316,7 @@ type DailyGemsResultsData {
 
 type DailyGemsResultsUserData {
   userid: ID
+  pkey: ID
   gems: Decimal
 }
 
@@ -733,21 +734,4 @@ input FeedInput {
   media: String!
   mediadescription: String
   contenttype: String!
-}
-
-type DailyGemsResultsResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: DailyGemsResultsData
-}
-
-type DailyGemsResultsData {
-  data: [DailyGemsResultsUserData]
-  totalGems: Decimal
-}
-
-type DailyGemsResultsUserData {
-  userid: ID
-  pkey: ID
-  gems: Decimal
 }
