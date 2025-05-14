@@ -2685,9 +2685,19 @@ class GraphQLSchemaBuilder
             if (isset($posts['status']) && $posts['status'] === 'error') {
                 return $posts;
             }
-        } else {
-            return $this->respondWithError(21504);
-        }
+        } 
+        
+       if (empty($posts['data'])) {
+    return [
+        'status' => 'success',
+        'ResponseCode' => 11502,
+        'data' => null,
+    ];
+
+}
+
+return $this->createSuccessResponse(message: 11502, data: $posts);
+
 
         return $this->createSuccessResponse(11502, $posts);
     }
