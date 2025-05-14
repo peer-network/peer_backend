@@ -98,7 +98,7 @@ class GraphQLSchemaBuilder
             $schema = 'admin_schema.graphl';
         }
 
-        if (empty($schema)){
+        if (empty($schema)) {
             $this->logger->error('Invalid schema', ['schema' => $schema]);
             return $this->respondWithError(40301);
         }
@@ -299,7 +299,7 @@ class GraphQLSchemaBuilder
                 },
                 'liquidity' => function (array $root): float {
                     return $root['liquidity'] ?? 0.0;
-                },  
+                },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 },
@@ -387,7 +387,7 @@ class GraphQLSchemaBuilder
                 },
                 'biography' => function (array $root): string {
                     return $root['biography'] ?? '';
-                },  
+                },
                 'amountposts' => function (array $root): int {
                     return $root['amountposts'] ?? 0;
                 },
@@ -1056,13 +1056,13 @@ class GraphQLSchemaBuilder
                 },
                 'liquidity' => function (array $root): float {
                     return $root['liquidity'] ?? 0.0;
-                }, 
+                },
                 'isfollowed' => function (array $root): bool {
                     return $root['isfollowed'] ?? false;
                 },
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
-                },                
+                },
                 'amountposts' => function (array $root): int {
                     return $root['amountposts'] ?? 0;
                 },
@@ -1491,7 +1491,7 @@ class GraphQLSchemaBuilder
                 },
                 'numbers' => function (array $root): float {
                     return $root['numbers'] ?? 0.0;
-                },  
+                },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 },
@@ -1517,13 +1517,13 @@ class GraphQLSchemaBuilder
                     return $root['follower'] ?? '';
                 },
                 'followername' => function (array $root): string {
-                    return $root['followername'].'.'.$root['followerslug'] ?? '';
+                    return $root['followername'] . '.' . $root['followerslug'] ?? '';
                 },
                 'followedid' => function (array $root): string {
                     return $root['followed'] ?? '';
                 },
                 'followedname' => function (array $root): string {
-                    return $root['followedname'].'.'.$root['followedslug'] ?? '';
+                    return $root['followedname'] . '.' . $root['followedslug'] ?? '';
                 },
             ],
             'AllUserFriends' => [
@@ -1566,10 +1566,10 @@ class GraphQLSchemaBuilder
                 },
                 'TokenPrice' => function (array $root): float {
                     return $root['TokenPrice'] ?? 0.0;
-                },  
+                },
                 'GemsPrice' => function (array $root): float {
                     return $root['GemsPrice'] ?? 0.0;
-                },  
+                },
             ],
             'ReferralInfoResponse' => [
                 'status' => function (array $root): string {
@@ -1608,7 +1608,7 @@ class GraphQLSchemaBuilder
                 'iInvited' => function (array $root): array {
                     return $root['iInvited'] ?? [];
                 },
-            ],                                 
+            ],
         ];
     }
 
@@ -1824,7 +1824,7 @@ class GraphQLSchemaBuilder
         $this->logger->warning('Query.resolveFetchPaysLog No records found');
         return $this->respondWithError(21202);
     }
-    
+
     protected function resolveReferralInfo(): ?array
     {
         if (!$this->checkAuthentication()) {
@@ -1846,7 +1846,7 @@ class GraphQLSchemaBuilder
             }
 
             $response = [
-                'referralUuid' => $info['referral_uuid'] ?? '', 
+                'referralUuid' => $info['referral_uuid'] ?? '',
                 'referralLink' => $info['referral_link'] ?? '',
                 'status' => 'success',
                 'ResponseCode' => 11011
@@ -2061,29 +2061,22 @@ class GraphQLSchemaBuilder
                 $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
 
                 if ($DailyUsage < $limit) {
-                    if ($action === 'comment') 
-                    {
+                    if ($action === 'comment') {
                         $response = $this->commentService->createComment($args);
                         if (isset($response['status']) && $response['status'] === 'error') {
                             return $response;
                         }
-                    }
-                    elseif ($action === 'post') 
-                    {
+                    } elseif ($action === 'post') {
                         $response = $this->postService->createPost($args['input']);
                         if (isset($response['status']) && $response['status'] === 'error') {
                             return $response;
                         }
-                    }
-                    elseif ($action === 'like') 
-                    {
+                    } elseif ($action === 'like') {
                         $response = $this->postInfoService->likePost($postId);
                         if (isset($response['status']) && $response['status'] === 'error') {
                             return $response;
                         }
-                    }
-                    else 
-                    {
+                    } else {
                         return $this->respondWithError(30105);
                     }
 
@@ -2113,42 +2106,33 @@ class GraphQLSchemaBuilder
                 return $this->respondWithError(51301);
             }
 
-            if ($action === 'comment') 
-            {
+            if ($action === 'comment') {
                 $response = $this->commentService->createComment($args);
                 if (isset($response['status']) && $response['status'] === 'error') {
                     return $response;
                 }
-            }
-            elseif ($action === 'post') 
-            {
+            } elseif ($action === 'post') {
                 $response = $this->postService->createPost($args['input']);
                 if (isset($response['status']) && $response['status'] === 'error') {
                     return $response;
                 }
 
-                if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])){
+                if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])) {
 
                     unset($args['input'], $args['action']);
                     $args['postid'] = $response['affectedRows']['postid'];
                 }
-            }
-            elseif ($action === 'like') 
-            {
+            } elseif ($action === 'like') {
                 $response = $this->postInfoService->likePost($postId);
                 if (isset($response['status']) && $response['status'] === 'error') {
                     return $response;
                 }
-            }
-            elseif ($action === 'dislike') 
-            {
+            } elseif ($action === 'dislike') {
                 $response = $this->postInfoService->dislikePost($postId);
                 if (isset($response['status']) && $response['status'] === 'error') {
                     return $response;
                 }
-            }
-            else 
-            {
+            } else {
                 return $this->respondWithError(30105);
             }
 
@@ -2303,7 +2287,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30242);
         }
 
-        $tokenAmount = (int)$args['tokenAmount'] ?? 0;
+        $tokenAmount = (int) $args['tokenAmount'] ?? 0;
 
         if ($tokenAmount < 10) {
             return $this->respondWithError(30243);
@@ -2442,7 +2426,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError("The IP '$ip' is not a valid IP address.");
         }
 
-        $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $args['limit'] = min(max((int) ($args['limit'] ?? 10), 1), 20);
 
         $this->logger->info('Query.resolveSearchUser started');
 
@@ -2678,21 +2662,16 @@ class GraphQLSchemaBuilder
 
         $this->logger->info('Query.resolvePostInfo started');
 
-        $posts = $this->postInfoService->findPostInfo(postId: $postId);
+        $postId = isset($postId) ? trim($postId) : '';
 
-        // If a post has been found, or at least the success status has arrived, give it back as it is.
-        if (isset($posts['status']) && $posts['status'] === 'success') {
-            return $this->createSuccessResponse(message: 11502, data: $posts);
+        if (!empty($postId)) {
+            $posts = $this->postInfoService->findPostInfo($postId);
+            if (isset($posts['status']) && $posts['status'] === 'error') {
+                return $posts;
+            }
+        } else {
+            return $this->respondWithError(21504);
         }
-
-        // if not found, return the success status from null.
-        return [
-            'status' => 'success',
-            'data' => null,
-            'ResponseCode' => 11502
-        ];
-
-
 
         return $this->createSuccessResponse(11502, $posts);
     }
@@ -2750,8 +2729,8 @@ class GraphQLSchemaBuilder
             return $posts;
         }
 
-        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
-        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
+        $commentOffset = max((int) ($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int) ($args['commentLimit'] ?? 10), 1), 20);
 
         $data = array_map(
             fn(PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit),
@@ -2768,9 +2747,9 @@ class GraphQLSchemaBuilder
     protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit): array
     {
         $postArray = $post->getArrayCopy();
-        
+
         $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit);
-        
+
         $postArray['comments'] = array_map(
             fn(CommentAdvanced $comment) => $this->fetchCommentWithoutReplies($comment),
             $comments
@@ -2812,10 +2791,12 @@ class GraphQLSchemaBuilder
                 if (!empty($params)) {
                     $firstParamType = $params[0]->getType();
 
-                    if ($firstParamType instanceof ReflectionNamedType 
-                        && !$firstParamType->isBuiltin() 
-                        && $firstParamType->getName() !== 'mixed' 
-                        && !($source instanceof ($firstParamType->getName() ?? ''))) {
+                    if (
+                        $firstParamType instanceof ReflectionNamedType
+                        && !$firstParamType->isBuiltin()
+                        && $firstParamType->getName() !== 'mixed'
+                        && !($source instanceof ($firstParamType->getName() ?? ''))
+                    ) {
 
                         throw new \TypeError("Resolver for '{$fieldName}' expected type '{$firstParamType->getName()}', but received " . gettype($source));
                     }
@@ -2829,7 +2810,7 @@ class GraphQLSchemaBuilder
             $this->logger->error("Type error in resolver for '{$fieldName}': " . $e->getMessage(), ['args' => $args]);
             throw new \GraphQL\Error\UserError("Type mismatch in resolver for field '{$fieldName}': " . $e->getMessage());
         } catch (\Throwable $e) {
-            $this->logger->alert("Unhandled error in resolver for '{$fieldName}': " . $e->getMessage(), ['exception' => (string)$e]);
+            $this->logger->alert("Unhandled error in resolver for '{$fieldName}': " . $e->getMessage(), ['exception' => (string) $e]);
             throw new \GraphQL\Error\UserError("An unexpected error occurred while resolving field '{$fieldName}'.");
         }
 
@@ -2846,7 +2827,7 @@ class GraphQLSchemaBuilder
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
         $response = [
             'status' => 'success',
@@ -2867,14 +2848,14 @@ class GraphQLSchemaBuilder
 
     protected function validateOffsetAndLimit(array $args = []): ?array
     {
-        $offset = isset($args['offset']) ? (int)$args['offset'] : null;
-        $limit = isset($args['limit']) ? (int)$args['limit'] : null;
-        $postOffset = isset($args['postOffset']) ? (int)$args['postOffset'] : null;
-        $postLimit = isset($args['postLimit']) ? (int)$args['postLimit'] : null;
-        $commentOffset = isset($args['commentOffset']) ? (int)$args['commentOffset'] : null;
-        $commentLimit = isset($args['commentLimit']) ? (int)$args['commentLimit'] : null;
-        $messageOffset = isset($args['messageOffset']) ? (int)$args['messageOffset'] : null;
-        $messageLimit = isset($args['messageLimit']) ? (int)$args['messageLimit'] : null;
+        $offset = isset($args['offset']) ? (int) $args['offset'] : null;
+        $limit = isset($args['limit']) ? (int) $args['limit'] : null;
+        $postOffset = isset($args['postOffset']) ? (int) $args['postOffset'] : null;
+        $postLimit = isset($args['postLimit']) ? (int) $args['postLimit'] : null;
+        $commentOffset = isset($args['commentOffset']) ? (int) $args['commentOffset'] : null;
+        $commentLimit = isset($args['commentLimit']) ? (int) $args['commentLimit'] : null;
+        $messageOffset = isset($args['messageOffset']) ? (int) $args['messageOffset'] : null;
+        $messageLimit = isset($args['messageLimit']) ? (int) $args['messageLimit'] : null;
 
         if ($offset !== null) {
             if ($offset < 0 || $offset > 200) {
@@ -2883,7 +2864,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($limit !== null) {
-            if ($limit < 1 || $limit > 20) {  
+            if ($limit < 1 || $limit > 20) {
                 return $this->respondWithError(30204);
             }
         }
@@ -2895,7 +2876,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($postLimit !== null) {
-            if ($postLimit < 1 || $postLimit > 20) {  
+            if ($postLimit < 1 || $postLimit > 20) {
                 return $this->respondWithError(30204);
             }
         }
@@ -2907,7 +2888,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($commentLimit !== null) {
-            if ($commentLimit < 1 || $commentLimit > 20) {  
+            if ($commentLimit < 1 || $commentLimit > 20) {
                 return $this->respondWithError(30216);
             }
         }
@@ -2919,7 +2900,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($messageLimit !== null) {
-            if ($messageLimit < 1 || $messageLimit > 20) {  
+            if ($messageLimit < 1 || $messageLimit > 20) {
                 return $this->respondWithError(30220);
             }
         }
@@ -3161,7 +3142,7 @@ class GraphQLSchemaBuilder
                 'exception' => $e->getMessage(),
                 'stackTrace' => $e->getTraceAsString()
             ]);
-            
+
             return $this->respondWithError(40901);
         }
     }
