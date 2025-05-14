@@ -525,14 +525,12 @@ type DailyGemsResultsResponse {
 
 type DailyGemsResultsData {
   data: [DailyGemsResultsUserData]
-  totalGems: Decimal
 }
 
 type DailyGemsResultsUserData {
   userid: ID
   pkey: ID
   gems: Decimal
-  tokenAmount: Decimal
 }
 
 input PostInput {

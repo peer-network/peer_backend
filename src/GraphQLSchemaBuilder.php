@@ -1219,14 +1219,8 @@ class GraphQLSchemaBuilder
                 'gems' => function (array $root): float {
                     return isset($root['gems']) ? (float)$root['gems'] : 0.0;
                 },
-                'tokenAmount' => function (array $root): float {
-                    return isset($root['tokenAmount']) ? (float)$root['tokenAmount'] : 0.0;
-                },
             ],
             'DailyGemsResultsData' => [
-                'totalGems' => function (array $root): float {
-                    return isset($root['totalGems']) ? (float)$root['totalGems'] : 0.0;
-                },
                 'data' => function (array $root): array {
                     return $root['data'] ?? [];
                 },

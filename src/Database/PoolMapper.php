@@ -195,7 +195,7 @@ class PoolMapper
             return $this->respondWithError(21202); //'No records found for ' . $day
         }
 
-        $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
+        #$totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
 
         $args = [];
 
@@ -207,7 +207,6 @@ class PoolMapper
                     'userid'      => $userId,
                     'gems'        => $row['gems'] ?? 0,
                     'pkey'        => $row['pkey'] ?? '',
-                    'tokenAmount' => $row['tokenAmount'] ?? 0,
                 ];
             }
 
@@ -234,7 +233,7 @@ class PoolMapper
                 'status' => 'success',
                 'counter' => count($args) -1,
                 'ResponseCode' => 11208,
-                'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
+                'affectedRows' => ['data' => array_values($args)]
             ];
         }
 
