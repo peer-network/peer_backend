@@ -1898,7 +1898,7 @@ class GraphQLSchemaBuilder
             }
 
             if (empty($referralUsers['invitedBy']) && empty($referralUsers['iInvited'])) {
-                return $this->createSuccessResponse('No referral data available', $referralUsers, false);
+                return $this->createSuccessResponse(21003, $referralUsers, false);
             }
 
             $this->logger->info('Returning final referralList response', ['referralUsers' => $referralUsers]);
