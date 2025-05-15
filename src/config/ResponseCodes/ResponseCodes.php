@@ -1,20 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\config\ResponseCodes;
-
-require_once __DIR__ . '/InputSanitization.php';
-require_once __DIR__ . '/ArgumentFields.php';
+namespace Fawaz\Config\ResponseCodes;
+use Fawaz\Config\ResponseCodes\{InputSanitization,ResponseCodesSection};
 
 class ResponseCodes {
-    /** @var array<string, ResponseCodeSection> */
+    /** @var array<string, ResponseCodesSection> */
     public array $codes;
 
      public function __construct() {
         $this->codes = $this->mergeArrays(
             [ 
                 InputSanitization::cases(), 
-                ArgumentFields::cases()
+                // ArgumentFields::cases()
             ]
         );
     }
@@ -28,8 +26,8 @@ class ResponseCodes {
     }
 
     /**
-     * @param array<array<string, ResponseCodeSection>> $arrays
-     * @return array<string, ResponseCodeSection>
+     * @param array<array<string, ResponseCodesSection>> $arrays
+     * @return array<string, ResponseCodesSection>
      */
     private function mergeArrays(array $arrays): array {
         $merged = [];

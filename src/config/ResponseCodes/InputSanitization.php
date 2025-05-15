@@ -2,9 +2,9 @@
 declare(strict_types=1);
 
 namespace Fawaz\Config\ResponseCodes;
-use Fawaz\Config\Constants;
+use Fawaz\Config\ResponseCodes\ResponseCodesSection;
 
-enum InputSanitization: int implements ResponseCodeSection {
+enum InputSanitization: int implements ResponseCodesSection {
     case allRequiredFieldsMustBeProvided = 30101;
 
     public function message(): string {

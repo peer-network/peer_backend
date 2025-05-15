@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\config\constants;
+namespace Fawaz\Config\Constants;
 
 readonly class ValidationRange {
     public int $min;
