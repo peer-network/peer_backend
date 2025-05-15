@@ -145,7 +145,7 @@ class PostService
 
         foreach (['title', 'media', 'contenttype'] as $field) {
             if (empty($args[$field])) {
-                return $this->respondWithError(30102);
+                return $this->respondWithError(30210);
             }
         }
 
