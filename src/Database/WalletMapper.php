@@ -11,7 +11,6 @@ use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
-use Fawaz\Utils\TokenToBtcSwapCalc;
 use Psr\Log\LoggerInterface;
 
 const TABLESTOGEMS = true;
@@ -51,6 +50,7 @@ class WalletMapper
     private string $poolWallet;
     private string $burnWallet;
     private string $peerWallet;
+    private string $btcpool;
 
     public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
     {
@@ -1757,6 +1757,9 @@ class WalletMapper
 
             $btcAddress = $args['btcAddress'];
             $transUniqueId = self::generateUUID();
+
+            $btcConstInitialY =  $this->getLpTokenBtcLP();
+            
             // 1. SENDER: Debit From Account
             if ($numberoftokens) {
                 $id = self::generateUUID();
@@ -1792,39 +1795,6 @@ class WalletMapper
 
             }
 
-            // 2. RECIPIENT: Credit To Account to Pool Account
-            if ($numberoftokens) {
-                $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($numberoftokens),
-                    'whereby' => TRANSFER_,
-                ];
-
-                $this->saveWalletEntry($recipient, $args['numbers']);
-
-                $transUniqueIdForDebit = self::generateUUID();
-                $transObj = [
-                    'transUniqueId' => $transUniqueIdForDebit,
-                    'transactionType' => 'btcSwapToPool',
-                    'senderId' => $userId,
-                    'recipientId' => $recipient,
-                    'tokenAmount' => $numberoftokens,
-                    'message' => $message,
-                    'transferAction' => 'CREDIT'
-                ];
-                $transactions = new Transaction($transObj);
-
-                $transRepo = new TransactionRepository($this->logger, $this->db);
-                $transRepo->saveTransaction($transactions);
-
-            }
 
             if (isset($result['invited']) && !empty($result['invited'])) {
                 // 3 . INVITER: Fees To inviter Account (if exist)
@@ -1906,6 +1876,50 @@ class WalletMapper
 
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
+
+
+                // Count LP after Fees calculation
+                $lpAccountTokenAfterLPFeeX = $this->getLpToken();
+                $contsAfterFeesK = $lpAccountTokenAfterLPFeeX * $btcConstInitialY;
+            }
+
+            // 2. RECIPIENT: Credit To Account to Pool Account
+            if ($numberoftokens) {
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($numberoftokens),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->saveWalletEntry($recipient, $args['numbers']);
+
+                $transUniqueIdForDebit = self::generateUUID();
+                $transObj = [
+                    'transUniqueId' => $transUniqueIdForDebit,
+                    'transactionType' => 'btcSwapToPool',
+                    'senderId' => $userId,
+                    'recipientId' => $recipient,
+                    'tokenAmount' => $numberoftokens,
+                    'message' => $message,
+                    'transferAction' => 'CREDIT'
+                ];
+                $transactions = new Transaction($transObj);
+
+                $transRepo = new TransactionRepository($this->logger, $this->db);
+                $transRepo->saveTransaction($transactions);
+
+
+                // Count LP swap tokens Fees calculation
+                $lpAccountTokenAfterSwapX = $this->getLpToken();
+                $btcConstNewY = $contsAfterFeesK / $lpAccountTokenAfterSwapX;
+
             }
 
             // 6. PEERWALLET: Fee To Account
@@ -1972,18 +1986,16 @@ class WalletMapper
 
             // Should be placed at last because it should include 1% LP Fees
             if($numberoftokens && $transactionId){
-                
                 // Store BTC Swap transactions in btc_swap_transactions
                 // count BTC amount
-                $lpAccountToken = $this->getLpToken();
-                $btcAmount = TokenToBtcSwapCalc::convert($numberoftokens, $lpAccountToken);
+                $btcAmountToUser = $btcConstInitialY - $btcConstNewY;
                 $transObj = [
                     'transUniqueId' => $transactionId,
                     'transactionType' => 'btcSwapToPool',
                     'userId' => $userId,
                     'btcAddress' => $btcAddress,
                     'tokenAmount' => $numberoftokens,
-                    'btcAmount' => $btcAmount,
+                    'btcAmount' => $btcAmountToUser,
                     'message' => $message,
                     'transferAction' => 'CREDIT'
                 ];
@@ -1993,12 +2005,18 @@ class WalletMapper
                 $btcTransRepo->saveTransaction($btcTransactions);
             }
 
+            // Update BTC Pool
+            if($btcAmountToUser){
+                $btcAmountToUpdateInBtcPool = -abs($btcAmountToUser);
+                $this->saveWalletEntry($this->btcpool, $btcAmountToUpdateInBtcPool);
+            }
+
             return [
                 'status' => 'success', 
                 'ResponseCode' => 0000,
                 'tokenSend' => $numberoftokens,
                 'tokensSubstractedFromWallet' => $requiredAmount,
-                'expectedBtcReturn' => $btcAmount ?? 0.0
+                'expectedBtcReturn' => $btcAmountToUser ?? 0.0
             ];
 
         } catch (\Throwable $e) {
@@ -2052,5 +2070,50 @@ class WalletMapper
         }
     }
 
+    /**
+     * get BTC LP.
+     * 
+     */    
+    public function getLpTokenBtcLP()
+    {
+
+        $this->logger->info("WalletMapper.getLpToken started");
+
+        $query = "SELECT * from wallett WHERE userid = :userId";
+       
+		$accounts = $this->pool->returnAccounts();
+
+		$liqpool = $accounts['response'] ?? null;
+		$this->btcpool = $liqpool['btcpool'];
+
+        try {
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindValue(':userId', $this->btcpool, \PDO::PARAM_STR);
+            $stmt->execute();
+            $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            $this->logger->info("Inserted new transaction into database");
+
+            return $walletInfo['liquidity'];
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "WalletMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error(
+                "WalletMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage()
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        }
+    }
 
 }
