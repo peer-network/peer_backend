@@ -449,7 +449,7 @@ class ChatMapper
 
             if ($participantExists) {
                 $this->logger->warning("Participant already exists", ['userid' => $userid]);
-                return $this->respondWithError(21803);
+                return $this->respondWithError(31813);
             }
 
             $query = "INSERT INTO chatparticipants (chatid, userid, hasaccess, createdat) 
@@ -505,7 +505,7 @@ class ChatMapper
 
             if (!$participantExists) {
                 $this->logger->warning("User is not a participant of the chat", ['userid' => $userid]);
-                return $this->respondWithError(21804);
+                return $this->respondWithError(31812);
             }
 
             $query = "INSERT INTO chatmessages (chatid, userid, content, createdat) 
