@@ -924,7 +924,7 @@ class UserService
                 $this->userMapper->deletePasswordResetToken($args['token']);
                 return [
                     'status' => 'error',
-                    'ResponseCode' => 'Invalid or expired reset token. Please try again.'
+                    'ResponseCode' => 31904
                 ];
             }
             $user = $this->userMapper->loadById($request['user_id']);
