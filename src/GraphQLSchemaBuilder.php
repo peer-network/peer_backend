@@ -1225,6 +1225,9 @@ class GraphQLSchemaBuilder
                 'gems' => function (array $root): float {
                     return $root['gems'] ?? 0.0;
                 },
+                'pkey' => function (array $root): string {
+                    return $root['pkey'] ?? '';
+                },
             ],
             'ContactusResponse' => [
                 'status' => function (array $root): string {
