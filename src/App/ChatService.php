@@ -113,7 +113,7 @@ class ChatService
 
             $recipientId = $recipients[0];
             if ($this->chatMapper->getPrivateChatBetweenUsers($creatorId, $recipientId)) {
-                return $this->respondWithError(21805);
+                return $this->respondWithError(31812);
             }
         }
 
@@ -473,7 +473,7 @@ class ChatService
                 }
 
                 if (!$this->chatMapper->isParticipantExist($chatId, $participantId)) {
-                    return $this->respondWithError(21001);
+                    return $this->respondWithError(31811);
                 }
 
                 $this->chatMapper->deleteParticipant($chatId, $participantId);
@@ -509,7 +509,7 @@ class ChatService
         }
 
         if (empty($chatId) || empty($content)) {
-            return $this->respondWithError(30102);
+            return $this->respondWithError(30252);
         }
 
         if (strlen($content) < 1 || strlen($content) > 500) {
@@ -660,7 +660,7 @@ class ChatService
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in loadChatById", ['error' => $e->getMessage()]);
-            return $this->respondWithError(40301);
+            return $this->respondWithError(21801);
         } catch (\Throwable $e) {
             $this->logger->error("Unexpected error in loadChatById", ['error' => $e->getMessage()]);
             return $this->respondWithError(40301);
