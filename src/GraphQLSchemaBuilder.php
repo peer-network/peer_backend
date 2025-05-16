@@ -2060,6 +2060,7 @@ class GraphQLSchemaBuilder
             if ($limit > 0) {
                 $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
 
+                // Return ResponseCode with Daily Free Code
                 if ($DailyUsage < $limit) {
                     if ($action === 'comment') 
                     {
@@ -2067,6 +2068,8 @@ class GraphQLSchemaBuilder
                         if (isset($response['status']) && $response['status'] === 'error') {
                             return $response;
                         }
+                        $response['ResponseCode'] = 11608;
+
                     }
                     elseif ($action === 'post') 
                     {
@@ -2074,6 +2077,7 @@ class GraphQLSchemaBuilder
                         if (isset($response['status']) && $response['status'] === 'error') {
                             return $response;
                         }
+                        $response['ResponseCode'] = 11513;
                     }
                     elseif ($action === 'like') 
                     {
@@ -2081,6 +2085,7 @@ class GraphQLSchemaBuilder
                         if (isset($response['status']) && $response['status'] === 'error') {
                             return $response;
                         }
+                        $response['ResponseCode'] = 11514;
                     }
                     else 
                     {
@@ -2105,8 +2110,9 @@ class GraphQLSchemaBuilder
                     return $response;
                 }
             }
-
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
+
+            // Return ResponseCode with Daily Free Code
 
             if ($balance < $price) {
                 $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
@@ -2119,6 +2125,7 @@ class GraphQLSchemaBuilder
                 if (isset($response['status']) && $response['status'] === 'error') {
                     return $response;
                 }
+                $response['ResponseCode'] = 11605;
             }
             elseif ($action === 'post') 
             {
@@ -2126,6 +2133,7 @@ class GraphQLSchemaBuilder
                 if (isset($response['status']) && $response['status'] === 'error') {
                     return $response;
                 }
+                $response['ResponseCode'] = 11508;
 
                 if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])){
 
@@ -2139,6 +2147,7 @@ class GraphQLSchemaBuilder
                 if (isset($response['status']) && $response['status'] === 'error') {
                     return $response;
                 }
+                $response['ResponseCode'] = 11503;
             }
             elseif ($action === 'dislike') 
             {
@@ -2146,6 +2155,7 @@ class GraphQLSchemaBuilder
                 if (isset($response['status']) && $response['status'] === 'error') {
                     return $response;
                 }
+                $response['ResponseCode'] = 11504;
             }
             else 
             {
@@ -2163,7 +2173,6 @@ class GraphQLSchemaBuilder
                     return $this->respondWithError($deducted['ResponseCode']);
                 }
 
-                $response['ResponseCode'] = 11508;
                 return $response;
             }
 
