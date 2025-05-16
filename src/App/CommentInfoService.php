@@ -44,7 +44,7 @@ class CommentInfoService
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('CommentInfoService.deleteCommentInfo started');
@@ -84,7 +84,7 @@ class CommentInfoService
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('CommentInfoService.likeComment started');
@@ -96,13 +96,13 @@ class CommentInfoService
         }
 
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
-            return $this->respondWithError(21602);
+            return $this->respondWithError(31606);
         }
 
         $exists = $this->commentInfoMapper->addUserActivity('likeComment', $this->currentUserId, $commentId);
 
         if (!$exists) {
-            return $this->respondWithError(21603);
+            return $this->respondWithError(31604);
         }
 
         $commentInfo->setLikes($commentInfo->getLikes() + 1);
@@ -122,7 +122,7 @@ class CommentInfoService
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         $this->logger->info('CommentInfoService.reportComment started');
@@ -134,13 +134,13 @@ class CommentInfoService
         }
 
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
-            return $this->respondWithError(21604);
+            return $this->respondWithError(31607);
         }
 
         $exists = $this->commentInfoMapper->addUserActivity('reportComment', $this->currentUserId, $commentId);
 
         if (!$exists) {
-            return $this->respondWithError(21605);
+            return $this->respondWithError(31605);
         }
 
         $commentInfo->setReports($commentInfo->getReports() + 1);

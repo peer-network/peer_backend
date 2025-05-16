@@ -68,7 +68,7 @@ class CommentService
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return $this->respondWithError(30102);
+                return $this->respondWithError(30265);
             }
         }
         return [];
@@ -95,7 +95,7 @@ class CommentService
         $content = trim($args['content']);
         $postId = trim($args['postid']);
         $parentId = isset($args['parentid']) ? trim($args['parentid']) : null;
-
+        
         if (!$this->validateUUID($postId)) {
             return $this->respondWithError(31501, ['postid' => $postId]);
         }

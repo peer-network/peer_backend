@@ -57,7 +57,7 @@ class TagPostService
         }
 
         if (strlen($tagName) < 2 || strlen($tagName) > 50 || !preg_match('/^[a-zA-Z]+$/', $tagName)) {
-            return $this->respondWithError(20255);
+            return $this->respondWithError(30255);
         }
 
         return true;
@@ -71,14 +71,14 @@ class TagPostService
 
         $maxTags = min(max((int)($maxTags ?? 5), 1), 10);
         if (count($tags) > $maxTags) {
-            return $this->respondWithError(20211);
+            return $this->respondWithError(30211);
         }
 
         foreach ($tags as $tagName) {
             $tagName = trim($tagName);
             // Validate tagName
             if (!$this->isValidTagName($tagName)) {
-                return $this->respondWithError(20255);
+                return $this->respondWithError(30255);
             }
 
             $tag = $this->tagMapper->loadByName($tagName) ?? $this->createTag($tagName);
@@ -101,7 +101,7 @@ class TagPostService
 
         $tagName = trim($tagName);
         if (!$this->isValidTagName($tagName)) {
-            return $this->respondWithError(20255);
+            return $this->respondWithError(30255);
         }
 
         try {

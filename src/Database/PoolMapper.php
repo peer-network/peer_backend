@@ -150,7 +150,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            return $this->respondWithError(20223);
+            return $this->respondWithError(30223);
         }
 
         $whereCondition = $dayOptions[$day];
@@ -169,6 +169,7 @@ class PoolMapper
             )
             SELECT 
                 g.userid,
+                ui.pkey,
                 g.gemid,
                 g.gems,
                 g.whereby,
@@ -178,6 +179,7 @@ class PoolMapper
                 (us.total_numbers * 100.0 / ts.overall_total) AS percentage
             FROM gems g
             JOIN user_sums us ON g.userid = us.userid
+            JOIN users_info ui ON g.userid = ui.userid
             CROSS JOIN total_sum ts
             WHERE us.total_numbers > 0 AND g.{$whereCondition};
         ";
@@ -204,7 +206,8 @@ class PoolMapper
             if (!isset($args[$userId])) {
                 $args[$userId] = [
                     'userid' => $userId,
-                    'gems' => $row['total_numbers']
+                    'gems' => $row['total_numbers'],
+                    'pkey' => $row['pkey'] ?? '',
                 ];
             }
 

@@ -154,7 +154,7 @@ class UserService
 
             if (empty($inviter)) {
                 $this->logger->warning('Invalid referral UUID provided.', ['referralUuid' => $referralUuid]);
-                return self::respondWithError(00000);
+                return self::respondWithError(31007);
             }
 
             $invited = $inviter->getUserId();
@@ -162,7 +162,7 @@ class UserService
 
         $email = trim($args['email']);
         if ($this->userMapper->isEmailTaken($email)) {
-            return self::respondWithError(20601);
+            return self::respondWithError(30601);
         }
 
         $username = trim($args['username']);
@@ -261,7 +261,7 @@ class UserService
             $this->userMapper->insertReferralInfo($id, $referralLink);
         } catch (\Throwable $e) {
             $this->logger->warning('Error handling referral info.', ['exception' => $e]);
-            return self::respondWithError(00000);
+            return self::respondWithError(41013);
         }
 
         try {
@@ -309,7 +309,7 @@ class UserService
 
         return [
             'status' => 'success',
-            'ResponseCode' => 00000,
+            'ResponseCode' => 11011,
             'counter' => count($data['iInvited']),
             'affectedRows' => [
                 'invitedBy' => $data['invitedBy'],
@@ -327,7 +327,7 @@ class UserService
                 $this->logger->info('UserService.uploadMedia mediaPath', ['mediaPath' => $mediaPath]);
 
                 if ($mediaPath === '') {
-                    return self::respondWithError(41009);
+                    return self::respondWithError(30251);
                 }
 
                 if (isset($mediaPath['path'])) {
@@ -351,7 +351,7 @@ class UserService
     public function verifyAccount(string $userId): array
     {
         if (!self::isValidUUID($userId)) {
-            return self::respondWithError(20201);
+            return self::respondWithError(30201);
         }
 
         try {
@@ -399,7 +399,7 @@ class UserService
         }
 
         if ($newPassword === $currentPassword) {
-            return self::respondWithError(21002);
+            return self::respondWithError(31004);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
@@ -441,16 +441,20 @@ class UserService
         $this->logger->info('UserService.setEmail started');
 
         $email = $args['email'] ?? null;
-        $exPassword = $args['password'] ?? null;
-
+        $exPassword = $args['password'] ?? null;    
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->logger->warning('Invalid email format', ['email' => $email]);
-            return self::respondWithError(20224);
+            return self::respondWithError(30224);
+        }
+        
+        $user = $this->userMapper->loadById($this->currentUserId);
+        if ($email === $user->getMail()) {
+            return self::respondWithError(31005);
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
             $this->logger->warning('Email already in use', ['email' => $email]);
-            return self::respondWithError(21003);
+            return self::respondWithError(31003);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
@@ -508,7 +512,7 @@ class UserService
             }
 
             if ($username === $user->getName()) {
-                return self::respondWithError(21005);
+                return self::respondWithError(31006);
             }
 
             if (!$this->validatePasswordMatch($password, $user->getPassword())) {
@@ -535,7 +539,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update username', ['exception' => $e]);
-            return self::respondWithError(20202);
+            return self::respondWithError(30202);
         }
     }
 
@@ -613,7 +617,7 @@ class UserService
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return self::respondWithError(41007);
+            return $this->createSuccessResponse(21001, []);
         }
     }
 
@@ -627,7 +631,7 @@ class UserService
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
-            return self::respondWithError(20201);
+            return self::respondWithError(30201);
         }
 
         try {
@@ -739,7 +743,7 @@ class UserService
                 ];
             }
 
-            return self::respondWithError(21001);
+            return $this->createSuccessResponse(21001, []);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
@@ -861,7 +865,7 @@ class UserService
     {
         return [
             'status' => 'success',
-            'ResponseCode' => 'An email will be sent to your mail address if an account associated with it exists.'
+            'ResponseCode' => 11901
         ];
     }
 
@@ -920,7 +924,7 @@ class UserService
                 $this->userMapper->deletePasswordResetToken($args['token']);
                 return [
                     'status' => 'error',
-                    'ResponseCode' => 'Invalid or expired reset token. Please try again.'
+                    'ResponseCode' => 31904
                 ];
             }
             $user = $this->userMapper->loadById($request['user_id']);

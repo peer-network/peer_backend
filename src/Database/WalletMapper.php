@@ -92,7 +92,7 @@ class WalletMapper
                 'recipient' => $recipient,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(20201);
+            return self::respondWithError(30201);
         }
 
         $numberoftokens = (float) $args['numberoftokens'];
@@ -101,7 +101,7 @@ class WalletMapper
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(20264);
+            return self::respondWithError(30264);
         }
 
         try {
@@ -116,7 +116,7 @@ class WalletMapper
 
         if (empty($row)) {
             $this->logger->warning('Unknown Id Exception.');
-            return self::respondWithError(21001);
+            return self::respondWithError(31003);
         }
 
         if ((string)$row === $userId) {
