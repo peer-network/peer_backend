@@ -638,8 +638,15 @@ class ChatService
             $result = $this->chatMapper->loadChatById($this->currentUserId, $args);
 
             if ($result['status'] !== 'success') {
-                throw new ValidationException($result['ResponseCode']);
-            }
+            throw new ValidationException($result['ResponseCode']);
+    } 
+            if (empty($result['data']) || empty($result['data']['chat'])) {
+            return [
+                'status' => 'success',
+                'ResponseCode' => 21801,
+                'data' => null,
+            ];
+    }
 
             $chatData = $result['data'];
 
