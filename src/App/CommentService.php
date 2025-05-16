@@ -97,7 +97,7 @@ class CommentService
         $parentId = isset($args['parentid']) ? trim($args['parentid']) : null;
         
         if (!$this->validateUUID($postId)) {
-            return $this->respondWithError(31501, ['postid' => $postId]);
+            return $this->respondWithError(30209, ['postid' => $postId]);
         }
 
         if ($parentId !== null && !$this->validateUUID($parentId)) {
@@ -198,7 +198,7 @@ class CommentService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if ($parentId !== null && !self::isValidUUID($parentId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info("CommentService.fetchByParentId started");
@@ -220,7 +220,7 @@ class CommentService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info("CommentService.fetchAllByPostId started");
