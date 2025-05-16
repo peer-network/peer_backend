@@ -279,7 +279,7 @@ class PostService
             $data = $post->getArrayCopy();
             $data['tags'] = $tagNames;
 
-            return $this->createSuccessResponse(11508, $data);
+            return $this->createSuccessResponse(11513, $data);
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);
