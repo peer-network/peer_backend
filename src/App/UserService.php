@@ -404,7 +404,7 @@ class UserService
 
         if (!$user) {
             $this->logger->warning('User not found', ['userId' => $this->currentUserId]);
-            return self::respondWithError(21001);
+            return self::createSuccessResponse(21001);
         }
 
         if (!$this->validatePasswordMatch($currentPassword, $user->getPassword())) {
@@ -458,11 +458,11 @@ class UserService
         $user = $this->userMapper->loadById($this->currentUserId);
         if (!$user) {
             $this->logger->warning('User not found', ['userId' => $this->currentUserId]);
-            return self::respondWithError(21001);
+            return self::createSuccessResponse(21001);
         }
 
         if ($email === $user->getMail()) {
-            return self::respondWithError(21004);
+            return self::createSuccessResponse(21004);
         }
 
         if (!$this->validatePasswordMatch($exPassword, $user->getPassword())) {
@@ -506,7 +506,7 @@ class UserService
 
             $user = $this->userMapper->loadById($this->currentUserId);
             if (!$user) {
-                return self::respondWithError(21001);
+                return self::createSuccessResponse(21001);
             }
 
             if ($username === $user->getName()) {
@@ -557,7 +557,7 @@ class UserService
 
         $user = $this->userMapper->loadById($userId);
         if (!$user) {
-            return self::respondWithError(21001);
+            return self::createSuccessResponse(21001);
         }
 
         if (!$this->validatePasswordMatch($expassword, $user->getPassword())) {
@@ -716,7 +716,7 @@ class UserService
             }
 
             $this->logger->info('No friends found @ all');
-            return self::respondWithError(21101);
+            return self::createSuccessResponse(21101);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
             return self::respondWithError(41107);
@@ -765,7 +765,7 @@ class UserService
                 ];
             }
 
-            return self::respondWithError(21001);
+            return self::createSuccessResponse(21001);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
@@ -929,7 +929,7 @@ class UserService
 
             if (!$user) {
                 $this->logger->warning('User not found', ['userId' => $request['user_id']]);
-                return self::respondWithError(21001);
+                return self::createSuccessResponse(21001);
             }
 
             $user->validatePass($args);

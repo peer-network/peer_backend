@@ -1791,7 +1791,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveFetchWinsLog No records found');
-        return $this->respondWithError(21202);
+        return $this->createSuccessResponse(21202);
     }
 
     protected function resolveFetchPaysLog(array $args): ?array
@@ -1825,7 +1825,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveFetchPaysLog No records found');
-        return $this->respondWithError(21202);
+        return $this->createSuccessResponse(21202);
     }
     
     protected function resolveReferralInfo(): ?array
@@ -1845,7 +1845,7 @@ class GraphQLSchemaBuilder
 
             $info = $this->userMapper->getReferralInfoByUserId($userId);
             if (empty($info)) {
-                return $this->respondWithError(21002);
+                return $this->createSuccessResponse(21002);
             }
 
             $response = [
@@ -1949,7 +1949,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveChatMessages No messages found');
-        return $this->respondWithError(21806);
+        return $this->createSuccessResponse(21806);
     }
 
     protected function resolveTestingPool(array $args): ?array
@@ -2212,7 +2212,7 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse(11607, $results);
         }
 
-        return $this->respondWithError(21601);
+        return $this->createSuccessResponse(21601);
     }
 
     protected function resolvePostComments(array $args): array
@@ -2240,7 +2240,7 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse(11601, $comments);
         }
 
-        return $this->respondWithError(21601);
+        return $this->createSuccessResponse(21601);
     }
 
     protected function resolveTags(array $args): ?array
@@ -2267,7 +2267,7 @@ class GraphQLSchemaBuilder
             return $tags;
         }
 
-        return $this->respondWithError(21701);
+        return $this->createSuccessResponse(21701);
     }
 
     protected function resolveTagsearch(array $args): ?array
@@ -2293,7 +2293,7 @@ class GraphQLSchemaBuilder
             return $data;
         }
 
-        return $this->respondWithError(21701);
+        return $this->createSuccessResponse(21701);
     }
 
     protected function resolveBeforeTransaction(?array $args = []): array
@@ -2457,7 +2457,7 @@ class GraphQLSchemaBuilder
             return $data;
         }
 
-        return $this->respondWithError(21001);
+        return $this->createSuccessResponse(21001);
     }
 
     protected function resolveFollows(array $args): ?array
@@ -2485,7 +2485,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveFollows User not found');
-        return $this->respondWithError(21001);
+        return $this->createSuccessResponse(21001);
     }
 
     protected function resolveProfile(array $args): ?array
@@ -2512,7 +2512,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveProfile User not found');
-        return $this->respondWithError(21001);
+        return $this->createSuccessResponse(21001);
     }
 
     protected function resolveFriends(array $args): ?array
@@ -2540,7 +2540,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveFriends Users not found');
-        return $this->respondWithError(21101);
+        return $this->createSuccessResponse(21101);
     }
 
     protected function resolveAllFriends(array $args): ?array
@@ -2563,7 +2563,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveAllFriends No listFriends found');
-        return $this->respondWithError(21101);
+        return $this->createSuccessResponse(21101);
     }
 
     protected function resolveUsers(array $args): ?array
@@ -2588,7 +2588,7 @@ class GraphQLSchemaBuilder
         return $results;
 
         $this->logger->warning('Query.resolveUsers No users found');
-        return $this->respondWithError(21001);
+        return $this->createSuccessResponse(21001);
     }
 
     protected function resolveChat(array $args): ?array
@@ -2656,7 +2656,7 @@ class GraphQLSchemaBuilder
             ];
         }
 
-        return $this->respondWithError(21801);
+        return $this->createSuccessResponse(21801);
     }
 
     protected function mapChatToArray(Chat $chat): array
@@ -2689,7 +2689,7 @@ class GraphQLSchemaBuilder
                 return $posts;
             }
         } else {
-            return $this->respondWithError(21504);
+            return $this->createSuccessResponse(21504);
         }
 
         return $this->createSuccessResponse(11502, $posts);
@@ -2717,10 +2717,10 @@ class GraphQLSchemaBuilder
             $comments = $this->commentInfoService->findCommentInfo($commentId);
 
             if ($comments === false) {
-                return $this->respondWithError(21505);
+                return $this->createSuccessResponse(21505);
             }
         } else {
-            return $this->respondWithError(21506);
+            return $this->createSuccessResponse(21506);
         }
 
         return [

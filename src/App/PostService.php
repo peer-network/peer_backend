@@ -177,7 +177,7 @@ class PostService
             }
 
             if (!$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
-                return $this->respondWithError(21516);
+                return $this->createSuccessResponse(21516);
             }
         }
 
@@ -529,7 +529,7 @@ class PostService
 
         $posts = $this->postMapper->loadById($id);
         if (!$posts) {
-            return $this->respondWithError(21516);
+            return $this->createSuccessResponse(21516);
         }
 
         $post = $posts->getArrayCopy();

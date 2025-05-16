@@ -38,6 +38,25 @@ class ChatService
         );
     }
 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                $response['counter'] = count($data[$countKey]);
+            } else {
+                $response['counter'] = count($data);
+            }
+        }
+
+        return $response;
+    }
+
     public static function isValidUUID(string $uuid): bool
     {
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
@@ -379,7 +398,7 @@ class ChatService
 
         // Check if $friends is an array and has follow
         if (!is_array($friends) || empty($friends)) {
-            return $this->respondWithError(21101);
+            return $this->createSuccessResponse(21101);
         }
 
         $friendIds = array_column($friends, 'uid');
@@ -582,7 +601,7 @@ class ChatService
         $message = $this->chatMapper->loadMessageById($messageId);
 
         if ($message === false) {
-            return $this->respondWithError(21001);
+            return $this->createSuccessResponse(21001);
         }
 
         if ($message['userid'] !== $this->currentUserId && !$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
