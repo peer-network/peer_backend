@@ -1,6 +1,6 @@
 <?php
 
-namespace Fawaz\Config;
+namespace Fawaz\config;
 
 enum ContentLimitsPerPost: string {
     case VIDEO = 'video';
