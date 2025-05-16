@@ -283,7 +283,7 @@ class PostService
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);
-            return $this->respondWithError(30263);
+            return $this->respondWithError(41508);
         }
     }
 

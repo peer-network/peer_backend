@@ -46,9 +46,7 @@ class UserService
     private function validatePassword(string $password): array
     {
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
-            return self::respondWithError(
-                20226
-            );
+            return self::respondWithError(30226);
         }
 
         return ['status' => 'success'];
@@ -686,7 +684,7 @@ class UserService
             }
 
             $this->logger->info('No friends found for the user', ['currentUserId' => $this->currentUserId]);
-            return self::respondWithError(21101);
+            return self::createSuccessResponse(21101);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
             return self::respondWithError(41107);
