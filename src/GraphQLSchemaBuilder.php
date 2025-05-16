@@ -2684,15 +2684,22 @@ class GraphQLSchemaBuilder
         $postId = isset($postId) ? trim($postId) : '';
 
         if (!empty($postId)) {
-            $posts = $this->postInfoService->findPostInfo($postId);
-            if (isset($posts['status']) && $posts['status'] === 'error') {
-                return $posts;
-            }
-        } else {
-            return $this->respondWithError(21504);
-        }
+    $posts = $this->postInfoService->findPostInfo(postId: $postId);
+    if (isset($posts['status']) && $posts['status'] === 'error') {
+        return $posts;
+    }
+}
 
-        return $this->createSuccessResponse(11502, $posts);
+if (empty($posts['data'])) {
+    return [
+        'status' => 'success',
+        'ResponseCode' => 11502,
+        'data' => null,
+    ];
+}
+
+return $this->createSuccessResponse(message: 11502, data: $posts);
+
     }
 
     protected function resolveCommentInfo(string $commentId): ?array
