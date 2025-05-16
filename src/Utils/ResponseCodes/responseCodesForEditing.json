@@ -440,7 +440,7 @@
         "userFriendlyComment": "Invalid user ID format. Please check and try again."
     },
     "30202": {
-        "comment": "The 'username' field (User's display name) must be between 3 and 23 characters long, must contain at least one letter and can contain numbers, and underscores",
+        "comment": "The 'username' field (User display name) must be between 3 and 23 characters long, must contain at least one letter and can contain numbers, and underscores",
         "userFriendlyComment": "Username must be 3-23 chars with letters, numbers, or underscores."
     },
     "30203": {
@@ -528,27 +528,27 @@
         "userFriendlyComment": "Invalid timeframe. Choose from available options."
     },
     "30224": {
-        "comment": "The 'email' field (User's email address) must be a valid email format",
+        "comment": "The 'email' field (User email address) must be a valid email format",
         "userFriendlyComment": "Please enter a valid email address."
     },
     "30225": {
-        "comment": "The 'password' field (User's current password) is required to update the email",
+        "comment": "The 'password' field (User current password) is required to update the email",
         "userFriendlyComment": "Current password required to change email."
     },
     "30226": {
-        "comment": "The 'password' field (User's new password) must be between 8 and 128 characters long and contain at least one lowercase letter, one uppercase letter, and one number",
+        "comment": "The 'password' field (User new password) must be between 8 and 128 characters long and contain at least one lowercase letter, one uppercase letter, and one number",
         "userFriendlyComment": "Password must be 8-128 chars with uppercase, lowercase and numbers."
     },
     "30227": {
-        "comment": "The 'expassword' field (User's current password) is required to update the password",
+        "comment": "The 'expassword' field (User current password) is required to update the password",
         "userFriendlyComment": "Current password required to change password."
     },
     "30228": {
-        "comment": "The 'biography' field (User's biography)must be between 3 and 5000 characters long",
+        "comment": "The 'biography' field (User biography)must be between 3 and 5000 characters long",
         "userFriendlyComment": "Bio must be 3-5000 characters."
     },
     "30229": {
-        "comment": "The 'img' field (User's profile picture) must be a valid image file (JPG, PNG, or GIF) and less than 5MB in size",
+        "comment": "The 'img' field (User profile picture) must be a valid image file (JPG, PNG, or GIF) and less than 5MB in size",
         "userFriendlyComment": "Profile pic must be JPG/PNG/GIF under 5MB."
     },
     "30230": {
@@ -580,15 +580,15 @@
         "userFriendlyComment": "Ignore list must be set to YES or NO."
     },
     "30237": {
-        "comment": "The 'password' field (User's password) is required to proceed",
+        "comment": "The 'password' field (User password) is required to proceed",
         "userFriendlyComment": "Password is required to continue."
     },
     "30238": {
-        "comment": "The 'biography' field (User's biography) must be provided to update the profile",
+        "comment": "The 'biography' field (User biography) must be provided to update the profile",
         "userFriendlyComment": "Bio is required to update profile."
     },
     "30239": {
-        "comment": "The 'img' field (User's profile picture) must be provided to update the image",
+        "comment": "The 'img' field (User profile picture) must be provided to update the image",
         "userFriendlyComment": "Image is required to update profile picture."
     },
     "30240": {
@@ -652,7 +652,7 @@
         "userFriendlyComment": "Invalid Solana public key format."
     },
     "30255": {
-        "comment": "The 'tagName' field (Tag identifier) must be between 2 and 53 characters long, must not contain spaces, and may include letters, numbers, special characters, underscores _, and hyphens - (format: valid-tag_name-123)\n",
+        "comment": "The 'tagName' field (Tag identifier) must be between 2 and 53 characters long, must not contain spaces, and may include letters, numbers, special characters, underscores _, and hyphens - (format: valid-tag_name-123)",
         "userFriendlyComment": "Tag name must be 2-53 chars without spaces (can use - and _)."
     },
     "30256": {
@@ -743,6 +743,138 @@
         "comment": "Invalid Action: Invalid email or password. Please check your credentials and try again",
         "userFriendlyComment": "Invalid email or password. Please try again."
     },
+    "30901": {
+        "comment": "Invalid Action: Invalid refresh token. Please log in again or request a new token",
+        "userFriendlyComment": "Session expired. Please log in again."
+    },
+    "31001": {
+        "comment": "Failure: Incorrect password. Please enter the correct current password and try again",
+        "userFriendlyComment": "Incorrect password. Please try again."
+    },
+    "31002": {
+        "comment": "Invalid Action: This username is not allowed.Please choose a different one",
+        "userFriendlyComment": "This username isn't available. Please choose another."
+    },
+    "31003": {
+        "comment": "Already Exists: Email is already in use. Please use a different email",
+        "userFriendlyComment": "Email already registered. Please use a different one."
+    },
+    "31004": {
+        "comment": "Invalid Action: New password cannot be the same as your current password. Please choose a different password",
+        "userFriendlyComment": "New password must be different from your current one."
+    },
+    "31005": {
+        "comment": "Invalid Action: New email cannot be the same as your current email. Please choose a different one",
+        "userFriendlyComment": "New email must be different from your current one."
+    },
+    "31006": {
+        "comment": "Invalid Action: New username cannot be the same as your current username. Please choose another",
+        "userFriendlyComment": "New username must be different from your current one."
+    },
+    "31007": {
+        "comment": "Information Not Found: No users found. Please refine your search or try a different query",
+        "userFriendlyComment": "No users found. Try different search terms."
+    },
+    "31101": {
+        "comment": "Not Allowed: You can only perform this action with users on your friends list",
+        "userFriendlyComment": "This action is only available for friends."
+    },
+    "31102": {
+        "comment": "Not Allowed: You cannot follow yourself. Please follow other users instead",
+        "userFriendlyComment": "You can't follow yourself."
+    },
+    "31103": {
+        "comment": "Information Not Found: The user you tried to follow does not exist. ",
+        "userFriendlyComment": "User not found."
+    },
+    "31104": {
+        "comment": "Not Allowed: You cannot block yourself. ",
+        "userFriendlyComment": "You can't block yourself."
+    },
+    "31105": {
+        "comment": "Information Not Found: The user you already followed does not exist anymore. ",
+        "userFriendlyComment": "This user no longer exists."
+    },
+    "31106": {
+        "comment": "Information Not Found: The user you tried to block does not exist. ",
+        "userFriendlyComment": "User not found."
+    },
+    "31201": {
+        "comment": "Market capitalization data is not available for the provided UUID",
+        "userFriendlyComment": "Market data unavailable for this ID."
+    },
+    "31202": {
+        "comment": "Not Allowed: You are not allowed to initiate transfers to your own address",
+        "userFriendlyComment": "You can't transfer to yourself."
+    },
+    "31501": {
+        "comment": "Invalid Action: You have already liked this post",
+        "userFriendlyComment": "You've already liked this post."
+    },
+    "31502": {
+        "comment": "Invalid Action: You have already disliked this post",
+        "userFriendlyComment": "You've already disliked this post."
+    },
+    "31503": {
+        "comment": "Invalid Action: You have already reported this post. Duplicate reports are not required",
+        "userFriendlyComment": "You've already reported this post."
+    },
+    "31504": {
+        "comment": "Invalid Action: Post already shared",
+        "userFriendlyComment": "You've already shared this post."
+    },
+    "31505": {
+        "comment": "Invalid Action: Post already viewed",
+        "userFriendlyComment": "Post already viewed."
+    },
+    "31506": {
+        "comment": "Not Allowed: Post owners cannot like their own posts",
+        "userFriendlyComment": "You can't like your own post."
+    },
+    "31507": {
+        "comment": "Not Allowed: Post owners cannot dislike their own posts",
+        "userFriendlyComment": "You can't dislike your own post."
+    },
+    "31508": {
+        "comment": "Not Allowed: Post owners cannot report their own posts",
+        "userFriendlyComment": "You can't report your own post."
+    },
+    "31509": {
+        "comment": "Not Allowed: As the owner, you are restricted from viewing your own posts",
+        "userFriendlyComment": "You can't view your own post this way."
+    },
+    "31601": {
+        "comment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",
+        "userFriendlyComment": "Comment not found. Check the ID and try again."
+    },
+    "31602": {
+        "comment": "Information Not Found: The post you're trying to comment on does not exist. Please check the post ID and try again",
+        "userFriendlyComment": "Post not found. Check the ID and try again."
+    },
+    "31603": {
+        "comment": "Information Not Found: This comment does not exist",
+        "userFriendlyComment": "Comment not found."
+    },
+    "31604": {
+        "comment": "Invalid Action: You have already liked this comment",
+        "userFriendlyComment": "You've already liked this comment."
+    },
+    "31605": {
+        "comment": "Invalid Action: This comment has already been reported",
+        "userFriendlyComment": "This comment has already been reported."
+    },
+    "31606": {
+        "comment": "Not Allowed: The owner of the comment cannot like their own comment",
+        "userFriendlyComment": "You can't like your own comment."
+    },
+    "31607": {
+        "comment": "Not Allowed: Comment owner cannot report their own comment",
+        "userFriendlyComment": "You can't report your own comment."
+    },
+    "31801": {
+        "comment": "Forbidden: Access denied. You do not have the required permissions for this action",
+        "userFriendlyComment": "You don't have permission for this action."
+    },
     "31802": {
         "comment": "Forbidden: You can only update your own chats",
         "userFriendlyComment": "You can only make changes to chats you created."
@@ -808,7 +940,7 @@
         "userFriendlyComment": "Something went wrong on our end. Please try again or contact support if it continues."
     },
     "40302": {
-        "comment": "Database Error: A database error occurred. Please try again later or contact support",
+        "comment": "Database Error: A database error occurred. Please try again later or contact support if the issue persists",
         "userFriendlyComment": "We're having database issues. Please try again or contact support if the problem persists."
     },
     "40303": {

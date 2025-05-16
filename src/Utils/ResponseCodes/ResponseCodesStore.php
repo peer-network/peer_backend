@@ -1,7 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\Utils\ResponseCodes;
+class Constants {
+    static $pathResponseCodesFileToAssets = "/Users/fcody/Desktop/Peer/peer_backend/runtime-data/assets/";
+    static $pathResponseCodesFileForEditing = "/Users/fcody/Desktop/Peer/peer_backend/src/Utils/ResponseCodes/";
+    static $outputResponseCodesFileName = "response-codes.json";
+    static $inputResponseCodesFileName = "responseCodesForEditing.json";
+}
 
 class ResponseCodesStore {
     private int $generatedAt;
@@ -70,3 +75,10 @@ class MessageEntry {
     }
 }
 
+
+try {
+    $store = new ResponseCodesStore(Constants::$pathResponseCodesFileForEditing . Constants::$inputResponseCodesFileName);
+    $store->generateJSONtoFile(Constants::$pathResponseCodesFileToAssets . Constants::$outputResponseCodesFileName);
+} catch (\Throwable $e) {
+    echo $e->getMessage();
+}
