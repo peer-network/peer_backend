@@ -132,7 +132,7 @@ class CommentService
             $result = $this->commentMapper->insert($comment);
 
             if (!$result) {
-                return $this->respondWithError(30265);
+                return $this->respondWithError(41602);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
@@ -180,7 +180,7 @@ class CommentService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError(30265);
+            return $this->respondWithError(41602);
         } finally {
             $this->logger->debug('createComment function execution completed');
         }
