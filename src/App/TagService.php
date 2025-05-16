@@ -142,7 +142,7 @@ class TagService
             $tags = $this->tagMapper->searchByName($args);
 
             if ($tags === false) {
-                return $this->respondWithError(41702);
+                return $this->createSuccessResponse(21701, []);
             }
 
             $this->logger->info("TagService.loadTag successfully fetched tags", [

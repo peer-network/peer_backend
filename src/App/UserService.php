@@ -162,7 +162,7 @@ class UserService
 
         $email = trim($args['email']);
         if ($this->userMapper->isEmailTaken($email)) {
-            return self::respondWithError(20601);
+            return self::respondWithError(30601);
         }
 
         $username = trim($args['username']);
@@ -399,7 +399,7 @@ class UserService
         }
 
         if ($newPassword === $currentPassword) {
-            return self::respondWithError(21002);
+            return self::respondWithError(31004);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
@@ -441,16 +441,20 @@ class UserService
         $this->logger->info('UserService.setEmail started');
 
         $email = $args['email'] ?? null;
-        $exPassword = $args['password'] ?? null;
-
+        $exPassword = $args['password'] ?? null;    
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->logger->warning('Invalid email format', ['email' => $email]);
             return self::respondWithError(30224);
         }
+        
+        $user = $this->userMapper->loadById($this->currentUserId);
+        if ($email === $user->getMail()) {
+            return self::respondWithError(31005);
+        }
 
         if ($this->userMapper->isEmailTaken($email)) {
             $this->logger->warning('Email already in use', ['email' => $email]);
-            return self::respondWithError(21003);
+            return self::respondWithError(31003);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
@@ -508,7 +512,7 @@ class UserService
             }
 
             if ($username === $user->getName()) {
-                return self::respondWithError(21005);
+                return self::respondWithError(31006);
             }
 
             if (!$this->validatePasswordMatch($password, $user->getPassword())) {
@@ -613,7 +617,7 @@ class UserService
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return self::respondWithError(21001);
+            return $this->createSuccessResponse(21001, []);
         }
     }
 
@@ -739,7 +743,7 @@ class UserService
                 ];
             }
 
-            return self::respondWithError(21001);
+            return $this->createSuccessResponse(21001, []);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
@@ -861,7 +865,7 @@ class UserService
     {
         return [
             'status' => 'success',
-            'ResponseCode' => 'An email will be sent to your mail address if an account associated with it exists.'
+            'ResponseCode' => 11901
         ];
     }
 
@@ -920,7 +924,7 @@ class UserService
                 $this->userMapper->deletePasswordResetToken($args['token']);
                 return [
                     'status' => 'error',
-                    'ResponseCode' => 'Invalid or expired reset token. Please try again.'
+                    'ResponseCode' => 31904
                 ];
             }
             $user = $this->userMapper->loadById($request['user_id']);
