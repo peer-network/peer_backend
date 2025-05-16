@@ -42,6 +42,25 @@ class UserInfoService
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                $response['counter'] = count($data[$countKey]);
+            } else {
+                $response['counter'] = count($data);
+            }
+        }
+
+        return $response;
+    }
+
     public function loadInfoById(): array|false
     {
 
@@ -61,7 +80,7 @@ class UserInfoService
                 return $success;
             }
 
-            return $this->respondWithError(21001);
+            return $this->createSuccessResponse(21001);
         } catch (\Exception $e) {
             return $this->respondWithError(41001);
         }
@@ -84,7 +103,7 @@ class UserInfoService
         $this->logger->info('UserInfoService.toggleUserFollow started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
-            return $this->respondWithError(21001);
+            return $this->createSuccessResponse(21001);
         }
 
         if (!$this->userInfoMapper->isUserExistById($followedUserId)) {
@@ -111,7 +130,7 @@ class UserInfoService
         $this->logger->info('UserInfoService.toggleUserBlock started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
-            return $this->respondWithError(21001);
+            return $this->createSuccessResponse(21001);
         }
 
         if (!$this->userInfoMapper->isUserExistById($blockedUserId)) {
@@ -156,7 +175,7 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadInfoById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError(21001);
+                return $this->createSuccessResponse(21001);
             }
 
             $newIsPrivate = !$user->getIsPrivate();
@@ -192,7 +211,7 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError(21001);
+                return $this->createSuccessResponse(21001);
             }
 
             if (!empty($biography)) {
@@ -244,7 +263,7 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError(21001);
+                return $this->createSuccessResponse(21001);
             }
 
             if (!empty($mediaFile)) {

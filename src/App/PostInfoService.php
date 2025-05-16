@@ -54,6 +54,25 @@ class PostInfoService
         }
     }
 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                $response['counter'] = count($data[$countKey]);
+            } else {
+                $response['counter'] = count($data);
+            }
+        }
+
+        return $response;
+    }
+
     public function deletePostInfo(string $postId): array
     {
         if (!$this->checkAuthentication()) {
@@ -293,7 +312,7 @@ class PostInfoService
 
         $postinfo = $this->postInfoMapper->loadById($postId);
         if ($postinfo === null) {
-            return $this->respondWithError(21501);
+            return $this->createSuccessResponse(21501);
         }
 
         $results = $postinfo->getArrayCopy();

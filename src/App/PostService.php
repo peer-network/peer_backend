@@ -12,7 +12,7 @@ use Fawaz\Database\TagPostMapper;
 use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
-use Fawaz\Config\ContentLimitsPerPost;
+use Fawaz\config\ContentLimitsPerPost;
 
 class PostService
 {
@@ -177,7 +177,7 @@ class PostService
             }
 
             if (!$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
-                return $this->respondWithError(21516);
+                return $this->createSuccessResponse(21516);
             }
         }
 
@@ -283,7 +283,7 @@ class PostService
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);
-            return $this->respondWithError(30263);
+            return $this->respondWithError(41508);
         }
     }
 
@@ -529,7 +529,7 @@ class PostService
 
         $posts = $this->postMapper->loadById($id);
         if (!$posts) {
-            return $this->respondWithError(21516);
+            return $this->createSuccessResponse(21516);
         }
 
         $post = $posts->getArrayCopy();

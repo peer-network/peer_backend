@@ -22,6 +22,25 @@ class PoolMapper
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                $response['counter'] = count($data[$countKey]);
+            } else {
+                $response['counter'] = count($data);
+            }
+        }
+
+        return $response;
+    }
+
     public function fetchPool(array $args = []): array
     {
         $this->logger->info('WalletMapper.fetchPool started');
@@ -193,7 +212,7 @@ class PoolMapper
         }
 
         if (empty($data)) {
-            return $this->respondWithError(21202); //'No records found for ' . $day
+            return $this->createSuccessResponse(21202); //'No records found for ' . $day
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';

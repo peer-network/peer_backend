@@ -1025,7 +1025,7 @@ class WalletMapper
         }
 
         if (empty($data)) {
-            return self::respondWithError(21206);
+            return self::createSuccessResponse(21206);
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
@@ -1114,7 +1114,7 @@ class WalletMapper
 
             if (!$result || !$result['invited']) {
                 $this->logger->warning('No inviter found for the given user', ['userid' => $userId]);
-                return self::respondWithError(21401);
+                return self::createSuccessResponse(21401);
             }
 
             $inviterId = $result['invited'];

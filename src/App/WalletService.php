@@ -29,6 +29,25 @@ class WalletService
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                $response['counter'] = count($data[$countKey]);
+            } else {
+                $response['counter'] = count($data);
+            }
+        }
+
+        return $response;
+    }
+
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -245,7 +264,7 @@ class WalletService
                 return $success;
             }
 
-            return $this->respondWithError(21203);
+            return $this->createSuccessResponse(21203);
         } catch (\Exception $e) {
             return $this->respondWithError(41204);
         }
