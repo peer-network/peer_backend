@@ -12,7 +12,7 @@ use Fawaz\Database\TagPostMapper;
 use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
-use Fawaz\Config\ContentLimitsPerPost;
+use Fawaz\config\ContentLimitsPerPost;
 
 class PostService
 {
