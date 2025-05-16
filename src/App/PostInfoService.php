@@ -80,7 +80,7 @@ class PostInfoService
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info('PostInfoService.deletePostInfo started');
@@ -99,7 +99,7 @@ class PostInfoService
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info('PostInfoService.likePost started');
@@ -137,7 +137,7 @@ class PostInfoService
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info('PostInfoService.dislikePost started');
@@ -173,7 +173,7 @@ class PostInfoService
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info('PostInfoService.reportPost started');
@@ -209,7 +209,7 @@ class PostInfoService
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info('PostInfoService.viewPost started');
@@ -245,7 +245,7 @@ class PostInfoService
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info('PostInfoService.sharePost started');
@@ -296,7 +296,7 @@ class PostInfoService
         }
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         $this->logger->info('PostInfoService.savePost started');
