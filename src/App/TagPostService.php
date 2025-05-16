@@ -108,7 +108,7 @@ class TagPostService
             $tag = $this->tagMapper->loadByName($tagName);
 
             if ($tag) {
-                return $this->respondWithError(21702);
+                return $this->createSuccessResponse(21702);
             }
 
             $tagId = $this->generateUUID();
