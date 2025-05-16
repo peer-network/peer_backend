@@ -1,8 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\config\ResponseCodes;
-use Fawaz\config\Constants;
+namespace Fawaz\Utils\ResponseCodes;
 
 class ResponseCodesStore {
     private int $generatedAt;
