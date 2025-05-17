@@ -200,7 +200,7 @@ class PostService
                 if (!empty($mediaPath['path'])) {
                     $postData['media'] = $this->argsToJsString($mediaPath['path']);
                 } else {
-                    return $this->respondWithError(41009);
+                    return $this->respondWithError(30251);
                 }
             } else {
                 return $this->respondWithError(30101);
@@ -257,8 +257,12 @@ class PostService
             }
 
             // Tags speichern
-            if (!empty($args['tags']) && is_array($args['tags'])) {
-                $this->handleTags($args['tags'], $postId, $createdAt);
+            try {
+                if (!empty($args['tags']) && is_array($args['tags'])) {
+                    $this->handleTags($args['tags'], $postId, $createdAt);
+                } 
+            } catch (\Throwable $e) {
+                return $this->respondWithError(30262);
             }
 
             // Metadaten für eigene Posts (kein Feed)
@@ -279,7 +283,7 @@ class PostService
             $data = $post->getArrayCopy();
             $data['tags'] = $tagNames;
 
-            return $this->createSuccessResponse(11508, $data);
+            return $this->createSuccessResponse(11513, $data);
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create post', ['exception' => $e]);

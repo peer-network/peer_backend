@@ -103,7 +103,7 @@ class WalletService
         }
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         if ($fromId !== null && !self::isValidUUID($fromId)) {
