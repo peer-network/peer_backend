@@ -524,7 +524,7 @@ class ChatMapper
 
             if (!$participantExists) {
                 $this->logger->warning("User is not a participant of the chat", ['userid' => $userid]);
-                return $this->respondWithError(31812);
+                return $this->respondWithError(31814);
             }
 
             $query = "INSERT INTO chatmessages (chatid, userid, content, createdat) 
