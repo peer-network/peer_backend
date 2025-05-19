@@ -815,7 +815,7 @@ class ChatMapper
 
             return $chats;
         } catch (\Throwable $e) {
-            $this->logger->error("Database error occurred in findChatser", [
+            $this->logger->error("Error occurred in findChatser", [
                 'error' => $e->getMessage(),
             ]);
             return [];
