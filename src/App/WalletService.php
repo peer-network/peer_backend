@@ -359,4 +359,36 @@ class WalletService
             return $this->respondWithError('Unknown Error.');
         }
     }
+
+    /**
+     * Add New Liquidity
+     * 
+     * @param args array
+     * 
+     * @return array with Response Object
+     */
+    public function addLiquidity(array $args): array
+    {
+        $this->logger->info('WalletService.addLiquidity started');
+
+        try {
+            $response = $this->walletMapper->addLiquidity($this->currentUserId, $args);
+            if ($response['status'] === 'error') {
+                return $response;
+            } else {
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => $response['ResponseCode'],
+                    'affectedRows' => [
+                        'newTokenAmount' => $response['newTokenAmount'],
+                        'newBtcAmount' => $response['newBtcAmount'],
+                        'newTokenPrice' => $response['newTokenPrice'] ?? 0.0
+                    ],
+                ];
+            }
+        } catch (\Exception $e) {
+            return $this->respondWithError('Unknown Error.');
+        }
+    }
+    
 }

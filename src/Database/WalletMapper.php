@@ -2073,8 +2073,9 @@ class WalletMapper
     /**
      * get BTC LP.
      * 
+     * @return BTC Liquidity in account
      */    
-    public function getLpTokenBtcLP()
+    public function getLpTokenBtcLP(): float
     {
 
         $this->logger->info("WalletMapper.getLpToken started");
@@ -2095,7 +2096,7 @@ class WalletMapper
 
             $this->logger->info("Inserted new transaction into database");
 
-            return $walletInfo['liquidity'];
+            return (float) $walletInfo['liquidity'];
         } catch (\PDOException $e) {
             $this->logger->error(
                 "WalletMapper.getLpToken: Exception occurred while getting loop accounts",
@@ -2114,6 +2115,115 @@ class WalletMapper
             );
             throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
         }
+
+        return 0.0;
+    }
+
+    
+    /**
+     * Add New Liquidity
+     * 
+     * @param int $userId
+     * @param array $args
+     * @return array
+     */
+    public function addLiquidity(string $userId, array $args): array
+    {
+        $this->logger->info("addLiquidity started");
+
+        try {
+            // Validate inputs
+            $amountPeerToken = $this->validateAmount($args['amountToken'] ?? null, 'PeerToken');
+            $amountBtc = $this->validateAmount($args['amountBtc'] ?? null, 'BTC');
+
+            // Fetch pool wallets
+            $accountsResult = $this->pool->returnAccounts();
+            
+            if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
+                $this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
+                return self::respondWithError(40701);
+            }
+
+            $poolAccounts = $accountsResult['response'] ?? null;
+            if (!is_array($poolAccounts) || !isset($poolAccounts['pool'], $poolAccounts['btcpool'])) {
+                $this->logger->warning('Missing pool or btcpool account', ['accounts' => $poolAccounts]);
+                return self::respondWithError(30102);
+            }
+
+            $this->poolWallet = $poolAccounts['pool'];
+            $this->btcpool = $poolAccounts['btcpool'];
+
+            // Save PeerToken liquidity
+            $this->saveLiquidity(
+                $userId,
+                $this->poolWallet,
+                $amountPeerToken,
+                'addPeerTokenLiquidity',
+                'ADD_PEER_LIQUIDITY'
+            );
+
+            // Save BTC liquidity
+            $this->saveLiquidity(
+                $userId,
+                $this->btcpool,
+                $amountBtc,
+                'addBtcTokenLiquidity',
+                'ADD_BTC_LIQUIDITY'
+            );
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 0000,
+                'newTokenAmount' => $this->getLpToken(),
+                'newBtcAmount' => $this->getLpTokenBtcLP(),
+                'newTokenPrice' => 0.0 // TODO: Replace with dynamic calculation
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Liquidity error', ['exception' => $e]);
+            return self::respondWithError($e->getMessage());
+        }
+    }
+
+    /**
+     * Validate and cast the liquidity amount.
+     *
+     * @param mixed $value
+     * @param string $typeLabel
+     * @return float
+     */
+    private function validateAmount($value, string $typeLabel): float
+    {
+        $amount = (float) $value;
+        if ($amount <= 0 && !is_float($value)) {
+            $this->logger->warning("Invalid $typeLabel amount", ['value' => $value]);
+            throw new \InvalidArgumentException("Invalid $typeLabel amount");
+        }
+        return $amount;
+    }
+    /**
+     * Save wallet entry and log transaction.
+     *
+     * @param int|string $userId
+     * @param string $recipientWallet
+     * @param float $amount
+     * @param string $transactionType
+     * @param string $transferAction
+     */
+    private function saveLiquidity($userId, string $recipientWallet, float $amount, string $transactionType, string $transferAction): void
+    {
+        $this->saveWalletEntry($recipientWallet, $amount);
+
+        $transaction = new Transaction([
+            'transUniqueId' => self::generateUUID(),
+            'transactionType' => $transactionType,
+            'senderId' => $userId,
+            'recipientId' => $recipientWallet,
+            'tokenAmount' => $amount,
+            'transferAction' => $transferAction,
+        ]);
+
+        $repo = new TransactionRepository($this->logger, $this->db);
+        $repo->saveTransaction($transaction);
     }
 
 }

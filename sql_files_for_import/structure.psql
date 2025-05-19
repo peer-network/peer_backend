@@ -533,7 +533,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     transferAction VARCHAR(255) DEFAULT NULL,
     message VARCHAR(255) DEFAULT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_senderId FOREIGN KEY (senderId) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_senderId FOREIGN KEY (senderId) REFERENCES users(uid) ON DELETE CASCADE
 );
 
 -- Table: btc_swap_transactions

@@ -1132,6 +1132,29 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'AddLiquidityResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'responseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'AddLiquidity' => [
+                'newTokenAmount' => function (array $root): float {
+                    return $root['newTokenAmount'] ?? 0.0;
+                },
+                'newBtcAmount' => function (array $root): float {
+                    return $root['newBtcAmount'] ?? 0.0;
+                },
+                'newTokenPrice' => function (array $root): float {
+                    return $root['newTokenPrice'] ?? 0.0;
+                },
+            ],
             'SwapToken' => [
                 'tokenSend' => function (array $root): float {
                     return $root['tokenSend'] ?? 0.0;
@@ -1269,6 +1292,7 @@ class GraphQLSchemaBuilder
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
             'swapTokens' => fn(mixed $root, array $args) => $this->walletService->swapTokens($args),
+            'addLiquidity' => fn(mixed $root, array $args) => $this->walletService->addLiquidity($args),
         ];
     }
 
