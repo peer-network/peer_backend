@@ -128,7 +128,16 @@ class CommentService
                 'parentid' => $parentId,
                 'content' => $content,
             ];
-            $comment = new Comment($commentData);
+
+            // Post speichern
+            try {
+                $comment = new Comment($commentData);
+            } catch (\Throwable $e) {
+                if ($e->getMessage() != 40301) {
+                    return $this->respondWithError($e->getMessage());
+                }
+            }
+
             $result = $this->commentMapper->insert($comment);
 
             if (!$result) {
