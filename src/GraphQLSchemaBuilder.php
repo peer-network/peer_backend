@@ -2438,7 +2438,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30201);
         }
 
-        if ($username !== null && strlen($username) < 3 || strlen($username) > 23) {
+        if ($username !== null && (strlen($username) < 3 || strlen($username) > 23)) {
             return $this->respondWithError(30202);
         }
 
