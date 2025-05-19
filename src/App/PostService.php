@@ -222,9 +222,12 @@ class PostService
                     return $this->respondWithError(40306);
                 }
             }
-
-            // Post speichern
-            $post = new Post($postData);
+            try {
+                // Post speichern
+                $post = new Post($postData);
+            } catch (\Throwable $e) {
+                return $this->respondWithError($e->getMessage());
+            }
             $this->postMapper->insert($post);
 
             if (isset($mediaPath['path']) && !empty($mediaPath['path'])) {

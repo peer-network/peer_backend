@@ -101,7 +101,6 @@ class Post
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
             throw new ValidationException($errorMessageString);
         }
     }
@@ -128,6 +127,7 @@ class Post
                     ['name' => 'StringLength', 'options' => [
                         'min' => 2,
                         'max' => 63,
+                        'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -168,6 +168,7 @@ class Post
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,
                         'max' => 500,
+                        'errorCode' => 30263
                     ]],
                     ['name' => 'isString'],
                 ],
