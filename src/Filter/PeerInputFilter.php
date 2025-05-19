@@ -477,7 +477,7 @@ class PeerInputFilter
                isset($chatmessage->chatid) && $this->Uuid($chatmessage->chatid) &&
                isset($chatmessage->userid) && $this->Uuid($chatmessage->userid) &&
                isset($chatmessage->content) && $this->StringLength($chatmessage->content, ['min' => 1, 'max' => 100]) &&
-               isset($chatmessage->createdat) && $this->StringLength($chatmessage->createdat, ['min' => 1]);
+               isset($chatmessage->createdat) && $this->StringLength($chatmessage->createdat, ['min' => 1,'max' => 40]);
     }
 
     protected function ValidateParticipants(array $participants, array $options = []): bool
