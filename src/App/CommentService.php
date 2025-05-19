@@ -133,9 +133,7 @@ class CommentService
             try {
                 $comment = new Comment($commentData);
             } catch (\Throwable $e) {
-                if ($e->getMessage() != 40301) {
-                    return $this->respondWithError($e->getMessage());
-                }
+                return $this->respondWithError($e->getMessage());
             }
 
             $result = $this->commentMapper->insert($comment);
