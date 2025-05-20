@@ -304,7 +304,7 @@ class PostInfoService
         return $this->postInfoMapper->togglePostSaved($this->currentUserId, $postId);
     }
 
-    public function findPostInfo(string $postId): array
+    public function findPostInfo(string $postId): ?array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
@@ -314,7 +314,7 @@ class PostInfoService
 
         $postinfo = $this->postInfoMapper->loadById($postId);
         if ($postinfo === null) {
-            return $this->createSuccessResponse(21501);
+            return null;
         }
 
         $results = $postinfo->getArrayCopy();

@@ -2694,6 +2694,9 @@ class GraphQLSchemaBuilder
 
         if (!empty($postId)) {
             $posts = $this->postInfoService->findPostInfo($postId);
+            if ($posts === null) {
+                return $this->createSuccessResponse(21501);
+            }          
             if (isset($posts['status']) && $posts['status'] === 'error') {
                 return $posts;
             }
