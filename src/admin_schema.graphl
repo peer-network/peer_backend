@@ -43,6 +43,8 @@ type Query {
   postcomments(postid: ID!, offset: Int, limit: Int): GenericResponse!
   dailygemstatus: StandardResponse!
   dailygemsresults(day: DayFilterType!): StandardResponse!
+  getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
+  getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
 }
 
 type Mutation {
@@ -192,6 +194,40 @@ type SwapTokenResponse {
   status: String!
   responseCode: Int!
   affectedRows: SwapToken!
+}
+
+type Transaction {
+  transactionid: String!
+  transuniqueid: String!
+  transactiontype: String!
+  senderid: String!
+  recipientid: String!
+  tokenamount: Int!
+  transferaction: String!
+  message: String!
+  flag: String!
+}
+
+type TransactionResponse {
+  status: String!
+  responseCode: Int!
+  affectedRows: [Transaction!]
+}
+
+type LiquidityPoolHistoryResponse {
+  status: String!
+  responseCode: Int!
+  affectedRows: [LiquidityPoolTransaction!]
+}
+type LiquidityPoolTransaction {
+  transactionid: String!
+  transactiontype: String!
+  senderid: String!
+  tokenamount: Decimal!
+  btcamount: Decimal!
+  status: String!
+  message: String!
+  createdat: String!
 }
 
 type AddLiquidity {

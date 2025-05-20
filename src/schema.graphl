@@ -33,6 +33,7 @@ type Query {
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listTodaysInteractions: StandardResponse!
   getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
+  getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
 }
 
 type Mutation {
@@ -166,6 +167,23 @@ type TransactionResponse {
   responseCode: Int!
   affectedRows: [Transaction!]
 }
+
+type LiquidityPoolHistoryResponse {
+  status: String!
+  responseCode: Int!
+  affectedRows: [LiquidityPoolTransaction!]
+}
+type LiquidityPoolTransaction {
+  transactionid: String!
+  transactiontype: String!
+  senderid: String!
+  tokenamount: Decimal!
+  btcamount: Decimal!
+  status: String!
+  message: String!
+  createdat: String!
+}
+
 
 type SwapToken {
   tokenSend: Decimal

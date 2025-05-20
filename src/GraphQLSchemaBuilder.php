@@ -1178,6 +1178,18 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'LiquidityPoolHistoryResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'responseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
             'Transaction' => [
                 'transactionid' => function (array $root): string {
                     return $root['transactionid'] ?? '';
@@ -1194,7 +1206,7 @@ class GraphQLSchemaBuilder
                 'recipientid' => function (array $root): string {
                     return $root['recipientid'] ?? '';
                 },
-                'tokenamount' => function (array $root): int {
+                'tokenamount' => function (array $root): float {
                     return $root['tokenamount'] ?? 0;
                 },
                 'transferaction' => function (array $root): string {
@@ -1213,7 +1225,32 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
             ],
-
+            'LiquidityPoolTransaction' => [
+                'transactionid' => function (array $root): string {
+                    return $root['transactionid'] ?? '';
+                },
+                'transactiontype' => function (array $root): string {
+                    return $root['transactiontype'] ?? '';
+                },
+                'senderid' => function (array $root): string {
+                    return $root['senderid'] ?? '';
+                },
+                'tokenamount' => function (array $root): float {
+                    return $root['tokenamount'] ?? 0;
+                },
+                'btcamount' => function (array $root): float {
+                    return $root['btcamount'] ?? 0;
+                },
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+                'status' => function (array $root): string {
+                    return $root['status'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                }
+            ],
         ];
     }
 
@@ -1255,6 +1292,7 @@ class GraphQLSchemaBuilder
             'dailygemstatus' => fn(mixed $root, array $args) => $this->poolService->callGemster(),
             'dailygemsresults' => fn(mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->walletService->transcationsHistory($args),
+            'getLiquidityPoolHistory' => fn(mixed $root, array $args) => $this->walletService->getLiquidityPoolHistory($args),
         ];
     }
 

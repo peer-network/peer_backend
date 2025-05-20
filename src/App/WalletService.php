@@ -329,6 +329,32 @@ class WalletService
 
     
     /**
+     * Get Swap transcation history
+     * 
+     */
+    public function getLiquidityPoolHistory(array $args): array
+    {
+        $this->logger->info('WalletService.getLiquidityPoolHistory started');
+
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+
+        try {
+            $results = $this->walletMapper->getLiquidityPoolHistory($this->currentUserId, $offset, $limit);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+                'affectedRows' => $results['affectedRows']
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in WalletService.getLiquidityPoolHistory", ['exception' => $e->getMessage()]);
+            return $this->respondWithError(0000);  
+        }
+    }
+
+    
+    /**
      * Swap Peer Token to BTC of Current User
      * 
      * @param args array

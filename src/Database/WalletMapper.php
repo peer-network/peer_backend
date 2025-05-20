@@ -1617,6 +1617,55 @@ class WalletMapper
      * @param limit int
      * 
      */
+    public function getLiquidityPoolHistory(string $userId, int $offset, int $limit): ?array
+    {
+        $this->logger->info('Fetching transaction history - WalletMapper.getLiquidityPoolHistory', ['userId' => $userId]);
+
+        $query = "
+                    SELECT 
+                        *
+                    FROM transactions AS tt
+                    LEFT JOIN btc_swap_transactions AS bt ON tt.transactionid = bt.transuniqueid
+                    WHERE 
+                        tt.senderid = :senderid AND tt.transactiontype = :transactiontype
+                    ORDER BY tt.createdat DESC
+                    LIMIT :limit OFFSET :offset
+                ";
+    
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':senderid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':transactiontype', "btcSwap", \PDO::PARAM_STR);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->execute();
+        
+            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC); 
+        
+            return [
+                'status' => 'success',
+                'ResponseCode' => 0000,
+                'affectedRows' => $transactions
+            ];
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error while fetching transactions - WalletMapper.getLiquidityPoolHistory", ['error' => $e->getMessage()]);
+            
+        }
+        return [
+            'status' => 'error',
+            'ResponseCode' => 0000,
+            'affectedRows' => []
+        ];
+    }
+
+    /**
+     * get swap transcation history of current user.
+     * 
+     * @param userId string
+     * @param offset int
+     * @param limit int
+     * 
+     */
     public function transcationsHistory(string $userId, int $offset, int $limit): ?array
     {
 
@@ -1657,7 +1706,6 @@ class WalletMapper
             'affectedRows' => []
         ];
     }
-
 
     /**
      * get transcation history of current user.
