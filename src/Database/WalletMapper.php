@@ -1677,25 +1677,8 @@ class WalletMapper
             // Please create New Response code message for "BTC Address is required!"
             return self::respondWithError(0000);
         }
-		$accountsResult = $this->pool->returnAccounts();
 
-		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
-			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
-			return self::respondWithError(40701);
-		}
-
-		$liqpool = $accountsResult['response'] ?? null;
-
-		if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
-			$this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
-			return self::respondWithError(30102);
-		}
-
-		$this->poolWallet = $liqpool['pool'];
-		$this->burnWallet = $liqpool['burn'];
-		$this->peerWallet = $liqpool['peer'];
-
-        $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
+        $this->initializeLiquidityPool();
 
         $currentBalance = $this->getUserWalletBalance($userId);
         if (empty($currentBalance)) {
@@ -2023,6 +2006,30 @@ class WalletMapper
             return self::respondWithError($e->getMessage());
         }
     }
+
+    
+    /**
+     * Loads and validates the liquidity pool wallets.
+     *
+     * @throws \RuntimeException if accounts are missing or invalid
+     */
+    private function initializeLiquidityPool(): void
+    {
+        $accounts = $this->pool->returnAccounts();
+        if (($accounts['status'] ?? '') === 'error') {
+            throw new \RuntimeException("Failed to load pool accounts");
+        }
+
+        $data = $accounts['response'] ?? [];
+        if (!isset($data['pool'], $data['burn'], $data['peer'])) {
+            throw new \RuntimeException("Liquidity pool wallets incomplete");
+        }
+
+        $this->poolWallet = $data['pool'];
+        $this->burnWallet = $data['burn'];
+        $this->peerWallet = $data['peer'];
+    }
+
 
 
     /**
