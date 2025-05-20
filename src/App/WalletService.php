@@ -352,6 +352,27 @@ class WalletService
             return $this->respondWithError(0000);  
         }
     }
+    
+    /**
+     * Update Swap transaction status to PAID
+     * 
+     */
+    public function updateSwapTranStatus(array $args): array
+    {
+        $this->logger->info('WalletService.updateSwapTranStatus started');
+
+        try {
+            $results = $this->walletMapper->updateSwapTranStatus($args['transactionId']);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in WalletService.updateSwapTranStatus", ['exception' => $e->getMessage()]);
+            return $this->respondWithError(0000);  
+        }
+    }
 
     
     /**

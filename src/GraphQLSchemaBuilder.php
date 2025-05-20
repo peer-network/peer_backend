@@ -1331,6 +1331,7 @@ class GraphQLSchemaBuilder
             'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
             'swapTokens' => fn(mixed $root, array $args) => $this->walletService->swapTokens($args),
             'addLiquidity' => fn(mixed $root, array $args) => $this->walletService->addLiquidity($args),
+            'updateSwapTranStatus' => fn(mixed $root, array $args) => $this->walletService->updateSwapTranStatus($args),
         ];
     }
 

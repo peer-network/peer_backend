@@ -1658,6 +1658,58 @@ class WalletMapper
         ];
     }
 
+    
+    /**
+     * update transcation status to PAID.
+     * 
+     * @param userId string
+     * @param offset int
+     * @param limit int
+     * 
+     */
+    public function updateSwapTranStatus(string $swapId): ?array
+    {
+        \ignore_user_abort(true);
+        $this->logger->info('WalletMapper.updateSwapTranStatus started');
+
+        try {
+            $this->db->beginTransaction();
+
+            $query = "SELECT 1 FROM btc_swap_transactions WHERE swapid = :swapid AND status = :status";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':status', "PENDING", \PDO::PARAM_STR);
+            $stmt->bindValue(':swapid', $swapId, \PDO::PARAM_STR);
+            $stmt->execute();
+            $transExists = $stmt->fetchColumn(); 
+
+            if ($transExists) {
+                $query = "UPDATE btc_swap_transactions
+                          SET status = :status
+                          WHERE swapid = :swapid";
+                $stmt = $this->db->prepare($query);
+                $stmt->bindValue(':swapid', $swapId, \PDO::PARAM_STR);
+                $stmt->bindValue(':status', 'PAID', \PDO::PARAM_STR);
+                $stmt->execute();
+            }
+            $this->db->commit();
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 0000,
+            ];
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $this->logger->error('Database error in saveWalletEntry: ' . $e->getMessage());
+            throw new \RuntimeException('Unable to save wallet entry');
+        }
+    
+        return [
+            'status' => 'error',
+            'ResponseCode' => 0000,
+            'affectedRows' => []
+        ];
+    }
+    
     /**
      * get swap transcation history of current user.
      * 

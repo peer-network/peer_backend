@@ -74,6 +74,7 @@ type Mutation {
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse!
   swapTokens(btcAddress: ID!, numberoftokens: Decimal!): SwapTokenResponse!
   addLiquidity(amountToken: Decimal!, amountBtc: Decimal!): AddLiquidityResponse!
+  updateSwapTranStatus(transactionId: ID!): DefaultResponse!
 }
 
 scalar Decimal
