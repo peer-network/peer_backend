@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\Config\Constants\Constants;
 
 class Commented
 {
@@ -168,8 +169,8 @@ class Commented
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 200,
+                        'min' => Constants::$comment::$contentStringLength->min,
+                        'max' => Constants::$comment::$contentStringLength->max,
                     ]],
                     ['name' => 'IsString'],
                 ],
