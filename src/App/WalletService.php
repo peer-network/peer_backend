@@ -29,6 +29,25 @@ class WalletService
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                $response['counter'] = count($data[$countKey]);
+            } else {
+                $response['counter'] = count($data);
+            }
+        }
+
+        return $response;
+    }
+
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -84,7 +103,7 @@ class WalletService
         }
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(31501);
+            return $this->respondWithError(30209);
         }
 
         if ($fromId !== null && !self::isValidUUID($fromId)) {
@@ -94,7 +113,7 @@ class WalletService
         $this->logger->info("WalletService.fetchWalletById started");
 
         try {
-            $wallets = $this->walletMapper->loadWalletById($args, $this->currentUserId);
+            $wallets = $this->walletMapper->loadWalletById($this->currentUserId, $args);
 
             if ($wallets === false) {
                 return $this->respondWithError(41216);
@@ -194,7 +213,32 @@ class WalletService
             return $this->respondWithError(30105);
         }
 
-        return $this->walletMapper->getTimeSortedMatch($day);
+        $gemsters = $this->walletMapper->getTimeSortedMatch($day);
+
+        if (isset($gemsters['affectedRows'])) {
+            $winstatus = $gemsters['affectedRows']['data'][0];
+            unset($gemsters['affectedRows']['data'][0]);
+
+            $userStatus= array_values($gemsters['affectedRows']['data']);
+                    
+            $affectedRows = [
+                'winStatus' => $winstatus ?? [],
+                'userStatus' => $userStatus ?? [],
+            ];  
+            
+            return [
+                'status' => $gemsters['status'],
+                'counter' => $gemsters['counter'] ?? 0,
+                'ResponseCode' => $gemsters['ResponseCode'],        
+                'affectedRows' => $affectedRows
+            ];
+        } 
+        return [
+            'status' => $gemsters['status'],
+            'counter' => 0,
+            'ResponseCode' => $gemsters['ResponseCode'],
+            'affectedRows' => []
+        ];     
     }
 
     public function getPercentBeforeTransaction(string $userId, int $tokenAmount): array
@@ -211,16 +255,16 @@ class WalletService
         try {
             $results = $this->walletMapper->loadLiquidityById($userId);
 
-            if ($results !== false && $results !== 0.0) {
+            if ($results !== false ) {
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 11204,
-                    'affectedRows' => ['currentliquidity' => $results],
+                    'currentliquidity' => $results,
                 ];
                 return $success;
             }
 
-            return $this->respondWithError(21203);
+            return $this->createSuccessResponse(21203);
         } catch (\Exception $e) {
             return $this->respondWithError(41204);
         }
@@ -288,7 +332,7 @@ class WalletService
             } else {
                 return [
                     'status' => 'success',
-                    'ResponseCode' => $response['ResponseCode'],
+                    'ResponseCode' => 11211,
                     'affectedRows' => [],
                 ];
             }

@@ -6,6 +6,7 @@ use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
+use Fawaz\Mail\UserWelcomeMail;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
@@ -45,9 +46,7 @@ class UserService
     private function validatePassword(string $password): array
     {
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
-            return self::respondWithError(
-                20226
-            );
+            return self::respondWithError(30226);
         }
 
         return ['status' => 'success'];
@@ -140,16 +139,28 @@ class UserService
         $pkey = $args['pkey'] ?? null;
         $mediaFile = isset($args['img']) ? trim($args['img']) : '';
         $isPrivate = (int)($args['isprivate'] ?? 0);
-        $invited = $args['invited'] ?? null;
+        $referralUuid = $args['referralUuid'] ?? null;
+        $invited = null;
 		$bin2hex = bin2hex(random_bytes(32));
 		$expiresat = (int)\time()+1800;
 
         $biography = $args['biography'] ?? '/userData/' . $id . '.txt';
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
+        if (!empty($referralUuid)) {
+            $inviter = $this->userMapper->loadById($referralUuid);
+
+            if (empty($inviter)) {
+                $this->logger->warning('Invalid referral UUID provided.', ['referralUuid' => $referralUuid]);
+                return self::respondWithError(31007);
+            }
+
+            $invited = $inviter->getUserId();
+        }
+
         $email = trim($args['email']);
         if ($this->userMapper->isEmailTaken($email)) {
-            return self::respondWithError(20601);
+            return self::respondWithError(30601);
         }
 
         $username = trim($args['username']);
@@ -244,6 +255,14 @@ class UserService
         }
 
         try {
+            $referralLink = $this->userMapper->generateReferralLink($id);
+            $this->userMapper->insertReferralInfo($id, $referralLink);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Error handling referral info.', ['exception' => $e]);
+            return self::respondWithError(41013);
+        }
+
+        try {
             $userwallet = new Wallett($walletData);
             $this->walletMapper->insertt($userwallet);
             unset($walletData, $userwallet);
@@ -264,8 +283,16 @@ class UserService
         $this->userMapper->logLoginDaten($id);
         $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
 
-		$payload = $this->createPayload($email, $username, $bin2hex);
-		$this->mailer->sendViaAPI($payload);
+        try {
+            if(isset($id)){
+                $data = [
+                    'username' => $username
+                ];
+                (new UserWelcomeMail($data))->send($email);
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
+        }
 
 		return [
 			'status' => 'success',
@@ -274,6 +301,21 @@ class UserService
 		];
     }
 
+    public function referralList(string $userId, int $offset = 0, int $limit = 20): array
+    {
+        $data = $this->userMapper->getReferralRelations($userId, $offset, $limit);
+
+        return [
+            'status' => 'success',
+            'ResponseCode' => 11011,
+            'counter' => count($data['iInvited']),
+            'affectedRows' => [
+                'invitedBy' => $data['invitedBy'],
+                'iInvited' => $data['iInvited']
+            ],
+        ];
+    }
+    
     private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
     {
         try {
@@ -283,7 +325,7 @@ class UserService
                 $this->logger->info('UserService.uploadMedia mediaPath', ['mediaPath' => $mediaPath]);
 
                 if ($mediaPath === '') {
-                    return self::respondWithError(41009);
+                    return self::respondWithError(30251);
                 }
 
                 if (isset($mediaPath['path'])) {
@@ -307,7 +349,7 @@ class UserService
     public function verifyAccount(string $userId): array
     {
         if (!self::isValidUUID($userId)) {
-            return self::respondWithError(20201);
+            return self::respondWithError(30201);
         }
 
         try {
@@ -355,14 +397,14 @@ class UserService
         }
 
         if ($newPassword === $currentPassword) {
-            return self::respondWithError(21002);
+            return self::respondWithError(31004);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
 
         if (!$user) {
             $this->logger->warning('User not found', ['userId' => $this->currentUserId]);
-            return self::respondWithError(21001);
+            return self::createSuccessResponse(21001);
         }
 
         if (!$this->validatePasswordMatch($currentPassword, $user->getPassword())) {
@@ -397,26 +439,30 @@ class UserService
         $this->logger->info('UserService.setEmail started');
 
         $email = $args['email'] ?? null;
-        $exPassword = $args['password'] ?? null;
-
+        $exPassword = $args['password'] ?? null;    
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->logger->warning('Invalid email format', ['email' => $email]);
-            return self::respondWithError(20224);
+            return self::respondWithError(30224);
+        }
+        
+        $user = $this->userMapper->loadById($this->currentUserId);
+        if ($email === $user->getMail()) {
+            return self::respondWithError(31005);
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
             $this->logger->warning('Email already in use', ['email' => $email]);
-            return self::respondWithError(21003);
+            return self::respondWithError(31003);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
         if (!$user) {
             $this->logger->warning('User not found', ['userId' => $this->currentUserId]);
-            return self::respondWithError(21001);
+            return self::createSuccessResponse(21001);
         }
 
         if ($email === $user->getMail()) {
-            return self::respondWithError(21004);
+            return self::createSuccessResponse(21004);
         }
 
         if (!$this->validatePasswordMatch($exPassword, $user->getPassword())) {
@@ -460,11 +506,11 @@ class UserService
 
             $user = $this->userMapper->loadById($this->currentUserId);
             if (!$user) {
-                return self::respondWithError(21001);
+                return self::createSuccessResponse(21001);
             }
 
             if ($username === $user->getName()) {
-                return self::respondWithError(21005);
+                return self::respondWithError(31006);
             }
 
             if (!$this->validatePasswordMatch($password, $user->getPassword())) {
@@ -491,7 +537,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update username', ['exception' => $e]);
-            return self::respondWithError(20202);
+            return self::respondWithError(30202);
         }
     }
 
@@ -511,7 +557,7 @@ class UserService
 
         $user = $this->userMapper->loadById($userId);
         if (!$user) {
-            return self::respondWithError(21001);
+            return self::createSuccessResponse(21001);
         }
 
         if (!$this->validatePasswordMatch($expassword, $user->getPassword())) {
@@ -569,7 +615,7 @@ class UserService
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return self::respondWithError(41007);
+            return $this->createSuccessResponse(21001, []);
         }
     }
 
@@ -583,7 +629,7 @@ class UserService
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
-            return self::respondWithError(20201);
+            return self::respondWithError(30201);
         }
 
         try {
@@ -638,7 +684,7 @@ class UserService
             }
 
             $this->logger->info('No friends found for the user', ['currentUserId' => $this->currentUserId]);
-            return self::respondWithError(21101);
+            return self::createSuccessResponse(21101);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
             return self::respondWithError(41107);
@@ -670,7 +716,7 @@ class UserService
             }
 
             $this->logger->info('No friends found @ all');
-            return self::respondWithError(21101);
+            return self::createSuccessResponse(21101);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
             return self::respondWithError(41107);
@@ -695,7 +741,7 @@ class UserService
                 ];
             }
 
-            return self::respondWithError(21001);
+            return $this->createSuccessResponse(21001, []);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
@@ -719,9 +765,187 @@ class UserService
                 ];
             }
 
-            return self::respondWithError(21001);
+            return self::createSuccessResponse(21001);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
     }
+
+    /**
+     * Reset password token request for NON logged in user
+     * 
+     * Generate Token for reset password and store on 
+     * 
+     * @param string $email
+     * 
+     * @return array
+     */
+    public function requestPasswordReset(string $email): array
+    {
+        $this->logger->info('UserService.requestPasswordReset started');
+
+        $updatedAt = $this->getCurrentTimestamp();
+        $expiresAt = $this->getFutureTimestamp('+1 hour');
+
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->logger->warning('Invalid email format', ['email' => $email]);
+            return self::respondWithError(30104);
+        }
+
+        try {
+
+            $user = $this->userMapper->loadByEmail($email);
+            
+            if (!$user) {
+                $this->logger->warning('Invalid user', ['email' => $email]);
+                return $this->genericPasswordResetSuccessResponse();
+            }
+
+            $userId = $user->getUserId();
+
+            $passwordAttempt = $this->userMapper->checkForPasswordResetExpiry($userId);
+            $token = bin2hex(random_bytes(32));
+
+            if (!$passwordAttempt) {
+                $this->userMapper->createResetRequest($userId, $token, $updatedAt, $expiresAt);
+
+                $data = [
+                    'code' => $token,
+                ];
+                $this->userMapper->sendPasswordResetEmail($email, $data);
+                
+                return $this->genericPasswordResetSuccessResponse();
+            }
+
+            // Check for rate limiting: 1st attempt 
+            if ($this->userMapper->isFirstAttemptTooSoon($passwordAttempt)) {
+                return $this->userMapper->rateLimitResponse(1);
+            }
+
+            // 2nd attempt 
+            if ($this->userMapper->isSecondAttemptTooSoon($passwordAttempt)) {
+                return $this->userMapper->rateLimitResponse(10, $passwordAttempt['last_attempt']);
+            }
+
+            // Too many attempts made without using the token
+            if ($passwordAttempt['attempt_count'] >= 3 && !$passwordAttempt['collected']) {
+                return $this->userMapper->tooManyAttemptsResponse();
+            }
+
+            $this->userMapper->updateAttempt($passwordAttempt);
+
+            if(isset($passwordAttempt['token'])){
+                $token = $passwordAttempt['token'];
+                $data = [
+                    'code' => $token,
+                ];
+
+                $this->userMapper->sendPasswordResetEmail($email, $data);
+            }
+            return $this->genericPasswordResetSuccessResponse();
+
+        } catch (\Exception $e) {
+            $this->logger->error('Unexpected error during password reset request', [
+                'error' => $e->getMessage(),
+                'userId' => $userId,
+                'updatedat' => $updatedAt,
+                'expires_at' => $expiresAt,
+            ]);
+        }
+        return $this->genericPasswordResetSuccessResponse();
+
+    }
+    
+    /**
+     * Standard success response (avoids revealing account existence).
+     */
+    public function genericPasswordResetSuccessResponse(): array
+    {
+        return [
+            'status' => 'success',
+            'ResponseCode' => 11901
+        ];
+    }
+
+
+    /**
+     * Returns the current timestamp in microsecond precision.
+     */
+    private function getCurrentTimestamp(): string
+    {
+        return date("Y-m-d H:i:s.u");
+    }
+
+    /**
+     * Returns a timestamp relative to now (e.g., +1 hour).
+     */
+    private function getFutureTimestamp(string $modifier): string
+    {
+        return date("Y-m-d H:i:s.u", strtotime($modifier));
+    }
+
+
+    /**
+     * Update password for NON logged in user
+     * 
+     * Get sent Token and New password to update it 
+     * 
+     * @param string $token
+     * @param string $newPassword
+     * 
+     * Response: 11005; Success: Password updated successfully.
+     * Response: 21001; Information Not Found: No users found. Please refine your search or try a different query.
+     * Response: 41004; Unexpected Error: Failed to update password. Please try again later or contact support.
+     * 
+     * @return array
+     */
+    public function resetPassword(?array $args): array
+    {
+        $this->logger->info('UserService.resetPassword started');
+
+        $newPassword = $args['password'] ?? null;
+
+        $passwordValidation = $this->validatePassword($newPassword);
+
+        if ($passwordValidation['status'] === 'error') {
+            return $passwordValidation;
+        }
+
+        try {
+            $newUser = new User();
+            $newUser->setPassword($newPassword);
+            $newUser->validatePass($args);
+
+            $request = $this->userMapper->getPasswordResetRequest($args['token']);
+
+            if (!$request) {
+                $this->userMapper->deletePasswordResetToken($args['token']);
+                return [
+                    'status' => 'error',
+                    'ResponseCode' => 31904
+                ];
+            }
+            $user = $this->userMapper->loadById($request['user_id']);
+
+            if (!$user) {
+                $this->logger->warning('User not found', ['userId' => $request['user_id']]);
+                return self::createSuccessResponse(21001);
+            }
+
+            $user->validatePass($args);
+            $this->userMapper->updatePass($user);
+
+            $this->userMapper->deletePasswordResetToken($args['token']);
+
+            $this->logger->info('User password updated successfully', ['userId' => $this->currentUserId]);
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11005,
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to update user password', ['exception' => $e]);
+            return self::respondWithError(41004);
+        }
+    }
+
 }

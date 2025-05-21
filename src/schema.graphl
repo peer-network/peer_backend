@@ -15,10 +15,10 @@ type Query {
   listUsers (offset: Int, limit: Int): UserListResponse!
   getProfile(userid: ID, postLimit: Int): ProfileInfo!
   listFollowRelations(userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
-  listFriends(offset: Int, limit: Int): FollowRelationsResponse!
+  listFriends(offset: Int, limit: Int): UserFriendsResponse!
   getUserInfo: UserInfoResponse!
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
-  listPosts(filterBy: [PostFilterType!], IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): BlockedUsersResponse!
+  listPosts(filterBy: [PostFilterType!], IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
   getPostInfo(postid: ID!): PostInfoResponse!
   getCommentInfo(commentId: ID!): CommentInfoResponse!
   listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
@@ -31,7 +31,9 @@ type Query {
   balance: CurrentLiquidity!
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
-  listTodaysInteractions: StandardResponse!
+  getReferralInfo: ReferralInfoResponse!
+  referralList(offset: Int, limit: Int): ReferralListResponse!
+  listTodaysInteractions: ListTodaysInteractionsResponse!
   getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
   getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
   getTokenPrice: TokenPriceResponse!
@@ -41,7 +43,6 @@ type Mutation {
   updateUsername(username: String!, password: String!): DefaultResponse!
   updateEmail(email: String!, password: String!): DefaultResponse!
   updatePassword(password: String!, expassword: String!): DefaultResponse!
-  toggleProfilePrivacy: DefaultResponse!
   updateBio(biography: String!): DefaultResponse!
   updateProfileImage(img: String!): DefaultResponse!
   toggleUserFollowStatus(userid: ID!): FollowStatusResponse!
@@ -66,9 +67,7 @@ type Mutation {
 }
 
 scalar Decimal
-scalar DATEN
 scalar Date
-scalar TagList
 
 enum PostActionType {
   LIKE
@@ -88,10 +87,10 @@ enum CommentType {
 }
 
 enum ContentType {
-  IMAGE
-  AUDIO
-  VIDEO
-  TEXT
+  image
+  audio
+  video
+  text
 }
 
 enum PostFilterType {
@@ -129,10 +128,27 @@ enum DayFilterType {
   Y0
 }
 
-type StandardResponse {
+type ListTodaysInteractionsResponse {
   status: String!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: TodaysInteractionsData
+}
+
+type TodaysInteractionsData {
+  totalInteractions: Decimal
+  totalScore: Decimal
+  totalDetails: TodaysInteractionsDetailsData
+}
+
+type TodaysInteractionsDetailsData {
+  views: Decimal
+  likes: Decimal
+  dislikes: Decimal
+  comments: Decimal
+  viewsScore: Decimal
+  likesScore: Decimal
+  dislikesScore: Decimal
+  commentsScore: Decimal
 }
 
 type HelloResponse {
@@ -224,7 +240,9 @@ type DailyFreeResponse {
 }
 
 type CurrentLiquidity {
-  getCurrentBalance: Decimal
+  status: String!
+  ResponseCode: String!
+  currentliquidity: Decimal
 }
 
 type UserInfoResponse {
@@ -502,18 +520,18 @@ type Post {
   media: String!
   cover: String!
   mediadescription: String!
-  createdAt: Date!
-  likeCount: Int!
-  viewScore: Int!
-  commentCount: Int!
-  dislikeCount: Int!
-  trendingScore: Int!
-  isLiked: Boolean!
-  isViewed: Boolean!
-  isReported: Boolean!
-  isDisliked: Boolean!
-  isSaved: Boolean!
-  listTags: TagList!
+ createdat: Date!
+  amountlikes: Int!
+  amountviews: Int!
+  amountcomments: Int!
+  amountdislikes: Int!
+  amounttrending: Int!
+  isliked: Boolean!
+  isviewed: Boolean!
+  isreported: Boolean!
+  isdisliked: Boolean!
+  issaved: Boolean!
+  tags: [String]!
   user: ProfileUser!
   comments: [Comment!]!
 }
@@ -538,10 +556,21 @@ type CommentResponse {
   affectedRows: [Comment]
 }
 
-input RegistrationInput {
-  email: String!
-  password: String!
-  username: String!
+type ReferralInfoResponse {
+  status: String
+  ResponseCode: String
+  referralUuid: ID
+  referralLink: String
+}
+type ReferralListResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String!
+  affectedRows: ReferralUsers!
+}
+type ReferralUsers {
+  invitedBy: ProfileUser
+  iInvited: [ProfileUser!]!
 }
 
 input PostInput {
@@ -550,7 +579,7 @@ input PostInput {
   contenttype: ContentType!
   media: [String!]
   cover: [String!]
-  listTags: [String!]
+  tags: [String!]
 }
 
 input ChatInput {

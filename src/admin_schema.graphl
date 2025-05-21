@@ -28,21 +28,21 @@ type Query {
   listChats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
   listChatMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
   getDailyFreeStatus: GetDailyResponse!
-  listTodaysInteractions: StandardResponse!
+  listTodaysInteractions: ListTodaysInteractionsResponse!
   allfriends(offset: Int, limit: Int): AllUserFriends!
   balance: CurrentLiquidity!
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
-  getpercentbeforetransaction(tokenAmount: Int!): StandardResponse!
-  refreshmarketcap: StandardResponse!
+  getpercentbeforetransaction(tokenAmount: Int!): PercentBeforeTransactionResponse!
+  refreshmarketcap: RefreshMarketCapResponse!
   globalwins: DefaultResponse!
-  gemster: StandardResponse!
-  gemsters(day: DayFilterType!): GenericResponse!
-  liquiditypool(userid: ID, postid: ID, fromid: ID, whereby: Int, offset: Int, limit: Int): GenericResponse!
-  testingpool(offset: Int, limit: Int): GenericResponse!
-  postcomments(postid: ID!, offset: Int, limit: Int): GenericResponse!
-  dailygemstatus: StandardResponse!
-  dailygemsresults(day: DayFilterType!): StandardResponse!
+  gemster: GemsterResponse!
+  gemsters(day: DayFilterType!): GemstersResponse!
+  liquiditypool(userid: ID, postid: ID, fromid: ID, whereby: Int, offset: Int, limit: Int): LiquidityPoolResponse!
+  testingpool(offset: Int, limit: Int): TestingPoolResponse!
+  postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
+  dailygemstatus: DailyGemStatusResponse!
+  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
   getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
   getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
   getTokenPrice: TokenPriceResponse!
@@ -52,7 +52,6 @@ type Mutation {
   updateUsername(username: String!, password: String!): DefaultResponse!
   updateEmail(email: String!, password: String!): DefaultResponse!
   updatePassword(password: String!, expassword: String!): DefaultResponse!
-  toggleProfilePrivacy: DefaultResponse!
   updateBio(biography: String!): DefaultResponse!
   updateProfileImage(img: String!): DefaultResponse!
   toggleUserFollowStatus(userid: ID!): FollowStatusResponse!
@@ -79,9 +78,7 @@ type Mutation {
 }
 
 scalar Decimal
-scalar DATEN
 scalar Date
-scalar TagList
 
 enum PostActionType {
   LIKE
@@ -101,10 +98,10 @@ enum CommentType {
 }
 
 enum ContentType {
-  IMAGE
-  AUDIO
-  VIDEO
-  TEXT
+  image
+  audio
+  video
+  text
 }
 
 enum PostFilterType {
@@ -142,17 +139,191 @@ enum DayFilterType {
   Y0
 }
 
-type GenericResponse {
+type ListTodaysInteractionsResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: TodaysInteractionsData
+}
+
+type TodaysInteractionsData {
+  totalInteractions: Decimal
+  totalScore: Decimal
+  totalDetails: TodaysInteractionsDetailsData
+}
+
+type TodaysInteractionsDetailsData {
+  views: Decimal
+  likes: Decimal
+  dislikes: Decimal
+  comments: Decimal
+  viewsScore: Decimal
+  likesScore: Decimal
+  dislikesScore: Decimal
+  commentsScore: Decimal
+}
+
+type GemstersResponse {
   status: String!
   counter: Int!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: GemstersData
 }
 
-type StandardResponse {
+type GemstersData {
+  winStatus: WinStatus
+  userStatus: [GemstersUserStatus] 
+}
+
+type WinStatus {
+  totalGems: Decimal
+  gemsintoken: Decimal
+  bestatigung: Decimal
+}
+
+type GemstersUserStatus {
+  userid: ID,
+  gems: Decimal,
+  tokens: Decimal,
+  percentage: Decimal,
+  details: [GemstersUserStatusDetails]
+}
+
+type GemstersUserStatusDetails {
+  gemid: ID,
+  userid: ID,
+  postid: ID,
+  fromid: ID,
+  gems: Decimal,
+  numbers: Decimal,
+  whereby: Decimal,
+  createdat: Date
+}
+
+type GemsterResponse {
   status: String!
   ResponseCode: String
-  affectedRows: DATEN
+  affectedRows: DailyGemStatusData
+}
+
+type LiquidityPoolResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: LiquidityPoolData
+}
+
+type LiquidityPoolData {
+  overallTotalNumbers: Decimal
+  overallTotalNumbersq: Decimal
+  posts: [LiquidityPoolPostData]
+}
+
+type LiquidityPoolPostData {
+  postid: ID
+  totalNumbers: Decimal
+  totalNumbersq: Decimal
+  transactionCount: Decimal
+}
+
+type TestingPoolResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: LiquidityPoolData
+}
+
+type PostCommentsResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [PostCommentsData]
+}
+
+type PostCommentsData {
+  commentid: ID
+  userid: ID
+  postid: ID
+  parentid: ID
+  content: String
+  createdat: Date
+  amountlikes: Decimal
+  isliked: Boolean
+  user: Userinfo
+  subcomments: [PostSubCommentsData]
+}
+
+type PostSubCommentsData {
+  commentid: ID
+  userid: ID
+  postid: ID
+  parentid: ID
+  content: String
+  createdat: Date
+  amountlikes: Decimal
+  amountreplies: Decimal,
+  isliked: Boolean
+  user: Userinfo
+}
+
+type PercentBeforeTransactionResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: PercentBeforeTransactionData
+}
+
+type PercentBeforeTransactionData {
+  inviterId: ID
+  tosend: Decimal
+  percentTransferred: Decimal
+}
+
+type RefreshMarketCapResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: RefreshMarketCapData
+}
+
+type RefreshMarketCapData {
+  NumberOfTokens: Decimal
+  NumberOfGems: Decimal
+  coverage: Decimal
+  TokenPrice: Decimal
+  GemsPrice: Decimal
+}
+
+type DailyGemStatusResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DailyGemStatusData
+}
+
+type DailyGemsResultsResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DailyGemsResultsData
+}
+
+type DailyGemStatusData {
+  d0: Decimal
+  d1: Decimal
+  d2: Decimal
+  d3: Decimal
+  d4: Decimal
+  d5: Decimal
+  w0: Decimal
+  m0: Decimal
+  y0: Decimal
+}
+
+type DailyGemsResultsData {
+  data: [DailyGemsResultsUserData],
+  totalGems: Decimal
+}
+
+type DailyGemsResultsUserData {
+  userid: ID
+  pkey: ID
+  gems: Decimal
 }
 
 type HelloResponse {
@@ -258,7 +429,9 @@ type DailyFreeResponse {
 }
 
 type CurrentLiquidity {
-  getCurrentBalance: Decimal
+  status: String!
+  ResponseCode: String!
+  currentliquidity: Decimal
 }
 
 type UserInfoResponse {
@@ -558,18 +731,18 @@ type Post {
   media: String!
   cover: String!
   mediadescription: String!
-  createdAt: Date!
-  likeCount: Int!
-  viewScore: Int!
-  commentCount: Int!
-  dislikeCount: Int!
-  trendingScore: Int!
-  isLiked: Boolean!
-  isViewed: Boolean!
-  isReported: Boolean!
-  isDisliked: Boolean!
-  isSaved: Boolean!
-  listTags: TagList!
+   createdat: Date!
+  amountlikes: Int!
+  amountviews: Int!
+  amountcomments: Int!
+  amountdislikes: Int!
+  amounttrending: Int!
+  isliked: Boolean!
+  isviewed: Boolean!
+  isreported: Boolean!
+  isdisliked: Boolean!
+  issaved: Boolean!
+  tags: [String]!
   user: ProfileUser!
   comments: [Comment!]!
 }
@@ -606,7 +779,7 @@ input PostInput {
   contenttype: ContentType!
   media: [String!]
   cover: [String!]
-  listTags: [String!]
+  tags: [String!]
 }
 
 input ChatInput {

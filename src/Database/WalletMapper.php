@@ -97,7 +97,7 @@ class WalletMapper
                 'recipient' => $recipient,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(20201);
+            return self::respondWithError(30201);
         }
 
         $numberoftokens = (float) $args['numberoftokens'];
@@ -106,7 +106,7 @@ class WalletMapper
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(51301);
+            return self::respondWithError(30264);
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
@@ -122,7 +122,7 @@ class WalletMapper
 
         if (empty($row)) {
             $this->logger->warning('Unknown Id Exception.');
-            return self::respondWithError(21001);
+            return self::respondWithError(31003);
         }
 
         if ((string)$row === $userId) {
@@ -1107,7 +1107,7 @@ class WalletMapper
         }
 
         if (empty($data)) {
-            return self::respondWithError(21206);
+            return self::createSuccessResponse(21206);
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
@@ -1212,7 +1212,7 @@ class WalletMapper
 
             if (!$result || !$result['invited']) {
                 $this->logger->warning('No inviter found for the given user', ['userid' => $userId]);
-                return self::respondWithError(11401);
+                return self::createSuccessResponse(21401);
             }
 
             $inviterId = $result['invited'];

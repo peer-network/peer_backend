@@ -17,6 +17,25 @@ class McapMapper
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                $response['counter'] = count($data[$countKey]);
+            } else {
+                $response['counter'] = count($data);
+            }
+        }
+
+        return $response;
+    }
+
     public function fetchAll(int $offset, int $limit): array
     {
         $this->logger->info("McapMapper.fetchAll started");
@@ -143,7 +162,7 @@ class McapMapper
 
             if ($numberoftokens === 0 || $numberofgems === 0) {
                 $this->logger->info("numberoftokens or numberofgems is empty.", ['numberoftokens' => $numberoftokens, 'numberofgems' => $numberofgems]);
-                return $this->respondWithError(21207);
+                return $this->createSuccessResponse(21207);
             }
 
             $resultLastData = $this->refreshMarketData();
@@ -217,7 +236,7 @@ class McapMapper
             }
 
             if (empty($array['data']['ETH/EUR']['bestAsk'])) {
-                return $this->respondWithError(21208);
+                return $this->createSuccessResponse(21208);
             }
 
             $coverage = (float) $array['data']['ETH/EUR']['bestAsk'];

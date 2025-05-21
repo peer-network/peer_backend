@@ -22,6 +22,25 @@ class PoolMapper
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                $response['counter'] = count($data[$countKey]);
+            } else {
+                $response['counter'] = count($data);
+            }
+        }
+
+        return $response;
+    }
+
     public function fetchPool(array $args = []): array
     {
         $this->logger->info('WalletMapper.fetchPool started');
@@ -150,7 +169,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            return $this->respondWithError(20223);
+            return $this->respondWithError(30223);
         }
 
         $whereCondition = $dayOptions[$day];
@@ -169,6 +188,7 @@ class PoolMapper
             )
             SELECT 
                 g.userid,
+                ui.pkey,
                 g.gemid,
                 g.gems,
                 g.whereby,
@@ -178,6 +198,7 @@ class PoolMapper
                 (us.total_numbers * 100.0 / ts.overall_total) AS percentage
             FROM gems g
             JOIN user_sums us ON g.userid = us.userid
+            JOIN users_info ui ON g.userid = ui.userid
             CROSS JOIN total_sum ts
             WHERE us.total_numbers > 0 AND g.{$whereCondition};
         ";
@@ -191,7 +212,7 @@ class PoolMapper
         }
 
         if (empty($data)) {
-            return $this->respondWithError(21202); //'No records found for ' . $day
+            return $this->createSuccessResponse(21202); //'No records found for ' . $day
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
@@ -204,7 +225,8 @@ class PoolMapper
             if (!isset($args[$userId])) {
                 $args[$userId] = [
                     'userid' => $userId,
-                    'gems' => $row['total_numbers']
+                    'gems' => $row['total_numbers'],
+                    'pkey' => $row['pkey'] ?? '',
                 ];
             }
 

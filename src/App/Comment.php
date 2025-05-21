@@ -145,10 +145,14 @@ class Comment
                 'required' => true,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 200,
-                    ]],
+                    [
+                        'name' => 'StringLength', 
+                        'options' => [
+                            'min' => 2,
+                            'max' => 200,
+                            'errorCode' => 30265,
+                            ]
+                        ],
                     ['name' => 'IsString'],
                 ],
             ],

@@ -42,6 +42,25 @@ class UserInfoService
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                $response['counter'] = count($data[$countKey]);
+            } else {
+                $response['counter'] = count($data);
+            }
+        }
+
+        return $response;
+    }
+
     public function loadInfoById(): array|false
     {
 
@@ -61,7 +80,7 @@ class UserInfoService
                 return $success;
             }
 
-            return $this->respondWithError(21001);
+            return $this->createSuccessResponse(21001);
         } catch (\Exception $e) {
             return $this->respondWithError(41001);
         }
@@ -74,7 +93,7 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if ($this->currentUserId === $followedUserId) {
@@ -84,7 +103,7 @@ class UserInfoService
         $this->logger->info('UserInfoService.toggleUserFollow started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
-            return $this->respondWithError(21001);
+            return $this->createSuccessResponse(21001);
         }
 
         if (!$this->userInfoMapper->isUserExistById($followedUserId)) {
@@ -101,7 +120,7 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($blockedUserId)) {
-            return $this->respondWithError(20201);
+            return $this->respondWithError(30201);
         }
 
         if ($this->currentUserId === $blockedUserId) {
@@ -111,7 +130,7 @@ class UserInfoService
         $this->logger->info('UserInfoService.toggleUserBlock started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
-            return $this->respondWithError(21001);
+            return $this->createSuccessResponse(21001);
         }
 
         if (!$this->userInfoMapper->isUserExistById($blockedUserId)) {
@@ -156,7 +175,7 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadInfoById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError(21001);
+                return $this->createSuccessResponse(21001);
             }
 
             $newIsPrivate = !$user->getIsPrivate();
@@ -184,7 +203,7 @@ class UserInfoService
         }
 
         if (trim($biography) === '' || strlen($biography) < 3 || strlen($biography) > 5000) {
-            return $this->respondWithError(20228);
+            return $this->respondWithError(30228);
         }
 
         $this->logger->info('UserInfoService.updateBio started');
@@ -192,7 +211,7 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError(21001);
+                return $this->createSuccessResponse(21001);
             }
 
             if (!empty($biography)) {
@@ -200,7 +219,7 @@ class UserInfoService
                 $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
 
                 if ($mediaPath === '') {
-                    return $this->respondWithError(41009);
+                    return $this->respondWithError(30251);
                 }
 
                 if (!empty($mediaPath['path'])) {
@@ -244,14 +263,14 @@ class UserInfoService
         try {
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
-                return $this->respondWithError(21001);
+                return $this->createSuccessResponse(21001);
             }
 
             if (!empty($mediaFile)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $this->currentUserId, 'profile');
 
                 if ($mediaPath === '') {
-                    return $this->respondWithError(41009);
+                    return $this->respondWithError(30251);
                 }
 
                 if (!empty($mediaPath['path'])) {

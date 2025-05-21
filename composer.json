@@ -15,7 +15,9 @@
         "webonyx/graphql-php": "^15.19",
         "vlucas/phpdotenv": "^5.6",
         "firebase/php-jwt": "^6.10",
-        "james-heinrich/getid3": "^1.9"
+        "james-heinrich/getid3": "^1.9",
+        "phpunit/phpunit": "^11.0",
+        "phpmailer/phpmailer": "^6.10"
     },
     "config": {
     }
