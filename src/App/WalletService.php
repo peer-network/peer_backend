@@ -362,7 +362,16 @@ class WalletService
         $this->logger->info('WalletService.updateSwapTranStatus started');
 
         try {
-            $results = $this->walletMapper->updateSwapTranStatus($args['transactionId']);
+            if (empty($args)) {
+                return $this->respondWithError(30101);
+            }
+            $transactionId = $args['transactionId'];
+            
+            if (!empty($transactionId) && !self::isValidUUID($transactionId)) {
+                return $this->respondWithError(0000);
+            }
+
+            $results = $this->walletMapper->updateSwapTranStatus($transactionId);
 
             return [
                 'status' => 'success',

@@ -1705,8 +1705,7 @@ class WalletMapper
     
         return [
             'status' => 'error',
-            'ResponseCode' => 0000,
-            'affectedRows' => []
+            'ResponseCode' => 0000
         ];
     }
     
