@@ -1644,7 +1644,7 @@ class WalletMapper
         
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000,
+                'ResponseCode' => 0000, // Liquidity Pool History retrived
                 'affectedRows' => $transactions
             ];
         } catch (\PDOException $e) {
@@ -1653,7 +1653,7 @@ class WalletMapper
         }
         return [
             'status' => 'error',
-            'ResponseCode' => 0000,
+            'ResponseCode' => 0000, // Error while retriveing Liquidity Pool History
             'affectedRows' => []
         ];
     }
@@ -1695,7 +1695,7 @@ class WalletMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000,
+                'ResponseCode' => 0000, // SWAP Transaction has been marked as PAID
             ];
         } catch (\Throwable $e) {
             $this->db->rollBack();
@@ -1705,7 +1705,7 @@ class WalletMapper
     
         return [
             'status' => 'error',
-            'ResponseCode' => 0000
+            'ResponseCode' => 0000 // Failed to Update SWAP Transaction to PAID
         ];
     }
     
@@ -1744,7 +1744,7 @@ class WalletMapper
         
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000,
+                'ResponseCode' => 0000, // Retrived Transaction history
                 'affectedRows' => $transactions
             ];
         } catch (\PDOException $e) {
@@ -1753,7 +1753,7 @@ class WalletMapper
         }
         return [
             'status' => 'error',
-            'ResponseCode' => 0000,
+            'ResponseCode' => 0000, // failed to Retrived Transaction history
             'affectedRows' => []
         ];
     }
@@ -1781,7 +1781,7 @@ class WalletMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000,
+                'ResponseCode' => 0000, // Successfully Retrived Peer token price
                 'currentTokenPrice' => $tokenPrice,
                 'updatedAt' => $getLpToken['updatedat'],
 
@@ -1791,7 +1791,7 @@ class WalletMapper
         }
         return [
             'status' => 'error',
-            'ResponseCode' => 0000,
+            'ResponseCode' => 0000,  // Failed to Retrive Peer token price
         ];
     }
 
@@ -1810,8 +1810,7 @@ class WalletMapper
 
         if (empty($args['btcAddress'])) {
             $this->logger->warning('BTC Address required');
-            // Please create New Response code message for "BTC Address is required!"
-            return self::respondWithError(0000);
+            return self::respondWithError(0000); // BTC Address is required!
         }
 
         $this->initializeLiquidityPool();
@@ -2132,7 +2131,7 @@ class WalletMapper
 
             return [
                 'status' => 'success', 
-                'ResponseCode' => 0000,
+                'ResponseCode' => 0000, // Successfully Swap Peer Token to BTC. Your BTC address will be paid soon.
                 'tokenSend' => $numberoftokens,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'expectedBtcReturn' => $btcAmountToUser ?? 0.0
@@ -2360,12 +2359,14 @@ class WalletMapper
                 'ADD_BTC_LIQUIDITY'
             );
 
+            $newTokenAmount = $this->getLpToken();
+            $newBtcAmount = $this->getLpTokenBtcLP();
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000,
-                'newTokenAmount' => $this->getLpToken(),
-                'newBtcAmount' => $this->getLpTokenBtcLP(),
-                'newTokenPrice' => 0.0 // TODO: Replace with dynamic calculation
+                'ResponseCode' => 0000, // Successfully update with Liquidity into Pool
+                'newTokenAmount' => $newTokenAmount,
+                'newBtcAmount' => $newBtcAmount,
+                'newTokenPrice' => ((float) $newBtcAmount / (float) $newTokenAmount)   // TODO: Replace with dynamic calculation
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Liquidity error', ['exception' => $e]);
