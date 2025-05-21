@@ -1758,6 +1758,43 @@ class WalletMapper
         ];
     }
 
+
+    /**
+     * get token price
+     * 
+     * @param userId string
+     * @param offset int
+     * @param limit int
+     * 
+     */
+    public function getTokenPrice(): ?array
+    {
+
+        $this->logger->info('WalletMapper.getTokenPrice');
+
+        try {
+            
+            $getLpToken = $this->getLpInfo();
+            $getLpTokenBtcLP = $this->getLpTokenBtcLP();
+
+            $tokenPrice =  (float)  $getLpTokenBtcLP / (float) ($getLpToken['liquidity']);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 0000,
+                'currentTokenPrice' => $tokenPrice,
+                'updatedAt' => $getLpToken['updatedat'],
+
+            ];
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error while fetching transactions - WalletMapper.transactionsHistory", ['error' => $e->getMessage()]);
+        }
+        return [
+            'status' => 'error',
+            'ResponseCode' => 0000,
+        ];
+    }
+
     /**
      * get transcation history of current user.
      * 
@@ -2156,6 +2193,52 @@ class WalletMapper
             $this->logger->info("Inserted new transaction into database");
 
             return $walletInfo['liquidity'];
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "WalletMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error(
+                "WalletMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage()
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        }
+    }
+
+    
+    /**
+     * get LP account info.
+     * 
+     */    
+    public function getLpInfo()
+    {
+
+        $this->logger->info("WalletMapper.getLpToken started");
+
+        $query = "SELECT * from wallett WHERE userid = :userId";
+       
+		$accounts = $this->pool->returnAccounts();
+		$liqpool = $accounts['response'] ?? null;
+		$this->poolWallet = $liqpool['pool'];
+
+        try {
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindValue(':userId', $this->poolWallet, \PDO::PARAM_STR);
+            $stmt->execute();
+            $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            $this->logger->info("Inserted new transaction into database");
+
+            return $walletInfo;
         } catch (\PDOException $e) {
             $this->logger->error(
                 "WalletMapper.getLpToken: Exception occurred while getting loop accounts",

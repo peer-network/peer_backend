@@ -45,6 +45,7 @@ type Query {
   dailygemsresults(day: DayFilterType!): StandardResponse!
   getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
   getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
+  getTokenPrice: TokenPriceResponse!
 }
 
 type Mutation {
@@ -213,6 +214,13 @@ type TransactionResponse {
   status: String!
   responseCode: Int!
   affectedRows: [Transaction!]
+}
+
+type TokenPriceResponse {
+  status: String!
+  responseCode: Int!
+  currentTokenPrice: Decimal
+  updatedAt: String
 }
 
 type LiquidityPoolHistoryResponse {

@@ -34,6 +34,7 @@ type Query {
   listTodaysInteractions: StandardResponse!
   getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
   getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
+  getTokenPrice: TokenPriceResponse!
 }
 
 type Mutation {
@@ -172,6 +173,12 @@ type LiquidityPoolHistoryResponse {
   status: String!
   responseCode: Int!
   affectedRows: [LiquidityPoolTransaction!]
+}
+type TokenPriceResponse {
+  status: String!
+  responseCode: Int!
+  currentTokenPrice: Decimal
+  updatedAt: String
 }
 type LiquidityPoolTransaction {
   transactionid: String!

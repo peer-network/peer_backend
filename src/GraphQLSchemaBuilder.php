@@ -1190,6 +1190,21 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'TokenPriceResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'responseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                 'currentTokenPrice' => function (array $root): float {
+                    return $root['currentTokenPrice'] ?? [];
+                },
+                'updatedAt' => function (array $root): string {
+                    return $root['updatedAt'] ?? [];
+                },
+            ],
             'Transaction' => [
                 'transactionid' => function (array $root): string {
                     return $root['transactionid'] ?? '';
@@ -1293,6 +1308,8 @@ class GraphQLSchemaBuilder
             'dailygemsresults' => fn(mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->walletService->transcationsHistory($args),
             'getLiquidityPoolHistory' => fn(mixed $root, array $args) => $this->walletService->getLiquidityPoolHistory($args),
+            'getTokenPrice' => fn(mixed $root, array $args) => $this->walletService->getTokenPrice($args),
+            
         ];
     }
 

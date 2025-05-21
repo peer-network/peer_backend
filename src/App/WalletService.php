@@ -353,6 +353,29 @@ class WalletService
         }
     }
     
+
+    /**
+     * Get Peer token price
+     * 
+     */
+    public function getTokenPrice(array $args): array
+    {
+        $this->logger->info('WalletService.getTokenPrice started');
+        try {
+            $results = $this->walletMapper->getTokenPrice();
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+                'currentTokenPrice' => $results['currentTokenPrice'],
+                'updatedAt' => $results['updatedAt'],
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in WalletService.getTokenPrice", ['exception' => $e->getMessage()]);
+            return $this->respondWithError(0000);  
+        }
+    }
+
+    
     /**
      * Update Swap transaction status to PAID
      * 
