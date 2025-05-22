@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ./sql_files_for_import:/docker-entrypoint-initdb.d
-      - peer_backend_ci-cd_db-data:/var/lib/postgresql/data
+      - peer_backend_db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
@@ -120,4 +120,4 @@ networks:
     name: my-network
  
 volumes:
-  peer_backend_ci-cd_db-data:
+  peer_backend_db-data:
