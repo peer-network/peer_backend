@@ -83,7 +83,7 @@ class ChatService
         }
 
         if (empty($args)) {
-            return $this->respondWithError(55555);
+            return $this->respondWithError(30103);
         }
 
         $this->logger->info('ChatService.createChatWithRecipients started');

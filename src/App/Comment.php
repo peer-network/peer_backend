@@ -150,7 +150,7 @@ class Comment
                         'options' => [
                             'min' => 2,
                             'max' => 200,
-                            'errorCode' => 30265,
+                            'errorCode' => 55555,
                             ]
                         ],
                     ['name' => 'IsString'],
