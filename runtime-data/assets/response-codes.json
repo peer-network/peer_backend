@@ -447,8 +447,8 @@
             "userFriendlyComment": "Username must be 3-23 chars with letters, numbers, or underscores."
         },
         "30203": {
-            "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 200",
-            "userFriendlyComment": "Offset must be a number between 0 and 200."
+            "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 2147483647",
+            "userFriendlyComment": "Offset must be a number between 0 and 2147483647."
         },
         "30204": {
             "comment": "The 'limit' field (Number of data objects to retrieve) must be an integer between 1 and 20",
