@@ -447,8 +447,8 @@
             "userFriendlyComment": "Username must be 3-23 chars with letters, numbers, or underscores."
         },
         "30203": {
-            "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 2147483647",
-            "userFriendlyComment": "Offset must be a number between 0 and 2147483647."
+            "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 200",
+            "userFriendlyComment": "Offset must be a number between 0 and 200."
         },
         "30204": {
             "comment": "The 'limit' field (Number of data objects to retrieve) must be an integer between 1 and 20",
@@ -726,6 +726,10 @@
             "comment": "A valid GraphQL query is required to proceed. Please enter valid GraphQL query",
             "userFriendlyComment": "Invalid GraphQL query. Please check your input."
         },
+        "30305": {
+           "comment": "No data found for provided UUID",
+           "userFriendlyComment": "We couldn’t find anything for this ID. Please check and try again."
+       },
         "30401": {
             "comment": "Unexpected Error: Failed to insert contact. Please check the details and try again",
             "userFriendlyComment": "Failed to send message. Please try again."
