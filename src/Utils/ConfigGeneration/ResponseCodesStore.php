@@ -1,11 +1,13 @@
 <?php
 declare(strict_types=1);
 
+namespace Fawaz\Utils\ConfigGeneration;
+
 class Constants {
-    static $pathResponseCodesFileToAssets = "/Users/fcody/Desktop/Peer/peer_backend/runtime-data/assets/";
+    static $pathResponseCodesFileToAssets = "/Users/fcody/Desktop/Peer/peer_backend/runtime-data/media/assets/";
     static $pathResponseCodesFileForEditing = "/Users/fcody/Desktop/Peer/peer_backend/src/Utils/ResponseCodes/";
     static $outputResponseCodesFileName = "response-codes.json";
-    static $inputResponseCodesFileName = "responseCodesForEditing.json";
+    static $inputResponseCodesFileName = "response-codes-editable.json";
 }
 
 class ResponseCodesStore {
@@ -36,14 +38,14 @@ class ResponseCodesStore {
 
     private function parseInputJson(string $filePath): array {
         if (!file_exists($filePath)) {
-            throw new \Throwable("Response Code File is not found: $filePath");
+            throw new \Exception("Response Code File is not found: $filePath");
         }
         
         $jsonContent = file_get_contents($filePath);
         $decoded = json_decode($jsonContent, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Throwable("JSON decode error: " . json_last_error_msg());
+            throw new \Exception("JSON decode error: " . json_last_error_msg());
         }
         return $decoded;
     }
@@ -60,7 +62,7 @@ class ResponseCodesStore {
     {
         $jsonString = $this->generateJson();
         if (file_put_contents($outputPath, $jsonString) === false) {
-            throw new \Throwable("Failed to write JSON to file: $outputPath");
+            throw new \Exception("Failed to write JSON to file: $outputPath");
         }
     }
 }
@@ -73,12 +75,4 @@ class MessageEntry {
         $this->comment = $comment;
         $this->userFriendlyComment = $userFriendlyComment;
     }
-}
-
-
-try {
-    $store = new ResponseCodesStore(Constants::$pathResponseCodesFileForEditing . Constants::$inputResponseCodesFileName);
-    $store->generateJSONtoFile(Constants::$pathResponseCodesFileToAssets . Constants::$outputResponseCodesFileName);
-} catch (\Throwable $e) {
-    echo $e->getMessage();
 }

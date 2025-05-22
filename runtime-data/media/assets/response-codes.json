@@ -1,5 +1,5 @@
 {
-    "createdAt": 1747415263,
+    "createdAt": 1747901804,
     "name": "Response Codes",
     "data": {
         "10401": {
@@ -921,10 +921,6 @@
         "31813": {
             "comment": "Already Exists: Participant already exists in the group",
             "userFriendlyComment": "This person is already in the group chat."
-        },
-        "31814": {
-            "comment": "Forbidden: You are not allowed to send messages in this chat.",
-            "userFriendlyComment": " You don’t have permission to send messages in this chat."
         },
         "31901": {
             "comment": "Failure: Too many requests. Email delivery failed. Please try again later. ",
