@@ -185,16 +185,6 @@ jobs:
       - name: List files in /var/www/html/public
         run: docker compose run --rm backend ls -R /var/www/html/public
  
-      - name: Manual curl to GraphQL (debug)
-        run: |
-          docker run --rm \
-            --network my-network \
-            curlimages/curl:latest \
-            curl -i http://backend/graphql || echo " GraphQL not reachable"
- 
-      - name: Check Running Docker Containers
-        run: docker ps
- 
       - name: Wait For Backend to be Ready
         run: |
           TAG=latest
@@ -309,10 +299,6 @@ jobs:
           name: docker_newman_report-${{ matrix.php-version }}
           path: ${{ github.workspace }}/newman/reports/report.html
         continue-on-error: true
- 
-      - name: Show Backend Logs on Failure
-        working-directory: .
-        run: docker compose -f docker-compose.yaml logs backend
           
       - name: List Running containers
         run: docker ps -a
