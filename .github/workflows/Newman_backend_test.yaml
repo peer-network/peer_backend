@@ -143,7 +143,7 @@ jobs:
         run: docker compose down -v
  
       - name: Force DB init by removing the volume
-        run: docker volume rm peer_backend_ci-cd_db-data || true
+        run: docker volume rm peer_backend_db-data || true
  
       - name: Build And Start Docker Containers
         run: |
@@ -216,7 +216,7 @@ jobs:
       - name: Check Backend Logs
         run: |
           echo "Fetching backend container logs..."
-          docker logs $(docker ps -q -f "name=peer_backend_ci-cd-backend-1")
+          docker logs $(docker ps -q -f "name=peer_backend-backend-1")
  
       - name: Check Backend Connection (using curl directly)
         run: |
