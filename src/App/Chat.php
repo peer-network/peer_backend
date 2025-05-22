@@ -183,8 +183,8 @@ class Chat
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => Constants::$chat::$nameStringLength->min,
-                        'max' => Constants::$chat::$nameStringLength->max,
+                        'min' => 3,
+                        'max' => 53,
                     ]],
                     ['name' => 'isString'],
                 ],
