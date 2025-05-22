@@ -148,16 +148,6 @@ jobs:
           docker compose -f ./docker-compose.yaml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}
           docker compose -f ./docker-compose.yaml up -d
  
-      - name: Check if test user and wallet exist
-        run: |
-          echo "Checking if test user exists..."
-          docker compose exec db psql -U postgres -d peer -c \
-            "SELECT uid, username FROM users WHERE uid = 'dbe72768-0d47-4d29-99e7-b6ec4eadfaa3';"
- 
-          echo "Checking wallett balance for test user..."
-          docker compose exec db psql -U postgres -d peer -c \
-            "SELECT userid, liquidity FROM wallett WHERE userid = 'dbe72768-0d47-4d29-99e7-b6ec4eadfaa3';"
- 
       - name: Set PHP upload limits
         run: |
           docker compose exec backend bash -c "echo 'upload_max_filesize = 80M' >> /usr/local/etc/php/conf.d/uploads.ini"
@@ -199,9 +189,6 @@ jobs:
  
       - name: List files in /var/www/html/public
         run: docker compose run --rm backend ls -R /var/www/html/public
- 
-      - name: Manually curl root
-        run: docker compose exec backend curl -i http://localhost
  
       - name: Manual curl to GraphQL (debug)
         run: |
@@ -278,28 +265,17 @@ jobs:
           }' tests/postman_collection/graphql_postman_collection.json > temp.json
           mv temp.json tests/postman_collection/graphql_postman_collection.json
  
-      - name: Verify Postman Collection File
-        run: cat tests/postman_collection/graphql_postman_collection.json
- 
       - name: Inject BACKEND_URL into Postman Environment
         run: |
           jq '.values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
             tests/postman_collection/graphql_postman_environment.json > temp_env.json
           mv temp_env.json tests/postman_collection/graphql_postman_environment.json
  
-      - name: Show updated Postman environment file
-        run:  cat tests/postman_collection/graphql_postman_environment.json
- 
       - name: Run Postman Tests in Newman Container
         id: newman
         run: |
           docker compose -f ./docker-compose.yaml run --rm newman
         continue-on-error: true
- 
-      - name: Show GraphQL Nginx Access Log (Last 500 Lines)
-        run: |
-          echo "===== graphql_access.log (last 500 lines) ====="
-          docker compose exec -T backend sh -c 'tail -n 500 /var/log/nginx/graphql_access.log || echo "Log file not found."'
  
       - name: Show GraphQL error and debug logs
         run: |
