@@ -172,11 +172,6 @@ jobs:
           docker compose exec db psql -U "${{ vars.DB_USERNAME }}" -d "${{ vars.DB_DATABASE }}" \
             -c "SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'users_info' AND constraint_type = 'FOREIGN KEY';"
  
-      - name: Verify additional_data.sql was executed (check inserted user)
-        run: |
-          docker compose exec db psql -U "${{ vars.DB_USERNAME }}" -d "${{ vars.DB_DATABASE }}" \
-            -c "SELECT username FROM users WHERE uid = '7e0b2d21-d2b0-4af5-8b73-5f8efc04b11f';"
- 
       - name: Verify all optional users were inserted
         run: |
           docker compose exec db psql -U "${{ vars.DB_USERNAME }}" -d "${{ vars.DB_DATABASE }}" \
@@ -215,19 +210,6 @@ jobs:
           done
           echo "Backend did not respond in time."
           exit 1
- 
-      - name: Debug JWT key presence
-        run: docker compose exec backend ls -l keys
- 
-      - name: Manually inspect GraphQL error
-        run: |
-          TAG=latest
-          docker run --rm \
-            --network my-network \
-            curlimages/curl:$TAG \
-            curl -i -X POST http://backend/graphql \
-            -H "Content-Type: application/json" \
-            --data '{"query":"{__typename}"}'
  
       - name: Test GraphQL Endpoint
         run: |
@@ -276,14 +258,6 @@ jobs:
         run: |
           docker compose -f ./docker-compose.yaml run --rm newman
         continue-on-error: true
- 
-      - name: Show GraphQL error and debug logs
-        run: |
-          echo " errorlog.txt:"
-          docker compose run --rm backend cat /var/www/html/runtime-data/logs/errorlog.txt || echo " errorlog.txt not found"
- 
-          echo -e "\n graphql_debug.log:"
-          docker compose run --rm backend cat /var/www/html/runtime-data/logs/graphql_debug.log || echo " graphql_debug.log not found"
  
       - name: List Logs in Backend Container
         run: docker compose exec backend ls -l /var/www/html/runtime-data/logs
