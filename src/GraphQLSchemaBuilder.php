@@ -79,7 +79,7 @@ class GraphQLSchemaBuilder
         protected CommentInfoService $commentInfoService,
         protected ChatService $chatService,
         protected WalletService $walletService,
-        protected JWTService $tokenService,
+        protected JWTService $tokenService
     ) {
         $this->resolvers = $this->buildResolvers();
     }
