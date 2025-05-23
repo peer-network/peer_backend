@@ -190,7 +190,7 @@ class WalletMapper
                     'transactionType' => 'transferDeductSenderToRecipient',
                     'senderId' => $userId,
                     'recipientId' => $recipient,
-                    'tokenAmount' => -$numberoftokens,
+                    'tokenAmount' => -($numberoftokens + $countAmount),
                     'message' => $message,
                 ];
                 $transactions = new Transaction($transObj);
@@ -1903,7 +1903,7 @@ class WalletMapper
                     'transactionType' => 'btcSwap',
                     'senderId' => $userId,
                     'recipientId' => $recipient,
-                    'tokenAmount' => -$numberoftokens,
+                    'tokenAmount' => -($numberoftokens + $countAmount),
                     'message' => $message,
                 ];
                 $transactions = new Transaction($transObj);
