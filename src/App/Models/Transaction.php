@@ -136,11 +136,11 @@ class Transaction
     /**
      * Getter and Setter methods for tokenAmount
      */
-    public function getTokenAmount(): string
+    public function getTokenAmount(): float
     {
         return $this->tokenAmount;
     }
-    public function setTokenAmount(string $tokenAmount): void
+    public function setTokenAmount(float $tokenAmount): void
     {
         $this->tokenAmount = $tokenAmount;
     }

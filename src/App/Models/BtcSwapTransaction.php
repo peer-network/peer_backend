@@ -130,11 +130,11 @@ class BtcSwapTransaction
     /**
      * Getter and Setter methods for tokenAmount
      */
-    public function getTokenAmount(): string
+    public function getTokenAmount(): float
     {
         return $this->tokenAmount;
     }
-    public function setTokenAmount(string $tokenAmount): void
+    public function setTokenAmount(float $tokenAmount): void
     {
         $this->tokenAmount = $tokenAmount;
     }
@@ -143,11 +143,11 @@ class BtcSwapTransaction
     /**
      * Getter and Setter methods for btcAmount
      */
-    public function getBtcAmount(): string
+    public function getBtcAmount(): float
     {
         return $this->btcAmount;
     }
-    public function setBtcAmount(string $btcAmount): void
+    public function setBtcAmount(float $btcAmount): void
     {
         $this->btcAmount = $btcAmount;
     }
