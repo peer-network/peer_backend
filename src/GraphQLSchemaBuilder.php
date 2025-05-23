@@ -79,7 +79,7 @@ class GraphQLSchemaBuilder
         protected CommentInfoService $commentInfoService,
         protected ChatService $chatService,
         protected WalletService $walletService,
-        protected JWTService $tokenService
+        protected JWTService $tokenService,
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -1613,7 +1613,33 @@ class GraphQLSchemaBuilder
                 'iInvited' => function (array $root): array {
                     return $root['iInvited'] ?? [];
                 },
-            ],                                 
+            ],      
+            'GetActionPricesResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.GetActionPricesResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): ?array {
+                    return $root['affectedRows'] ?? null;
+                },
+            ],
+            'ActionPriceResult' => [
+                'postPrice' => function (array $root): float {
+                    return (float) ($root['postPrice'] ?? 0);
+                },
+                'likePrice' => function (array $root): float {
+                    return (float) ($root['likePrice'] ?? 0);
+                },
+                'dislikePrice' => function (array $root): float {
+                    return (float) ($root['dislikePrice'] ?? 0);
+                },
+                'commentPrice' => function (array $root): float {
+                    return (float) ($root['commentPrice'] ?? 0);
+                },
+            ],                           
         ];
     }
 
@@ -1656,6 +1682,7 @@ class GraphQLSchemaBuilder
             'dailygemsresults' => fn(mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
             'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
+            'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
         ];
     }
 
@@ -1917,6 +1944,40 @@ class GraphQLSchemaBuilder
                 'trace' => $e->getTraceAsString()
             ]);
             return $this->respondWithError(41013);
+        }
+    }
+
+    protected function resolveActionPrices(): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->info('PoolService.getActionPrices started');
+
+        try {
+            $result = $this->poolService->getActionPrices();
+
+            if (empty($result)) {
+                return $this->createSuccessResponse(00000);
+            }
+
+            return [
+                'status'        => 'success',
+                'ResponseCode'  => 00000,
+                'affectedRows'  => [
+                    'postPrice'     => (float) $result['post_price'],
+                    'likePrice'     => (float) $result['like_price'],
+                    'dislikePrice'  => (float) $result['dislike_price'],
+                    'commentPrice'  => (float) $result['comment_price'],
+                ]
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Query.resolveActionPrices exception', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError(00000);s
         }
     }
 

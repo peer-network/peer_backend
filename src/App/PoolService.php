@@ -73,4 +73,17 @@ class PoolService
 
         return $this->poolMapper->getTimeSortedMatch($day);
     }
+    
+    public function getActionPrices(): ?array
+    {
+        try {
+            return $this->poolMapper->fetchCurrentActionPrices();
+        } catch (\Throwable $e) {
+            $this->logger->error('PoolService.getActionPrices exception', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString()
+            ]);
+            return null;
+        }
+    }
 }
