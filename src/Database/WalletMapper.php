@@ -100,6 +100,10 @@ class WalletMapper
             return self::respondWithError(30201);
         }
 
+        if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
+            return self::respondWithError(0000); // Invalid token amount provided. It is should be Integer or with decimal numbers
+        }
+
         $numberoftokens = (float) $args['numberoftokens'];
         if ($numberoftokens <= 0) {
             $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
@@ -1825,6 +1829,9 @@ class WalletMapper
 
         $recipient = (string) $this->poolWallet;
 
+        if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
+            return self::respondWithError(0000); // Invalid token amount provided. It is should be Integer or with decimal numbers
+        }
         $numberoftokens = (float) $args['numberoftokens'];
        
         if ($numberoftokens <= 0) {
