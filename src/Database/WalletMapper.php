@@ -81,6 +81,24 @@ class WalletMapper
 		$this->burnWallet = $liqpool['burn'];
 		$this->peerWallet = $liqpool['peer'];
 
+        if (!self::isValidUUID($this->poolWallet)) {
+            $this->logger->warning('Incorrect poolWallet Exception.', [
+                'poolWallet' => $this->poolWallet,
+            ]);
+            return self::respondWithError(0000); // Invalid Pool Wallet ID
+        }
+        if (!self::isValidUUID($this->burnWallet)) {
+            $this->logger->warning('Incorrect burn Wallet Exception.', [
+                'burnWallet' => $this->burnWallet,
+            ]);
+            return self::respondWithError(0000); // Invalid BURN Wallet ID
+        }
+        if (!self::isValidUUID($this->peerWallet)) {
+            $this->logger->warning('Incorrect Peer Wallet Exception.', [
+                'peerWallet' => $this->peerWallet,
+            ]);
+            return self::respondWithError(0000); // Invalid Peer Wallet ID
+        }
         $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
 
         $currentBalance = $this->getUserWalletBalance($userId);
@@ -1819,6 +1837,24 @@ class WalletMapper
 
         $this->initializeLiquidityPool();
 
+        if (!self::isValidUUID($this->poolWallet)) {
+            $this->logger->warning('Incorrect poolWallet Exception.', [
+                'poolWallet' => $this->poolWallet,
+            ]);
+            return self::respondWithError(0000); // Invalid Pool Wallet ID
+        }
+        if (!self::isValidUUID($this->burnWallet)) {
+            $this->logger->warning('Incorrect burn Wallet Exception.', [
+                'burnWallet' => $this->burnWallet,
+            ]);
+            return self::respondWithError(0000); // Invalid BURN Wallet ID
+        }
+        if (!self::isValidUUID($this->peerWallet)) {
+            $this->logger->warning('Incorrect Peer Wallet Exception.', [
+                'peerWallet' => $this->peerWallet,
+            ]);
+            return self::respondWithError(0000); // Invalid Peer Wallet ID
+        }
         $currentBalance = $this->getUserWalletBalance($userId);
         if (empty($currentBalance)) {
             $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
@@ -2328,8 +2364,15 @@ class WalletMapper
 
         try {
             // Validate inputs
-            $amountPeerToken = $this->validateAmount($args['amountToken'] ?? null, 'PeerToken');
-            $amountBtc = $this->validateAmount($args['amountBtc'] ?? null, 'BTC');
+            if (!isset($args['amountToken']) || !is_numeric($args['amountToken']) || (float) $args['amountToken'] != $args['amountToken']) {
+                return self::respondWithError(0000); // Invalid PeerToken amount provided. It is should be Integer or with decimal numbers
+            }
+            if (!isset($args['amountBtc']) || !is_numeric($args['amountBtc']) || (float) $args['amountBtc'] != $args['amountBtc']) {
+                return self::respondWithError(0000); // Invalid BTC amount provided. It is should be Integer or with decimal numbers
+            }
+
+            $amountPeerToken =  (float) $args['amountToken'];
+            $amountBtc = (float) $args['amountBtc'];
 
             // Fetch pool wallets
             $accountsResult = $this->pool->returnAccounts();
@@ -2347,6 +2390,19 @@ class WalletMapper
 
             $this->poolWallet = $poolAccounts['pool'];
             $this->btcpool = $poolAccounts['btcpool'];
+
+            if (!self::isValidUUID($this->poolWallet)) {
+                $this->logger->warning('Incorrect poolWallet Exception.', [
+                    'poolWallet' => $this->poolWallet,
+                ]);
+                return self::respondWithError(0000); // Invalid Pool Wallet ID
+            }
+            if (!self::isValidUUID($this->btcpool)) {
+                $this->logger->warning('Incorrect BTC Wallet Exception.', [
+                    'btcpool' => $this->btcpool,
+                ]);
+                return self::respondWithError(0000); // Invalid BTC Wallet ID
+            }
 
             // Save PeerToken liquidity
             $this->saveLiquidity(
