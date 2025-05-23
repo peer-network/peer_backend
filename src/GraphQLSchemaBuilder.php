@@ -1977,7 +1977,7 @@ class GraphQLSchemaBuilder
                 'message' => $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError(00000);s
+            return $this->respondWithError(00000);
         }
     }
 
