@@ -359,4 +359,24 @@ class WalletService
             return $this->respondWithError('Unknown Error.');
         }
     }
+
+    public function callTokenMovements(array $args): ?array
+    {
+        $this->logger->info('WalletService.okenMovements started');
+        try {
+            $results = $this->walletMapper->getTransactions($this->currentUserId, $args);
+            // var_dump($results);
+            // exit;
+            return [
+                'status' => 'success',
+                'responseCode' => $results['ResponseCode'],
+                'affectedRows' => $results['affectedRows']
+            ];
+
+        } catch (\Throwable $th) {
+            $this->logger->error("callTokenMovements failed", ['error' => $th->getMessage()]);
+            return $this->respondWithError(0000);
+        }
+    }
+
 }

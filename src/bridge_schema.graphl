@@ -42,3 +42,21 @@ type GenericResponse {
   ResponseCode: String
   affectedRows: DATEN
 }
+
+enum TokenMovementFilterType {
+  TRANSACTION
+  AIRDROP
+  MINT
+  PAYMENT
+  FEES
+}
+
+enum DirectionFilterType {
+  INCOME
+  DEDUCTION
+}
+
+enum SortFilterType {
+  DESCENDING
+  ASCENDING
+}

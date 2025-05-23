@@ -33,6 +33,7 @@ type Query {
   balance: CurrentLiquidity!
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
+  ListTokenMovements( type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): GenericResponse!
   getpercentbeforetransaction(tokenAmount: Int!): StandardResponse!
   refreshmarketcap: StandardResponse!
   globalwins: DefaultResponse!
@@ -136,6 +137,24 @@ enum DayFilterType {
   W0
   M0
   Y0
+}
+
+enum TokenMovementFilterType{
+  TRANSACTION
+  AIRDROP
+  MINT
+  PAYMENT
+  BURN
+}
+
+enum DirectionFilterType {
+  INCOME
+  DEDUCTION
+}
+
+enum SortFilterType {
+  descending
+  ascending
 }
 
 type GenericResponse {
@@ -575,4 +594,21 @@ input FeedInput {
   media: String!
   mediadescription: String
   contenttype: String!
+}
+
+type TokenMovement {
+  from: String
+  token: String
+  userid: String
+  postid: String
+  action: String
+  numbers: Decimal
+  createdat: String
+}
+
+type GenericResponse {
+  status: String
+  ResponseCode: String
+  counter: Int
+  affectedRows: [TokenMovement]
 }

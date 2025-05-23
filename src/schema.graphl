@@ -31,6 +31,7 @@ type Query {
   balance: CurrentLiquidity!
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
+  ListTokenMovements(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): ListTokenMovementResponse!
   listTodaysInteractions: StandardResponse!
   getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
 }
@@ -125,6 +126,24 @@ enum DayFilterType {
   W0
   M0
   Y0
+}
+
+enum TokenMovementFilterType {
+  TRANSACTION
+  AIRDROP
+  MINT
+  PAYMENT
+  FEES
+}
+
+enum DirectionFilterType {
+  INCOME
+  DEDUCTION
+}
+
+enum SortFilterType {
+  DESCENDING
+  ASCENDING
 }
 
 type StandardResponse {
@@ -551,4 +570,19 @@ input FeedInput {
   media: String!
   mediadescription: String
   contenttype: String!
+}
+
+type TokenMovement {
+  token: Decimal!
+  transactionid: String!
+  transuniqueid: String!
+  recipientid: String!
+  senderid: String!
+  createdat: String!
+}
+
+type ListTokenMovementResponse {
+  status: String
+  responseCode: String
+  affectedRows: [TokenMovement!]
 }

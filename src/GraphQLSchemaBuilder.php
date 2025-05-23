@@ -1190,7 +1190,39 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
             ],
-
+            
+            'ListTokenMovementResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'responseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'TokenMovement' => [
+                'token' => function (array $root): float {
+                    return $root['tokenamount'] ?? 0.0;
+                },
+                'transactionid' => function (array $root): string {
+                    return $root['transactionid'] ?? '';
+                },
+                'transuniqueid' => function (array $root): string {
+                    return $root['transuniqueid'] ?? '';
+                },
+                'recipientid' => function (array $root): string {
+                    return $root['recipientid'] ?? '';
+                },
+                'senderid' => function (array $root): string {
+                    return $root['senderid'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ],
         ];
     }
 
@@ -1223,6 +1255,7 @@ class GraphQLSchemaBuilder
             'getUserInfo' => fn(mixed $root, array $args) => $this->resolveUserInfo(),
             'listWinLogs' => fn(mixed $root, array $args) => $this->resolveFetchWinsLog($args),
             'listPaymentLogs' => fn(mixed $root, array $args) => $this->resolveFetchPaysLog($args),
+            'ListTokenMovements' => fn($root, $args) => $this->walletService->callTokenMovements($args), 
             'listBlockedUsers' => fn(mixed $root, array $args) => $this->resolveBlocklist($args),
             'listTodaysInteractions' => fn(mixed $root, array $args) => $this->walletService->callUserMove(),
             'liquiditypool' => fn(mixed $root, array $args) => $this->resolvePool($args),
@@ -2648,4 +2681,5 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(40901);
         }
     }
+
 }
