@@ -450,7 +450,7 @@ class WalletService
             $results = $this->walletMapper->updateSwapTranStatus($transactionId);
 
             return [
-                'status' => 'success',
+                'status' => $results['status'],
                 'ResponseCode' => $results['ResponseCode'],
             ];
         } catch (\Exception $e) {
