@@ -939,8 +939,9 @@
             "userFriendlyComment": "We're sending too many emails right now. Please try again in a little while."
         },
         "31902": {
-            "comment": "Failure: Too many requests. Email delivery failed. Please try again later. ",
-            "userFriendlyComment": "Our email system is busy. Please wait a bit and try again."
+            "comment": "Failure: No users found associated with this email.",
+            "userFriendlyComment": "We couldn't find an account with that email address. Please check and try again."
+
         },
         "31903": {
             "comment": "Failure: Too many requests. Email delivery failed. Please contact support team at peernetworkpse@gmail.com. ",
