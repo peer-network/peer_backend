@@ -1786,42 +1786,52 @@ class WalletMapper
         ];
     }
 
-
     /**
-     * get token price
+     * Get token price.
      * 
-     * @param userId string
-     * @param offset int
-     * @param limit int
-     * 
+     * @return array|null
      */
     public function getTokenPrice(): ?array
     {
-
         $this->logger->info('WalletMapper.getTokenPrice');
 
         try {
-            
             $getLpToken = $this->getLpInfo();
             $getLpTokenBtcLP = $this->getLpTokenBtcLP();
 
-            $tokenPrice =  (float)  $getLpTokenBtcLP / (float) ($getLpToken['liquidity']);
+            if (empty($getLpToken) || !isset($getLpToken['liquidity']) || $getLpToken['liquidity'] == 0) {
+                throw new \RuntimeException("Invalid LP token data retrieved.");
+            }
+
+            $tokenPrice = (float) $getLpTokenBtcLP / (float) $getLpToken['liquidity'];
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000, // Successfully Retrived Peer token price
+                'ResponseCode' => 0000, // Successfully retrieved Peer token price
                 'currentTokenPrice' => $tokenPrice,
-                'updatedAt' => $getLpToken['updatedat'],
-
+                'updatedAt' => $getLpToken['updatedat'] ?? null,
             ];
         } catch (\PDOException $e) {
             $this->logger->error("Database error while fetching transactions - WalletMapper.transactionsHistory", ['error' => $e->getMessage()]);
+             return [
+                'status' => 'error',
+                'ResponseCode' => 40302,
+            ];
+        }catch (\Throwable $e) {
+            $this->logger->error(
+                "WalletMapper.getTokenPrice: Exception occurred while calculating token price",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            return [
+                'status' => 'error',
+                'ResponseCode' => 0000, // Failed to retrieve Peer token price
+            ];
         }
-        return [
-            'status' => 'error',
-            'ResponseCode' => 0000,  // Failed to Retrive Peer token price
-        ];
     }
+
 
     /**
      * get transcation history of current user.
