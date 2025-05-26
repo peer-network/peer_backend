@@ -314,7 +314,7 @@ class PostInfoService
 
         $postinfo = $this->postInfoMapper->loadById($postId);
         if ($postinfo === null) {
-            return $this->createSuccessResponse(21501);
+            return $this->respondWithError(31510);
         }
 
         $results = $postinfo->getArrayCopy();

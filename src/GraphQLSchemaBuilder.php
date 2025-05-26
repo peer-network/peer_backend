@@ -1929,7 +1929,13 @@ class GraphQLSchemaBuilder
         if (empty($args)) {
             return $this->respondWithError(30101);
         }
+        if (isset($args['chatid']) && $this->isValidUUID($args['chatid'])) {
+            $chat = $this->chatService->loadChatById(['chatid' => $args['chatid']]);
 
+            if (!isset($chat['status']) || $chat['status'] !== 'success' || empty($chat['data'])) {
+                return $this->respondWithError(31815);
+            }
+        }
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
             return $validationResult;
@@ -2728,7 +2734,7 @@ class GraphQLSchemaBuilder
             $comments = $this->commentInfoService->findCommentInfo($commentId);
 
             if ($comments === false) {
-                return $this->createSuccessResponse(21505);
+                return $this->respondWithError(31601);
             }
         } else {
             return $this->createSuccessResponse(21506);
