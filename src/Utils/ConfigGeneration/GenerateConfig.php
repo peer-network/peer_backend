@@ -55,12 +55,13 @@ require __DIR__ . '../../../../vendor/autoload.php';
 
 try {
     $files = ConfigGenerationConstants::cases();
+    $pathsConfig = new ConfigUrl();
+
     foreach($files as $file) {
         JSONHandler::generateJSONtoFile(Constants::$pathToAssets . $file->outputFileName(), $file->getData(), $file->getName());
     }
-
-    $pathsConfig = new ConfigUrl();
     JSONHandler::generateJSONtoFile(Constants::$pathToAssets . "config.json", $pathsConfig->getData(), "config");
+
 } catch (\Exception $e) {
     echo $e->getMessage();
 }

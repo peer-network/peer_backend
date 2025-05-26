@@ -1,11 +1,7 @@
 {
-    "createdAt": 1748249790,
+    "createdAt": 1748257937,
     "name": "response-codes",
     "data": {
-        "10401": {
-            "comment": "Success: Contact created successfully",
-            "userFriendlyComment": "Your message has been sent successfully!"
-        },
         "10601": {
             "comment": "Success: User registered successfully. Please verify your account and log in",
             "userFriendlyComment": "Registration successful! Please check your email to verify your account."
