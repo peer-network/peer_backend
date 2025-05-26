@@ -411,7 +411,7 @@ class WalletService
      * Get Peer token price
      * 
      */
-    public function getTokenPrice(array $args): array
+    public function getTokenPrice(): array
     {
         $this->logger->info('WalletService.getTokenPrice started');
         try {

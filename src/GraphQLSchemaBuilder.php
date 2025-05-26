@@ -1802,7 +1802,7 @@ class GraphQLSchemaBuilder
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->walletService->transactionsHistory($args),
             'getLiquidityPoolHistory' => fn(mixed $root, array $args) => $this->walletService->getLiquidityPoolHistory($args),
-            'getTokenPrice' => fn(mixed $root, array $args) => $this->walletService->getTokenPrice($args),
+            'getTokenPrice' => fn(mixed $root, array $args) => $this->walletService->getTokenPrice(),
         ];
     }
 
