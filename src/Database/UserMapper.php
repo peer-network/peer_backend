@@ -1164,18 +1164,20 @@ class UserMapper
 
     public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array 
     {
+
+        $offset = max(0, (int)$offset);
+        $limit = min(100, max(1, (int)$limit));
+
         $query = "
             SELECT u.uid, u.username, u.slug, u.img
             FROM users_info ui
             JOIN users u ON ui.userid = u.uid
             WHERE ui.invited = :userId
-            LIMIT :limit OFFSET :offset
+            LIMIT $limit OFFSET $offset
         ";
 
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':userId', $userId);
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
 
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);

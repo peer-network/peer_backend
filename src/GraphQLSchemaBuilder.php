@@ -1876,7 +1876,10 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.resolveReferralList started');
 
         $userId = $this->currentUserId;
-
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
         try {
             $this->logger->info('Current userId in resolveReferralList', ['userId' => $userId]);
 
@@ -1892,7 +1895,11 @@ class GraphQLSchemaBuilder
                 $referralUsers['invitedBy'] = $inviter;
             }
 
-            $referrals = $this->userMapper->getReferralRelations($userId);
+            $offset = max((int)($args['offset'] ?? 0), 0);
+            $limit = min(max((int)($args['limit'] ?? 20), 1), 20);
+
+            $referrals = $this->userMapper->getReferralRelations($userId, $offset, $limit);
+            $this->logger->info('Referral relations', ['referrals' => $referrals]);
             $this->logger->info('Referral relations', ['referrals' => $referrals]);
 
             if (!empty($referrals['iInvited'])) {
