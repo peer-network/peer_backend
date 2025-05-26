@@ -1745,7 +1745,7 @@ class WalletMapper
      * @param limit int
      * 
      */
-    public function transcationsHistory(string $userId, int $offset, int $limit): ?array
+    public function transactionsHistory(string $userId, int $offset, int $limit): ?array
     {
 
         $this->logger->info('Fetching transaction history - WalletMapper.transactionsHistory', ['userId' => $userId]);

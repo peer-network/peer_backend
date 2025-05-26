@@ -348,9 +348,9 @@ class WalletService
      * 
      */
     
-    public function transcationsHistory(array $args): array
+    public function transactionsHistory(array $args): array
     {
-        $this->logger->info('WalletService.transcationsHistory started');
+        $this->logger->info('WalletService.transactionsHistory started');
 
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -361,7 +361,7 @@ class WalletService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         try {
-            $results = $this->walletMapper->transcationsHistory($this->currentUserId, $offset, $limit);
+            $results = $this->walletMapper->transactionsHistory($this->currentUserId, $offset, $limit);
 
             return [
                 'status' => 'success',
@@ -369,7 +369,7 @@ class WalletService
                 'affectedRows' => $results['affectedRows']
             ];
         } catch (\Exception $e) {
-            $this->logger->error("Error in WalletService.transcationsHistory", ['exception' => $e->getMessage()]);
+            $this->logger->error("Error in WalletService.transactionsHistory", ['exception' => $e->getMessage()]);
             return $this->respondWithError(0000);  // Error occurred while retrieving transaction history
         }
 

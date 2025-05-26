@@ -1800,7 +1800,7 @@ class GraphQLSchemaBuilder
             'dailygemsresults' => fn(mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
             'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
-            'getTransactionHistory' => fn(mixed $root, array $args) => $this->walletService->transcationsHistory($args),
+            'getTransactionHistory' => fn(mixed $root, array $args) => $this->walletService->transactionsHistory($args),
             'getLiquidityPoolHistory' => fn(mixed $root, array $args) => $this->walletService->getLiquidityPoolHistory($args),
             'getTokenPrice' => fn(mixed $root, array $args) => $this->walletService->getTokenPrice($args),
         ];

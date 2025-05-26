@@ -40,8 +40,6 @@ class TransactionRepository
             $stmt->bindValue(':tokenAmount', $transaction->getTokenAmount(), \PDO::PARAM_STR);
             $stmt->bindValue(':transferAction', $transaction->geTtransferAction(), \PDO::PARAM_STR);
             $stmt->bindValue(':message', $transaction->getMessage(), \PDO::PARAM_STR);
-            // $stmt->bindValue(':flag', $transaction->getFlag(), \PDO::PARAM_STR);
-            // $stmt->bindValue(':action', $transaction->getAction(), \PDO::PARAM_STR);
             $stmt->bindValue(':createdat', $transaction->getCreatedat(), \PDO::PARAM_STR);
             $stmt->execute();
 
