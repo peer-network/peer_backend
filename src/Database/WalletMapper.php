@@ -1739,6 +1739,18 @@ class WalletMapper
                 'status' => 'success',
                 'ResponseCode' => 0000,  // SWAP Transaction has been marked as PAID
             ];
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "WalletMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            return [
+                'status' => 'error',
+                'ResponseCode' => 40302, 
+            ];
         } catch (\Throwable $e) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
