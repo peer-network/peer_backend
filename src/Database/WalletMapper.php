@@ -1688,54 +1688,76 @@ class WalletMapper
 
     
     /**
-     * update transcation status to PAID.
+     * Update transaction status to PAID.
      * 
-     * @param userId string
-     * @param offset int
-     * @param limit int
-     * 
+     * @param string $swapId
+     * @return array|null
      */
     public function updateSwapTranStatus(string $swapId): ?array
     {
         \ignore_user_abort(true);
-        $this->logger->info('WalletMapper.updateSwapTranStatus started');
+        $this->logger->info('WalletMapper.updateSwapTranStatus started', ['swapId' => $swapId]);
 
         try {
-            $this->db->beginTransaction();
+            if (!$this->db->beginTransaction()) {
+                $this->logger->critical('Failed to start database transaction', ['swapId' => $swapId]);
+                return [
+                    'status' => 'error',
+                    'ResponseCode' => 40302,
+                    'message' => 'Unable to start database transaction.',
+                ];
+            }
 
+            // 1. Check if transaction exists and is PENDING
             $query = "SELECT 1 FROM btc_swap_transactions WHERE swapid = :swapid AND status = :status";
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':status', "PENDING", \PDO::PARAM_STR);
             $stmt->bindValue(':swapid', $swapId, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', 'PENDING', \PDO::PARAM_STR);
             $stmt->execute();
-            $transExists = $stmt->fetchColumn(); 
 
-            if ($transExists) {
-                $query = "UPDATE btc_swap_transactions
-                          SET status = :status
-                          WHERE swapid = :swapid";
-                $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':swapid', $swapId, \PDO::PARAM_STR);
-                $stmt->bindValue(':status', 'PAID', \PDO::PARAM_STR);
-                $stmt->execute();
+            if (!$stmt->fetchColumn()) {
+                $this->db->rollBack();
+                $this->logger->warning('No matching PENDING transaction found for swapId.', ['swapId' => $swapId]);
+                return [
+                    'status' => 'error',
+                    'ResponseCode' => 0000, // Transaction status updated to PAID
+                ];
             }
+
+            // 2. Update status to PAID
+            $updateQuery = "UPDATE btc_swap_transactions SET status = :status WHERE swapid = :swapid";
+            $updateStmt = $this->db->prepare($updateQuery);
+            $updateStmt->bindValue(':swapid', $swapId, \PDO::PARAM_STR);
+            $updateStmt->bindValue(':status', 'PAID', \PDO::PARAM_STR);
+            $updateStmt->execute();
+
             $this->db->commit();
+
+            $this->logger->info('Transaction marked as PAID', ['swapId' => $swapId]);
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000, // SWAP Transaction has been marked as PAID
+                'ResponseCode' => 0000,  // SWAP Transaction has been marked as PAID
             ];
         } catch (\Throwable $e) {
-            $this->db->rollBack();
-            $this->logger->error('Database error in saveWalletEntry: ' . $e->getMessage());
-            throw new \RuntimeException('Unable to save wallet entry');
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            $this->logger->error('WalletMapper.updateSwapTranStatus failed', [
+                'error' => $e->getMessage(),
+                'swapId' => $swapId,
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'status' => 'error',
+                'ResponseCode' => 0000, // Failed to update transaction status
+            ];
         }
-    
-        return [
-            'status' => 'error',
-            'ResponseCode' => 0000 // Failed to Update SWAP Transaction to PAID
-        ];
     }
+
+
     
     /**
      * get swap transcation history of current user.
