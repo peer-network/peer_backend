@@ -16,44 +16,6 @@ class TransactionRepository
     {
     }
     
-    /**
-     * get transactions data
-     */
-    public function getTransaction(Transaction $transaction)
-    {
-        $this->logger->info("TransactionRepository.getTransaction started");
-
-        $query = "SELECT * FROM transactions";
-
-        try {
-            $stmt = $this->db->prepare($query);
-
-            $stmt->execute();
-
-            $this->logger->info("Get transactions into database");
-
-            return $transaction;
-        } catch (\PDOException $e) {
-            $this->logger->error(
-                "TransactionRepository.getTransaction: Exception occurred while getting transaction",
-                [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]
-            );
-
-            throw new \RuntimeException("Failed to insert transaction into database: " . $e->getMessage());
-        } catch (\Exception $e) {
-            $this->logger->error(
-                "TransactionRepository.getTransaction: Exception occurred while getting transaction",
-                [
-                    'error' => $e->getMessage()
-                ]
-            );
-
-            throw new \RuntimeException("Failed to get transaction from database: " . $e->getMessage());
-        }
-    }
 
     /**
      * Save transaction data
