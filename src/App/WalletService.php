@@ -353,6 +353,10 @@ class WalletService
         $this->logger->info('WalletService.transcationsHistory started');
 
 
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
@@ -379,6 +383,11 @@ class WalletService
     public function getLiquidityPoolHistory(array $args): array
     {
         $this->logger->info('WalletService.getLiquidityPoolHistory started');
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -513,5 +522,34 @@ class WalletService
             return $this->respondWithError('Unknown Error.');
         }
     }
+
+    
+    
+    /**
+     * Validation for Offset and Limit values
+     * 
+     * @param args array
+     * 
+     * @return array with Response Object
+     */
+    protected function validateOffsetAndLimit(array $args = []): ?array
+    {
+        $offset = isset($args['offset']) ? (int)$args['offset'] : null;
+        $limit = isset($args['limit']) ? (int)$args['limit'] : null;
+
+        if ($offset !== null) {
+            if ($offset < 0 || $offset > 200) {
+                return $this->respondWithError(30203);
+            }
+        }
+
+        if ($limit !== null) {
+            if ($limit < 1 || $limit > 20) {  
+                return $this->respondWithError(30204);
+            }
+        }
+        return null;
+    }
+
     
 }
