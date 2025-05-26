@@ -6,14 +6,7 @@ use Fawaz\Utils\ConfigGeneration\JSONHandler;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
-class Constants {
-    static $pathResponseCodesFileToAssets = "/Users/fcody/Desktop/Peer/peer_backend/runtime-data/media/assets/";
-    static $pathResponseCodesFileForEditing = "/Users/fcody/Desktop/Peer/peer_backend/src/Utils/ConfigGeneration/src/";
-    static $outputResponseCodesFileName = "response-codes.json";
-    static $inputResponseCodesFileName = "response-codes-editable.json";
-}
-
-class ResponseCodesStore {
+class ResponseCodesStore implements DataGeneratable {
     /** @var array<string, MessageEntry> */
     private array $data = [];
 
