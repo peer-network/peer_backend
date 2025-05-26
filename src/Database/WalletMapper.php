@@ -1720,7 +1720,7 @@ class WalletMapper
                 $this->logger->warning('No matching PENDING transaction found for swapId.', ['swapId' => $swapId]);
                 return [
                     'status' => 'error',
-                    'ResponseCode' => 0000, // Transaction status updated to PAID
+                    'ResponseCode' => 0000, // No Transaction Found with Pending Status
                 ];
             }
 
