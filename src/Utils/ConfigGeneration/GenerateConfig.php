@@ -6,6 +6,7 @@ namespace Fawaz\Utils\ConfigGeneration;
 use Fawaz\Utils\ConfigGeneration\ResponseCodesStore;
 use Fawaz\Utils\ConfigGeneration\EndpointsConfig;
 use Fawaz\Utils\ConfigGeneration\JSONHandler;
+use Fawaz\Utils\ConfigGeneration\ConfigUrl;
 
 interface DataGeneratable {
     public function getData(): array;
@@ -14,7 +15,9 @@ interface DataGeneratable {
 class Constants {
     static $pathToAssets = "/Users/fcody/Desktop/Peer/peer_backend/runtime-data/media/assets/"; 
     static $pathForEditing = "/Users/fcody/Desktop/Peer/peer_backend/src/Utils/ConfigGeneration/src/";
-    
+    static $configUrlBase = "https://media.getpeer.eu/assets/";
+
+
     static $inputFileNameSuffix = "-editable";
     static $extension = ".json";
 }
@@ -55,6 +58,9 @@ try {
     foreach($files as $file) {
         JSONHandler::generateJSONtoFile(Constants::$pathToAssets . $file->outputFileName(), $file->getData(), $file->getName());
     }
+
+    $pathsConfig = new ConfigUrl();
+    JSONHandler::generateJSONtoFile(Constants::$pathToAssets . "config.json", $pathsConfig->getData(), "config");
 } catch (\Exception $e) {
     echo $e->getMessage();
 }
