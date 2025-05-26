@@ -541,12 +541,13 @@ CREATE TABLE IF NOT EXISTS transactions (
     transUniqueId UUID NOT NULL,
     transactionType VARCHAR(255) DEFAULT NULL,
     senderId UUID DEFAULT NULL,
-    recipientId VARCHAR(255) DEFAULT NULL,
+    recipientId UUID DEFAULT NULL,
     tokenAmount NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
     transferAction VARCHAR(255) DEFAULT NULL,
     message VARCHAR(255) DEFAULT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_senderId FOREIGN KEY (senderId) REFERENCES users(uid) ON DELETE CASCADE
+    CONSTRAINT fk_senderId FOREIGN KEY (senderId) REFERENCES users(uid),
+    CONSTRAINT fk_recipientId FOREIGN KEY (recipientId) REFERENCES users(uid)
 );
 
 -- Table: btc_swap_transactions
@@ -561,6 +562,7 @@ CREATE TABLE IF NOT EXISTS btc_swap_transactions (
     status VARCHAR(255) DEFAULT NULL,
     message VARCHAR(255) DEFAULT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_userId FOREIGN KEY (userId) REFERENCES users(uid),
     CONSTRAINT fk_transUniqueId FOREIGN KEY (transUniqueId) REFERENCES transactions(transactionId) ON DELETE CASCADE
 );
 
