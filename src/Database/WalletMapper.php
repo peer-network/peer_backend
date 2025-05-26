@@ -206,7 +206,6 @@ class WalletMapper
                 ];
 
 
-                $this->saveWalletEntry($userId, $args['numbers']);
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferDeductSenderToRecipient',
@@ -219,6 +218,8 @@ class WalletMapper
 
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
+
+                $this->saveWalletEntry($userId, $args['numbers']);
             }
 
             // 2. RECIPIENT: Credit To Account
@@ -236,7 +237,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->saveWalletEntry($row, $args['numbers']);
 
                 $transUniqueIdForDebit = self::generateUUID();
                 $transObj = [
@@ -252,6 +252,8 @@ class WalletMapper
 
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
+
+                $this->saveWalletEntry($row, $args['numbers']);
             }
 
             if (isset($result['invited']) && !empty($result['invited'])) {
@@ -270,7 +272,6 @@ class WalletMapper
                         'whereby' => TRANSFER_,
                     ];
 
-                    $this->saveWalletEntry($inviterId, $args['numbers']);
                     $transObj = [
                         'transUniqueId' => $transUniqueId,
                         'transactionType' => 'transferSenderToInviter',
@@ -283,6 +284,8 @@ class WalletMapper
     
                     $transRepo = new TransactionRepository($this->logger, $this->db);
                     $transRepo->saveTransaction($transactions);
+
+                    $this->saveWalletEntry($inviterId, $args['numbers']);
                 }
             }
 
@@ -320,7 +323,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->saveWalletEntry($this->poolWallet, $args['numbers']);
 
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
@@ -335,6 +337,8 @@ class WalletMapper
 
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
+
+                $this->saveWalletEntry($this->poolWallet, $args['numbers']);
             }
 
             // 6. PEERWALLET: Fee To Account
@@ -352,7 +356,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->saveWalletEntry($this->peerWallet, $args['numbers']);
 
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
@@ -367,6 +370,8 @@ class WalletMapper
 
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
+
+                $this->saveWalletEntry($this->peerWallet, $args['numbers']);
             }
 
             // 7. BURNWALLET: Fee Burning Tokens
@@ -384,7 +389,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->saveWalletEntry($this->burnWallet, $args['numbers']);
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferSenderToBurnWallet',
@@ -397,6 +401,8 @@ class WalletMapper
 
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
+
+                $this->saveWalletEntry($this->burnWallet, $args['numbers']);
             }
 
             return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
@@ -1937,7 +1943,6 @@ class WalletMapper
                 ];
 
 
-                $this->saveWalletEntry($userId, $args['numbers']);
                 $transactionId = self::generateUUID();
 
                 $transObj = [
@@ -1953,6 +1958,8 @@ class WalletMapper
 
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
+
+                $this->saveWalletEntry($userId, $args['numbers']);
 
             }
 
@@ -1973,7 +1980,6 @@ class WalletMapper
                         'whereby' => TRANSFER_,
                     ];
 
-                    $this->saveWalletEntry($inviterId, $args['numbers']);
                     $transObj = [
                         'transUniqueId' => $transUniqueId,
                         'transactionType' => 'transferSenderToInviter',
@@ -1986,6 +1992,8 @@ class WalletMapper
     
                     $transRepo = new TransactionRepository($this->logger, $this->db);
                     $transRepo->saveTransaction($transactions);
+
+                    $this->saveWalletEntry($inviterId, $args['numbers']);
                 }
             }
 
@@ -2022,7 +2030,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->saveWalletEntry($this->poolWallet, $args['numbers']);
 
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
@@ -2038,6 +2045,7 @@ class WalletMapper
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
 
+                $this->saveWalletEntry($this->poolWallet, $args['numbers']);
 
                 // Count LP after Fees calculation
                 $lpAccountTokenAfterLPFeeX = $this->getLpToken();
@@ -2059,7 +2067,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->saveWalletEntry($recipient, $args['numbers']);
 
                 $transUniqueIdForDebit = self::generateUUID();
                 $transObj = [
@@ -2075,6 +2082,8 @@ class WalletMapper
 
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
+                
+                $this->saveWalletEntry($recipient, $args['numbers']);
 
 
                 // Count LP swap tokens Fees calculation
@@ -2098,7 +2107,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->saveWalletEntry($this->peerWallet, $args['numbers']);
 
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
@@ -2113,6 +2121,8 @@ class WalletMapper
 
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
+
+                $this->saveWalletEntry($this->peerWallet, $args['numbers']);
             }
 
             // 7. BURNWALLET: Fee Burning Tokens
@@ -2130,7 +2140,6 @@ class WalletMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->saveWalletEntry($this->burnWallet, $args['numbers']);
                 $transObj = [
                     'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferSenderToBurnWallet',
@@ -2143,6 +2152,8 @@ class WalletMapper
 
                 $transRepo = new TransactionRepository($this->logger, $this->db);
                 $transRepo->saveTransaction($transactions);
+                $this->saveWalletEntry($this->burnWallet, $args['numbers']);
+
             }
 
             // Should be placed at last because it should include 1% LP Fees

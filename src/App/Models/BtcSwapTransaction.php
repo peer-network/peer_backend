@@ -2,6 +2,9 @@
 
 namespace Fawaz\App\Models;
 
+use DateTime;
+use Fawaz\App\ValidationException;
+use Fawaz\Filter\PeerInputFilter;
 
 class BtcSwapTransaction
 {
@@ -19,7 +22,7 @@ class BtcSwapTransaction
     /**
      * Assign Notification object while instantiated
      */
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
         $this->swapId = $data['swapId'] ?? self::generateUUID();
         $this->transUniqueId = $data['transUniqueId'] ?? null;
@@ -31,6 +34,122 @@ class BtcSwapTransaction
         $this->status = $data['status'] ?? 'PENDING';
         $this->message = $data['message'] ?? null;
         $this->createdat = $data['createdat'] ?? date('Y-m-d H:i:s.u');
+
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
+    }
+    
+    
+    /**
+     * Define Input filter
+     */   
+    protected function createInputFilter(array $elements = []): PeerInputFilter
+    {
+        $specification = [
+            'swapId' => [
+                'required' => false,
+                'validators' => [['name' => 'Uuid']],
+            ],
+            'transUniqueId' => [
+                'required' => true,
+                'validators' => [['name' => 'Uuid']],
+            ],
+            'userId' => [
+                'required' => true,
+                'validators' => [['name' => 'Uuid']],
+            ],
+            'btcAddress' => [
+                'required' => true,
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 256,
+                        'errorCode' => 30210
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'transactionType' => [
+                'required' => true,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 63,
+                        'errorCode' => 30210
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'tokenAmount' => [
+                'required' => true,
+                'validators' => [['name' => 'ToFloat'], ['name' => 'FloatSanitize']],
+            ],
+            'btcAmount' => [
+                'required' => true,
+                'validators' => [['name' => 'ToFloat'], ['name' => 'FloatSanitize']],
+            ],
+            'status' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 63,
+                        'errorCode' => 30210
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'message' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 100,
+                        'errorCode' => 30210
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'createdat' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
+                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                ],
+            ],
+        ];
+
+        if ($elements) {
+            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+        }
+
+        return (new PeerInputFilter($specification));
+    }
+
+    /**
+     * Apply Input filter
+     */  
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
+
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
+
+        $validationErrors = $inputFilter->getMessages();
+
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error;
+            }
+            $errorMessageString = implode("", $errorMessages);
+            throw new ValidationException($errorMessageString);
+        }
     }
     
     /**

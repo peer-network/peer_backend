@@ -9,6 +9,10 @@ enum TransferAction {
     case BURN;
 }
 
+use DateTime;
+use Fawaz\App\ValidationException;
+use Fawaz\Filter\PeerInputFilter;
+
 class Transaction
 {
     protected string $transactionId;
@@ -26,7 +30,7 @@ class Transaction
     /**
      * Assign Notification object while instantiated
      */
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
         $this->transactionId = $data['transactionId'] ?? self::generateUUID();
         $this->transUniqueId = $data['transUniqueId'] ?? null;
@@ -39,8 +43,136 @@ class Transaction
         $this->action = $data['action'] ?? null;
         $this->message = $data['message'] ?? null;
         $this->createdat = $data['createdat'] ?? date('Y-m-d H:i:s.u');
+
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
     }
     
+
+    /**
+     * Define Input filter
+     */    
+    protected function createInputFilter(array $elements = []): PeerInputFilter
+    {
+        $specification = [
+            'transactionId' => [
+                'required' => false,
+                'validators' => [['name' => 'Uuid']],
+            ],
+            'transUniqueId' => [
+                'required' => true,
+                'validators' => [['name' => 'Uuid']],
+            ],
+            'senderId' => [
+                'required' => true,
+                'validators' => [['name' => 'Uuid']],
+            ],
+            'recipientId' => [
+                'required' => true,
+                'validators' => [['name' => 'Uuid']],
+            ],
+            'transactionType' => [
+                'required' => true,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 63,
+                        'errorCode' => 30210
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'tokenAmount' => [
+                'required' => true,
+                'validators' => [['name' => 'ToFloat'], ['name' => 'FloatSanitize']],
+            ],
+            'flag' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 63,
+                        'errorCode' => 30210
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'action' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 63,
+                        'errorCode' => 30210
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'transferAction' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 63,
+                        'errorCode' => 30210
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'message' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 100,
+                        'errorCode' => 30210
+                    ]],
+                    ['name' => 'isString'],
+                ],
+            ],
+            'createdat' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
+                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                ],
+            ],
+        ];
+
+        if ($elements) {
+            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+        }
+
+        return (new PeerInputFilter($specification));
+    }
+
+    /**
+     * Apply Input filter
+     */    
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
+
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
+
+        $validationErrors = $inputFilter->getMessages();
+
+        foreach ($validationErrors as $field => $errors) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error;
+            }
+            $errorMessageString = implode("", $errorMessages);
+            throw new ValidationException($errorMessageString);
+        }
+    }
+
+
     /**
      * Generate UUID
      */ 
