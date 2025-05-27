@@ -58,7 +58,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         LiquidityPool::class => function (ContainerInterface $c) {
             $settings = $c->get('settings')['liquidity'];
 			$Envi = [];
-			$Envi = ['peer' => (string)$settings['peer'], 'pool' => (string)$settings['pool'], 'burn' => (string)$settings['burn'], 'btcpool' => (string)$settings['btcpool']];
+			$Envi = ['peer' => (string)$settings['peer'], 'pool' => (string)$settings['pool'], 'burn' => (string)$settings['burn']];
             return new LiquidityPool(
                 $Envi
             );

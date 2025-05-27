@@ -43,9 +43,6 @@ type Query {
   postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
   dailygemstatus: DailyGemStatusResponse!
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
-  getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
-  getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
-  getTokenPrice: TokenPriceResponse!
 }
 
 type Mutation {
@@ -72,9 +69,6 @@ type Mutation {
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse!
-  swapTokens(btcAddress: ID!, numberoftokens: Decimal!): SwapTokenResponse!
-  addLiquidity(amountToken: Decimal!, amountBtc: Decimal!): AddLiquidityResponse!
-  updateSwapTranStatus(transactionId: ID!): DefaultResponse!
 }
 
 scalar Decimal
@@ -355,71 +349,6 @@ type GetDailyResponse {
   status: String!
   ResponseCode: String!
   affectedRows: [DailyFreeResponse]
-}
-
-type SwapToken {
-  tokenSend: Decimal
-  tokensSubstractedFromWallet: Decimal
-  expectedBtcReturn: Decimal
-}
-
-type SwapTokenResponse {
-  status: String!
-  responseCode: Int!
-  affectedRows: SwapToken!
-}
-
-type Transaction {
-  transactionid: String!
-  transuniqueid: String!
-  transactiontype: String!
-  senderid: String!
-  recipientid: String!
-  tokenamount: Int!
-  transferaction: String!
-  message: String!
-  flag: String!
-}
-
-type TransactionResponse {
-  status: String!
-  responseCode: Int!
-  affectedRows: [Transaction!]
-}
-
-type TokenPriceResponse {
-  status: String!
-  responseCode: Int!
-  currentTokenPrice: Decimal
-  updatedAt: String
-}
-
-type LiquidityPoolHistoryResponse {
-  status: String!
-  responseCode: Int!
-  affectedRows: [LiquidityPoolTransaction!]
-}
-type LiquidityPoolTransaction {
-  transactionid: String!
-  transactiontype: String!
-  senderid: String!
-  tokenamount: Decimal!
-  btcamount: Decimal!
-  status: String!
-  message: String!
-  createdat: String!
-}
-
-type AddLiquidity {
-  newTokenAmount: Decimal
-  newBtcAmount: Decimal
-  newTokenPrice: Decimal
-}
-
-type AddLiquidityResponse {
-  status: String!
-  responseCode: Int!
-  affectedRows: AddLiquidity!
 }
 
 type DailyFreeResponse {

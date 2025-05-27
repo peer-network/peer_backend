@@ -34,9 +34,6 @@ type Query {
   getReferralInfo: ReferralInfoResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
   listTodaysInteractions: ListTodaysInteractionsResponse!
-  getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
-  getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
-  getTokenPrice: TokenPriceResponse!
 }
 
 type Mutation {
@@ -62,8 +59,6 @@ type Mutation {
   createPost(action: PostType!, input: PostInput!): PostResponse!
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
-  resolveTransfer(recipient: ID!, numberoftokens: Int!, message: String): DefaultResponse!
-  swapTokens(btcAddress: ID!, numberoftokens: Decimal!): SwapTokenResponse!
 }
 
 scalar Decimal
@@ -165,59 +160,6 @@ type LogWins {
   action: String
   numbers: Decimal
   createdat: String
-}
-
-type Transaction {
-  transactionid: String!
-  transuniqueid: String!
-  transactiontype: String!
-  senderid: String!
-  recipientid: String!
-  tokenamount: Int!
-  transferaction: String!
-  message: String!
-  flag: String!
-}
-
-type TransactionResponse {
-  status: String!
-  responseCode: Int!
-  affectedRows: [Transaction!]
-}
-
-type LiquidityPoolHistoryResponse {
-  status: String!
-  responseCode: Int!
-  affectedRows: [LiquidityPoolTransaction!]
-}
-type TokenPriceResponse {
-  status: String!
-  responseCode: Int!
-  currentTokenPrice: Decimal
-  updatedAt: String
-}
-type LiquidityPoolTransaction {
-  transactionid: String!
-  transactiontype: String!
-  senderid: String!
-  tokenamount: Decimal!
-  btcamount: Decimal!
-  status: String!
-  message: String!
-  createdat: String!
-}
-
-
-type SwapToken {
-  tokenSend: Decimal
-  tokensSubstractedFromWallet: Decimal
-  expectedBtcReturn: Decimal
-}
-
-type SwapTokenResponse {
-  status: String!
-  responseCode: Int!
-  affectedRows: SwapToken!
 }
 
 type UserLogWins {
