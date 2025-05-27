@@ -846,6 +846,10 @@
             "comment": "Not Allowed: As the owner, you are restricted from viewing your own posts",
             "userFriendlyComment": "You can't view your own post this way."
         },
+        "31510": {
+            "comment": "Information Not Found: No post found for the provided post ID. Please check the ID and try again.",
+            "userFriendlyComment": "Post not found. Check the ID and try again."
+        },
         "31601": {
             "comment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",
             "userFriendlyComment": "Comment not found. Check the ID and try again."
@@ -924,7 +928,11 @@
         },
         "31814": {
             "comment": "Forbidden: You are not allowed to send messages in this chat.",
-            "userFriendlyComment": " You don’t have permission to send messages in this chat."
+            "userFriendlyComment": "You don’t have permission to send messages in this chat."
+        },
+        "31815": {
+            "comment": "Information Not Found: No chat found for the provided chat ID. Please check the ID and try again.",
+            "userFriendlyComment": "Chat not found. Check the ID and try again."
         },
         "31901": {
             "comment": "Failure: Too many requests. Email delivery failed. Please try again later. ",
