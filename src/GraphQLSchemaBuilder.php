@@ -2,6 +2,8 @@
 
 namespace Fawaz;
 
+const INT32_MAX= 2147483647;
+
 // whereby
 const VIEW_=1;// whereby VIEW
 const LIKE_=2;// whereby LIKE
@@ -1077,6 +1079,9 @@ class GraphQLSchemaBuilder
                 },
                 'amountfriends' => function (array $root): int {
                     return $root['amountfriends'] ?? 0;
+                },
+                'invited' => function (array $root): string {
+                    return $root['invited'] ?? '';
                 },
                 'updatedat' => function (array $root): string {
                     return $root['updatedat'] ?? '';
@@ -3036,7 +3041,7 @@ class GraphQLSchemaBuilder
         $messageLimit = isset($args['messageLimit']) ? (int)$args['messageLimit'] : null;
 
         if ($offset !== null) {
-            if ($offset < 0 || $offset > 200) {
+            if ($offset < 0 || $offset > INT32_MAX) {
                 return $this->respondWithError(30203);
             }
         }
@@ -3048,7 +3053,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($postOffset !== null) {
-            if ($postOffset < 0 || $postOffset > 200) {
+            if ($postOffset < 0 || $postOffset > INT32_MAX) {
                 return $this->respondWithError(30203);
             }
         }
@@ -3060,7 +3065,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($commentOffset !== null) {
-            if ($commentOffset < 0 || $commentOffset > 200) {
+            if ($commentOffset < 0 || $commentOffset > INT32_MAX) {
                 return $this->respondWithError(30215);
             }
         }
@@ -3072,7 +3077,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($messageOffset !== null) {
-            if ($messageOffset < 0 || $messageOffset > 200) {
+            if ($messageOffset < 0 || $messageOffset > INT32_MAX) {
                 return $this->respondWithError(30219);
             }
         }
