@@ -1897,12 +1897,9 @@ class GraphQLSchemaBuilder
             if (!empty($inviter)) {
                 $referralUsers['invitedBy'] = $inviter;
             }
-
-            $offset = max((int)($args['offset'] ?? 0), 0);
-            $limit = min(max((int)($args['limit'] ?? 20), 1), 20);
-
-            $referrals = $this->userMapper->getReferralRelations($userId, $offset, $limit);
-            $this->logger->info('Referral relations', ['referrals' => $referrals]);
+            $offset = $args['offset'] ?? 0;
+            $limit = $args['limit'] ?? 20;
+            $referrals = $this->userMapper->getReferralRelations($userId,$offset, $limit);
             $this->logger->info('Referral relations', ['referrals' => $referrals]);
 
             if (!empty($referrals['iInvited'])) {
