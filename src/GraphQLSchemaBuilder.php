@@ -1616,7 +1616,7 @@ class GraphQLSchemaBuilder
                 'iInvited' => function (array $root): array {
                     return $root['iInvited'] ?? [];
                 },
-            ]                        
+            ],                                 
         ];
     }
 

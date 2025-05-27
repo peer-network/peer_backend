@@ -340,5 +340,5 @@ class WalletService
         } catch (\Exception $e) {
             return $this->respondWithError('Unknown Error.');
         }
-    }    
+    }
 }
