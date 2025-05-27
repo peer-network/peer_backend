@@ -1162,11 +1162,8 @@ class UserMapper
         return $result ?: null;
     }
 
-    public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array 
+    public function getReferralRelations(string $userId, int $offset, int $limit): array 
     {
-
-        $offset = max(0, (int)$offset);
-        $limit = min(100, max(1, (int)$limit));
 
         $query = "
             SELECT u.uid, u.username, u.slug, u.img
