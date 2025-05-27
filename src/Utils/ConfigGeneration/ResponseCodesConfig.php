@@ -6,13 +6,9 @@ namespace Fawaz\Utils\ConfigGeneration;
 use Exception;
 use Fawaz\Utils\ConfigGeneration\JSONHandler;
 
-use function DI\string;
-use function PHPSTORM_META\type;
-use function PHPUnit\Framework\isNumeric;
-
 require __DIR__ . '../../../../vendor/autoload.php';
 
-class ResponseCodesStore implements DataGeneratable {
+class ResponseCodesConfig implements DataGeneratable {
     /** @var array<string, MessageEntry> */
     private array $data = [];
 

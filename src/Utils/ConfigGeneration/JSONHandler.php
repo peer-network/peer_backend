@@ -28,7 +28,10 @@ class JSONHandler {
         
         $jsonContent = file_get_contents($filePath);
         if ($validateKeyUniqness == true) {
-            $duplications = JSONHandler::findDuplicateJsonKeys($jsonContent);
+            $duplications = JSONHandler::getDuplicatedNumericKeys($jsonContent);
+            if ($duplications) {
+                throw new \Exception("Error: Duplicated Keys: $duplications");
+            }
         }
 
         if (!empty($duplications)) {
@@ -44,26 +47,20 @@ class JSONHandler {
         return $decoded;
     }
 
-    private static function findDuplicateJsonKeys(string $json): array {
-        $pattern = '/\"(\d{5})\"\:/';
-        if (preg_match($pattern, $json, $matches)) {
-            $keys = $matches[1];
+    private static function getDuplicatedNumericKeys(string $json): string | null {
+        // Match all top-level keys using regex
+        preg_match_all('/"([^"]+)"\s*:/', $json, $matches);
 
-            $seen = [];
-            $duplicates = [];
+        $keys = $matches[1];
+        $numericKeys = array_filter($keys, fn($key) => is_numeric($key));
 
-            foreach ($keys as $key) {
-                echo $key;
-                if (isset($seen[$key])) {
-                    $duplicates[] = $key;
-                } else {
-                    $seen[$key] = true;
-                }
-            }
-
-            return array_unique($duplicates);
+        // Count and find duplicates
+        $counts = array_count_values($numericKeys);
+        $duplicatedKeys = array_keys(array_filter($counts, fn($count) => $count > 1));
+        if ($duplicatedKeys) {
+            return implode(',', $duplicatedKeys);
+        } else {
+            return null;
         }
-
-    return [];
     }
 }

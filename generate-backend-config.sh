@@ -1,0 +1,1 @@
+php src/Utils/ConfigGeneration/GenerateConfig.php

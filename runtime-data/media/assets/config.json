@@ -1,13 +1,13 @@
 {
-    "createdAt": 1748257937,
+    "createdAt": 1748332637,
     "name": "config",
     "data": {
         "response-codes": {
-            "createdAt": 1748257885,
+            "createdAt": 1748332614,
             "url": "https:\/\/media.getpeer.eu\/assets\/response-codes.json"
         },
         "endpoints": {
-            "createdAt": 1748257885,
+            "createdAt": 1748332614,
             "url": "https:\/\/media.getpeer.eu\/assets\/endpoints.json"
         }
     }
