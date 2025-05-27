@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\Utils\ConfigGeneration;
+namespace Tests\Utils\ConfigGeneration;
 
 class EndpointsConfigConstants {
     static $testBackendServerEndpoint = "https://peer-network.eu/graphql";

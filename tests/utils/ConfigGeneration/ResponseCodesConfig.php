@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\Utils\ConfigGeneration;
+namespace Tests\Utils\ConfigGeneration;
 
 use Exception;
-use Fawaz\Utils\ConfigGeneration\JSONHandler;
+use Tests\Utils\ConfigGeneration\JSONHandler;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\Utils\ConfigGeneration;
+namespace Tests\Utils\ConfigGeneration;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
-use Fawaz\Utils\ConfigGeneration\JSONHandler;
-use Fawaz\Utils\ConfigGeneration\ConfigUrl;
-use Fawaz\Utils\ConfigGeneration\ConfigGenerationConstants;
+use Tests\Utils\ConfigGeneration\JSONHandler;
+use Tests\Utils\ConfigGeneration\ConfigUrl;
+use Tests\Utils\ConfigGeneration\ConfigGenerationConstants;
 
 interface DataGeneratable {
     public function getData(): array;

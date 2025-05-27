@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\Utils\ConfigGeneration;
+namespace Tests\Utils\ConfigGeneration;
 
 use Exception;
-use Fawaz\Utils\ConfigGeneration\Constants;
+use Tests\Utils\ConfigGeneration\Constants;
 
 class ConfigUrl implements DataGeneratable {
     private array $data = [];

@@ -1,8 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\Utils\ConfigGeneration;
-use Psr\Log\LoggerInterface;
+namespace Tests\Utils\ConfigGeneration;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 

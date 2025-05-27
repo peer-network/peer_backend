@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\Utils\ConfigGeneration;
+namespace Tests\Utils\ConfigGeneration;
 
 class Constants {
     static $pathToAssets = "./runtime-data/media/assets/"; 

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Fawaz\Utils\ConfigGeneration;
+namespace Tests\Utils\ConfigGeneration;
 
-use Fawaz\Utils\ConfigGeneration\ResponseCodesConfig;
-use Fawaz\Utils\ConfigGeneration\EndpointsConfig;
+use Tests\Utils\ConfigGeneration\ResponseCodesConfig;
+use Tests\Utils\ConfigGeneration\EndpointsConfig;
 
 enum ConfigGenerationConstants : string implements DataGeneratable {
     case repsonseCodes = "response-codes";
