@@ -80,6 +80,7 @@ class WalletMapper
 		$this->poolWallet = $liqpool['pool'];
 		$this->burnWallet = $liqpool['burn'];
 		$this->peerWallet = $liqpool['peer'];
+		$this->btcpool = $liqpool['btcpool'];
 
         if (!self::isValidUUID($this->poolWallet)) {
             $this->logger->warning('Incorrect poolWallet Exception.', [
@@ -99,6 +100,15 @@ class WalletMapper
             ]);
             return self::respondWithError(0000); // Invalid Peer Wallet ID
         }
+        if (!self::isValidUUID($this->btcpool)) {
+            $this->logger->warning('Incorrect BTC Wallet Exception.', [
+                'btcpool' => $this->btcpool,
+            ]);
+            return self::respondWithError(0000); // Invalid BTC wallet ID
+        }
+
+        $liqpool = $accounts['response'] ?? null;
+        
         $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
 
         $currentBalance = $this->getUserWalletBalance($userId);
@@ -110,6 +120,11 @@ class WalletMapper
         }
 
         $recipient = (string) $args['recipient'];
+
+        if($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient){
+            return self::respondWithError(465852); // Unauthorized to send token.
+        }
+
         if (!self::isValidUUID($recipient)) {
             $this->logger->warning('Incorrect recipientId Exception.', [
                 'recipient' => $recipient,
@@ -1905,6 +1920,12 @@ class WalletMapper
             ]);
             return self::respondWithError(0000); // Invalid Peer Wallet ID
         }
+        if (!self::isValidUUID($this->btcpool)) {
+            $this->logger->warning('Incorrect BTC Wallet Exception.', [
+                'btcpool' => $this->btcpool,
+            ]);
+            return self::respondWithError(0000); // Invalid BTC wallet ID
+        }
         $currentBalance = $this->getUserWalletBalance($userId);
         if (empty($currentBalance)) {
             $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
@@ -2261,6 +2282,7 @@ class WalletMapper
         $this->poolWallet = $data['pool'];
         $this->burnWallet = $data['burn'];
         $this->peerWallet = $data['peer'];
+		$this->btcpool = $data['btcpool'];
     }
 
 
