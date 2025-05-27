@@ -176,7 +176,7 @@ type Transaction {
   tokenamount: Decimal!
   transferaction: String!
   message: String!
-  flag: String!
+  createdat: String!
 }
 
 type TransactionResponse {

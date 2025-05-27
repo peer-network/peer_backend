@@ -1722,14 +1722,8 @@ class GraphQLSchemaBuilder
                 'message' => function (array $root): string {
                     return $root['message'] ?? '';
                 },
-                'flag' => function (array $root): string {
-                    return $root['flag'] ?? '';
-                },
-                'timestamp' => function (array $root): string {
-                    return $root['timestamp'] ?? '';
-                },
-                'status' => function (array $root): string {
-                    return $root['status'] ?? '';
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
                 },
             ],
             'LiquidityPoolTransaction' => [

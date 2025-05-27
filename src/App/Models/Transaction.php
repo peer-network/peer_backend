@@ -23,8 +23,6 @@ class Transaction
     protected string $tokenAmount;
     protected $transferAction;
     protected ?string $message;
-    protected ?string $flag;
-    protected ?string $action;
     protected ?string $createdat;
 
     /**
@@ -39,8 +37,6 @@ class Transaction
         $this->transactionType = $data['transactionType'] ?? null;
         $this->tokenAmount = $data['tokenAmount'] ?? null;
         $this->transferAction = $data['transferAction'] ?? 'DEDUCT';
-        $this->flag = $data['flag'] ?? null;
-        $this->action = $data['action'] ?? null;
         $this->message = $data['message'] ?? null;
         $this->createdat = $data['createdat'] ?? date('Y-m-d H:i:s.u');
 
@@ -87,28 +83,6 @@ class Transaction
             'tokenAmount' => [
                 'required' => true,
                 'validators' => [['name' => 'ToFloat'], ['name' => 'FloatSanitize']],
-            ],
-            'flag' => [
-                'required' => false,
-                'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 63,
-                        'errorCode' => 30210
-                    ]],
-                    ['name' => 'isString'],
-                ],
-            ],
-            'action' => [
-                'required' => false,
-                'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 63,
-                        'errorCode' => 30210
-                    ]],
-                    ['name' => 'isString'],
-                ],
             ],
             'transferAction' => [
                 'required' => false,
@@ -226,18 +200,6 @@ class Transaction
         $this->senderId = $senderId;
     }
 
-    /**
-     * Getter and Setter methods for action
-     */
-    public function getAction(): string|null
-    {
-        return $this->action;
-    }
-    public function setAction(string $action): void
-    {
-        $this->action = $action;
-    }
-
 
     /**
      * Getter and Setter methods for recipientId
@@ -303,17 +265,6 @@ class Transaction
         $this->message = $message;
     }
     
-    /**
-     * Getter and Setter methods for message
-     */
-    public function getFlag(): string|null
-    {
-        return $this->flag;
-    }
-    public function setFlag(string $flag): void
-    {
-        $this->flag = $flag;
-    }
     
 
     /**
