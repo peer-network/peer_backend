@@ -1080,6 +1080,9 @@ class GraphQLSchemaBuilder
                 'amountfriends' => function (array $root): int {
                     return $root['amountfriends'] ?? 0;
                 },
+                'invited' => function (array $root): string {
+                    return $root['invited'] ?? '';
+                },
                 'updatedat' => function (array $root): string {
                     return $root['updatedat'] ?? '';
                 },

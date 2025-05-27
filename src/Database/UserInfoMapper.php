@@ -26,7 +26,7 @@ class UserInfoMapper
         try {
             $stmt = $this->db->prepare(
                 'SELECT userid, liquidity, amountposts, amountblocked, amountfollower, 
-                        amountfollowed, amountfriends, isprivate, updatedat 
+                        amountfollowed, amountfriends, isprivate, invited, updatedat 
                  FROM users_info 
                  WHERE userid = :id'
             );
