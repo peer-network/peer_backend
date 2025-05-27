@@ -2734,7 +2734,7 @@ class GraphQLSchemaBuilder
             $comments = $this->commentInfoService->findCommentInfo($commentId);
 
             if ($comments === false) {
-                return $this->respondWithError(31601);
+                return $this->createSuccessResponse(21505);
             }
         } else {
             return $this->createSuccessResponse(21506);

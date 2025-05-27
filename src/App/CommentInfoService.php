@@ -164,7 +164,7 @@ class CommentInfoService
         $commentinfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentinfo) {
-            return false;
+            return $this->respondWithError(31601);
         }
 
         $results = $commentinfo->getArrayCopy();
