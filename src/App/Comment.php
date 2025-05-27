@@ -148,8 +148,8 @@ class Comment
                     [
                         'name' => 'StringLength', 
                         'options' => [
-                            'min' => 3,
-                            'max' => 53,
+                            'min' => 2,
+                            'max' => 200,
                             'errorCode' => 30265,
                             ]
                         ],
