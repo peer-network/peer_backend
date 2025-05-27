@@ -202,6 +202,7 @@ type UserInfo {
   amountfollower: Int!
   amountfollowed: Int!
   amountfriends: Int!
+  invited: ID!
   updatedat: Date
 }
 
