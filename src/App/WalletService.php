@@ -338,7 +338,7 @@ class WalletService
             }
 
         } catch (\Exception $e) {
-            return $this->respondWithError('Unknown Error.');
+            return $this->respondWithError(0000); // Failed to transfer token
         }
     }
 
@@ -488,7 +488,7 @@ class WalletService
             }
 
         } catch (\Exception $e) {
-            return $this->respondWithError('Unknown Error.');
+            return $this->respondWithError(0000); // Failed to swap tokens
         }
     }
 
@@ -519,7 +519,7 @@ class WalletService
                 ];
             }
         } catch (\Exception $e) {
-            return $this->respondWithError('Unknown Error.');
+            return $this->respondWithError(0000); // Failed to add Liquidity
         }
     }
 
