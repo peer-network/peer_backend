@@ -1959,17 +1959,17 @@ class GraphQLSchemaBuilder
             $result = $this->poolService->getActionPrices();
 
             if (empty($result)) {
-                return $this->createSuccessResponse(00000);
+                return $this->respondWithError(00000);
             }
 
             return [
                 'status'        => 'success',
                 'ResponseCode'  => 00000,
                 'affectedRows'  => [
-                    'postPrice'     => (float) $result['post_price'],
-                    'likePrice'     => (float) $result['like_price'],
-                    'dislikePrice'  => (float) $result['dislike_price'],
-                    'commentPrice'  => (float) $result['comment_price'],
+                    'postPrice'     => isset($result['post_price']) ? (float) $result['post_price'] : 0.0,
+                    'likePrice'     => isset($result['like_price']) ? (float) $result['like_price'] : 0.0,
+                    'dislikePrice'  => isset($result['dislike_price']) ? (float) $result['dislike_price'] : 0.0,
+                    'commentPrice'  => isset($result['comment_price']) ? (float) $result['comment_price'] : 0.0,
                 ]
             ];
         } catch (\Throwable $e) {
