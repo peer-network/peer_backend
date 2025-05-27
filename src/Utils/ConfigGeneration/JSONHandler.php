@@ -2,12 +2,14 @@
 declare(strict_types=1);
 
 namespace Fawaz\Utils\ConfigGeneration;
+use Psr\Log\LoggerInterface;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
 class JSONHandler {
-    private static function generateJson(array $data, string $name)
-    {
+    private static function generateJson(array $data, string $name) {
+        echo("ConfigGeneration: JSONHandler: generating JSON: " . $name . "\n");
+        
         $jsonObj['createdAt'] = time();
         $jsonObj['name'] = $name;
         $jsonObj['data'] = $data;
@@ -22,6 +24,8 @@ class JSONHandler {
     }
 
     public static function parseInputJson(string $filePath, bool $validateKeyUniqness = false): array {
+        echo("ConfigGeneration: JSONHandler: parseInputJson: " . $filePath. "\n");
+
         if (!file_exists($filePath)) {
             throw new \Exception("Response Code File is not found: $filePath");
         }
@@ -33,11 +37,10 @@ class JSONHandler {
                 throw new \Exception("Error: Duplicated Keys: $duplications");
             }
         }
-
+        
         if (!empty($duplications)) {
             throw new \Exception("Error: " . $filePath . ": duplication: " . $duplications[0]);
         }
-
 
         $decoded = json_decode($jsonContent, true);
 
@@ -48,13 +51,13 @@ class JSONHandler {
     }
 
     private static function getDuplicatedNumericKeys(string $json): string | null {
-        // Match all top-level keys using regex
+        echo("ConfigGeneration: JSONHandler: getDuplicatedNumericKeys start". "\n");
+
         preg_match_all('/"([^"]+)"\s*:/', $json, $matches);
 
         $keys = $matches[1];
         $numericKeys = array_filter($keys, fn($key) => is_numeric($key));
 
-        // Count and find duplicates
         $counts = array_count_values($numericKeys);
         $duplicatedKeys = array_keys(array_filter($counts, fn($count) => $count > 1));
         if ($duplicatedKeys) {

@@ -13,7 +13,7 @@ class ResponseCodesConfig implements DataGeneratable {
     private array $data = [];
 
 
-    public function __construct($filePath) {           
+    public function __construct($filePath) {  
         $decoded = JSONHandler::parseInputJson($filePath, true);
 
         if (!$decoded || empty($decoded)) {
@@ -38,6 +38,7 @@ class ResponseCodesConfig implements DataGeneratable {
     }
 
     private function validate() {
+        echo("ConfigGeneration: ResponseCodesConfig: validate: start \n");
         $this->validateMessages();
         $this->validateCodes();
     }

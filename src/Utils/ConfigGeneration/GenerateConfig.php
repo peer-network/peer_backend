@@ -21,7 +21,8 @@ try {
         JSONHandler::generateJSONtoFile(Constants::$pathToAssets . $file->outputFileName(), $file->getData(), $file->getName());
     }
     JSONHandler::generateJSONtoFile(Constants::$pathToAssets . "config.json", $pathsConfig->getData(), "config");
-
+    
+    echo("ConfigGeneration: Done! \n");
 } catch (\Exception $e) {
-    echo $e->getMessage();
+    echo "ConfigGeneration: Erorr: " . $e->getMessage();
 }
