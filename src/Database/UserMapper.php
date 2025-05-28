@@ -1169,6 +1169,7 @@ class UserMapper
             FROM users_info ui
             JOIN users u ON ui.userid = u.uid
             WHERE ui.invited = :userId
+            ORDER BY ui.updatedat DESC
             LIMIT :limit OFFSET :offset
         ";
 
