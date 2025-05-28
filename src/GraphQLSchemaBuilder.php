@@ -2,6 +2,8 @@
 
 namespace Fawaz;
 
+const INT32_MAX= 2147483647;
+
 // whereby
 const VIEW_=1;// whereby VIEW
 const LIKE_=2;// whereby LIKE
@@ -1078,6 +1080,9 @@ class GraphQLSchemaBuilder
                 'amountfriends' => function (array $root): int {
                     return $root['amountfriends'] ?? 0;
                 },
+                'invited' => function (array $root): string {
+                    return $root['invited'] ?? '';
+                },
                 'updatedat' => function (array $root): string {
                     return $root['updatedat'] ?? '';
                 },
@@ -1774,7 +1779,7 @@ class GraphQLSchemaBuilder
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 }
-            ],                              
+            ],
         ];
     }
 
@@ -2043,7 +2048,10 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.resolveReferralList started');
 
         $userId = $this->currentUserId;
-
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
         try {
             $this->logger->info('Current userId in resolveReferralList', ['userId' => $userId]);
 
@@ -2058,8 +2066,9 @@ class GraphQLSchemaBuilder
             if (!empty($inviter)) {
                 $referralUsers['invitedBy'] = $inviter;
             }
-
-            $referrals = $this->userMapper->getReferralRelations($userId);
+            $offset = $args['offset'] ?? 0;
+            $limit = $args['limit'] ?? 20;
+            $referrals = $this->userMapper->getReferralRelations($userId,$offset, $limit);
             $this->logger->info('Referral relations', ['referrals' => $referrals]);
 
             if (!empty($referrals['iInvited'])) {
@@ -3053,7 +3062,7 @@ class GraphQLSchemaBuilder
         $messageLimit = isset($args['messageLimit']) ? (int)$args['messageLimit'] : null;
 
         if ($offset !== null) {
-            if ($offset < 0 || $offset > 200) {
+            if ($offset < 0 || $offset > INT32_MAX) {
                 return $this->respondWithError(30203);
             }
         }
@@ -3065,7 +3074,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($postOffset !== null) {
-            if ($postOffset < 0 || $postOffset > 200) {
+            if ($postOffset < 0 || $postOffset > INT32_MAX) {
                 return $this->respondWithError(30203);
             }
         }
@@ -3077,7 +3086,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($commentOffset !== null) {
-            if ($commentOffset < 0 || $commentOffset > 200) {
+            if ($commentOffset < 0 || $commentOffset > INT32_MAX) {
                 return $this->respondWithError(30215);
             }
         }
@@ -3089,7 +3098,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($messageOffset !== null) {
-            if ($messageOffset < 0 || $messageOffset > 200) {
+            if ($messageOffset < 0 || $messageOffset > INT32_MAX) {
                 return $this->respondWithError(30219);
             }
         }
