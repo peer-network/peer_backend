@@ -401,7 +401,7 @@ type TransactionResponse {
 type TokenPriceResponse {
   status: String!
   responseCode: Int!
-  currentTokenPrice: Decimal
+  currentTokenPrice: String!
   updatedAt: String
 }
 

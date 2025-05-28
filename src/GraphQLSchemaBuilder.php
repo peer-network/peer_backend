@@ -1718,8 +1718,8 @@ class GraphQLSchemaBuilder
                 'responseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
-                 'currentTokenPrice' => function (array $root): float {
-                    return $root['currentTokenPrice'] ?? [];
+                 'currentTokenPrice' => function (array $root): string {
+                    return $root['currentTokenPrice'] ?? '';
                 },
                 'updatedAt' => function (array $root): string {
                     return $root['updatedAt'] ?? [];

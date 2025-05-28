@@ -193,7 +193,7 @@ type LiquidityPoolHistoryResponse {
 type TokenPriceResponse {
   status: String!
   responseCode: Int!
-  currentTokenPrice: Decimal
+  currentTokenPrice: String!
   updatedAt: String
 }
 type LiquidityPoolTransaction {

@@ -1859,7 +1859,12 @@ class WalletMapper
                 throw new \RuntimeException("Invalid LP token data retrieved.");
             }
 
-            $tokenPrice = (float) $getLpTokenBtcLP / (float) $getLpToken['liquidity'];
+            // Ensure both values are strings
+            $liquidity = (float) $getLpToken['liquidity'];
+            $btcLP = (float) $getLpTokenBtcLP;
+
+            // Use bcdiv to avoid float/scientific notation, and set precision
+            $tokenPrice = bcdiv($btcLP, $liquidity, 18); // 10 decimal places as example
 
             return [
                 'status' => 'success',
