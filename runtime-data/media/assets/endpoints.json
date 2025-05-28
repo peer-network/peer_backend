@@ -1,0 +1,36 @@
+{
+    "createdAt": 1748436568,
+    "name": "endpoints",
+    "data": {
+        "ios": [
+            {
+                "version": "0.0.0",
+                "url": "https:\/\/fourchan.fake\/"
+            },
+            {
+                "version": "1.2.0",
+                "url": "https:\/\/peernetwork.eu\/graphql"
+            },
+            {
+                "version": "1.3.0",
+                "url": "https:\/\/getpeer.eu\/graphql"
+            }
+        ],
+        "android": [
+            {
+                "version": "1.0.2",
+                "url": "https:\/\/peernetwork.eu\/graphql"
+            },
+            {
+                "version": "1.0.3",
+                "url": "https:\/\/getpeer.eu\/graphql"
+            }
+        ],
+        "web": [
+            {
+                "version": "1.0.0",
+                "url": "https:\/\/getpeer.eu\/graphql"
+            }
+        ]
+    }
+}
