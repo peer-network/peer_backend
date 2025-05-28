@@ -333,7 +333,11 @@ class WalletService
                 return [
                     'status' => 'success',
                     'ResponseCode' => 11211,
-                    'affectedRows' => [],
+                    'affectedRows' => [
+                        'tokenSend' => $response['tokenSend'],
+                        'tokensSubstractedFromWallet' => $response['tokensSubstractedFromWallet'],
+                        'createdat' => $response['createdat'] ?? ''
+                    ],
                 ];
             }
 

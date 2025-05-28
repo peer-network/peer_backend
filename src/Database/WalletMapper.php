@@ -122,7 +122,8 @@ class WalletMapper
         $recipient = (string) $args['recipient'];
 
         if($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient){
-            return self::respondWithError(465852); // Unauthorized to send token.
+            $this->logger->warning('Unauthorized to send token');
+            return self::respondWithError(0000); // Unauthorized to send token.
         }
 
         if (!self::isValidUUID($recipient)) {
@@ -420,7 +421,13 @@ class WalletMapper
                 $this->saveWalletEntry($this->burnWallet, $args['numbers']);
             }
 
-            return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
+            return [
+                'status' => 'success', 
+                'ResponseCode' => 0000, // Successfully transferred to wallet
+                'tokenSend' => $numberoftokens,
+                'tokensSubstractedFromWallet' => $requiredAmount,
+                'createdat' => date('Y-m-d H:i:s.u')
+            ];
 
         } catch (\Throwable $e) {
             return self::respondWithError($e->getMessage());

@@ -1658,6 +1658,29 @@ class GraphQLSchemaBuilder
                     return $root['expectedBtcReturn'] ?? 0.0;
                 },
             ],
+            'TransferTokenResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'responseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'TransferToken' => [
+                'tokenSend' => function (array $root): float {
+                    return $root['tokenSend'] ?? 0.0;
+                },
+                'tokensSubstractedFromWallet' => function (array $root): float {
+                    return $root['tokensSubstractedFromWallet'] ?? 0.0;
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ],
             'TransactionResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.getTransactionHistory Resolvers');

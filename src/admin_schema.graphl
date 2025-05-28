@@ -71,7 +71,7 @@ type Mutation {
   createPost(action: PostType!, input: PostInput!): PostResponse!
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
-  resolveTransfer(recipient: ID!, numberoftokens: Decimal!): DefaultResponse!
+  resolveTransfer(recipient: ID!, numberoftokens: Decimal!): TransferTokenResponse!
   swapTokens(btcAddress: ID!, numberoftokens: Decimal!): SwapTokenResponse!
   addLiquidity(amountToken: Decimal!, amountBtc: Decimal!): AddLiquidityResponse!
   updateSwapTranStatus(transactionId: ID!): DefaultResponse!
@@ -367,6 +367,17 @@ type SwapTokenResponse {
   status: String!
   responseCode: Int!
   affectedRows: SwapToken!
+}
+
+type TransferTokenResponse {
+  status: String!
+  responseCode: Int!
+  affectedRows: TransferToken!
+}
+type TransferToken {
+  tokenSend: Decimal
+  tokensSubstractedFromWallet: Decimal
+  createdat: String
 }
 
 type Transaction {
