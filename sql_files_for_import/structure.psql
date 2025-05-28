@@ -499,7 +499,7 @@ CREATE TABLE IF NOT EXISTS user_post_shares (
 -- Table: Versionierung
 CREATE TABLE IF NOT EXISTS versions (
     versid UUID PRIMARY KEY,
-    version NUMERIC(2,3) DEFAULT 0.0 NOT NULL,
+    version NUMERIC(3,2) DEFAULT 0.0 NOT NULL,
     wikiLink TEXT DEFAULT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -533,7 +533,6 @@ CREATE INDEX IF NOT EXISTS idx_wallet_userid ON wallet(userid);
 
 ALTER TABLE wallet ADD message VARCHAR(255) NULL;
 ALTER TABLE logwins ADD message VARCHAR(255) NULL;
-
 
 -- Table: transactions
 CREATE TABLE IF NOT EXISTS transactions (

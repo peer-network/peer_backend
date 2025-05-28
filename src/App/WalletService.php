@@ -215,7 +215,7 @@ class WalletService
 
         $gemsters = $this->walletMapper->getTimeSortedMatch($day);
 
-        if (isset($gemsters['affectedRows'])) {
+        if (isset($gemsters['affectedRows']['data'])) {
             $winstatus = $gemsters['affectedRows']['data'][0];
             unset($gemsters['affectedRows']['data'][0]);
 
