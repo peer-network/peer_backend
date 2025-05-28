@@ -1,5 +1,5 @@
 {
-    "createdAt": 1748436568,
+    "createdAt": 1748444951,
     "name": "response-codes",
     "data": {
         "10401": {
@@ -936,15 +936,11 @@
         },
         "31901": {
             "comment": "Failure: Too many requests. Email delivery failed. Please try again later. ",
-            "userFriendlyComment": "We're sending too many emails right now. Please try again in a little while."
-        },
-        "31902": {
-            "comment": "Failure: No users found associated with this email.",
-            "userFriendlyComment": "We couldn't find an account with that email address. Please check and try again."
+            "userFriendlyComment": "Failure: Too many requests. Email delivery failed. Please try again later."
         },
         "31903": {
             "comment": "Failure: Too many requests. Email delivery failed. Please contact support team at peernetworkpse@gmail.com. ",
-            "userFriendlyComment": "We're having trouble sending emails. Please contact our support team for help."
+            "userFriendlyComment": "Failure: Too many requests. Email delivery failed. Please contact support team at peernetworkpse@gmail.com. "
         },
         "31904": {
             "comment": "Failure: Invalid or expired reset token. Please try again",
