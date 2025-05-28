@@ -1645,13 +1645,13 @@ class UserMapper
             $remaining = ceil((strtotime($lastAttempt . " +{$waitMinutes} minutes") - time()) / 60);
             return [
                 'status' => 'error',
-                'ResponseCode' => "Email delivery failed - Please try again after {$remaining} minute(s)"
+                'ResponseCode' => 31901
             ];
         }
 
         return [
             'status' => 'error',
-            'ResponseCode' => "Email delivery failed - Please try again after {$waitMinutes} minute(s)"
+            'ResponseCode' => 31901
         ];
     }
 
@@ -1662,7 +1662,7 @@ class UserMapper
     {
         return [
             'status' => 'error',
-            'ResponseCode' => 'Email delivery failed - Please contact support team at peernetworkpse@gmail.com'
+            'ResponseCode' => 31903
         ];
     }
 
