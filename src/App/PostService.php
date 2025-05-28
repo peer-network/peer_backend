@@ -429,7 +429,7 @@ class PostService
             return $this->respondWithError(30201);
         }
 
-        if ($title !== null && strlen($title) < 2 || strlen($title) > 33) {
+        if ($title !== null && strlen((string)$title) < 2 || strlen((string)$title) > 33) {
             return $this->respondWithError(30210);
         }
 

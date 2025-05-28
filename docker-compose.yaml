@@ -1,0 +1,123 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./sql_files_for_import:/docker-entrypoint-initdb.d
+      - peer_backend_db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  backend:
+    build:
+      context: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8888:80"
+    environment:
+      DB_DRIVER: ${DB_DRIVER}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_CHARSET: ${DB_CHARSET}
+      DB_SSLMODE: ${DB_SSLMODE}
+      DB_TIMEOUT: ${DB_TIMEOUT}
+      CONTAINER_PATH: ${CONTAINER_PATH}
+      LOGGER_NAME: ${LOGGER_NAME}
+      LOGGER_PATH: ${LOGGER_PATH}
+      LOGGER_LEVEL: ${LOGGER_LEVEL}
+      APP_ENV: ${APP_ENV}
+      APP_NAME: ${APP_NAME}
+      APP_URL: ${APP_URL}
+      BASE_URL: ${BASE_URL}
+      TIME_ZONE: ${TIME_ZONE}
+      GRAPHQL_ENDPOINT: ${GRAPHQL_ENDPOINT}
+      PRIVATE_KEY_PATH: ${PRIVATE_KEY_PATH}
+      PUBLIC_KEY_PATH: ${PUBLIC_KEY_PATH}
+      REFRESH_PRIVATE_KEY_PATH: ${REFRESH_PRIVATE_KEY_PATH}
+      REFRESH_PUBLIC_KEY_PATH: ${REFRESH_PUBLIC_KEY_PATH}
+      REFRESH_TOKEN_EXPIRY: ${REFRESH_TOKEN_EXPIRY}
+      TOKEN_EXPIRY: ${TOKEN_EXPIRY}
+      LIMITER_TIME: ${LIMITER_TIME}
+      LIMITER_RATE: ${LIMITER_RATE}
+      RATE_LIMITER: ${RATE_LIMITER}
+      MAIL_API_LINK: ${MAIL_API_LINK}
+      MAIL_API_KEY: ${MAIL_API_KEY}
+      MAIL_DRIVER: ${MAIL_DRIVER}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+      PEER_BANK: ${PEER_BANK}
+      BURN_ACCOUNT: ${BURN_ACCOUNT}
+      LIQUIDITY_POOL: ${LIQUIDITY_POOL}
+    networks:
+      - my-network
+    command: >
+      sh -c "
+        echo 'Waiting for Postgres...' &&
+        until pg_isready -h \"$DB_HOST\" -p \"$DB_PORT\" -U \"$DB_USERNAME\"; do
+          echo 'Waiting...'; sleep 2;
+        done &&
+        echo 'Postgres is up!' &&
+        mkdir -p keys &&
+        [ -f keys/private.key ] || openssl genpkey -algorithm RSA -out keys/private.key -pkeyopt rsa_keygen_bits:2048 &&
+        [ -f keys/public.key ] || openssl rsa -pubout -in keys/private.key -out keys/public.key &&
+        [ -f keys/refresh_private.key ] || openssl genpkey -algorithm RSA -out keys/refresh_private.key -pkeyopt rsa_keygen_bits:2048 &&
+        [ -f keys/refresh_public.key ] || openssl rsa -pubout -in keys/refresh_private.key -out keys/refresh_public.key &&
+        chmod 644 keys/*.key &&
+        supervisord -c /etc/supervisord.conf
+      "
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "curl -s -X POST -H 'Content-Type: application/json' --data '{\"query\":\"{__typename}\"}' http://localhost/graphql || exit 1"
+      ]
+      interval: 10s
+      retries: 5
+      start_period: 90s
+      timeout: 10s
+  newman:
+    build:
+      context: .
+      dockerfile: Dockerfile.newman
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      BACKEND_URL: "http://backend:80"
+    volumes:
+      - ./tests/postman_collection:/etc/newman
+      - ./newman/reports:/etc/newman/reports
+    entrypoint: >
+      newman run /etc/newman/graphql_postman_collection.json
+      --environment /etc/newman/graphql_postman_environment.json
+      --reporters cli,htmlextra
+      --reporter-htmlextra-export /etc/newman/reports/report.html
+    restart: "no"
+    networks:
+      - my-network
+ 
+networks:
+  my-network:
+    name: my-network
+ 
+volumes:
+  peer_backend_db-data:
