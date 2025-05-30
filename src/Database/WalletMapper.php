@@ -86,25 +86,25 @@ class WalletMapper
             $this->logger->warning('Incorrect poolWallet Exception.', [
                 'poolWallet' => $this->poolWallet,
             ]);
-            return self::respondWithError(0000); // Invalid Pool Wallet ID
+            return self::respondWithError(0000); // Invalid Pool account
         }
         if (!self::isValidUUID($this->burnWallet)) {
             $this->logger->warning('Incorrect burn Wallet Exception.', [
                 'burnWallet' => $this->burnWallet,
             ]);
-            return self::respondWithError(0000); // Invalid BURN Wallet ID
+            return self::respondWithError(0000); // Invalid BURN account
         }
         if (!self::isValidUUID($this->peerWallet)) {
             $this->logger->warning('Incorrect Peer Wallet Exception.', [
                 'peerWallet' => $this->peerWallet,
             ]);
-            return self::respondWithError(0000); // Invalid Peer Wallet ID
+            return self::respondWithError(0000); // Invalid Peer account
         }
         if (!self::isValidUUID($this->btcpool)) {
             $this->logger->warning('Incorrect BTC Wallet Exception.', [
                 'btcpool' => $this->btcpool,
             ]);
-            return self::respondWithError(0000); // Invalid BTC wallet ID
+            return self::respondWithError(0000); // Invalid BTC account
         }
 
         $liqpool = $accounts['response'] ?? null;
@@ -120,6 +120,12 @@ class WalletMapper
         }
 
         $recipient = (string) $args['recipient'];
+
+        
+        if ((string) $recipient === $userId) {
+            $this->logger->warning('Send and Receive Same Wallet Error.');
+            return self::respondWithError(31202);
+        }
 
         if($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient){
             $this->logger->warning('Unauthorized to send token');
@@ -139,14 +145,19 @@ class WalletMapper
         }
 
         $numberoftokens = (float) $args['numberoftokens'];
-        if ($numberoftokens <= 0) {
-            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+        if ($numberoftokens < 0) {
+            $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
             return self::respondWithError(30264);
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
+
+        if ($message !== null && strlen($message) > 200) {
+            $this->logger->warning('message length is too high');
+            return self::respondWithError(30210); // message length is too high.
+        }
 
         try {
             $sql = "SELECT uid FROM users WHERE uid = :uid";
@@ -1953,12 +1964,13 @@ class WalletMapper
         }
         $numberoftokens = (float) $args['numberoftokens'];
        
-        if ($numberoftokens <= 0) {
-            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+
+        if ($numberoftokens < 10) {
+            $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(51301);
+            return self::respondWithError(30264);
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
