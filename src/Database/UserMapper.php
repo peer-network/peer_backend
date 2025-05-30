@@ -1643,22 +1643,22 @@ class UserMapper
     public function rateLimitResponse(int $waitMinutes, ?string $lastAttempt = null): array
     {
         if ($lastAttempt) {
-            $remaining = ceil((strtotime($lastAttempt . " +{$waitMinutes} minutes") - time()) / 60);
-            return [
-                'status' => 'error',
-                'ResponseCode' => 31901
-            ];
+        $nextAttemptTimestamp = strtotime($lastAttempt . " +{$waitMinutes} minutes");
+        } else {
+        $nextAttemptTimestamp = time() + ($waitMinutes * 60);
         }
-
+        $nextAttemptAt = (new \DateTime())->setTimestamp($nextAttemptTimestamp)->format('Y-m-d H:i:s.u');
+                
         return [
             'status' => 'error',
-            'ResponseCode' => 31901
+            'ResponseCode' => 31901,
+            'nextAttemptAt' => $nextAttemptAt,
         ];
     }
 
     /**
      * Returns a response when user has made too many attempts.
-     */
+     */
     public function tooManyAttemptsResponse(): array
     {
         return [
