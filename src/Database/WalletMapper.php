@@ -1867,12 +1867,21 @@ class WalletMapper
             $getLpToken = $this->getLpInfo();
             $getLpTokenBtcLP = $this->getLpTokenBtcLP();
 
-            if (empty($getLpToken) || !isset($getLpToken['liquidity']) || $getLpToken['liquidity'] == 0) {
+            if (empty($getLpToken) || !isset($getLpToken['liquidity'])) {
                 throw new \RuntimeException("Invalid LP token data retrieved.");
             }
 
             // Ensure both values are strings
             $liquidity = (float) $getLpToken['liquidity'];
+
+            if($liquidity == 0){
+                 return [
+                    'status' => 'success',
+                    'ResponseCode' => 0000, // Successfully retrieved Peer token price
+                    'currentTokenPrice' => 0,
+                    'updatedAt' => $getLpToken['updatedat'] ?? null,
+                ];
+            }
             $btcLP = (float) $getLpTokenBtcLP;
 
             // Use bcdiv to avoid float/scientific notation, and set precision
