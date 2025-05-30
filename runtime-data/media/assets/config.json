@@ -1,0 +1,14 @@
+{
+    "createdAt": 1748444951,
+    "name": "config",
+    "data": {
+        "response-codes": {
+            "createdAt": 1748444951,
+            "url": "https:\/\/media.getpeer.eu\/assets\/response-codes.json"
+        },
+        "endpoints": {
+            "createdAt": 1748444951,
+            "url": "https:\/\/media.getpeer.eu\/assets\/endpoints.json"
+        }
+    }
+}
