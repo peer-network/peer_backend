@@ -2719,7 +2719,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30101);
         }
 
-        if (!empty($commentId) && !self::isValidUUID($commentId)) {
+        if (!self::isValidUUID($commentId)) {
             return $this->respondWithError(30217);
         }
 
@@ -2731,10 +2731,10 @@ class GraphQLSchemaBuilder
             $comments = $this->commentInfoService->findCommentInfo($commentId);
 
             if ($comments === false) {
-                return $this->createSuccessResponse(21505);
+                return $this->respondWithError(21505);
             }
         } else {
-            return $this->createSuccessResponse(21506);
+            return $this->respondWithError(21506);
         }
 
         return [
