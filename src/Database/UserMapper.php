@@ -1643,8 +1643,6 @@ class UserMapper
      */
     public function rateLimitResponse(int $waitMinutes, ?string $lastAttempt = null): array
     {
-        $remaining = $waitMinutes;
-
         if ($lastAttempt) {
         $nextAttemptTimestamp = strtotime($lastAttempt . " +{$waitMinutes} minutes");
         } else {
@@ -1652,11 +1650,6 @@ class UserMapper
         }
         $nextAttemptAt = (new \DateTime())->setTimestamp($nextAttemptTimestamp)->format('Y-m-d H:i:s.u');
                 
-            $remaining = ceil((strtotime($lastAttempt . " +{$waitMinutes} minutes") - time()) / 60);
-        }
-
-        $nextAttemptAt = DateService::nowPlusMinutes($remaining);
-        
         return [
             'status' => 'error',
             'ResponseCode' => 31901,
