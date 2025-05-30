@@ -444,8 +444,8 @@
         "userFriendlyComment": "Username must be 3-23 chars with letters, numbers, or underscores."
     },
     "30203": {
-        "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 200",
-        "userFriendlyComment": "Offset must be a number between 0 and 200."
+        "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 2147483647",
+        "userFriendlyComment": "Offset must be a number between 0 and 2147483647."
     },
     "30204": {
         "comment": "The 'limit' field (Number of data objects to retrieve) must be an integer between 1 and 20",
@@ -843,6 +843,10 @@
         "comment": "Not Allowed: As the owner, you are restricted from viewing your own posts",
         "userFriendlyComment": "You can't view your own post this way."
     },
+    "31510": {
+        "comment": "Information Not Found: No post found for the provided post ID. Please check the ID and try again.",
+        "userFriendlyComment": "Post not found. Check the ID and try again."
+    },
     "31601": {
         "comment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",
         "userFriendlyComment": "Comment not found. Check the ID and try again."
@@ -919,17 +923,21 @@
         "comment": "Already Exists: Participant already exists in the group",
         "userFriendlyComment": "This person is already in the group chat."
     },
+    "31814": {
+        "comment": "Forbidden: You are not allowed to send messages in this chat.",
+        "userFriendlyComment": "You don’t have permission to send messages in this chat."
+    },
+    "31815": {
+        "comment": "Information Not Found: No chat found for the provided chat ID. Please check the ID and try again.",
+        "userFriendlyComment": "Chat not found. Check the ID and try again."
+    },
     "31901": {
         "comment": "Failure: Too many requests. Email delivery failed. Please try again later. ",
-        "userFriendlyComment": "We're sending too many emails right now. Please try again in a little while."
-    },
-    "31902": {
-        "comment": "Failure: Too many requests. Email delivery failed. Please try again later. ",
-        "userFriendlyComment": "Our email system is busy. Please wait a bit and try again."
+        "userFriendlyComment": "Failure: Too many requests. Email delivery failed. Please try again later."
     },
     "31903": {
         "comment": "Failure: Too many requests. Email delivery failed. Please contact support team at peernetworkpse@gmail.com. ",
-        "userFriendlyComment": "We're having trouble sending emails. Please contact our support team for help."
+        "userFriendlyComment": "Failure: Too many requests. Email delivery failed. Please contact support team at peernetworkpse@gmail.com. "
     },
     "31904": {
         "comment": "Failure: Invalid or expired reset token. Please try again",
