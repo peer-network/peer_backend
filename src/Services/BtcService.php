@@ -1,0 +1,56 @@
+<?php
+
+namespace Fawaz\Services;
+
+class BtcService
+{
+    /**
+     * Fetches the current Bitcoin price in EUR from the CoinGecko API.
+     *
+     * @return float|0.0 Returns the price in EUR, or 0.0 if the request fails.
+     */
+    public static function getBitcoinPriceEUR(): ?float
+    {
+        $url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur";
+
+        // Initialize cURL session
+        $ch = curl_init($url);
+
+        // Set cURL options
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
+
+        // Execute the HTTP request
+        $response = curl_exec($ch);
+
+        // Check for cURL errors
+        if (curl_errno($ch)) {
+            error_log("Fehler beim Abrufen des Bitcoin-Kurses: " . curl_error($ch));
+            curl_close($ch);
+            return 0.0;
+        }
+
+        // Get HTTP status code
+        $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        // Check if the request was successful
+        if ($httpStatus !== 200) {
+            error_log("HTTP-Fehler beim Abrufen des Bitcoin-Kurses: $httpStatus");
+            return 0.0;
+        }
+
+        // Decode the JSON response into an associative array
+        $data = json_decode($response, true);
+
+        // Validate and return the price if it exists
+        if (isset($data['bitcoin']['eur'])) {
+
+            $btcPrice = (float) $data['bitcoin']['eur'];
+            return 100000 / $btcPrice;
+        }
+
+        // Log unexpected format
+        error_log("Unerwartetes Antwortformat vom CoinGecko API.");
+        return 0.0;
+    }
+}

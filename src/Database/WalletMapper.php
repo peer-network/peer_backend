@@ -9,6 +9,7 @@ use Fawaz\App\Repositories\TransactionRepository;
 use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
+use Fawaz\Services\BtcService;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
@@ -1965,12 +1966,14 @@ class WalletMapper
         $numberoftokens = (float) $args['numberoftokens'];
        
 
-        if ($numberoftokens < 10) {
-            $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
+        // Get BTC price
+        $btcPrice = BtcService::getBitcoinPriceEUR();
+        if (($btcPrice * $numberoftokens) < 10) {
+            $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(30264);
+            return self::respondWithError(0000); // Price should be above 10 EUROs
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
