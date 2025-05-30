@@ -43,7 +43,7 @@ type Query {
   postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
   dailygemstatus: DailyGemStatusResponse!
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
-  getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
+  getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
   getTokenPrice: TokenPriceResponse!
 }
@@ -88,6 +88,25 @@ enum PostActionType {
   SHARE
   SAVE
 }
+
+enum TokenMovementFilterType{
+  TRANSACTION
+  AIRDROP
+  MINT
+  PAYMENT
+  BURN
+}
+
+enum DirectionFilterType {
+  INCOME
+  DEDUCTION
+}
+
+enum SortFilterType {
+  descending
+  ascending
+}
+
 
 enum PostType {
   POST

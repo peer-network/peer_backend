@@ -365,7 +365,7 @@ class WalletService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         try {
-            $results = $this->walletMapper->transactionsHistory($this->currentUserId, $offset, $limit);
+            $results = $this->walletMapper->getTransactions($this->currentUserId, $args);
 
             return [
                 'status' => 'success',

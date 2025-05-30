@@ -1792,52 +1792,116 @@ class WalletMapper
     }
 
 
-    
     /**
-     * get swap transcation history of current user.
-     * 
-     * @param userId string
-     * @param offset int
-     * @param limit int
-     * 
-     */
-    public function transactionsHistory(string $userId, int $offset, int $limit): ?array
+      * 
+      * get transcations history of current user.
+      * 
+      */ 
+    public function getTransactions(string $userId, array $args): ?array
     {
+        $this->logger->info("WalletMapper.getTransactions started");
 
-        $this->logger->info('Fetching transaction history - WalletMapper.transactionsHistory', ['userId' => $userId]);
+        // Define FILTER mappings. 
+        $typeMap = [
+            'TRANSACTION' => ['transferSenderToRecipient', 'transferDeductSenderToRecipient'],
+            'AIRDROP' => ['airdrop'],
+            'MINT' => ['mint'],
+            'FEES' => ['transferSenderToBurnWallet', 'transferSenderToPeerWallet', 'transferSenderToPoolWallet']
+        ];
 
-        $query = "
-                    SELECT 
-                        *
-                    FROM transactions
-                    WHERE 
-                        senderid = :senderid 
-                        AND transferaction != 'CREDIT'
-                    ORDER BY createdat DESC
-                    LIMIT :limit OFFSET :offset
-                ";
-    
+        // Define DIRECTION FILTER mappings.
+        $directionMap = [
+            'INCOME' => ['CREDIT'],
+            'DEDUCTION' => ['DEDUCT', 'BURN_FEE', 'POOL_FEE', 'PEER_FEE']
+        ];
+
+        $transactionTypes = isset($args['type']) ? ($typeMap[$args['type']] ?? []) : [];
+        $transferActions = isset($args['direction']) ? ($directionMap[$args['direction']] ?? []) : [];
+
+        $query = "SELECT * FROM transactions WHERE senderid = :senderid";
+        $params = [':senderid' => $userId];
+
+        // Handle TRANSACTION TYPE filter.
+        if (!empty($transactionTypes)) {
+            $typePlaceholders = [];
+            foreach ($transactionTypes as $i => $type) {
+                $ph = ":type$i";
+                $typePlaceholders[] = $ph;
+                $params[$ph] = $type;
+            }
+            $query .= " AND transactiontype IN (" . implode(',', $typePlaceholders) . ")";
+        }
+
+        // Handle TRANSFER ACTION filter.
+        if (!empty($transferActions)) {
+            $actionPlaceholders = [];
+            foreach ($transferActions as $i => $action) {
+                $ph = ":action$i";
+                $actionPlaceholders[] = $ph;
+                $params[$ph] = $action;
+            }
+            $query .= " AND transferaction IN (" . implode(',', $actionPlaceholders) . ")";
+        }
+
+        // Handle DATE filters.(accepting only date, appending time internally)
+        if (isset($args['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['start_date'])) {
+            $query .= " AND createdat >= :start_date";
+            $params[':start_date'] = $args['start_date'] . ' 00:00:00';
+        }
+
+        if (isset($args['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['end_date'])) {
+            $query .= " AND createdat <= :end_date";
+            $params[':end_date'] = $args['end_date'] . ' 23:59:59';
+        }
+
+        // Handle SORT safely.(accept ASCENDING or DESCENDING)
+        $sortDirection = 'DESC'; // default
+        if (isset($args['sort'])) {
+            $sortValue = strtoupper(trim($args['sort']));
+            if ($sortValue === 'ASCENDING') {
+                $sortDirection = 'ASC';
+            } elseif ($sortValue === 'DESCENDING') {
+                $sortDirection = 'DESC';
+            }
+        }
+        $query .= " ORDER BY createdat $sortDirection";
+
+        // Handle PAGINATION.(limit and offset)
+        if (isset($args['limit']) && is_numeric($args['limit'])) {
+            $query .= " LIMIT :limit";
+            $params[':limit'] = (int) $args['limit'];
+        }
+
+        if (isset($args['offset']) && is_numeric($args['offset'])) {
+            $query .= " OFFSET :offset";
+            $params[':offset'] = (int) $args['offset'];
+        }
+
         try {
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':senderid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            foreach ($params as $key => $val) {
+                $stmt->bindValue($key, $val, is_int($val) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
+            }
+
             $stmt->execute();
-        
-            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC); 
-        
+            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000, // Retrived Transaction history
+                'ResponseCode' => 0000,
                 'affectedRows' => $transactions
             ];
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error while fetching transactions - WalletMapper.transactionsHistory", ['error' => $e->getMessage()]);
-            
+
+        } catch (\Throwable $th) {
+            $this->logger->error("Database error while fetching transactions - WalletMapper.getTransactions", [
+                'error' => $th->getMessage()
+            ]);
+            throw new \RuntimeException("Database error while fetching transactions: " . $th->getMessage());
         }
+
         return [
             'status' => 'error',
-            'ResponseCode' => 0000, // failed to Retrived Transaction history
+            'ResponseCode' => 0000,
             'affectedRows' => []
         ];
     }
