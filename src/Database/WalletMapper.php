@@ -1967,7 +1967,7 @@ class WalletMapper
        
 
         // Get BTC price
-        $btcPrice = BtcService::getBitcoinPriceEUR();
+        $btcPrice = BtcService::getBitcoinPriceWithPeer();
         if (($btcPrice * $numberoftokens) < 10) {
             $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
                 'numberoftokens' => $numberoftokens,

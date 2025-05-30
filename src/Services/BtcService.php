@@ -9,7 +9,7 @@ class BtcService
      *
      * @return float|0.0 Returns the price in EUR, or 0.0 if the request fails.
      */
-    public static function getBitcoinPriceEUR(): ?float
+    public static function getBitcoinPriceWithPeer(): ?float
     {
         $url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur";
 
