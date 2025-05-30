@@ -11,6 +11,7 @@ use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
 use Psr\Log\LoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
+use Fawaz\Utils\DateService;
 
 class UserMapper
 {
@@ -1636,20 +1637,20 @@ class UserMapper
             && !$attempt['collected'] 
             && time() < strtotime($attempt['last_attempt'] . ' +10 minutes');
     }
-
+    
     /**
      * Returns a response indicating the user should retry after a delay.
      */
     public function rateLimitResponse(int $waitMinutes, ?string $lastAttempt = null): array
     {
+        $remaining = $waitMinutes;
+
         if ($lastAttempt) {
             $remaining = ceil((strtotime($lastAttempt . " +{$waitMinutes} minutes") - time()) / 60);
-            return [
-                'status' => 'error',
-                'ResponseCode' => 31901
-            ];
         }
 
+        $nextAttemptAt = DateService::nowPlusMinutes($remaining);
+        
         return [
             'status' => 'error',
             'ResponseCode' => 31901

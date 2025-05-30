@@ -805,7 +805,7 @@ class UserService
             
             if (!$user) {
                 $this->logger->warning('Invalid user', ['email' => $email]);
-                return $this->respondWithError(31902);
+                return $this->genericPasswordResetSuccessResponse();
             }
 
             $userId = $user->getUserId();
