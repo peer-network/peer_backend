@@ -1566,7 +1566,7 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.getTransactionHistory Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
+                'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
                 'affectedRows' => function (array $root): array {
@@ -1626,7 +1626,7 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.getTransactionHistory Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
+                'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
                 'affectedRows' => function (array $root): array {
@@ -1668,7 +1668,7 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.getTransactionHistory Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
+                'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
                 'affectedRows' => function (array $root): array {
@@ -1691,7 +1691,7 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.getTransactionHistory Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
+                'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
                 'affectedRows' => function (array $root): array {
@@ -1703,7 +1703,7 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.getTransactionHistory Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
+                'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
                 'affectedRows' => function (array $root): array {
@@ -1715,7 +1715,7 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.getTransactionHistory Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
+                'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
                  'currentTokenPrice' => function (array $root): string {
