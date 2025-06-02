@@ -298,16 +298,6 @@ class PeerInputFilter
         return $validationResult;
     }
 
-    function StringContentSpaceMinusUnderscore(string $value, array $options = []) {
-        $validationResult = preg_match('/^[a-zA-Z0-9 _-]+$/', $value);
-        $errorCode = $options['errorCode'] ?? 30210;
-
-        if ($validationResult == false) {
-            $this->errors['content'][] = $errorCode;
-        }
-        return $validationResult;
-    }
-
     protected function ArrayValues(mixed $value, array $options = []): bool
     {
         if (!is_array($value)) {

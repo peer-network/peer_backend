@@ -183,9 +183,6 @@ class PostAdvanced
                 'required' => true,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
-                    ['name' => 'StringContentSpaceMinusUnderscore', 'options' => [
-                        'errorCode' => 30210
-                    ]],
                     ['name' => 'StringLength', 'options' => [
                         'min' => 2,
                         'max' => 63,
@@ -217,9 +214,6 @@ class PostAdvanced
                 'required' => false,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']], 
                 'validators' => [
-                    ['name' => 'StringContentSpaceMinusUnderscore', 'options' => [
-                        'errorCode' => 30210
-                    ]],
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,
                         'max' => 500,
