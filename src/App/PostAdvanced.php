@@ -215,7 +215,7 @@ class PostAdvanced
             ],
             'mediadescription' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']], 
+                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']], 
                 'validators' => [
                     ['name' => 'StringContentSpaceMinusUnderscore', 'options' => [
                         'errorCode' => 30210
