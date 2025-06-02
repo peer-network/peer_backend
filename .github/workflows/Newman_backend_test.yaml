@@ -453,7 +453,7 @@ jobs:
               echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
               ;;
             bipin1611)
-              echo "discord_mention=<@1354855455179935896>" >> $GITHUB_OUTPUT
+              echo "discord_mention=<@1358723876883923075>" >> $GITHUB_OUTPUT
               ;;
             *)
               echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
