@@ -1884,8 +1884,13 @@ class WalletMapper
             }
             $btcLP = (float) $getLpTokenBtcLP;
 
-            // Use bcdiv to avoid float/scientific notation, and set precision
-            $tokenPrice = bcdiv($btcLP, $liquidity, 18); // 10 decimal places as example
+            // Berechne beforeToken mit hoher Präzision
+            $beforeToken = bcdiv((string) $btcLP, (string) $liquidity, 20);
+
+            $precision = 10;
+            $multiplier = bcpow('10', (string)$precision);
+            $scaled = bcmul($beforeToken, $multiplier, 0);
+            $tokenPrice = bcdiv($scaled, $multiplier, $precision);
 
             return [
                 'status' => 'success',
@@ -1987,9 +1992,9 @@ class WalletMapper
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
         $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE);
-        $feeAmount = round((float)$numberoftokens * POOLFEE, 2);
-        $peerAmount = round((float)$numberoftokens * PEERFEE, 2);
-        $burnAmount = round((float)$numberoftokens * BURNFEE, 2);
+        $feeAmount = $this->roundUp((float)$numberoftokens * POOLFEE, 2);
+        $peerAmount = $this->roundUp((float)$numberoftokens * PEERFEE, 2);
+        $burnAmount = $this->roundUp((float)$numberoftokens * BURNFEE, 2);
         $countAmount = $feeAmount + $peerAmount + $burnAmount;
 
         try {
@@ -2000,7 +2005,7 @@ class WalletMapper
 
             if (isset($result['invited']) && !empty($result['invited'])) {
                 $inviterId = $result['invited'];
-                $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
+                $inviterWin = $this->roundUp((float)$numberoftokens * INVTFEE, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
                 $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
                 $this->logger->info('Invited By', [
@@ -2150,7 +2155,7 @@ class WalletMapper
 
                 // Count LP after Fees calculation
                 $lpAccountTokenAfterLPFeeX = $this->getLpToken();
-                $contsAfterFeesK = $lpAccountTokenAfterLPFeeX * $btcConstInitialY;
+                $contsAfterFeesK = $this->roundUp($lpAccountTokenAfterLPFeeX * $btcConstInitialY, 9);            
             }
 
             // 2. RECIPIENT: Credit To Account to Pool Account
@@ -2189,8 +2194,7 @@ class WalletMapper
 
                 // Count LP swap tokens Fees calculation
                 $lpAccountTokenAfterSwapX = $this->getLpToken();
-                $btcConstNewY = $contsAfterFeesK / $lpAccountTokenAfterSwapX;
-
+                $btcConstNewY = $this->roundUp($contsAfterFeesK / $lpAccountTokenAfterSwapX, 9);  
             }
 
             // 6. PEERWALLET: Fee To Account
@@ -2261,7 +2265,7 @@ class WalletMapper
             if($numberoftokens && $transactionId){
                 // Store BTC Swap transactions in btc_swap_transactions
                 // count BTC amount
-                $btcAmountToUser = $btcConstInitialY - $btcConstNewY;
+                $btcAmountToUser = $this->roundUp($btcConstInitialY - $btcConstNewY, 9);
                 $transObj = [
                     'transUniqueId' => $transactionId,
                     'transactionType' => 'btcSwapToPool',
@@ -2296,6 +2300,18 @@ class WalletMapper
             return self::respondWithError($e->getMessage());
         }
     }
+
+    /**
+     * Round UP method.
+     *
+     * @return float value
+     */
+    private function roundUp($value, $precision = 2)
+    {
+        $multiplier = pow(10, $precision);
+        return ceil($value * $multiplier) / $multiplier;
+    }
+
 
     
     /**

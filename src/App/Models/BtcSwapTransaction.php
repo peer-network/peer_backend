@@ -14,7 +14,7 @@ class BtcSwapTransaction
     protected string $btcAddress;
     protected string $transactionType;
     protected string $tokenAmount;
-    protected string $btcAmount;
+    protected ?string $btcAmount;
     protected ?string $message;
     protected ?string $status;
     protected ?string $createdat;
@@ -30,7 +30,7 @@ class BtcSwapTransaction
         $this->btcAddress = $data['btcAddress'] ?? null;
         $this->transactionType = $data['transactionType'] ?? null;
         $this->tokenAmount = $data['tokenAmount'] ?? null;
-        $this->btcAmount = $data['btcAmount'] ?? null;
+        $this->btcAmount = $data['btcAmount'] ?? 0.0;
         $this->status = $data['status'] ?? 'PENDING';
         $this->message = $data['message'] ?? null;
         $this->createdat = $data['createdat'] ?? date('Y-m-d H:i:s.u');
