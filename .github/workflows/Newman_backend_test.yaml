@@ -440,6 +440,9 @@ jobs:
             jakobPeer)
               echo "discord_mention=<@1334087880833892392>" >> $GITHUB_OUTPUT
               ;;
+            tasoraso)
+              echo "discord_mention=<@843252980069433384>" >> $GITHUB_OUTPUT
+              ;;
             artemyavruyan)
               echo "discord_mention=<@1354855455179935896>" >> $GITHUB_OUTPUT
               ;;
