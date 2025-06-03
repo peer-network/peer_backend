@@ -592,6 +592,10 @@ class UserService
             $this->logger->warning('Invalid UUID for profile', ['userId' => $userId]);
             return self::respondWithError(30102);
         }
+        if (!$this->userMapper->isUserExistById($userId)) {
+            $this->logger->warning('User not found for Follows', ['userId' => $userId]);
+        return self::respondWithError(31007);
+        }
 
         try {
             $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId)->getArrayCopy();
@@ -631,7 +635,10 @@ class UserService
             $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
             return self::respondWithError(30201);
         }
-
+        if (!$this->userMapper->isUserExistById($userId)) {
+            $this->logger->warning('User not found for Follows', ['userId' => $userId]);
+            return self::respondWithError(31007);
+        }
         try {
             $followers = $this->userMapper->fetchFollowers($userId, $this->currentUserId, $offset, $limit);
             $following = $this->userMapper->fetchFollowing($userId, $this->currentUserId, $offset, $limit);
@@ -741,7 +748,7 @@ class UserService
                 ];
             }
 
-            return $this->createSuccessResponse(21001, []);
+            return $this->respondWithError(31007, []);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
