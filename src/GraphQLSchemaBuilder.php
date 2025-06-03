@@ -1975,6 +1975,9 @@ class GraphQLSchemaBuilder
                     'commentPrice'  => isset($result['comment_price']) ? (float) $result['comment_price'] : 0.0,
                 ]
             ];
+
+            $this->logger->info('resolveActionPrices: Successfully fetched prices', $response['affectedRows']);
+            
         } catch (\Throwable $e) {
             $this->logger->error('Query.resolveActionPrices exception', [
                 'message' => $e->getMessage(),
