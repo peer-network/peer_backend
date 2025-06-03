@@ -1937,6 +1937,14 @@ class WalletMapper
             $this->logger->warning('BTC Address required');
             return self::respondWithError(0000); // BTC Address is required!
         }
+        $btcAddress = $args['btcAddress'];
+
+        if (!self::isValidBTCAddress($btcAddress)) {
+            $this->logger->warning('Invalid btcAddress .', [
+                'btcAddress' => $btcAddress,
+            ]);
+            return self::respondWithError(0000); // Invalid BTC Address
+        }
 
         $this->initializeLiquidityPool();
 
@@ -2028,7 +2036,6 @@ class WalletMapper
 
         try {
 
-            $btcAddress = $args['btcAddress'];
             $transUniqueId = self::generateUUID();
 
             $btcConstInitialY =  $this->getLpTokenBtcLP();
@@ -2591,6 +2598,20 @@ class WalletMapper
      * @param string $transactionType
      * @param string $transferAction
      */
+
+    function isValidBTCAddress($address) {
+        // Legacy and P2SH addresses
+        if (preg_match('/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/', $address)) {
+            return true;
+        }
+
+        // Bech32 (SegWit) addresses
+        if (preg_match('/^(bc1|BC1)[0-9a-z]{25,39}$/', $address)) {
+            return true;
+        }
+        return false;
+    }
+
     private function saveLiquidity($userId, string $recipientWallet, float $amount, string $transactionType, string $transferAction): void
     {
         $this->saveWalletEntry($recipientWallet, $amount);
