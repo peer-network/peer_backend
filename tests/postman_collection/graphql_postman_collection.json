@@ -17,36 +17,7 @@
 							"pm.test(\"Null is in there\", function () {",
 							"    let responseJson = pm.response.json();",
 							"    pm.expect(responseJson.data.hello.currentuserid).to.eql(\"\");",
-							"});",
-							"",
-							"",
-							"//and even more cunting of the cunt",
-							"",
-							"// Function to resolve nested variables in a string",
-							"function resolveNestedVariables(value) {",
-							"    if (typeof value === \"string\" && value.includes(\"{{\")) {",
-							"        return value.replace(/{{(.*?)}}/g, (match, variableName) => {",
-							"            return pm.environment.get(variableName) || match; // Replace with the value if found",
-							"        });",
-							"    }",
-							"    return value; // Return non-string or non-nested values as they are",
-							"}",
-							"",
-							"// Loop through all environment variables and resolve nested variables, excluding `initial_` prefixed vars",
-							"pm.environment.values.each((envVar) => {",
-							"    // Skip variables prefixed with `initial_`",
-							"    if (!envVar.key.startsWith(\"initial_\")) {",
-							"        let currentValue = pm.environment.get(envVar.key);",
-							"",
-							"        // Resolve only if the current value contains `{{}}`",
-							"        if (typeof currentValue === \"string\" && currentValue.includes(\"{{\")) {",
-							"            let resolvedValue = resolveNestedVariables(currentValue);",
-							"            pm.environment.set(envVar.key, resolvedValue); // Update the current value with resolved content",
-							"        }",
-							"    }",
-							"});",
-							"",
-							""
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -56,21 +27,6 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"//do some environment nesting because postman can't... cunt!",
-							"",
-							"// Loop through environment variables with initial values prefixed by \"initial_\"",
-							"pm.environment.values.each((envVar) => {",
-							"    // Check if this is an \"initial_\" variable",
-							"    if (envVar.key.startsWith(\"initial_\")) {",
-							"        let originalKey = envVar.key.replace(\"initial_\", \"\"); // Get the original variable name",
-							"        let initialValue = pm.environment.get(envVar.key); // Get the initial value",
-							"",
-							"        console.log(`Resetting variable \"${originalKey}\" to its initial value: ${initialValue}`);",
-							"        ",
-							"        // Set the main variable to its initial value",
-							"        pm.environment.set(originalKey, initialValue);",
-							"    }",
-							"});",
 							""
 						],
 						"type": "text/javascript",
@@ -7581,10 +7537,10 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"21806\");",
+							"    pm.expect(pm.response.text()).to.include(\"31815\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
 							"});"
 						],
 						"type": "text/javascript",
@@ -12419,6 +12375,116 @@
 			"response": []
 		},
 		{
+			"name": "Get referral info",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11011\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetReferralInfo {\n    getReferralInfo {\n        status\n        ResponseCode\n        referralUuid\n        referralLink\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get referral list",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11011\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"ref tester exists\", function () {",
+							"    pm.expect(pm.response.text()).to.include(pm.environment.get(\"userid\"));",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ReferralList {\n    referralList(limit: 1) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            invitedBy {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            iInvited {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Login referred tester",
 			"event": [
 				{
@@ -15474,6 +15540,69 @@
 			"response": []
 		},
 		{
+			"name": "Posts type injection test 9",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"31510\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: \"{{uuid}}\"\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Posts type injection test 16",
 			"event": [
 				{
@@ -15918,67 +16047,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: Zhopa\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Posts type injection test 9",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"error\");",
-							"});",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: Zhopa\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -17328,10 +17396,10 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"21001\");",
+							"    pm.expect(pm.response.text()).to.include(\"31007\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
 							"});"
 						],
 						"type": "text/javascript",
@@ -17485,10 +17553,10 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"21001\");",
+							"    pm.expect(pm.response.text()).to.include(\"31007\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
 							"});"
 						],
 						"type": "text/javascript",
