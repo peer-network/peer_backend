@@ -6,6 +6,9 @@ on:
       - development
       - main
       - pre-release
+
+permissions:
+  contents: write
  
 jobs:
   build_and_test:
@@ -14,6 +17,8 @@ jobs:
     strategy:
       matrix:
         php-version: ['8.2', '8.3']
+    outputs:
+      outcome: ${{ steps.outcome.outputs.outcome }}
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -53,7 +58,6 @@ jobs:
               }
           }
           EOF
- 
       - name: Create Supervisor Config
         run: |
           mkdir -p docker
@@ -129,7 +133,7 @@ jobs:
         run: grep -v DB_PASSWORD .env
  
       - name: Set Docker Image Tag
-        run: echo "IMAGE_TAG=peer-backend:${{ github.sha }}" >> $GITHUB_ENV
+        run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
  
       - name: Create ordered SQL init files in CI
         run: |
@@ -143,7 +147,7 @@ jobs:
         run: docker compose down -v
  
       - name: Force DB init by removing the volume
-        run: docker volume rm peer_backend_db-data || true
+        run: docker volume rm peer_backend_ci-cd_db-data || true
  
       - name: Build And Start Docker Containers
         run: |
@@ -247,9 +251,30 @@ jobs:
  
       - name: Run Postman Tests in Newman Container
         id: newman
-        run: |
-          docker compose -f ./docker-compose.yaml run --rm newman
         continue-on-error: true
+        run: |
+          result=0
+          docker compose -f ./docker-compose.yaml run --rm newman || result=$?
+          echo "$result" > newman_exit_code.txt
+ 
+      - name: Set newman outcome output
+        id: newman_output
+        run: |
+          echo "outcome=$(cat newman_exit_code.txt)" >> $GITHUB_OUTPUT
+ 
+      - name: Save Newman Failure Result
+        run: |
+          if [ "${{ steps.newman_output.outputs.outcome }}" != "0" ]; then
+            echo "true" > newman_failed.txt
+          else
+            echo "false" > newman_failed.txt
+          fi
+ 
+      - name: Upload Newman Failure Marker
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-failed-${{ matrix.php-version }}
+          path: newman_failed.txt
  
       - name: List Logs in Backend Container
         run: docker compose exec backend ls -l /var/www/html/runtime-data/logs
@@ -305,16 +330,442 @@ jobs:
       - name: List Running containers
         run: docker ps -a
  
-      - name: Fail CI if Newman failed
-        if: always()
-        run: |
-          if [ ${{ steps.newman.outcome }} != 'success' ]; then
-            echo "Newman tests failed. Blocking merge."
-            exit 1
-          else
-            echo "Newman passed."
-          fi
- 
       - name: Tear Down Docker Containers
         if: always()
         run: docker compose -f ./docker-compose.yaml down
+ 
+      - name: Set build outcome flag
+        id: outcome
+        if: always()
+        run: |
+          newman_exit_code="${{ steps.newman_output.outputs.outcome }}"
+          job_status="${{ job.status }}"
+ 
+          if [ "$newman_exit_code" = "0" ]; then
+            if [ "$job_status" != "success" ]; then
+              echo "outcome=other_failure" >> $GITHUB_OUTPUT
+            else
+              echo "outcome=success" >> $GITHUB_OUTPUT
+            fi
+          elif [ -z "$newman_exit_code" ]; then
+            echo "outcome=other_failure" >> $GITHUB_OUTPUT
+          else
+            echo "outcome=newman_failed" >> $GITHUB_OUTPUT
+          fi
+ 
+      - name: Save outcome to file
+        if: always()
+        run: echo "${{ steps.outcome.outputs.outcome }}" > outcome.txt
+ 
+      - name: Upload build outcome marker
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: outcome-${{ matrix.php-version }}
+          path: outcome.txt
+ 
+      - name: Save Docker image as artifact
+        run: docker save -o peer-backend.tar peer-backend:${{ github.sha }}
+ 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-${{ matrix.php-version }}
+          path: peer-backend.tar
+          overwrite: true
+ 
+  trivy_scan:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    needs: [build_and_test]
+    if: needs.build_and_test.outputs.outcome == 'success'
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+ 
+      - uses: actions/download-artifact@v4
+        with:
+          name: docker-image-${{ matrix.php-version }}
+          path: .
+          
+      - name: Load Docker image
+        run: docker load -i peer-backend.tar
+ 
+      - name: Set image name
+        run: echo "IMAGE_NAME=peer-backend:${{ github.sha }}" >> $GITHUB_ENV
+ 
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release apt-transport-https
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+ 
+      - name: Generate composer.lock (not committed)
+        run: composer install --no-dev --prefer-dist --no-interaction
+ 
+      - name: Set Trivy Scan Outcome
+        id: trivy_outcome
+        run: |
+          result=0
+          trivy image --exit-code 1 --severity CRITICAL,HIGH --ignore-unfixed $IMAGE_NAME || result=1
+          trivy fs . --scanners vuln --exit-code 1 --severity CRITICAL,HIGH || result=1
+          trivy fs . --scanners secret --exit-code 1 || result=1
+ 
+          if [ "$result" -eq 0 ]; then
+            echo "outcome=success" >> $GITHUB_OUTPUT
+            echo "success" > outcome.txt
+          else
+            echo "outcome=other_failure" >> $GITHUB_OUTPUT
+            echo "other_failure" > outcome.txt
+          fi
+ 
+      - name: Save Trivy outcome to file
+        if: always()
+        run: echo "${{ steps.trivy_outcome.outputs.outcome }}" > outcome.txt
+ 
+      - name: Upload Trivy build outcome marker
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: outcome-${{ matrix.php-version }}
+          path: outcome.txt
+          overwrite: true
+ 
+      - name: Upload Scan Reports
+        if: always()
+        run: |
+          mkdir -p trivy_reports
+          trivy image --format table --ignore-unfixed --output trivy_reports/image.txt peer-backend:${{ github.sha }}
+          trivy fs . --format table --scanners vuln --output trivy_reports/filesystem_vuln.txt
+          trivy fs . --format table --scanners secret --output trivy_reports/secrets.txt
+ 
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-security-reports-${{ matrix.php-version }}
+          path: trivy_reports
+ 
+  aggregate_outcome:
+    name: Aggregate Matrix Job Outcomes
+    runs-on: ubuntu-latest
+    needs: [build_and_test]
+ 
+    if: always()
+    outputs:
+      final_outcome: ${{ steps.aggregate.outputs.final_outcome }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: outcome-*
+          path: outcomes
+ 
+      - id: aggregate
+        run: |
+          result="success"
+          for f in outcomes/**/outcome.txt; do
+            outcome=$(cat "$f")
+            if [ "$outcome" = "other_failure" ]; then
+              result="other_failure"
+              break
+            elif [ "$outcome" = "newman_failed" ] && [ "$result" != "other_failure" ]; then
+              result="newman_failed"
+            fi
+          done
+          echo "final_outcome=$result" >> $GITHUB_OUTPUT
+ 
+      - run: echo "Aggregated final outcome ${{ steps.aggregate.outputs.final_outcome }}"
+ 
+  aggregate_results:
+    name: Aggregate Newman Results
+    runs-on: ubuntu-latest
+    if: needs.build_and_test.outputs.outcome == 'newman_failed'
+    needs: [build_and_test]
+    outputs:
+      newman_failed_any: ${{ steps.setflag.outputs.newman_failed_any }}
+    steps:
+      - name: Download All Newman Failure Markers
+        uses: actions/download-artifact@v4
+        with:
+          path: newman_flags
+ 
+      - name: Check Any Newman Failures
+        id: setflag
+        run: |
+          found_failure=false
+          for f in newman_flags/**/newman_failed.txt; do
+            if grep -q true "$f"; then
+              found_failure=true
+              break
+            fi
+          done
+          echo "newman_failed_any=$found_failure" >> $GITHUB_OUTPUT
+ 
+      - name: Show Newman Failed Output
+        run: echo "Newman failed any? => ${{ steps.setflag.outputs.newman_failed_any }}"
+ 
+  map_pr_to_discord:
+    name: Map PR to Discord User
+    runs-on: ubuntu-latest
+    needs: [aggregate_results]
+    outputs:
+      discord_mention: ${{ steps.map.outputs.discord_mention }}
+    steps:
+      - name: Map GitHub username to Discord ID
+        id: map
+        run: |
+          case "${{ github.event.pull_request.user.login }}" in
+            vidkazan)
+              echo "discord_mention=<@1355093873323671742>" >> $GITHUB_OUTPUT
+              ;;
+            abu965)
+              echo "discord_mention=<@1356624252320743434>" >> $GITHUB_OUTPUT
+              ;;
+            jakobPeer)
+              echo "discord_mention=<@1334087880833892392>" >> $GITHUB_OUTPUT
+              ;;
+            artemyavruyan)
+              echo "discord_mention=<@1354855455179935896>" >> $GITHUB_OUTPUT
+              ;;
+            tasoraso)
+              echo "discord_mention=<@843252980069433384>" >> $GITHUB_OUTPUT
+              ;;
+            Ali2710)
+              echo "discord_mention=<@1354034371555758100>" >> $GITHUB_OUTPUT
+              ;;
+            WisdomNwaiwu)
+              echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
+              ;;
+            bipin1611)
+              echo "discord_mention=<@1358723876883923075>" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
+              ;;
+          esac
+ 
+  publish_failure_report_to_pages:
+    name: Publish Htmlextra Report to Pages
+    runs-on: ubuntu-latest
+    needs: [build_and_test, aggregate_results, map_pr_to_discord]
+    if: needs.build_and_test.outputs.outcome == 'newman_failed'
+    steps:
+      - name: Show newman_failed_any output
+        run: echo "Evaluating newman_failed_any => ${{ needs.aggregate_results.outputs.newman_failed_any }}"
+ 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+ 
+      - name: Ensure gh-pages branch exists
+        run: |
+          if ! git ls-remote --exit-code --heads origin gh-pages; then
+            echo "Creating gh-pages branch"
+            git checkout --orphan gh-pages
+            git config user.name "github-actions"
+            git config user.email "actions@github.com"
+            git rm -rf .
+            touch .keep
+            git add .keep
+            git commit -m "Initialize gh-pages branch"
+            git push origin gh-pages
+          else
+            echo "gh-pages branch already exists"
+          fi
+ 
+      - name: Checkout gh-pages branch
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages
+ 
+      - name: Download HTMLExtra report for PHP 8.2
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_newman_report-8.2  
+          path: reports/${{ github.run_id }}/php-8.2
+ 
+      - name: Download HTMLExtra report for PHP 8.3
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_newman_report-8.3
+          path: reports/${{ github.run_id }}/php-8.3
+        
+      - name: Commit and push reports
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add reports/${{ github.run_id }}
+          git commit -m "Add Newman HTML reports for run ${{ github.run_id }}" || echo "Nothing to commit"
+          git push origin gh-pages
+ 
+  publish_success_report_to_pages:
+    name: Publish HTMLExtra Report to Pages on Success
+    runs-on: ubuntu-latest
+    needs: [build_and_test, aggregate_outcome]
+    if: needs.aggregate_outcome.outputs.final_outcome == 'success'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+ 
+      - name: Ensure gh-pages branch exists
+        run: |
+          if ! git ls-remote --exit-code --heads origin gh-pages; then
+            echo "Creating gh-pages branch"
+            git checkout --orphan gh-pages
+            git config user.name "github-actions"
+            git config user.email "actions@github.com"
+            git rm -rf .
+            touch .keep
+            git add .keep
+            git commit -m "Initialize gh-pages branch"
+            git push origin gh-pages
+          else
+            echo "gh-pages branch already exists"
+          fi
+      
+      - name: Checkout gh-pages branch
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages
+ 
+      - name: Download HTMLExtra report for PHP 8.2
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_newman_report-8.2
+          path: reports/${{ github.run_id }}/php-8.2
+ 
+      - name: Download HTMLExtra report for PHP 8.3
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_newman_report-8.3
+          path: reports/${{ github.run_id }}/php-8.3
+ 
+      - name: Commit and push reports
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add reports/${{ github.run_id }}
+          git commit -m "Add Newman HTML reports for successful run ${{ github.run_id }}" || echo "Nothing to commit"
+          git push origin gh-pages
+ 
+  send_newman_discord_notification:
+    name: Send Discord Notification for Newman Failures
+    runs-on: ubuntu-latest
+    needs: [aggregate_outcome, aggregate_results, map_pr_to_discord, publish_failure_report_to_pages]
+    if: needs.aggregate_outcome.outputs.final_outcome == 'newman_failed'
+    steps:
+      - name: Construct HTMLExtra report URLs
+        id: urls
+        run: |
+          BASE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          echo "php82_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.2/report.html" >> $GITHUB_OUTPUT
+          echo "php83_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.3/report.html" >> $GITHUB_OUTPUT
+ 
+      - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          PHP82_URL="${{ steps.urls.outputs.php82_url }}"
+          PHP83_URL="${{ steps.urls.outputs.php83_url }}"
+          MESSAGE=":x: **Newman Tests Failed!**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="PR Link: <$PR_URL>\n"
+          MESSAGE+="CI Run: <$RUN_URL>\n"
+          MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
+          MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
+          MESSAGE+="Maintainer: <@1362087975906967736>\n"
+          MESSAGE+="Author: $DISCORD_MENTION"
+ 
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"${MESSAGE}\"}" \
+               "$DISCORD_WEBHOOK_URL"
+ 
+  send_other_failure_discord_notification:
+    name: Send Discord Notification for Non-Newman Failures
+    runs-on: ubuntu-latest
+    needs: [aggregate_outcome, map_pr_to_discord]
+    if: always()
+    steps:
+      - name: Log aggregated outcome
+        run: echo "Outcome was ${{ needs.aggregate_outcome.outputs.final_outcome }}"
+ 
+      - name: Send Discord Notification (if other_failure)
+        if: needs.aggregate_outcome.outputs.final_outcome == 'other_failure'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+          MAINTAINER_MENTION: <@1362087975906967736>
+        run: |
+          MESSAGE=":x: **CI Failed (non-Newman error)**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="PR Link: <$PR_URL>\n"
+          MESSAGE+="CI Run: <$RUN_URL>\n"
+          MESSAGE+="Maintainer: $MAINTAINER_MENTION\n"
+          MESSAGE+="Author: $PR_MENTION"
+ 
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"${MESSAGE}\"}" \
+               "$DISCORD_WEBHOOK_URL"
+ 
+  send_success_discord_notification:
+    name: Send Discord Notification for Successful CI
+    runs-on: ubuntu-latest
+    needs: [aggregate_outcome, publish_success_report_to_pages]
+    if: needs.aggregate_outcome.outputs.final_outcome == 'success'
+    steps:
+      - name: Construct HTMLExtra report URLs
+        id: urls
+        run: |
+          BASE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          echo "php82_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.2/report.html" >> $GITHUB_OUTPUT
+          echo "php83_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.3/report.html" >> $GITHUB_OUTPUT
+ 
+      - name: Send Discord Notification to Team Lead
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          PHP82_URL="${{ steps.urls.outputs.php82_url }}"
+          PHP83_URL="${{ steps.urls.outputs.php83_url }}"
+          MESSAGE=":white_check_mark: **CI Passed Successfully**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="PR Link: <$PR_URL>\n"
+          MESSAGE+="CI Run: <$RUN_URL>\n"
+          MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
+          MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
+          MESSAGE+="<@1355093873323671742>"  # vidkazan
+ 
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"${MESSAGE}\"}" \
+               "$DISCORD_WEBHOOK_URL"
+ 
+  final_check:
+    name: Fail workflow if needed
+    runs-on: ubuntu-latest
+    needs: [aggregate_outcome]
+    if: always() && needs.aggregate_outcome.outputs.final_outcome != 'success'
+    steps:
+      - run: |
+          echo "Failing workflow to block merge (reason: ${{ needs.aggregate_outcome.outputs.final_outcome }})"
+          exit 1
+ 
