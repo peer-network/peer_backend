@@ -1,5 +1,5 @@
 {
-    "createdAt": 1748942389,
+    "createdAt": 1748955699,
     "name": "response-codes",
     "data": {
         "10401": {
@@ -142,6 +142,10 @@
             "comment": "Success: Payment completed successfully",
             "userFriendlyComment": "Payment processed successfully!"
         },
+        "41301": {
+            "comment": "Failure: Failed to fetch action prices",
+            "userFriendlyComment": "We couldn't retrieve the action prices. Please try again later."
+        },
         "11302": {
             "comment": "Success: Your daily free-action applied successfully",
             "userFriendlyComment": "Daily free action used successfully."
@@ -149,6 +153,10 @@
         "11303": {
             "comment": "Success: Daily free data fetched successfully",
             "userFriendlyComment": "Daily free actions loaded."
+        },
+        "11304": {
+            "comment": "Success: Successfully fetched action prices",
+            "userFriendlyComment": "Action prices have been successfully fetched."
         },
         "11402": {
             "comment": "Success: Transaction successful. 1% of the amount has been transferred to the inviter",
