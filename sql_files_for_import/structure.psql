@@ -554,5 +554,15 @@ CREATE TABLE IF NOT EXISTS password_reset_requests (
 
     FOREIGN KEY (user_id) REFERENCES users(uid) ON DELETE CASCADE
 );
+-- Table: action_prices
+CREATE TABLE action_prices (
+    post_price      NUMERIC(10, 4) NOT NULL DEFAULT 0.00,
+    like_price      NUMERIC(10, 4) NOT NULL DEFAULT 0.00,
+    dislike_price   NUMERIC(10, 4) NOT NULL DEFAULT 0.00,
+    comment_price   NUMERIC(10, 4) NOT NULL DEFAULT 0.00,
+    currency        VARCHAR(10) DEFAULT 'EUR',
+    createdat       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedat       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 COMMIT;
