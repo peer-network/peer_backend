@@ -1965,13 +1965,9 @@ class GraphQLSchemaBuilder
         try {
             $result = $this->poolService->getActionPrices();
 
-            if (empty($result)) {
-                return $this->respondWithError(00000);
-            }
-
             return [
                 'status'        => 'success',
-                'ResponseCode'  => 00000,
+                'ResponseCode'  => 11304,
                 'affectedRows'  => [
                     'postPrice'     => isset($result['post_price']) ? (float) $result['post_price'] : 0.0,
                     'likePrice'     => isset($result['like_price']) ? (float) $result['like_price'] : 0.0,
@@ -1984,7 +1980,7 @@ class GraphQLSchemaBuilder
                 'message' => $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError(00000);
+            return $this->respondWithError(41301);
         }
     }
 
