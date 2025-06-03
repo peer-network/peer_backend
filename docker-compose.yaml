@@ -19,6 +19,7 @@ services:
       timeout: 5s
       retries: 5
   backend:
+    image: peer-backend:${IMAGE_TAG}
     build:
       context: .
     depends_on:
