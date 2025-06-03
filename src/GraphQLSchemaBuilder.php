@@ -1946,7 +1946,7 @@ class GraphQLSchemaBuilder
         $chat = $this->chatService->loadChatById(['chatid' => $args['chatid']]);
 
         if (empty($chat)) {
-            return $this->respondWithError(21802);
+            return $this->respondWithError(31815);
         }
 
         if (!isset($chat['status']) || $chat['status'] !== 'success') {
