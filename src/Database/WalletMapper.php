@@ -64,6 +64,21 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.transferToken started');
 
+        
+        $recipient = (string) $args['recipient'];
+        
+        if ((string) $recipient === $userId) {
+            $this->logger->warning('Send and Receive Same Wallet Error.');
+            return self::respondWithError(31202);
+        }
+
+        if (!self::isValidUUID($recipient)) {
+            $this->logger->warning('Incorrect recipientId Exception.', [
+                'recipient' => $recipient,
+            ]);
+            return self::respondWithError(30201);
+        }
+
 		$accountsResult = $this->pool->returnAccounts();
 
 		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
@@ -120,26 +135,11 @@ class WalletMapper
             return self::respondWithError(51301);
         }
 
-        $recipient = (string) $args['recipient'];
-
-        
-        if ((string) $recipient === $userId) {
-            $this->logger->warning('Send and Receive Same Wallet Error.');
-            return self::respondWithError(31202);
-        }
-
         if($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient){
             $this->logger->warning('Unauthorized to send token');
             return self::respondWithError(0000); // Unauthorized to send token.
         }
 
-        if (!self::isValidUUID($recipient)) {
-            $this->logger->warning('Incorrect recipientId Exception.', [
-                'recipient' => $recipient,
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(30201);
-        }
 
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
             return self::respondWithError(0000); // Invalid token amount provided. It is should be Integer or with decimal numbers
@@ -1936,6 +1936,13 @@ class WalletMapper
         if (empty($args['btcAddress'])) {
             $this->logger->warning('BTC Address required');
             return self::respondWithError(0000); // BTC Address is required!
+        }
+        
+        if (self::isValidUUID($args['btcAddress'])) {
+            $this->logger->warning('BTC address should not be a User Id.', [
+                'btcAddress' => $args['btcAddress'],
+            ]);
+            return self::respondWithError(0000); // BTC address should not be a User Id
         }
        
         if (!isset($args['password']) && empty($args['password'])) {
