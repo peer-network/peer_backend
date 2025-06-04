@@ -285,7 +285,7 @@ class CommentMapper
 			$parentExists = $parentStmt->fetchColumn();
 
 			if (!$parentExists) {
-				return $this->respondWithError(41605);
+				return $this->respondWithError(31601);
 			}
 
 			// Fetch child comments

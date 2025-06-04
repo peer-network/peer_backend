@@ -1936,7 +1936,26 @@ class GraphQLSchemaBuilder
         if (empty($args)) {
             return $this->respondWithError(30101);
         }
+        if (!isset($args['chatid'])) {
+            return $this->respondWithError(30101); 
+        }
 
+        if (!self::isValidUUID($args['chatid'])) {
+            return $this->respondWithError(30218);
+        }
+        $chat = $this->chatService->loadChatById(['chatid' => $args['chatid']]);
+
+        if (empty($chat)) {
+            return $this->respondWithError(31815);
+        }
+
+        if (!isset($chat['status']) || $chat['status'] !== 'success') {
+            return $chat;
+        }
+
+        if (empty($chat['data'])) {
+            return $this->respondWithError(31815);
+        }
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
             return $validationResult;
