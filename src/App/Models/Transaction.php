@@ -18,7 +18,7 @@ class Transaction
     protected string $transactionId;
     protected string $transUniqueId;
     protected string $senderId;
-    protected string $recipientId;
+    protected string|null $recipientId;
     protected string $transactionType;
     protected string $tokenAmount;
     protected $transferAction;
@@ -65,7 +65,7 @@ class Transaction
                 'validators' => [['name' => 'Uuid']],
             ],
             'recipientId' => [
-                'required' => true,
+                'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],
             'transactionType' => [
@@ -204,7 +204,7 @@ class Transaction
     /**
      * Getter and Setter methods for recipientId
      */
-    public function getRecipientId(): string
+    public function getRecipientId(): string|null
     {
         return $this->recipientId;
     }

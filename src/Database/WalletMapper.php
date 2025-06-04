@@ -238,7 +238,6 @@ class WalletMapper
                     'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferDeductSenderToRecipient',
                     'senderId' => $userId,
-                    'recipientId' => $recipient,
                     'tokenAmount' => -($numberoftokens + $countAmount),
                     'message' => $message,
                 ];
@@ -266,9 +265,8 @@ class WalletMapper
                 ];
 
 
-                $transUniqueIdForDebit = self::generateUUID();
                 $transObj = [
-                    'transUniqueId' => $transUniqueIdForDebit,
+                    'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferSenderToRecipient',
                     'senderId' => $userId,
                     'recipientId' => $recipient,
@@ -1830,8 +1828,8 @@ class WalletMapper
         $transactionTypes = isset($args['type']) ? ($typeMap[$args['type']] ?? []) : [];
         $transferActions = isset($args['direction']) ? ($directionMap[$args['direction']] ?? []) : [];
 
-        $query = "SELECT * FROM transactions WHERE senderid = :senderid";
-        $params = [':senderid' => $userId];
+        $query = "SELECT * FROM transactions WHERE (senderid = :userid OR recipientid = :userid)";
+        $params = [':userid' => $userId];
 
         // Handle TRANSACTION TYPE filter.
         if (!empty($transactionTypes)) {
