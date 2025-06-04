@@ -1937,6 +1937,18 @@ class WalletMapper
             $this->logger->warning('BTC Address required');
             return self::respondWithError(0000); // BTC Address is required!
         }
+       
+        if (!isset($args['password']) && empty($args['password'])) {
+            $this->logger->warning('Password required');
+            return self::respondWithError(0000); // Password is required!
+        }
+        // validate password
+        $user = (new UserMapper($this->logger, $this->db))->loadById($userId);
+        $password = $args['password'];
+        if (!$this->validatePasswordMatch($password, $user->getPassword())) {
+            return self::respondWithError(31001);
+        }
+
 
         $this->initializeLiquidityPool();
 
@@ -2298,6 +2310,30 @@ class WalletMapper
 
         } catch (\Throwable $e) {
             return self::respondWithError($e->getMessage());
+        }
+    }
+
+
+    /**
+     * validate password.
+     *
+     * @param $inputPassword string
+     * @param $hashedPassword string
+     * 
+     * @return bool value
+     */
+    private function validatePasswordMatch(?string $inputPassword, string $hashedPassword): bool
+    {
+        if (empty($inputPassword) || empty($hashedPassword)) {
+            $this->logger->warning('Password or hash cannot be empty');
+            return false;
+        }
+
+        try {
+            return password_verify($inputPassword, $hashedPassword);
+        } catch (\Throwable $e) {
+            $this->logger->error('Password verification error', ['exception' => $e]);
+            return false;
         }
     }
 
