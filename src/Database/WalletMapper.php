@@ -2152,8 +2152,13 @@ class WalletMapper
 
             if ($inviterId && !empty($inviterId)) {
                 $inviterWin = TokenHelper::roundUp((float)$numberoftokens * INVTFEE);
-                $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
-                $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
+                $countAmount = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
+                    $feeAmount,
+                    $peerAmount,
+                    $burnAmount,
+                    $inviterWin
+                );
+                $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, PEERFEE,POOLFEE,BURNFEE,INVTFEE);
                 
                 $this->logger->info('Invited By', [
                     'invited' => $inviterId,
