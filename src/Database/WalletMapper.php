@@ -64,6 +64,21 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.transferToken started');
 
+        
+        $recipient = (string) $args['recipient'];
+        
+        if ((string) $recipient === $userId) {
+            $this->logger->warning('Send and Receive Same Wallet Error.');
+            return self::respondWithError(31202);
+        }
+
+        if (!self::isValidUUID($recipient)) {
+            $this->logger->warning('Incorrect recipientId Exception.', [
+                'recipient' => $recipient,
+            ]);
+            return self::respondWithError(30201);
+        }
+
 		$accountsResult = $this->pool->returnAccounts();
 
 		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
@@ -120,26 +135,11 @@ class WalletMapper
             return self::respondWithError(51301);
         }
 
-        $recipient = (string) $args['recipient'];
-
-        
-        if ((string) $recipient === $userId) {
-            $this->logger->warning('Send and Receive Same Wallet Error.');
-            return self::respondWithError(31202);
-        }
-
         if($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient){
             $this->logger->warning('Unauthorized to send token');
             return self::respondWithError(0000); // Unauthorized to send token.
         }
 
-        if (!self::isValidUUID($recipient)) {
-            $this->logger->warning('Incorrect recipientId Exception.', [
-                'recipient' => $recipient,
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(30201);
-        }
 
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
             return self::respondWithError(0000); // Invalid token amount provided. It is should be Integer or with decimal numbers
@@ -238,7 +238,6 @@ class WalletMapper
                     'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferDeductSenderToRecipient',
                     'senderId' => $userId,
-                    'recipientId' => $recipient,
                     'tokenAmount' => -($numberoftokens + $countAmount),
                     'message' => $message,
                 ];
@@ -266,9 +265,8 @@ class WalletMapper
                 ];
 
 
-                $transUniqueIdForDebit = self::generateUUID();
                 $transObj = [
-                    'transUniqueId' => $transUniqueIdForDebit,
+                    'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferSenderToRecipient',
                     'senderId' => $userId,
                     'recipientId' => $recipient,
@@ -1804,52 +1802,116 @@ class WalletMapper
     }
 
 
-    
     /**
-     * get swap transcation history of current user.
-     * 
-     * @param userId string
-     * @param offset int
-     * @param limit int
-     * 
-     */
-    public function transactionsHistory(string $userId, int $offset, int $limit): ?array
+      * 
+      * get transcations history of current user.
+      * 
+      */ 
+    public function getTransactions(string $userId, array $args): ?array
     {
+        $this->logger->info("WalletMapper.getTransactions started");
 
-        $this->logger->info('Fetching transaction history - WalletMapper.transactionsHistory', ['userId' => $userId]);
+        // Define FILTER mappings. 
+        $typeMap = [
+            'TRANSACTION' => ['transferSenderToRecipient', 'transferDeductSenderToRecipient'],
+            'AIRDROP' => ['airdrop'],
+            'MINT' => ['mint'],
+            'FEES' => ['transferSenderToBurnWallet', 'transferSenderToPeerWallet', 'transferSenderToPoolWallet']
+        ];
 
-        $query = "
-                    SELECT 
-                        *
-                    FROM transactions
-                    WHERE 
-                        senderid = :senderid 
-                        AND transferaction != 'CREDIT'
-                    ORDER BY createdat DESC
-                    LIMIT :limit OFFSET :offset
-                ";
-    
+        // Define DIRECTION FILTER mappings.
+        $directionMap = [
+            'INCOME' => ['CREDIT'],
+            'DEDUCTION' => ['DEDUCT', 'BURN_FEE', 'POOL_FEE', 'PEER_FEE']
+        ];
+
+        $transactionTypes = isset($args['type']) ? ($typeMap[$args['type']] ?? []) : [];
+        $transferActions = isset($args['direction']) ? ($directionMap[$args['direction']] ?? []) : [];
+
+        $query = "SELECT * FROM transactions WHERE (senderid = :userid OR recipientid = :userid)";
+        $params = [':userid' => $userId];
+
+        // Handle TRANSACTION TYPE filter.
+        if (!empty($transactionTypes)) {
+            $typePlaceholders = [];
+            foreach ($transactionTypes as $i => $type) {
+                $ph = ":type$i";
+                $typePlaceholders[] = $ph;
+                $params[$ph] = $type;
+            }
+            $query .= " AND transactiontype IN (" . implode(',', $typePlaceholders) . ")";
+        }
+
+        // Handle TRANSFER ACTION filter.
+        if (!empty($transferActions)) {
+            $actionPlaceholders = [];
+            foreach ($transferActions as $i => $action) {
+                $ph = ":action$i";
+                $actionPlaceholders[] = $ph;
+                $params[$ph] = $action;
+            }
+            $query .= " AND transferaction IN (" . implode(',', $actionPlaceholders) . ")";
+        }
+
+        // Handle DATE filters.(accepting only date, appending time internally)
+        if (isset($args['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['start_date'])) {
+            $query .= " AND createdat >= :start_date";
+            $params[':start_date'] = $args['start_date'] . ' 00:00:00';
+        }
+
+        if (isset($args['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['end_date'])) {
+            $query .= " AND createdat <= :end_date";
+            $params[':end_date'] = $args['end_date'] . ' 23:59:59';
+        }
+
+        // Handle SORT safely.(accept ASCENDING or DESCENDING)
+        $sortDirection = 'DESC'; // default
+        if (isset($args['sort'])) {
+            $sortValue = strtoupper(trim($args['sort']));
+            if ($sortValue === 'ASCENDING') {
+                $sortDirection = 'ASC';
+            } elseif ($sortValue === 'DESCENDING') {
+                $sortDirection = 'DESC';
+            }
+        }
+        $query .= " ORDER BY createdat $sortDirection";
+
+        // Handle PAGINATION.(limit and offset)
+        if (isset($args['limit']) && is_numeric($args['limit'])) {
+            $query .= " LIMIT :limit";
+            $params[':limit'] = (int) $args['limit'];
+        }
+
+        if (isset($args['offset']) && is_numeric($args['offset'])) {
+            $query .= " OFFSET :offset";
+            $params[':offset'] = (int) $args['offset'];
+        }
+
         try {
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':senderid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            foreach ($params as $key => $val) {
+                $stmt->bindValue($key, $val, is_int($val) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
+            }
+
             $stmt->execute();
-        
-            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC); 
-        
+            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000, // Retrived Transaction history
+                'ResponseCode' => 0000,
                 'affectedRows' => $transactions
             ];
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error while fetching transactions - WalletMapper.transactionsHistory", ['error' => $e->getMessage()]);
-            
+
+        } catch (\Throwable $th) {
+            $this->logger->error("Database error while fetching transactions - WalletMapper.getTransactions", [
+                'error' => $th->getMessage()
+            ]);
+            throw new \RuntimeException("Database error while fetching transactions: " . $th->getMessage());
         }
+
         return [
             'status' => 'error',
-            'ResponseCode' => 0000, // failed to Retrived Transaction history
+            'ResponseCode' => 0000,
             'affectedRows' => []
         ];
     }
@@ -1983,6 +2045,24 @@ class WalletMapper
                 'btcAddress' => $btcAddress,
             ]);
             return self::respondWithError(0000); // Invalid BTC Address
+        }
+        
+        if (self::isValidUUID($args['btcAddress'])) {
+            $this->logger->warning('BTC address should not be a User Id.', [
+                'btcAddress' => $args['btcAddress'],
+            ]);
+            return self::respondWithError(0000); // BTC address should not be a User Id
+        }
+       
+        if (!isset($args['password']) && empty($args['password'])) {
+            $this->logger->warning('Password required');
+            return self::respondWithError(0000); // Password is required!
+        }
+        // validate password
+        $user = (new UserMapper($this->logger, $this->db))->loadById($userId);
+        $password = $args['password'];
+        if (!$this->validatePasswordMatch($password, $user->getPassword())) {
+            return self::respondWithError(31001);
         }
 
         $this->initializeLiquidityPool();
@@ -2363,6 +2443,30 @@ class WalletMapper
 
         } catch (\Throwable $e) {
             return self::respondWithError($e->getMessage());
+        }
+    }
+
+
+    /**
+     * validate password.
+     *
+     * @param $inputPassword string
+     * @param $hashedPassword string
+     * 
+     * @return bool value
+     */
+    private function validatePasswordMatch(?string $inputPassword, string $hashedPassword): bool
+    {
+        if (empty($inputPassword) || empty($hashedPassword)) {
+            $this->logger->warning('Password or hash cannot be empty');
+            return false;
+        }
+
+        try {
+            return password_verify($inputPassword, $hashedPassword);
+        } catch (\Throwable $e) {
+            $this->logger->error('Password verification error', ['exception' => $e]);
+            return false;
         }
     }
 
