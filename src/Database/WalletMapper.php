@@ -12,6 +12,7 @@ use Fawaz\App\Wallett;
 use Fawaz\Services\BtcService;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
+use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Psr\Log\LoggerInterface;
 
 const TABLESTOGEMS = true;
@@ -2002,7 +2003,7 @@ class WalletMapper
                 return NULL;
             }
 
-            $tokenPrice = WalletMapper::calculatePeerTokenPriceValue($btcPoolBTCAmount, $liqPoolTokenAmount);
+            $tokenPrice = TokenHelper::calculatePeerTokenPriceValue($btcPoolBTCAmount, $liqPoolTokenAmount);
 
             return $tokenPrice;
 
@@ -2122,7 +2123,7 @@ class WalletMapper
             return self::respondWithError(0000);
         }
 
-        $peerTokenEURPrice = WalletMapper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
+        $peerTokenEURPrice = TokenHelper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
 
 
         if (($peerTokenEURPrice * $numberoftokens) < 10) {
@@ -2134,13 +2135,13 @@ class WalletMapper
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
-        $requiredAmount = WalletMapper::calculateTokenRequiredAmount($numberoftokens, PEERFEE,POOLFEE,BURNFEE);
+        $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, PEERFEE,POOLFEE,BURNFEE);
 
-        $feeAmount = WalletMapper::roundUpStatic((float)$numberoftokens * POOLFEE);
-        $peerAmount = WalletMapper::roundUpStatic((float)$numberoftokens * PEERFEE);
-        $burnAmount = WalletMapper::roundUpStatic((float)$numberoftokens * BURNFEE);
+        $feeAmount = TokenHelper::roundUp((float)$numberoftokens * POOLFEE);
+        $peerAmount = TokenHelper::roundUp((float)$numberoftokens * PEERFEE);
+        $burnAmount = TokenHelper::roundUp((float)$numberoftokens * BURNFEE);
 
-        $countAmount = WalletMapper::calculateSwapTokenSenderRequiredAmountIncludingFees(
+        $countAmount = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
             $feeAmount,
             $peerAmount,
             $burnAmount
@@ -2150,7 +2151,7 @@ class WalletMapper
             $inviterId = $this->getInviterID($userId);
 
             if ($inviterId && !empty($inviterId)) {
-                $inviterWin = WalletMapper::roundUpStatic((float)$numberoftokens * INVTFEE);
+                $inviterWin = TokenHelper::roundUp((float)$numberoftokens * INVTFEE);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
                 $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
                 
@@ -2807,41 +2808,5 @@ class WalletMapper
             return self::respondWithError($e->getMessage());
         }
     }
-
-    public static function calculatePeerTokenEURPrice(float $btcEURPrice,float $peerTokenBTCPrice): ?float
-    {
-        return $btcEURPrice * $peerTokenBTCPrice;
-    }
-
-    public static function calculatePeerTokenPriceValue(float $btcPoolBTCAmount,float $liqPoolTokenAmount): ?float
-    {
-        // Berechne beforeToken mit hoher Präzision
-        $beforeToken = bcdiv((string) $btcPoolBTCAmount, (string) $liqPoolTokenAmount, 20);
-
-        $precision = 10;
-        $multiplier = bcpow('10', (string)$precision);
-        $scaled = bcmul($beforeToken, $multiplier, 0);
-        $tokenPrice = bcdiv($scaled, $multiplier, $precision);
-        return $tokenPrice;
-    }
-
-    public static function calculateTokenRequiredAmount(float $numberoftokens,float $peerFee,float $poolFee,float $burnFee): ?float
-    {
-        $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee);
-
-        return $requiredAmount;
-    }
-
-    public static function calculateSwapTokenSenderRequiredAmountIncludingFees(float $feeAmount,float $peerAmount,float $burnAmount): ?float
-    {
-        $countAmount = $feeAmount + $peerAmount + $burnAmount;
-
-        return $countAmount;
-    }
-    
-    private static function roundUpStatic($value, $precision = 2)
-    {
-        $multiplier = pow(10, $precision);
-        return ceil($value * $multiplier) / $multiplier;
-    }
 }
+    
