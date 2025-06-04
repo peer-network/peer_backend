@@ -1755,6 +1755,9 @@ class GraphQLSchemaBuilder
                 },
             ],
             'LiquidityPoolTransaction' => [
+                'swapid' => function (array $root): string {
+                    return $root['swapid'] ?? '';
+                },
                 'transactionid' => function (array $root): string {
                     return $root['transactionid'] ?? '';
                 },

@@ -217,6 +217,7 @@ type TokenPriceResponse {
   updatedAt: String
 }
 type LiquidityPoolTransaction {
+  swapid: String!
   transactionid: String!
   transactiontype: String!
   senderid: String!

@@ -146,7 +146,7 @@ class WalletMapper
         }
 
         $numberoftokens = (float) $args['numberoftokens'];
-        if ($numberoftokens < 0) {
+        if ($numberoftokens <= 0) {
             $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
