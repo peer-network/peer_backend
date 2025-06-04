@@ -63,7 +63,7 @@ type Mutation {
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
-  swapTokens(btcAddress: ID!, numberoftokens: Decimal!): SwapTokenResponse!
+  swapTokens(btcAddress: ID!, numberoftokens: Decimal!, password: String!): SwapTokenResponse!
 }
 
 scalar Decimal

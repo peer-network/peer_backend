@@ -99,8 +99,8 @@ class Transaction
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 100,
+                        'min' => 0,
+                        'max' => 200,
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],

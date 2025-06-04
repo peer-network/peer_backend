@@ -325,6 +325,9 @@ class WalletService
     {
         $this->logger->info('WalletService.transferToken started');
 
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
         try {
             $response = $this->walletMapper->transferToken($this->currentUserId, $args);
             if ($response['status'] === 'error') {
@@ -356,6 +359,9 @@ class WalletService
     {
         $this->logger->info('WalletService.transactionsHistory started');
 
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
 
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
@@ -388,6 +394,10 @@ class WalletService
     {
         $this->logger->info('WalletService.getLiquidityPoolHistory started');
 
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
             return $validationResult;
@@ -418,6 +428,11 @@ class WalletService
     public function getTokenPrice(): array
     {
         $this->logger->info('WalletService.getTokenPrice started');
+
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
         try {
             $results = $this->walletMapper->getTokenPrice();
             return [
@@ -440,6 +455,10 @@ class WalletService
     public function updateSwapTranStatus(array $args): array
     {
         $this->logger->info('WalletService.updateSwapTranStatus started');
+
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
 
         try {
             if (empty($args)) {
@@ -475,6 +494,10 @@ class WalletService
     {
         $this->logger->info('WalletService.swapTokens started');
 
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
         try {
             $response = $this->walletMapper->swapTokens($this->currentUserId, $args);
             if ($response['status'] === 'error') {
@@ -507,6 +530,9 @@ class WalletService
     {
         $this->logger->info('WalletService.addLiquidity started');
 
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
         try {
             $response = $this->walletMapper->addLiquidity($this->currentUserId, $args);
             if ($response['status'] === 'error') {

@@ -9,6 +9,7 @@ use Fawaz\App\Repositories\TransactionRepository;
 use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
+use Fawaz\Services\BtcService;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
@@ -63,6 +64,21 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.transferToken started');
 
+        
+        $recipient = (string) $args['recipient'];
+        
+        if ((string) $recipient === $userId) {
+            $this->logger->warning('Send and Receive Same Wallet Error.');
+            return self::respondWithError(31202);
+        }
+
+        if (!self::isValidUUID($recipient)) {
+            $this->logger->warning('Incorrect recipientId Exception.', [
+                'recipient' => $recipient,
+            ]);
+            return self::respondWithError(30201);
+        }
+
 		$accountsResult = $this->pool->returnAccounts();
 
 		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
@@ -86,25 +102,25 @@ class WalletMapper
             $this->logger->warning('Incorrect poolWallet Exception.', [
                 'poolWallet' => $this->poolWallet,
             ]);
-            return self::respondWithError(0000); // Invalid Pool Wallet ID
+            return self::respondWithError(0000); // Invalid Pool account
         }
         if (!self::isValidUUID($this->burnWallet)) {
             $this->logger->warning('Incorrect burn Wallet Exception.', [
                 'burnWallet' => $this->burnWallet,
             ]);
-            return self::respondWithError(0000); // Invalid BURN Wallet ID
+            return self::respondWithError(0000); // Invalid BURN account
         }
         if (!self::isValidUUID($this->peerWallet)) {
             $this->logger->warning('Incorrect Peer Wallet Exception.', [
                 'peerWallet' => $this->peerWallet,
             ]);
-            return self::respondWithError(0000); // Invalid Peer Wallet ID
+            return self::respondWithError(0000); // Invalid Peer account
         }
         if (!self::isValidUUID($this->btcpool)) {
             $this->logger->warning('Incorrect BTC Wallet Exception.', [
                 'btcpool' => $this->btcpool,
             ]);
-            return self::respondWithError(0000); // Invalid BTC wallet ID
+            return self::respondWithError(0000); // Invalid BTC account
         }
 
         $liqpool = $accounts['response'] ?? null;
@@ -119,34 +135,30 @@ class WalletMapper
             return self::respondWithError(51301);
         }
 
-        $recipient = (string) $args['recipient'];
-
         if($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient){
             $this->logger->warning('Unauthorized to send token');
             return self::respondWithError(0000); // Unauthorized to send token.
         }
 
-        if (!self::isValidUUID($recipient)) {
-            $this->logger->warning('Incorrect recipientId Exception.', [
-                'recipient' => $recipient,
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(30201);
-        }
 
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
             return self::respondWithError(0000); // Invalid token amount provided. It is should be Integer or with decimal numbers
         }
 
         $numberoftokens = (float) $args['numberoftokens'];
-        if ($numberoftokens <= 0) {
-            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+        if ($numberoftokens < 0) {
+            $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
             return self::respondWithError(30264);
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
+
+        if ($message !== null && strlen($message) > 200) {
+            $this->logger->warning('message length is too high');
+            return self::respondWithError(30210); // message length is too high.
+        }
 
         try {
             $sql = "SELECT uid FROM users WHERE uid = :uid";
@@ -1919,16 +1931,30 @@ class WalletMapper
             $getLpToken = $this->getLpInfo();
             $getLpTokenBtcLP = $this->getLpTokenBtcLP();
 
-            if (empty($getLpToken) || !isset($getLpToken['liquidity']) || $getLpToken['liquidity'] == 0) {
+            if (empty($getLpToken) || !isset($getLpToken['liquidity'])) {
                 throw new \RuntimeException("Invalid LP token data retrieved.");
             }
 
             // Ensure both values are strings
             $liquidity = (float) $getLpToken['liquidity'];
+
+            if($liquidity == 0){
+                 return [
+                    'status' => 'success',
+                    'ResponseCode' => 0000, // Successfully retrieved Peer token price
+                    'currentTokenPrice' => 0,
+                    'updatedAt' => $getLpToken['updatedat'] ?? null,
+                ];
+            }
             $btcLP = (float) $getLpTokenBtcLP;
 
-            // Use bcdiv to avoid float/scientific notation, and set precision
-            $tokenPrice = bcdiv($btcLP, $liquidity, 18); // 10 decimal places as example
+            // Berechne beforeToken mit hoher Präzision
+            $beforeToken = bcdiv((string) $btcLP, (string) $liquidity, 20);
+
+            $precision = 10;
+            $multiplier = bcpow('10', (string)$precision);
+            $scaled = bcmul($beforeToken, $multiplier, 0);
+            $tokenPrice = bcdiv($scaled, $multiplier, $precision);
 
             return [
                 'status' => 'success',
@@ -1975,6 +2001,25 @@ class WalletMapper
             $this->logger->warning('BTC Address required');
             return self::respondWithError(0000); // BTC Address is required!
         }
+        
+        if (self::isValidUUID($args['btcAddress'])) {
+            $this->logger->warning('BTC address should not be a User Id.', [
+                'btcAddress' => $args['btcAddress'],
+            ]);
+            return self::respondWithError(0000); // BTC address should not be a User Id
+        }
+       
+        if (!isset($args['password']) && empty($args['password'])) {
+            $this->logger->warning('Password required');
+            return self::respondWithError(0000); // Password is required!
+        }
+        // validate password
+        $user = (new UserMapper($this->logger, $this->db))->loadById($userId);
+        $password = $args['password'];
+        if (!$this->validatePasswordMatch($password, $user->getPassword())) {
+            return self::respondWithError(31001);
+        }
+
 
         $this->initializeLiquidityPool();
 
@@ -2017,19 +2062,22 @@ class WalletMapper
         }
         $numberoftokens = (float) $args['numberoftokens'];
        
-        if ($numberoftokens <= 0) {
-            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+
+        // Get BTC price
+        $btcPrice = BtcService::getBitcoinPriceWithPeer();
+        if (($btcPrice * $numberoftokens) < 10) {
+            $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(51301);
+            return self::respondWithError(0000); // Price should be above 10 EUROs
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
         $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE);
-        $feeAmount = round((float)$numberoftokens * POOLFEE, 2);
-        $peerAmount = round((float)$numberoftokens * PEERFEE, 2);
-        $burnAmount = round((float)$numberoftokens * BURNFEE, 2);
+        $feeAmount = $this->roundUp((float)$numberoftokens * POOLFEE, 2);
+        $peerAmount = $this->roundUp((float)$numberoftokens * PEERFEE, 2);
+        $burnAmount = $this->roundUp((float)$numberoftokens * BURNFEE, 2);
         $countAmount = $feeAmount + $peerAmount + $burnAmount;
 
         try {
@@ -2040,7 +2088,7 @@ class WalletMapper
 
             if (isset($result['invited']) && !empty($result['invited'])) {
                 $inviterId = $result['invited'];
-                $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
+                $inviterWin = $this->roundUp((float)$numberoftokens * INVTFEE, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
                 $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
                 $this->logger->info('Invited By', [
@@ -2190,7 +2238,7 @@ class WalletMapper
 
                 // Count LP after Fees calculation
                 $lpAccountTokenAfterLPFeeX = $this->getLpToken();
-                $contsAfterFeesK = $lpAccountTokenAfterLPFeeX * $btcConstInitialY;
+                $contsAfterFeesK = $this->roundUp($lpAccountTokenAfterLPFeeX * $btcConstInitialY, 9);            
             }
 
             // 2. RECIPIENT: Credit To Account to Pool Account
@@ -2229,8 +2277,7 @@ class WalletMapper
 
                 // Count LP swap tokens Fees calculation
                 $lpAccountTokenAfterSwapX = $this->getLpToken();
-                $btcConstNewY = $contsAfterFeesK / $lpAccountTokenAfterSwapX;
-
+                $btcConstNewY = $this->roundUp($contsAfterFeesK / $lpAccountTokenAfterSwapX, 9);  
             }
 
             // 6. PEERWALLET: Fee To Account
@@ -2301,7 +2348,7 @@ class WalletMapper
             if($numberoftokens && $transactionId){
                 // Store BTC Swap transactions in btc_swap_transactions
                 // count BTC amount
-                $btcAmountToUser = $btcConstInitialY - $btcConstNewY;
+                $btcAmountToUser = $this->roundUp($btcConstInitialY - $btcConstNewY, 9);
                 $transObj = [
                     'transUniqueId' => $transactionId,
                     'transactionType' => 'btcSwapToPool',
@@ -2336,6 +2383,42 @@ class WalletMapper
             return self::respondWithError($e->getMessage());
         }
     }
+
+
+    /**
+     * validate password.
+     *
+     * @param $inputPassword string
+     * @param $hashedPassword string
+     * 
+     * @return bool value
+     */
+    private function validatePasswordMatch(?string $inputPassword, string $hashedPassword): bool
+    {
+        if (empty($inputPassword) || empty($hashedPassword)) {
+            $this->logger->warning('Password or hash cannot be empty');
+            return false;
+        }
+
+        try {
+            return password_verify($inputPassword, $hashedPassword);
+        } catch (\Throwable $e) {
+            $this->logger->error('Password verification error', ['exception' => $e]);
+            return false;
+        }
+    }
+
+    /**
+     * Round UP method.
+     *
+     * @return float value
+     */
+    private function roundUp($value, $precision = 2)
+    {
+        $multiplier = pow(10, $precision);
+        return ceil($value * $multiplier) / $multiplier;
+    }
+
 
     
     /**
