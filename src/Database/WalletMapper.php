@@ -1919,6 +1919,45 @@ class WalletMapper
         }
     }
 
+    public function getTokenPriceValue(): ?float
+    {
+        $this->logger->info('WalletMapper.getTokenPriceValue');
+
+        try {
+            $liqPool = $this->getLpInfo();
+            $btcPoolBTCAmount = $this->getLpTokenBtcLP();
+
+            if (empty($liqPool) || !isset($liqPool['liquidity'])) {
+                $this->logger->error("Invalid LP data retrieved");
+                throw new \RuntimeException("Invalid LP data retrieved.");
+            }
+
+            // Ensure both values are strings
+            $liqPoolTokenAmount = (float) $liqPool['liquidity'];
+
+            if($liqPoolTokenAmount == 0 || $btcPoolBTCAmount == 0){
+                $this->logger->error("liqudityPool or btcPool liquidity is 0");
+                return NULL;
+            }
+
+            $tokenPrice = WalletMapper::calculatePeerTokenPriceValue($btcPoolBTCAmount, $liqPoolTokenAmount);
+
+            return $tokenPrice;
+
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error while fetching transactions - WalletMapper.transactionsHistory", ['error' => $e->getMessage()]);
+            return NULL;
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                "WalletMapper.getTokenPrice: Exception occurred while calculating token price",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            return NULL;
+        }
+    }
 
     /**
      * get transcation history of current user.
@@ -1973,13 +2012,13 @@ class WalletMapper
             return self::respondWithError(0000); // Invalid BTC wallet ID
         }
         $currentBalance = $this->getUserWalletBalance($userId);
+
         if (empty($currentBalance)) {
             $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                 'Balance' => $currentBalance,
             ]);
             return self::respondWithError(51301);
         }
-
         $recipient = (string) $this->poolWallet;
 
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
@@ -1988,9 +2027,25 @@ class WalletMapper
         $numberoftokens = (float) $args['numberoftokens'];
        
 
-        // Get BTC price
+        // Get EUR/BTC price
         $btcPrice = BtcService::getBitcoinPriceWithPeer();
-        if (($btcPrice * $numberoftokens) < 10) {
+
+        if (empty($btcPrice)) {
+            $this->logger->error('Empty EUR/BTC Price');
+            return self::respondWithError(0);
+        }
+
+        $peerTokenBTCPrice = $this->getTokenPriceValue(); 
+
+        if (!$peerTokenBTCPrice) {
+            $this->logger->error('Peer/BTC Price is NULL');
+            return self::respondWithError(0000);
+        }
+
+        $peerTokenEURPrice = WalletMapper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
+
+
+        if (($peerTokenEURPrice * $numberoftokens) < 10) {
             $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
@@ -1999,23 +2054,26 @@ class WalletMapper
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
-        $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE);
-        $feeAmount = $this->roundUp((float)$numberoftokens * POOLFEE, 2);
-        $peerAmount = $this->roundUp((float)$numberoftokens * PEERFEE, 2);
-        $burnAmount = $this->roundUp((float)$numberoftokens * BURNFEE, 2);
-        $countAmount = $feeAmount + $peerAmount + $burnAmount;
+        $requiredAmount = WalletMapper::calculateTokenRequiredAmount($numberoftokens, PEERFEE,POOLFEE,BURNFEE);
+
+        $feeAmount = WalletMapper::roundUpStatic((float)$numberoftokens * POOLFEE);
+        $peerAmount = WalletMapper::roundUpStatic((float)$numberoftokens * PEERFEE);
+        $burnAmount = WalletMapper::roundUpStatic((float)$numberoftokens * BURNFEE);
+
+        $countAmount = WalletMapper::calculateSwapTokenSenderRequiredAmountIncludingFees(
+            $feeAmount,
+            $peerAmount,
+            $burnAmount
+        );
 
         try {
-            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
-            $stmt = $this->db->prepare($query);
-            $stmt->execute(['userid' => $userId]);
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $inviterId = $this->getInviterID($userId);
 
-            if (isset($result['invited']) && !empty($result['invited'])) {
-                $inviterId = $result['invited'];
-                $inviterWin = $this->roundUp((float)$numberoftokens * INVTFEE, 2);
+            if ($inviterId && !empty($inviterId)) {
+                $inviterWin = WalletMapper::roundUpStatic((float)$numberoftokens * INVTFEE);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
                 $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
+                
                 $this->logger->info('Invited By', [
                     'invited' => $inviterId,
                 ]);
@@ -2318,8 +2376,6 @@ class WalletMapper
         $multiplier = pow(10, $precision);
         return ceil($value * $multiplier) / $multiplier;
     }
-
-
     
     /**
      * Loads and validates the liquidity pool wallets.
@@ -2440,7 +2496,7 @@ class WalletMapper
     /**
      * get BTC LP.
      * 
-     * @return BTC Liquidity in account
+     * @return float BTC Liquidity in account
      */    
     public function getLpTokenBtcLP(): float
     {
@@ -2461,9 +2517,14 @@ class WalletMapper
             $stmt->execute();
             $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            $this->logger->info("Inserted new transaction into database");
-
-            return (float) $walletInfo['liquidity'];
+            $this->logger->info("Fetched btcPool data");
+            
+            if (!isset($walletInfo['liquidity']) || empty($walletInfo['liquidity'])) {
+                throw new \RuntimeException("Failed to get accounts: " . "btcPool liquidity amount is invalid");
+            }
+            $liquidity = (float)$walletInfo['liquidity'];
+            
+            return $liquidity;
         } catch (\PDOException $e) {
             $this->logger->error(
                 "WalletMapper.getLpToken: Exception occurred while getting loop accounts",
@@ -2629,4 +2690,54 @@ class WalletMapper
         $repo->saveTransaction($transaction);
     }
 
+    private function getInviterID(string $userId) {
+        try {
+            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['userid' => $userId]);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            return $result;
+
+        } catch (\Throwable $e) {
+            return self::respondWithError($e->getMessage());
+        }
+    }
+
+    public static function calculatePeerTokenEURPrice(float $btcEURPrice,float $peerTokenBTCPrice): ?float
+    {
+        return $btcEURPrice * $peerTokenBTCPrice;
+    }
+
+    public static function calculatePeerTokenPriceValue(float $btcPoolBTCAmount,float $liqPoolTokenAmount): ?float
+    {
+        // Berechne beforeToken mit hoher Präzision
+        $beforeToken = bcdiv((string) $btcPoolBTCAmount, (string) $liqPoolTokenAmount, 20);
+
+        $precision = 10;
+        $multiplier = bcpow('10', (string)$precision);
+        $scaled = bcmul($beforeToken, $multiplier, 0);
+        $tokenPrice = bcdiv($scaled, $multiplier, $precision);
+        return $tokenPrice;
+    }
+
+    public static function calculateTokenRequiredAmount(float $numberoftokens,float $peerFee,float $poolFee,float $burnFee): ?float
+    {
+        $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee);
+
+        return $requiredAmount;
+    }
+
+    public static function calculateSwapTokenSenderRequiredAmountIncludingFees(float $feeAmount,float $peerAmount,float $burnAmount): ?float
+    {
+        $countAmount = $feeAmount + $peerAmount + $burnAmount;
+
+        return $countAmount;
+    }
+    
+    private static function roundUpStatic($value, $precision = 2)
+    {
+        $multiplier = pow(10, $precision);
+        return ceil($value * $multiplier) / $multiplier;
+    }
 }
