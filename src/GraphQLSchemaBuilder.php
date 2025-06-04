@@ -1563,7 +1563,7 @@ class GraphQLSchemaBuilder
             ],
             'SwapTokenResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    $this->logger->info('Query.SwapTokenResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'responseCode' => function (array $root): string {
@@ -1623,7 +1623,7 @@ class GraphQLSchemaBuilder
             ],
             'AddLiquidityResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    $this->logger->info('Query.AddLiquidityResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'responseCode' => function (array $root): string {
@@ -1665,7 +1665,7 @@ class GraphQLSchemaBuilder
             ],
             'TransferTokenResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    $this->logger->info('Query.TransferTokenResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'responseCode' => function (array $root): string {
@@ -1688,7 +1688,7 @@ class GraphQLSchemaBuilder
             ],
             'TransactionResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    $this->logger->info('Query.TransactionResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'responseCode' => function (array $root): string {
@@ -1700,7 +1700,7 @@ class GraphQLSchemaBuilder
             ],
             'LiquidityPoolHistoryResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    $this->logger->info('Query.LiquidityPoolHistoryResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'responseCode' => function (array $root): string {
@@ -1712,7 +1712,7 @@ class GraphQLSchemaBuilder
             ],
             'TokenPriceResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.getTransactionHistory Resolvers');
+                    $this->logger->info('Query.TokenPriceResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'responseCode' => function (array $root): string {
