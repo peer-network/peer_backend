@@ -2275,7 +2275,7 @@ class GraphQLSchemaBuilder
                 'exception' => $e->getMessage(),
                 'args' => $args,
             ]);
-            return $this->respondWithError(41203);
+            return $this->respondWithError(40301);
         }
     }
 
