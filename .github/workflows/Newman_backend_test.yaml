@@ -11,9 +11,77 @@ permissions:
   contents: write
  
 jobs:
+  check_branch_sync:
+    name: Check if PR Branch is Behind Base
+    runs-on: ubuntu-latest
+    outputs:
+      is_behind: ${{ steps.check.outputs.is_behind }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+ 
+      - name: Fetch all branches
+        run: |
+          git fetch origin +refs/heads/*:refs/remotes/origin/*
+ 
+      - id: check
+        run: |
+          base_branch="${{ github.event.pull_request.base.ref }}"
+          pr_branch="${{ github.event.pull_request.head.ref }}"
+ 
+          echo "Comparing $pr_branch against $base_branch"
+          behind=$(git rev-list --left-right --count origin/${base_branch}...origin/${pr_branch} | awk '{print $1}')
+ 
+          if [ "$behind" -gt 0 ]; then
+            echo "Branch is behind!"
+            echo "is_behind=true" >> $GITHUB_OUTPUT
+          else
+            echo "Branch is up-to-date."
+            echo "is_behind=false" >> $GITHUB_OUTPUT
+          fi
+ 
+  notify_if_behind:
+    name: Notify on Outdated PR
+    runs-on: ubuntu-latest
+    needs: [check_branch_sync, map_pr_to_discord]
+    if: needs.check_branch_sync.outputs.is_behind == 'true'
+    steps:
+      - name: Send Discord Notification for Outdated PR
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+        run: |
+          MESSAGE=":warning: **PR Branch is Behind the Base Branch**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="Link: <$PR_URL>\n"
+          MESSAGE+="Author: $DISCORD_MENTION\n"
+          MESSAGE+="Please update your branch with the latest changes from \`${{ github.event.pull_request.base.ref }}\`."
+ 
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"$MESSAGE\"}" \
+               "$DISCORD_WEBHOOK_URL"
+ 
+  fail_outdated_branch:
+    name: Block CI Due to Outdated Branch
+    runs-on: ubuntu-latest
+    needs: [check_branch_sync]
+    if: needs.check_branch_sync.outputs.is_behind == 'true'
+    steps:
+      - run: |
+          echo " PR branch is behind the base branch."
+          exit 1
+
   build_and_test:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
+    needs: [check_branch_sync]
+    if: needs.check_branch_sync.outputs.is_behind == 'false'
     strategy:
       matrix:
         php-version: ['8.2', '8.3']
@@ -511,7 +579,7 @@ jobs:
   map_pr_to_discord:
     name: Map PR to Discord User
     runs-on: ubuntu-latest
-    needs: [aggregate_results]
+    if: github.event_name == 'pull_request'
     outputs:
       discord_mention: ${{ steps.map.outputs.discord_mention }}
     steps:
