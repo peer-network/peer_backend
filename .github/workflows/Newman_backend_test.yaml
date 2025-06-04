@@ -3,9 +3,7 @@ name: Newman Test For Postman on the php Backend Directory
 on:
   pull_request:
     branches:
-      - development
-      - main
-      - pre-release
+      - '**'
 
 permissions:
   contents: write
