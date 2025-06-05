@@ -14,6 +14,7 @@ use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 const TABLESTOGEMS = true;
 const DAILY_NUMBER_TOKEN= 5000;
@@ -2140,9 +2141,8 @@ class WalletMapper
             $burnAmount
         );
 
+        $inviterId = $this->getInviterID($userId);
         try {
-            $inviterId = $this->getInviterID($userId);
-
             if ($inviterId && !empty($inviterId)) {
                 $inviterWin = TokenHelper::roundUpFeeAmount($numberoftokensToSwap * INVTFEE);
                 $countAmount = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
@@ -2215,7 +2215,7 @@ class WalletMapper
             }
 
 
-            if (isset($result['invited']) && !empty($result['invited'])) {
+            if ($inviterId && !empty($inviterId)) {
                 // 3 . INVITER: Fees To inviter Account (if exist)
                 if ($inviterWin) {
                     $id = self::generateUUID();
@@ -2231,6 +2231,7 @@ class WalletMapper
                         'numbers' => abs($inviterWin),
                         'whereby' => TRANSFER_,
                     ];
+
 
                     $transObj = [
                         'transUniqueId' => $transUniqueId,
@@ -2803,17 +2804,19 @@ class WalletMapper
         $repo->saveTransaction($transaction);
     }
 
-    private function getInviterID(string $userId) {
+    private function getInviterID(string $userId): ?string {
         try {
             $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['userid' => $userId]);
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            return $result;
-
+            
+            if (isset($result['invited']) && !empty($result['invited'])) {
+                return $result["invited"];
+            }
+            return NULL;
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            throw new RuntimeException($e->getMessage());
         }
     }
 }
