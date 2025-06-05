@@ -41,18 +41,18 @@ class TokenHelper {
         return $countAmount;
     }
     
-    static function roundUp($value, $precision = 2)
+    static function roundUp(float $value,int $precision = 2)
     {
         $multiplier = pow(10, $precision);
         return ceil($value * $multiplier) / $multiplier;
     }
 
-    static function roundUpFeeAmount($value)
+    static function roundUpFeeAmount(float $value): float
     {
         return TokenHelper::roundUp($value, 2);
     }
 
-    static function roundUpBTCAmount($value)
+    static function roundUpBTCAmount(float $value): float
     {
         return TokenHelper::roundUp($value, 9);
     }
