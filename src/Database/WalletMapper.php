@@ -103,25 +103,25 @@ class WalletMapper
             $this->logger->warning('Incorrect poolWallet Exception.', [
                 'poolWallet' => $this->poolWallet,
             ]);
-            return self::respondWithError(0000); // Invalid Pool account
+            return self::respondWithError(41222); // Invalid Pool account
         }
         if (!self::isValidUUID($this->burnWallet)) {
             $this->logger->warning('Incorrect burn Wallet Exception.', [
                 'burnWallet' => $this->burnWallet,
             ]);
-            return self::respondWithError(0000); // Invalid BURN account
+            return self::respondWithError(41222); // Invalid BURN account
         }
         if (!self::isValidUUID($this->peerWallet)) {
             $this->logger->warning('Incorrect Peer Wallet Exception.', [
                 'peerWallet' => $this->peerWallet,
             ]);
-            return self::respondWithError(0000); // Invalid Peer account
+            return self::respondWithError(41222); // Invalid Peer account
         }
         if (!self::isValidUUID($this->btcpool)) {
             $this->logger->warning('Incorrect BTC Wallet Exception.', [
                 'btcpool' => $this->btcpool,
             ]);
-            return self::respondWithError(0000); // Invalid BTC account
+            return self::respondWithError(41222); // Invalid BTC account
         }
 
         $liqpool = $accounts['response'] ?? null;
@@ -138,12 +138,12 @@ class WalletMapper
 
         if($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient){
             $this->logger->warning('Unauthorized to send token');
-            return self::respondWithError(0000); // Unauthorized to send token.
+            return self::respondWithError(31203); // Unauthorized to send token.
         }
 
 
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
-            return self::respondWithError(0000); // Invalid token amount provided. It is should be Integer or with decimal numbers
+            return self::respondWithError(30264); // Invalid token amount provided. It is should be Integer or with decimal numbers
         }
 
         $numberoftokens = (float) $args['numberoftokens'];
