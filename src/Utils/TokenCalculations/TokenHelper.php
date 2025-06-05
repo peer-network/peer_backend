@@ -39,4 +39,9 @@ class TokenHelper {
         $multiplier = pow(10, $precision);
         return ceil($value * $multiplier) / $multiplier;
     }
+
+    static function roundUpFeeAmount($value)
+    {
+        return TokenHelper::roundUp($value, 2);
+    }
 }
