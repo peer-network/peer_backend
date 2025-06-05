@@ -79,7 +79,6 @@ class PoolService
         $this->logger->info('PoolService.getActionPrices: Calling fetchCurrentActionPrices');
         try {
             return $this->poolMapper->fetchCurrentActionPrices();
-            $this->logger->info('PoolService.getActionPrices: Retrieved prices', $prices ?: []);
         } catch (\Throwable $e) {
             $this->logger->error('PoolService.getActionPrices exception', [
                 'message' => $e->getMessage(),
