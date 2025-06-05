@@ -3,8 +3,8 @@
 		"_postman_id": "3fbc734e-cd22-4f47-8dce-4fde2e0941d3",
 		"name": "Limitless Graphql Automation Testing",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-3fbc734e-cd22-4f47-8dce-4fde2e0941d3?action=share&source=collection_link&creator=43606001"
+		"_exporter_id": "32542010",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-3fbc734e-cd22-4f47-8dce-4fde2e0941d3?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -17581,6 +17581,66 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query GetProfile {\n    getProfile(postLimit: 20, userid: \"{{uuid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            isfollowed\n            isfollowing\n            amountposts\n            amounttrending\n            amountfollowed\n            amountfollower\n            amountfriends\n            amountblocked\n            imageposts {\n                id\n                title\n                contenttype\n                media\n                createdat\n            }\n            textposts {\n                id\n                title\n                contenttype\n                media\n                createdat\n            }\n            videoposts {\n                id\n                title\n                contenttype\n                media\n                createdat\n            }\n            audioposts {\n                id\n                title\n                contenttype\n                media\n                createdat\n            }\n        }\n    }\n}\n\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getActionPrice",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Query completed with expected success response\", function () {",
+							"    pm.response.to.be.ok;",
+							"});",
+							"",
+							"pm.test(\"Response time is acceptable (below 200ms)\", function () {",
+							"    pm.response.to.have.responseTime.below(200);",
+							"});",
+							"",
+							"pm.test(\"Correct ResponseCode 11304 is returned\", function () {",
+							"    let response = pm.response.json();",
+							"    pm.expect(response.data.getActionPrices.ResponseCode).to.eql(\"11304\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetActionPrices {\n    getActionPrices {\n        status\n        ResponseCode\n        affectedRows {\n            postPrice\n            likePrice\n            dislikePrice\n            commentPrice\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},

@@ -268,4 +268,15 @@ class PoolMapper
         
         return $scaledValue;
     }
+    public function fetchCurrentActionPrices(): ?array
+    {
+        $sql = "SELECT post_price, like_price, dislike_price, comment_price
+                FROM action_prices
+                LIMIT 1";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+    }
 }
