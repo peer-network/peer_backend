@@ -2041,7 +2041,7 @@ class WalletMapper
         }
         $btcAddress = $args['btcAddress'];
 
-        if (!self::isValidBTCAddress($btcAddress)) {
+        if (!WalletMapper::isValidBTCAddress($btcAddress)) {
             $this->logger->warning('Invalid btcAddress .', [
                 'btcAddress' => $btcAddress,
             ]);
@@ -2105,7 +2105,7 @@ class WalletMapper
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
             return self::respondWithError(0000); // Invalid token amount provided. It is should be Integer or with decimal numbers
         }
-        $numberoftokens = (float) $args['numberoftokens'];
+        $numberoftokens = (float) $args['numberoftokens'] ?? 0.0;
        
 
         // Get EUR/BTC price
@@ -2137,9 +2137,9 @@ class WalletMapper
 
         $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, PEERFEE,POOLFEE,BURNFEE);
 
-        $feeAmount = TokenHelper::roundUp((float)$numberoftokens * POOLFEE);
-        $peerAmount = TokenHelper::roundUp((float)$numberoftokens * PEERFEE);
-        $burnAmount = TokenHelper::roundUp((float)$numberoftokens * BURNFEE);
+        $feeAmount = TokenHelper::roundUp($numberoftokens * POOLFEE);
+        $peerAmount = TokenHelper::roundUp($numberoftokens * PEERFEE);
+        $burnAmount = TokenHelper::roundUp($numberoftokens * BURNFEE);
 
         $countAmount = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
             $feeAmount,
@@ -2151,7 +2151,7 @@ class WalletMapper
             $inviterId = $this->getInviterID($userId);
 
             if ($inviterId && !empty($inviterId)) {
-                $inviterWin = TokenHelper::roundUp((float)$numberoftokens * INVTFEE);
+                $inviterWin = TokenHelper::roundUp($numberoftokens * INVTFEE);
                 $countAmount = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
                     $feeAmount,
                     $peerAmount,
@@ -2179,7 +2179,7 @@ class WalletMapper
         }
 
         try {
-
+            $this->db->beginTransaction();
             $transUniqueId = self::generateUUID();
 
             $btcConstInitialY =  $this->getLpTokenBtcLP();
@@ -2188,6 +2188,7 @@ class WalletMapper
             if ($numberoftokens) {
                 $id = self::generateUUID();
                 if (empty($id)) {
+                    $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2226,6 +2227,7 @@ class WalletMapper
                 if ($inviterWin) {
                     $id = self::generateUUID();
                     if (empty($id)) {
+                        $this->db->rollBack();
                         $this->logger->critical('Failed to generate logwins ID');
                         return self::respondWithError(41401);
                     }
@@ -2258,6 +2260,7 @@ class WalletMapper
             if ($countAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
+                    $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2276,6 +2279,7 @@ class WalletMapper
             if ($feeAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
+                    $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2313,6 +2317,7 @@ class WalletMapper
             if ($numberoftokens) {
                 $id = self::generateUUID();
                 if (empty($id)) {
+                    $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2352,6 +2357,7 @@ class WalletMapper
             if ($peerAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
+                    $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2385,6 +2391,7 @@ class WalletMapper
             if ($burnAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
+                    $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2438,7 +2445,8 @@ class WalletMapper
                 $btcAmountToUpdateInBtcPool = -abs($btcAmountToUser);
                 $this->saveWalletEntry($this->btcpool, $btcAmountToUpdateInBtcPool);
             }
-
+            
+            $this->db->commit();
             return [
                 'status' => 'success', 
                 'ResponseCode' => 0000, // Successfully Swap Peer Token to BTC. Your BTC address will be paid soon.
@@ -2448,6 +2456,7 @@ class WalletMapper
             ];
 
         } catch (\Throwable $e) {
+            $this->db->rollBack();
             return self::respondWithError($e->getMessage());
         }
     }
@@ -2760,17 +2769,9 @@ class WalletMapper
         }
         return $amount;
     }
-    /**
-     * Save wallet entry and log transaction.
-     *
-     * @param int|string $userId
-     * @param string $recipientWallet
-     * @param float $amount
-     * @param string $transactionType
-     * @param string $transferAction
-     */
+    
 
-    function isValidBTCAddress($address) {
+    static function isValidBTCAddress($address) {
         // Legacy and P2SH addresses
         if (preg_match('/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/', $address)) {
             return true;
@@ -2783,6 +2784,15 @@ class WalletMapper
         return false;
     }
 
+    /**
+     * Save wallet entry and log transaction.
+     *
+     * @param int|string $userId
+     * @param string $recipientWallet
+     * @param float $amount
+     * @param string $transactionType
+     * @param string $transferAction
+     */
     private function saveLiquidity($userId, string $recipientWallet, float $amount, string $transactionType, string $transferAction): void
     {
         $this->saveWalletEntry($recipientWallet, $amount);
