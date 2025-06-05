@@ -434,7 +434,7 @@ class WalletMapper
 
             return [
                 'status' => 'success', 
-                'ResponseCode' => 0000, // Successfully transferred to wallet
+                'ResponseCode' => 11212, // Successfully transferred to wallet
                 'tokenSend' => $numberoftokens,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'createdat' => date('Y-m-d H:i:s.u')
@@ -1705,7 +1705,7 @@ class WalletMapper
         
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000, // Liquidity Pool History retrived
+                'ResponseCode' => 11213, // Liquidity Pool History retrived
                 'affectedRows' => $transactions
             ];
         } catch (\PDOException $e) {
@@ -1714,7 +1714,7 @@ class WalletMapper
         }
         return [
             'status' => 'error',
-            'ResponseCode' => 0000, // Error while retriveing Liquidity Pool History
+            'ResponseCode' => 41223, // Error while retriveing Liquidity Pool History
             'affectedRows' => []
         ];
     }
@@ -1753,7 +1753,7 @@ class WalletMapper
                 $this->logger->warning('No matching PENDING transaction found for swapId.', ['swapId' => $swapId]);
                 return [
                     'status' => 'error',
-                    'ResponseCode' => 0000, // No Transaction Found with Pending Status
+                    'ResponseCode' => 41224, // No Transaction Found with Pending Status
                 ];
             }
 
@@ -1770,7 +1770,7 @@ class WalletMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000,  // SWAP Transaction has been marked as PAID
+                'ResponseCode' => 11214,  // SWAP Transaction has been marked as PAID
             ];
         } catch (\PDOException $e) {
             $this->logger->error(
@@ -1797,7 +1797,7 @@ class WalletMapper
 
             return [
                 'status' => 'error',
-                'ResponseCode' => 0000, // Failed to update transaction status
+                'ResponseCode' => 41225, // Failed to update transaction status
             ];
         }
     }
@@ -1899,7 +1899,7 @@ class WalletMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000,
+                'ResponseCode' => 11215,
                 'affectedRows' => $transactions
             ];
 
@@ -1910,11 +1910,11 @@ class WalletMapper
             throw new \RuntimeException("Database error while fetching transactions: " . $th->getMessage());
         }
 
-        return [
-            'status' => 'error',
-            'ResponseCode' => 0000,
-            'affectedRows' => []
-        ];
+        // return [
+        //     'status' => 'error',
+        //     'ResponseCode' => 0000,
+        //     'affectedRows' => []
+        // ];
     }
 
     /**
@@ -1940,7 +1940,7 @@ class WalletMapper
             if($liquidity == 0){
                  return [
                     'status' => 'success',
-                    'ResponseCode' => 0000, // Successfully retrieved Peer token price
+                    'ResponseCode' => 11202, // Successfully retrieved Peer token price
                     'currentTokenPrice' => 0,
                     'updatedAt' => $getLpToken['updatedat'] ?? null,
                 ];
@@ -1957,7 +1957,7 @@ class WalletMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000, // Successfully retrieved Peer token price
+                'ResponseCode' => 11202, // Successfully retrieved Peer token price
                 'currentTokenPrice' => $tokenPrice,
                 'updatedAt' => $getLpToken['updatedat'] ?? null,
             ];
@@ -1977,7 +1977,7 @@ class WalletMapper
             );
             return [
                 'status' => 'error',
-                'ResponseCode' => 0000, // Failed to retrieve Peer token price
+                'ResponseCode' => 41203, // Failed to retrieve Peer token price
             ];
         }
     }
@@ -2037,7 +2037,7 @@ class WalletMapper
 
         if (empty($args['btcAddress'])) {
             $this->logger->warning('BTC Address required');
-            return self::respondWithError(0000); // BTC Address is required!
+            return self::respondWithError(31204); // BTC Address is required!
         }
         $btcAddress = $args['btcAddress'];
 
@@ -2045,19 +2045,12 @@ class WalletMapper
             $this->logger->warning('Invalid btcAddress .', [
                 'btcAddress' => $btcAddress,
             ]);
-            return self::respondWithError(0000); // Invalid BTC Address
-        }
-        
-        if (self::isValidUUID($args['btcAddress'])) {
-            $this->logger->warning('BTC address should not be a User Id.', [
-                'btcAddress' => $args['btcAddress'],
-            ]);
-            return self::respondWithError(0000); // BTC address should not be a User Id
+            return self::respondWithError(31204); // Invalid BTC Address
         }
        
         if (!isset($args['password']) && empty($args['password'])) {
             $this->logger->warning('Password required');
-            return self::respondWithError(0000); // Password is required!
+            return self::respondWithError(30237); // Password is required!
         }
         // validate password
         $user = (new UserMapper($this->logger, $this->db))->loadById($userId);
@@ -2072,25 +2065,25 @@ class WalletMapper
             $this->logger->warning('Incorrect poolWallet Exception.', [
                 'poolWallet' => $this->poolWallet,
             ]);
-            return self::respondWithError(0000); // Invalid Pool Wallet ID
+            return self::respondWithError(41227); // Invalid Pool Wallet ID
         }
         if (!self::isValidUUID($this->burnWallet)) {
             $this->logger->warning('Incorrect burn Wallet Exception.', [
                 'burnWallet' => $this->burnWallet,
             ]);
-            return self::respondWithError(0000); // Invalid BURN Wallet ID
+            return self::respondWithError(41227); // Invalid BURN Wallet ID
         }
         if (!self::isValidUUID($this->peerWallet)) {
             $this->logger->warning('Incorrect Peer Wallet Exception.', [
                 'peerWallet' => $this->peerWallet,
             ]);
-            return self::respondWithError(0000); // Invalid Peer Wallet ID
+            return self::respondWithError(41227); // Invalid Peer Wallet ID
         }
         if (!self::isValidUUID($this->btcpool)) {
             $this->logger->warning('Incorrect BTC Wallet Exception.', [
                 'btcpool' => $this->btcpool,
             ]);
-            return self::respondWithError(0000); // Invalid BTC wallet ID
+            return self::respondWithError(41227); // Invalid BTC wallet ID
         }
         $currentBalance = $this->getUserWalletBalance($userId);
 
@@ -2103,7 +2096,7 @@ class WalletMapper
         $recipient = (string) $this->poolWallet;
 
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
-            return self::respondWithError(0000); // Invalid token amount provided. It is should be Integer or with decimal numbers
+            return self::respondWithError(30264); // Invalid token amount provided. It is should be Integer or with decimal numbers
         }
         $numberoftokens = (float) $args['numberoftokens'] ?? 0.0;
        
@@ -2113,14 +2106,14 @@ class WalletMapper
 
         if (empty($btcPrice)) {
             $this->logger->error('Empty EUR/BTC Price');
-            return self::respondWithError(0);
+            return self::respondWithError(41203);
         }
 
         $peerTokenBTCPrice = $this->getTokenPriceValue(); 
 
         if (!$peerTokenBTCPrice) {
             $this->logger->error('Peer/BTC Price is NULL');
-            return self::respondWithError(0000);
+            return self::respondWithError(41203);
         }
 
         $peerTokenEURPrice = TokenHelper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
@@ -2131,7 +2124,7 @@ class WalletMapper
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(0000); // Price should be above 10 EUROs
+            return self::respondWithError(30269); // Price should be above 10 EUROs
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
@@ -2449,7 +2442,7 @@ class WalletMapper
             // $this->db->commit(); 
             return [
                 'status' => 'success', 
-                'ResponseCode' => 0000, // Successfully Swap Peer Token to BTC. Your BTC address will be paid soon.
+                'ResponseCode' => 11217, // Successfully Swap Peer Token to BTC. Your BTC address will be paid soon.
                 'tokenSend' => $numberoftokens,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'expectedBtcReturn' => $btcAmountToUser ?? 0.0
@@ -2681,10 +2674,10 @@ class WalletMapper
         try {
             // Validate inputs
             if (!isset($args['amountToken']) || !is_numeric($args['amountToken']) || (float) $args['amountToken'] != $args['amountToken']) {
-                return self::respondWithError(0000); // Invalid PeerToken amount provided. It is should be Integer or with decimal numbers
+                return self::respondWithError(30241); // Invalid PeerToken amount provided. It is should be Integer or with decimal numbers
             }
             if (!isset($args['amountBtc']) || !is_numeric($args['amountBtc']) || (float) $args['amountBtc'] != $args['amountBtc']) {
-                return self::respondWithError(0000); // Invalid BTC amount provided. It is should be Integer or with decimal numbers
+                return self::respondWithError(30270); // Invalid BTC amount provided. It is should be Integer or with decimal numbers
             }
 
             $amountPeerToken =  (float) $args['amountToken'];
@@ -2711,13 +2704,13 @@ class WalletMapper
                 $this->logger->warning('Incorrect poolWallet Exception.', [
                     'poolWallet' => $this->poolWallet,
                 ]);
-                return self::respondWithError(0000); // Invalid Pool Wallet ID
+                return self::respondWithError(41214); // Invalid Pool Wallet ID
             }
             if (!self::isValidUUID($this->btcpool)) {
-                $this->logger->warning('Incorrect BTC Wallet Exception.', [
+                $this->logger->warning('Incorrect BTC Pool Exception.', [
                     'btcpool' => $this->btcpool,
                 ]);
-                return self::respondWithError(0000); // Invalid BTC Wallet ID
+                return self::respondWithError(41214); // Invalid BTC Wallet ID
             }
 
             // Save PeerToken liquidity
@@ -2742,7 +2735,7 @@ class WalletMapper
             $newBtcAmount = $this->getLpTokenBtcLP();
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000, // Successfully update with Liquidity into Pool
+                'ResponseCode' => 11218, // Successfully update with Liquidity into Pool
                 'newTokenAmount' => $newTokenAmount,
                 'newBtcAmount' => $newBtcAmount,
                 'newTokenPrice' => ((float) $newBtcAmount / (float) $newTokenAmount)   // TODO: Replace with dynamic calculation

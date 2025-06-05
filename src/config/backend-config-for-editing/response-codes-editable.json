@@ -163,7 +163,6 @@
         "comment": "Success: Successfully updated Liquidity into Pool.",
         "userFriendlyComment": "Liquidity was successfully added to the pool."
     },
-
     "11301": {
         "comment": "Success: Payment completed successfully",
         "userFriendlyComment": "Payment processed successfully!"
@@ -740,6 +739,10 @@
         "comment": "Minimum amount of swapping should be 10 euros.",
         "userFriendlyComment": "Minimum swap amount is 10 euros."
     },
+    "30270": {
+        "comment": "The 'btcAmount' field (Amount of tokens to process) must be provided",
+        "userFriendlyComment": "BTC amount is required."
+    },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
         "userFriendlyComment": "Input required. Please provide the needed information."
@@ -845,8 +848,8 @@
         "userFriendlyComment": "You are not authorized to transfer to pool accounts."
     },
     "31204": {
-       "comment": "Invalid Pool or BTC wallet ID.",
-       "userFriendlyComment": "Invalid pool or BTC wallet ID. Please check your input."
+       "comment": "Invalid BTC wallet ID.",
+       "userFriendlyComment": "Invalid BTC wallet ID. Please check your input."
     },
     "31301": {
         "comment": "Invalid Action: You have already liked this post",
@@ -1229,9 +1232,8 @@
         "userFriendlyComment": "Failed to load transaction history. Please try again later."
     },
     "41227": {
-        "comment": "Unexpected Error: Failed to retrieve Peer token price.",
-        "userFriendlyComment": "We couldn't fetch the Peer token price. Please try again."
-
+       "comment": "Invalid Pool ID.",
+       "userFriendlyComment": "Invalid pool ID. Please try again later."
     },
     "41401": {
         "comment": "Unexpected Error: Failed to create transaction. Please try again later or contact support",
