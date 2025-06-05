@@ -1235,6 +1235,22 @@
        "comment": "Invalid Pool ID.",
        "userFriendlyComment": "Invalid pool ID. Please try again later."
     },
+    "41228": {
+       "comment": "Failed to add liquidity",
+       "userFriendlyComment": "Failed to add liquidity."
+    },
+    "41229": {
+       "comment": "Failed to transfer token",
+       "userFriendlyComment": "Failed to transfer token."
+    },
+    "41230": {
+       "comment": "Error occurred while update Swap transaction status",
+       "userFriendlyComment": "Error occurred while update Swap transaction status."
+    },
+    "41231": {
+       "comment": "Failed to swap tokens.",
+       "userFriendlyComment": "Failed to swap tokens."
+    },
     "41401": {
         "comment": "Unexpected Error: Failed to create transaction. Please try again later or contact support",
         "userFriendlyComment": "We couldn't complete this transaction. Please try again."

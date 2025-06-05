@@ -345,7 +345,7 @@ class WalletService
             }
 
         } catch (\Exception $e) {
-            return $this->respondWithError(0000); // Failed to transfer token
+            return $this->respondWithError(41229); // Failed to transfer token
         }
     }
 
@@ -380,7 +380,7 @@ class WalletService
             ];
         } catch (\Exception $e) {
             $this->logger->error("Error in WalletService.transactionsHistory", ['exception' => $e->getMessage()]);
-            return $this->respondWithError(0000);  // Error occurred while retrieving transaction history
+            return $this->respondWithError(41226);  // Error occurred while retrieving transaction history
         }
 
     }
@@ -416,7 +416,7 @@ class WalletService
             ];
         } catch (\Exception $e) {
             $this->logger->error("Error in WalletService.getLiquidityPoolHistory", ['exception' => $e->getMessage()]);
-            return $this->respondWithError(0000);  // Error occurred while retrieving Liquidity Pool transaction history
+            return $this->respondWithError(41226);  // Error occurred while retrieving Liquidity Pool transaction history
         }
     }
     
@@ -443,7 +443,7 @@ class WalletService
             ];
         } catch (\Exception $e) {
             $this->logger->error("Error in WalletService.getTokenPrice", ['exception' => $e->getMessage()]);
-            return $this->respondWithError(0000);  // Error occurred while retrieving token price
+            return $this->respondWithError(41203);  // Error occurred while retrieving token price
         }
     }
 
@@ -467,7 +467,7 @@ class WalletService
             $transactionId = $args['transactionId'];
             
             if (!empty($transactionId) && !self::isValidUUID($transactionId)) {
-                return $this->respondWithError(0000); // Invalid transaction ID provided
+                return $this->respondWithError(30242); // Invalid transaction ID provided
             }
 
             $results = $this->walletMapper->updateSwapTranStatus($transactionId);
@@ -478,7 +478,7 @@ class WalletService
             ];
         } catch (\Exception $e) {
             $this->logger->error("Error in WalletService.updateSwapTranStatus", ['exception' => $e->getMessage()]);
-            return $this->respondWithError(0000);  // Error occurred while update Swap transaction status
+            return $this->respondWithError(41230);  // Error occurred while update Swap transaction status
         }
     }
 
@@ -515,7 +515,7 @@ class WalletService
             }
 
         } catch (\Exception $e) {
-            return $this->respondWithError(0000); // Failed to swap tokens
+            return $this->respondWithError(41231); // Failed to swap tokens
         }
     }
 
@@ -549,7 +549,7 @@ class WalletService
                 ];
             }
         } catch (\Exception $e) {
-            return $this->respondWithError(0000); // Failed to add Liquidity
+            return $this->respondWithError(41228); // Failed to add Liquidity
         }
     }
 
