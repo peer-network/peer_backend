@@ -2303,7 +2303,7 @@ class WalletMapper
 
                 // Count LP after Fees calculation
                 $lpAccountTokenAfterLPFeeX = $this->getLpToken();
-                $contsAfterFeesK = $this->roundUp($lpAccountTokenAfterLPFeeX * $btcConstInitialY, 9);            
+                $contsAfterFeesK = TokenHelper::roundUpBTCAmount($lpAccountTokenAfterLPFeeX * $btcConstInitialY, 9);            
             }
 
             // 2. RECIPIENT: Credit To Account to Pool Account
@@ -2343,7 +2343,7 @@ class WalletMapper
 
                 // Count LP swap tokens Fees calculation
                 $lpAccountTokenAfterSwapX = $this->getLpToken();
-                $btcConstNewY = $this->roundUp($contsAfterFeesK / $lpAccountTokenAfterSwapX, 9);  
+                $btcConstNewY = TokenHelper::roundUpBTCAmount($contsAfterFeesK / $lpAccountTokenAfterSwapX, 9);  
             }
 
             // 6. PEERWALLET: Fee To Account
@@ -2416,7 +2416,7 @@ class WalletMapper
             if($numberoftokensToSwap && $transactionId){
                 // Store BTC Swap transactions in btc_swap_transactions
                 // count BTC amount
-                $btcAmountToUser = $this->roundUp($btcConstInitialY - $btcConstNewY, 9);
+                $btcAmountToUser = TokenHelper::roundUpBTCAmount($btcConstInitialY - $btcConstNewY, 9);
                 $transObj = [
                     'transUniqueId' => $transactionId,
                     'transactionType' => 'btcSwapToPool',
