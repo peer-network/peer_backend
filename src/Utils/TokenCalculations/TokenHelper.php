@@ -2,6 +2,8 @@
 
 namespace Fawaz\Utils\TokenCalculations;
 
+use Fawaz\Utils\TokenCalculations\SwapTokenResult;
+
 class TokenHelper {
     public static function calculatePeerTokenEURPrice(float $btcEURPrice,float $peerTokenBTCPrice): ?float
     {
@@ -20,7 +22,12 @@ class TokenHelper {
         return $tokenPrice;
     }
 
-    public static function calculateTokenRequiredAmount(float $numberoftokens,float $peerFee,float $poolFee,float $burnFee, float $inviterFee = 0): ?float
+    public static function calculateTokenRequiredAmount(
+        float $numberoftokens,
+        float $peerFee,
+        float $poolFee,
+        float $burnFee, 
+        float $inviterFee = 0): ?float
     {
         $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee + $inviterFee);
 
@@ -43,5 +50,10 @@ class TokenHelper {
     static function roundUpFeeAmount($value)
     {
         return TokenHelper::roundUp($value, 2);
+    }
+
+    static function roundUpBTCAmount($value)
+    {
+        return TokenHelper::roundUp($value, 9);
     }
 }
