@@ -22,14 +22,14 @@ class TokenHelper {
 
     public static function calculateTokenRequiredAmount(float $numberoftokens,float $peerFee,float $poolFee,float $burnFee, float $inviterFee = 0): ?float
     {
-        $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee);
+        $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee + $inviterFee);
 
         return $requiredAmount;
     }
 
     public static function calculateSwapTokenSenderRequiredAmountIncludingFees(float $feeAmount,float $peerAmount,float $burnAmount,float $inviterAmount = 0): ?float
     {
-        $countAmount = $feeAmount + $peerAmount + $burnAmount;
+        $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterAmount;
 
         return $countAmount;
     }
