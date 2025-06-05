@@ -1967,7 +1967,7 @@ class WalletMapper
                 'status' => 'error',
                 'ResponseCode' => 40302,
             ];
-        }catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->error(
                 "WalletMapper.getTokenPrice: Exception occurred while calculating token price",
                 [
@@ -2176,7 +2176,7 @@ class WalletMapper
             $transUniqueId = self::generateUUID();
 
             $btcConstInitialY =  $this->getLpTokenBtcLP();
-            
+
             // 1. SENDER: Debit From Account
             if ($numberoftokensToSwap) {
                 $id = self::generateUUID();
@@ -2189,7 +2189,7 @@ class WalletMapper
                 $args = [
                     'token' => $id,
                     'fromid' => $userId,
-                    'numbers' => -abs($requiredAmount),
+                    'numbers' => -abs($numberoftokensToSwap),
                     'whereby' => TRANSFER_,
                 ];
 
@@ -2202,7 +2202,7 @@ class WalletMapper
                     'transactionType' => 'btcSwap',
                     'senderId' => $userId,
                     'recipientId' => $recipient,
-                    'tokenAmount' => -($numberoftokensToSwap + $countAmount),
+                    'tokenAmount' => -($requiredAmount),
                     'message' => $message,
                 ];
                 $transactions = new Transaction($transObj);
