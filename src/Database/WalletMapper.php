@@ -2137,9 +2137,9 @@ class WalletMapper
 
         $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, PEERFEE,POOLFEE,BURNFEE);
 
-        $feeAmount = TokenHelper::roundUp($numberoftokens * POOLFEE);
-        $peerAmount = TokenHelper::roundUp($numberoftokens * PEERFEE);
-        $burnAmount = TokenHelper::roundUp($numberoftokens * BURNFEE);
+        $feeAmount = TokenHelper::roundUpFeeAmount($numberoftokens * POOLFEE);
+        $peerAmount = TokenHelper::roundUpFeeAmount($numberoftokens * PEERFEE);
+        $burnAmount = TokenHelper::roundUpFeeAmount($numberoftokens * BURNFEE);
 
         $countAmount = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
             $feeAmount,
@@ -2151,7 +2151,7 @@ class WalletMapper
             $inviterId = $this->getInviterID($userId);
 
             if ($inviterId && !empty($inviterId)) {
-                $inviterWin = TokenHelper::roundUp($numberoftokens * INVTFEE);
+                $inviterWin = TokenHelper::roundUpFeeAmount($numberoftokens * INVTFEE);
                 $countAmount = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
                     $feeAmount,
                     $peerAmount,
@@ -2179,7 +2179,7 @@ class WalletMapper
         }
 
         try {
-            $this->db->beginTransaction();
+            // $this->db->beginTransaction();
             $transUniqueId = self::generateUUID();
 
             $btcConstInitialY =  $this->getLpTokenBtcLP();
@@ -2188,7 +2188,7 @@ class WalletMapper
             if ($numberoftokens) {
                 $id = self::generateUUID();
                 if (empty($id)) {
-                    $this->db->rollBack();
+                    // $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2227,7 +2227,7 @@ class WalletMapper
                 if ($inviterWin) {
                     $id = self::generateUUID();
                     if (empty($id)) {
-                        $this->db->rollBack();
+                        // $this->db->rollBack();
                         $this->logger->critical('Failed to generate logwins ID');
                         return self::respondWithError(41401);
                     }
@@ -2260,7 +2260,7 @@ class WalletMapper
             if ($countAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
-                    $this->db->rollBack();
+                    // $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2279,7 +2279,7 @@ class WalletMapper
             if ($feeAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
-                    $this->db->rollBack();
+                    // $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2317,7 +2317,7 @@ class WalletMapper
             if ($numberoftokens) {
                 $id = self::generateUUID();
                 if (empty($id)) {
-                    $this->db->rollBack();
+                    // $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2357,7 +2357,7 @@ class WalletMapper
             if ($peerAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
-                    $this->db->rollBack();
+                    // $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2391,7 +2391,7 @@ class WalletMapper
             if ($burnAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
-                    $this->db->rollBack();
+                    // $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -2446,7 +2446,7 @@ class WalletMapper
                 $this->saveWalletEntry($this->btcpool, $btcAmountToUpdateInBtcPool);
             }
             
-            $this->db->commit();
+            // $this->db->commit(); 
             return [
                 'status' => 'success', 
                 'ResponseCode' => 0000, // Successfully Swap Peer Token to BTC. Your BTC address will be paid soon.
@@ -2456,7 +2456,7 @@ class WalletMapper
             ];
 
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            // $this->db->rollBack();
             return self::respondWithError($e->getMessage());
         }
     }
