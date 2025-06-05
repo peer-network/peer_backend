@@ -2098,7 +2098,7 @@ class WalletMapper
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
             return self::respondWithError(30264); // Invalid token amount provided. It is should be Integer or with decimal numbers
         }
-        $numberoftokens = (float) $args['numberoftokens'] ?? 0.0;
+        $numberoftokensToSwap = (float) $args['numberoftokens'] ?? 0.0;
        
 
         // Get EUR/BTC price
@@ -2119,20 +2119,20 @@ class WalletMapper
         $peerTokenEURPrice = TokenHelper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
 
 
-        if (($peerTokenEURPrice * $numberoftokens) < 10) {
+        if (($peerTokenEURPrice * $numberoftokensToSwap) < 10) {
             $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
-                'numberoftokens' => $numberoftokens,
+                'numberoftokens' => $numberoftokensToSwap,
                 'Balance' => $currentBalance,
             ]);
             return self::respondWithError(30269); // Price should be above 10 EUROs
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
-        $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, PEERFEE,POOLFEE,BURNFEE);
+        $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokensToSwap, PEERFEE,POOLFEE,BURNFEE);
 
-        $feeAmount = TokenHelper::roundUpFeeAmount($numberoftokens * POOLFEE);
-        $peerAmount = TokenHelper::roundUpFeeAmount($numberoftokens * PEERFEE);
-        $burnAmount = TokenHelper::roundUpFeeAmount($numberoftokens * BURNFEE);
+        $feeAmount = TokenHelper::roundUpFeeAmount($numberoftokensToSwap * POOLFEE);
+        $peerAmount = TokenHelper::roundUpFeeAmount($numberoftokensToSwap * PEERFEE);
+        $burnAmount = TokenHelper::roundUpFeeAmount($numberoftokensToSwap * BURNFEE);
 
         $countAmount = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
             $feeAmount,
@@ -2144,14 +2144,14 @@ class WalletMapper
             $inviterId = $this->getInviterID($userId);
 
             if ($inviterId && !empty($inviterId)) {
-                $inviterWin = TokenHelper::roundUpFeeAmount($numberoftokens * INVTFEE);
+                $inviterWin = TokenHelper::roundUpFeeAmount($numberoftokensToSwap * INVTFEE);
                 $countAmount = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
                     $feeAmount,
                     $peerAmount,
                     $burnAmount,
                     $inviterWin
                 );
-                $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, PEERFEE,POOLFEE,BURNFEE,INVTFEE);
+                $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokensToSwap, PEERFEE,POOLFEE,BURNFEE,INVTFEE);
                 
                 $this->logger->info('Invited By', [
                     'invited' => $inviterId,
@@ -2178,7 +2178,7 @@ class WalletMapper
             $btcConstInitialY =  $this->getLpTokenBtcLP();
             
             // 1. SENDER: Debit From Account
-            if ($numberoftokens) {
+            if ($numberoftokensToSwap) {
                 $id = self::generateUUID();
                 if (empty($id)) {
                     // $this->db->rollBack();
@@ -2189,7 +2189,7 @@ class WalletMapper
                 $args = [
                     'token' => $id,
                     'fromid' => $userId,
-                    'numbers' => -abs($numberoftokens),
+                    'numbers' => -abs($requiredAmount),
                     'whereby' => TRANSFER_,
                 ];
 
@@ -2202,7 +2202,7 @@ class WalletMapper
                     'transactionType' => 'btcSwap',
                     'senderId' => $userId,
                     'recipientId' => $recipient,
-                    'tokenAmount' => -($numberoftokens + $countAmount),
+                    'tokenAmount' => -($numberoftokensToSwap + $countAmount),
                     'message' => $message,
                 ];
                 $transactions = new Transaction($transObj);
@@ -2307,7 +2307,7 @@ class WalletMapper
             }
 
             // 2. RECIPIENT: Credit To Account to Pool Account
-            if ($numberoftokens) {
+            if ($numberoftokensToSwap) {
                 $id = self::generateUUID();
                 if (empty($id)) {
                     // $this->db->rollBack();
@@ -2318,7 +2318,7 @@ class WalletMapper
                 $args = [
                     'token' => $id,
                     'fromid' => $userId,
-                    'numbers' => abs($numberoftokens),
+                    'numbers' => abs($numberoftokensToSwap),
                     'whereby' => TRANSFER_,
                 ];
 
@@ -2329,7 +2329,7 @@ class WalletMapper
                     'transactionType' => 'btcSwapToPool',
                     'senderId' => $userId,
                     'recipientId' => $recipient,
-                    'tokenAmount' => $numberoftokens,
+                    'tokenAmount' => $numberoftokensToSwap,
                     'message' => $message,
                     'transferAction' => 'CREDIT'
                 ];
@@ -2413,7 +2413,7 @@ class WalletMapper
             }
 
             // Should be placed at last because it should include 1% LP Fees
-            if($numberoftokens && $transactionId){
+            if($numberoftokensToSwap && $transactionId){
                 // Store BTC Swap transactions in btc_swap_transactions
                 // count BTC amount
                 $btcAmountToUser = $this->roundUp($btcConstInitialY - $btcConstNewY, 9);
@@ -2422,7 +2422,7 @@ class WalletMapper
                     'transactionType' => 'btcSwapToPool',
                     'userId' => $userId,
                     'btcAddress' => $btcAddress,
-                    'tokenAmount' => $numberoftokens,
+                    'tokenAmount' => $numberoftokensToSwap,
                     'btcAmount' => $btcAmountToUser,
                     'message' => $message,
                     'transferAction' => 'CREDIT'
@@ -2443,7 +2443,7 @@ class WalletMapper
             return [
                 'status' => 'success', 
                 'ResponseCode' => 11217, // Successfully Swap Peer Token to BTC. Your BTC address will be paid soon.
-                'tokenSend' => $numberoftokens,
+                'tokenSend' => $numberoftokensToSwap,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'expectedBtcReturn' => $btcAmountToUser ?? 0.0
             ];

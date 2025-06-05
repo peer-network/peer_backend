@@ -443,7 +443,7 @@ class WalletService
             ];
         } catch (\Exception $e) {
             $this->logger->error("Error in WalletService.getTokenPrice", ['exception' => $e->getMessage()]);
-            return $this->respondWithError(41203);  // Error occurred while retrieving token price
+            return $this->respondWithError($e->getMessage());  // Error occurred while retrieving token price
         }
     }
 
