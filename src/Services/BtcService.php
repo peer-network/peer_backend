@@ -7,7 +7,7 @@ class BtcService
     /**
      * Fetches the current Bitcoin price in EUR from the CoinGecko API.
      *
-     * @return float|0.0 Returns the price in EUR, or 0.0 if the request fails.
+     * @return float|NULL Returns the price in EUR, or NULL if the request fails.
      */
     public static function getBitcoinPriceWithPeer(): ?float
     {
@@ -26,7 +26,7 @@ class BtcService
         if (curl_errno($ch)) {
             error_log("Fehler beim Abrufen des Bitcoin-Kurses: " . curl_error($ch));
             curl_close($ch);
-            return 0.0;
+            return NULL;
         }
 
         // Get HTTP status code
@@ -36,21 +36,21 @@ class BtcService
         // Check if the request was successful
         if ($httpStatus !== 200) {
             error_log("HTTP-Fehler beim Abrufen des Bitcoin-Kurses: $httpStatus");
-            return 0.0;
+            return NULL;
         }
 
         // Decode the JSON response into an associative array
         $data = json_decode($response, true);
 
         // Validate and return the price if it exists
-        if (isset($data['bitcoin']['eur'])) {
 
+        if (isset($data['bitcoin']['eur']) && is_numeric($data['bitcoin']['eur'])) {
             $btcPrice = (float) $data['bitcoin']['eur'];
-            return 100000 / $btcPrice;
+            return $btcPrice;
         }
 
         // Log unexpected format
         error_log("Unerwartetes Antwortformat vom CoinGecko API.");
-        return 0.0;
+        return NULL;
     }
 }
