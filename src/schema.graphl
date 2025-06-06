@@ -34,7 +34,7 @@ type Query {
   getReferralInfo: ReferralInfoResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
   listTodaysInteractions: ListTodaysInteractionsResponse!
-  getTransactionHistory(offset: Int, limit: Int): TransactionResponse!
+  getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
   getTokenPrice: TokenPriceResponse!
 }
@@ -63,7 +63,7 @@ type Mutation {
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
-  swapTokens(btcAddress: ID!, numberoftokens: Decimal!): SwapTokenResponse!
+  swapTokens(btcAddress: ID!, numberoftokens: Decimal!, password: String!): SwapTokenResponse!
 }
 
 scalar Decimal
@@ -77,6 +77,25 @@ enum PostActionType {
   SHARE
   SAVE
 }
+
+enum TokenMovementFilterType{
+  TRANSACTION
+  AIRDROP
+  MINT
+  PAYMENT
+  BURN
+}
+
+enum DirectionFilterType {
+  INCOME
+  DEDUCTION
+}
+
+enum SortFilterType {
+  descending
+  ascending
+}
+
 
 enum PostType {
   POST
@@ -127,6 +146,7 @@ enum DayFilterType {
   M0
   Y0
 }
+
 
 type ListTodaysInteractionsResponse {
   status: String!
@@ -197,6 +217,7 @@ type TokenPriceResponse {
   updatedAt: String
 }
 type LiquidityPoolTransaction {
+  swapid: String!
   transactionid: String!
   transactiontype: String!
   senderid: String!

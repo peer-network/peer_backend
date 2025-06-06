@@ -135,6 +135,34 @@
         "comment": "Success: Successfully added to wallet",
         "userFriendlyComment": "Funds added to your wallet."
     },
+    "11212": {
+        "comment": "Success: Successfully transferred to the wallet.",
+        "userFriendlyComment": "Funds have been successfully transferred to the wallet."
+    },
+    "11213": {
+        "comment": "Success: Successfully retrieved Liquidity Pool history.",
+        "userFriendlyComment": "Liquidity pool history loaded successfully."
+    },
+    "11214": {
+        "comment": "Success: SWAP Transaction has been marked as PAID.",
+        "userFriendlyComment": "Swap transaction marked as paid."
+    },
+    "11215": {
+        "comment": "Success: Successfully retrieved transaction history.",
+        "userFriendlyComment": "Transaction history loaded successfully."
+    },
+    "11216": {
+        "comment": "Success: Successfully retrieved Peer token price.",
+        "userFriendlyComment": "Peer token price retrieved successfully."
+    },
+    "11217": {
+        "comment": "Success: Successfully swapped Peer Token to BTC. Your BTC address will be paid soon.",
+        "userFriendlyComment": "Swap successful! BTC will be sent to your address shortly."
+    },
+    "11218": {
+        "comment": "Success: Successfully updated Liquidity into Pool.",
+        "userFriendlyComment": "Liquidity was successfully added to the pool."
+    },
     "11301": {
         "comment": "Success: Payment completed successfully",
         "userFriendlyComment": "Payment processed successfully!"
@@ -707,6 +735,14 @@
         "comment": "The cover field must contain at most only 1 image",
         "userFriendlyComment": "Only one cover image allowed."
     },
+    "30269": {
+        "comment": "Minimum amount of swapping should be 10 euros.",
+        "userFriendlyComment": "Minimum swap amount is 10 euros."
+    },
+    "30270": {
+        "comment": "The 'btcAmount' field (Amount of tokens to process) must be provided",
+        "userFriendlyComment": "BTC amount is required."
+    },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
         "userFriendlyComment": "Input required. Please provide the needed information."
@@ -806,6 +842,18 @@
     "31202": {
         "comment": "Not Allowed: You are not allowed to initiate transfers to your own address",
         "userFriendlyComment": "You can't transfer to yourself."
+    },
+    "31203": {
+        "comment": "Unauthorized to initiate transfers to Pool accounts.",
+        "userFriendlyComment": "You are not authorized to transfer to pool accounts."
+    },
+    "31204": {
+       "comment": "Invalid BTC wallet ID.",
+       "userFriendlyComment": "Invalid BTC wallet ID. Please check your input."
+    },
+    "31301": {
+        "comment": "Invalid Action: You have already liked this post",
+        "userFriendlyComment": "You've already liked this post."
     },
     "31501": {
         "comment": "Invalid Action: You have already liked this post",
@@ -1162,6 +1210,46 @@
     "41221": {
         "comment": "Unexpected Error: Invalid action type",
         "userFriendlyComment": "This action isn't valid. Please try something else."
+    },
+    "41222": {
+        "comment": "Unexpected Error: One of the pool accounts in the env file is missing.",
+        "userFriendlyComment": "A configuration error occurred. Please contact support."
+    },
+    "41223": {
+        "comment": "Unexpected Error: Failed to retrieve Liquidity Pool history.",
+        "userFriendlyComment": "We couldn't load your liquidity pool history. Please try again later."
+    },
+    "41224": {
+        "comment": "Error: No transactions found with 'Pending' status.",
+        "userFriendlyComment": "No pending transactions found."
+    },
+    "41225": {
+        "comment": "Unexpected Error: Failed to update transaction status.",
+        "userFriendlyComment": "We couldn't update the transaction status. Please try again."
+    },
+    "41226": {
+        "comment": "Unexpected Error: Failed to retrieve transaction history.",
+        "userFriendlyComment": "Failed to load transaction history. Please try again later."
+    },
+    "41227": {
+       "comment": "Invalid Pool ID.",
+       "userFriendlyComment": "Invalid pool ID. Please try again later."
+    },
+    "41228": {
+       "comment": "Failed to add liquidity",
+       "userFriendlyComment": "Failed to add liquidity."
+    },
+    "41229": {
+       "comment": "Failed to transfer token",
+       "userFriendlyComment": "Failed to transfer token."
+    },
+    "41230": {
+       "comment": "Error occurred while update Swap transaction status",
+       "userFriendlyComment": "Error occurred while update Swap transaction status."
+    },
+    "41231": {
+       "comment": "Failed to swap tokens.",
+       "userFriendlyComment": "Failed to swap tokens."
     },
     "41401": {
         "comment": "Unexpected Error: Failed to create transaction. Please try again later or contact support",
