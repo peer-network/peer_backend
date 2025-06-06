@@ -2072,28 +2072,7 @@ class WalletMapper
 
         $this->initializeLiquidityPool();
 
-        if (!self::isValidUUID($this->poolWallet)) {
-            $this->logger->warning('Incorrect poolWallet Exception.', [
-                'poolWallet' => $this->poolWallet,
-            ]);
-            return self::respondWithError(41227);
-        }
-        if (!self::isValidUUID($this->burnWallet)) {
-            $this->logger->warning('Incorrect burn Wallet Exception.', [
-                'burnWallet' => $this->burnWallet,
-            ]);
-            return self::respondWithError(41227);
-        }
-        if (!self::isValidUUID($this->peerWallet)) {
-            $this->logger->warning('Incorrect Peer Wallet Exception.', [
-                'peerWallet' => $this->peerWallet,
-            ]);
-            return self::respondWithError(41227);
-        }
-        if (!self::isValidUUID($this->btcpool)) {
-            $this->logger->warning('Incorrect BTC Wallet Exception.', [
-                'btcpool' => $this->btcpool,
-            ]);
+        if (!$this->validateSwapWalletUUIDs()) {
             return self::respondWithError(41227);
         }
         $currentBalance = $this->getUserWalletBalance($userId);
@@ -2461,6 +2440,22 @@ class WalletMapper
         }
     }
 
+    /**
+     * Validate fees wallet UUID.
+     *
+     * @param $inputPassword string
+     * @param $hashedPassword string
+     * 
+     * @return bool value
+     */
+    private function validateSwapWalletUUIDs(): bool
+    {
+        return self::isValidUUID($this->poolWallet)
+            && self::isValidUUID($this->burnWallet)
+            && self::isValidUUID($this->peerWallet)
+            && self::isValidUUID($this->btcpool);
+    }
+    
 
     /**
      * validate password.
