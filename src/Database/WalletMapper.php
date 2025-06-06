@@ -2108,7 +2108,6 @@ class WalletMapper
     
         $peerTokenEURPrice = TokenHelper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
 
-
         if (($peerTokenEURPrice * $numberoftokensToSwap) < 10) {
             $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
                 'numberoftokens' => $numberoftokensToSwap,
@@ -2124,22 +2123,12 @@ class WalletMapper
         $peerAmount = TokenHelper::roundUpFeeAmount($numberoftokensToSwap * PEERFEE);
         $burnAmount = TokenHelper::roundUpFeeAmount($numberoftokensToSwap * BURNFEE);
 
-        $countAmount = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
-            $feeAmount,
-            $peerAmount,
-            $burnAmount
-        );
 
         $inviterId = $this->getInviterID($userId);
         try {
             if ($inviterId && !empty($inviterId)) {
                 $inviterWin = TokenHelper::roundUpFeeAmount($numberoftokensToSwap * INVTFEE);
-                $countAmount = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
-                    $feeAmount,
-                    $peerAmount,
-                    $burnAmount,
-                    $inviterWin
-                );
+                
                 $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokensToSwap, PEERFEE, POOLFEE, BURNFEE, INVTFEE);
                 
                 $this->logger->info('Invited By', [
@@ -2161,241 +2150,94 @@ class WalletMapper
         }
 
         try {
-            $transUniqueId = self::generateUUID();
 
             $btcConstInitialY =  $this->getLpTokenBtcLP();
             $lpAccountInitialX = $this->getLpToken();
 
             $btcAmountToUser = SwapTokenHelper::calculateBtc($btcConstInitialY, $lpAccountInitialX, $numberoftokensToSwap);
 
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+            $transUniqueId = self::generateUUID();
 
-            // 1. SENDER: Debit From Account
-            if ($numberoftokensToSwap) {
-                $id = self::generateUUID();
-                if (empty($id)) {
-                    // $this->db->rollBack();
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => -abs($numberoftokensToSwap),
-                    'whereby' => TRANSFER_,
-                ];
-
-
+            // 1. SENDER: Debit Token and Fees From Account
+            if ($requiredAmount) {
                 $transactionId = self::generateUUID();
-
-                $transObj = [
+                $this->createAndSaveTransaction($transRepo, [
                     'transactionId' => $transactionId,
                     'transUniqueId' => $transUniqueId,
                     'transactionType' => 'btcSwap',
                     'senderId' => $userId,
                     'recipientId' => $recipient,
-                    'tokenAmount' => -($requiredAmount),
+                    'tokenAmount' => -abs($requiredAmount),
                     'message' => $message,
-                ];
-                $transactions = new Transaction($transObj);
-
-                $transRepo = new TransactionRepository($this->logger, $this->db);
-                $transRepo->saveTransaction($transactions);
-
-                $this->saveWalletEntry($userId, $args['numbers']);
-
-            }
-
-            if ($inviterId && !empty($inviterId)) {
-                // 3 . INVITER: Fees To inviter Account (if exist)
-                if ($inviterWin) {
-                    $id = self::generateUUID();
-                    if (empty($id)) {
-                        // $this->db->rollBack();
-                        $this->logger->critical('Failed to generate logwins ID');
-                        return self::respondWithError(41401);
-                    }
-
-                    $args = [
-                        'token' => $id,
-                        'fromid' => $userId,
-                        'numbers' => abs($inviterWin),
-                        'whereby' => TRANSFER_,
-                    ];
-
-
-                    $transObj = [
-                        'transUniqueId' => $transUniqueId,
-                        'transactionType' => 'transferSenderToInviter',
-                        'senderId' => $userId,
-                        'recipientId' => $inviterId,
-                        'tokenAmount' => $inviterWin,
-                        'transferAction' => 'INVITER_FEE'
-                    ];
-                    $transactions = new Transaction($transObj);
-    
-                    $transRepo = new TransactionRepository($this->logger, $this->db);
-                    $transRepo->saveTransaction($transactions);
-
-                    $this->saveWalletEntry($inviterId, $args['numbers']);
-                }
-            }
-
-            // 4. SENDER: Deduct Fees From Sender
-            if ($countAmount) {
-                $id = self::generateUUID();
-                if (empty($id)) {
-                    // $this->db->rollBack();
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => -abs($countAmount),
-                    'whereby' => TRANSFER_,
-                ];
-
-                $this->saveWalletEntry($userId, $args['numbers']);
-            }
-
-            // 6. PEERWALLET: Fee To Account
-            if ($peerAmount) {
-                $id = self::generateUUID();
-                if (empty($id)) {
-                    // $this->db->rollBack();
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($peerAmount),
-                    'whereby' => TRANSFER_,
-                ];
-
-
-                $transObj = [
-                    'transUniqueId' => $transUniqueId,
-                    'transactionType' => 'transferSenderToPeerWallet',
-                    'senderId' => $userId,
-                    'recipientId' => $this->peerWallet,
-                    'tokenAmount' => $peerAmount,
-                    'transferAction' => 'PEER_FEE'
-
-                ];
-                $transactions = new Transaction($transObj);
-
-                $transRepo = new TransactionRepository($this->logger, $this->db);
-                $transRepo->saveTransaction($transactions);
-
-                $this->saveWalletEntry($this->peerWallet, $args['numbers']);
-            }
-
-            // 7. BURNWALLET: Fee Burning Tokens
-            if ($burnAmount) {
-                $id = self::generateUUID();
-                if (empty($id)) {
-                    // $this->db->rollBack();
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($burnAmount),
-                    'whereby' => TRANSFER_,
-                ];
-
-                $transObj = [
-                    'transUniqueId' => $transUniqueId,
-                    'transactionType' => 'transferSenderToBurnWallet',
-                    'senderId' => $userId,
-                    'recipientId' => $this->burnWallet,
-                    'tokenAmount' => $burnAmount,
-                    'transferAction' => 'BURN_FEE'
-                ];
-                $transactions = new Transaction($transObj);
-
-                $transRepo = new TransactionRepository($this->logger, $this->db);
-                $transRepo->saveTransaction($transactions);
-                $this->saveWalletEntry($this->burnWallet, $args['numbers']);
-
-            }
-
-            // 5. POOLWALLET: Fee To Account
-            if ($feeAmount) {
-                $id = self::generateUUID();
-                if (empty($id)) {
-                    // $this->db->rollBack();
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($feeAmount),
-                    'whereby' => TRANSFER_,
-                ];
-
-
-                $transObj = [
-                    'transUniqueId' => $transUniqueId,
-                    'transactionType' => 'transferSenderToPoolWallet',
-                    'senderId' => $userId,
-                    'recipientId' => $this->poolWallet,
-                    'tokenAmount' => $feeAmount,
-                    'transferAction' => 'POOL_FEE'
-
-                ];
-                $transactions = new Transaction($transObj);
-
-                $transRepo = new TransactionRepository($this->logger, $this->db);
-                $transRepo->saveTransaction($transactions);
-
-                $this->saveWalletEntry($this->poolWallet, $args['numbers']);
-         
+                ]);
+                $this->saveWalletEntry($userId, -abs($requiredAmount));
             }
 
             // 2. RECIPIENT: Credit To Account to Pool Account
             if ($numberoftokensToSwap) {
-                $id = self::generateUUID();
-                if (empty($id)) {
-                    // $this->db->rollBack();
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($numberoftokensToSwap),
-                    'whereby' => TRANSFER_,
-                ];
-
-
-                $transUniqueIdForDebit = self::generateUUID();
-                $transObj = [
-                    'transUniqueId' => $transUniqueIdForDebit,
+                $this->createAndSaveTransaction($transRepo, [
+                    'transUniqueId' => $transUniqueId,
                     'transactionType' => 'btcSwapToPool',
                     'senderId' => $userId,
                     'recipientId' => $recipient,
                     'tokenAmount' => $numberoftokensToSwap,
                     'message' => $message,
                     'transferAction' => 'CREDIT'
-                ];
-                $transactions = new Transaction($transObj);
+                ]);
+                $this->saveWalletEntry($recipient, $numberoftokensToSwap);
+            }
 
-                $transRepo = new TransactionRepository($this->logger, $this->db);
-                $transRepo->saveTransaction($transactions);
-                
-                $this->saveWalletEntry($recipient, $args['numbers']);
+            // 3. INVITER: Fees To inviter Account (if exist)
+            if ($inviterId && $inviterWin) {
+                $this->createAndSaveTransaction($transRepo, [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferSenderToInviter',
+                    'senderId' => $userId,
+                    'recipientId' => $inviterId,
+                    'tokenAmount' => $inviterWin,
+                    'transferAction' => 'INVITER_FEE'
+                ]);
+                $this->saveWalletEntry($inviterId, $inviterWin);
+            }
 
+            // 4. PEERWALLET: Fee To Account
+            if ($peerAmount) {
+                $this->createAndSaveTransaction($transRepo, [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferSenderToPeerWallet',
+                    'senderId' => $userId,
+                    'recipientId' => $this->peerWallet,
+                    'tokenAmount' => $peerAmount,
+                    'transferAction' => 'PEER_FEE'
+                ]);
+                $this->saveWalletEntry($this->peerWallet, $peerAmount);
+            }
 
+            // 5. POOLWALLET: Fee To Account
+            if ($feeAmount) {
+                $this->createAndSaveTransaction($transRepo, [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferSenderToPoolWallet',
+                    'senderId' => $userId,
+                    'recipientId' => $this->poolWallet,
+                    'tokenAmount' => $feeAmount,
+                    'transferAction' => 'POOL_FEE'
+                ]);
+                $this->saveWalletEntry($this->poolWallet, $feeAmount);
+            }
+
+            // 6. BURNWALLET: Fee Burning Tokens
+            if ($burnAmount) {
+                $this->createAndSaveTransaction($transRepo, [
+                    'transUniqueId' => $transUniqueId,
+                    'transactionType' => 'transferSenderToBurnWallet',
+                    'senderId' => $userId,
+                    'recipientId' => $this->burnWallet,
+                    'tokenAmount' => $burnAmount,
+                    'transferAction' => 'BURN_FEE'
+                ]);
+                $this->saveWalletEntry($this->burnWallet, $burnAmount);
             }
 
 
@@ -2425,7 +2267,6 @@ class WalletMapper
                 $this->saveWalletEntry($this->btcpool, $btcAmountToUpdateInBtcPool);
             }
             
-            // $this->db->commit(); 
             return [
                 'status' => 'success', 
                 'ResponseCode' => 11217, // Successfully Swap Peer Token to BTC. Your BTC address will be paid soon.
@@ -2440,6 +2281,15 @@ class WalletMapper
         }
     }
 
+     /**
+     * Helper to create and save a transaction
+     */
+    private function createAndSaveTransaction($transRepo, array $transObj): void
+    {
+        $transaction = new Transaction($transObj);
+        $transRepo->saveTransaction($transaction);
+    }
+    
     /**
      * Validate fees wallet UUID.
      *
