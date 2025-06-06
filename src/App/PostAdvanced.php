@@ -181,7 +181,7 @@ class PostAdvanced
             ],
             'title' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 2,
@@ -212,7 +212,7 @@ class PostAdvanced
             ],
             'mediadescription' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,

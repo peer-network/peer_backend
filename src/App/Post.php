@@ -122,7 +122,7 @@ class Post
             ],
             'title' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 2,
@@ -163,7 +163,7 @@ class Post
             ],
             'mediadescription' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,

@@ -168,7 +168,7 @@ class Chat
             ],
             'image' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,
@@ -179,7 +179,7 @@ class Chat
             ],
             'name' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,
