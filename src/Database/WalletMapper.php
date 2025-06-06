@@ -1771,9 +1771,16 @@ class WalletMapper
 
             $this->logger->info('Transaction marked as PAID', ['swapId' => $swapId]);
 
+            $query = "SELECT BTC_T.swapid, TNX.transactionid, BTC_T.transactiontype, TNX.senderid, BTC_T.tokenamount, BTC_T.btcamount, BTC_T.status, BTC_T.message, BTC_T.createdat FROM btc_swap_transactions AS BTC_T LEFT JOIN transactions AS TNX ON TNX.transactionid = BTC_T.transuniqueid WHERE BTC_T.swapid = :swapid";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':swapid', $swapId, \PDO::PARAM_STR);
+            $stmt->execute();
+            $swapTnx = $stmt->fetch(\PDO::FETCH_ASSOC);
+
             return [
                 'status' => 'success',
                 'ResponseCode' => 11214,  // SWAP Transaction has been marked as PAID
+                'affectedRows' => $swapTnx
             ];
         } catch (\PDOException $e) {
             $this->logger->error(

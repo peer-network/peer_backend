@@ -1633,6 +1633,19 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'UpdateSwapResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.UpdateSwapResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            
             'ReferralUsers' => [
                 'invitedBy' => function (array $root): ?array {
                     return $root['invitedBy'] ?? null;

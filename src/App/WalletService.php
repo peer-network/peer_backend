@@ -472,10 +472,26 @@ class WalletService
 
             $results = $this->walletMapper->updateSwapTranStatus($transactionId);
 
-            return [
-                'status' => $results['status'],
-                'ResponseCode' => $results['ResponseCode'],
-            ];
+            if ($results['status'] === 'error') {
+                return $results;
+            } else {
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => $results['ResponseCode'],
+                    'affectedRows' => [
+                        'swapid' => $results['affectedRows']['swapid'],
+                        'transactionid' => $results['affectedRows']['transactionid'],
+                        'transactiontype' => $results['affectedRows']['transactiontype'],
+                        'senderid' => $results['affectedRows']['senderid'],
+                        'tokenamount' => $results['affectedRows']['tokenamount'],
+                        'btcamount' => $results['affectedRows']['btcamount'],
+                        'status' => $results['affectedRows']['status'],
+                        'message' => $results['affectedRows']['message'],
+                        'createdat' => $results['affectedRows']['createdat'],
+                    ]
+                ];
+            }
+
         } catch (\Exception $e) {
             $this->logger->error("Error in WalletService.updateSwapTranStatus", ['exception' => $e->getMessage()]);
             return $this->respondWithError(41230);  // Error occurred while update Swap transaction status

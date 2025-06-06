@@ -74,7 +74,7 @@ type Mutation {
   resolveTransfer(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
   swapTokens(btcAddress: ID!, numberoftokens: Decimal!, password: String!): SwapTokenResponse!
   addLiquidity(amountToken: Decimal!, amountBtc: Decimal!): AddLiquidityResponse!
-  updateSwapTranStatus(transactionId: ID!): DefaultResponse!
+  updateSwapTranStatus(transactionId: ID!): UpdateSwapResponse!
 }
 
 scalar Decimal
@@ -451,6 +451,12 @@ type AddLiquidityResponse {
   status: String!
   responseCode: Int!
   affectedRows: AddLiquidity!
+}
+
+type UpdateSwapResponse {
+  status: String!
+  ResponseCode: Int!
+  affectedRows: LiquidityPoolTransaction
 }
 
 type DailyFreeResponse {
