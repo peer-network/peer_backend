@@ -6,14 +6,10 @@ use PDO;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostMedia;
-use Psr\Log\LoggerInterface;
+use Fawaz\Database\Interfaces\PeerMapper;
 
-class PostMapper
+class PostMapper extends PeerMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
-    {
-    }
-
     public function isSameUser(string $userid, string $currentUserId): bool
     {
         return $userid === $currentUserId;

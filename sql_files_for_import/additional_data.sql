@@ -90,3 +90,7 @@ VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df93', 0, 0, 0, 0, 0, 0, 0, NULL, NULL,
 
 INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df93', 0, 0);
 
+
+--action_prices
+INSERT INTO action_prices (post_price, like_price, dislike_price, comment_price, currency) 
+VALUES (2.0, 0.30, 0.50, 0.05,'EUR');

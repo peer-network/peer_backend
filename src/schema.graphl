@@ -34,6 +34,7 @@ type Query {
   getReferralInfo: ReferralInfoResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
   listTodaysInteractions: ListTodaysInteractionsResponse!
+  getActionPrices: GetActionPricesResponse!
 }
 
 type Mutation {
@@ -549,4 +550,17 @@ input FeedInput {
   media: String!
   mediadescription: String
   contenttype: String!
+}
+
+type ActionPriceResult {
+    postPrice: Float!
+    likePrice: Float!
+    dislikePrice: Float!
+    commentPrice: Float!
+}
+
+type GetActionPricesResponse {
+    status: String!
+    ResponseCode: String!
+    affectedRows: ActionPriceResult!
 }
