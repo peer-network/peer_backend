@@ -13,6 +13,8 @@ use Fawaz\Services\BtcService;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
+use Fawaz\Utils\TokenCalculations\SwapTokenCalculation;
+use Fawaz\Utils\TokenCalculations\SwapTokenData;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 
@@ -2116,7 +2118,7 @@ class WalletMapper
             $this->logger->error('Peer/BTC Price is NULL');
             return self::respondWithError(41203);
         }
-
+    
         $peerTokenEURPrice = TokenHelper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
 
 
@@ -2172,10 +2174,18 @@ class WalletMapper
         }
 
         try {
+            $btcConstInitialY =  $this->getLpTokenBtcLP();
+
+            // $swapCalculation = new SwapTokenCalculation([
+            //     'numberoftokensToSwap' => $numberoftokensToSwap,
+            //     'btcPrice' => $btcPrice,
+            //     'peerTokenBTCPrice' => $peerTokenBTCPrice,
+            //     'btcConstInitialY' => $btcConstInitialY,
+            // ])->data();
+        
             // $this->db->beginTransaction();
             $transUniqueId = self::generateUUID();
 
-            $btcConstInitialY =  $this->getLpTokenBtcLP();
 
             // 1. SENDER: Debit From Account
             if ($numberoftokensToSwap) {
