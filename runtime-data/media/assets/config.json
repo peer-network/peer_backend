@@ -1,17 +1,17 @@
 {
-    "createdAt": 1749221687,
+    "createdAt": 1749565218,
     "name": "config",
     "data": {
         "constants": {
-            "createdAt": 1749221687,
+            "createdAt": 1749565218,
             "url": "https:\/\/media.getpeer.eu\/assets\/constants.json"
         },
         "response-codes": {
-            "createdAt": 1749221687,
+            "createdAt": 1749565218,
             "url": "https:\/\/media.getpeer.eu\/assets\/response-codes.json"
         },
         "endpoints": {
-            "createdAt": 1749221687,
+            "createdAt": 1749565218,
             "url": "https:\/\/media.getpeer.eu\/assets\/endpoints.json"
         }
     }
