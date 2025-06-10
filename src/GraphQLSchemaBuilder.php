@@ -1642,7 +1642,19 @@ class GraphQLSchemaBuilder
                 'commentPrice' => function (array $root): float {
                     return (float) ($root['commentPrice'] ?? 0);
                 },
-            ],                           
+            ],    
+            'ResetPasswordRequestResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ResetPasswordRequestResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'nextAttemptAt' => function (array $root): string {
+                    return $root['nextAttemptAt'] ?? '';
+                },
+            ],                       
         ];
     }
 
