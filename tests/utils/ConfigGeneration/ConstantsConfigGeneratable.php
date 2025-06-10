@@ -5,7 +5,6 @@ namespace Tests\Utils\ConfigGeneration;
 use Fawaz\config\constants\ConstantsConfig;
 
 class ConstantsConfigGeneratable implements DataGeneratable {
-    /** @var array<string, MessageEntry> */
     private array $data = [];
 
 

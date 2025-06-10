@@ -5,6 +5,8 @@ namespace Tests\Utils\ConfigGeneration;
 
 use Exception;
 use Tests\Utils\ConfigGeneration\JSONHandler;
+use Tests\Utils\ConfigGeneration\ResponseMessagesValueInjector;
+use Tests\Utils\ConfigGeneration\MessageEntry;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
@@ -27,6 +29,13 @@ class ResponseCodesConfig implements DataGeneratable {
             );
         }
 
+        $injector = new ResponseMessagesValueInjector();
+        $injectedData = $injector->injectConstants($this->data);
+
+        if (!$injectedData || empty($injectedData)) {
+            throw new Exception("ResponseCodesConfig: injectConstantsToMessages: result is empty");
+        }
+        $this->data = $injectedData;
         $this->validate();
     }
 
@@ -43,8 +52,17 @@ class ResponseCodesConfig implements DataGeneratable {
     private function validateMessages() {
          foreach ($this->data as $code => $entry) {
             if (empty($entry->comment) || empty($entry->userFriendlyComment)) {
-                throw new Exception("Error: Empty Message found for code " . $code);
+                throw new Exception("ResponseCodesConfig: validateMessages: Empty Message found for code " . $code);
             }
+            $this->isStringContainsPlaceholders($entry->comment);
+            $this->isStringContainsPlaceholders($entry->userFriendlyComment);
+        }
+    }
+
+    private function isStringContainsPlaceholders($input) {
+        // Returns false if curly braces are found
+        if (preg_match('/[{}]/', $input)) {
+            throw new Exception("ResponseCodesConfig: validateMessages: message still contains a placeholder" . $input);
         }
     }
 
@@ -64,15 +82,5 @@ class ResponseCodesConfig implements DataGeneratable {
                 throw new Exception("Error: Invalid Code " . $code . ": first digit should be within 1 and 6");
             }
         }
-    }
-}
-
-class MessageEntry {
-    public string $comment;
-    public string $userFriendlyComment;
-
-    public function __construct(string $comment, string $userFriendlyComment) {
-        $this->comment = $comment;
-        $this->userFriendlyComment = $userFriendlyComment;
     }
 }

@@ -12,20 +12,20 @@ class ConstantsConfig
     }
 
     public const COMMENT = [
-        'content' => [
-            'min_length' => 2,
-            'max_length' => 200,
+        'CONTENT' => [
+            'MIN_LENGTH' => 2,
+            'MAX_LENGTH' => 200,
         ], 
     ];
 
     public const POST = [
-        'title' => [
-            'min_length' => 2,
-            'max_length' => 63,
+        'TITLE' => [
+            'MIN_LENGTH' => 2,
+            'MAX_LENGTH' => 63,
         ],
-        'mediadescription' => [
-            'min_length' => 3,
-            'max_length' => 500,
+        'MEDIADESCRIPTION' => [
+            'MIN_LENGTH' => 3,
+            'MAX_LENGTH' => 500,
         ],
     ];
 }
