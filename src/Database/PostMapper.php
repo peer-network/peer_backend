@@ -91,7 +91,7 @@ class PostMapper extends PeerMapper
 
         $results = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $results[] = new Post($row);
+            $results[] = new Post($row,[],false);
         }
 
         if (empty($results)) {
@@ -114,7 +114,7 @@ class PostMapper extends PeerMapper
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         if (!empty($data)) {
-            return array_map(fn($row) => new Post($row), $data);
+            return array_map(fn($row) => new Post($row, [],false), $data);
         }
 
         $this->logger->warning("No posts found with title", ['title' => $title]);
@@ -131,7 +131,7 @@ class PostMapper extends PeerMapper
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
-            return new Post($data);
+            return new Post($data,[],false);
         }
 
         $this->logger->warning("No post found with id", ['id' => $id]);
@@ -646,7 +646,7 @@ class PostMapper extends PeerMapper
 							'isfollowed' => (bool)$row['isfollowed'],
 							'isfollowing' => (bool)$row['isfollowing'],
 						],
-					]);
+					],[],false);
 				}
             } else {
                 //$this->logger->warning("Failed to Get post info"]);
