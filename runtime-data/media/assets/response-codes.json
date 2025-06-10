@@ -1,5 +1,5 @@
 {
-    "createdAt": 1749565218,
+    "createdAt": 1749566545,
     "name": "response-codes",
     "data": {
         "10401": {
@@ -703,7 +703,7 @@
             "userFriendlyComment": "Token amount must be positive and within your balance."
         },
         "30265": {
-            "comment": "The 'content' field must be between  2 and 200 characters long",
+            "comment": "The 'content' field must be between 2 and 200 characters long",
             "userFriendlyComment": "Content must be 2-200 characters."
         },
         "30266": {
