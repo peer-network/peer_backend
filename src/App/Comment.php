@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class Comment
 {
@@ -148,8 +149,8 @@ class Comment
                     [
                         'name' => 'StringLength', 
                         'options' => [
-                            'min' => 2,
-                            'max' => 200,
+                            'min' => ConstantsConfig::COMMENT['content']['min_length'],
+                            'max' => ConstantsConfig::COMMENT['content']['max_length'],
                             'errorCode' => 30265,
                             ]
                         ],

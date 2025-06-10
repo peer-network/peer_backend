@@ -4,6 +4,20 @@ namespace Fawaz\config\constants;
 
 class ConstantsConfig
 {
+    public function getData() {
+        return [
+            "POST" => $this::POST,
+            "COMMENT" => $this::COMMENT,
+        ];
+    }
+
+    public const COMMENT = [
+        'content' => [
+            'min_length' => 2,
+            'max_length' => 200,
+        ], 
+    ];
+
     public const POST = [
         'title' => [
             'min_length' => 2,
@@ -14,10 +28,4 @@ class ConstantsConfig
             'max_length' => 500,
         ],
     ];
-
-    public function getData() {
-        return [
-            "POST" => $this::POST,
-        ];
-    }
 }
