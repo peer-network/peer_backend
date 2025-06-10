@@ -480,8 +480,8 @@
         "userFriendlyComment": "Invalid post ID format."
     },
     "30210": {
-        "comment": "The 'title' field (Title of the post to search for) must be between 2 and 63 characters long and can only contain letters, numbers, spaces, dashes (-), and underscores (_)",
-        "userFriendlyComment": "Title must be 2-63 chars with letters, numbers, spaces, - or _."
+        "comment": "The 'title' field (Title of the post to search for) must be between 2 and 63 characters long",
+        "userFriendlyComment": "Title must be 2-63 chars"
     },
     "30211": {
         "comment": "The 'tag' field (Tags to search for in posts) must be an array of up to five tags, each between 2 and 53 characters long",
