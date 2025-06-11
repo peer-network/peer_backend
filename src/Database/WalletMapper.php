@@ -1911,7 +1911,7 @@ class WalletMapper
        
 
         // Get EUR/BTC price
-        $btcPrice = BtcService::getBitcoinPriceWithPeer();
+        $btcPrice = BtcService::getOrUpdateBitcoinPrice($this->logger, $this->db);
 
         if (empty($btcPrice)) {
             $this->logger->error('Empty EUR/BTC Price');

@@ -2,12 +2,6 @@
 
 namespace Fawaz\App\Models;
 
-enum TransferAction {
-    case DEDUCT;
-    case CREDIT;
-    case FEE;
-    case BURN;
-}
 
 use DateTime;
 use Fawaz\App\ValidationException;

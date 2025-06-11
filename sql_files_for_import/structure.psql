@@ -565,6 +565,13 @@ CREATE TABLE IF NOT EXISTS btc_swap_transactions (
     CONSTRAINT fk_transUniqueId FOREIGN KEY (transUniqueId) REFERENCES transactions(transactionId) ON DELETE CASCADE
 );
 
+-- Table: token_euro_price
+CREATE TABLE IF NOT EXISTS token_euro_price (
+    token VARCHAR(255) DEFAULT NULL,
+    europrice NUMERIC(30,10) DEFAULT NULL,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
 -- Table: wallett
 CREATE TABLE IF NOT EXISTS wallett (
     userid UUID PRIMARY KEY,
