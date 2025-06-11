@@ -21,7 +21,7 @@ try {
     }
 
     $pathsConfig = new ConfigUrl();
-    JSONHandler::generateJSONtoFile(Constants::$pathToAssets . "config.json", $pathsConfig->getData(), "config");
+    JSONHandler::generateJSONtoFile(Constants::$pathToAssets . "config.json", $pathsConfig->getData(), "config", false);
     
     echo("ConfigGeneration: Done! \n");
 } catch (\Exception $e) {

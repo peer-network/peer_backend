@@ -6,17 +6,27 @@ namespace Tests\Utils\ConfigGeneration;
 require __DIR__ . '../../../../vendor/autoload.php';
 
 class JSONHandler {
-    private static function generateJson(array $data, string $name) {
+    private static function generateJson(array $data, string $name, bool $addHash): string {
         echo("ConfigGeneration: JSONHandler: generating JSON: " . $name . "\n");
         
         $jsonObj['createdAt'] = time();
+
+        if ($addHash == true) {
+            $jsonStringForHash = json_encode($data, JSON_UNESCAPED_UNICODE);
+            $hash = hash('sha256', $jsonStringForHash);
+            $jsonObj['contentHash'] = $hash;
+        }
         $jsonObj['name'] = $name;
         $jsonObj['data'] = $data;
-        return json_encode($jsonObj, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $jsonString = json_encode($jsonObj, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        if (!$jsonString) {
+            throw new \Exception("JSONHandler: generateJson: Failed encode JSON");
+        }
+        return $jsonString;
     }
 
-    public static function generateJSONtoFile(string $outputPath,array $data,string $name) {
-        $jsonString = JSONHandler::generateJson($data,$name);
+    public static function generateJSONtoFile(string $outputPath,array $data,string $name, bool $addHash = true) {
+        $jsonString = JSONHandler::generateJson($data,$name,$addHash);
         if (file_put_contents($outputPath, $jsonString) === false) {
             throw new \Exception("Failed to write JSON to file: $outputPath");
         }
