@@ -130,8 +130,8 @@ class Post
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => ConstantsConfig::POST['TITLE']['MIN_LENGTH'],
-                        'max' => ConstantsConfig::POST['TITLE']['MAX_LENGTH'],
+                        'min' => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
+                        'max' => ConstantsConfig::post()['TITLE']['MAX_LENGTH'],
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
@@ -171,8 +171,8 @@ class Post
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => ConstantsConfig::POST['MEDIADESCRIPTION']['MIN_LENGTH'],
-                        'max' => ConstantsConfig::POST['MEDIADESCRIPTION']['MAX_LENGTH'],
+                        'min' => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],
+                        'max' => ConstantsConfig::post()['MEDIADESCRIPTION']['MAX_LENGTH'],
                         'errorCode' => 30263
                     ]],
                     ['name' => 'isString'],
