@@ -149,8 +149,8 @@ class Comment
                     [
                         'name' => 'StringLength', 
                         'options' => [
-                            'min' => ConstantsConfig::COMMENT['content']['min_length'],
-                            'max' => ConstantsConfig::COMMENT['content']['max_length'],
+                            'min' => ConstantsConfig::COMMENT['CONTENT']['MIN_LENGTH'],
+                            'max' => ConstantsConfig::COMMENT['CONTENT']['MAX_LENGTH'],
                             'errorCode' => 30265,
                             ]
                         ],
