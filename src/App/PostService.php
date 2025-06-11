@@ -177,7 +177,7 @@ class PostService
             }
 
             if (!$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
-                return $this->createSuccessResponse(21516);
+                return $this->respondWithError(31801);
             }
         }
 

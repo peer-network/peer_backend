@@ -6,27 +6,10 @@ use PDO;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostMedia;
-use Fawaz\Database\Interfaces\RollbackableDatabase;
-use Psr\Log\LoggerInterface;
+use Fawaz\Database\Interfaces\PeerMapper;
 
-class PostMapper implements RollbackableDatabase
+class PostMapper extends PeerMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
-    {
-    }
-
-    public function beginTransaction(): bool {
-        return $this->db->beginTransaction();
-    }
-
-    public function commit(): bool {
-        return $this->db->commit();
-    }
-
-    public function rollback(): bool {
-        return $this->db->rollBack();
-    }
-
     public function isSameUser(string $userid, string $currentUserId): bool
     {
         return $userid === $currentUserId;
@@ -108,7 +91,7 @@ class PostMapper implements RollbackableDatabase
 
         $results = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $results[] = new Post($row);
+            $results[] = new Post($row,[],false);
         }
 
         if (empty($results)) {
@@ -131,7 +114,7 @@ class PostMapper implements RollbackableDatabase
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         if (!empty($data)) {
-            return array_map(fn($row) => new Post($row), $data);
+            return array_map(fn($row) => new Post($row, [],false), $data);
         }
 
         $this->logger->warning("No posts found with title", ['title' => $title]);
@@ -148,7 +131,7 @@ class PostMapper implements RollbackableDatabase
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
-            return new Post($data);
+            return new Post($data,[],false);
         }
 
         $this->logger->warning("No post found with id", ['id' => $id]);
@@ -663,7 +646,7 @@ class PostMapper implements RollbackableDatabase
 							'isfollowed' => (bool)$row['isfollowed'],
 							'isfollowing' => (bool)$row['isfollowing'],
 						],
-					]);
+					],[],false);
 				}
             } else {
                 //$this->logger->warning("Failed to Get post info"]);
