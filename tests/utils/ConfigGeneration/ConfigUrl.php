@@ -16,7 +16,7 @@ class ConfigUrl implements DataGeneratable {
 
         foreach ($configs as $config) { 
             $createdAtKey = "createdAt";
-            $hashKey = "contentHash";
+            $hashKey = "hash";
             $file = JSONHandler::parseInputJson(Constants::$pathToAssets . $config->outputFileName());
 
             if (!isset($file[$createdAtKey]) || empty($file[$createdAtKey])) {

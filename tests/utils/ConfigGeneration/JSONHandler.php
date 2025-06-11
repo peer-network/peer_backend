@@ -14,7 +14,7 @@ class JSONHandler {
         if ($addHash == true) {
             $jsonStringForHash = json_encode($data, JSON_UNESCAPED_UNICODE);
             $hash = hash('sha256', $jsonStringForHash);
-            $jsonObj['contentHash'] = $hash;
+            $jsonObj['hash'] = $hash;
         }
         $jsonObj['name'] = $name;
         $jsonObj['data'] = $data;
