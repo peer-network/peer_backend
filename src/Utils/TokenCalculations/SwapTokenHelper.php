@@ -8,33 +8,31 @@ class SwapTokenHelper
 {
 
     /**
-     * Calculates Peer token to BTC.
+     * Calculate the amount of BTC a user will receive when swapping a given amount of tokens.
      *
-     * @param float $btcEURPrice Current BTC to EUR price.
-     * @param float $peerTokenBTCPrice Current PeerToken to BTC price.
-     * @return float|null Calculated PeerToken price in EUR.
+     * @param float $btcReserve Initial BTC reserve in the liquidity pool.
+     * @param float $tokenReserve Initial token reserve in the liquidity pool.
+     * @param float $tokensToSwap Amount of tokens the user wants to swap for BTC.
+     * @return float Amount of BTC the user will receive after fees and pool adjustment.
      */
-    public static function calculateBtc(float $btcConstInitialY, float $lpInitialState, float $numberoftokensToSwap)
+    public static function calculateBtc(float $btcLpTokenReserve, float $lpTokenReserve, float $tokensToSwap, float $POOLFEE = 0.01): float
     {
-        
-        $feeAmount = TokenHelper::roundUpFeeAmount($numberoftokensToSwap * POOLFEE);
+        // Step 1: New token reserve after adding the pool fee.
+        $tokenWithPoolFee = TokenHelper::roundUpFeeAmount($tokensToSwap * $POOLFEE);
 
-        // Count LP after Fees calculation
-        $lpAccountTokenAfterLPFeeX = TokenHelper::roundUpFeeAmount($lpInitialState + $feeAmount);
-        $contsAfterFeesK = TokenHelper::roundUpBTCAmount($lpAccountTokenAfterLPFeeX * $btcConstInitialY);   
-
-        
-        // Count LP swap tokens Fees calculation
-        $lpAccountTokenAfterSwapX = TokenHelper::roundUpFeeAmount($lpAccountTokenAfterLPFeeX + $numberoftokensToSwap);
-        $btcConstNewY = TokenHelper::roundUpBTCAmount($contsAfterFeesK / $lpAccountTokenAfterSwapX);  
+        // Count LP after including Fees
+        $lpTokenAmountAfterLPFee = TokenHelper::roundUpFeeAmount($lpTokenReserve + $tokenWithPoolFee);
+        $contsAfterLpFees = TokenHelper::roundUpBTCAmount($lpTokenAmountAfterLPFee * $btcLpTokenReserve);   
 
         
-        // Store BTC Swap transactions in btc_swap_transactions
-        // count BTC amount
-        $btcAmountToUser = TokenHelper::roundUpBTCAmount($btcConstInitialY - $btcConstNewY);
+        // Count LP After Adding Amount of Peer Token
+        $lpAccountAfterTokenTransfer = TokenHelper::roundUpFeeAmount($lpTokenAmountAfterLPFee + $tokensToSwap);
+        $btcPeerTokenAfterSwap = TokenHelper::roundUpBTCAmount($contsAfterLpFees / $lpAccountAfterTokenTransfer);  
 
+        
+        // BTC amount to user
+        $btcReceived = TokenHelper::roundUpBTCAmount($btcLpTokenReserve - $btcPeerTokenAfterSwap);
 
-        return $btcAmountToUser;
+        return $btcReceived;
     }
-    
 }
