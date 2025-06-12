@@ -143,7 +143,7 @@ class Comment
             ],
             'content' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     [
                         'name' => 'StringLength', 

@@ -320,7 +320,7 @@ class User
             ],
             'email' => [
                 'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'EmailAddress'],
                     ['name' => 'isString'],
@@ -328,7 +328,7 @@ class User
             ],
             'username' => [
                 'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'validateUsername'],
                 ],
@@ -375,7 +375,7 @@ class User
             ],
             'img' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 0,
@@ -386,7 +386,7 @@ class User
             ],
             'biography' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,

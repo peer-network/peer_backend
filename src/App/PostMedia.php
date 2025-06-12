@@ -99,7 +99,7 @@ class PostMedia
             ],
             'media' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 0,
@@ -110,7 +110,7 @@ class PostMedia
             ],
             'options' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 0,
