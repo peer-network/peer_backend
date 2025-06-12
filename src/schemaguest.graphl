@@ -71,3 +71,4 @@ input RegistrationInput {
   pkey: String
   referralUuid: ID
 }
+
