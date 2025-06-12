@@ -177,14 +177,14 @@ class PostService
             }
 
             if (!$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
-                return $this->createSuccessResponse(21516);
+                return $this->respondWithError(31801);
             }
         }
 
         try {
+            $this->postMapper->beginTransaction();
             // Media Upload
             if ($this->isValidMedia($args['media'])) {
-                
                 $validateContentCountResult = $this->validateContentCount($args);
                 if (isset($validateContentCountResult['error'])) {
                     return $this->respondWithError($validateContentCountResult['error']);
@@ -208,11 +208,6 @@ class PostService
 
             // Cover Upload Nur (Audio & Video)
             if ($this->isValidCover($args)) {
-                $validateContentCountResult = $this->validateContentCount($args);
-                if (isset($validateContentCountResult['error'])) {
-                    return $this->respondWithError($validateContentCountResult['error']);
-                }
-
                 $coverPath = $this->base64filehandler->handleUploads($args['cover'], 'cover', $postId);
                 $this->logger->info('PostService.createPost coverPath', ['coverPath' => $coverPath]);
 
@@ -226,6 +221,7 @@ class PostService
                 // Post speichern
                 $post = new Post($postData);
             } catch (\Throwable $e) {
+                $this->postMapper->rollback();
                 return $this->respondWithError($e->getMessage());
             }
             $this->postMapper->insert($post);
@@ -265,6 +261,7 @@ class PostService
                     $this->handleTags($args['tags'], $postId, $createdAt);
                 } 
             } catch (\Throwable $e) {
+                $this->postMapper->rollback();
                 return $this->respondWithError(30262);
             }
 
@@ -285,10 +282,11 @@ class PostService
 
             $data = $post->getArrayCopy();
             $data['tags'] = $tagNames;
-
+            $this->postMapper->commit();
             return $this->createSuccessResponse(11513, $data);
 
         } catch (\Throwable $e) {
+            $this->postMapper->rollback();
             $this->logger->error('Failed to create post', ['exception' => $e]);
             return $this->respondWithError(41508);
         }
@@ -468,6 +466,9 @@ class PostService
         $this->logger->info("PostService.findPostser started");
 
         $results = $this->postMapper->findPostser($this->currentUserId, $args);
+        if (empty($results)) {
+            return $this->respondWithError(31510); 
+        }
 
         return $results;
     }

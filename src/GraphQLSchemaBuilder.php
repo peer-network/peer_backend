@@ -1795,7 +1795,45 @@ class GraphQLSchemaBuilder
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 }
+            ],      
+            'GetActionPricesResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.GetActionPricesResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): ?array {
+                    return $root['affectedRows'] ?? null;
+                },
             ],
+            'ActionPriceResult' => [
+                'postPrice' => function (array $root): float {
+                    return (float) ($root['postPrice'] ?? 0);
+                },
+                'likePrice' => function (array $root): float {
+                    return (float) ($root['likePrice'] ?? 0);
+                },
+                'dislikePrice' => function (array $root): float {
+                    return (float) ($root['dislikePrice'] ?? 0);
+                },
+                'commentPrice' => function (array $root): float {
+                    return (float) ($root['commentPrice'] ?? 0);
+                },
+            ],    
+            'ResetPasswordRequestResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ResetPasswordRequestResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'nextAttemptAt' => function (array $root): string {
+                    return $root['nextAttemptAt'] ?? '';
+                },
+            ],                       
         ];
     }
 
@@ -1841,6 +1879,7 @@ class GraphQLSchemaBuilder
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->walletService->transactionsHistory($args),
             'getLiquidityPoolHistory' => fn(mixed $root, array $args) => $this->walletService->getLiquidityPoolHistory($args),
             'getTokenPrice' => fn(mixed $root, array $args) => $this->walletService->getTokenPrice(),
+            'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
         ];
     }
 
@@ -2112,6 +2151,39 @@ class GraphQLSchemaBuilder
         }
     }
 
+    protected function resolveActionPrices(): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->info('PoolService.getActionPrices started');
+
+        try {
+            $result = $this->poolService->getActionPrices();
+
+            return [
+                'status'        => 'success',
+                'ResponseCode'  => 11304,
+                'affectedRows'  => [
+                    'postPrice'     => isset($result['post_price']) ? (float) $result['post_price'] : 0.0,
+                    'likePrice'     => isset($result['like_price']) ? (float) $result['like_price'] : 0.0,
+                    'dislikePrice'  => isset($result['dislike_price']) ? (float) $result['dislike_price'] : 0.0,
+                    'commentPrice'  => isset($result['comment_price']) ? (float) $result['comment_price'] : 0.0,
+                ]
+            ];
+
+            $this->logger->info('resolveActionPrices: Successfully fetched prices', $response['affectedRows']);
+            
+        } catch (\Throwable $e) {
+            $this->logger->error('Query.resolveActionPrices exception', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError(41301);
+        }
+    }
+
     protected function resolveChatMessages(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
@@ -2121,7 +2193,26 @@ class GraphQLSchemaBuilder
         if (empty($args)) {
             return $this->respondWithError(30101);
         }
+        if (!isset($args['chatid'])) {
+            return $this->respondWithError(30101); 
+        }
 
+        if (!self::isValidUUID($args['chatid'])) {
+            return $this->respondWithError(30218);
+        }
+        $chat = $this->chatService->loadChatById(['chatid' => $args['chatid']]);
+
+        if (empty($chat)) {
+            return $this->respondWithError(31815);
+        }
+
+        if (!isset($chat['status']) || $chat['status'] !== 'success') {
+            return $chat;
+        }
+
+        if (empty($chat['data'])) {
+            return $this->respondWithError(31815);
+        }
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
             return $validationResult;
@@ -2381,7 +2472,7 @@ class GraphQLSchemaBuilder
                 'exception' => $e->getMessage(),
                 'args' => $args,
             ]);
-            return $this->respondWithError(41203);
+            return $this->respondWithError(40301);
         }
     }
 

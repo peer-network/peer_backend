@@ -21,9 +21,6 @@ class ResponseCodesConfig implements DataGeneratable {
         }
 
         foreach ($decoded as $code => $entry) { 
-            if (in_array($code, $this->data)) {
-                throw new Exception("Error: Duplicated Code: " . $code);
-            }
             $this->data[$code] = new MessageEntry(
                 $entry['comment'],
                 $entry['userFriendlyComment']

@@ -37,6 +37,7 @@ type Query {
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
   getTokenPrice: TokenPriceResponse!
+  getActionPrices: GetActionPricesResponse!
 }
 
 type Mutation {
@@ -638,4 +639,17 @@ input FeedInput {
   media: String!
   mediadescription: String
   contenttype: String!
+}
+
+type ActionPriceResult {
+    postPrice: Float!
+    likePrice: Float!
+    dislikePrice: Float!
+    commentPrice: Float!
+}
+
+type GetActionPricesResponse {
+    status: String!
+    ResponseCode: String!
+    affectedRows: ActionPriceResult!
 }
