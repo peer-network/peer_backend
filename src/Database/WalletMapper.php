@@ -1911,7 +1911,7 @@ class WalletMapper
        
 
         // Get EUR/BTC price
-        $btcPrice = BtcService::getBitcoinPriceWithPeer();
+        $btcPrice = BtcService::getOrUpdateBitcoinPrice($this->logger, $this->db);
 
         if (empty($btcPrice)) {
             $this->logger->error('Empty EUR/BTC Price');
@@ -1970,10 +1970,10 @@ class WalletMapper
 
         try {
 
-            $btcConstInitialY =  $this->getLpTokenBtcLP();
-            $lpAccountInitialX = $this->getLpToken();
+            $btcLpState =  $this->getLpTokenBtcLP();
+            $lpState = $this->getLpToken();
 
-            $btcAmountToUser = SwapTokenHelper::calculateBtc($btcConstInitialY, $lpAccountInitialX, $numberoftokensToSwap);
+            $btcAmountToUser = SwapTokenHelper::calculateBtc($btcLpState, $lpState, $numberoftokensToSwap, POOLFEE);
 
             $transRepo = new TransactionRepository($this->logger, $this->db);
             $transUniqueId = self::generateUUID();

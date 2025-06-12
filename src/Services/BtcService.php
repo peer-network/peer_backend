@@ -1,9 +1,48 @@
 <?php
 
 namespace Fawaz\Services;
+use Fawaz\App\Models\TokenEuroPrice;
+use Fawaz\App\Repositories\TokenEuroPriceRepository;
+use Psr\Log\LoggerInterface;
+use PDO;
 
 class BtcService
 {
+
+     /**
+     * Returns the current BTC/EUR price, updating the DB if needed.
+     */
+    public static function getOrUpdateBitcoinPrice(LoggerInterface $logger, PDO $db): string
+    {
+        $tokenPriceRepo = new TokenEuroPriceRepository($logger, $db);
+        $btcTokenObj = new TokenEuroPrice(['token' => 'BTC']);
+
+        $tokenPrice = $tokenPriceRepo->getTokenEuroPrice($btcTokenObj);
+
+        if (!$tokenPrice) {
+            $btcPrice = self::getBitcoinPriceWithPeer();
+            $btcTokenObj = new TokenEuroPrice([
+                'token' => 'BTC',
+                'europrice' => $btcPrice
+            ]);
+            $tokenPrice = $tokenPriceRepo->saveTokenEuroPrice($btcTokenObj);
+        } elseif (strtotime($tokenPrice->getUpdatedat()) <= time() - 5) {
+            $btcPrice = self::getBitcoinPriceWithPeer();
+            if ($btcPrice) {
+                $btcTokenObj = new TokenEuroPrice([
+                    'token' => 'BTC',
+                    'europrice' => $btcPrice
+                ]);
+                $tokenPrice = $tokenPriceRepo->updateTokenEuroPrice($btcTokenObj);
+            } else {
+                $btcPrice = $tokenPrice->getEuroPrice();
+            }
+        } else {
+            $btcPrice = $tokenPrice->getEuroPrice();
+        }
+
+        return $btcPrice;
+    }
     /**
      * Fetches the current Bitcoin price in EUR from the CoinGecko API.
      *
