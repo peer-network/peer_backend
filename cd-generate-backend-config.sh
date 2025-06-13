@@ -1,1 +1,1 @@
-php tests/utils/ConfigGeneration/GenerateConfig.php
+php tests/utils/ConfigGeneration/GenerateConfig.php 
