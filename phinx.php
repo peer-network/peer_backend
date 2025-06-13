@@ -9,15 +9,15 @@ return
     'environments' => [
         'default_migration_table' => 'phinxlog',
         'default_environment' => 'development',
-        // 'production' => [
-        //     'adapter' => 'pgsql',
-        //     'host' => 'localhost',
-        //     'name' => 'peer',
-        //     'user' => 'postgres',
-        //     'pass' => 'test',
-        //     'port' => '5432',
-        //     'charset' => 'utf8',
-        // ],
+        'production' => [
+            'adapter' => 'pgsql',
+            'host' => 'localhost',
+            'name' => 'peer',
+            'user' => 'postgres',
+            'pass' => 'test',
+            'port' => '5432',
+            'charset' => 'utf8',
+        ],
         'development' => [
             'adapter' => 'pgsql',
             'host' => 'localhost',

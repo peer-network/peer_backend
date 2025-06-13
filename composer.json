@@ -18,7 +18,8 @@
         "firebase/php-jwt": "^6.10",
         "james-heinrich/getid3": "^1.9",
         "phpunit/phpunit": "^11.0",
-        "phpmailer/phpmailer": "^6.10"
+        "phpmailer/phpmailer": "^6.10",
+        "robmorgan/phinx": "^0.16.9"
     },
     "config": {
     },
