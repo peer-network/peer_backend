@@ -367,8 +367,6 @@ class WalletService
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
             return $validationResult;
         }
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         try {
             $results = $this->walletMapper->getTransactions($this->currentUserId, $args);
@@ -435,15 +433,19 @@ class WalletService
 
         try {
             $results = $this->walletMapper->getTokenPrice();
-            return [
-                'status' => 'success',
-                'ResponseCode' => $results['ResponseCode'],
-                'currentTokenPrice' => $results['currentTokenPrice'],
-                'updatedAt' => $results['updatedAt'],
-            ];
+            if ($results['status'] === 'error') {
+                return $results;
+            } else {
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => $results['ResponseCode'],
+                    'currentTokenPrice' => $results['currentTokenPrice'],
+                    'updatedAt' => $results['updatedAt'],
+                ];
+            }
         } catch (\Exception $e) {
             $this->logger->error("Error in WalletService.getTokenPrice", ['exception' => $e->getMessage()]);
-            return $this->respondWithError($e->getMessage());  // Error occurred while retrieving token price
+            return $this->respondWithError(41232);
         }
     }
 

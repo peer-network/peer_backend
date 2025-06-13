@@ -1735,7 +1735,7 @@ class GraphQLSchemaBuilder
                     return $root['currentTokenPrice'] ?? '';
                 },
                 'updatedAt' => function (array $root): string {
-                    return $root['updatedAt'] ?? [];
+                    return $root['updatedAt'] ?? '';
                 },
             ],
             'Transaction' => [

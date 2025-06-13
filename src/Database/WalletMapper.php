@@ -1653,7 +1653,7 @@ class WalletMapper
         // Define DIRECTION FILTER mappings.
         $directionMap = [
             'INCOME' => ['CREDIT'],
-            'DEDUCTION' => ['DEDUCT', 'BURN_FEE', 'POOL_FEE', 'PEER_FEE']
+            'DEDUCTION' => ['DEDUCT', 'BURN_FEE', 'POOL_FEE', 'PEER_FEE', 'INVITER_FEE']
         ];
 
         $transactionTypes = isset($args['type']) ? ($typeMap[$args['type']] ?? []) : [];
@@ -1772,7 +1772,7 @@ class WalletMapper
                     'status' => 'success',
                     'ResponseCode' => 11202, // Successfully retrieved Peer token price
                     'currentTokenPrice' => 0,
-                    'updatedAt' => $getLpToken['updatedat'] ?? null,
+                    'updatedAt' => $getLpToken['updatedat'] ?? '',
                 ];
             }
             $btcLP = (float) $getLpTokenBtcLP;
@@ -1789,7 +1789,7 @@ class WalletMapper
                 'status' => 'success',
                 'ResponseCode' => 11202, // Successfully retrieved Peer token price
                 'currentTokenPrice' => $tokenPrice,
-                'updatedAt' => $getLpToken['updatedat'] ?? null,
+                'updatedAt' => $getLpToken['updatedat'] ?? '',
             ];
         } catch (\PDOException $e) {
             $this->logger->error("Database error while fetching transactions - WalletMapper.transactionsHistory", ['error' => $e->getMessage()]);
