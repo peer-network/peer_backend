@@ -659,7 +659,10 @@ jobs:
         with:
           name: docker_newman_report-8.3
           path: reports/${{ github.run_id }}/php-8.3
-        
+
+      - name: Add timestamp to force commit
+        run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
+
       - name: Commit and push reports
         run: |
           git config user.name "github-actions"
@@ -715,7 +718,10 @@ jobs:
         with:
           name: docker_newman_report-8.3
           path: reports/${{ github.run_id }}/php-8.3
- 
+
+      - name: Add timestamp to force commit
+        run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
+
       - name: Commit and push reports
         run: |
           git config user.name "github-actions"
@@ -756,6 +762,7 @@ jobs:
           MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
           MESSAGE+="Maintainer: <@1362087975906967736>\n"
           MESSAGE+="Author: $DISCORD_MENTION"
+          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
  
           curl -H "Content-Type: application/json" \
                -X POST \
@@ -787,7 +794,8 @@ jobs:
           MESSAGE+="CI Run: <$RUN_URL>\n"
           MESSAGE+="Maintainer: $MAINTAINER_MENTION\n"
           MESSAGE+="Author: $PR_MENTION"
- 
+          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
+
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{\"content\": \"${MESSAGE}\"}" \
@@ -822,7 +830,8 @@ jobs:
           MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
           MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
           MESSAGE+="<@1355093873323671742>"  # vidkazan
- 
+          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
+
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{\"content\": \"${MESSAGE}\"}" \
