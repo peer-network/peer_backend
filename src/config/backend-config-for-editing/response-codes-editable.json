@@ -1259,6 +1259,10 @@
        "comment": "Failed to swap tokens.",
        "userFriendlyComment": "Failed to swap tokens."
     },
+    "41232": {
+       "comment": "Error occurred while retrieving token price",
+       "userFriendlyComment": "Error occurred while retrieving token price"
+    },
     "41401": {
         "comment": "Unexpected Error: Failed to create transaction. Please try again later or contact support",
         "userFriendlyComment": "We couldn't complete this transaction. Please try again."
