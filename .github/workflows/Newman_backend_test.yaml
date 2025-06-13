@@ -652,9 +652,10 @@ jobs:
           git fetch origin gh-pages
           git checkout gh-pages
 
-      - name: Clean up old reports (older than 3 days)
+      - name: Clean up old reports (older than 1 day)
         run: |
-          find reports -mindepth 1 -maxdepth 1 -type d -mtime +3 -exec rm -rf {} +
+          echo "Cleaning old reports..."
+          find reports -mindepth 1 -maxdepth 1 -type d -mtime +1 -print -exec rm -rf {} +
  
       - name: Download HTMLExtra report for PHP 8.2
         uses: actions/download-artifact@v4
@@ -712,9 +713,10 @@ jobs:
           git fetch origin gh-pages
           git checkout gh-pages
 
-      - name: Clean up old reports (older than 3 days)
+      - name: Clean up old reports (older than 1 day)
         run: |
-          find reports -mindepth 1 -maxdepth 1 -type d -mtime +3 -exec rm -rf {} +
+          echo "Cleaning old reports..."
+          find reports -mindepth 1 -maxdepth 1 -type d -mtime +1 -print -exec rm -rf {} +
  
       - name: Download HTMLExtra report for PHP 8.2
         uses: actions/download-artifact@v4
