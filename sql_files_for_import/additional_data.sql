@@ -88,6 +88,8 @@ INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('85d5f836-b1f5-4
 INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
 VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df93', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df93', 0, 0);
+
 -- btc_account
 INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
 VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 'btc@system.com', 'btc_account',
