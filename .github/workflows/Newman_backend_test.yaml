@@ -195,6 +195,7 @@ jobs:
           PEER_BANK="${{ vars.PEER_BANK }}"
           BURN_ACCOUNT="${{ vars.BURN_ACCOUNT }}"
           LIQUIDITY_POOL="${{ vars.LIQUIDITY_POOL }}"
+          BTC_POOL="${{ vars.BTC_POOL }}"
           EOF
  
       - name: Show .env File (excluding password)
@@ -650,6 +651,10 @@ jobs:
         run: |
           git fetch origin gh-pages
           git checkout gh-pages
+
+      - name: Clean up old reports (older than 3 days)
+        run: |
+          find reports -mindepth 1 -maxdepth 1 -type d -mtime +3 -exec rm -rf {} +
  
       - name: Download HTMLExtra report for PHP 8.2
         uses: actions/download-artifact@v4
@@ -703,6 +708,10 @@ jobs:
         run: |
           git fetch origin gh-pages
           git checkout gh-pages
+
+      - name: Clean up old reports (older than 3 days)
+        run: |
+          find reports -mindepth 1 -maxdepth 1 -type d -mtime +3 -exec rm -rf {} +
  
       - name: Download HTMLExtra report for PHP 8.2
         uses: actions/download-artifact@v4
