@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Utils\ConfigGeneration;
+namespace Tests\utils\ConfigGeneration;
 
-use Tests\Utils\ConfigGeneration\ResponseCodesConfig;
-use Tests\Utils\ConfigGeneration\EndpointsConfig;
-use Tests\Utils\ConfigGeneration\ConstantsConfigGeneratable;
+use Tests\utils\ConfigGeneration\ResponseCodesConfig;
+use Tests\utils\ConfigGeneration\EndpointsConfig;
+use Tests\utils\ConfigGeneration\ConstantsConfigGeneratable;
 
 enum ConfigGenerationConstants : string implements DataGeneratable {
     case constants = "constants";

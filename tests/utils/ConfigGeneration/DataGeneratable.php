@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Utils\ConfigGeneration;
+namespace Tests\utils\ConfigGeneration;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 

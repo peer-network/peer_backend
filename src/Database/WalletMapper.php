@@ -432,7 +432,7 @@ class WalletMapper
     {
         $this->logger->info('WalletMapper.loadWalletById started');
 
-        $userId = $currentUserId ?? null;
+        $userId = $currentUserId;
         $postId = $args['postid'] ?? null;
         $fromId = $args['fromid'] ?? null;
 

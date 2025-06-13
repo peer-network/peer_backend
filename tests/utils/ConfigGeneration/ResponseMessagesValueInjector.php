@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Utils\ConfigGeneration;
+namespace Tests\utils\ConfigGeneration;
 
 use Exception;
 use Fawaz\config\constants\ConstantsConfig;
-use Tests\Utils\ConfigGeneration\MessageEntry;
+use Tests\utils\ConfigGeneration\MessageEntry;
 
 use function PHPUnit\Framework\isArray;
 use function PHPUnit\Framework\isNumeric;

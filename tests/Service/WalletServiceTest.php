@@ -179,7 +179,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals(['total-wins'], $result);
     }
 
-    public function testCallUserMoveSuccess(): voi
+    public function testCallUserMoveSuccess(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('callUserMove')->willReturn([

@@ -14,9 +14,8 @@ class EndpointsConfig implements DataGeneratable {
     /** @var array<string, TargetEntry> */
     private array $data = [];
 
-    public function __construct($filePath)
+    public function __construct(string $filePath)
     {  
-        
         $decoded = JSONHandler::parseInputJson($filePath);
 
         foreach ($decoded as $code => $entry) {

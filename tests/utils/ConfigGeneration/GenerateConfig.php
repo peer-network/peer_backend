@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Utils\ConfigGeneration;
+namespace Tests\utils\ConfigGeneration;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
-use Tests\Utils\ConfigGeneration\JSONHandler;
-use Tests\Utils\ConfigGeneration\ConfigUrl;
-use Tests\Utils\ConfigGeneration\ConfigGenerationConstants;
+use Tests\utils\ConfigGeneration\JSONHandler;
+use Tests\utils\ConfigGeneration\ConfigUrl;
+use Tests\utils\ConfigGeneration\ConfigGenerationConstants;
 
 interface DataGeneratable {
     public function getData(): array;

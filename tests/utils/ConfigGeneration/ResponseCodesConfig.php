@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Utils\ConfigGeneration;
+namespace Tests\utils\ConfigGeneration;
 
 use Exception;
-use Tests\Utils\ConfigGeneration\JSONHandler;
-use Tests\Utils\ConfigGeneration\ResponseMessagesValueInjector;
-use Tests\Utils\ConfigGeneration\MessageEntry;
+use Tests\utils\ConfigGeneration\JSONHandler;
+use Tests\utils\ConfigGeneration\ResponseMessagesValueInjector;
+use Tests\utils\ConfigGeneration\MessageEntry;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
@@ -28,7 +28,7 @@ class ResponseCodesConfig implements DataGeneratable {
         $injector = new ResponseMessagesValueInjector();
         $injectedData = $injector->injectConstants($this->data);
 
-        if (!$injectedData || empty($injectedData)) {
+        if (empty($injectedData)) {
             throw new Exception("ResponseCodesConfig: injectConstantsToMessages: result is empty");
         }
         $this->data = $injectedData;
