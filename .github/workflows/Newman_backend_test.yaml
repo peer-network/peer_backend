@@ -814,7 +814,7 @@ jobs:
   send_success_discord_notification:
     name: Send Discord Notification for Successful CI
     runs-on: ubuntu-latest
-    needs: [aggregate_outcome, publish_success_report_to_pages]
+    needs: [aggregate_outcome, publish_success_report_to_pages, trivy_scan]
     if: needs.aggregate_outcome.outputs.final_outcome == 'success'
     steps:
       - name: Construct HTMLExtra report URLs
