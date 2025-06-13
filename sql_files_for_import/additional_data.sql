@@ -88,7 +88,19 @@ INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('85d5f836-b1f5-4
 INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
 VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df93', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
-INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df93', 0, 0);
+-- btc_account
+INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
+VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 'btc@system.com', 'btc_account',
+'$argon2id$v=19$m=65536,t=3,p=2$OXF0NlY5R09xRDRXLkREaw$E/P8IL1rNIRboG0Bl39kkNm9ozcoVxtNH/6NogztAD0', 0, 1, 97183, 0, '127.0.0.1',
+'/profile/85d5f836-b1f5-4c4e-9381-1b058e13df94.jpg',
+'/userData/85d5f836-b1f5-4c4e-9381-1b058e13df94.txt');
+
+INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0, 0, 0);
+
+INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
+VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
+
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 0);
 
 
 --action_prices
