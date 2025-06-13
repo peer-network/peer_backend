@@ -42,7 +42,7 @@ class JSONHandler {
         
         $jsonContent = file_get_contents($filePath);
         if (!$jsonContent) {
-            throw new \Exception("Error: " . $filePath . ": duplication: " . $duplications[0]);
+            throw new \Exception("Error: " . $filePath . "is empty");
         }
         if ($validateKeyUniqness == true) {
             $duplications = JSONHandler::getDuplicatedNumericKeys($jsonContent);

@@ -22,7 +22,10 @@ class ResponseMessagesValueInjector
         $constantsObject = new ConstantsConfig();
         $this->constants = $constantsObject->getData();
     }
-    /** @param array<string, MessageEntry> */
+
+    /**
+    **  @param array<string, MessageEntry> 
+    **/
     public function injectConstants(array $data): array
     {
         echo("ConfigGeneration: ResponseMessagesValueInjector: injectConstants: start \n");
@@ -49,7 +52,7 @@ class ResponseMessagesValueInjector
             '/\{([A-Z0-9_.]+)\}/',
             function ($matches) {
                 $path = explode('.', $matches[1]);
-                return $this->getValueFromPath($this->constants, $path) ?? $matches[0];
+                return $this->getValueFromPath($this->constants, $path);
             }, 
             $text
         );
@@ -58,20 +61,18 @@ class ResponseMessagesValueInjector
     private function getValueFromPath(array $constants, array $path): string|int
     {
         if (empty($constants) || empty($path)) {
-            throw new Exception("Error: ResponseMessagesValueInjector: getValueFromPath: invalid input arguments " . $constants . " " . $path);
+            throw new Exception("Error: ResponseMessagesValueInjector: getValueFromPath: invalid input arguments ");
         }
         foreach ($path as $key) {
             if (!is_array($constants) || !array_key_exists($key, $constants)) {
-                throw new Exception("Error: ResponseMessagesValueInjector: getValueFromPath: invalid CONSTANTS " . $constants);
+                throw new Exception("Error: ResponseMessagesValueInjector: getValueFromPath: invalid CONSTANTS: " . implode(",",$constants));
             }
             $constants = $constants[$key];
         }
 
-        if (
-            empty($constants) || 
-            is_array($constants) ||
-            (!isString($constants) && !isNumeric($constants))) {
-                throw new Exception("Error: ResponseMessagesValueInjector: getValueFromPath: invalid path or contants: constant value is not found by path:" . implode(" ",$path) . ", Faulty result: " . implode(",",$constants));
+
+        if (is_array($constants)) {
+            throw new Exception("Error: ResponseMessagesValueInjector: getValueFromPath: invalid path or contants: constant value is not found by path:" . implode(" ",$path) . ", Faulty result: " . implode(",",$constants));
         }
         return $constants;
     }
