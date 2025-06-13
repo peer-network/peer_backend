@@ -8,7 +8,8 @@ require __DIR__ . '../../../../vendor/autoload.php';
 class JSONHandler {
     private static function generateJson(array $data, string $name, bool $addHash): string {
         echo("ConfigGeneration: JSONHandler: generating JSON: " . $name . "\n");
-        
+
+        $jsonObj = [];
         $jsonObj['createdAt'] = time();
 
         if ($addHash == true) {
@@ -25,14 +26,14 @@ class JSONHandler {
         return $jsonString;
     }
 
-    public static function generateJSONtoFile(string $outputPath,array $data,string $name, bool $addHash = true) {
+    public static function generateJSONtoFile(string $outputPath,array $data,string $name, bool $addHash = true): void {
         $jsonString = JSONHandler::generateJson($data,$name,$addHash);
         if (file_put_contents($outputPath, $jsonString) === false) {
             throw new \Exception("Failed to write JSON to file: $outputPath");
         }
     }
 
-    public static function parseInputJson(string $filePath, bool $validateKeyUniqness = false): array {
+    public static function parseInputJson(string $filePath, bool $validateKeyUniqness = false): mixed {
         echo("ConfigGeneration: JSONHandler: parseInputJson: " . $filePath. "\n");
 
         if (!file_exists($filePath)) {
@@ -40,6 +41,9 @@ class JSONHandler {
         }
         
         $jsonContent = file_get_contents($filePath);
+        if (!$jsonContent) {
+            throw new \Exception("Error: " . $filePath . ": duplication: " . $duplications[0]);
+        }
         if ($validateKeyUniqness == true) {
             $duplications = JSONHandler::getDuplicatedNumericKeys($jsonContent);
             if ($duplications) {
@@ -59,7 +63,7 @@ class JSONHandler {
         return $decoded;
     }
 
-    private static function getDuplicatedNumericKeys(string $json): string | null {
+    private static function getDuplicatedNumericKeys(string $json): string | false {
         echo("ConfigGeneration: JSONHandler: getDuplicatedNumericKeys start". "\n");
 
         preg_match_all('/"([^"]+)"\s*:/', $json, $matches);
@@ -72,7 +76,7 @@ class JSONHandler {
         if ($duplicatedKeys) {
             return implode(',', $duplicatedKeys);
         } else {
-            return null;
+            return false;
         }
     }
 }

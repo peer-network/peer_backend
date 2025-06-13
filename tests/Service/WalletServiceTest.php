@@ -21,7 +21,7 @@ class WalletServiceTest extends TestCase
         $this->walletService = new WalletService($this->loggerMock, $this->walletMapperMock);
     }
 
-    public function testAdjustCoinBalanceDeductsCoins()
+    public function testAdjustCoinBalanceDeductsCoins(): void
     {
         $userId = 'user-1';
         $this->walletMapperMock->method('getUserWalletBalance')->willReturn(100.0);
@@ -29,7 +29,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals(100.0, $balance);
     }
 
-    public function testAdjustCoinBalanceAddsCoins()
+    public function testAdjustCoinBalanceAddsCoins(): void
     {
         $userId = 'user-1';
         $this->walletMapperMock->method('getUserWalletBalance')->willReturn(150.0);
@@ -37,7 +37,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals(150.0, $balance);
     }
 
-    public function testDeductFromWalletSuccess()
+    public function testDeductFromWalletSuccess(): void
     {
         $userId = 'user-1';
         $args = ['postid' => 'post-1', 'art' => 2];
@@ -47,7 +47,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function testDeductFromWalletFailureInsufficientBalance()
+    public function testDeductFromWalletFailureInsufficientBalance(): void
     {
         $userId = 'user-1';
         $args = ['postid' => 'post-1', 'art' => 2];
@@ -57,7 +57,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function testDeductFromWalletFailureGeneric()
+    public function testDeductFromWalletFailureGeneric(): void
     {
         $userId = 'user-1';
         $args = ['postid' => 'post-1', 'art' => 3];
@@ -67,7 +67,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function testLoadLiquiditySuccess()
+    public function testLoadLiquiditySuccess(): void
     {
         $userId = 'user-1';
         $this->walletMapperMock->method('loadLiquidityById')->willReturn(77.0);
@@ -75,7 +75,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals('success', $response['status']);
     }
 
-    public function testLoadLiquidityFailure()
+    public function testLoadLiquidityFailure(): void
     {
         $userId = 'user-1';
         $this->walletMapperMock->method('loadLiquidityById')->willThrowException(new \Exception());
@@ -83,7 +83,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals('error', $response['status']);
     }
 
-    public function testUnauthorizedFetchPool()
+    public function testUnauthorizedFetchPool(): void
     {
         $ref = new \ReflectionClass($this->walletService);
         $prop = $ref->getProperty('currentUserId');
@@ -93,7 +93,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals('error', $result['status']);
     }
 
-    public function testFetchAllSuccess()
+    public function testFetchAllSuccess(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $walletMock = $this->createMock(Wallet::class);
@@ -103,7 +103,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals([['id' => 'wallet-1']], $result);
     }
 
-    public function testFetchAllReturnsEmpty()
+    public function testFetchAllReturnsEmpty(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('fetchAll')->willReturn([]);
@@ -111,14 +111,14 @@ class WalletServiceTest extends TestCase
         $this->assertEquals([], $result);
     }
 
-    public function testFetchWalletByIdWithInvalidUUID()
+    public function testFetchWalletByIdWithInvalidUUID(): void
     {
         $this->walletService->setCurrentUserId('bad');
         $result = $this->walletService->fetchWalletById();
         $this->assertEquals('error', $result['status']);
     }
 
-    public function testFetchWalletByIdWithInvalidPostIdAndFromId()
+    public function testFetchWalletByIdWithInvalidPostIdAndFromId(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $args = ['postid' => 'bad', 'fromid' => 'also-bad'];
@@ -126,28 +126,28 @@ class WalletServiceTest extends TestCase
         $this->assertEquals('error', $result['status']);
     }
 
-    public function testCallFetchWinsLogInvalidDay()
+    public function testCallFetchWinsLogInvalidDay(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $result = $this->walletService->callFetchWinsLog(['day' => 'WRONG']);
         $this->assertEquals('error', $result['status']);
     }
 
-    public function testCallFetchPaysLogInvalidDay()
+    public function testCallFetchPaysLogInvalidDay(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $result = $this->walletService->callFetchPaysLog(['day' => 'FAKE']);
         $this->assertEquals('error', $result['status']);
     }
 
-    public function testCallGemstersInvalidDay()
+    public function testCallGemstersInvalidDay(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $result = $this->walletService->callGemsters('???');
         $this->assertEquals('error', $result['status']);
     }
 
-    public function testCallGemstersValidDay()
+    public function testCallGemstersValidDay(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('getTimeSortedMatch')->willReturn(['daylist']);
@@ -155,7 +155,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals(['daylist'], $result);
     }
 
-    public function testCallGemstersEmptyResult()
+    public function testCallGemstersEmptyResult(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('getTimeSortedMatch')->willReturn([]);
@@ -163,7 +163,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals([], $result);
     }
 
-    public function testCallFetchWinsLogValidDay()
+    public function testCallFetchWinsLogValidDay(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('fetchWinsLog')->willReturn(['status' => 'ok']);
@@ -171,7 +171,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals('ok', $result['status']);
     }
 
-    public function testCallGlobalWinsSuccess()
+    public function testCallGlobalWinsSuccess(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('callGlobalWins')->willReturn(['total-wins']);
@@ -179,7 +179,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals(['total-wins'], $result);
     }
 
-    public function testCallUserMoveSuccess()
+    public function testCallUserMoveSuccess(): voi
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('callUserMove')->willReturn([
@@ -190,7 +190,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals('success', $result['status']);
     }
 
-    public function testCallUserMoveThrowsException()
+    public function testCallUserMoveThrowsException(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('callUserMove')->willThrowException(new \Exception());
@@ -198,7 +198,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals('error', $result['status']);
     }
 
-    public function testGetPercentBeforeTransaction()
+    public function testGetPercentBeforeTransaction(): void
     {
         $this->walletMapperMock->method('getPercentBeforeTransaction')
             ->with('user-1', 50)
@@ -207,7 +207,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals(['percent' => 20], $result);
     }
 
-    public function testFetchPoolReturnsExpectedData()
+    public function testFetchPoolReturnsExpectedData():void
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('fetchPool')->willReturn(['some' => 'data']);

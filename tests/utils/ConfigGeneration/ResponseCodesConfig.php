@@ -15,12 +15,8 @@ class ResponseCodesConfig implements DataGeneratable {
     private array $data = [];
 
 
-    public function __construct($filePath) {  
+    public function __construct(string $filePath) {
         $decoded = JSONHandler::parseInputJson($filePath, true);
-
-        if (!$decoded || empty($decoded)) {
-            throw new Exception("Error: File " . $filePath . " is empty");        
-        }
 
         foreach ($decoded as $code => $entry) { 
             $this->data[$code] = new MessageEntry(
@@ -43,13 +39,13 @@ class ResponseCodesConfig implements DataGeneratable {
         return $this->data;
     }
 
-    private function validate() {
+    private function validate(): void {
         echo("ConfigGeneration: ResponseCodesConfig: validate: start \n");
         $this->validateMessages();
         $this->validateCodes();
     }
 
-    private function validateMessages() {
+    private function validateMessages(): void {
          foreach ($this->data as $code => $entry) {
             if (empty($entry->comment) || empty($entry->userFriendlyComment)) {
                 throw new Exception("ResponseCodesConfig: validateMessages: Empty Message found for code " . $code);
@@ -66,7 +62,7 @@ class ResponseCodesConfig implements DataGeneratable {
         }
     }
 
-    private function validateCodes() {
+    private function validateCodes(): void {
         $codes = array_keys($this->data);
 
         foreach ($codes as $code) {
