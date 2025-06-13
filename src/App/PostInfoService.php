@@ -314,6 +314,7 @@ class PostInfoService
 
         $postinfo = $this->postInfoMapper->loadById($postId);
         if ($postinfo === null) {
+            
             return $this->respondWithError(31510);
         }
 
