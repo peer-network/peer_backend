@@ -127,7 +127,7 @@ class Post
             ],
             'title' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
@@ -168,7 +168,7 @@ class Post
             ],
             'mediadescription' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],

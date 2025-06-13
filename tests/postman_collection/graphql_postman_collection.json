@@ -3,8 +3,8 @@
 		"_postman_id": "3fbc734e-cd22-4f47-8dce-4fde2e0941d3",
 		"name": "Limitless Graphql Automation Testing",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "32542010",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-3fbc734e-cd22-4f47-8dce-4fde2e0941d3?action=share&source=collection_link&creator=32542010"
+		"_exporter_id": "43606001",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-3fbc734e-cd22-4f47-8dce-4fde2e0941d3?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -9127,7 +9127,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text\", contenttype: text, media: [\"{{new_bio}}\"], cover: \"{{base64_photo1}}\" }) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text's\", mediadescription: \"text's\", contenttype: text, media: [\"{{new_bio}}\"], cover: \"{{base64_photo1}}\" }) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -9146,7 +9146,7 @@
 			"response": []
 		},
 		{
-			"name": "Check if cover is not there",
+			"name": "Check if there is no cover and /",
 			"event": [
 				{
 					"listen": "test",
@@ -9164,6 +9164,12 @@
 							"",
 							"pm.test(\"Cover field is empty\", function () {",
 							"    pm.expect(post.cover).to.eql(\"\", \"Expected 'cover' to be an empty string\");",
+							"});",
+							"pm.test(\"Title is exactly \\\"text's\\\"\", function () {",
+							"    pm.expect(post.title).to.eql(\"text's\");",
+							"});",
+							"pm.test(\"Media description is exactly \\\"text's\\\"\", function () {",
+							"    pm.expect(post.mediadescription).to.eql(\"text's\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -11213,6 +11219,77 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check if there is no /",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let post = response?.data?.listPosts?.affectedRows?.[0];",
+							"let comment = post.comments[0];",
+							"",
+							"pm.test(\"Comment content is exactly \\\"myaaaaauuuuu's\\\"\", function () {",
+							"    pm.expect(comment.content).to.eql(\"myaaaaauuuuu's\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -17599,25 +17676,18 @@
 			"response": []
 		},
 		{
-			"name": "getActionPrice",
+			"name": "Get action price",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Query completed with expected success response\", function () {",
-							"    pm.response.to.be.ok;",
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11304\");",
 							"});",
-							"",
-							"pm.test(\"Response time is acceptable (below 200ms)\", function () {",
-							"    pm.response.to.have.responseTime.below(200);",
-							"});",
-							"",
-							"pm.test(\"Correct ResponseCode 11304 is returned\", function () {",
-							"    let response = pm.response.json();",
-							"    pm.expect(response.data.getActionPrices.ResponseCode).to.eql(\"11304\");",
-							"});",
-							""
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}

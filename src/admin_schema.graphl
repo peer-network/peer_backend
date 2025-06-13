@@ -344,6 +344,7 @@ type HelloResponse {
   userroles: Int
   currentVersion: String
   wikiLink: String
+  lastMergedPullRequestNumber: String
 }
 
 
