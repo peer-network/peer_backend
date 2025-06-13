@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Utils\ConfigGeneration;
+namespace Tests\utils\ConfigGeneration;
 
 use Exception;
-use Tests\Utils\ConfigGeneration\Constants;
+use Tests\utils\ConfigGeneration\Constants;
 
 class ConfigUrl implements DataGeneratable {
     private array $data = [];
