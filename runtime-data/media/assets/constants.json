@@ -1,0 +1,22 @@
+{
+    "createdAt": 1749566545,
+    "name": "constants",
+    "data": {
+        "POST": {
+            "TITLE": {
+                "MIN_LENGTH": 2,
+                "MAX_LENGTH": 63
+            },
+            "MEDIADESCRIPTION": {
+                "MIN_LENGTH": 3,
+                "MAX_LENGTH": 500
+            }
+        },
+        "COMMENT": {
+            "CONTENT": {
+                "MIN_LENGTH": 2,
+                "MAX_LENGTH": 200
+            }
+        }
+    }
+}
