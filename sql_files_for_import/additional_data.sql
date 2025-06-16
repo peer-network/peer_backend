@@ -18,7 +18,7 @@ INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('b9e94945-abd7-46a5-8
 -- tester02
 INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
 VALUES ('6520ac47-f262-4f7e-b643-9dc5ee4cfa82', 'tester02@tester.de', 'tester02',
-'$argon2id$v=19$m=65536,t=3,p=2$OXF0NlY5R09xRDRXLkREaw$E/P8IL1rNIRboG0Bl39kkNm9ozcoVxtNH/6NogztAD0', 0, 1, 97183, 0, '75.50.101.245',
+'$argon2id$v=19$m=65536,t=3,p=2$OXF0NlY5R09xRDRXLkREaw$E/P8IL1rNIRboG0Bl39kkNm9ozcoVxtNH/6NogztAD0', 0, 1, 97183, 16, '75.50.101.245',
 '/profile/6520ac47-f262-4f7e-b643-9dc5ee4cfa82.jpg',
 '/userData/6520ac47-f262-4f7e-b643-9dc5ee4cfa82.txt');
 
