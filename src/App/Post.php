@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class Post
 {
@@ -18,7 +19,11 @@ class Post
     protected string $createdat;
 
     // Constructor
-    public function __construct(array $data = [], array $elements = [], bool $validate = true)
+    public function __construct(
+        array $data = [], 
+        array $elements = [], 
+        bool $validate = true
+    )
     {
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
@@ -125,8 +130,8 @@ class Post
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 63,
+                        'min' => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
+                        'max' => ConstantsConfig::post()['TITLE']['MAX_LENGTH'],
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
@@ -166,8 +171,8 @@ class Post
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 500,
+                        'min' => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],
+                        'max' => ConstantsConfig::post()['MEDIADESCRIPTION']['MAX_LENGTH'],
                         'errorCode' => 30263
                     ]],
                     ['name' => 'isString'],
