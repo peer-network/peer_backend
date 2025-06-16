@@ -195,6 +195,7 @@ jobs:
           PEER_BANK="${{ vars.PEER_BANK }}"
           BURN_ACCOUNT="${{ vars.BURN_ACCOUNT }}"
           LIQUIDITY_POOL="${{ vars.LIQUIDITY_POOL }}"
+          BTC_POOL="${{ vars.BTC_POOL }}"
           EOF
  
       - name: Show .env File (excluding password)
@@ -650,6 +651,11 @@ jobs:
         run: |
           git fetch origin gh-pages
           git checkout gh-pages
+
+      - name: Clean up old reports (older than 1 day)
+        run: |
+          echo "Cleaning old reports..."
+          find reports -mindepth 1 -maxdepth 1 -type d -mtime +1 -print -exec rm -rf {} +
  
       - name: Download HTMLExtra report for PHP 8.2
         uses: actions/download-artifact@v4
@@ -662,7 +668,10 @@ jobs:
         with:
           name: docker_newman_report-8.3
           path: reports/${{ github.run_id }}/php-8.3
-        
+
+      - name: Add timestamp to force commit
+        run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
+ 
       - name: Commit and push reports
         run: |
           git config user.name "github-actions"
@@ -703,6 +712,11 @@ jobs:
         run: |
           git fetch origin gh-pages
           git checkout gh-pages
+
+      - name: Clean up old reports (older than 1 day)
+        run: |
+          echo "Cleaning old reports..."
+          find reports -mindepth 1 -maxdepth 1 -type d -mtime +1 -print -exec rm -rf {} +
  
       - name: Download HTMLExtra report for PHP 8.2
         uses: actions/download-artifact@v4
@@ -715,6 +729,9 @@ jobs:
         with:
           name: docker_newman_report-8.3
           path: reports/${{ github.run_id }}/php-8.3
+
+      - name: Add timestamp to force commit
+        run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
  
       - name: Commit and push reports
         run: |
@@ -757,6 +774,7 @@ jobs:
           MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
           MESSAGE+="Maintainer: <@1362087975906967736>\n"
           MESSAGE+="Author: $DISCORD_MENTION"
+          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
  
           curl -H "Content-Type: application/json" \
                -X POST \
@@ -788,6 +806,7 @@ jobs:
           MESSAGE+="CI Run: <$RUN_URL>\n"
           MESSAGE+="Maintainer: $MAINTAINER_MENTION\n"
           MESSAGE+="Author: $PR_MENTION"
+          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
  
           curl -H "Content-Type: application/json" \
                -X POST \
@@ -797,7 +816,7 @@ jobs:
   send_success_discord_notification:
     name: Send Discord Notification for Successful CI
     runs-on: ubuntu-latest
-    needs: [aggregate_outcome, publish_success_report_to_pages]
+    needs: [aggregate_outcome, publish_success_report_to_pages, trivy_scan]
     if: needs.aggregate_outcome.outputs.final_outcome == 'success'
     steps:
       - name: Construct HTMLExtra report URLs
@@ -823,6 +842,7 @@ jobs:
           MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
           MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
           MESSAGE+="<@1355093873323671742>"  # vidkazan
+          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
  
           curl -H "Content-Type: application/json" \
                -X POST \

@@ -1,24 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Utils\ConfigGeneration;
+namespace Tests\utils\ConfigGeneration;
 
 class EndpointsConfigConstants {
-    static $testBackendServerEndpoint = "https://peer-network.eu/graphql";
-    static $testProductionServerEndpoint = "https://getpeer.eu/graphql";
-    static $productionServerEndpoint = "https://peernetwork.eu/graphql";
-
-    static $requiredPlatforms = ["ios","android","web"];
+    static string $testBackendServerEndpoint = "https://peer-network.eu/graphql";
+    static string $testProductionServerEndpoint = "https://getpeer.eu/graphql";
+    static string $productionServerEndpoint = "https://peernetwork.eu/graphql";
+    static array $requiredPlatforms = ["ios","android","web"];
 }
 
 class EndpointsConfig implements DataGeneratable {
-    /** @var array<string, MessageEntry> */
+    /** @var array<string, TargetEntry> */
     private array $data = [];
 
-
-    public function __construct($filePath)
+    public function __construct(string $filePath)
     {  
-        
         $decoded = JSONHandler::parseInputJson($filePath);
 
         foreach ($decoded as $code => $entry) {

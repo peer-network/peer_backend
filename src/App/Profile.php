@@ -153,7 +153,7 @@ class Profile
             ],
             'img' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,
@@ -164,7 +164,7 @@ class Profile
             ],
             'biography' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,

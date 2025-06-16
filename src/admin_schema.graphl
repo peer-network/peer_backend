@@ -43,6 +43,8 @@ type Query {
   postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
   dailygemstatus: DailyGemStatusResponse!
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
+  getReferralInfo: ReferralInfoResponse!
+  referralList(offset: Int, limit: Int): ReferralListResponse!
 }
 
 type Mutation {
@@ -89,6 +91,23 @@ enum PostType {
 
 enum CommentType {
   COMMENT
+}
+
+type ReferralInfoResponse {
+  status: String
+  ResponseCode: String
+  referralUuid: ID
+  referralLink: String
+}
+type ReferralListResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String!
+  affectedRows: ReferralUsers!
+}
+type ReferralUsers {
+  invitedBy: ProfileUser
+  iInvited: [ProfileUser!]!
 }
 
 enum ContentType {
@@ -325,6 +344,7 @@ type HelloResponse {
   userroles: Int
   currentVersion: String
   wikiLink: String
+  lastMergedPullRequestNumber: String
 }
 
 

@@ -700,8 +700,8 @@
         "userFriendlyComment": "Token amount must be positive and within your balance."
     },
     "30265": {
-        "comment": "The 'content' field must be between 2 and 200 characters long",
-        "userFriendlyComment": "Content must be 2-200 characters."
+        "comment": "The 'content' field must be between {COMMENT.CONTENT.MIN_LENGTH} and {COMMENT.CONTENT.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Content must be {COMMENT.CONTENT.MIN_LENGTH}-{COMMENT.CONTENT.MAX_LENGTH} characters."
     },
     "30266": {
         "comment": "The media field must contain only 1 type of media. ",
