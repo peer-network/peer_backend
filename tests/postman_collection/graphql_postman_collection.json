@@ -11707,6 +11707,243 @@
 			"response": []
 		},
 		{
+			"name": "Add negative token amount (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30000\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AddLiquidity {\n    addLiquidity(amountToken: \"-1\", amountBtc: \"0.0001\") {\n        status\n        responseCode\n        affectedRows {\n            newTokenAmount\n            newBtcAmount\n            newTokenPrice\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add negative btc amount (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30000\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AddLiquidity {\n    addLiquidity(amountToken: \"2\", amountBtc: \"-0.00001\") {\n        status\n        responseCode\n        affectedRows {\n            newTokenAmount\n            newBtcAmount\n            newTokenPrice\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add zero (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30000\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AddLiquidity {\n    addLiquidity(amountToken: \"0\", amountBtc: \"0\") {\n        status\n        responseCode\n        affectedRows {\n            newTokenAmount\n            newBtcAmount\n            newTokenPrice\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get token price",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11202\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = {};",
+							"try {",
+							"    response = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let newPrice = parseFloat(response?.data?.getTokenPrice?.currentTokenPrice);",
+							"let oldPrice = parseFloat(pm.environment.get(\"currentTokenPrice\"));",
+							"",
+							"pm.test(\"Previous token price exists\", function () {",
+							"    pm.expect(oldPrice).to.be.a(\"number\");",
+							"});",
+							"",
+							"pm.test(\"Token price has not changed\", function () {",
+							"    pm.expect(newPrice).to.equal(oldPrice);",
+							"});",
+							"",
+							"if (!isNaN(newPrice)) {",
+							"    pm.environment.set(\"currentTokenPrice\", newPrice);",
+							"    console.log(\"Updated token price:\", newPrice);",
+							"} else {",
+							"    console.log(\"New token price is invalid.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTokenPrice {\n    getTokenPrice {\n        status\n        responseCode\n        currentTokenPrice\n        updatedAt\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Check current liquidity",
 			"event": [
 				{
@@ -13812,7 +14049,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 1) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -14815,7 +15052,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 1) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
