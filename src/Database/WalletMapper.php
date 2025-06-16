@@ -1776,14 +1776,14 @@ class WalletMapper
                 ];
             }
             $btcLP = (float) $getLpTokenBtcLP;
-
+            $tokenPrice = TokenHelper::calculatePeerTokenPriceValue($btcLP,$liquidity);
             // Berechne beforeToken mit hoher Präzision
-            $beforeToken = bcdiv((string) $btcLP, (string) $liquidity, 20);
+            // $beforeToken = bcdiv((string) $btcLP, (string) $liquidity, 20);
 
-            $precision = 10;
-            $multiplier = bcpow('10', (string)$precision);
-            $scaled = bcmul($beforeToken, $multiplier, 0);
-            $tokenPrice = bcdiv($scaled, $multiplier, $precision);
+            // $precision = 10;
+            // $multiplier = bcpow('10', (string)$precision);
+            // $scaled = bcmul($beforeToken, $multiplier, 0);
+            // $tokenPrice = bcdiv($scaled, $multiplier, $precision);
 
             return [
                 'status' => 'success',
