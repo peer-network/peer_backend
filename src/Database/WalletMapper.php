@@ -1659,7 +1659,20 @@ class WalletMapper
         $transactionTypes = isset($args['type']) ? ($typeMap[$args['type']] ?? []) : [];
         $transferActions = isset($args['direction']) ? ($directionMap[$args['direction']] ?? []) : [];
 
-        $query = "SELECT * FROM transactions WHERE (senderid = :userid OR recipientid = :userid)";
+        $query = "SELECT 
+                        txn.*, 
+                        CASE 
+                            WHEN ubu.blockerid IS NOT NULL THEN NULL
+                            ELSE txn.message
+                        END AS message
+                    FROM transactions txn
+                    LEFT JOIN user_block_user ubu 
+                        ON (
+                            (ubu.blockerid = :userid AND (ubu.blockedid = txn.senderid OR ubu.blockedid = txn.recipientid)) OR 
+                            (ubu.blockedid = :userid AND (ubu.blockerid = txn.senderid OR ubu.blockerid = txn.recipientid))
+                        )
+                    WHERE (txn.senderid = :userid OR txn.recipientid = :userid)";
+
         $params = [':userid' => $userId];
 
         // Handle TRANSACTION TYPE filter.
@@ -1670,7 +1683,7 @@ class WalletMapper
                 $typePlaceholders[] = $ph;
                 $params[$ph] = $type;
             }
-            $query .= " AND transactiontype IN (" . implode(',', $typePlaceholders) . ")";
+            $query .= " AND txn.transactiontype IN (" . implode(',', $typePlaceholders) . ")";
         }
 
         // Handle TRANSFER ACTION filter.
@@ -1681,17 +1694,17 @@ class WalletMapper
                 $actionPlaceholders[] = $ph;
                 $params[$ph] = $action;
             }
-            $query .= " AND transferaction IN (" . implode(',', $actionPlaceholders) . ")";
+            $query .= " AND txn.transferaction IN (" . implode(',', $actionPlaceholders) . ")";
         }
 
         // Handle DATE filters.(accepting only date, appending time internally)
         if (isset($args['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['start_date'])) {
-            $query .= " AND createdat >= :start_date";
+            $query .= " AND txn.createdat >= :start_date";
             $params[':start_date'] = $args['start_date'] . ' 00:00:00';
         }
 
         if (isset($args['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['end_date'])) {
-            $query .= " AND createdat <= :end_date";
+            $query .= " AND txn.createdat <= :end_date";
             $params[':end_date'] = $args['end_date'] . ' 23:59:59';
         }
 
@@ -1705,7 +1718,7 @@ class WalletMapper
                 $sortDirection = 'DESC';
             }
         }
-        $query .= " ORDER BY createdat $sortDirection";
+        $query .= " ORDER BY txn.createdat $sortDirection";
 
         // Handle PAGINATION.(limit and offset)
         if (isset($args['limit']) && is_numeric($args['limit'])) {
