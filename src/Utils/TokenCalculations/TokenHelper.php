@@ -23,7 +23,7 @@ class TokenHelper
      * @param float $liqPoolTokenAmount Total Peer Tokens in the liquidity pool.
      * @return float|null Peer Token price in BTC with 10-digit precision.
      */
-    public static function calculatePeerTokenPriceValue(float $btcPoolBTCAmount, float $liqPoolTokenAmount): ?float
+    public static function calculatePeerTokenPriceValue(float $btcPoolBTCAmount, float $liqPoolTokenAmount): ?string
     {
         // Calculate token price with high precision using BC Math
         $beforeToken = bcdiv((string) $btcPoolBTCAmount, (string) $liqPoolTokenAmount, 20);
@@ -33,7 +33,9 @@ class TokenHelper
         $scaled = bcmul($beforeToken, $multiplier, 0);
         $tokenPrice = bcdiv($scaled, $multiplier, $precision);
 
-        return $tokenPrice;
+        $tokenPriceFormattedFromScientificNotation = number_format((float)$tokenPrice, 10, '.', '');
+
+        return $tokenPriceFormattedFromScientificNotation;
     }
 
     /**
