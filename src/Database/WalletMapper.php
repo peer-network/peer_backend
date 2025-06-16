@@ -1647,7 +1647,7 @@ class WalletMapper
             'TRANSACTION' => ['transferSenderToRecipient', 'transferDeductSenderToRecipient'],
             'AIRDROP' => ['airdrop'],
             'MINT' => ['mint'],
-            'FEES' => ['transferSenderToBurnWallet', 'transferSenderToPeerWallet', 'transferSenderToPoolWallet']
+            'FEES' => ['transferSenderToBurnWallet', 'transferSenderToPeerWallet', 'transferSenderToPoolWallet', 'transferSenderToInviter']
         ];
 
         // Define DIRECTION FILTER mappings.
@@ -2253,8 +2253,6 @@ class WalletMapper
             $stmt->execute();
             $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            $this->logger->info("Inserted new transaction into database");
-
             return $walletInfo;
         } catch (\PDOException $e) {
             $this->logger->error(
@@ -2326,8 +2324,6 @@ class WalletMapper
             );
             throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
         }
-
-        return 0.0;
     }
 
     
