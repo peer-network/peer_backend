@@ -38,6 +38,7 @@ type HelloResponse {
   currentuserid: ID
   currentVersion: String
   wikiLink: String
+  lastMergedPullRequestNumber: String
 }
 
 type RegisterResponse {
@@ -71,3 +72,4 @@ input RegistrationInput {
   pkey: String
   referralUuid: ID
 }
+
