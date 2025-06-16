@@ -5,8 +5,10 @@ namespace Tests\utils\ConfigGeneration;
 
 use Tests\utils\ConfigGeneration\ResponseCodesConfig;
 use Tests\utils\ConfigGeneration\EndpointsConfig;
+use Tests\utils\ConfigGeneration\ConstantsConfigGeneratable;
 
 enum ConfigGenerationConstants : string implements DataGeneratable {
+    case constants = "constants";
     case repsonseCodes = "response-codes";
     case endpoints = "endpoints";
 
@@ -26,6 +28,7 @@ enum ConfigGenerationConstants : string implements DataGeneratable {
         {
             ConfigGenerationConstants::endpoints => (new EndpointsConfig($path))->getData(),
             ConfigGenerationConstants::repsonseCodes => (new ResponseCodesConfig($path))->getData(),
+            ConfigGenerationConstants::constants => (new ConstantsConfigGeneratable())->getData(),
         };
     }    
 
