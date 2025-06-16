@@ -5,6 +5,7 @@ schema {
 }
 
 type Subscription {
+  getTokenPrice(): TokenPriceResponse!
   getChatMessages(chatid: ID!): AddChatmessageResponse!
   setChatMessages(chatid: ID!, content: String!): AddChatmessageResponse!
 }
@@ -755,4 +756,10 @@ input FeedInput {
   media: String!
   mediadescription: String
   contenttype: String!
+}
+
+type TokenPriceResponse {
+    status: String!
+    ResponseCode: String!
+    peerTokenPerBtcPrice: Float!
 }
