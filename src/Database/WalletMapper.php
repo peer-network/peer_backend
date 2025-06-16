@@ -204,7 +204,7 @@ class WalletMapper
             }
 
             // 3. INVITER: Fees To Inviter (if applicable)
-            if (!empty($result['invited']) && $inviterWin) {
+            if (!empty($inviterId) && $inviterWin) {
                 $this->createAndSaveTransaction($transRepo, [
                     'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferSenderToInviter',
