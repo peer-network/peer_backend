@@ -398,7 +398,7 @@ class WalletMapper
     {
         $this->logger->info('WalletMapper.loadWalletById started');
 
-        $userId = $currentUserId ?? null;
+        $userId = $currentUserId;
         $postId = $args['postid'] ?? null;
         $fromId = $args['fromid'] ?? null;
 
@@ -1812,7 +1812,7 @@ class WalletMapper
         }
     }
 
-    public function getTokenPriceValue(): ?float
+    public function getTokenPriceValue(): ?string
     {
         $this->logger->info('WalletMapper.getTokenPriceValue');
 
@@ -2402,14 +2402,15 @@ class WalletMapper
                 'ADD_BTC_LIQUIDITY'
             );
 
-            $newTokenAmount = $this->getLpToken();
-            $newBtcAmount = $this->getLpTokenBtcLP();
+            $newTokenAmount = (float)$this->getLpToken();
+            $newBtcAmount = (float)$this->getLpTokenBtcLP();
+            $peerTokenBTCPrice = $this->getTokenPriceValue(); 
             return [
                 'status' => 'success',
                 'ResponseCode' => 11218, // Successfully update with Liquidity into Pool
                 'newTokenAmount' => $newTokenAmount,
                 'newBtcAmount' => $newBtcAmount,
-                'newTokenPrice' => ((float) $newBtcAmount / (float) $newTokenAmount)   // TODO: Replace with dynamic calculation
+                'newTokenPrice' => $peerTokenBTCPrice  // TODO: Replace with dynamic calculation
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Liquidity error', ['exception' => $e]);
