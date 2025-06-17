@@ -193,7 +193,7 @@ class Base64FileHandler
         return true;
     }
 
-    public function handleFileUpload(string $base64File, string $contentType, string $identifier, string $defaultSubfolder = null): array
+    public function handleFileUpload(string $base64File, string $contentType, string $identifier, string $defaultSubfolder = ''): array
     {
         if (!$this->isValidBase64Media($base64File, $contentType)) {
             return ['success' => false, 'error' => $this->errors];
