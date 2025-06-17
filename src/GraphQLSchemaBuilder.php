@@ -3119,9 +3119,9 @@ class GraphQLSchemaBuilder
         }
     }
 
-    protected function verifyAccount(string $userid = null): array
+    protected function verifyAccount(string $userid = ''): array
     {
-        if ($userid === null) {
+        if ($userid === '') {
             return $this->respondWithError(30101);
         }
 
