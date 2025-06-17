@@ -1471,25 +1471,28 @@ class WalletMapper
 
     private function decimalToQ64_96(float $value): string
     {
-        $scaleFactor = bcpow('2', '96');
-        
-        $scaledValue = bcmul((string)$value, $scaleFactor, 0);
-        
+        $scaleFactor = \bcpow('2', '96');
+
+		// Convert float to plain decimal string 
+		$decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
+
+		$scaledValue = \bcmul($decimalString, $scaleFactor, 0);
+
         return $scaledValue;
     }
 
     private function q64_96ToDecimal(string $qValue): string
     {
-        $scaleFactor = bcpow('2', '96');
+        $scaleFactor = \bcpow('2', '96');
         
-        $decimalValue = bcdiv($qValue, $scaleFactor, 18);
+        $decimalValue = \bcdiv($qValue, $scaleFactor, 18);
         
         return round($decimalValue, 2);
     }
 
     private function addQ64_96(string $qValue1, string $qValue2): string
     {
-        return bcadd($qValue1, $qValue2);
+        return \bcadd($qValue1, $qValue2);
     }
 
 
