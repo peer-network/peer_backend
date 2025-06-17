@@ -1774,15 +1774,9 @@ class WalletMapper
                     'updatedAt' => $getLpToken['updatedat'] ?? '',
                 ];
             }
-            $btcLP = (float) $getLpTokenBtcLP;
+            
+            $tokenPrice = TokenHelper::calculatePeerTokenPriceValue($getLpTokenBtcLP, $liquidity);
 
-            // Berechne beforeToken mit hoher Präzision
-            $beforeToken = bcdiv((string) $btcLP, (string) $liquidity, 20);
-
-            $precision = 10;
-            $multiplier = bcpow('10', (string)$precision);
-            $scaled = bcmul($beforeToken, $multiplier, 0);
-            $tokenPrice = bcdiv($scaled, $multiplier, $precision);
 
             return [
                 'status' => 'success',
@@ -2339,16 +2333,15 @@ class WalletMapper
 
         try {
             // Validate inputs
-            if (!isset($args['amountToken']) || !is_numeric($args['amountToken']) || (float) $args['amountToken'] != $args['amountToken']) {
+            if (!isset($args['amountToken']) || !is_numeric($args['amountToken']) || (float) $args['amountToken'] != $args['amountToken'] || (float) $args['amountToken'] <= 0) {
                 return self::respondWithError(30241); // Invalid PeerToken amount provided. It is should be Integer or with decimal numbers
             }
-            if (!isset($args['amountBtc']) || !is_numeric($args['amountBtc']) || (float) $args['amountBtc'] != $args['amountBtc']) {
+            if (!isset($args['amountBtc']) || !is_numeric($args['amountBtc']) || (float) $args['amountBtc'] != $args['amountBtc'] || (float) $args['amountBtc'] <= 0) {
                 return self::respondWithError(30270); // Invalid BTC amount provided. It is should be Integer or with decimal numbers
             }
 
             $amountPeerToken =  (float) $args['amountToken'];
             $amountBtc = (float) $args['amountBtc'];
-
             // Fetch pool wallets
             $accountsResult = $this->pool->returnAccounts();
             
@@ -2399,12 +2392,15 @@ class WalletMapper
 
             $newTokenAmount = $this->getLpToken();
             $newBtcAmount = $this->getLpTokenBtcLP();
+
+            $tokenPrice = TokenHelper::calculatePeerTokenPriceValue($newBtcAmount, $newTokenAmount);
+
             return [
                 'status' => 'success',
                 'ResponseCode' => 11218, // Successfully update with Liquidity into Pool
                 'newTokenAmount' => $newTokenAmount,
                 'newBtcAmount' => $newBtcAmount,
-                'newTokenPrice' => ((float) $newBtcAmount / (float) $newTokenAmount)   // TODO: Replace with dynamic calculation
+                'newTokenPrice' => $tokenPrice   // TODO: Replace with dynamic calculation
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Liquidity error', ['exception' => $e]);

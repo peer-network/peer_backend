@@ -1665,8 +1665,8 @@ class GraphQLSchemaBuilder
                 'newBtcAmount' => function (array $root): float {
                     return $root['newBtcAmount'] ?? 0.0;
                 },
-                'newTokenPrice' => function (array $root): float {
-                    return $root['newTokenPrice'] ?? 0.0;
+                'newTokenPrice' => function (array $root): string {
+                    return $root['newTokenPrice'] ?? '';
                 },
             ],
             'SwapToken' => [
