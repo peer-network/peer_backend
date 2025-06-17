@@ -62,15 +62,15 @@ class Base64FileHandler
         };
     }
 
-    private function formatDuration(float $durationInSeconds): string
-    {
-        $hours = \floor($durationInSeconds / 3600);
-        $minutes = \floor(($durationInSeconds % 3600) / 60);
-        $seconds = \floor($durationInSeconds % 60);
-        $milliseconds = \round(($durationInSeconds - \floor($durationInSeconds)) * 100);
+	private function formatDuration(float $durationInSeconds): string
+	{
+		$hours = (int) \floor($durationInSeconds / 3600);
+		$minutes = (int) \floor(fmod($durationInSeconds, 3600) / 60);
+		$seconds = (int) \floor(fmod($durationInSeconds, 60));
+		$milliseconds = (int) \round(($durationInSeconds - \floor($durationInSeconds)) * 100);
 
-        return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
-    }
+		return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+	}
 
     private function formatBytes(int $bytes): string
     {
