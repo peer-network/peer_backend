@@ -152,6 +152,7 @@ type HelloResponse {
   currentuserid: ID
   currentVersion: String
   wikiLink: String
+  lastMergedPullRequestNumber: String
 }
 
 type LogWins {

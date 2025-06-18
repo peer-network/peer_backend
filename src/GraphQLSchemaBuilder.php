@@ -55,6 +55,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
+use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 
 class GraphQLSchemaBuilder
 {
@@ -246,6 +247,9 @@ class GraphQLSchemaBuilder
                 },
                 'wikiLink' => function (array $root): string {
                     return $root['wikiLink'] ?? 'https://github.com/peer-network/peer_backend/wiki/Backend-Version-Update-1.2.0';
+                },
+                'lastMergedPullRequestNumber' => function (array $root): string {
+                    return $root['lastMergedPullRequestNumber'] ?? '';
                 },
             ],
             'RegisterResponse' => [
@@ -1751,9 +1755,12 @@ class GraphQLSchemaBuilder
     {
         $this->logger->info('Query.hello started', ['args' => $args]);
 
+        $lastMergedPullRequestNumber = LastGithubPullRequestNumberProvider::getValue();
+
         return [
             'userroles' => $this->userRoles,
-            'currentuserid' => $this->currentUserId
+            'currentuserid' => $this->currentUserId,
+            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? ""
         ];
     }
 
@@ -3112,9 +3119,9 @@ class GraphQLSchemaBuilder
         }
     }
 
-    protected function verifyAccount(string $userid = null): array
+    protected function verifyAccount(string $userid = ''): array
     {
-        if ($userid === null) {
+        if ($userid === '') {
             return $this->respondWithError(30101);
         }
 

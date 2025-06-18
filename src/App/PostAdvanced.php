@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class PostAdvanced
 {
@@ -184,8 +185,9 @@ class PostAdvanced
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 63,
+                        'min' => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
+                        'max' => ConstantsConfig::post()['TITLE']['MAX_LENGTH'],
+                        'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -215,8 +217,9 @@ class PostAdvanced
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 500,
+                        'min' => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],
+                        'max' => ConstantsConfig::post()['MEDIADESCRIPTION']['MAX_LENGTH'],
+                        'errorCode' => 30263
                     ]],
                     ['name' => 'isString'],
                 ],

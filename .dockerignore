@@ -1,0 +1,32 @@
+# Git and CI
+.github/
+.gitignore
+ 
+# Environment and secrets
+.env
+*.env
+ 
+# Logs and temp files
+*.log
+*.tmp
+ 
+# IDE/editor clutter
+.vscode/
+.idea/
+*.swp
+.DS_Store
+ 
+# Composer build cache (safe to ignore in image)
+vendor/
+ 
+# Test and report artifacts
+reports/
+newman/
+coverage/
+ 
+# Node/npm stuff (only if present)
+node_modules/
+npm-debug.log
+ 
+# Ignore local-only override file if it ever exists
+docker-compose.override.yml
