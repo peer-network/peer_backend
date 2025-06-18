@@ -1,4 +1,4 @@
-Name:  Unit Test For Peer Backend
+name:  Unit Test For Peer Backend
 
 on:
   pull_request:
