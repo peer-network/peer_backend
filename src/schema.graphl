@@ -5,9 +5,10 @@ schema {
 }
 
 type Subscription {
-  getTokenPrice(): TokenPriceResponse!
   getChatMessages(chatid: ID!): AddChatmessageResponse!
   setChatMessages(chatid: ID!, content: String!): AddChatmessageResponse!
+  timeUpdated: String
+  # hello: HelloResponse!
 }
 
 type Query {
@@ -565,10 +566,4 @@ type GetActionPricesResponse {
     status: String!
     ResponseCode: String!
     affectedRows: ActionPriceResult!
-}
-
-type TokenPriceResponse {
-    status: String!
-    ResponseCode: String!
-    peerTokenPerBtcPrice: Float!
 }
