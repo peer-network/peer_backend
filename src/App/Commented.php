@@ -165,7 +165,7 @@ class Commented
             ],
             'content' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 2,

@@ -74,7 +74,11 @@ jobs:
       - run: |
           echo " PR branch is behind the base branch."
           exit 1
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> development
   build_and_test:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
@@ -193,6 +197,7 @@ jobs:
           PEER_BANK="${{ vars.PEER_BANK }}"
           BURN_ACCOUNT="${{ vars.BURN_ACCOUNT }}"
           LIQUIDITY_POOL="${{ vars.LIQUIDITY_POOL }}"
+          BTC_POOL="${{ vars.BTC_POOL }}"
           EOF
  
       - name: Show .env File (excluding password)
@@ -644,7 +649,11 @@ jobs:
         run: |
           git fetch origin gh-pages
           git checkout gh-pages
+<<<<<<< HEAD
           
+=======
+
+>>>>>>> development
       - name: Clean up old reports (older than 1 day)
         run: |
           echo "Cleaning old reports..."
@@ -664,11 +673,16 @@ jobs:
 
       - name: Add timestamp to force commit
         run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> development
       - name: Commit and push reports
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+          git pull origin gh-pages --rebase
           git add reports/${{ github.run_id }}
           git commit -m "Add Newman HTML reports for run ${{ github.run_id }}" || echo "Nothing to commit"
           git push origin gh-pages
@@ -724,11 +738,16 @@ jobs:
 
       - name: Add timestamp to force commit
         run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> development
       - name: Commit and push reports
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+          git pull origin gh-pages --rebase
           git add reports/${{ github.run_id }}
           git commit -m "Add Newman HTML reports for successful run ${{ github.run_id }}" || echo "Nothing to commit"
           git push origin gh-pages
@@ -798,7 +817,11 @@ jobs:
           MESSAGE+="Maintainer: $MAINTAINER_MENTION\n"
           MESSAGE+="Author: $PR_MENTION"
           MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> development
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{\"content\": \"${MESSAGE}\"}" \
@@ -834,7 +857,11 @@ jobs:
           MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
           MESSAGE+="<@1355093873323671742>"  # vidkazan
           MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> development
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{\"content\": \"${MESSAGE}\"}" \

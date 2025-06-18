@@ -55,6 +55,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
+use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 
 class GraphQLSchemaBuilder
 {
@@ -246,6 +247,9 @@ class GraphQLSchemaBuilder
                 },
                 'wikiLink' => function (array $root): string {
                     return $root['wikiLink'] ?? 'https://github.com/peer-network/peer_backend/wiki/Backend-Version-Update-1.2.0';
+                },
+                'lastMergedPullRequestNumber' => function (array $root): string {
+                    return $root['lastMergedPullRequestNumber'] ?? '';
                 },
             ],
             'RegisterResponse' => [
@@ -1616,7 +1620,45 @@ class GraphQLSchemaBuilder
                 'iInvited' => function (array $root): array {
                     return $root['iInvited'] ?? [];
                 },
-            ],                                 
+            ],      
+            'GetActionPricesResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.GetActionPricesResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): ?array {
+                    return $root['affectedRows'] ?? null;
+                },
+            ],
+            'ActionPriceResult' => [
+                'postPrice' => function (array $root): float {
+                    return (float) ($root['postPrice'] ?? 0);
+                },
+                'likePrice' => function (array $root): float {
+                    return (float) ($root['likePrice'] ?? 0);
+                },
+                'dislikePrice' => function (array $root): float {
+                    return (float) ($root['dislikePrice'] ?? 0);
+                },
+                'commentPrice' => function (array $root): float {
+                    return (float) ($root['commentPrice'] ?? 0);
+                },
+            ],    
+            'ResetPasswordRequestResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ResetPasswordRequestResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'nextAttemptAt' => function (array $root): string {
+                    return $root['nextAttemptAt'] ?? '';
+                },
+            ],                       
         ];
     }
 
@@ -1659,6 +1701,7 @@ class GraphQLSchemaBuilder
             'dailygemsresults' => fn(mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
             'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
+            'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
         ];
     }
 
@@ -1712,9 +1755,12 @@ class GraphQLSchemaBuilder
     {
         $this->logger->info('Query.hello started', ['args' => $args]);
 
+        $lastMergedPullRequestNumber = LastGithubPullRequestNumberProvider::getValue();
+
         return [
             'userroles' => $this->userRoles,
-            'currentuserid' => $this->currentUserId
+            'currentuserid' => $this->currentUserId,
+            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? ""
         ];
     }
 
@@ -1924,6 +1970,39 @@ class GraphQLSchemaBuilder
                 'trace' => $e->getTraceAsString()
             ]);
             return $this->respondWithError(41013);
+        }
+    }
+
+    protected function resolveActionPrices(): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->info('PoolService.getActionPrices started');
+
+        try {
+            $result = $this->poolService->getActionPrices();
+
+            return [
+                'status'        => 'success',
+                'ResponseCode'  => 11304,
+                'affectedRows'  => [
+                    'postPrice'     => isset($result['post_price']) ? (float) $result['post_price'] : 0.0,
+                    'likePrice'     => isset($result['like_price']) ? (float) $result['like_price'] : 0.0,
+                    'dislikePrice'  => isset($result['dislike_price']) ? (float) $result['dislike_price'] : 0.0,
+                    'commentPrice'  => isset($result['comment_price']) ? (float) $result['comment_price'] : 0.0,
+                ]
+            ];
+
+            $this->logger->info('resolveActionPrices: Successfully fetched prices', $response['affectedRows']);
+            
+        } catch (\Throwable $e) {
+            $this->logger->error('Query.resolveActionPrices exception', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError(41301);
         }
     }
 
@@ -2215,7 +2294,7 @@ class GraphQLSchemaBuilder
                 'exception' => $e->getMessage(),
                 'args' => $args,
             ]);
-            return $this->respondWithError(41203);
+            return $this->respondWithError(40301);
         }
     }
 
@@ -3040,9 +3119,9 @@ class GraphQLSchemaBuilder
         }
     }
 
-    protected function verifyAccount(string $userid = null): array
+    protected function verifyAccount(string $userid = ''): array
     {
-        if ($userid === null) {
+        if ($userid === '') {
             return $this->respondWithError(30101);
         }
 

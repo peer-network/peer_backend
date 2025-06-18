@@ -1,12 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Utils\ConfigGeneration;
+namespace Tests\utils\ConfigGeneration;
 
-use Tests\Utils\ConfigGeneration\ResponseCodesConfig;
-use Tests\Utils\ConfigGeneration\EndpointsConfig;
+use Tests\utils\ConfigGeneration\ResponseCodesConfig;
+use Tests\utils\ConfigGeneration\EndpointsConfig;
+use Tests\utils\ConfigGeneration\ConstantsConfigGeneratable;
 
 enum ConfigGenerationConstants : string implements DataGeneratable {
+    case constants = "constants";
     case repsonseCodes = "response-codes";
     case endpoints = "endpoints";
 
@@ -26,6 +28,7 @@ enum ConfigGenerationConstants : string implements DataGeneratable {
         {
             ConfigGenerationConstants::endpoints => (new EndpointsConfig($path))->getData(),
             ConfigGenerationConstants::repsonseCodes => (new ResponseCodesConfig($path))->getData(),
+            ConfigGenerationConstants::constants => (new ConstantsConfigGeneratable())->getData(),
         };
     }    
 
