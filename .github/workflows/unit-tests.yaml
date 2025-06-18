@@ -1,0 +1,30 @@
+Name:  Unit Test For Peer Backend
+
+on:
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  unit-test:
+    name: Peer Backend Unit Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']
+    steps:
+      - name: checkout Source Code
+        uses: actions/checkout@v4
+      
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: pdo
+          coverage: none
+
+      - name: Install Dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPUnit on tests/service
+        run: ./vendor/bin/phpunit tests/service
