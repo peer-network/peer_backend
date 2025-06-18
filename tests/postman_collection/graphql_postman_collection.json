@@ -11707,6 +11707,243 @@
 			"response": []
 		},
 		{
+			"name": "Add negative token amount (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30241\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AddLiquidity {\n    addLiquidity(amountToken: \"-1\", amountBtc: \"0.0001\") {\n        status\n        responseCode\n        affectedRows {\n            newTokenAmount\n            newBtcAmount\n            newTokenPrice\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add negative btc amount (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30270\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AddLiquidity {\n    addLiquidity(amountToken: \"2\", amountBtc: \"-0.00001\") {\n        status\n        responseCode\n        affectedRows {\n            newTokenAmount\n            newBtcAmount\n            newTokenPrice\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add zero (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30241\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AddLiquidity {\n    addLiquidity(amountToken: \"0\", amountBtc: \"0\") {\n        status\n        responseCode\n        affectedRows {\n            newTokenAmount\n            newBtcAmount\n            newTokenPrice\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get token price",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11202\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = {};",
+							"try {",
+							"    response = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let newPrice = parseFloat(response?.data?.getTokenPrice?.currentTokenPrice);",
+							"let oldPrice = parseFloat(pm.environment.get(\"currentTokenPrice\"));",
+							"",
+							"pm.test(\"Previous token price exists\", function () {",
+							"    pm.expect(oldPrice).to.be.a(\"number\");",
+							"});",
+							"",
+							"pm.test(\"Token price has not changed\", function () {",
+							"    pm.expect(newPrice).to.equal(oldPrice);",
+							"});",
+							"",
+							"if (!isNaN(newPrice)) {",
+							"    pm.environment.set(\"currentTokenPrice\", newPrice);",
+							"    console.log(\"Updated token price:\", newPrice);",
+							"} else {",
+							"    console.log(\"New token price is invalid.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTokenPrice {\n    getTokenPrice {\n        status\n        responseCode\n        currentTokenPrice\n        updatedAt\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Check current liquidity",
 			"event": [
 				{
@@ -11824,7 +12061,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid}}\", numberoftokens: 115, message: \"hi\") {\n        status\n        responseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid}}\", numberoftokens: 160, message: \"hi\") {\n        status\n        responseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -11862,7 +12099,7 @@
 							"pm.test(\"Previous liquidity exists\", function () {",
 							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
 							"});",
-							"let expectedDecrease = 119.6;",
+							"let expectedDecrease = 166.4;",
 							"let actualDecrease = oldLiquidity - newLiquidity;",
 							"let tolerance = 0.1;",
 							"pm.test(`Liquidity should decrease by approximately ${expectedDecrease} ±${tolerance}`, function () {",
@@ -11939,13 +12176,13 @@
 							"pm.test(\"DEDUCT transaction has correct message and amount\", function () {",
 							"    pm.expect(deduct).to.not.be.undefined;",
 							"    pm.expect(deduct.message).to.eql(\"hi\");",
-							"    pm.expect(deduct.tokenamount).to.eql(-119.6);",
+							"    pm.expect(deduct.tokenamount).to.eql(-166.4);",
 							"});",
 							"",
 							"pm.test(\"CREDIT transaction has correct message\", function () {",
 							"    pm.expect(credit).to.not.be.undefined;",
 							"    pm.expect(credit.message).to.eql(\"hi\");",
-							"    pm.expect(credit?.tokenamount).to.eql(115);",
+							"    pm.expect(credit?.tokenamount).to.eql(160);",
 							"});"
 						],
 						"type": "text/javascript",
@@ -13772,12 +14009,12 @@
 							"",
 							"let inviterFeeTx = transactions.find(tx =>",
 							"    tx.transferaction === \"INVITER_FEE\" &&",
-							"    tx.tokenamount === 0.04",
+							"    tx.tokenamount === 0.02",
 							");",
 							"",
 							"pm.test(\"Inviter fee transaction of 1 token exists\", function () {",
 							"    pm.expect(inviterFeeTx).to.not.be.undefined;",
-							"    pm.expect(inviterFeeTx.tokenamount).to.eql(0.04);",
+							"    pm.expect(inviterFeeTx.tokenamount).to.eql(0.02);",
 							"    pm.expect(inviterFeeTx.transferaction).to.eql(\"INVITER_FEE\");",
 							"});"
 						],
@@ -13812,7 +14049,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 1) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -14108,80 +14345,6 @@
 			"response": []
 		},
 		{
-			"name": "Login tester 2",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"10801\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
-							"} else {",
-							"    console.log(\"Error detected in response, environment variable not set.\");",
-							"}",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
-							"} else {",
-							"    console.log(\"Error detected in response, environment variable not set.\");",
-							"}",
-							"let token = pm.environment.get(\"accessToken\");",
-							"pm.test(\"Access token exists\", function () {",
-							"    pm.expect(token).to.be.a(\"string\");",
-							"});",
-							"",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Get LP history",
 			"event": [
 				{
@@ -14389,6 +14552,80 @@
 			"response": []
 		},
 		{
+			"name": "Login tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Update trans status",
 			"event": [
 				{
@@ -14435,6 +14672,70 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation UpdateSwapTranStatus {\n    updateSwapTranStatus(transactionId: \"{{swapid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login referred tester",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
 						"variables": ""
 					}
 				},
@@ -14516,6 +14817,80 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query GetLiquidityPoolHistory {\n    getLiquidityPoolHistory(limit: 1) {\n        status\n        responseCode\n        affectedRows {\n            swapid\n            transactionid\n            transactiontype\n            senderid\n            tokenamount\n            btcamount\n            status\n            message\n            createdat\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
 						"variables": ""
 					}
 				},
@@ -14677,7 +15052,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 1) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -15455,13 +15830,13 @@
 							"",
 							"pm.test(\"DEDUCT transaction has correct message and amount\", function () {",
 							"    pm.expect(deduct).to.not.be.undefined;",
-							"    pm.expect(deduct.message).to.eql(\"hi\");",
+							"    pm.expect(deduct.message).to.eql(\"\");",
 							"    pm.expect(deduct.tokenamount).to.eql(-5.2);",
 							"});",
 							"",
 							"pm.test(\"CREDIT transaction has correct message\", function () {",
 							"    pm.expect(credit).to.not.be.undefined;",
-							"    pm.expect(credit.message).to.eql(\"hi\");",
+							"    pm.expect(credit.message).to.eql(\"\");",
 							"    pm.expect(credit?.tokenamount).to.eql(5);",
 							"});"
 						],
