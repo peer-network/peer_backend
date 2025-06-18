@@ -222,7 +222,10 @@ class PostService
                 }
             }
             elseif ($args['contenttype'] === 'video' && !empty($mediaPath['path'])) {
-                $coverResult = $this->generateCoverFromVideo($mediaPath, $postId);
+                $videoRelativePath = $mediaPath['path'][0]['path'];
+                $videoFilePath = __DIR__ . '/../../runtime-data/media' . $videoRelativePath;
+
+                $coverResult = $this->generateCoverFromVideo($videoFilePath, $postId);
 
                 if (!empty($coverResult['path'])) {
                     $postData['cover'] = $this->argsToJsString($coverResult['path']);
@@ -304,14 +307,11 @@ class PostService
         }
     }
 
-    private function generateCoverFromVideo(array $mediaPath, string $postId): ?array
+    private function generateCoverFromVideo(string $videoFilePath, string $postId): ?array
     {
         $generatedCoverPath = null;
 
         try {
-            $videoRelativePath = $mediaPath['path'][0]['path'];
-            $videoFilePath = __DIR__ . '/../../runtime-data/media' . $videoRelativePath;
-
             $generatedCoverPath = $this->videoCoverGenerator->generate($videoFilePath);
             $base64String = $this->base64Encoder->encodeFileToBase64($generatedCoverPath, 'image/jpeg');
 
