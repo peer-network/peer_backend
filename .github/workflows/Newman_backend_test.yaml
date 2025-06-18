@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - '**'
- 
+
 permissions:
   contents: write
  
@@ -74,11 +74,7 @@ jobs:
       - run: |
           echo " PR branch is behind the base branch."
           exit 1
-<<<<<<< HEAD
- 
-=======
 
->>>>>>> development
   build_and_test:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
@@ -291,7 +287,7 @@ jobs:
       - name: Check Backend Logs
         run: |
           echo "Fetching backend container logs..."
-          docker logs $(docker ps -q -f "name=peer_backend_ci-cd-backend-1")
+          docker logs $(docker ps -q -f "name=peer_backend-backend-1")
  
       - name: Check Backend Connection (using curl directly)
         run: |
@@ -460,6 +456,7 @@ jobs:
         with:
           name: docker-image-${{ matrix.php-version }}
           path: .
+          
       - name: Load Docker image
         run: docker load -i peer-backend.tar
  
@@ -601,6 +598,9 @@ jobs:
             artemyavruyan)
               echo "discord_mention=<@1354855455179935896>" >> $GITHUB_OUTPUT
               ;;
+            tasoraso)
+              echo "discord_mention=<@843252980069433384>" >> $GITHUB_OUTPUT
+              ;;
             Ali2710)
               echo "discord_mention=<@1354034371555758100>" >> $GITHUB_OUTPUT
               ;;
@@ -608,7 +608,7 @@ jobs:
               echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
               ;;
             bipin1611)
-              echo "discord_mention=<@1354855455179935896>" >> $GITHUB_OUTPUT
+              echo "discord_mention=<@1358723876883923075>" >> $GITHUB_OUTPUT
               ;;
             *)
               echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
@@ -649,11 +649,7 @@ jobs:
         run: |
           git fetch origin gh-pages
           git checkout gh-pages
-<<<<<<< HEAD
-          
-=======
 
->>>>>>> development
       - name: Clean up old reports (older than 1 day)
         run: |
           echo "Cleaning old reports..."
@@ -673,11 +669,7 @@ jobs:
 
       - name: Add timestamp to force commit
         run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
-<<<<<<< HEAD
-
-=======
  
->>>>>>> development
       - name: Commit and push reports
         run: |
           git config user.name "github-actions"
@@ -738,11 +730,7 @@ jobs:
 
       - name: Add timestamp to force commit
         run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
-<<<<<<< HEAD
-
-=======
  
->>>>>>> development
       - name: Commit and push reports
         run: |
           git config user.name "github-actions"
@@ -817,11 +805,7 @@ jobs:
           MESSAGE+="Maintainer: $MAINTAINER_MENTION\n"
           MESSAGE+="Author: $PR_MENTION"
           MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
-<<<<<<< HEAD
-
-=======
  
->>>>>>> development
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{\"content\": \"${MESSAGE}\"}" \
@@ -857,11 +841,7 @@ jobs:
           MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
           MESSAGE+="<@1355093873323671742>"  # vidkazan
           MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
-<<<<<<< HEAD
-
-=======
  
->>>>>>> development
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{\"content\": \"${MESSAGE}\"}" \
