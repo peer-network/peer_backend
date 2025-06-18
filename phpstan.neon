@@ -1,6 +1,6 @@
 parameters:
-    level: 5
+    level: 0
 
     paths:
-        - src/config/constants
+        - src
         - tests
