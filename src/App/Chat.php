@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -17,15 +18,17 @@ class Chat
     protected ?array $chatparticipants = [];
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->chatid = $data['chatid'] ?? '';
         $this->creatorid = $data['creatorid'] ?? '';
         $this->image = $data['image'] ?? '';
         $this->name = $data['name'] ?? '';
-        $this->ispublic = $data['ispublic'] ?? 1;
+        $this->ispublic = isset($data['ispublic']) ? (int)$data['ispublic'] : 1;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->chatmessages = isset($data['chatmessages']) && is_array($data['chatmessages']) ? $data['chatmessages'] : [];
@@ -143,9 +146,8 @@ class Chat
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -166,18 +168,18 @@ class Chat
             ],
             'image' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,
                         'max' => 100,
                     ]],
-                    ['name' => 'isString'],
+                    ['name' => 'validateImage'],
                 ],
             ],
             'name' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,
@@ -190,7 +192,7 @@ class Chat
                 'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 1]],
+                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],
                 ],
             ],
             'createdat' => [

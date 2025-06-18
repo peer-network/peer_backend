@@ -1,0 +1,861 @@
+name: Newman Test For Postman on the php Backend Directory
+ 
+on:
+  pull_request:
+    branches:
+      - development
+      - main
+      - pre-release
+
+permissions:
+  contents: write
+ 
+jobs:
+  check_branch_sync:
+    name: Check if PR Branch is Behind Base
+    runs-on: ubuntu-latest
+    outputs:
+      is_behind: ${{ steps.check.outputs.is_behind }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+ 
+      - name: Fetch all branches
+        run: |
+          git fetch origin +refs/heads/*:refs/remotes/origin/*
+ 
+      - id: check
+        run: |
+          base_branch="${{ github.event.pull_request.base.ref }}"
+          pr_branch="${{ github.event.pull_request.head.ref }}"
+ 
+          echo "Comparing $pr_branch against $base_branch"
+          behind=$(git rev-list --left-right --count origin/${base_branch}...origin/${pr_branch} | awk '{print $1}')
+ 
+          if [ "$behind" -gt 0 ]; then
+            echo "Branch is behind!"
+            echo "is_behind=true" >> $GITHUB_OUTPUT
+          else
+            echo "Branch is up-to-date."
+            echo "is_behind=false" >> $GITHUB_OUTPUT
+          fi
+ 
+  notify_if_behind:
+    name: Notify on Outdated PR
+    runs-on: ubuntu-latest
+    needs: [check_branch_sync, map_pr_to_discord]
+    if: needs.check_branch_sync.outputs.is_behind == 'true'
+    steps:
+      - name: Send Discord Notification for Outdated PR
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+        run: |
+          MESSAGE=":warning: **PR Branch is Behind the Base Branch**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="Link: <$PR_URL>\n"
+          MESSAGE+="Author: $DISCORD_MENTION\n"
+          MESSAGE+="Please update your branch with the latest changes from \`${{ github.event.pull_request.base.ref }}\`."
+ 
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"$MESSAGE\"}" \
+               "$DISCORD_WEBHOOK_URL"
+ 
+  fail_outdated_branch:
+    name: Block CI Due to Outdated Branch
+    runs-on: ubuntu-latest
+    needs: [check_branch_sync]
+    if: needs.check_branch_sync.outputs.is_behind == 'true'
+    steps:
+      - run: |
+          echo " PR branch is behind the base branch."
+          exit 1
+
+  build_and_test:
+    name: Build And Run Postman Tests
+    runs-on: ubuntu-latest
+    needs: [check_branch_sync]
+    if: needs.check_branch_sync.outputs.is_behind == 'false'
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']
+    outputs:
+      outcome: ${{ steps.outcome.outputs.outcome }}
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+ 
+      - name: Fix log directory permissions
+        run: sudo chown -R 33:33 runtime-data/logs
+ 
+      - name: Create Nginx Config
+        run: |
+          mkdir -p docker/nginx
+          cat <<EOF > docker/nginx/default.conf
+          log_format graphql_debug '\$remote_addr - [\$time_local] '
+                                   '"\$request" body: \$request_body '
+                                   'status: \$status ref: \$http_referer ua: \$http_user_agent';
+          access_log /var/log/nginx/graphql_access.log graphql_debug;
+          server {
+              listen 80;
+              index index.php;
+              root /var/www/html/public;
+ 
+              client_max_body_size 80M;
+              client_body_buffer_size 128k;
+ 
+              location / {
+                  try_files \$uri /index.php\$is_args\$args;
+              }
+ 
+              location ~ \.php\$ {
+                  include fastcgi_params;
+                  fastcgi_pass 127.0.0.1:9000;
+                  fastcgi_index index.php;
+                  fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+              }
+ 
+              location ~ /\.ht {
+                  deny all;
+              }
+          }
+          EOF
+      - name: Create Supervisor Config
+        run: |
+          mkdir -p docker
+          cat <<'EOF' > docker/supervisord.conf
+          [supervisord]
+          nodaemon=true
+          logfile=/tmp/supervisord.log
+          logfile_maxbytes=0
+          user=root
+ 
+          [program:php-fpm]
+          command=/usr/local/sbin/php-fpm
+          stdout_logfile=/dev/stdout
+          stdout_logfile_maxbytes=0
+          stderr_logfile=/dev/stderr
+          stderr_logfile_maxbytes=0
+ 
+          [program:nginx]
+          command=/usr/sbin/nginx -g "daemon off;"
+          stdout_logfile=/dev/stdout
+          stdout_logfile_maxbytes=0
+          stderr_logfile=/dev/stderr
+          stderr_logfile_maxbytes=0
+          EOF
+ 
+      - name: Create .env Files From Github Secrets and Variables
+        run: |
+          cat <<EOF > .env
+          DB_DRIVER="${{ vars.DB_DRIVER }}"
+          DB_HOST="${{ vars.DB_HOST }}"
+          DB_PORT="${{ vars.DB_PORT }}"
+          DB_DATABASE="${{ vars.DB_DATABASE }}"
+          DB_USERNAME="${{ vars.DB_USERNAME }}"
+          DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+          DB_CHARSET="${{ vars.DB_CHARSET }}"
+          DB_SSLMODE="${{ vars.DB_SSLMODE }}"
+          DB_TIMEOUT="${{ vars.DB_TIMEOUT }}"
+          CONTAINER_PATH="${{ vars.CONTAINER_PATH }}"
+          LOGGER_NAME="${{ vars.LOGGER_NAME }}"
+          LOGGER_PATH="${{ vars.LOGGER_PATH }}"
+          LOGGER_LEVEL="${{ vars.LOGGER_LEVEL }}"
+          APP_ENV="${{ vars.APP_ENV }}"
+          APP_NAME="${{ vars.APP_NAME }}"
+          APP_URL="${{ vars.APP_URL }}"
+          BASE_URL="${{ vars.BASE_URL }}"
+          TIME_ZONE="${{ vars.TIME_ZONE }}"
+          GRAPHQL_ENDPOINT="${{ vars.GRAPHQL_ENDPOINT }}"
+          PRIVATE_KEY_PATH="${{ vars.PRIVATE_KEY_PATH }}"
+          PUBLIC_KEY_PATH="${{ vars.PUBLIC_KEY_PATH }}"
+          REFRESH_PRIVATE_KEY_PATH="${{ vars.REFRESH_PRIVATE_KEY_PATH }}"
+          REFRESH_PUBLIC_KEY_PATH="${{ vars.REFRESH_PUBLIC_KEY_PATH }}"
+          REFRESH_TOKEN_EXPIRY="${{ vars.REFRESH_TOKEN_EXPIRY }}"
+          TOKEN_EXPIRY="${{ vars.TOKEN_EXPIRY }}"
+          LIMITER_RATE="${{ vars.LIMITER_RATE }}"
+          LIMITER_TIME="${{ vars.LIMITER_TIME }}"
+          RATE_LIMITER="${{ vars.RATE_LIMITER }}"
+          MAIL_API_LINK="${{ vars.MAIL_API_LINK }}"
+          MAIL_API_KEY="${{ vars.MAIL_API_KEY }}"
+          MAIL_DRIVER="${{ vars.MAIL_DRIVER }}"
+          MAIL_HOST="${{ vars.MAIL_HOST }}"
+          MAIL_PORT="${{ vars.MAIL_PORT }}"
+          MAIL_USERNAME="${{ vars.MAIL_USERNAME }}"
+          MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}"
+          MAIL_ENCRYPTION="${{ vars.MAIL_ENCRYPTION }}"
+          MAIL_FROM_ADDRESS="${{ vars.MAIL_FROM_ADDRESS }}"
+          MAIL_FROM_NAME="${{ vars.MAIL_FROM_NAME }}"
+          PEER_BANK="${{ vars.PEER_BANK }}"
+          BURN_ACCOUNT="${{ vars.BURN_ACCOUNT }}"
+          LIQUIDITY_POOL="${{ vars.LIQUIDITY_POOL }}"
+          BTC_POOL="${{ vars.BTC_POOL }}"
+          EOF
+ 
+      - name: Show .env File (excluding password)
+        run: grep -v DB_PASSWORD .env
+ 
+      - name: Set Docker Image Tag
+        run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+ 
+      - name: Create ordered SQL init files in CI
+        run: |
+          mkdir tmp_sql
+          cp sql_files_for_import/structure.psql tmp_sql/01.sql
+          cp sql_files_for_import/additional_data.sql tmp_sql/02.sql
+          rm -rf sql_files_for_import/*
+          cp -a tmp_sql/. sql_files_for_import/
+ 
+      - name: Reset Docker volumes (force initdb scripts to run)
+        run: docker compose down -v
+ 
+      - name: Force DB init by removing the volume
+        run: docker volume rm peer_backend_ci-cd_db-data || true
+ 
+      - name: Build And Start Docker Containers
+        run: |
+          docker compose -f ./docker-compose.yaml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}
+          docker compose -f ./docker-compose.yaml up -d
+ 
+      - name: Set PHP upload limits
+        run: |
+          docker compose exec backend bash -c "echo 'upload_max_filesize = 80M' >> /usr/local/etc/php/conf.d/uploads.ini"
+          docker compose exec backend bash -c "echo 'post_max_size = 80M' >> /usr/local/etc/php/conf.d/uploads.ini"
+          docker compose exec backend bash -c "php -i | grep upload_max_filesize"
+          docker compose exec backend bash -c "php -i | grep post_max_size"
+ 
+      - name: Fix ownership and permissions on /var/www/html
+        run: |
+          docker compose exec backend chown -R www-data:www-data /var/www/
+          docker compose exec backend find /var/www/ -type d -exec chmod 755 {} \;
+          docker compose exec backend find /var/www/ -type f -exec chmod 644 {} \;
+ 
+      - name: Show Postgres logs (check for errors)
+        run: docker compose logs db
+ 
+      - name: Check Postgres tables
+        run: docker compose exec db psql -U "${{ vars.DB_USERNAME }}" -d "${{ vars.DB_DATABASE }}" -c '\dt'
+ 
+      - name: Verify FK constraint from users_info → users
+        run: |
+          docker compose exec db psql -U "${{ vars.DB_USERNAME }}" -d "${{ vars.DB_DATABASE }}" \
+            -c "SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'users_info' AND constraint_type = 'FOREIGN KEY';"
+ 
+      - name: Verify all optional users were inserted
+        run: |
+          docker compose exec db psql -U "${{ vars.DB_USERNAME }}" -d "${{ vars.DB_DATABASE }}" \
+            -c "SELECT uid, username FROM users WHERE
+                  email LIKE '%@tester.de'
+                  OR username IN ('burn_account', 'lp_account', 'company_account');"
+ 
+      - name: List app folder in container
+        run: docker compose run --rm backend ls -R /var/www/html
+ 
+      - name: List files in /var/www/html/public
+        run: docker compose run --rm backend ls -R /var/www/html/public
+ 
+      - name: Wait For Backend to be Ready
+        run: |
+          TAG=latest
+          for i in {1..120}; do
+            if docker run --rm \
+                --network my-network \
+                curlimages/curl:$TAG \
+                curl -sf http://backend/graphql > /dev/null; then
+              echo "Backend is up!"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Backend did not respond in time."
+          exit 1
+ 
+      - name: Test GraphQL Endpoint
+        run: |
+          TAG=latest
+          docker run --rm \
+            --network my-network \
+            curlimages/curl:$TAG \
+            curl -s -X POST http://backend/graphql \
+            -H "Content-Type: application/json" \
+            --data '{"query":"{__typename}"}'
+ 
+      - name: Check Backend Logs
+        run: |
+          echo "Fetching backend container logs..."
+          docker logs $(docker ps -q -f "name=peer_backend-backend-1")
+ 
+      - name: Check Backend Connection (using curl directly)
+        run: |
+          TAG=latest
+          docker run --rm \
+            --network my-network \
+            curlimages/curl:$TAG \
+            curl -sf http://backend/graphql
+ 
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+       
+      - name: Replace Hardcoded URL in Postman Collection (using jq)
+        run: |
+          jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {
+            raw: "{{BACKEND_URL}}/graphql",
+            protocol: "http",
+            host: ["backend"],
+            path: ["graphql"]
+          }' tests/postman_collection/graphql_postman_collection.json > temp.json
+          mv temp.json tests/postman_collection/graphql_postman_collection.json
+ 
+      - name: Inject BACKEND_URL into Postman Environment
+        run: |
+          jq '.values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
+            tests/postman_collection/graphql_postman_environment.json > temp_env.json
+          mv temp_env.json tests/postman_collection/graphql_postman_environment.json
+ 
+      - name: Run Postman Tests in Newman Container
+        id: newman
+        continue-on-error: true
+        run: |
+          result=0
+          docker compose -f ./docker-compose.yaml run --rm newman || result=$?
+          echo "$result" > newman_exit_code.txt
+ 
+      - name: Set newman outcome output
+        id: newman_output
+        run: |
+          echo "outcome=$(cat newman_exit_code.txt)" >> $GITHUB_OUTPUT
+ 
+      - name: Save Newman Failure Result
+        run: |
+          if [ "${{ steps.newman_output.outputs.outcome }}" != "0" ]; then
+            echo "true" > newman_failed.txt
+          else
+            echo "false" > newman_failed.txt
+          fi
+ 
+      - name: Upload Newman Failure Marker
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-failed-${{ matrix.php-version }}
+          path: newman_failed.txt
+ 
+      - name: List Logs in Backend Container
+        run: docker compose exec backend ls -l /var/www/html/runtime-data/logs
+ 
+      - name: Show backend application runtime log
+        run: |
+          echo " Showing backend application runtime log..."
+          docker compose exec backend sh <<'EOF'
+            latest_log=$(ls -t /var/www/html/runtime-data/logs/*.log 2>/dev/null | grep -v errorlog.txt | head -n 1)
+            if [ -n "$latest_log" ]; then
+              echo -e "\n===== $latest_log ====="
+              cat "$latest_log"
+            else
+              echo " No runtime log found"
+            fi
+          EOF
+      - name: Show backend error log (errorlog.txt)
+        run: |
+          echo " Contents of errorlog.txt"
+          docker compose exec backend cat /var/www/html/runtime-data/logs/errorlog.txt || echo " Log not found"
+ 
+      - name: Copy backend logs to host
+        run: |
+          mkdir -p logs/runtime logs/error
+          docker compose cp backend:/var/www/html/runtime-data/logs/errorlog.txt logs/error/errorlog.txt || echo " errorlog.txt not found"
+ 
+          latest_log=$(docker compose exec backend sh -c 'ls -t /var/www/html/runtime-data/logs/*.log 2>/dev/null | grep -v errorlog.txt | head -n 1')
+          if [ -n "$latest_log" ]; then
+            docker compose cp backend:$latest_log logs/runtime/$(basename $latest_log)
+          else
+            echo " No runtime log found"
+          fi
+ 
+      - name: Upload backend runtime log for PHP ${{ matrix.php-version }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-runtime-log-${{ matrix.php-version }}
+          path: logs/runtime
+ 
+      - name: Upload backend error log for PHP ${{ matrix.php-version }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-error-log-${{ matrix.php-version }}
+          path: logs/error/errorlog.txt
+          
+      - name: Upload Newman Report for PHP ${{ matrix.php-version }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker_newman_report-${{ matrix.php-version }}
+          path: ${{ github.workspace }}/newman/reports/report.html
+        continue-on-error: true
+          
+      - name: List Running containers
+        run: docker ps -a
+ 
+      - name: Tear Down Docker Containers
+        if: always()
+        run: docker compose -f ./docker-compose.yaml down
+ 
+      - name: Set build outcome flag
+        id: outcome
+        if: always()
+        run: |
+          newman_exit_code="${{ steps.newman_output.outputs.outcome }}"
+          job_status="${{ job.status }}"
+ 
+          if [ "$newman_exit_code" = "0" ]; then
+            if [ "$job_status" != "success" ]; then
+              echo "outcome=other_failure" >> $GITHUB_OUTPUT
+            else
+              echo "outcome=success" >> $GITHUB_OUTPUT
+            fi
+          elif [ -z "$newman_exit_code" ]; then
+            echo "outcome=other_failure" >> $GITHUB_OUTPUT
+          else
+            echo "outcome=newman_failed" >> $GITHUB_OUTPUT
+          fi
+ 
+      - name: Save outcome to file
+        if: always()
+        run: echo "${{ steps.outcome.outputs.outcome }}" > outcome.txt
+ 
+      - name: Upload build outcome marker
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: outcome-${{ matrix.php-version }}
+          path: outcome.txt
+ 
+      - name: Save Docker image as artifact
+        run: docker save -o peer-backend.tar peer-backend:${{ github.sha }}
+ 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-${{ matrix.php-version }}
+          path: peer-backend.tar
+          overwrite: true
+ 
+  trivy_scan:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    needs: [build_and_test]
+    if: needs.build_and_test.outputs.outcome == 'success'
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+ 
+      - uses: actions/download-artifact@v4
+        with:
+          name: docker-image-${{ matrix.php-version }}
+          path: .
+          
+      - name: Load Docker image
+        run: docker load -i peer-backend.tar
+ 
+      - name: Set image name
+        run: echo "IMAGE_NAME=peer-backend:${{ github.sha }}" >> $GITHUB_ENV
+ 
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release apt-transport-https
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+ 
+      - name: Generate composer.lock (not committed)
+        run: composer install --no-dev --prefer-dist --no-interaction
+ 
+      - name: Set Trivy Scan Outcome
+        id: trivy_outcome
+        run: |
+          result=0
+          trivy image --exit-code 1 --severity CRITICAL,HIGH --ignore-unfixed $IMAGE_NAME || result=1
+          trivy fs . --scanners vuln --exit-code 1 --severity CRITICAL,HIGH || result=1
+          trivy fs . --scanners secret --exit-code 1 || result=1
+ 
+          if [ "$result" -eq 0 ]; then
+            echo "outcome=success" >> $GITHUB_OUTPUT
+            echo "success" > outcome.txt
+          else
+            echo "outcome=other_failure" >> $GITHUB_OUTPUT
+            echo "other_failure" > outcome.txt
+          fi
+ 
+      - name: Save Trivy outcome to file
+        if: always()
+        run: echo "${{ steps.trivy_outcome.outputs.outcome }}" > outcome.txt
+ 
+      - name: Upload Trivy build outcome marker
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: outcome-${{ matrix.php-version }}
+          path: outcome.txt
+          overwrite: true
+ 
+      - name: Upload Scan Reports
+        if: always()
+        run: |
+          mkdir -p trivy_reports
+          trivy image --format table --ignore-unfixed --output trivy_reports/image.txt peer-backend:${{ github.sha }}
+          trivy fs . --format table --scanners vuln --output trivy_reports/filesystem_vuln.txt
+          trivy fs . --format table --scanners secret --output trivy_reports/secrets.txt
+ 
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-security-reports-${{ matrix.php-version }}
+          path: trivy_reports
+ 
+  aggregate_outcome:
+    name: Aggregate Matrix Job Outcomes
+    runs-on: ubuntu-latest
+    needs: [build_and_test]
+ 
+    if: always()
+    outputs:
+      final_outcome: ${{ steps.aggregate.outputs.final_outcome }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: outcome-*
+          path: outcomes
+ 
+      - id: aggregate
+        run: |
+          result="success"
+          for f in outcomes/**/outcome.txt; do
+            outcome=$(cat "$f")
+            if [ "$outcome" = "other_failure" ]; then
+              result="other_failure"
+              break
+            elif [ "$outcome" = "newman_failed" ] && [ "$result" != "other_failure" ]; then
+              result="newman_failed"
+            fi
+          done
+          echo "final_outcome=$result" >> $GITHUB_OUTPUT
+ 
+      - run: echo "Aggregated final outcome ${{ steps.aggregate.outputs.final_outcome }}"
+ 
+  aggregate_results:
+    name: Aggregate Newman Results
+    runs-on: ubuntu-latest
+    if: needs.build_and_test.outputs.outcome == 'newman_failed'
+    needs: [build_and_test]
+    outputs:
+      newman_failed_any: ${{ steps.setflag.outputs.newman_failed_any }}
+    steps:
+      - name: Download All Newman Failure Markers
+        uses: actions/download-artifact@v4
+        with:
+          path: newman_flags
+ 
+      - name: Check Any Newman Failures
+        id: setflag
+        run: |
+          found_failure=false
+          for f in newman_flags/**/newman_failed.txt; do
+            if grep -q true "$f"; then
+              found_failure=true
+              break
+            fi
+          done
+          echo "newman_failed_any=$found_failure" >> $GITHUB_OUTPUT
+ 
+      - name: Show Newman Failed Output
+        run: echo "Newman failed any? => ${{ steps.setflag.outputs.newman_failed_any }}"
+ 
+  map_pr_to_discord:
+    name: Map PR to Discord User
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    outputs:
+      discord_mention: ${{ steps.map.outputs.discord_mention }}
+    steps:
+      - name: Map GitHub username to Discord ID
+        id: map
+        run: |
+          case "${{ github.event.pull_request.user.login }}" in
+            vidkazan)
+              echo "discord_mention=<@1355093873323671742>" >> $GITHUB_OUTPUT
+              ;;
+            abu965)
+              echo "discord_mention=<@1356624252320743434>" >> $GITHUB_OUTPUT
+              ;;
+            jakobPeer)
+              echo "discord_mention=<@1334087880833892392>" >> $GITHUB_OUTPUT
+              ;;
+            artemyavruyan)
+              echo "discord_mention=<@1354855455179935896>" >> $GITHUB_OUTPUT
+              ;;
+            tasoraso)
+              echo "discord_mention=<@843252980069433384>" >> $GITHUB_OUTPUT
+              ;;
+            Ali2710)
+              echo "discord_mention=<@1354034371555758100>" >> $GITHUB_OUTPUT
+              ;;
+            WisdomNwaiwu)
+              echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
+              ;;
+            bipin1611)
+              echo "discord_mention=<@1358723876883923075>" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
+              ;;
+          esac
+ 
+  publish_failure_report_to_pages:
+    name: Publish Htmlextra Report to Pages
+    runs-on: ubuntu-latest
+    needs: [build_and_test, aggregate_results, map_pr_to_discord]
+    if: needs.build_and_test.outputs.outcome == 'newman_failed'
+    steps:
+      - name: Show newman_failed_any output
+        run: echo "Evaluating newman_failed_any => ${{ needs.aggregate_results.outputs.newman_failed_any }}"
+ 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+ 
+      - name: Ensure gh-pages branch exists
+        run: |
+          if ! git ls-remote --exit-code --heads origin gh-pages; then
+            echo "Creating gh-pages branch"
+            git checkout --orphan gh-pages
+            git config user.name "github-actions"
+            git config user.email "actions@github.com"
+            git rm -rf .
+            touch .keep
+            git add .keep
+            git commit -m "Initialize gh-pages branch"
+            git push origin gh-pages
+          else
+            echo "gh-pages branch already exists"
+          fi
+ 
+      - name: Checkout gh-pages branch
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages
+
+      - name: Clean up old reports (older than 1 day)
+        run: |
+          echo "Cleaning old reports..."
+          find reports -mindepth 1 -maxdepth 1 -type d -mtime +1 -print -exec rm -rf {} +
+ 
+      - name: Download HTMLExtra report for PHP 8.2
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_newman_report-8.2  
+          path: reports/${{ github.run_id }}/php-8.2
+ 
+      - name: Download HTMLExtra report for PHP 8.3
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_newman_report-8.3
+          path: reports/${{ github.run_id }}/php-8.3
+
+      - name: Add timestamp to force commit
+        run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
+ 
+      - name: Commit and push reports
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git pull origin gh-pages --rebase
+          git add reports/${{ github.run_id }}
+          git commit -m "Add Newman HTML reports for run ${{ github.run_id }}" || echo "Nothing to commit"
+          git push origin gh-pages
+ 
+  publish_success_report_to_pages:
+    name: Publish HTMLExtra Report to Pages on Success
+    runs-on: ubuntu-latest
+    needs: [build_and_test, aggregate_outcome]
+    if: needs.aggregate_outcome.outputs.final_outcome == 'success'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+ 
+      - name: Ensure gh-pages branch exists
+        run: |
+          if ! git ls-remote --exit-code --heads origin gh-pages; then
+            echo "Creating gh-pages branch"
+            git checkout --orphan gh-pages
+            git config user.name "github-actions"
+            git config user.email "actions@github.com"
+            git rm -rf .
+            touch .keep
+            git add .keep
+            git commit -m "Initialize gh-pages branch"
+            git push origin gh-pages
+          else
+            echo "gh-pages branch already exists"
+          fi
+      
+      - name: Checkout gh-pages branch
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages
+
+      - name: Clean up old reports (older than 1 day)
+        run: |
+          echo "Cleaning old reports..."
+          find reports -mindepth 1 -maxdepth 1 -type d -mtime +1 -print -exec rm -rf {} +
+ 
+      - name: Download HTMLExtra report for PHP 8.2
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_newman_report-8.2
+          path: reports/${{ github.run_id }}/php-8.2
+ 
+      - name: Download HTMLExtra report for PHP 8.3
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_newman_report-8.3
+          path: reports/${{ github.run_id }}/php-8.3
+
+      - name: Add timestamp to force commit
+        run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
+ 
+      - name: Commit and push reports
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git pull origin gh-pages --rebase
+          git add reports/${{ github.run_id }}
+          git commit -m "Add Newman HTML reports for successful run ${{ github.run_id }}" || echo "Nothing to commit"
+          git push origin gh-pages
+ 
+  send_newman_discord_notification:
+    name: Send Discord Notification for Newman Failures
+    runs-on: ubuntu-latest
+    needs: [aggregate_outcome, aggregate_results, map_pr_to_discord, publish_failure_report_to_pages]
+    if: needs.aggregate_outcome.outputs.final_outcome == 'newman_failed'
+    steps:
+      - name: Construct HTMLExtra report URLs
+        id: urls
+        run: |
+          BASE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          echo "php82_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.2/report.html" >> $GITHUB_OUTPUT
+          echo "php83_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.3/report.html" >> $GITHUB_OUTPUT
+ 
+      - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          PHP82_URL="${{ steps.urls.outputs.php82_url }}"
+          PHP83_URL="${{ steps.urls.outputs.php83_url }}"
+          MESSAGE=":x: **Newman Tests Failed!**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="PR Link: <$PR_URL>\n"
+          MESSAGE+="CI Run: <$RUN_URL>\n"
+          MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
+          MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
+          MESSAGE+="Maintainer: <@1362087975906967736>\n"
+          MESSAGE+="Author: $DISCORD_MENTION"
+          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
+ 
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"${MESSAGE}\"}" \
+               "$DISCORD_WEBHOOK_URL"
+ 
+  send_other_failure_discord_notification:
+    name: Send Discord Notification for Non-Newman Failures
+    runs-on: ubuntu-latest
+    needs: [aggregate_outcome, map_pr_to_discord]
+    if: always()
+    steps:
+      - name: Log aggregated outcome
+        run: echo "Outcome was ${{ needs.aggregate_outcome.outputs.final_outcome }}"
+ 
+      - name: Send Discord Notification (if other_failure)
+        if: needs.aggregate_outcome.outputs.final_outcome == 'other_failure'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+          MAINTAINER_MENTION: <@1362087975906967736>
+        run: |
+          MESSAGE=":x: **CI Failed (non-Newman error)**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="PR Link: <$PR_URL>\n"
+          MESSAGE+="CI Run: <$RUN_URL>\n"
+          MESSAGE+="Maintainer: $MAINTAINER_MENTION\n"
+          MESSAGE+="Author: $PR_MENTION"
+          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
+ 
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"${MESSAGE}\"}" \
+               "$DISCORD_WEBHOOK_URL"
+ 
+  send_success_discord_notification:
+    name: Send Discord Notification for Successful CI
+    runs-on: ubuntu-latest
+    needs: [aggregate_outcome, publish_success_report_to_pages, trivy_scan]
+    if: needs.aggregate_outcome.outputs.final_outcome == 'success'
+    steps:
+      - name: Construct HTMLExtra report URLs
+        id: urls
+        run: |
+          BASE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          echo "php82_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.2/report.html" >> $GITHUB_OUTPUT
+          echo "php83_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.3/report.html" >> $GITHUB_OUTPUT
+ 
+      - name: Send Discord Notification to Team Lead
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          PHP82_URL="${{ steps.urls.outputs.php82_url }}"
+          PHP83_URL="${{ steps.urls.outputs.php83_url }}"
+          MESSAGE=":white_check_mark: **CI Passed Successfully**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="PR Link: <$PR_URL>\n"
+          MESSAGE+="CI Run: <$RUN_URL>\n"
+          MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
+          MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
+          MESSAGE+="<@1355093873323671742>"  # vidkazan
+          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
+ 
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"${MESSAGE}\"}" \
+               "$DISCORD_WEBHOOK_URL"
+ 
+  final_check:
+    name: Fail workflow if needed
+    runs-on: ubuntu-latest
+    needs: [aggregate_outcome]
+    if: always() && needs.aggregate_outcome.outputs.final_outcome != 'success'
+    steps:
+      - run: |
+          echo "Failing workflow to block merge (reason: ${{ needs.aggregate_outcome.outputs.final_outcome }})"
+          exit 1
+ 

@@ -9,6 +9,7 @@ class User
 {
     protected string $uid;
     protected string $email;
+    protected string $referral_uuid;
     protected string $username;
     protected string $password;
     protected int $status;
@@ -16,15 +17,17 @@ class User
     protected int $slug;
     protected int $roles_mask;
     protected string $ip;
-    protected ?string $biography;
-    protected ?string $img;
+    protected string $img;
+    protected string $biography;
     protected string $createdat;
     protected string $updatedat;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->uid = $data['uid'] ?? '';
         $this->email = $data['email'] ?? '';
@@ -39,6 +42,7 @@ class User
         $this->biography = $data['biography'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
     }
 
     // Array Copy methods
@@ -107,7 +111,7 @@ class User
         $this->password = $data['password'] ?? $this->password;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getUserId(): string
     {
         return $this->uid;
@@ -118,6 +122,16 @@ class User
         $this->uid = $uid;
     }
 
+    public function getReferralUuid(): string
+    {
+        return $this->referral_uuid;
+    }
+
+    public function setReferralUuid(string $referral_uuid): void
+    {
+        $this->referral_uuid = $referral_uuid;
+    }
+    
     public function getSlug(): int
     {
         return $this->slug;
@@ -193,9 +207,9 @@ class User
         return $this->ip;
     }
 
-    public function setIp(?string $ip): void
+    public function setIp(?string $ip = null): void
     {
-        $this->ip = $ip;
+        $this->ip = filter_var($ip, FILTER_VALIDATE_IP) ?: ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
     }
 
     public function getImg(): ?string
@@ -288,9 +302,8 @@ class User
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -307,7 +320,7 @@ class User
             ],
             'email' => [
                 'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'EmailAddress'],
                     ['name' => 'isString'],
@@ -315,20 +328,19 @@ class User
             ],
             'username' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'validateUsername'],
                 ],
             ],
             'password' => [
                 'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'validatePassword'],
                 ],
             ],
             'status' => [
-                'required' => false,
+                'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],
@@ -363,7 +375,7 @@ class User
             ],
             'img' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 0,
@@ -374,7 +386,7 @@ class User
             ],
             'biography' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,

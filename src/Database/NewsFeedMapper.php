@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Database;
 
 use PDO;
@@ -34,7 +35,7 @@ class NewsFeedMapper
         $sql = "SELECT * FROM posts WHERE feedid = :feedid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['feedid' => $id]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new NewsFeed($data);
@@ -51,7 +52,7 @@ class NewsFeedMapper
         $sql = "SELECT uid AS id, username, img FROM users WHERE uid = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data === false) {
             $this->logger->warning("No user found with id: " . $id);
@@ -107,7 +108,7 @@ class NewsFeedMapper
         $stmt->execute(['feedid' => $feedid]);
 
         $results = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $results[] = new NewsFeed($row);
         }
 

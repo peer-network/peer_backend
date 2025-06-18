@@ -1,9 +1,10 @@
 <?php
-
 declare(strict_types=1);
 
 use Fawaz\BaseURL;
 use Fawaz\Services\JWTService;
+use Fawaz\Services\Mailer;
+use Fawaz\Services\LiquidityPool;
 use DI\ContainerBuilder;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -41,6 +42,25 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
                 (int)$settings['accessTokenValidity'],
                 (int)$settings['refreshTokenValidity'],
                 $c->get(LoggerInterface::class)
+            );
+        },
+
+        Mailer::class => function (ContainerInterface $c) {
+            $settings = $c->get('settings');
+			$Envi = [];
+			$Envi = ['mailapilink' => (string)$settings['mailapilink'], 'mailapikey' => (string)$settings['mailapikey']];
+            return new Mailer(
+                $Envi,
+                $c->get(LoggerInterface::class)
+            );
+        },
+
+        LiquidityPool::class => function (ContainerInterface $c) {
+            $settings = $c->get('settings')['liquidity'];
+			$Envi = [];
+			$Envi = ['peer' => (string)$settings['peer'], 'pool' => (string)$settings['pool'], 'burn' => (string)$settings['burn']];
+            return new LiquidityPool(
+                $Envi
             );
         },
 

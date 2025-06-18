@@ -14,7 +14,8 @@ Follow these steps to set up the backend on your local machine:
 ### **1. Install PHP 8.3 & Extensions**
 ```bash
 sudo apt install php8.3-cli
-sudo apt-get install php-pgsql php-bcmath
+sudo apt-get install php-pgsql php-bcmath php-xml
+sudo apt install php8.3-curl php8.3-gmp
 ```
 
 ### **2. Install Composer**
@@ -26,9 +27,6 @@ php -r "unlink('composer-setup.php');"
 
 # Add to PATH (recommended)
 sudo mv composer.phar /usr/local/bin/composer
-
-# Install a dependency for uploads
-sudo composer require james-heinrich/getid3
 ```
 
 ### **3. Install & Configure PostgreSQL**
@@ -85,6 +83,7 @@ psql -U postgres -d peer
 **Install Dependencies:**  
 ```bash
 # From project-root directory:
+sudo composer require james-heinrich/getid3
 composer install
 ```
 
@@ -97,7 +96,14 @@ DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=test
 DB_DATABASE=peer
-```
+```  
+And change these value:
+```env
+PRIVATE_KEY_PATH=../keys/private.key  -> keys/private.key
+PUBLIC_KEY_PATH=../keys/public.key  -> keys/public.key
+REFRESH_PRIVATE_KEY_PATH=../keys/refresh_private.key  -> keys/refresh_private.key
+REFRESH_PUBLIC_KEY_PATH=../keys/refresh_public.key  -> keys/refresh_public.key
+```  
 
 ### **6. Generate Security Keys**
 ```bash

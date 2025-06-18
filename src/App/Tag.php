@@ -11,9 +11,11 @@ class Tag
     protected string $name;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->tagid = $data['tagid'] ?? 0;
         $this->name = $data['name'] ?? '';
@@ -35,7 +37,7 @@ class Tag
         $this->name = $data['name'] ?? $this->name;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getTagId(): int
     {
         return $this->tagid;
@@ -70,9 +72,8 @@ class Tag
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             

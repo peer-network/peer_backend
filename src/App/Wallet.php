@@ -17,9 +17,11 @@ class Wallet
     protected string $createdat;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->token = $data['token'] ?? '';
         $this->userid = $data['userid'] ?? '';
@@ -128,7 +130,7 @@ class Wallet
         $this->createdat = $createdat;
     }
 
-    // Validation and Array Filtering methods (Unchanged)
+    // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array
     {
         $inputFilter = $this->createInputFilter($elements);
@@ -142,9 +144,8 @@ class Wallet
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -157,7 +158,7 @@ class Wallet
         $specification = [
             'token' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 12,
@@ -203,7 +204,6 @@ class Wallet
                 'required' => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];

@@ -14,12 +14,14 @@ class CommentInfo
     protected int $comments;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
-        $this->commentid = $data['commentid'];
-        $this->userid = $data['userid'];
+        $this->commentid = $data['commentid'] ?? '';
+        $this->userid = $data['userid'] ?? '';
         $this->likes = $data['likes'] ?? 0;
         $this->reports = $data['reports'] ?? 0;
         $this->comments = $data['comments'] ?? 0;
@@ -103,9 +105,8 @@ class CommentInfo
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             

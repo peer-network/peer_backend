@@ -1,17 +1,15 @@
 <?php
+
 namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
-use Psr\Log\LoggerInterface;
+use Fawaz\App\PostMedia;
+use Fawaz\Database\Interfaces\PeerMapper;
 
-class PostMapper
+class PostMapper extends PeerMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
-    {
-    }
-
     public function isSameUser(string $userid, string $currentUserId): bool
     {
         return $userid === $currentUserId;
@@ -41,6 +39,11 @@ class PostMapper
             $this->logger->error("Error fetching posts from database", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            $this->logger->error("Error fetching posts from database", [
+                'error' => $e->getMessage(),
             ]);
             return [];
         }
@@ -88,7 +91,7 @@ class PostMapper
 
         $results = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $results[] = new Post($row);
+            $results[] = new Post($row,[],false);
         }
 
         if (empty($results)) {
@@ -111,7 +114,7 @@ class PostMapper
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         if (!empty($data)) {
-            return array_map(fn($row) => new Post($row), $data);
+            return array_map(fn($row) => new Post($row, [],false), $data);
         }
 
         $this->logger->warning("No posts found with title", ['title' => $title]);
@@ -128,7 +131,7 @@ class PostMapper
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
-            return new Post($data);
+            return new Post($data,[],false);
         }
 
         $this->logger->warning("No post found with id", ['id' => $id]);
@@ -327,7 +330,7 @@ class PostMapper
     {
         $this->logger->info("PostMapper.userInfoForPosts started");
 
-        $sql = "SELECT uid AS id, username, img FROM users WHERE uid = :id";
+        $sql = "SELECT uid AS id, username, slug, img FROM users WHERE uid = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -348,9 +351,9 @@ class PostMapper
         $data = $post->getArrayCopy();
 
         $query = "INSERT INTO posts 
-                  (postid, userid, feedid, title, media, cover, mediadescription, contenttype, options, createdat)
+                  (postid, userid, feedid, contenttype, title, mediadescription, media, cover, createdat)
                   VALUES 
-                  (:postid, :userid, :feedid, :title, :media, :cover, :mediadescription, :contenttype, :options, :createdat)";
+                  (:postid, :userid, :feedid, :contenttype, :title, :mediadescription, :media, :cover, :createdat)";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -359,20 +362,20 @@ class PostMapper
             $stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
             $stmt->bindValue(':feedid', $data['feedid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':title', $data['title'], \PDO::PARAM_STR);
-            $stmt->bindValue(':media', $data['media'], \PDO::PARAM_STR);
-            $stmt->bindValue(':cover', $data['cover'], \PDO::PARAM_STR);
-            $stmt->bindValue(':mediadescription', $data['mediadescription'], \PDO::PARAM_STR);
             $stmt->bindValue(':contenttype', $data['contenttype'], \PDO::PARAM_STR);
-            $stmt->bindValue(':options', $data['options'], \PDO::PARAM_STR);
+            $stmt->bindValue(':title', $data['title'], \PDO::PARAM_STR);
+            $stmt->bindValue(':mediadescription', $data['mediadescription'], \PDO::PARAM_STR);
+            $stmt->bindValue(':media', $data['media'], \PDO::PARAM_STR);
+            //$stmt->bindValue(':cover', $data['cover'], \PDO::PARAM_STR);
+            $stmt->bindValue(':cover', $data['cover'] ?? null, $data['cover'] !== null ? \PDO::PARAM_STR : \PDO::PARAM_NULL);
             $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
-			$queryUpdateProfile = "UPDATE users_info SET amountposts = amountposts + 1 WHERE userid = :userid";
-			$stmt = $this->db->prepare($queryUpdateProfile);
+            $queryUpdateProfile = "UPDATE users_info SET amountposts = amountposts + 1 WHERE userid = :userid";
+            $stmt = $this->db->prepare($queryUpdateProfile);
             $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-			$stmt->execute();
+            $stmt->execute();
 
             $this->logger->info("Inserted new post into database");
 
@@ -381,8 +384,17 @@ class PostMapper
             $this->logger->error(
                 "PostMapper.insert: Exception occurred while inserting post",
                 [
-                    'data' => $data,
-                    'exception' => $e->getMessage(),
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+
+            throw new \RuntimeException("Failed to insert post into database: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error(
+                "PostMapper.insert: Exception occurred while inserting post",
+                [
+                    'error' => $e->getMessage()
                 ]
             );
 
@@ -390,12 +402,63 @@ class PostMapper
         }
     }
 
-    public function findPostser(?array $args = [], string $currentUserId): array
+    // Create a post Media
+    public function insertmed(PostMedia $post): PostMedia
+    {
+        $this->logger->info("PostMapper.insertmed started");
+
+        $data = $post->getArrayCopy();
+
+        $query = "INSERT INTO posts_media 
+                  (postid, contenttype, media, options)
+                  VALUES 
+                  (:postid, :contenttype, :media, :options)";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            if (!$stmt) {
+                throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
+            }
+
+            $stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':contenttype', $data['contenttype'], \PDO::PARAM_STR);
+            $stmt->bindValue(':media', $data['media'], \PDO::PARAM_STR);
+            //$stmt->bindValue(':options', $data['options'], \PDO::PARAM_STR);
+            $stmt->bindValue(':options', $data['options'] ?? null, $data['options'] !== null ? \PDO::PARAM_STR : \PDO::PARAM_NULL);
+
+            $stmt->execute();
+
+            $this->logger->info("Inserted new PostMedia into database");
+
+            return new PostMedia($data);
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "PostMapper.insertmed: Exception occurred while inserting PostMedia",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+
+            throw new \RuntimeException("Failed to insert PostMedia into database: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error(
+                "PostMapper.insertmed: Exception occurred while inserting PostMedia",
+                [
+                    'error' => $e->getMessage()
+                ]
+            );
+
+            throw new \RuntimeException("Failed to insert PostMedia into database: " . $e->getMessage());
+        }
+    }
+
+    public function findPostser(string $currentUserId, ?array $args = []): array
     {
         $this->logger->info("PostMapper.findPostser started");
 
-        $offset = max((int)($args['postOffset'] ?? 0), 0);
-        $limit = min(max((int)($args['postLimit'] ?? 10), 1), 20);
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $from = $args['from'] ?? null;
         $to = $args['to'] ?? null;
@@ -485,9 +548,9 @@ class PostMapper
             }
         }
 
-		if (!empty($Ignorlist) && $Ignorlist === 'YES') {
-			$whereClauses[] = "p.userid NOT IN (SELECT blockedid FROM user_block_user WHERE blockerid = :currentUserId)";
-		}
+        if (!empty($Ignorlist) && $Ignorlist === 'YES') {
+            $whereClauses[] = "p.userid NOT IN (SELECT blockedid FROM user_block_user WHERE blockerid = :currentUserId)";
+        }
 
         $orderBy = match ($sortBy) {
             'NEWEST' => "p.createdat DESC",
@@ -510,9 +573,9 @@ class PostMapper
                 p.media, 
                 p.cover, 
                 p.mediadescription, 
-				p.options, 
                 p.createdat, 
                 u.username, 
+				u.slug,
                 u.img AS userimg,
                 COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
                 (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) as amountlikes,
@@ -537,7 +600,7 @@ class PostMapper
             LEFT JOIN post_tags pt ON p.postid = pt.postid
             LEFT JOIN tags t ON pt.tagid = t.tagid
             WHERE %s
-            GROUP BY p.postid, u.username, u.img
+            GROUP BY p.postid, u.username, u.slug, u.img
             ORDER BY %s
             LIMIT :limit OFFSET :offset",
             implode(" AND ", $whereClauses),
@@ -549,48 +612,56 @@ class PostMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
 
             $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                $row['tags'] = json_decode($row['tags'], true) ?? [];
-                $results[] = new PostAdvanced([
-                    'postid' => $row['postid'],
-                    'userid' => $row['userid'],
-                    'contenttype' => $row['contenttype'],
-                    'title' => $row['title'],
-                    'media' => $row['media'],
-                    'cover' => $row['cover'],
-                    'mediadescription' => $row['mediadescription'],
-                    'createdat' => $row['createdat'],
-                    'amountlikes' => (int)$row['amountlikes'],
-                    'amountviews' => (int)$row['amountviews'],
-                    'amountcomments' => (int)$row['amountcomments'],
-                    'amountdislikes' => (int)$row['amountdislikes'],
-                    'amounttrending' => (int)$row['amounttrending'],
-                    'isliked' => (bool)$row['isliked'],
-                    'isviewed' => (bool)$row['isviewed'],
-                    'isreported' => (bool)$row['isreported'],
-                    'isdisliked' => (bool)$row['isdisliked'],
-                    'issaved' => (bool)$row['issaved'],
-                    'options' => (string)$row['options'],
-                    'tags' => $row['tags'],
-                    'user' => [
-                        'uid' => $row['userid'],
-                        'username' => $row['username'],
-                        'img' => $row['userimg'],
-                        'isfollowed' => (bool)$row['isfollowed'],
-                        'isfollowing' => (bool)$row['isfollowing'],
-                    ],
-                ]);
+			if ($stmt->execute($params)) {
+				//$this->logger->info("Get post successfully");
+				while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+					$row['tags'] = json_decode($row['tags'], true) ?? [];
+					$results[] = new PostAdvanced([
+						'postid' => $row['postid'],
+						'userid' => $row['userid'],
+						'contenttype' => $row['contenttype'],
+						'title' => $row['title'],
+						'media' => $row['media'],
+						'cover' => $row['cover'],
+						'mediadescription' => $row['mediadescription'],
+						'createdat' => $row['createdat'],
+						'amountlikes' => (int)$row['amountlikes'],
+						'amountviews' => (int)$row['amountviews'],
+						'amountcomments' => (int)$row['amountcomments'],
+						'amountdislikes' => (int)$row['amountdislikes'],
+						'amounttrending' => (int)$row['amounttrending'],
+						'isliked' => (bool)$row['isliked'],
+						'isviewed' => (bool)$row['isviewed'],
+						'isreported' => (bool)$row['isreported'],
+						'isdisliked' => (bool)$row['isdisliked'],
+						'issaved' => (bool)$row['issaved'],
+						'tags' => $row['tags'],
+						'user' => [
+							'uid' => $row['userid'],
+							'username' => $row['username'],
+							'slug' => $row['slug'],
+							'img' => $row['userimg'],
+							'isfollowed' => (bool)$row['isfollowed'],
+							'isfollowing' => (bool)$row['isfollowing'],
+						],
+					],[],false);
+				}
+            } else {
+                //$this->logger->warning("Failed to Get post info"]);
             }
 
             return $results;
         } catch (\PDOException $e) {
             $this->logger->error("Database error in findPostser", [
                 'error' => $e->getMessage(),
-                'sql' => $sql,
-                'params' => $params,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            $this->logger->error('Database error in findPostser', [
+                'error' => $e->getMessage(),
             ]);
             return [];
         }

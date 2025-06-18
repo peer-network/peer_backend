@@ -29,6 +29,25 @@ class WalletService
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                $response['counter'] = count($data[$countKey]);
+            } else {
+                $response['counter'] = count($data);
+            }
+        }
+
+        return $response;
+    }
+
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -38,56 +57,10 @@ class WalletService
         return true;
     }
 
-    public function createTransaction(?array $args = []): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
-        }
-
-        if (empty($args)) {
-            return $this->respondWithError('Could not find mandatory args.');
-        }
-
-        $this->logger->info('WalletService.createTransaction started');
-
-        $token = $this->walletMapper->getPeerToken();
-        $userid = $this->currentUserId;
-        $postid = $args['postid'] ?? '';
-        $fromid = $args['fromid'] ?? '';
-        $numbers = $args['numbers'] ?? 0;
-        $whereby = $args['whereby'] ?? 0;
-        $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
-
-        // Validate input parameters
-        try {
-            // Create the Survey
-            $walletData = [
-                'token' => $token,
-                'userid' => $userid,
-                'postid' => $postid,
-                'fromid' => $fromid,
-                'numbers' => $numbers,
-                'whereby' => $whereby,
-                'createdat' => $createdat,
-            ];
-            $towallet = new Wallet($walletData);
-            $this->walletMapper->insert($towallet);
-
-            $this->logger->info('Transaction created successfully', ['token' => $token]);
-            return [
-                'status' => 'success',
-                'affectedRows' => $walletData,
-            ];
-        } catch (\Exception $e) {
-            $this->logger->error('Failed to create Transaction', ['args' => $args, 'exception' => $e]);
-            return $this->respondWithError('Failed to create Transaction.');
-        }
-    }
-
     public function fetchPool(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info("WalletService.fetchPool started");
@@ -99,7 +72,7 @@ class WalletService
     public function fetchAll(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info("WalletService.fetchAll started");
@@ -118,7 +91,7 @@ class WalletService
     public function fetchWalletById(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError(60501);
         }
 
         $userId = $this->currentUserId;
@@ -126,24 +99,24 @@ class WalletService
         $fromId = $args['fromid'] ?? null;
 
         if ($postId === null && $fromId === null && !self::isValidUUID($userId)) {
-            return $this->respondWithError('At least one of postid, or fromid is required.');
+            return $this->respondWithError(30102);
         }
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError('Invalid postid provided.');
+            return $this->respondWithError(30209);
         }
 
         if ($fromId !== null && !self::isValidUUID($fromId)) {
-            return $this->respondWithError('Invalid fromid provided.');
+            return $this->respondWithError(30105);
         }
 
         $this->logger->info("WalletService.fetchWalletById started");
 
         try {
-            $wallets = $this->walletMapper->loadWalletById($args, $this->currentUserId);
+            $wallets = $this->walletMapper->loadWalletById($this->currentUserId, $args);
 
             if ($wallets === false) {
-                return $this->respondWithError('Failed to fetch wallets from database.');
+                return $this->respondWithError(41216);
             }
 
             $walletData = array_map(
@@ -160,7 +133,7 @@ class WalletService
             $success = [
                 'status' => 'success',
                 'counter' => count($walletData),
-                'ResponseCode' => 'Successfully fetched wallets',
+                'ResponseCode' => 11209,
                 'affectedRows' => $walletData
             ];
 
@@ -171,14 +144,14 @@ class WalletService
                 'error' => $e->getMessage(),
                 'args' => $args,
             ]);
-            return $this->respondWithError('An internal error occurred.');
+            return $this->respondWithError(40301);
         }
     }
 
     public function callFetchWinsLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError(60501);
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -186,16 +159,16 @@ class WalletService
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
-            return $this->respondWithError('Invalid day parameter provided.');
+            return $this->respondWithError(30105);
         }
 
-        return $this->walletMapper->fetchWinsLog($this->currentUserId, $args, 'win');
+        return $this->walletMapper->fetchWinsLog($this->currentUserId, 'win', $args);
     }
 
     public function callFetchPaysLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError(60501);
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -203,16 +176,16 @@ class WalletService
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
-            return $this->respondWithError('Invalid day parameter provided.');
+            return $this->respondWithError(30105);
         }
 
-        return $this->walletMapper->fetchWinsLog($this->currentUserId, $args, 'pay');
+        return $this->walletMapper->fetchWinsLog($this->currentUserId, 'pay', $args);
     }
 
     public function callGlobalWins(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError(60501);
         }
 
         return $this->walletMapper->callGlobalWins();
@@ -221,7 +194,7 @@ class WalletService
     public function callGemster(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError(60501);
         }
 
         return $this->walletMapper->getTimeSorted();
@@ -230,22 +203,48 @@ class WalletService
     public function callGemsters(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized.');
+            return $this->respondWithError(60501);
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
-            return $this->respondWithError('Invalid day parameter provided.');
+            return $this->respondWithError(30105);
         }
 
-        return $this->walletMapper->getTimeSortedMatch($day);
+        $gemsters = $this->walletMapper->getTimeSortedMatch($day);
+
+        if (isset($gemsters['affectedRows']['data'])) {
+            $winstatus = $gemsters['affectedRows']['data'][0];
+            unset($gemsters['affectedRows']['data'][0]);
+
+            $userStatus= array_values($gemsters['affectedRows']['data']);
+                    
+            $affectedRows = [
+                'winStatus' => $winstatus ?? [],
+                'userStatus' => $userStatus ?? [],
+            ];  
+            
+            return [
+                'status' => $gemsters['status'],
+                'counter' => $gemsters['counter'] ?? 0,
+                'ResponseCode' => $gemsters['ResponseCode'],        
+                'affectedRows' => $affectedRows
+            ];
+        } 
+        return [
+            'status' => $gemsters['status'],
+            'counter' => 0,
+            'ResponseCode' => $gemsters['ResponseCode'],
+            'affectedRows' => []
+        ];     
     }
 
     public function getPercentBeforeTransaction(string $userId, int $tokenAmount): array
     {
-        //$this->logger->info('WalletService.getPercentBeforeTransaction started');
+        $this->logger->info('WalletService.getPercentBeforeTransaction started');
+
         return $this->walletMapper->getPercentBeforeTransaction($userId, $tokenAmount);
     }
 
@@ -256,18 +255,18 @@ class WalletService
         try {
             $results = $this->walletMapper->loadLiquidityById($userId);
 
-            if ($results !== false && $results !== 0.0) {
+            if ($results !== false ) {
                 $success = [
                     'status' => 'success',
-                    'ResponseCode' => 'Liquidity data prepared successfully',
-                    'affectedRows' => ['currentliquidity' => $results],
+                    'ResponseCode' => 11204,
+                    'currentliquidity' => $results,
                 ];
                 return $success;
             }
 
-            return $this->respondWithError('No liquidity found for the user.');
+            return $this->createSuccessResponse(21203);
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve liquidity list.');
+            return $this->respondWithError(41204);
         }
     }
 
@@ -293,9 +292,7 @@ class WalletService
         $this->logger->info('WalletService.deductFromWallet started');
 
         try {
-            //$response = $this->walletMapper->deductFromWallet($userId, $args);
             $response = $this->walletMapper->deductFromWallets($userId, $args);
-
             if ($response['status'] === 'success') {
                 return $response;
             } else {
@@ -303,7 +300,7 @@ class WalletService
             }
 
         } catch (\Exception $e) {
-            return $this->respondWithError('Unknown Error.');
+            return $this->respondWithError(40301);
         }
     }
 
@@ -313,11 +310,32 @@ class WalletService
 
         try {
             $response = $this->walletMapper->callUserMove($this->currentUserId);
-			return [
-				'status' => 'success',
-				'ResponseCode' => $response['ResponseCode'],
-				'affectedRows' => $response['affectedRows'],
-			];
+            return [
+                'status' => 'success',
+                'ResponseCode' => $response['ResponseCode'],
+                'affectedRows' => $response['affectedRows'],
+            ];
+
+        } catch (\Exception $e) {
+            return $this->respondWithError(41205);
+        }
+    }
+
+    public function transferToken(array $args): array
+    {
+        $this->logger->info('WalletService.transferToken started');
+
+        try {
+            $response = $this->walletMapper->transferToken($this->currentUserId, $args);
+            if ($response['status'] === 'error') {
+                return $response;
+            } else {
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => 11211,
+                    'affectedRows' => [],
+                ];
+            }
 
         } catch (\Exception $e) {
             return $this->respondWithError('Unknown Error.');

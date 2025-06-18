@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Database;
 
 use PDO;
@@ -19,11 +20,11 @@ class TagPostMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new TagPost($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+            $results = array_map(fn($row) => new TagPost($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched postags successfully" : "No postags found",
@@ -49,7 +50,7 @@ class TagPostMapper
         $stmt->execute(['postid' => $postid]);
         $results = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $results[] = new TagPost($row);
         }
 
@@ -71,7 +72,7 @@ class TagPostMapper
         $stmt->execute(['tagid' => $tagid]);
         $results = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $results[] = new TagPost($row);
         }
 

@@ -60,74 +60,114 @@ class ContactusService
         return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
     }
 
-    public function fetchAll(?array $args = []): array
+    private function validateRequiredFields(array $args, array $requiredFields): array
     {
-        $this->logger->info("ContactusService.fetchAll started");
-
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-
-        try {
-            $tags = $this->contactUsMapper->fetchAll($offset, $limit);
-            $result = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $tags);
-
-            return $this->createSuccessResponse('Contactus fetched successfully', $result);
-
-        } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to fetch Contactus');
+        foreach ($requiredFields as $field) {
+            if (empty($args[$field])) {
+                return $this->respondWithError("$field is required");
+            }
         }
+        return [];
     }
 
-    public function loadById(string $tagId): array
+    public function insert(Contactus $contact): ?Contactus
     {
-        return $this->loadTag('id', $tagId);
+        return $this->contactUsMapper->insert($contact);
     }
 
-    public function loadByName(string $name): array
+    public function checkRateLimit(string $ip): bool
     {
-        return $this->loadTag('name', $name);
+        return $this->contactUsMapper->checkRateLimit($ip);
     }
 
-    private function loadTag(string $type, string $value): array
+    public function loadById(string $type, string $value): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
-        if ($value === '') {
-            return $this->respondWithError('At least one of ' . $type . ' is required.');
+        if (!in_array($type, ['id', 'name'], true)) {
+            return $this->respondWithError(30105);
+        }
+
+        if (empty($value)) {
+            return $this->respondWithError(30102);
         }
 
         if ($type === 'id' && !self::isValidUUID($value)) {
-            return $this->respondWithError('Invalid tagId provided.');
+            return $this->respondWithError(30105);
         }
 
-        $this->logger->info("ContactusService.loadTag started");
+        $this->logger->info("ContactusService.loadById started", [
+            'type' => $type,
+            'value' => $value,
+        ]);
 
         try {
-            $tags = ($type === 'id') ? $this->contactUsMapper->loadById($value) : $this->contactUsMapper->loadByName($value);
+            $exist = ($type === 'id') ? $this->contactUsMapper->loadById($value) : $this->contactUsMapper->loadByName($value);
 
-            if ($tags === false) {
-                return $this->respondWithError('Failed to fetch tags from database.');
+            if ($exist === null) {
+                return $this->respondWithError(40401);
             }
 
-            $tagData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $tags);
+            $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $exist);
 
-            $this->logger->info("ContactusService.loadTag successfully fetched tags", [
+            $this->logger->info("ContactusService.loadById successfully fetched contact", [
                 'type' => $type,
                 'value' => $value,
-                'count' => count($tagData),
+                'count' => count($existData),
             ]);
 
-            return $tagData;
+            return $existData;
 
         } catch (\Throwable $e) {
-            $this->logger->error("Error occurred in ContactusService.loadTag", [
+            $this->logger->error("Error occurred in ContactusService.loadById", [
                 'error' => $e->getMessage(),
                 'type' => $type,
                 'value' => $value,
             ]);
-            return $this->respondWithError('An internal error occurred.');
+
+            return $this->respondWithError(40301);
+        }
+    }
+
+    public function fetchAll(?array $args = []): array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        if (empty($args)) {
+            return $this->respondWithError(30101);
+        }
+
+        $this->logger->info("ContactusService.fetchAll started", [
+            'args' => $args,
+        ]);
+
+        try {
+            $exist = $this->contactUsMapper->fetchAll($args);
+
+            if ($exist === null) {
+                return $this->respondWithError(40401);
+            }
+
+            $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $exist);
+
+            $this->logger->info("ContactusService.loadById successfully fetched contact", [
+                'args' => $args,
+                'count' => count($existData),
+            ]);
+
+            return $existData;
+
+        } catch (\Throwable $e) {
+            $this->logger->error("Error occurred in ContactusService.loadById", [
+                'error' => $e->getMessage(),
+                'args' => $args,
+            ]);
+
+            return $this->respondWithError(40301);
         }
     }
 }

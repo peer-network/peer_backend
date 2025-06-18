@@ -9,17 +9,21 @@ class ProfilUser
 {
     protected string $uid;
     protected string $username;
+    protected ?int $slug;
     protected ?string $img;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->uid = $data['uid'] ?? '';
         $this->username = $data['username'] ?? '';
+        $this->slug = $data['slug'] ?? 0;
         $this->img = $data['img'] ?? '';
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
@@ -31,6 +35,7 @@ class ProfilUser
         $att = [
             'uid' => $this->uid,
             'username' => $this->username,
+            'slug' => $this->slug,
             'img' => $this->img,
             'isfollowed' => $this->isfollowed,
             'isfollowing' => $this->isfollowing,
@@ -38,7 +43,7 @@ class ProfilUser
         return $att;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getUserId(): string
     {
         return $this->uid;
@@ -57,6 +62,11 @@ class ProfilUser
     public function setName(string $name): void
     {
         $this->username = $name;
+    }
+
+    public function setSlug(string $slug): void
+    {
+        $this->slug = $slug;
     }
 
     public function getImg(): ?string
@@ -83,9 +93,8 @@ class ProfilUser
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -102,18 +111,21 @@ class ProfilUser
             ],
             'username' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
                 'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 23,
-                    ]],
-                    ['name' => 'isString'],
+                    ['name' => 'validateUsername'],
+                ],
+            ],
+            'slug' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [
+                    ['name' => 'validateIntRange', 'options' => ['min' => 00001, 'max' => 99999]],
                 ],
             ],
             'img' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,

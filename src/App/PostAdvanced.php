@@ -1,8 +1,10 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class PostAdvanced
 {
@@ -11,7 +13,7 @@ class PostAdvanced
     protected ?string $feedid;
     protected string $title;
     protected string $media;
-    protected string $cover;
+    protected ?string $cover;
     protected string $mediadescription;
     protected string $contenttype;
     protected ?int $amountlikes;
@@ -27,23 +29,24 @@ class PostAdvanced
     protected ?bool $issaved;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
-    protected string $options;
     protected string $createdat;
-    protected ?array $tags = []; // Changed to array
+    protected ?array $tags = [];
     protected ?array $user = [];
     protected ?array $comments = [];
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->postid = $data['postid'] ?? '';
         $this->userid = $data['userid'] ?? '';
         $this->feedid = $data['feedid'] ?? null;
         $this->title = $data['title'] ?? '';
         $this->media = $data['media'] ?? '';
-        $this->cover = $data['cover'] ?? '';
+        $this->cover = $data['cover'] ?? null;
         $this->mediadescription = $data['mediadescription'] ?? '';
         $this->contenttype = $data['contenttype'] ?? 'text';
         $this->amountlikes = $data['amountlikes'] ?? 0;
@@ -59,22 +62,10 @@ class PostAdvanced
         $this->issaved = $data['issaved'] ?? false;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
-        $this->options = $data['options'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->comments = isset($data['comments']) && is_array($data['comments']) ? $data['comments'] : [];
-    }
-
-    // Getter and Setter for Tags
-    public function getTags(): array
-    {
-        return $this->tags;
-    }
-
-    public function setTags(array $tags): void
-    {
-        $this->tags = $tags;
     }
 
     // Array Copy methods
@@ -102,7 +93,6 @@ class PostAdvanced
             'issaved' => $this->issaved,
             'isfollowed' => $this->isfollowed,
             'isfollowing' => $this->isfollowing,
-            'options' => $this->options,
             'createdat' => $this->createdat,
             'tags' => $this->tags, // Include tags
             'user' => $this->user,
@@ -111,7 +101,17 @@ class PostAdvanced
         return $att;
     }
 
-    // Other Methods (Unchanged)
+    // Getter and Setter
+    public function getTags(): array
+    {
+        return $this->tags;
+    }
+
+    public function setTags(array $tags): void
+    {
+        $this->tags = $tags;
+    }
+
     public function getPostId(): string
     {
         return $this->postid;
@@ -142,12 +142,7 @@ class PostAdvanced
         return $this->contenttype;
     }
 
-    public function getOptions(): string
-    {
-        return $this->options;
-    }
-
-    // Validation and Array Filtering methods (Unchanged)
+    // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array
     {
         $inputFilter = $this->createInputFilter($elements);
@@ -161,9 +156,8 @@ class PostAdvanced
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -187,45 +181,45 @@ class PostAdvanced
                 'validators' => [['name' => 'Uuid']],
             ],
             'title' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
+                'required' => true,
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 96,
+                        'min' => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
+                        'max' => ConstantsConfig::post()['TITLE']['MAX_LENGTH'],
+                        'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'media' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'required' => true,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,
-                        'max' => 244,
+                        'max' => 1000,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'cover' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 244,
+                        'min' => 0,
+                        'max' => 1000,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'mediadescription' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 440,
+                        'min' => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],
+                        'max' => ConstantsConfig::post()['MEDIADESCRIPTION']['MAX_LENGTH'],
+                        'errorCode' => 30263
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -297,17 +291,6 @@ class PostAdvanced
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
             ],
-            'options' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
-                'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 4,
-                        'max' => 250,
-                    ]],
-                    ['name' => 'isString'],
-                ],
-            ],
             'tags' => [
                 'required' => false,
                 'validators' => [
@@ -331,11 +314,15 @@ class PostAdvanced
             ],
             'user' => [
                 'required' => false,
-                'validators' => [['name' => 'IsArray']],
+                'validators' => [
+                    ['name' => 'IsArray'],
+                ],
             ],
             'comments' => [
                 'required' => false,
-                'validators' => [['name' => 'IsArray']],
+                'validators' => [
+                    ['name' => 'IsArray'],
+                ],
             ],
         ];
 

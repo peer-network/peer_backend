@@ -47,7 +47,14 @@ class TagService
 
     private function isValidTagName(?string $tagName): bool
     {
-        return $tagName && strlen($tagName) >= 2 && strlen($tagName) <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
+        if (empty($tagName)) {
+            return false;
+        }
+
+        $tagName = htmlspecialchars($tagName, ENT_QUOTES, 'UTF-8'); // Schutz vor XSS
+
+        $length = strlen($tagName);
+        return $length >= 2 && $length <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
     }
 
     private function respondWithError(string $message): array
@@ -63,17 +70,14 @@ class TagService
     public function createTag(string $tagName): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError('Unauthorized');
+            return $this->respondWithError(60501);
         }
 
         $this->logger->info('TagService.createTag started');
-
-        $tagName = trim($tagName);
-        if (!$this->isValidTagName($tagName)) {
-            return $this->respondWithError('Invalid tagName. Must be 2-50 letters long and contain only letters.');
-        }
+        $tagName = !empty($tagName) ? trim($tagName) : null;
 
         try {
+            $tagValid = new Tag(['name' => $tagName], ['name']);
             $tag = $this->tagMapper->loadByName($tagName);
 
             if ($tag) {
@@ -83,20 +87,22 @@ class TagService
             $tagId = $this->generateUUID();
             if (empty($tagId)) {
                 $this->logger->critical('Failed to generate tag ID');
-                return $this->respondWithError('Failed to generate tag ID');
+                return $this->respondWithError(41704);
             }
 
             $tagData = ['tagid' => $tagId, 'name' => $tagName];
             $tag = new Tag($tagData);
 
             if (!$this->tagMapper->insert($tag)) {
-                return $this->respondWithError('Failed to insert tag into database');
+                return $this->respondWithError(41703);
             }
 
-            return $this->createSuccessResponse('Tag created successfully', [$tagData]);
+            return $this->createSuccessResponse(11702, [$tagData]);
 
         } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to create tag');
+            return $this->respondWithError(40301);
+        } catch (ValidationException $e) {
+            return $this->respondWithError(40301);
         } finally {
             $this->logger->debug('createTag function execution completed');
         }
@@ -113,10 +119,10 @@ class TagService
             $tags = $this->tagMapper->fetchAll($offset, $limit);
             $result = array_map(fn(Tag $tag) => $tag->getArrayCopy(), $tags);
 
-            return $this->createSuccessResponse('Tags fetched successfully', $result);
+            return $this->createSuccessResponse(11701, $result);
 
         } catch (\Throwable $e) {
-            return $this->respondWithError('Failed to fetch tags');
+            return $this->respondWithError(41702);
         }
     }
 
@@ -125,10 +131,18 @@ class TagService
         $this->logger->info("TagService.loadTag started");
 
         try {
+
+            if (isset($args['tagName']) && !empty($args['tagName'])) {
+                $tagData = ['name' => $args['tagName']];
+                $tag = new Tag($tagData, ['name']);
+            } else {
+                return $this->respondWithError(30101);
+            }
+
             $tags = $this->tagMapper->searchByName($args);
 
             if ($tags === false) {
-                return $this->respondWithError('Failed to fetch tags from database.');
+                return $this->createSuccessResponse(21701, []);
             }
 
             $this->logger->info("TagService.loadTag successfully fetched tags", [
@@ -137,13 +151,13 @@ class TagService
 
             $result = array_map(fn(Tag $tag) => $tag->getArrayCopy(), $tags);
 
-            return $this->createSuccessResponse('Tags fetched successfully', $result);
+            return $this->createSuccessResponse(11701, $result);
 
         } catch (\Throwable $e) {
             $this->logger->error("Error occurred in TagService.loadTag", [
                 'error' => $e->getMessage(),
             ]);
-            return $this->respondWithError('An internal error occurred.');
+            return $this->respondWithError(40301);
         }
     }
 }

@@ -10,26 +10,34 @@ class UserInfo
     protected string $userid;
     protected float $liquidity;
     protected int $amountposts;
-    protected int $amountblocked;
     protected int $amountfollower;
     protected int $amountfollowed;
+    protected int $amountfriends;
+    protected int $amountblocked;
     protected int $isprivate;
     protected ?string $invited;
+    protected ?string $phone;
+    protected ?string $pkey;
     protected string $updatedat;
 
     // Constructor
-    public function __construct(array $data)
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->userid = $data['userid'] ?? '';
         $this->liquidity = $data['liquidity'] ?? 0.0;
         $this->amountposts = $data['amountposts'] ?? 0;
-        $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->amountfollower = $data['amountfollower'] ?? 0;
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
+        $this->amountfriends = $data['amountfriends'] ?? 0;
+        $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->isprivate = $data['isprivate'] ?? 0;
         $this->invited = $data['invited'] ?? null;
+        $this->phone = $data['phone'] ?? null;
+        $this->pkey = $data['pkey'] ?? null;
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
@@ -40,17 +48,20 @@ class UserInfo
             'userid' => $this->userid,
             'liquidity' => $this->liquidity,
             'amountposts' => $this->amountposts,
-            'amountblocked' => $this->amountblocked,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
+            'amountfriends' => $this->amountfriends,
+            'amountblocked' => $this->amountblocked,
             'isprivate' => $this->isprivate,
             'invited' => $this->invited,
+            'phone' => $this->phone,
+            'pkey' => $this->pkey,
             'updatedat' => $this->updatedat,
         ];
         return $att;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getLiquidity(): float
     {
         return $this->liquidity;
@@ -101,6 +112,16 @@ class UserInfo
         $this->amountfollowed = $amountfollowed;
     }
 
+    public function getAmountFriends(): int|null
+    {
+        return $this->amountfriends;
+    }
+
+    public function setAmountFriends(int $amountfriends): void
+    {
+        $this->amountfriends = $amountfriends;
+    }
+
     public function getIsPrivate(): int
     {
         return $this->isprivate;
@@ -119,6 +140,26 @@ class UserInfo
     public function setInvited(string $invited): void
     {
         $this->invited = $invited;
+    }
+
+    public function getpKey(): string
+    {
+        return $this->pkey;
+    }
+
+    public function setpKey(string $pkey): void
+    {
+        $this->pkey = $pkey;
+    }
+
+    public function getPhone(): string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(string $phone): void
+    {
+        $this->phone = $phone;
     }
 
     public function getUpdatedAt(): ?string
@@ -145,9 +186,8 @@ class UserInfo
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -174,17 +214,22 @@ class UserInfo
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
-            'amountblocked' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
-                'validators' => [['name' => 'IsInt']],
-            ],
             'amountfollower' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountfollowed' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountfriends' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountblocked' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
@@ -200,11 +245,24 @@ class UserInfo
                 'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],
+            'phone' => [
+                'required' => false,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'validators' => [
+                    ['name' => 'validatePhoneNumber'],
+                ],
+            ],
+            'pkey' => [
+                'required' => false,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'validators' => [
+                    ['name' => 'validatePkey'],
+                ],
+            ],
             'updatedat' => [
                 'required' => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];

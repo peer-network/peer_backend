@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Database;
 
 use PDO;
@@ -24,8 +25,8 @@ class TagMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
             $results = array_map(fn($row) => new Tag($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -52,7 +53,7 @@ class TagMapper
         $sql = "SELECT * FROM tags WHERE tagid = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new Tag($data);
@@ -70,7 +71,7 @@ class TagMapper
         $sql = "SELECT * FROM tags WHERE name = :name";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['name' => $name]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             $this->logger->info("tag found with name", ['data' => $data]);
@@ -89,8 +90,8 @@ class TagMapper
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
-        $name = strtolower($args['tagname']);
 
+        $name = strtolower($args['tagName']);
         $sql = "SELECT * FROM tags WHERE name ILIKE :name ORDER BY name ASC LIMIT :limit OFFSET :offset";
 
         try {
@@ -153,7 +154,6 @@ class TagMapper
         } catch (\Throwable $e) {
             $this->logger->error("Error inserting tag into database", [
                 'error' => $e->getMessage(),
-                'data' => $tag->getArrayCopy(),
             ]);
             return false;
         }
@@ -176,7 +176,6 @@ class TagMapper
         } catch (\Throwable $e) {
             $this->logger->error("Error updating tag in database", [
                 'error' => $e->getMessage(),
-                'data' => $tag->getArrayCopy(),
             ]);
             return false;
         }

@@ -25,14 +25,17 @@ class UserAdvanced
     protected ?bool $isfollowing;
     protected ?int $amountfollower;
     protected ?int $amountfollowed;
+    protected ?int $amountfriends;
     protected ?float $liquidity;
     protected ?string $createdat;
     protected ?string $updatedat;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->uid = $data['uid'] ?? '';
         $this->email = $data['email'] ?? '';
@@ -52,12 +55,13 @@ class UserAdvanced
         $this->isfollowing = $data['isfollowing'] ?? false;
         $this->amountfollower = $data['amountfollower'] ?? 0;
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
+        $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->liquidity = $data['liquidity'] ?? 0.0;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
-    // Array Copy methodsgetUpdateInfo
+    // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
@@ -79,6 +83,7 @@ class UserAdvanced
             'isfollowing' => $this->isfollowing,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
+            'amountfriends' => $this->amountfriends,
             'liquidity' => $this->liquidity,
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
@@ -132,7 +137,7 @@ class UserAdvanced
         $this->password = $data['password'] ?? $this->password;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getUserId(): string
     {
         return $this->uid;
@@ -218,9 +223,9 @@ class UserAdvanced
         return $this->ip;
     }
 
-    public function setIp(?string $ip): void
+    public function setIp(?string $ip = null): void
     {
-        $this->ip = $ip;
+        $this->ip = filter_var($ip, FILTER_VALIDATE_IP) ?: ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
     }
 
     public function getImg(): ?string
@@ -263,24 +268,54 @@ class UserAdvanced
         $this->img = $imgPath;
     }
 
-    public function getamountposts(): int|null
+    public function getAmountPosts(): int|null
     {
         return $this->amountposts;
     }
 
-    public function setamountposts(int $amountposts): void
+    public function setAmountPosts(int $amountposts): void
     {
         $this->amountposts = $amountposts;
     }
 
-    public function getamounttrending(): int|null
+    public function getAmountTrending(): int|null
     {
         return $this->amounttrending;
     }
 
-    public function setamounttrending(int $amounttrending): void
+    public function setAmountTrending(int $amounttrending): void
     {
         $this->amounttrending = $amounttrending;
+    }
+
+    public function getAmountFollowes(): int
+    {
+        return $this->amountfollower;
+    }
+
+    public function setAmountFollowers(int $amountfollower): void
+    {
+        $this->amountfollower = $amountfollower;
+    }
+
+    public function getAmountFollowed(): int
+    {
+        return $this->amountfollowed;
+    }
+
+    public function setAmountFollowed(int $amountfollowed): void
+    {
+        $this->amountfollowed = $amountfollowed;
+    }
+
+    public function getAmountFriends(): int|null
+    {
+        return $this->amountfriends;
+    }
+
+    public function setAmountFriends(int $amountfriends): void
+    {
+        $this->amountfriends = $amountfriends;
     }
 
     public function getLiquidity(): float
@@ -353,9 +388,8 @@ class UserAdvanced
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -372,7 +406,7 @@ class UserAdvanced
             ],
             'email' => [
                 'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'EmailAddress'],
                     ['name' => 'isString'],
@@ -380,24 +414,16 @@ class UserAdvanced
             ],
             'username' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 23,
-                    ]],
-                    ['name' => 'isString'],
+                    ['name' => 'validateUsername'],
                 ],
             ],
             'password' => [
                 'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 8,
-                        'max' => 128,
-                    ]],
-                    ['name' => 'isString'],
+                    ['name' => 'validatePassword'],
                 ],
             ],
             'status' => [
@@ -436,7 +462,7 @@ class UserAdvanced
             ],
             'img' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 0,
@@ -447,7 +473,7 @@ class UserAdvanced
             ],
             'biography' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 3,
@@ -485,6 +511,11 @@ class UserAdvanced
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountfollowed' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountfriends' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],

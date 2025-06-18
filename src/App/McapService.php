@@ -34,6 +34,25 @@ class McapService
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
+    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    {
+        $response = [
+            'status' => 'success',
+            'ResponseCode' => $message,
+            'affectedRows' => $data,
+        ];
+
+        if ($countEnabled && is_array($data)) {
+            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                $response['counter'] = count($data[$countKey]);
+            } else {
+                $response['counter'] = count($data);
+            }
+        }
+
+        return $response;
+    }
+    
     public function loadLastId(): array
     {
 
@@ -41,9 +60,9 @@ class McapService
 
         try {
             $fetchUpdate = $this->mcapMapper->fetchAndUpdateMarketPrices();
-			if (isset($fetchUpdate['status']) && $fetchUpdate['status'] === 'error') {
-				return $this->respondWithError($fetchUpdate['ResponseCode']);
-			}
+            if (isset($fetchUpdate['status']) && $fetchUpdate['status'] === 'error') {
+                return $fetchUpdate;
+            }
 
             $results = $this->mcapMapper->loadLastId();
 
@@ -52,15 +71,15 @@ class McapService
                 $this->logger->info("McapService.loadLastId mcap found", ['affectedRows' => $affectedRows]);
                 $success = [
                     'status' => 'success',
-                    'ResponseCode' => 'Mcap data prepared successfully',
+                    'ResponseCode' => 11021,
                     'affectedRows' => $affectedRows,
                 ];
                 return $success;
             }
 
-            return $this->respondWithError('No mcaps found for the user.');
+            return $this->respondWithError(31201);
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve mcaps list.');
+            return $this->respondWithError(41206);
         }
     }
 
@@ -77,17 +96,15 @@ class McapService
                 $success = [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 'Users data prepared successfully',
+                    'ResponseCode' => 11009,
                     'affectedRows' => $fetchAll,
                 ];
                 return $success;
             }
 
-            return $this->respondWithError('No users found for the user.');
+            return $this->createSuccessResponse(21001);
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to retrieve users list.');
+            return $this->respondWithError(41207);
         }
     }
 }
-
-

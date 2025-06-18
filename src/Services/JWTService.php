@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Services;
 
 use Firebase\JWT\JWT;
@@ -57,7 +58,7 @@ class JWTService
             'exp' => $expirationTime
         ]);
 
-        $this->logger->info('Creating refresh token', ['data' => $data]);
+        $this->logger->info('Creating refresh token.', ['data' => $data]);
 
         return JWT::encode($payload, $this->refreshPrivateKey, 'RS256');
     }
@@ -81,7 +82,7 @@ class JWTService
             return $decodedToken;
 
         } catch (ExpiredException $e) {
-            $this->logger->info('Token has expired', ['exception' => $e->getMessage(), 'token' => $token]);
+            //$this->logger->info('Token has expired', ['exception' => $e->getMessage(), 'token' => $token]);
             return null;
 
         } catch (\Exception $e) {

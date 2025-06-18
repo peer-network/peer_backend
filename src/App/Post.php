@@ -1,8 +1,10 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class Post
 {
@@ -12,15 +14,20 @@ class Post
     protected string $title;
     protected string $contenttype;
     protected string $media;
-    protected string $cover;
+    protected ?string $cover;
     protected string $mediadescription;
-    protected string $options;
     protected string $createdat;
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(
+        array $data = [], 
+        array $elements = [], 
+        bool $validate = true
+    )
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->postid = $data['postid'] ?? '';
         $this->userid = $data['userid'] ?? '';
@@ -28,9 +35,8 @@ class Post
         $this->title = $data['title'] ?? '';
         $this->contenttype = $data['contenttype'] ?? 'text';
         $this->media = $data['media'] ?? '';
-        $this->cover = $data['cover'] ?? '';
+        $this->cover = $data['cover'] ?? null;
         $this->mediadescription = $data['mediadescription'] ?? '';
-        $this->options = $data['options'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
@@ -46,7 +52,6 @@ class Post
             'media' => $this->media,
             'cover' => $this->cover,
             'mediadescription' => $this->mediadescription,
-            'options' => $this->options,
             'createdat' => $this->createdat,
         ];
         return $att;
@@ -83,12 +88,7 @@ class Post
         return $this->contenttype;
     }
 
-    public function getOptions(): string
-    {
-        return $this->options;
-    }
-
-    // Validation and Array Filtering methods (Unchanged)
+    // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array
     {
         $inputFilter = $this->createInputFilter($elements);
@@ -102,12 +102,10 @@ class Post
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
             throw new ValidationException($errorMessageString);
         }
     }
@@ -129,11 +127,12 @@ class Post
             ],
             'title' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 63,
+                        'min' => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
+                        'max' => ConstantsConfig::post()['TITLE']['MAX_LENGTH'],
+                        'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -149,44 +148,32 @@ class Post
             ],
             'media' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,
-                        'max' => 244,
+                        'max' => 1000,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'cover' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 244,
+                        'min' => 0,
+                        'max' => 1000,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'mediadescription' => [
                 'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 500,
-                    ]],
-                    ['name' => 'isString'],
-                ],
-            ],
-            'options' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
-                'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 4,
-                        'max' => 250,
+                        'min' => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],
+                        'max' => ConstantsConfig::post()['MEDIADESCRIPTION']['MAX_LENGTH'],
+                        'errorCode' => 30263
                     ]],
                     ['name' => 'isString'],
                 ],

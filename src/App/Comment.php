@@ -1,8 +1,10 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class Comment
 {
@@ -12,12 +14,13 @@ class Comment
     protected ?string $parentid;
     protected string $content;
     protected string $createdat;
-    
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->commentid = $data['commentid'] ?? '';
         $this->userid = $data['userid'] ?? '';
@@ -41,7 +44,7 @@ class Comment
         return $att;
     }
 
-    // Getter and Setter methods
+    // Getter and Setter
     public function getId(): string
     {
         return $this->commentid;
@@ -111,9 +114,8 @@ class Comment
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -142,12 +144,16 @@ class Comment
             ],
             'content' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
-                    ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 200,
-                    ]],
+                    [
+                        'name' => 'StringLength', 
+                        'options' => [
+                            'min' => ConstantsConfig::comment()['MIN_LENGTH'],
+                            'max' => ConstantsConfig::comment()['CONTENT']['MAX_LENGTH'],
+                            'errorCode' => 30265,
+                            ]
+                        ],
                     ['name' => 'IsString'],
                 ],
             ],

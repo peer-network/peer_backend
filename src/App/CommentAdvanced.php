@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -11,25 +12,29 @@ class CommentAdvanced
     protected string $postid;
     protected ?string $parentid;
     protected string $content;
-    protected ?int $amountlikes;
-    protected ?bool $isliked;
     protected string $createdat;
+    protected ?int $amountlikes;
+    protected ?int $amountreplies;
+    protected ?bool $isliked;
     protected ?array $user = [];
     
 
     // Constructor
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $data = $this->validate($data);
+        if ($validate && !empty($data)) {
+            $data = $this->validate($data, $elements);
+        }
 
         $this->commentid = $data['commentid'] ?? '';
         $this->userid = $data['userid'] ?? '';
         $this->postid = $data['postid'] ?? '';
         $this->parentid = $data['parentid'] ?? null;
         $this->content = $data['content'] ?? '';
-        $this->amountlikes = $data['amountlikes'] ?? 0;
-        $this->isliked = $data['isliked'] ?? false;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->amountlikes = $data['amountlikes'] ?? 0;
+        $this->amountreplies = $data['amountreplies'] ?? 0;
+        $this->isliked = $data['isliked'] ?? false;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
     }
 
@@ -42,9 +47,10 @@ class CommentAdvanced
             'postid' => $this->postid,
             'parentid' => $this->parentid,
             'content' => $this->content,
-            'amountlikes' => $this->amountlikes,
-            'isliked' => $this->isliked,
             'createdat' => $this->createdat,
+            'amountlikes' => $this->amountlikes,
+            'amountreplies' => $this->amountreplies,
+            'isliked' => $this->isliked,
             'user' => $this->user,
         ];
         return $att;
@@ -120,9 +126,8 @@ class CommentAdvanced
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                $errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
@@ -151,7 +156,7 @@ class CommentAdvanced
             ],
             'content' => [
                 'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities'], ['name' => 'SqlSanitize']],
+                'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 2,
@@ -160,7 +165,19 @@ class CommentAdvanced
                     ['name' => 'IsString'],
                 ],
             ],
+            'createdat' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
+                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                ],
+            ],
             'amountlikes' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountreplies' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
@@ -168,13 +185,6 @@ class CommentAdvanced
             'isliked' => [
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
-            ],
-            'createdat' => [
-                'required' => false,
-                'validators' => [
-                    ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
-                ],
             ],
             'user' => [
                 'required' => false,
