@@ -22,4 +22,11 @@ class VideoCoverGenerator
 
         return $outputPath;
     }
+    public function deleteTemporaryFile(?string $path): void
+    {
+        if ($path && is_file($path)) {
+            unlink($path);
+
+        }
+    }
 }
