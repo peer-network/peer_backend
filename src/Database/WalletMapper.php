@@ -13,8 +13,6 @@ use Fawaz\Services\BtcService;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
-use Fawaz\Utils\TokenCalculations\SwapTokenCalculation;
-use Fawaz\Utils\TokenCalculations\SwapTokenData;
 use Fawaz\Utils\TokenCalculations\SwapTokenHelper;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
