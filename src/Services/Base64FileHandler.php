@@ -266,4 +266,18 @@ class Base64FileHandler
             'options' => $options ?: null
         ]);
     }
+    public function encodeFileToBase64(string $filePath, string $mimeType): string
+    {
+        if (!is_file($filePath)) {
+            throw new \InvalidArgumentException("File not found: $filePath");
+        }
+
+        $binary = file_get_contents($filePath);
+        if ($binary === false) {
+            throw new \RuntimeException("Failed to read file: $filePath");
+        }
+
+        $base64 = base64_encode($binary);
+        return "data:$mimeType;base64," . $base64;
+    }
 }
