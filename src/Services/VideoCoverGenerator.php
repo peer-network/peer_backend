@@ -9,7 +9,7 @@ class VideoCoverGenerator
         $outputPath = sys_get_temp_dir() . '/' . uniqid('cover_', true) . '.jpg';
 
         $cmd = sprintf(
-            'ffmpeg -y -i %s -ss 00:00:01.000 -vframes 1 %s 2>&1',
+            'ffmpeg -y -ss 0 -i %s -vframes 1 %s 2>&1',
             escapeshellarg($videoPath),
             escapeshellarg($outputPath)
         );
