@@ -204,7 +204,7 @@ class WalletMapper
             }
 
             // 3. INVITER: Fees To Inviter (if applicable)
-            if (!empty($result['invited']) && $inviterWin) {
+            if (!empty($inviterId) && $inviterWin) {
                 $this->createAndSaveTransaction($transRepo, [
                     'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferSenderToInviter',
@@ -1471,25 +1471,28 @@ class WalletMapper
 
     private function decimalToQ64_96(float $value): string
     {
-        $scaleFactor = bcpow('2', '96');
-        
-        $scaledValue = bcmul((string)$value, $scaleFactor, 0);
-        
+        $scaleFactor = \bcpow('2', '96');
+
+		// Convert float to plain decimal string 
+		$decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
+
+		$scaledValue = \bcmul($decimalString, $scaleFactor, 0);
+
         return $scaledValue;
     }
 
     private function q64_96ToDecimal(string $qValue): string
     {
-        $scaleFactor = bcpow('2', '96');
+        $scaleFactor = \bcpow('2', '96');
         
-        $decimalValue = bcdiv($qValue, $scaleFactor, 18);
+        $decimalValue = \bcdiv($qValue, $scaleFactor, 18);
         
         return round($decimalValue, 2);
     }
 
     private function addQ64_96(string $qValue1, string $qValue2): string
     {
-        return bcadd($qValue1, $qValue2);
+        return \bcadd($qValue1, $qValue2);
     }
 
 
@@ -1647,7 +1650,7 @@ class WalletMapper
             'TRANSACTION' => ['transferSenderToRecipient', 'transferDeductSenderToRecipient'],
             'AIRDROP' => ['airdrop'],
             'MINT' => ['mint'],
-            'FEES' => ['transferSenderToBurnWallet', 'transferSenderToPeerWallet', 'transferSenderToPoolWallet']
+            'FEES' => ['transferSenderToBurnWallet', 'transferSenderToPeerWallet', 'transferSenderToPoolWallet', 'transferSenderToInviter']
         ];
 
         // Define DIRECTION FILTER mappings.
@@ -1660,6 +1663,7 @@ class WalletMapper
         $transferActions = isset($args['direction']) ? ($directionMap[$args['direction']] ?? []) : [];
 
         $query = "SELECT * FROM transactions WHERE (senderid = :userid OR recipientid = :userid)";
+        
         $params = [':userid' => $userId];
 
         // Handle TRANSACTION TYPE filter.
@@ -1740,11 +1744,6 @@ class WalletMapper
             throw new \RuntimeException("Database error while fetching transactions: " . $th->getMessage());
         }
 
-        // return [
-        //     'status' => 'error',
-        //     'ResponseCode' => 0000,
-        //     'affectedRows' => []
-        // ];
     }
 
     /**
@@ -1775,15 +1774,8 @@ class WalletMapper
                     'updatedAt' => $getLpToken['updatedat'] ?? '',
                 ];
             }
-            $btcLP = (float) $getLpTokenBtcLP;
-            $tokenPrice = TokenHelper::calculatePeerTokenPriceValue($btcLP,$liquidity);
-            // Berechne beforeToken mit hoher Präzision
-            // $beforeToken = bcdiv((string) $btcLP, (string) $liquidity, 20);
-
-            // $precision = 10;
-            // $multiplier = bcpow('10', (string)$precision);
-            // $scaled = bcmul($beforeToken, $multiplier, 0);
-            // $tokenPrice = bcdiv($scaled, $multiplier, $precision);
+            
+            $tokenPrice = TokenHelper::calculatePeerTokenPriceValue($getLpTokenBtcLP, $liquidity);
 
             return [
                 'status' => 'success',
@@ -2253,8 +2245,6 @@ class WalletMapper
             $stmt->execute();
             $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            $this->logger->info("Inserted new transaction into database");
-
             return $walletInfo;
         } catch (\PDOException $e) {
             $this->logger->error(
@@ -2326,8 +2316,6 @@ class WalletMapper
             );
             throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
         }
-
-        return 0.0;
     }
 
     
@@ -2344,16 +2332,15 @@ class WalletMapper
 
         try {
             // Validate inputs
-            if (!isset($args['amountToken']) || !is_numeric($args['amountToken']) || (float) $args['amountToken'] != $args['amountToken']) {
+            if (!isset($args['amountToken']) || !is_numeric($args['amountToken']) || (float) $args['amountToken'] != $args['amountToken'] || (float) $args['amountToken'] <= 0) {
                 return self::respondWithError(30241); // Invalid PeerToken amount provided. It is should be Integer or with decimal numbers
             }
-            if (!isset($args['amountBtc']) || !is_numeric($args['amountBtc']) || (float) $args['amountBtc'] != $args['amountBtc']) {
+            if (!isset($args['amountBtc']) || !is_numeric($args['amountBtc']) || (float) $args['amountBtc'] != $args['amountBtc'] || (float) $args['amountBtc'] <= 0) {
                 return self::respondWithError(30270); // Invalid BTC amount provided. It is should be Integer or with decimal numbers
             }
 
             $amountPeerToken =  (float) $args['amountToken'];
             $amountBtc = (float) $args['amountBtc'];
-
             // Fetch pool wallets
             $accountsResult = $this->pool->returnAccounts();
             
@@ -2402,15 +2389,17 @@ class WalletMapper
                 'ADD_BTC_LIQUIDITY'
             );
 
-            $newTokenAmount = (float)$this->getLpToken();
-            $newBtcAmount = (float)$this->getLpTokenBtcLP();
-            $peerTokenBTCPrice = $this->getTokenPriceValue(); 
+            $newTokenAmount = $this->getLpToken();
+            $newBtcAmount = $this->getLpTokenBtcLP();
+
+            $tokenPrice = TokenHelper::calculatePeerTokenPriceValue($newBtcAmount, $newTokenAmount);
+
             return [
                 'status' => 'success',
                 'ResponseCode' => 11218, // Successfully update with Liquidity into Pool
                 'newTokenAmount' => $newTokenAmount,
                 'newBtcAmount' => $newBtcAmount,
-                'newTokenPrice' => $peerTokenBTCPrice  // TODO: Replace with dynamic calculation
+                'newTokenPrice' => $tokenPrice   // TODO: Replace with dynamic calculation
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Liquidity error', ['exception' => $e]);

@@ -9,6 +9,7 @@ index.php
 psalm.xml
 composer.lock
 keys/*.key
+runtime-data/media/assets/*
 runtime-data/media/audio/*
 runtime-data/media/chat/*
 runtime-data/media/cover/*

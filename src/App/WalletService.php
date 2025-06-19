@@ -562,7 +562,7 @@ class WalletService
                     'affectedRows' => [
                         'newTokenAmount' => $response['newTokenAmount'],
                         'newBtcAmount' => $response['newBtcAmount'],
-                        'newTokenPrice' => $response['newTokenPrice'] ?? 0.0
+                        'newTokenPrice' => $response['newTokenPrice'] ?? ""
                     ],
                 ];
             }

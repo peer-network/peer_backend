@@ -1666,7 +1666,7 @@ class GraphQLSchemaBuilder
                     return $root['newBtcAmount'] ?? 0.0;
                 },
                 'newTokenPrice' => function (array $root): string {
-                    return $root['newTokenPrice'] ?? "";
+                    return $root['newTokenPrice'] ?? '';
                 },
             ],
             'SwapToken' => [
@@ -3304,9 +3304,9 @@ class GraphQLSchemaBuilder
         }
     }
 
-    protected function verifyAccount(string $userid = null): array
+    protected function verifyAccount(string $userid = ''): array
     {
-        if ($userid === null) {
+        if ($userid === '') {
             return $this->respondWithError(30101);
         }
 

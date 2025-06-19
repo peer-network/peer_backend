@@ -11714,7 +11714,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"30000\");",
+							"    pm.expect(pm.response.text()).to.include(\"30241\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -11767,7 +11767,11 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
+<<<<<<< HEAD
 							"    pm.expect(pm.response.text()).to.include(\"30000\");",
+=======
+							"    pm.expect(pm.response.text()).to.include(\"30270\");",
+>>>>>>> origin/bipin/feat/transfer-token
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -11820,7 +11824,11 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
+<<<<<<< HEAD
 							"    pm.expect(pm.response.text()).to.include(\"30000\");",
+=======
+							"    pm.expect(pm.response.text()).to.include(\"30241\");",
+>>>>>>> origin/bipin/feat/transfer-token
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",

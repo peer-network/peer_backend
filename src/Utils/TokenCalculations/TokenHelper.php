@@ -25,17 +25,10 @@ class TokenHelper
      */
     public static function calculatePeerTokenPriceValue(float $btcPoolBTCAmount, float $liqPoolTokenAmount): ?string
     {
-        // Calculate token price with high precision using BC Math
-        $beforeToken = bcdiv((string) $btcPoolBTCAmount, (string) $liqPoolTokenAmount, 20);
-
-        $precision = 10;
-        $multiplier = bcpow('10', (string) $precision);
-        $scaled = bcmul($beforeToken, $multiplier, 0);
-        $tokenPrice = bcdiv($scaled, $multiplier, $precision);
-
-        $tokenPriceFormattedFromScientificNotation = number_format((float)$tokenPrice, 10, '.', '');
-
-        return $tokenPriceFormattedFromScientificNotation;
+        $beforeToken = $btcPoolBTCAmount / $liqPoolTokenAmount;
+        
+        $beforeToken = self::roundUpBTCAmount($beforeToken);
+        return number_format($beforeToken, 9, '.', '');
     }
 
     /**
@@ -56,7 +49,7 @@ class TokenHelper
         float $inviterFee = 0
     ): ?float {
         $requiredAmount = $numberOfTokens * (1 + $peerFee + $poolFee + $burnFee + $inviterFee);
-        return $requiredAmount;
+        return self::roundUpFeeAmount($requiredAmount);
     }
 
     /**
