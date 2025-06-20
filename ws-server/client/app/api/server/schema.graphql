@@ -1,0 +1,37 @@
+type Query {
+  hello : HelloResponse
+}
+
+type Mutation {
+  # triggerTestSolanaFlow(day: DayFilterType!): RequestGemsDataPullStatusResponse
+  mockMint(day: DayFilterType!): RequestGemsDataPullStatusResponse
+  mint(day: DayFilterType!): RequestGemsDataPullStatusResponse
+}
+
+enum DayFilterType {
+  D0
+  D1
+  D2
+  D3
+  D4
+  D5
+  W0
+  M0
+  Y0
+}
+
+type HelloResponse {
+  responseCode : String
+  message : String
+  data : GitData
+}
+
+type GitData {
+  gitCommitId : String
+  gitBranch : String
+}
+
+type RequestGemsDataPullStatusResponse {
+  responseCode : String
+  message : String
+}

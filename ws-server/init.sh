@@ -1,0 +1,3 @@
+echo 💿Installing dependencies...
+cd client/ && yarn install
+echo ✅ Add .env files and server is ready to launch
