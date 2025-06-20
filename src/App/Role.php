@@ -5,8 +5,8 @@ namespace Fawaz\App;
 final class Role {
 
     const BEGINNER = 0;
-    const INTERMEDIATE = 1;
-    const ADVANCED = 2;
+    const NOACCESS = 1;
+    const DELETEDID = 2;
     const EXPERT = 4;
     const MASTER = 8;
     const ADMIN = 16;

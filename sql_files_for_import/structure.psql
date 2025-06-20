@@ -206,6 +206,32 @@ CREATE TABLE IF NOT EXISTS comment_info (
 CREATE INDEX IF NOT EXISTS idx_comment_info_commentid ON comment_info(commentid);
 CREATE INDEX IF NOT EXISTS idx_comment_info_userid ON comment_info(userid);
 
+-- Tabelle: advertisements
+CREATE TABLE advertisements (
+    advertisementid UUID PRIMARY KEY,
+    userid UUID NOT NULL,
+    status VARCHAR(12) NOT NULL DEFAULT 'basic' CHECK (status IN ('basic', 'pinned')),
+    timestart TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    timeend TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_advertisement_advertisementid FOREIGN KEY (advertisementid) REFERENCES posts(postid) ON DELETE CASCADE,
+    CONSTRAINT fk_advertisement_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_ads_advertisementid ON advertisements(advertisementid);
+CREATE INDEX IF NOT EXISTS idx_ads_status ON advertisements(status);
+
+-- Tabelle: advertisements
+CREATE TABLE advertisements_log (
+    id SERIAL PRIMARY KEY,
+    advertisementid UUID NOT NULL,
+    userid UUID NOT NULL,
+    status VARCHAR(12) NOT NULL DEFAULT 'basic' CHECK (status IN ('basic', 'pinned')),
+    timestart TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    timeend TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_adslog_advertisementid ON advertisements_log(advertisementid);
+CREATE INDEX IF NOT EXISTS idx_adslog_status ON advertisements_log(status);
+
 -- Table: contactus
 CREATE TABLE IF NOT EXISTS contactus (
     msgid BIGSERIAL PRIMARY KEY,
