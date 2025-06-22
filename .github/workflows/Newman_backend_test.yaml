@@ -90,6 +90,9 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
+
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
  
       - name: Fix log directory permissions
         run: sudo chown -R 33:33 runtime-data/logs
