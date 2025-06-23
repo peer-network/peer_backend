@@ -2528,7 +2528,7 @@ class GraphQLSchemaBuilder
         }
 
         $username = isset($args['username']) ? trim($args['username']) : null;
-        $usernameConfig = ConstantsConfig::post()['USERNAME'];
+        $usernameConfig = ConstantsConfig::user()['USERNAME'];
         $userId = $args['userid'] ?? null;
         $email = $args['email'] ?? null;
         $status = $args['status'] ?? null;
@@ -2551,7 +2551,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30202);
         }
 
-        if ($username !== null && !preg_match('/^[a-zA-Z0-9]+$/', $username)) {
+        if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
             return $this->respondWithError(30202);
         }
 
