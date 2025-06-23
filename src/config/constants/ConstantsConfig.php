@@ -58,7 +58,7 @@ class ConstantsConfig
         ],
         'TAGNAME' => [
             'MIN_LENGTH' => 2,
-            'MAX_LENGTH' => 50,
+            'MAX_LENGTH' => 53,
             'MAX_LIMIT' => 5,
             'PATTERN' => '^[a-zA-Z]+$',
         ],
