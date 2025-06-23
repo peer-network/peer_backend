@@ -7,8 +7,7 @@ schema {
 type Subscription {
   getChatMessages(chatid: ID!): AddChatmessageResponse!
   setChatMessages(chatid: ID!, content: String!): AddChatmessageResponse!
-  getBtcTokenPrice: String
-  numberIncremented: Int
+  newPost: String
 }
 
 type Query {

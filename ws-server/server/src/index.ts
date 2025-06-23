@@ -11,30 +11,37 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { readFileSync } from 'fs';
 import path from 'path';
+import pubsub from './infrastructure/redis/redis.js';
+import { PubSubAsyncIterator } from 'graphql-redis-subscriptions/dist/pubsub-async-iterator';
+import { print } from 'ioredis/built';
+import { Resolvers } from './infrastructure/gql/generated-types/server/types-server';
+
 // import resolvers from './resolvers-server/resolvers-server';
 // import { baseConfig } from '../../config/config';
 
 const schemaPath : string = "../../src/schema.graphql"
 const typeDefs = readFileSync(schemaPath, 'utf8');
 const PORT = 8080;
-const pubsub = new PubSub();
 
 // A number that we'll increment over time to simulate subscription events
-let currentNumber = 0;
 
-const resolvers = {
+function resolveNewPost(payload: {newPost:any;}): string {
+  if (typeof payload === 'string') {
+    payload = JSON.parse(payload);
+  }
+  console.log(payload);
+  console.log(payload["newPost"]);
+  console.log(payload.newPost);
+  return payload.newPost;
+}
+
+const resolvers: Resolvers = {
   Subscription: {
-    numberIncremented: {
-      subscribe: () => pubsub.asyncIterator(['NUMBER_INCREMENTED']),
-    },
-    getBtcTokenPrice: {
-      subscribe: async function* () {
-        for await (const word of ['Hello', 'Bonjour', 'Ciao']) {
-          yield { getBtcTokenPrice: word };
-        }
-      },
-    },
-  },
+    newPost: {
+      subscribe: () => pubsub.asyncIterator(["newPost"]),
+      resolve: resolveNewPost, // extract string from object
+    }
+  }
 };
 
 // Create schema, which will be used separately by ApolloServer and
@@ -82,12 +89,3 @@ httpServer.listen(PORT, () => {
   console.log(`🚀 Subscription endpoint ready at ws://localhost:${PORT}/graphql`);
 });
 
-// In the background, increment a number every second and notify subscribers when it changes.
-function incrementNumber() {
-  currentNumber++;
-  pubsub.publish('NUMBER_INCREMENTED', { numberIncremented: currentNumber });
-  setTimeout(incrementNumber, 1000);
-}
-
-// Start incrementing
-incrementNumber();

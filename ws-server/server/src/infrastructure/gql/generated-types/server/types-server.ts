@@ -784,9 +784,8 @@ export type ReferralUsers = {
 
 export type Subscription = {
   __typename?: 'Subscription';
-  getBtcTokenPrice?: Maybe<Scalars['String']['output']>;
   getChatMessages: AddChatmessageResponse;
-  numberIncremented?: Maybe<Scalars['Int']['output']>;
+  newPost?: Maybe<Scalars['String']['output']>;
   setChatMessages: AddChatmessageResponse;
 };
 
@@ -1563,9 +1562,8 @@ export type ReferralUsersResolvers<ContextType = any, ParentType extends Resolve
 }>;
 
 export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = ResolversObject<{
-  getBtcTokenPrice?: SubscriptionResolver<Maybe<ResolversTypes['String']>, "getBtcTokenPrice", ParentType, ContextType>;
   getChatMessages?: SubscriptionResolver<ResolversTypes['AddChatmessageResponse'], "getChatMessages", ParentType, ContextType, RequireFields<SubscriptionGetChatMessagesArgs, 'chatid'>>;
-  numberIncremented?: SubscriptionResolver<Maybe<ResolversTypes['Int']>, "numberIncremented", ParentType, ContextType>;
+  newPost?: SubscriptionResolver<Maybe<ResolversTypes['String']>, "newPost", ParentType, ContextType>;
   setChatMessages?: SubscriptionResolver<ResolversTypes['AddChatmessageResponse'], "setChatMessages", ParentType, ContextType, RequireFields<SubscriptionSetChatMessagesArgs, 'chatid' | 'content'>>;
 }>;
 

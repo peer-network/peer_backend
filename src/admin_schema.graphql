@@ -5,9 +5,9 @@ schema {
 }
 
 type Subscription {
-  getTokenPrice(): TokenPriceResponse!
   getChatMessages(chatid: ID!): AddChatmessageResponse!
   setChatMessages(chatid: ID!, content: String!): AddChatmessageResponse!
+  newPost: String!
 }
 
 type Query {

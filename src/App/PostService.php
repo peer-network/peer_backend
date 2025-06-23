@@ -13,6 +13,8 @@ use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
+use Fawaz\Services\Interface\SubscriptionsService;
+use Fawaz\Services\RedisSubscriptionsService;
 
 class PostService
 {
@@ -27,6 +29,7 @@ class PostService
         protected TagMapper $tagMapper,
         protected TagPostMapper $tagPostMapper,
         protected FileUploadDispatcher $base64filehandler,
+        protected SubscriptionsService $subscriptionsService = new RedisSubscriptionsService(),
     ) {}
 
     public function setCurrentUserId(string $userid): void
@@ -283,6 +286,14 @@ class PostService
             $data = $post->getArrayCopy();
             $data['tags'] = $tagNames;
             $this->postMapper->commit();
+            
+            
+            $message = [
+                'newPost' => $post->getPostId()
+            ];
+
+            // Publish the JSON string with a key matching your subscription field name
+            $this->subscriptionsService->publish('newPost', json_encode($message));
             return $this->createSuccessResponse(11513, $data);
 
         } catch (\Throwable $e) {
