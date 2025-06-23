@@ -460,8 +460,8 @@
         "userFriendlyComment": "Invalid user ID format. Please check and try again."
     },
     "30202": {
-        "comment": "The 'username' field (User display name) must be between {POST.USERNAME.MIN_LENGTH} and {POST.USERNAME.MAX_LENGTH} characters long, must contain at least one letter and can contain numbers, and underscores",
-        "userFriendlyComment": "Username must be {POST.USERNAME.MIN_LENGTH}-{POST.USERNAME.MAX_LENGTH} chars with letters, numbers, or underscores."
+        "comment": "The 'username' field (User display name) must be between {USER.USERNAME.MIN_LENGTH} and {USER.USERNAME.MAX_LENGTH} characters long, must contain at least one letter and can contain numbers, and underscores",
+        "userFriendlyComment": "Username must be {USER.USERNAME.MIN_LENGTH}-{USER.USERNAME.MAX_LENGTH} chars with letters, numbers, or underscores."
     },
     "30203": {
         "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 2147483647",
