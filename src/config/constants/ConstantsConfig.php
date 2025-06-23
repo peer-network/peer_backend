@@ -8,6 +8,7 @@ class ConstantsConfig
         return [
             "POST" => $this::post(),
             "COMMENT" => $this::comment(),
+            "PAGING" => $this::paging(),
         ];
     }
 
@@ -17,6 +18,9 @@ class ConstantsConfig
 
     public static function post() {
         return ConstantsConfig::POST;
+    }
+    public static function paging() {
+        return ConstantsConfig::PAGING;
     }
 
     private const COMMENT = [
@@ -35,5 +39,15 @@ class ConstantsConfig
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 500,
         ],
-    ];    
+    ];
+    private const PAGING = [
+        'OFFSET' => [
+            'MIN' => 0,
+            'MAX' => 2147483647,
+        ],
+        'LIMIT' => [
+            'MIN' => 1,
+            'MAX' => 20,
+        ],
+    ];     
 }
