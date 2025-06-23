@@ -688,12 +688,12 @@
         "userFriendlyComment": "File too large. Please reduce size."
     },
     "30262": {
-        "comment": "The 'tag' field (Tags in post creation) must be an array of up to ten tags, each between 2 and 53 characters long",
-        "userFriendlyComment": "Max 10 tags, each 2-53 characters."
+        "comment": "The 'tag' field (Tags in post creation) must be an array of up to ten tags, each between {POST.TAGNAME.MIN_LENGTH} and {POST.TAGNAME.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Max 10 tags, each {POST.TAGNAME.MIN_LENGTH}-{POST.TAGNAME.MAX_LENGTH} characters."
     },
     "30263": {
-        "comment": "The 'mediadescription' field (Create Post input) must be between 3 and 500 characters long",
-        "userFriendlyComment": "Media description must be 3-500 characters."
+        "comment": "The 'mediadescription' field (Create Post input) must be between {POST.MEDIADESCRIPTION.MIN_LENGTH} and {POST.MEDIADESCRIPTION.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Media description must be {POST.MEDIADESCRIPTION.MIN_LENGTH}-{POST.MEDIADESCRIPTION.MAX_LENGTH} characters."
     },
     "30264": {
         "comment": "The numberoftokens field must be a number, greater than zero, and less than the account balance",
@@ -708,8 +708,8 @@
         "userFriendlyComment": "Only one media type allowed per post."
     },
     "30267": {
-        "comment": "The media field must contain less than 5 image files, 1 text file, 1 audio file, 2 video files. ",
-        "userFriendlyComment": "Media limits: 5 images, 1 text, 1 audio, or 2 videos."
+        "comment": "The media field must contain less than {POST.MEDIALIMIT.IMAGE} image files, {POST.MEDIALIMIT.TEXT} text file, {POST.MEDIALIMIT.AUDIO} audio file, {POST.MEDIALIMIT.VIDEO} video files. ",
+        "userFriendlyComment": "Media limits: {POST.MEDIALIMIT.IMAGE} images, {POST.MEDIALIMIT.TEXT} text, {POST.MEDIALIMIT.AUDIO} audio, or {POST.MEDIALIMIT.VIDEO} videos."
     },
     "30268": {
         "comment": "The cover field must contain at most only 1 image",
