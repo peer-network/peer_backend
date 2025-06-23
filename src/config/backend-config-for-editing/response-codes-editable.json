@@ -464,16 +464,16 @@
         "userFriendlyComment": "Username must be {USER.USERNAME.MIN_LENGTH}-{USER.USERNAME.MAX_LENGTH} chars with letters, numbers, or underscores."
     },
     "30203": {
-        "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 2147483647",
-        "userFriendlyComment": "Offset must be a number between 0 and 2147483647."
+        "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between {PAGING.OFFSET.MIN} and {PAGING.OFFSET.MAX}",
+        "userFriendlyComment": "Offset must be a number between {PAGING.OFFSET.MIN} and {PAGING.OFFSET.MAX}."
     },
     "30204": {
-        "comment": "The 'limit' field (Number of data objects to retrieve) must be an integer between 1 and 20",
-        "userFriendlyComment": "Limit must be a number between 1 and 20."
+        "comment": "The 'limit' field (Number of data objects to retrieve) must be an integer between {PAGING.LIMIT.MIN} and {PAGING.LIMIT.MAX}",
+        "userFriendlyComment": "Limit must be a number between {PAGING.LIMIT.MIN} and {PAGING.LIMIT.MAX}."
     },
     "30205": {
-        "comment": "The 'postLimit' field (Number of posts to retrieve) must be an integer between 1 and 20",
-        "userFriendlyComment": "Post limit must be 1-20."
+        "comment": "The 'postLimit' field (Number of posts to retrieve) must be an integer between {PAGING.LIMIT.MIN} and {PAGING.LIMIT.MAX}",
+        "userFriendlyComment": "Post limit must be {PAGING.LIMIT.MIN}-{PAGING.LIMIT.MAX}."
     },
     "30206": {
         "comment": "The 'filterBy' field (Post filter criteria) must be an array containing only valid ENUM options: IMAGE, AUDIO, TEXT, VIDEO, FOLLOWED, FOLLOWER",
@@ -516,8 +516,8 @@
         "userFriendlyComment": "Comment offset must be a number."
     },
     "30216": {
-        "comment": "The 'commentLimit' field (Number of comments to retrieve) must be an integer between 1 and 20",
-        "userFriendlyComment": "Comment limit must be 1-20."
+        "comment": "The 'commentLimit' field (Number of comments to retrieve) must be an integer between {PAGING.LIMIT.MIN} and {PAGING.LIMIT.MAX}",
+        "userFriendlyComment": "Comment limit must be {PAGING.LIMIT.MIN}-{PAGING.LIMIT.MAX}."
     },
     "30217": {
         "comment": "The 'commentid' field (Comment identifier) must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
@@ -532,8 +532,8 @@
         "userFriendlyComment": "Message offset must be a number."
     },
     "30220": {
-        "comment": "The 'messageLimit' field (Number of chat messages to retrieve) must be an integer between 1 and 20",
-        "userFriendlyComment": "Message limit must be 1-20."
+        "comment": "The 'messageLimit' field (Number of chat messages to retrieve) must be an integer between {PAGING.LIMIT.MIN} and {PAGING.LIMIT.MAX}",
+        "userFriendlyComment": "Message limit must be {PAGING.LIMIT.MIN}-{PAGING.LIMIT.MAX}."
     },
     "30221": {
         "comment": "The 'searchChatByName' field (Search for chats by name) must be a valid string",

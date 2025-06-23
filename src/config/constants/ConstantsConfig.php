@@ -10,6 +10,7 @@ class ConstantsConfig
             "POST" => $this::post(),
             "COMMENT" => $this::comment(),
             "USER" => $this::user(),
+            "PAGING" => $this::paging(),
         ];
     }
 
@@ -26,6 +27,9 @@ class ConstantsConfig
 
     public static function contentFiltering() {
         return ConstantsModeration::contentFiltering();
+    }
+    public static function paging() {
+        return ConstantsConfig::PAGING;
     }
 
     private const COMMENT = [
@@ -66,11 +70,21 @@ class ConstantsConfig
             ],
         ],
     ];
+    private const PAGING = [
+        'OFFSET' => [
+            'MIN' => 0,
+            'MAX' => 2147483647,
+        ],
+        'LIMIT' => [
+            'MIN' => 1,
+            'MAX' => 20,
+        ],
+    ];
     private const USER = [
         'USERNAME' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 23,
             'PATTERN' => '[a-zA-Z0-9]+',
         ],
-    ]; 
+    ];  
 }
