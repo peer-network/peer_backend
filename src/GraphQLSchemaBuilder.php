@@ -56,6 +56,7 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
+use Fawaz\config\constants\ConstantsConfig;
 
 class GraphQLSchemaBuilder
 {
@@ -2527,6 +2528,7 @@ class GraphQLSchemaBuilder
         }
 
         $username = isset($args['username']) ? trim($args['username']) : null;
+        $usernameConfig = ConstantsConfig::post()['USERNAME'];
         $userId = $args['userid'] ?? null;
         $email = $args['email'] ?? null;
         $status = $args['status'] ?? null;
@@ -2545,7 +2547,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30201);
         }
 
-        if ($username !== null && (strlen($username) < 3 || strlen($username) > 23)) {
+        if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
             return $this->respondWithError(30202);
         }
 
