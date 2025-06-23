@@ -672,8 +672,8 @@
         "userFriendlyComment": "Invalid Solana public key format."
     },
     "30255": {
-        "comment": "The 'tagName' field (Tag identifier) must be between {POST.TAGNAME.MIN_LENGTH} and {POST.TAGNAME.MAX_LENGTH} characters long, must not contain spaces, and may include letters, numbers, special characters, underscores _, and hyphens - (format: valid-tag_name-123)",
-        "userFriendlyComment": "Tag name must be {POST.TAGNAME.MIN_LENGTH}-{POST.TAGNAME.MAX_LENGTH} chars without spaces (can use - and _)."
+        "comment": "The 'tagName' field (Tag identifier) must be between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long, must not contain spaces, and may include letters, numbers, special characters, underscores _, and hyphens - (format: valid-tag_name-123)",
+        "userFriendlyComment": "Tag name must be {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} chars without spaces (can use - and _)."
     },
     "30256": {
         "comment": "Title must be between 2 and 30 characters. Please adjust and try again",
@@ -700,8 +700,8 @@
         "userFriendlyComment": "File too large. Please reduce size."
     },
     "30262": {
-        "comment": "The 'tag' field (Tags in post creation) must be an array of up to ten tags, each between {POST.TAGNAME.MIN_LENGTH} and {POST.TAGNAME.MAX_LENGTH} characters long",
-        "userFriendlyComment": "Max 10 tags, each {POST.TAGNAME.MIN_LENGTH}-{POST.TAGNAME.MAX_LENGTH} characters."
+        "comment": "The 'tag' field (Tags in post creation) must be an array of up to ten tags, each between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Max 10 tags, each {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} characters."
     },
     "30263": {
         "comment": "The 'mediadescription' field (Create Post input) must be between {POST.MEDIADESCRIPTION.MIN_LENGTH} and {POST.MEDIADESCRIPTION.MAX_LENGTH} characters long",

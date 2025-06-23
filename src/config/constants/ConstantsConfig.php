@@ -56,7 +56,7 @@ class ConstantsConfig
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 23,
         ],
-        'TAGNAME' => [
+        'TAG' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 53,
             'MAX_LIMIT' => 5,
