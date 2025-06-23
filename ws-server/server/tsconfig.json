@@ -1,39 +1,22 @@
-// {
-//           "compilerOptions": {
-//             // "rootDirs": ["src"],
-//             "outDir": "dist",
-//             "lib": ["es2015", "es2020", "dom"],
-//             "target": "es2020",
-//             "module": "esnext",
-//             "moduleResolution": "node",
-//             "esModuleInterop": true,
-//             "types": ["jest", "node"],
-//             "forceConsistentCasingInFileNames": true,
-//             // "paths": {
-//             //   "*": ["node_modules/*"]
-//             // },
-//             // "baseUrl": ".",
-//             // "typeRoots": ["./node_modules/@types"],
-//             "strict": true,
-//             "skipLibCheck": true,
-//             "resolveJsonModule": true,
-              
-//           },
-//             // ?"include": ["app/**/*", "tests/**/*", "utils/**/*", "codegen-old.ts", "domain/CoreClientResponse.ts", "useCases/Mint/validation/MintUseCaseValidatorImplZod.ts"],
-//             // "exclude": ["node_modules", "dist"]
-//           }
-          
+{
+  "compilerOptions": {
+    "rootDirs": ["src"],
+    "outDir": "dist",
+    "lib": ["es2020"],
+    "target": "es2020",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "types": ["node"],
+    "skipLibCheck": true,
 
-          {
-            "compilerOptions": {
-              "rootDirs": ["app"],
-              "outDir": "dist",
-              "lib": ["es2020"],
-              "target": "es2020",
-              "module": "esnext",
-              "moduleResolution": "node",
-              "esModuleInterop": true,
-              "types": ["node"],
-              "skipLibCheck": true
-            }
-          }
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "*": ["node_modules/*"]
+    },
+    "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types"],
+    "strict": true,
+    "resolveJsonModule": true,
+  }
+}

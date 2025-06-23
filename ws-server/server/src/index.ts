@@ -1,5 +1,3 @@
-import { readFileSync } from 'fs';
-import path from 'path';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
@@ -11,16 +9,37 @@ import { useServer } from 'graphql-ws/lib/use/ws';
 import { PubSub } from 'graphql-subscriptions';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { baseConfig } from '../../config/config';
-import { resolvers } from './resolvers-server/resolvers';
 
-const schemaPath : string = "../../../../../src/schema.graphql"
-const typeDefs = readFileSync(path.join(__dirname, schemaPath), 'utf8');
-
+const PORT = 4000;
 const pubsub = new PubSub();
-const PORT = baseConfig.GRAPHQL.APP_PORT;
+
 // A number that we'll increment over time to simulate subscription events
 let currentNumber = 0;
+
+// Schema definition
+const typeDefs = `#graphql
+  type Query {
+    currentNumber: Int
+  }
+
+  type Subscription {
+    numberIncremented: Int
+  }
+`;
+
+// Resolver map
+const resolvers = {
+  Query: {
+    currentNumber() {
+      return currentNumber;
+    },
+  },
+  Subscription: {
+    numberIncremented: {
+      subscribe: () => pubsub.asyncIterator(['NUMBER_INCREMENTED']),
+    },
+  },
+};
 
 // Create schema, which will be used separately by ApolloServer and
 // the WebSocket server.
@@ -62,7 +81,7 @@ await server.start();
 app.use('/graphql', cors<cors.CorsRequest>(), bodyParser.json(), expressMiddleware(server));
 
 // Now that our HTTP server is fully set up, actually listen.
-httpServer.listen(baseConfig.GRAPHQL.APP_PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`🚀 Query endpoint ready at http://localhost:${PORT}/graphql`);
   console.log(`🚀 Subscription endpoint ready at ws://localhost:${PORT}/graphql`);
 });
@@ -76,4 +95,3 @@ function incrementNumber() {
 
 // Start incrementing
 incrementNumber();
-
