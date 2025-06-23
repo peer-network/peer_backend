@@ -1,9 +1,10 @@
 import path from 'path';
 import { Config, GraphQLConfig, AppConfig } from './types';
-import { getRequiredEnvNumber, getRequiredEnvString } from './validators';
+import { getRequiredEnvNumber, getRequiredEnvString } from './validators.js';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: path.resolve(__dirname, '../../env/app.env') });
+
+dotenv.config({ path: path.resolve('../../env/app.env') });
 
 // Default configuration values
 const DEFAULT_CONFIG = {

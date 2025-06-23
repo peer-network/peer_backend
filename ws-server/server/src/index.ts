@@ -11,40 +11,31 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { readFileSync } from 'fs';
 import path from 'path';
-import { baseConfig } from './app/config/config';
-import { resolvers } from './app/api/server/resolvers-server/resolvers';
+// import resolvers from './resolvers-server/resolvers-server';
+// import { baseConfig } from '../../config/config';
 
-
-const PORT = 4000;
+const schemaPath : string = "../../src/schema.graphql"
+const typeDefs = readFileSync(schemaPath, 'utf8');
+const PORT = 8080;
 const pubsub = new PubSub();
 
 // A number that we'll increment over time to simulate subscription events
 let currentNumber = 0;
 
-// Schema definition
-const typeDefs = `#graphql
-  type Query {
-    currentNumber: Int
-  }
-
-  type Subscription {
-    numberIncremented: Int
-  }
-`;
-
-// Resolver map
-// const resolvers = {
-//   Query: {
-//     currentNumber() {
-//       return currentNumber;
-//     },
-//   },
-//   Subscription: {
-//     numberIncremented: {
-//       subscribe: () => pubsub.asyncIterator(['NUMBER_INCREMENTED']),
-//     },
-//   },
-// };
+const resolvers = {
+  Subscription: {
+    numberIncremented: {
+      subscribe: () => pubsub.asyncIterator(['NUMBER_INCREMENTED']),
+    },
+    getBtcTokenPrice: {
+      subscribe: async function* () {
+        for await (const word of ['Hello', 'Bonjour', 'Ciao']) {
+          yield { getBtcTokenPrice: word };
+        }
+      },
+    },
+  },
+};
 
 // Create schema, which will be used separately by ApolloServer and
 // the WebSocket server.
