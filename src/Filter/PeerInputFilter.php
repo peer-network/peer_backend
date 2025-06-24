@@ -621,18 +621,19 @@ class PeerInputFilter
     protected function validateUsername(string $value, array $options = []): bool
     {
         $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
+        $usernameConfig = ConstantsConfig::user()['USERNAME'];
 
         if ($value === '') {
             $this->errors['username'][] = 30202;
             return false;
         }
 
-        if (strlen($value) < 3 || strlen($value) > 23) {
+        if (strlen($value) < $usernameConfig['MIN_LENGTH'] || strlen($value) > $usernameConfig['MAX_LENGTH']) {
             $this->errors['username'][] = 30202;
             return false;
         }
 
-        if (!preg_match('/^[a-zA-Z0-9_]{3,23}$/', $value)) {
+        if (!preg_match('/^' . $usernameConfig['PATTERN'] . '_*$/u', $value)) {
             $this->errors['username'][] = 30202;
             return false;
         }
