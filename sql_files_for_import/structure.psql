@@ -64,7 +64,6 @@ CREATE TABLE IF NOT EXISTS user_referral_info (
 );
 CREATE INDEX IF NOT EXISTS idx_user_referral_info_uid ON user_referral_info(uid);
 
-
 -- Table: access_tokens
 CREATE TABLE IF NOT EXISTS access_tokens (
     userid UUID PRIMARY KEY,
@@ -219,7 +218,7 @@ CREATE TABLE advertisements (
 CREATE INDEX IF NOT EXISTS idx_ads_advertisementid ON advertisements(advertisementid);
 CREATE INDEX IF NOT EXISTS idx_ads_status ON advertisements(status);
 
--- Tabelle: advertisements
+-- Tabelle: advertisements_log
 CREATE TABLE advertisements_log (
     id SERIAL PRIMARY KEY,
     advertisementid UUID NOT NULL,
