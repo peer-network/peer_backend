@@ -484,8 +484,8 @@
         "userFriendlyComment": "Title must be {POST.TITLE.MIN_LENGTH}–{POST.TITLE.MAX_LENGTH} chars"
     },
     "30211": {
-        "comment": "The 'tag' field (Tags to search for in posts) must be an array of up to five tags, each between 2 and 53 characters long",
-        "userFriendlyComment": "Tags must be 2-53 chars, max 5 tags."
+        "comment": "The 'tag' field (Tags to search for in posts) must be an array of up to five tags, each between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Tags must be {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} chars, max {POST.TAG.MAX_LIMIT} tags."
     },
     "30212": {
         "comment": "The 'from' field (Starting date for data retrieval) must be a valid date in the format YYYY-MM-DD",
@@ -662,10 +662,6 @@
     "30255": {
         "comment": "The 'tagName' field (Tag identifier) must be between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long, must not contain spaces, and may include letters, numbers, special characters, underscores _, and hyphens - (format: valid-tag_name-123)",
         "userFriendlyComment": "Tag name must be {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} chars without spaces (can use - and _)."
-    },
-    "30256": {
-        "comment": "Title must be between 2 and 30 characters. Please adjust and try again",
-        "userFriendlyComment": "Title must be 2-30 characters."
     },
     "30257": {
         "comment": "Invalid IP address. Please enter a valid IPv4 (e.g. 192.168.0.1) or IPv6 (e.g. 2001:0db8:85a3:0000:0000:8a2e:0370:7334) address",
