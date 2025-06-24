@@ -55,14 +55,14 @@ class ConstantsConfig
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 53,
             'MAX_LIMIT' => 5,
-            'PATTERN' => '^[a-zA-Z]+$',
+            'PATTERN' => '[a-zA-Z]+',        
         ],
     ];   
     private const USER = [
         'USERNAME' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 23,
-            'PATTERN' => '^[a-zA-Z0-9]+$'
+            'PATTERN' => '[a-zA-Z0-9]+',
         ],
     ]; 
 }
