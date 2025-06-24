@@ -46,6 +46,7 @@ use Fawaz\App\User;
 use Fawaz\App\UserInfoService;
 use Fawaz\App\UserService;
 use Fawaz\App\TagService;
+use Fawaz\App\PeerTokenService;
 use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
@@ -80,6 +81,7 @@ class GraphQLSchemaBuilder
         protected CommentInfoService $commentInfoService,
         protected ChatService $chatService,
         protected WalletService $walletService,
+        protected PeerTokenService $peerTokenService,
         protected JWTService $tokenService
     ) {
         $this->resolvers = $this->buildResolvers();
@@ -153,6 +155,7 @@ class GraphQLSchemaBuilder
         $this->chatService->setCurrentUserId($userid);
         $this->mcapService->setCurrentUserId($userid);
         $this->walletService->setCurrentUserId($userid);
+        $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
     }
 
@@ -1880,9 +1883,9 @@ class GraphQLSchemaBuilder
             'dailygemsresults' => fn(mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
             'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
-            'getTransactionHistory' => fn(mixed $root, array $args) => $this->walletService->transactionsHistory($args),
-            'getLiquidityPoolHistory' => fn(mixed $root, array $args) => $this->walletService->getLiquidityPoolHistory($args),
-            'getTokenPrice' => fn(mixed $root, array $args) => $this->walletService->getTokenPrice(),
+            'getTransactionHistory' => fn(mixed $root, array $args) => $this->peerTokenService->transactionsHistory($args),
+            'getLiquidityPoolHistory' => fn(mixed $root, array $args) => $this->peerTokenService->getLiquidityPoolHistory($args),
+            'getTokenPrice' => fn(mixed $root, array $args) => $this->peerTokenService->getTokenPrice(),
             'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
         ];
     }
@@ -1921,10 +1924,10 @@ class GraphQLSchemaBuilder
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
-            'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
-            'swapTokens' => fn(mixed $root, array $args) => $this->walletService->swapTokens($args),
-            'addLiquidity' => fn(mixed $root, array $args) => $this->walletService->addLiquidity($args),
-            'updateSwapTranStatus' => fn(mixed $root, array $args) => $this->walletService->updateSwapTranStatus($args),
+            'resolveTransfer' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
+            'swapTokens' => fn(mixed $root, array $args) => $this->peerTokenService->swapTokens($args),
+            'addLiquidity' => fn(mixed $root, array $args) => $this->peerTokenService->addLiquidity($args),
+            'updateSwapTranStatus' => fn(mixed $root, array $args) => $this->peerTokenService->updateSwapTranStatus($args),
         ];
     }
 

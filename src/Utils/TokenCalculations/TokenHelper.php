@@ -2,6 +2,8 @@
 
 namespace Fawaz\Utils\TokenCalculations;
 
+define('Q64_96_SCALE', bcpow('2', '96'));
+
 class TokenHelper
 {
     /**
@@ -13,7 +15,13 @@ class TokenHelper
      */
     public static function calculatePeerTokenEURPrice(float $btcEURPrice, float $peerTokenBTCPrice): ?float
     {
-        return $btcEURPrice * $peerTokenBTCPrice;
+        
+        $btcEURPrice = self::convertToQ96($btcEURPrice);
+        $peerTokenBTCPrice = self::convertToQ96($peerTokenBTCPrice);
+
+        $peerValue = self::mulQ96($btcEURPrice, $peerTokenBTCPrice);
+
+        return self::decodeFromQ96($peerValue);
     }
 
     /**
@@ -23,12 +31,13 @@ class TokenHelper
      * @param float $liqPoolTokenAmount Total Peer Tokens in the liquidity pool.
      * @return float|null Peer Token price in BTC with 10-digit precision.
      */
-    public static function calculatePeerTokenPriceValue(float $btcPoolBTCAmount, float $liqPoolTokenAmount): ?string
+    public static function calculatePeerTokenPriceValue(string $btcPoolBTCAmount, string $liqPoolTokenAmount): ?string
     {
-        $beforeToken = $btcPoolBTCAmount / $liqPoolTokenAmount;
+        $btcPoolBTCAmount = self::convertToQ96($btcPoolBTCAmount);
+        $liqPoolTokenAmount = self::convertToQ96($liqPoolTokenAmount);
+        $beforeToken = self::divQ96($btcPoolBTCAmount, $liqPoolTokenAmount);
         
-        $beforeToken = self::roundUpBTCAmount($beforeToken);
-        return number_format($beforeToken, 9, '.', '');
+        return self::decodeFromQ96($beforeToken);
     }
 
     /**
@@ -42,14 +51,17 @@ class TokenHelper
      * @return float|null Total required tokens including all fees.
      */
     public static function calculateTokenRequiredAmount(
-        float $numberOfTokens,
+        string $numberOfTokens,
         float $peerFee,
         float $poolFee,
         float $burnFee,
         float $inviterFee = 0
-    ): ?float {
-        $requiredAmount = $numberOfTokens * (1 + $peerFee + $poolFee + $burnFee + $inviterFee);
-        return self::roundUpFeeAmount($requiredAmount);
+    ): ?string {
+        $allFees = self::convertToQ96((1 + $peerFee + $poolFee + $burnFee + $inviterFee));
+
+        $requiredAmount = self::mulQ96($numberOfTokens, $allFees);
+
+        return $requiredAmount;
     }
 
     /**
@@ -67,41 +79,127 @@ class TokenHelper
         float $burnAmount,
         float $inviterAmount = 0
     ): ?float {
-        return $feeAmount + $peerAmount + $burnAmount + $inviterAmount;
+        return self::convertToQ96($feeAmount + $peerAmount + $burnAmount + $inviterAmount);
+    }
+
+
+     /**
+     * Converts a floating-point number to its Q96 fixed-point representation.
+     *
+     * Q96 is a fixed-point format where values are scaled by 2^96.
+     * This method multiplies the given float by 2^96 and returns the result as a string.
+     *
+     * @param float $value The floating-point number to convert.
+     * @return string The Q96-scaled value as a string.
+     */
+    public static function convertToQ96(float $value): string
+    {
+        $decimalString = number_format($value, 30, '.', '');
+        return bcmul($decimalString, Q64_96_SCALE, 0);
     }
 
     /**
-     * Rounds a float value up to a given precision.
+     * Converts a Q96 fixed-point string back to a human-readable decimal string.
      *
-     * @param float $value The number to round up.
-     * @param int $precision Number of decimal places.
-     * @return float Rounded up value.
+     * This method divides the given Q96 value by 2^96 to recover the original number.
+     *
+     * @param string $q96Value The Q96-encoded string.
+     * @param int $precision The number of decimal digits to include in the result (default: 18).
+     * @return string The decoded decimal value.
      */
-    public static function roundUp(float $value, int $precision = 2): float
+    public static function decodeFromQ96(string $q96Value, int $precision = 9): string
     {
-        $multiplier = pow(10, $precision);
-        return ceil($value * $multiplier) / $multiplier;
+        return bcdiv($q96Value, Q64_96_SCALE, $precision);
+    }
+
+
+    /**
+     * Adds two Q96-encoded fixed-point values.
+     *
+     * This method assumes both values are already scaled by 2^96.
+     *
+     * @param string $q96Value1 First Q96-encoded value.
+     * @param string $q96Value2 Second Q96-encoded value.
+     * @return string Sum of the two Q96 values, as a Q96-encoded string.
+     */
+    public static function addQ96(string $q96Value1, string $q96Value2): string
+    {
+        return bcadd($q96Value1, $q96Value2);
+    }
+
+
+    /**
+     * Multiply two Q96-encoded fixed-point values.
+     *
+     * This method assumes both values are already scaled by 2^96.
+     *
+     * @param string $q96Value1 First Q96-encoded value.
+     * @param string $q96Value2 Second Q96-encoded value.
+     * @return string Sum of the two Q96 values, as a Q96-encoded string.
+     */
+    public static function mulQ96(string $q96Value1, string $q96Value2): string
+    {
+        $result = bcmul($q96Value1, $q96Value2);
+
+        return bcdiv($result, Q64_96_SCALE, 0);
+
+    }
+    
+    /**
+     * divide two Q96-encoded fixed-point values.
+     *
+     * This method assumes both values are already scaled by 2^96.
+     *
+     * @param string $q96Value1 First Q96-encoded value.
+     * @param string $q96Value2 Second Q96-encoded value.
+     * @return string Sum of the two Q96 values, as a Q96-encoded string.
+     */
+    public static function divQ96(string $q96Value1, string $q96Value2): string
+    {
+        $scaled = bcmul($q96Value1, Q64_96_SCALE);
+        return bcdiv($scaled, $q96Value2, 0);
     }
 
     /**
-     * Rounds a fee amount up to 2 decimal places.
+     * compare two Q96-encoded values.
      *
-     * @param float $value The fee value to round.
-     * @return float Rounded fee.
+     * This method assumes both values are already scaled by 2^96.
+     *
+     * @param string $q96Value1 First Q96-encoded value.
+     * @param string $q96Value2 Second Q96-encoded value.
+     * @return string Sum of the two Q96 values, as a Q96-encoded string.
      */
-    public static function roundUpFeeAmount(float $value): float
+    public static function compare(string $qValue1, string $qValue2): int
     {
-        return self::roundUp($value, 2);
+        if (!self::isValidQ64_96($qValue1) || !self::isValidQ64_96($qValue2)) {
+            return 0;
+        }
+        return bccomp($qValue1, $qValue2);
+    }
+        
+    /**
+     * Substract two Q96-encoded fixed-point values.
+     *
+     * This method assumes both values are already scaled by 2^96.
+     *
+     * @param string $q96Value1 First Q96-encoded value.
+     * @param string $q96Value2 Second Q96-encoded value.
+     * @return string Sum of the two Q96 values, as a Q96-encoded string.
+     */
+    public static function subQ96(string $q96Value1, string $q96Value2): string
+    {
+        return bcsub($q96Value1, $q96Value2);
     }
 
-    /**
-     * Rounds a BTC amount up to 9 decimal places (common BTC precision).
-     *
-     * @param float $value BTC value to round.
-     * @return float Rounded BTC value.
-     */
-    public static function roundUpBTCAmount(float $value): float
+    // Überprüft, ob der Wert eine gültige Q64.96-Zahl ist
+    public static function isValidQ64_96(string $qValue): bool
     {
-        return self::roundUp($value, 9);
+        if (!preg_match('/^[0-9]+$/', $qValue)) {
+            return false;
+        }
+        if (bccomp($qValue, MAX_VAL_Q_96) >= 0) {
+            return false;
+        }
+        return true;
     }
 }
