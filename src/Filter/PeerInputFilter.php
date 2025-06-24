@@ -24,6 +24,7 @@ use function is_object;
 use function is_string;
 use function sprintf;
 use function method_exists;
+use Fawaz\config\constants\ConstantsConfig;
 
 class ValidationException extends Exception {}
 
@@ -651,6 +652,8 @@ class PeerInputFilter
 
     protected function validateTagName(string $value, array $options = []): bool
     {
+        $tagConfig = ConstantsConfig::post()['TAG'];
+
         if ($value === '') {
             $this->errors['tag'][] = 30101;
             return false;
@@ -659,12 +662,12 @@ class PeerInputFilter
         $value = trim($value);
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
-        if (strlen($value) < 2 || strlen($value) > 53) {
+        if (strlen($value) < $tagConfig['MIN_LENGTH'] || strlen($value) > $tagConfig['MAX_LENGTH']) {
             $this->errors['tag'][] = 30103;
             return false;
         }
 
-        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $value)) {
+        if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $value)) {
             $this->errors['tag'][] = 30103;
             return false;
         }
