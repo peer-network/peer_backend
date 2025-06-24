@@ -357,6 +357,7 @@ class PostService
     private function handleTags(array $tags, string $postId, string $createdAt): void
     {
         $maxTags = 10;
+        $tagNameConfig = ConstantsConfig::post()['TAG'];
         if (count($tags) > $maxTags) {
             throw new \Exception('Maximum tag limit exceeded');
         }
@@ -364,8 +365,8 @@ class PostService
         foreach ($tags as $tagName) {
             $tagName = !empty($tagName) ? trim((string) $tagName) : '';
             
-            if (strlen($tagName) < 2 || strlen($tagName) > 53 || !preg_match('/^[a-zA-Z0-9_-]+$/', $tagName)) {
-                throw new \Exception('Invalid tag name');
+            if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] || strlen($tagName) > $tagNameConfig['MAX_LENGTH'] || !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
+                throw new \Throwable('Invalid tag name');
             }
 
             $tag = $this->tagMapper->loadByName($tagName);
