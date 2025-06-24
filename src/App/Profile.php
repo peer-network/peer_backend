@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class Profile
 {
@@ -132,6 +133,7 @@ class Profile
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $userConfig = ConstantsConfig::user();
         $specification = [
             'uid' => [
                 'required' => true,
@@ -174,8 +176,8 @@ class Profile
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 500,
+                        'min' => $userConfig['BIOGRAPHY']['MIN_LENGTH'],
+                        'max' => $userConfig['BIOGRAPHY']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
