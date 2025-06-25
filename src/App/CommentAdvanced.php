@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class CommentAdvanced
 {
@@ -137,6 +138,7 @@ class CommentAdvanced
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $commentConfig = ConstantsConfig::comment();
         $specification = [
             'commentid' => [
                 'required' => true,
@@ -159,8 +161,8 @@ class CommentAdvanced
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 200,
+                        'min' => $commentConfig['CONTENT']['MIN_LENGTH'],
+                        'max' => $commentConfig['CONTENT']['MAX_LENGTH'],
                     ]],
                     ['name' => 'IsString'],
                 ],

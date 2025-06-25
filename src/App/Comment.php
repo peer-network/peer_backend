@@ -125,6 +125,7 @@ class Comment
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $commentConfig = ConstantsConfig::comment();
         $specification = [
             'commentid' => [
                 'required' => true,
@@ -149,8 +150,8 @@ class Comment
                     [
                         'name' => 'StringLength', 
                         'options' => [
-                            'min' => ConstantsConfig::comment()['MIN_LENGTH'],
-                            'max' => ConstantsConfig::comment()['CONTENT']['MAX_LENGTH'],
+                            'min' => $commentConfig['CONTENT']['MIN_LENGTH'],
+                            'max' => $commentConfig['CONTENT']['MAX_LENGTH'],
                             'errorCode' => 30265,
                             ]
                         ],
