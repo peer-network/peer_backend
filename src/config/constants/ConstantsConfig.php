@@ -11,6 +11,8 @@ class ConstantsConfig
             "COMMENT" => $this::comment(),
             "USER" => $this::user(),
             "PAGING" => $this::paging(),
+            "CHAT" => $this::chat(),
+            "CONTACT" => $this::contact(),
         ];
     }
 
@@ -21,15 +23,21 @@ class ConstantsConfig
     public static function post() {
         return ConstantsConfig::POST;
     }
-    public static function user() {
-        return ConstantsConfig::USER;
-    }
 
     public static function contentFiltering() {
         return ConstantsModeration::contentFiltering();
     }
     public static function paging() {
         return ConstantsConfig::PAGING;
+    }
+    public static function user() {
+        return ConstantsConfig::USER;
+    }
+    public static function chat() {
+        return ConstantsConfig::CHAT;
+    }
+    public static function contact() {
+        return ConstantsConfig::CONTACT;
     }
 
     private const COMMENT = [
@@ -68,6 +76,9 @@ class ConstantsConfig
                 'CREATE' => 10,
                 'SEARCH' => 5,
             ],
+        ],
+        'COVER' => [
+            'MAX_COUNT' => 1,
         ],
     ];
     private const PAGING = [
@@ -112,5 +123,48 @@ class ConstantsConfig
             'MIN_LENGTH' => -18250000,
             'MAX_LENGTH' => 18250000,
         ],
-    ]; 
+        'AVATAR' => [
+            'MAX_SIZE_MB' => 5,
+        ],
+        'TRANSACTION' => [
+            'MIN_TOKENS' => 10,
+        ],
+    ];
+    private const CHAT = [
+        'MESSAGE' => [
+            'MIN_LENGTH' => 1,
+            'MAX_LENGTH' => 500,
+        ],
+        'NAME' => [
+            'MIN_LENGTH' => 3,
+            'MAX_LENGTH' => 53,
+        ],
+        'IMAGE' => [
+            'MIN_LENGTH' => 30,
+            'MAX_LENGTH' => 100,
+        ],
+        'IS_PUBLIC' => [
+            'MIN' => 0,
+            'MAX' => 10,
+            'SUSPENDED' => 9,
+        ],
+        'ACCESS_LEVEL' => [
+            'MIN' => 0,
+            'MAX' => 10,
+            'USER' => 0,
+            'ADMIN' => 10,
+        ],
+    ];
+
+    private const CONTACT = [
+        'NAME' => [
+            'MIN_LENGTH' => 3,
+            'MAX_LENGTH' => 53,
+            'PATTERN' => '^[a-zA-Z]+$',
+        ],
+        'MESSAGE' => [
+            'MIN_LENGTH' => 3,
+            'MAX_LENGTH' => 500,
+        ],
+    ];    
 }

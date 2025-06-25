@@ -568,8 +568,8 @@
         "userFriendlyComment": "Bio must be {USER.BIOGRAPHY.MIN_LENGTH}-{USER.BIOGRAPHY.MAX_LENGTH} characters."
     },
     "30229": {
-        "comment": "The 'img' field (User profile picture) must be a valid image file (JPG, PNG, or GIF) and less than 5MB in size",
-        "userFriendlyComment": "Profile pic must be JPG/PNG/GIF under 5MB."
+        "comment": "The 'img' field (User profile picture) must be a valid image file (JPG, PNG, or GIF) and less than {USER.AVATAR.MAX_SIZE_MB}MB in size",
+        "userFriendlyComment": "Profile pic must be JPG/PNG/GIF under {USER.AVATAR.MAX_SIZE_MB}MB."
     },
     "30230": {
         "comment": "You are not authorized to perform this action on the specified chat",
@@ -624,8 +624,8 @@
         "userFriendlyComment": "Transaction ID is required."
     },
     "30243": {
-        "comment": "The 'tokenAmount' field (Transaction amount) must be more than 10 tokens",
-        "userFriendlyComment": "Minimum transaction is 10 tokens."
+        "comment": "The 'tokenAmount' field (Transaction amount) must be more than {USER.TRANSACTION.MIN_TOKENS} tokens",
+        "userFriendlyComment": "Minimum transaction is {USER.TRANSACTION.MIN_TOKENS} tokens."
     },
     "30244": {
         "comment": "The 'value' field must be an integer",
@@ -660,8 +660,8 @@
         "userFriendlyComment": "Invalid media format. Please upload again."
     },
     "30252": {
-        "comment": "The 'message' field must be between 1 and 500 characters long",
-        "userFriendlyComment": "Message must be 1-500 characters."
+        "comment": "The 'message' field must be between {CHAT.MESSAGE.MIN_LENGTH} and {CHAT.MESSAGE.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Message must be {CHAT.MESSAGE.MIN_LENGTH}-{CHAT.MESSAGE.MAX_LENGTH} characters."
     },
     "30253": {
         "comment": "The 'phone number' field must be an integer between {USER.PHONENUMBER.MIN_LENGTH} and {USER.PHONENUMBER.MAX_LENGTH}",
@@ -720,8 +720,8 @@
         "userFriendlyComment": "Media limits: {POST.MEDIALIMIT.IMAGE} images, {POST.MEDIALIMIT.TEXT} text, {POST.MEDIALIMIT.AUDIO} audio, or {POST.MEDIALIMIT.VIDEO} videos."
     },
     "30268": {
-        "comment": "The cover field must contain at most only 1 image",
-        "userFriendlyComment": "Only one cover image allowed."
+        "comment": "The cover field must contain at most only {POST.COVER.MAX_COUNT} image",
+        "userFriendlyComment": "Only {POST.COVER.MAX_COUNT} cover image allowed."
     },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
