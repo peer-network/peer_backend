@@ -682,12 +682,12 @@ class PeerTokenMapper
         }
         $btcAddress = $args['btcAddress'];
 
-        // if (!PeerTokenMapper::isValidBTCAddress($btcAddress)) {
-        //     $this->logger->warning('Invalid btcAddress .', [
-        //         'btcAddress' => $btcAddress,
-        //     ]);
-        //     return self::respondWithError(31204); // Invalid BTC Address
-        // }
+        if (!PeerTokenMapper::isValidBTCAddress($btcAddress)) {
+            $this->logger->warning('Invalid btcAddress .', [
+                'btcAddress' => $btcAddress,
+            ]);
+            return self::respondWithError(31204); // Invalid BTC Address
+        }
 
         if (!isset($args['password']) && empty($args['password'])) {
             $this->logger->warning('Password required');
