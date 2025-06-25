@@ -570,7 +570,6 @@ class PeerTokenMapper
      * 
      * @return array|null
      */
-    // NEEDS TO CONVERT INTO Q96
     public function getTokenPrice(): ?array
     {
         $this->logger->info('PeerTokenMapper.getTokenPrice');
@@ -739,7 +738,7 @@ class PeerTokenMapper
 
         $peerTokenEURPrice = TokenHelper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
 
-        if (TokenHelper::mulQ96($peerTokenEURPrice, $numberoftokensToSwap) < 10) {
+        if (TokenHelper::mulQ96($peerTokenEURPrice, $numberoftokensToSwap) < TokenHelper::convertToQ96(10)) {
             $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
                 'numberoftokens' => $numberoftokensToSwap,
                 'Balance' => $currentBalance,

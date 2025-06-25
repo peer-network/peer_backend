@@ -9,11 +9,11 @@ class TokenHelper
     /**
      * Calculates the Peer Token price in EUR based on BTC-EUR and PeerToken-BTC prices.
      *
-     * @param float $btcEURPrice Current BTC to EUR price.
-     * @param float $peerTokenBTCPrice Current PeerToken to BTC price.
+     * @param string $btcEURPrice Current BTC to EUR price.
+     * @param string $peerTokenBTCPrice Current PeerToken to BTC price.
      * @return float|null Calculated PeerToken price in EUR.
      */
-    public static function calculatePeerTokenEURPrice(float $btcEURPrice, float $peerTokenBTCPrice): ?string
+    public static function calculatePeerTokenEURPrice(string $btcEURPrice, string $peerTokenBTCPrice): ?string
     {
         
         $btcEURPrice = self::convertToQ96($btcEURPrice);

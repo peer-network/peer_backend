@@ -27,7 +27,7 @@ INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('6520ac47-f262-4
 INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
 VALUES ('6520ac47-f262-4f7e-b643-9dc5ee4cfa82', 5000, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
-INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('6520ac47-f262-4f7e-b643-9dc5ee4cfa82', 5000, 0);
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('6520ac47-f262-4f7e-b643-9dc5ee4cfa82', 5000, 396140812571321687967719751680000);
 
 -- tester03
 INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
@@ -41,7 +41,7 @@ INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('dbe72768-0d47-4
 INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
 VALUES ('dbe72768-0d47-4d29-99e7-b6ec4eadfaa3', 5000, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
-INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('dbe72768-0d47-4d29-99e7-b6ec4eadfaa3', 5000, 0);
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('dbe72768-0d47-4d29-99e7-b6ec4eadfaa3', 5000, 396140812571321687967719751680000);
 
 
 -- burn_account
@@ -73,7 +73,7 @@ INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfo
 VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5cc4', 100000, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
 
-INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5cc4', 100000, 0);
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5cc4', 100000, 7922816251426433759354395033600000);
 
 
 -- company_account
@@ -102,7 +102,7 @@ INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('85d5f836-b1f5-4
 INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
 VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
-INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 0);
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 7922816251426434199159046144);
 
 
 --action_prices
