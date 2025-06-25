@@ -111,7 +111,7 @@ class ChatParticipants
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => [
                         'min' => $chatConfig['ACCESS_LEVEL']['MIN'], 
-                        'max' => $chatConfig['ACCESS_LEVEL']['MIN'],
+                        'max' => $chatConfig['ACCESS_LEVEL']['MAX'],
                         ]],
                 ],
             ],
