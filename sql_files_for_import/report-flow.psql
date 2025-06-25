@@ -1,0 +1,16 @@
+BEGIN;
+
+-- Table: user_user_reports
+CREATE TABLE IF NOT EXISTS user_user_reports (
+    reporter_userid UUID NOT NULL,
+    reported_userid UUID NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT unique_reporter_user_reported_user_reports PRIMARY KEY (reporter_userid, reported_userid),
+    CONSTRAINT fk_reporter_user_reports_users FOREIGN KEY (reporter_userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_reported_user_reports_users FOREIGN KEY (reported_userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+-- CREATE INDEX idx_reporter_userid_reports_userid ON user_user_reports(reporter_userid);
+-- CREATE INDEX idx_reported_userid_reports_userid ON user_user_reports(reported_userid);
+
+COMMIT;
