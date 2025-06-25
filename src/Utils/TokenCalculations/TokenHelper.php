@@ -13,7 +13,7 @@ class TokenHelper
      * @param float $peerTokenBTCPrice Current PeerToken to BTC price.
      * @return float|null Calculated PeerToken price in EUR.
      */
-    public static function calculatePeerTokenEURPrice(float $btcEURPrice, float $peerTokenBTCPrice): ?float
+    public static function calculatePeerTokenEURPrice(float $btcEURPrice, float $peerTokenBTCPrice): ?string
     {
         
         $btcEURPrice = self::convertToQ96($btcEURPrice);
@@ -21,7 +21,7 @@ class TokenHelper
 
         $peerValue = self::mulQ96($btcEURPrice, $peerTokenBTCPrice);
 
-        return self::decodeFromQ96($peerValue);
+        return ($peerValue);
     }
 
     /**
@@ -33,8 +33,6 @@ class TokenHelper
      */
     public static function calculatePeerTokenPriceValue(string $btcPoolBTCAmount, string $liqPoolTokenAmount): ?string
     {
-        $btcPoolBTCAmount = self::convertToQ96($btcPoolBTCAmount);
-        $liqPoolTokenAmount = self::convertToQ96($liqPoolTokenAmount);
         $beforeToken = self::divQ96($btcPoolBTCAmount, $liqPoolTokenAmount);
         
         return self::decodeFromQ96($beforeToken);
@@ -78,7 +76,7 @@ class TokenHelper
         float $peerAmount,
         float $burnAmount,
         float $inviterAmount = 0
-    ): ?float {
+    ): ?string {
         return self::convertToQ96($feeAmount + $peerAmount + $burnAmount + $inviterAmount);
     }
 

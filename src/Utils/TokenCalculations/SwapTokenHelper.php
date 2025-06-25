@@ -19,8 +19,6 @@ class SwapTokenHelper
     public static function calculateBtc(string $btcLpTokenReserve, string $lpTokenReserve, string $tokensToSwap, float $POOLFEE = 0.01): string
     {
         // Convert inputs to Q96 fixed-point format
-        $btcLpQ96 = TokenHelper::convertToQ96($btcLpTokenReserve);
-        $lpQ96 = TokenHelper::convertToQ96($lpTokenReserve);
         $tokensToSwapQ96 = $tokensToSwap;
 
         $POOLFEE = TokenHelper::convertToQ96($POOLFEE);
@@ -28,10 +26,10 @@ class SwapTokenHelper
         $feeAmountQ96 = TokenHelper::mulQ96($tokensToSwap, $POOLFEE);
 
         // Step 2: Add pool fee to LP token reserve
-        $lpTokenAmountAfterLPFee = TokenHelper::addQ96($lpQ96, $feeAmountQ96);
+        $lpTokenAmountAfterLPFee = TokenHelper::addQ96($lpTokenReserve, $feeAmountQ96);
 
         // Step 3: Calculate product of new token reserve and BTC reserve
-        $constantProductQ96 = TokenHelper::mulQ96($lpTokenAmountAfterLPFee, $btcLpQ96);
+        $constantProductQ96 = TokenHelper::mulQ96($lpTokenAmountAfterLPFee, $btcLpTokenReserve);
 
         // Step 4: Add user tokens to pool
         $lpAccountAfterTokenTransfer = TokenHelper::addQ96($lpTokenAmountAfterLPFee, $tokensToSwapQ96);
@@ -40,7 +38,7 @@ class SwapTokenHelper
         $btcPeerTokenAfterSwap = TokenHelper::divQ96($constantProductQ96, $lpAccountAfterTokenTransfer);
 
         // Step 6: BTC received = Initial BTC reserve - new BTC reserve
-        $btcReceivedQ96 = TokenHelper::subQ96($btcLpQ96, $btcPeerTokenAfterSwap);
+        $btcReceivedQ96 = TokenHelper::subQ96($btcLpTokenReserve, $btcPeerTokenAfterSwap);
 
         // Convert result back to float for human-readability
         return $btcReceivedQ96;

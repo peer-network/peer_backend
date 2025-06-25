@@ -70,9 +70,7 @@ class PeerTokenMapper
             $stmt->execute();
             $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            $this->logger->info("Inserted new transaction into database");
-
-            return $walletInfo['liquidity'];
+            return $walletInfo['liquiditq'];
         } catch (\PDOException $e) {
             $this->logger->error(
                 "PeerTokenMapper.getLpToken: Exception occurred while getting loop accounts",
@@ -220,7 +218,7 @@ class PeerTokenMapper
                     'transUniqueId' => $transUniqueId,
                     'transactionType' => 'transferDeductSenderToRecipient',
                     'senderId' => $userId,
-                    'tokenAmount' => $requiredAmount,
+                    'tokenAmount' => -$requiredAmount,
                     'message' => $message
                 ]);
                 $this->saveWalletEntry($userId, $requiredAmount, 'DEBIT');
@@ -581,12 +579,12 @@ class PeerTokenMapper
             $getLpToken = $this->getLpInfo();
             $getLpTokenBtcLP = $this->getLpTokenBtcLP();
 
-            if (empty($getLpToken) || !isset($getLpToken['liquidity'])) {
+            if (empty($getLpToken) || !isset($getLpToken['liquiditq'])) {
                 throw new \RuntimeException("Invalid LP token data retrieved.");
             }
 
             // Ensure both values are strings
-            $liquidity = (float) $getLpToken['liquidity'];
+            $liquidity = (string) $getLpToken['liquiditq'];
 
             if ($liquidity == 0) {
                 return [
@@ -626,7 +624,7 @@ class PeerTokenMapper
         }
     }
 
-    public function getTokenPriceValue(): ?float
+    public function getTokenPriceValue(): ?string
     {
         $this->logger->info('PeerTokenMapper.getTokenPriceValue');
 
@@ -640,7 +638,7 @@ class PeerTokenMapper
             }
 
             // Ensure both values are strings
-            $liqPoolTokenAmount = (float) $liqPool['liquidity'];
+            $liqPoolTokenAmount = (string) $liqPool['liquiditq'];
 
             if ($liqPoolTokenAmount == 0 || $btcPoolBTCAmount == 0) {
                 $this->logger->error("liqudityPool or btcPool liquidity is 0");
@@ -684,12 +682,12 @@ class PeerTokenMapper
         }
         $btcAddress = $args['btcAddress'];
 
-        if (!PeerTokenMapper::isValidBTCAddress($btcAddress)) {
-            $this->logger->warning('Invalid btcAddress .', [
-                'btcAddress' => $btcAddress,
-            ]);
-            return self::respondWithError(31204); // Invalid BTC Address
-        }
+        // if (!PeerTokenMapper::isValidBTCAddress($btcAddress)) {
+        //     $this->logger->warning('Invalid btcAddress .', [
+        //         'btcAddress' => $btcAddress,
+        //     ]);
+        //     return self::respondWithError(31204); // Invalid BTC Address
+        // }
 
         if (!isset($args['password']) && empty($args['password'])) {
             $this->logger->warning('Password required');
@@ -721,6 +719,7 @@ class PeerTokenMapper
             return self::respondWithError(30264);
         }
         $numberoftokensToSwap = (float) $args['numberoftokens'] ?? 0.0;
+        $numberoftokensToSwap = TokenHelper::convertToQ96($numberoftokensToSwap);
 
 
         // Get EUR/BTC price
@@ -740,7 +739,7 @@ class PeerTokenMapper
 
         $peerTokenEURPrice = TokenHelper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
 
-        if (($peerTokenEURPrice * $numberoftokensToSwap) < 10) {
+        if (TokenHelper::mulQ96($peerTokenEURPrice, $numberoftokensToSwap) < 10) {
             $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
                 'numberoftokens' => $numberoftokensToSwap,
                 'Balance' => $currentBalance,
@@ -749,7 +748,6 @@ class PeerTokenMapper
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
-        $numberoftokensToSwap = TokenHelper::convertToQ96($numberoftokensToSwap);
 
         $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokensToSwap, PEERFEE, POOLFEE, BURNFEE);
 
@@ -769,7 +767,7 @@ class PeerTokenMapper
             return self::respondWithError($e->getMessage());
         }
 
-        if ($currentBalance < $requiredAmount) {
+        if (($currentBalance < $requiredAmount)) {
             $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
                 'userId' => $userId,
                 'Balance' => TokenHelper::decodeFromQ96($currentBalance),
@@ -975,7 +973,7 @@ class PeerTokenMapper
      * 
      * @return float BTC Liquidity in account
      */
-    public function getLpTokenBtcLP(): float
+    public function getLpTokenBtcLP(): string
     {
 
         $this->logger->info("PeerTokenMapper.getLpToken started");
@@ -996,10 +994,10 @@ class PeerTokenMapper
 
             $this->logger->info("Fetched btcPool data");
 
-            if (!isset($walletInfo['liquidity']) || empty($walletInfo['liquidity'])) {
-                throw new \RuntimeException("Failed to get accounts: " . "btcPool liquidity amount is invalid");
+            if (!isset($walletInfo['liquiditq']) || empty($walletInfo['liquiditq'])) {
+                throw new \RuntimeException("Failed to get accounts: " . "btcPool liquiditq amount is invalid");
             }
-            $liquidity = (float)$walletInfo['liquidity'];
+            $liquidity = (string) $walletInfo['liquiditq'];
 
             return $liquidity;
         } catch (\PDOException $e) {
@@ -1101,8 +1099,8 @@ class PeerTokenMapper
             return [
                 'status' => 'success',
                 'ResponseCode' => 11218, // Successfully update with Liquidity into Pool
-                'newTokenAmount' => $newTokenAmount,
-                'newBtcAmount' => $newBtcAmount,
+                'newTokenAmount' => TokenHelper::decodeFromQ96($newTokenAmount),
+                'newBtcAmount' => TokenHelper::decodeFromQ96($newBtcAmount),
                 'newTokenPrice' => $tokenPrice   // TODO: Replace with dynamic calculation
             ];
         } catch (\Throwable $e) {
@@ -1110,24 +1108,6 @@ class PeerTokenMapper
             return self::respondWithError($e->getMessage());
         }
     }
-
-    /**
-     * Validate and cast the liquidity amount.
-     *
-     * @param mixed $value
-     * @param string $typeLabel
-     * @return float
-     */
-    private function validateAmount($value, string $typeLabel): float
-    {
-        $amount = (float) $value;
-        if ($amount <= 0 && !is_float($value)) {
-            $this->logger->warning("Invalid $typeLabel amount", ['value' => $value]);
-            throw new \InvalidArgumentException("Invalid $typeLabel amount");
-        }
-        return $amount;
-    }
-
 
     static function isValidBTCAddress($address)
     {
