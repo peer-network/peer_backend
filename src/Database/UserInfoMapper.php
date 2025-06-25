@@ -74,6 +74,7 @@ class UserInfoMapper
                           amountfriends = :amountfriends, 
                           amountblocked = :amountblocked, 
                           isprivate = :isprivate, 
+                          reports = :reports, 
                           invited = :invited,
                           phone = :phone,                          
                           pkey = :pkey,
@@ -89,6 +90,7 @@ class UserInfoMapper
             $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
             $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
+            $stmt->bindValue(':reports', $data['reports'], \PDO::PARAM_INT);
             $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
             $stmt->bindValue(':phone', $data['phone'], \PDO::PARAM_STR);
             $stmt->bindValue(':pkey', $data['pkey'], \PDO::PARAM_STR);
@@ -644,6 +646,56 @@ class UserInfoMapper
                 'error' => $e->getMessage()
             ]);
             return ['status' => 'error', 'message' => 41012];
+        }
+    }
+
+    public function addUserActivity(string $action, string $userid, string $reported_userid): bool
+    {
+        $this->logger->info("UserInfoMapper.addUserActivity started");
+
+        $table = match ($action) {
+            'reportUser' => 'user_user_reports',
+            default => null,
+        };
+
+        if (!$table) {
+            $this->logger->error("UserInfoMapper.addUserActivity: Invalid action provided", ['action' => $action]);
+            return false;
+        }
+
+        try {
+            $this->db->beginTransaction();
+
+            // Check if the record already exists
+            $sqlCheck = "SELECT COUNT(*) FROM $table WHERE reporter_userid = :reporter_userid AND reported_userid = :reported_userid";
+            $stmtCheck = $this->db->prepare($sqlCheck);
+            $stmtCheck->bindValue(':reporter_userid', $userid, \PDO::PARAM_STR);
+            $stmtCheck->bindValue(':reported_userid', $reported_userid, \PDO::PARAM_STR);
+            $stmtCheck->execute();
+            $exists = $stmtCheck->fetchColumn() > 0;
+
+            if (!$exists) {
+                // Insert a new record
+                $sql = "INSERT INTO $table (reporter_userid, reported_userid) VALUES (:reporter_userid, :reported_userid)";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindValue(':reporter_userid', $userid, \PDO::PARAM_STR);
+                $stmt->bindValue(':reported_userid', $reported_userid, \PDO::PARAM_STR);
+                $success = $stmt->execute();
+
+                if ($success) {
+                    $this->db->commit();
+                    $this->logger->info("User activity added successfully", ['action' => $action, 'userid' => $userid, 'reported_userid' => $reported_userid]);
+                    return true;
+                }
+            }
+
+            $this->db->rollBack();
+            $this->logger->warning("User activity already exists or failed to add", ['action' => $action, 'userid' => $userid, 'reported_userid' => $reported_userid]);
+            return false;
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            $this->logger->error("UserInfoMapper.addUserActivity: Exception occurred", ['exception' => $e->getMessage()]);
+            return false;
         }
     }
 }

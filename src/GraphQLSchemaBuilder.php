@@ -1735,6 +1735,7 @@ class GraphQLSchemaBuilder
             'deletePost' => fn(mixed $root, array $args) => $this->postService->deletePost($args['id']),
             'likeComment' => fn(mixed $root, array $args) => $this->commentInfoService->likeComment($args['commentid']),
             'reportComment' => fn(mixed $root, array $args) => $this->commentInfoService->reportComment($args['commentid']),
+            'reportUser' => fn(mixed $root, array $args) => $this->userInfoService->reportUser($args['userid']),
             'contactus' => fn(mixed $root, array $args) => $this->ContactUs($args),
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
