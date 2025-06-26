@@ -3,13 +3,15 @@
 namespace Fawaz\App;
 
 use Fawaz\Database\CommentInfoMapper;
+use Fawaz\Database\ReportsMapper;
+use Fawaz\Utils\ReportTargetType;
 use Psr\Log\LoggerInterface;
 
 class CommentInfoService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected CommentInfoMapper $commentInfoMapper)
+    public function __construct(protected LoggerInterface $logger, protected CommentInfoMapper $commentInfoMapper, protected ReportsMapper $reportsMapper)
     {
     }
 
@@ -137,7 +139,13 @@ class CommentInfoService
             return $this->respondWithError(31607);
         }
 
-        $exists = $this->commentInfoMapper->addUserActivity('reportComment', $this->currentUserId, $commentId);
+        // $exists = $this->commentInfoMapper->addUserActivity('reportComment', $this->currentUserId, $commentId);
+        $exists = $this->reportsMapper->addReport(
+            $this->currentUserId,
+            ReportTargetType::COMMENT, 
+            $commentId, 
+            ""
+        );
 
         if (!$exists) {
             return $this->respondWithError(31605);

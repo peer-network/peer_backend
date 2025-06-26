@@ -3,14 +3,16 @@
 namespace Fawaz\App;
 
 use Fawaz\Database\PostInfoMapper;
+use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\CommentMapper;
+use Fawaz\Utils\ReportTargetType;
 use Psr\Log\LoggerInterface;
 
 class PostInfoService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected PostInfoMapper $postInfoMapper, protected CommentMapper $commentMapper)
+    public function __construct(protected LoggerInterface $logger, protected PostInfoMapper $postInfoMapper, protected CommentMapper $commentMapper, protected ReportsMapper $reportMapper)
     {
     }
 
@@ -187,7 +189,13 @@ class PostInfoService
             return $this->respondWithError(31508);
         }
 
-        $exists = $this->postInfoMapper->addUserActivity('reportPost', $this->currentUserId, $postId);
+        // $exists = $this->postInfoMapper->addUserActivity('reportPost', $this->currentUserId, $postId);
+        $exists = $this->reportMapper->addReport(
+            $this->currentUserId,
+            ReportTargetType::POST, 
+            $postId, 
+            ""
+        );
 
         if (!$exists) {
             return $this->respondWithError(31503);

@@ -3,7 +3,9 @@
 namespace Fawaz\App;
 
 use Fawaz\Database\UserInfoMapper;
+use Fawaz\Database\ReportsMapper;
 use Fawaz\Services\Base64FileHandler;
+use Fawaz\Utils\ReportTargetType;
 use Psr\Log\LoggerInterface;
 
 class UserInfoService
@@ -13,7 +15,8 @@ class UserInfoService
 
     public function __construct(
         protected LoggerInterface $logger,
-        protected UserInfoMapper $userInfoMapper
+        protected UserInfoMapper $userInfoMapper,
+        protected ReportsMapper $reportsMapper,
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -321,7 +324,13 @@ class UserInfoService
             return $this->respondWithError(00000); //Information Not Found: No user found for the provided user ID. Please check the ID and try again",
         }
 
-        $exists = $this->userInfoMapper->addUserActivity('reportUser', $this->currentUserId, $reported_userid);
+        // $exists = $this->userInfoMapper->addUserActivity('reportUser', $this->currentUserId, $reported_userid);
+        $exists = $this->reportsMapper->addReport(
+            $this->currentUserId,
+            ReportTargetType::USER, 
+            $reported_userid, 
+            ""
+        );
 
         if (!$exists) {
             return $this->respondWithError(0000); // "Invalid Action: This user has already been reported",
