@@ -3281,42 +3281,4 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(40901);
         }
     }
-
-    public function resolveReport(array $args): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
-        }
-
-        if (!self::isValidUUID($reported_userid)) {
-            return $this->respondWithError(30201);
-        }
-
-        if ($this->currentUserId === $reported_userid) {
-            return $this->respondWithError(00000); // you cant report on yourself
-        }
-
-        $this->logger->info('CommentInfoService.reportUser started');
-
-        $userInfo = $this->userInfoMapper->loadInfoById($reported_userid);
-
-        if (!$userInfo) {
-            return $this->respondWithError(00000); //Information Not Found: No user found for the provided user ID. Please check the ID and try again",
-        }
-
-        $exists = $this->userInfoMapper->addUserActivity('reportUser', $this->currentUserId, $reported_userid);
-
-        if (!$exists) {
-            return $this->respondWithError(0000); // "Invalid Action: This user has already been reported",
-        }
-
-        $userInfo->setReports($userInfo->getReports() + 1);
-        $this->userInfoMapper->update($userInfo);
-
-        return [
-            'status' => 'success',
-            'ResponseCode' => "00000", // added user report successfully
-            'affectedRows' => $userInfo->getReports(),
-        ];
-    }
 }
