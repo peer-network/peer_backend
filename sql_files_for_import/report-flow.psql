@@ -22,13 +22,22 @@ CREATE TABLE IF NOT EXISTS user_reports (
     targettype          VARCHAR(13) NOT NULL DEFAULT 'post' CHECK (targettype IN ('post', 'user', 'comment')),
     message             VARCHAR (500) DEFAULT NULL,
     collected           SMALLINT DEFAULT 0 NOT NULL,
+    hash_content_sha256 CHAR(64) NOT NULL,
     createdat           TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT unique_reporter_userid_targetid_user_reports UNIQUE (reporter_userid, targetid),
-    CONSTRAINT ids_not_equal CHECK (reporter_userid <> targetid),
-    CONSTRAINT fk_reporter_user_reports_users FOREIGN KEY (reporter_userid) REFERENCES users(uid) ON DELETE CASCADE
+    
+    CONSTRAINT unique_reporter_userid_targetid_user_reports 
+        UNIQUE (reporter_userid, targetid, hash_content_sha256),
+    CONSTRAINT ids_not_equal 
+        CHECK (reporter_userid <> targetid),
+    CONSTRAINT fk_reporter_user_reports_users 
+        FOREIGN KEY (reporter_userid) 
+        REFERENCES users(uid) 
+        ON DELETE CASCADE
 );
 -- CREATE INDEX idx_reporter_userid_reports_user ON user_reports(reporter_userid);
 -- CREATE INDEX idx_targetid_reports_user ON user_reports(targetid);
+-- CREATE INDEX idx_hash_content_reports_user ON user_reports(hash_content_sha256);
+-- CREATE INDEX idx_createdat_reports_user ON user_reports(createdat);
 
 -- Table: users_info
 ALTER TABLE users_info
