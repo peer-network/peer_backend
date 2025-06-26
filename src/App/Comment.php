@@ -5,9 +5,13 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Utils\HashObject;
 
-class Comment
+class Comment implements Hashable
 {
+    use HashObject;
+
     protected string $commentid;
     protected string $userid;
     protected string $postid;
@@ -171,5 +175,15 @@ class Comment
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+    public function getHashableContent(): string {
+        return implode('|', [
+            $this->content
+        ]);
+    }
+
+    public function hashValue(): string {
+        return $this->hashObject($this);
     }
 }
