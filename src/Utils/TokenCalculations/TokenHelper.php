@@ -2,6 +2,8 @@
 
 namespace Fawaz\Utils\TokenCalculations;
 
+use FFI;
+
 define('Q64_96_SCALE', bcpow('2', '96'));
 
 class TokenHelper
@@ -15,11 +17,7 @@ class TokenHelper
      */
     public static function calculatePeerTokenEURPrice(string $btcEURPrice, string $peerTokenBTCPrice): ?string
     {
-        
-        $btcEURPrice = self::convertToQ96($btcEURPrice);
-        $peerTokenBTCPrice = self::convertToQ96($peerTokenBTCPrice);
-
-        $peerValue = self::mulQ96($btcEURPrice, $peerTokenBTCPrice);
+        $peerValue = self::mulRc($btcEURPrice, $peerTokenBTCPrice);
 
         return ($peerValue);
     }
@@ -33,9 +31,9 @@ class TokenHelper
      */
     public static function calculatePeerTokenPriceValue(string $btcPoolBTCAmount, string $liqPoolTokenAmount): ?string
     {
-        $beforeToken = self::divQ96($btcPoolBTCAmount, $liqPoolTokenAmount);
+        $beforeToken = self::divRc($btcPoolBTCAmount, $liqPoolTokenAmount);
         
-        return self::decodeFromQ96($beforeToken);
+        return ($beforeToken);
     }
 
     /**
@@ -55,9 +53,9 @@ class TokenHelper
         float $burnFee,
         float $inviterFee = 0
     ): ?string {
-        $allFees = self::convertToQ96((1 + $peerFee + $poolFee + $burnFee + $inviterFee));
+        $allFees = (1 + $peerFee + $poolFee + $burnFee + $inviterFee);
 
-        $requiredAmount = self::mulQ96($numberOfTokens, $allFees);
+        $requiredAmount = self::mulRc($numberOfTokens, $allFees);
 
         return $requiredAmount;
     }
@@ -77,7 +75,7 @@ class TokenHelper
         float $burnAmount,
         float $inviterAmount = 0
     ): ?string {
-        return self::convertToQ96($feeAmount + $peerAmount + $burnAmount + $inviterAmount);
+        return ($feeAmount + $peerAmount + $burnAmount + $inviterAmount);
     }
 
     /**
@@ -98,10 +96,10 @@ class TokenHelper
      * @param int $precision Number of decimal places in output.
      * @return string
      */
-    public static function decodeFromQ96(string $q96Value, int $precision = 30): string
-    {
-        return bcdiv($q96Value, Q64_96_SCALE, $precision);
-    }
+    // public static function decodeFromQ96(string $q96Value, int $precision = 30): string
+    // {
+    //     return bcdiv($q96Value, Q64_96_SCALE, $precision);
+    // }
 
 
     /**
@@ -113,9 +111,13 @@ class TokenHelper
      * @param string $q96Value2 Second Q96-encoded value.
      * @return string Sum of the two Q96 values, as a Q96-encoded string.
      */
-    public static function addQ96(string $q96Value1, string $q96Value2): string
+    public static function addRc(string $q96Value1, string $q96Value2): string
     {
-        return bcadd($q96Value1, $q96Value2);
+        $runtIns = self::initRc();
+
+        $result = $runtIns->add_decimal($q96Value1, $q96Value2);
+
+        return $result;
     }
 
 
@@ -128,11 +130,13 @@ class TokenHelper
      * @param string $q96Value2 Second Q96-encoded value.
      * @return string Sum of the two Q96 values, as a Q96-encoded string.
      */
-    public static function mulQ96(string $q96Value1, string $q96Value2): string
+    public static function mulRc(string $q96Value1, string $q96Value2): string
     {
-        $result = bcmul($q96Value1, $q96Value2);
+        $runtIns = self::initRc();
 
-        return bcdiv($result, Q64_96_SCALE);
+        $result = $runtIns->multiply_decimal($q96Value1, $q96Value2);
+
+        return $result;
 
     }
     
@@ -145,10 +149,13 @@ class TokenHelper
      * @param string $q96Value2 Second Q96-encoded value.
      * @return string Sum of the two Q96 values, as a Q96-encoded string.
      */
-    public static function divQ96(string $q96Value1, string $q96Value2): string
+    public static function divRc(string $q96Value1, string $q96Value2): string
     {
-        $scaled = bcmul($q96Value1, Q64_96_SCALE);
-        return bcdiv($scaled, $q96Value2);
+        $runtIns = self::initRc();
+
+        $result = $runtIns->divide_decimal($q96Value1, $q96Value2);
+
+        return $result;
     }
 
     /**
@@ -160,14 +167,6 @@ class TokenHelper
      * @param string $q96Value2 Second Q96-encoded value.
      * @return string Sum of the two Q96 values, as a Q96-encoded string.
      */
-    public static function compare(string $qValue1, string $qValue2): int
-    {
-        if (!self::isValidQ64_96($qValue1) || !self::isValidQ64_96($qValue2)) {
-            return 0;
-        }
-        return bccomp($qValue1, $qValue2);
-    }
-        
     /**
      * Substract two Q96-encoded fixed-point values.
      *
@@ -177,20 +176,37 @@ class TokenHelper
      * @param string $q96Value2 Second Q96-encoded value.
      * @return string Sum of the two Q96 values, as a Q96-encoded string.
      */
-    public static function subQ96(string $q96Value1, string $q96Value2): string
+    public static function subRc(string $q96Value1, string $q96Value2): string
     {
-        return bcsub($q96Value1, $q96Value2);
+        $runtIns = self::initRc();
+
+        $result = $runtIns->subtract_decimal($q96Value1, $q96Value2);
+
+        return $result;
     }
 
-    // Überprüft, ob der Wert eine gültige Q64.96-Zahl ist
-    public static function isValidQ64_96(string $qValue): bool
-    {
-        if (!preg_match('/^[0-9]+$/', $qValue)) {
-            return false;
-        }
-        if (bccomp($qValue, MAX_VAL_Q_96) >= 0) {
-            return false;
-        }
-        return true;
+    /**
+     * initialise Rust.
+     *
+     * This method assumes both values are already scaled by 2^96.
+     *
+     * @param string $q96Value1 First Q96-encoded value.
+     * @param string $q96Value2 Second Q96-encoded value.
+     * @return string Sum of the two Q96 values, as a Q96-encoded string.
+     */
+    public static function initRc(){
+
+        $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/tokencalculation.dll';
+
+        // Load FFI bindings
+        $ffi = FFI::cdef("
+            const char* add_decimal(const char* a, const char* b);
+            const char* subtract_decimal(const char* a, const char* b);
+            const char* multiply_decimal(const char* a, const char* b);
+            const char* divide_decimal(const char* a, const char* b);
+        ", $relativePath);
+
+        return $ffi;
+
     }
 }
