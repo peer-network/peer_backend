@@ -80,32 +80,25 @@ class TokenHelper
         return self::convertToQ96($feeAmount + $peerAmount + $burnAmount + $inviterAmount);
     }
 
-
-     /**
-     * Converts a floating-point number to its Q96 fixed-point representation.
+    /**
+     * Converts a decimal string to its Q96 fixed-point representation.
      *
-     * Q96 is a fixed-point format where values are scaled by 2^96.
-     * This method multiplies the given float by 2^96 and returns the result as a string.
-     *
-     * @param float $value The floating-point number to convert.
-     * @return string The Q96-scaled value as a string.
+     * @param string $decimal The number as a string (not float).
+     * @return string Q96 fixed-point representation.
      */
-    public static function convertToQ96(float $value): string
+    public static function convertToQ96(string $decimal): string
     {
-        $decimalString = number_format($value, 30, '.', '');
-        return bcmul($decimalString, Q64_96_SCALE, 0);
+        return bcmul($decimal, Q64_96_SCALE, 0);
     }
 
     /**
-     * Converts a Q96 fixed-point string back to a human-readable decimal string.
+     * Converts a Q96 fixed-point string back to a decimal string.
      *
-     * This method divides the given Q96 value by 2^96 to recover the original number.
-     *
-     * @param string $q96Value The Q96-encoded string.
-     * @param int $precision The number of decimal digits to include in the result (default: 18).
-     * @return string The decoded decimal value.
+     * @param string $q96Value The Q96 fixed-point value.
+     * @param int $precision Number of decimal places in output.
+     * @return string
      */
-    public static function decodeFromQ96(string $q96Value, int $precision = 9): string
+    public static function decodeFromQ96(string $q96Value, int $precision = 30): string
     {
         return bcdiv($q96Value, Q64_96_SCALE, $precision);
     }
@@ -139,7 +132,7 @@ class TokenHelper
     {
         $result = bcmul($q96Value1, $q96Value2);
 
-        return bcdiv($result, Q64_96_SCALE, 0);
+        return bcdiv($result, Q64_96_SCALE);
 
     }
     
@@ -155,7 +148,7 @@ class TokenHelper
     public static function divQ96(string $q96Value1, string $q96Value2): string
     {
         $scaled = bcmul($q96Value1, Q64_96_SCALE);
-        return bcdiv($scaled, $q96Value2, 0);
+        return bcdiv($scaled, $q96Value2);
     }
 
     /**

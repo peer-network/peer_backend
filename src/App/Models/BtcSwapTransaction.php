@@ -84,11 +84,9 @@ class BtcSwapTransaction
             ],
             'tokenAmount' => [
                 'required' => true,
-                'validators' => [['name' => 'ToFloat'], ['name' => 'FloatSanitize']],
             ],
             'btcAmount' => [
                 'required' => true,
-                'validators' => [['name' => 'ToFloat'], ['name' => 'FloatSanitize']],
             ],
             'status' => [
                 'required' => false,
@@ -249,11 +247,11 @@ class BtcSwapTransaction
     /**
      * Getter and Setter methods for tokenAmount
      */
-    public function getTokenAmount(): float
+    public function getTokenAmount(): string
     {
         return $this->tokenAmount;
     }
-    public function setTokenAmount(float $tokenAmount): void
+    public function setTokenAmount(string $tokenAmount): void
     {
         $this->tokenAmount = $tokenAmount;
     }
@@ -262,11 +260,11 @@ class BtcSwapTransaction
     /**
      * Getter and Setter methods for btcAmount
      */
-    public function getBtcAmount(): float
+    public function getBtcAmount(): string
     {
         return $this->btcAmount;
     }
-    public function setBtcAmount(float $btcAmount): void
+    public function setBtcAmount(string $btcAmount): void
     {
         $this->btcAmount = $btcAmount;
     }

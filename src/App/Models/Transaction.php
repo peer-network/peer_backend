@@ -75,8 +75,7 @@ class Transaction
                 ],
             ],
             'tokenAmount' => [
-                'required' => true,
-                'validators' => [['name' => 'ToFloat'], ['name' => 'FloatSanitize']],
+                'required' => true
             ],
             'transferAction' => [
                 'required' => false,
@@ -224,11 +223,11 @@ class Transaction
     /**
      * Getter and Setter methods for tokenAmount
      */
-    public function getTokenAmount(): float
+    public function getTokenAmount(): string
     {
         return $this->tokenAmount;
     }
-    public function setTokenAmount(float $tokenAmount): void
+    public function setTokenAmount(string $tokenAmount): void
     {
         $this->tokenAmount = $tokenAmount;
     }
