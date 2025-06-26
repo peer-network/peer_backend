@@ -3,13 +3,9 @@
 namespace Fawaz\Database;
 
 use PDO;
-use Fawaz\App\User;
-use Fawaz\App\UserInfo;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\ReportTargetType;
 use DateTime;
-
-use function DI\string;
 
 class ReportsMapper
 {
