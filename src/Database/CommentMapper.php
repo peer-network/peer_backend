@@ -399,20 +399,22 @@ class CommentMapper
         return $comments;
     }
 
-    public function loadById(string $id): Comment|false
+    public function loadById(string $commentid): Comment|false
     {
         $this->logger->info("CommentMapper.loadById started");
-
-        $sql = "SELECT * FROM comments WHERE id = :id";
+        
+        $sql = "SELECT * FROM comments WHERE commentid = :commentid";
         $stmt = $this->db->prepare($sql);
-        $stmt->execute(['id' => $id]);
+        $stmt->execute(
+            ['commentid' => $commentid]
+        );
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new Comment($data);
         }
 
-        $this->logger->warning("No comment found with id", ['id' => $id]);
+        $this->logger->warning("No comment found with commentid", ['commentid' => $commentid]);
         return false;
     }
 

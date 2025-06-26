@@ -153,7 +153,7 @@ class Comment implements Hashable
                     [
                         'name' => 'StringLength', 
                         'options' => [
-                            'min' => ConstantsConfig::comment()['MIN_LENGTH'],
+                            'min' => ConstantsConfig::comment()['CONTENT']['MIN_LENGTH'],
                             'max' => ConstantsConfig::comment()['CONTENT']['MAX_LENGTH'],
                             'errorCode' => 30265,
                             ]

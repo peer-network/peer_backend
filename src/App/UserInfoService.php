@@ -3,6 +3,7 @@
 namespace Fawaz\App;
 
 use Fawaz\Database\UserInfoMapper;
+use Fawaz\Database\UserMapper;
 use Fawaz\Database\ReportsMapper;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Utils\ReportTargetType;
@@ -16,6 +17,7 @@ class UserInfoService
     public function __construct(
         protected LoggerInterface $logger,
         protected UserInfoMapper $userInfoMapper,
+        protected UserMapper $userMapper,
         protected ReportsMapper $reportsMapper,
     ) {
         $this->base64filehandler = new Base64FileHandler();
@@ -304,45 +306,70 @@ class UserInfoService
 
     public function reportUser(string $reported_userid): array
     {
+        $this->logger->info('UserInfoService.reportUser started');
+
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
-        }
+        }   
 
         if (!self::isValidUUID($reported_userid)) {
             return $this->respondWithError(30201);
         }
 
         if ($this->currentUserId === $reported_userid) {
+            $this->logger->error('Error: currentUserId == $reported_userid');
             return $this->respondWithError(00000); // you cant report on yourself
         }
 
-        $this->logger->info('CommentInfoService.reportUser started');
+        try {
+            $user = $this->userMapper->loadById($reported_userid);
 
-        $userInfo = $this->userInfoMapper->loadInfoById($reported_userid);
+            if (!$user) {
+                $this->logger->error('Error while fetching user data from db');
+                return $this->respondWithError(00000);
+            }
 
-        if (!$userInfo) {
-            return $this->respondWithError(00000); //Information Not Found: No user found for the provided user ID. Please check the ID and try again",
+            $userInfo = $this->userInfoMapper->loadInfoById($reported_userid);
+
+            if (!$userInfo) {
+                $this->logger->error('Error while fetching user data from db');
+                return $this->respondWithError(00000); 
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Error while fetching data for report generation ', ['exception' => $e]);
+            return $this->respondWithError(00000);
         }
 
-        // $exists = $this->userInfoMapper->addUserActivity('reportUser', $this->currentUserId, $reported_userid);
-        $exists = $this->reportsMapper->addReport(
-            $this->currentUserId,
-            ReportTargetType::USER, 
-            $reported_userid, 
-            ""
-        );
-
-        if (!$exists) {
-            return $this->respondWithError(0000); // "Invalid Action: This user has already been reported",
+        $contentHash = $user->hashValue();
+        if (empty($contentHash)) {
+            $this->logger->error('Error while generation content hash');
+            return $this->respondWithError(00000);
         }
 
-        $userInfo->setReports($userInfo->getReports() + 1);
-        $this->userInfoMapper->update($userInfo);
+        try {
+            $exists = $this->reportsMapper->addReport(
+                $this->currentUserId,
+                ReportTargetType::USER, 
+                $reported_userid, 
+                $contentHash
+            );
 
-        return [
-            'status' => 'success',
-            'ResponseCode' => "00000", // added user report successfully
-            'affectedRows' => $userInfo->getReports(),
-        ];
+            if (!$exists) {
+                $this->logger->error('Error while adding report to db');
+                return $this->respondWithError(00000);
+            }
+
+            $userInfo->setReports($userInfo->getReports() + 1);
+            $this->userInfoMapper->update($userInfo);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => "00000", // added user report successfully
+                'affectedRows' => $userInfo->getReports(),
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
+            return $this->respondWithError(00000);
+        }
     }
 }

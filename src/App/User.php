@@ -421,12 +421,14 @@ class User implements Hashable
     }
 
     public function getHashableContent(): string {
-        return implode('|', [
+        $content = implode('|', [
             $this->email,
             $this->img,
             $this->username,
             $this->biography
         ]);
+        echo $content;
+        return $content;
     }
 
     public function hashValue(): string {

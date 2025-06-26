@@ -7,14 +7,19 @@ use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Utils\ReportTargetType;
 use Psr\Log\LoggerInterface;
+use Fawaz\Database\PostMapper;
 
 class PostInfoService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected PostInfoMapper $postInfoMapper, protected CommentMapper $commentMapper, protected ReportsMapper $reportMapper)
-    {
-    }
+    public function __construct(
+        protected LoggerInterface $logger, 
+        protected PostInfoMapper $postInfoMapper, 
+        protected CommentMapper $commentMapper, 
+        protected ReportsMapper $reportMapper,
+        protected PostMapper $postMapper
+    ){}
 
     public function setCurrentUserId(string $userId): void
     {
@@ -174,40 +179,61 @@ class PostInfoService
             return $this->respondWithError(60501);
         }
 
+        $this->logger->info('PostInfoService.reportPost started');
+
         if (!self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
         }
 
-        $this->logger->info('PostInfoService.reportPost started');
+        try {
+            $post = $this->postMapper->loadById($postId);
+            if (!$post) {
+                $this->logger->error('Error while fetching comment data from db');
+                return $this->respondWithError(00000);
+            }
 
-        $postInfo = $this->postInfoMapper->loadById($postId);
-        if ($postInfo === null) {
-            return $this->respondWithError(31602);
+            $postInfo = $this->postInfoMapper->loadById($postId);
+            if ($postInfo === null) {
+                $this->logger->error('Error while fetching comment data from db');
+                return $this->respondWithError(31602);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Error while fetching data for report generation ', ['exception' => $e]);
+            return $this->respondWithError(00000);
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
             return $this->respondWithError(31508);
         }
-
-        // $exists = $this->postInfoMapper->addUserActivity('reportPost', $this->currentUserId, $postId);
-        $exists = $this->reportMapper->addReport(
-            $this->currentUserId,
-            ReportTargetType::POST, 
-            $postId, 
-            ""
-        );
-
-        if (!$exists) {
-            return $this->respondWithError(31503);
+        
+        $contentHash = $post->hashValue();
+        if (empty($contentHash)) {
+            return $this->respondWithError(00000);
         }
 
-        $postInfo->setReports($postInfo->getReports() + 1);
-        $this->postInfoMapper->update($postInfo);
+        try {
+            $exists = $this->reportMapper->addReport(
+                $this->currentUserId,
+                ReportTargetType::POST, 
+                $postId, 
+                $contentHash
+            );
 
-        return [
-            'status' => 'success',
-            'ResponseCode' => 11505,
-        ];
+            if (!$exists) {
+                return $this->respondWithError(31503);
+            }
+
+            $postInfo->setReports($postInfo->getReports() + 1);
+            $this->postInfoMapper->update($postInfo);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11505,
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
+            return $this->respondWithError(00000);
+        }
     }
 
     public function viewPost(string $postId): array
