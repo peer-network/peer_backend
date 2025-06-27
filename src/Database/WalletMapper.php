@@ -11,27 +11,31 @@ use Psr\Log\LoggerInterface;
 
 const TABLESTOGEMS = true;
 const DAILY_NUMBER_TOKEN= 5000;
+// Whereby
 const VIEW_=1;
 const LIKE_=2;
 const DISLIKE_=3;
 const COMMENT_=4;
 const POST_=5;
+const POSTINVESTBASIC_=6;
+const POSTINVESTPREMIUM_=7;
 const INVITATION_=11;
-
+const DIRECTDEBIT_=14;
+const CREDIT_=15;
+const TRANSFER_=18;
+// Recieve
 const RECEIVELIKE=5;
 const RECEIVEDISLIKE=4;
 const RECEIVECOMMENT=2;
 const RECEIVEPOSTVIEW=0.25;
-
+// Price
 const PRICELIKE=3;
 const PRICEDISLIKE=5;
 const PRICECOMMENT=0.5;
 const PRICEPOST=20;
-
-const DIRECTDEBIT_=14;
-const CREDIT_=15;
-const TRANSFER_=18;
-
+const PRICEINVESTBASIC_=50;
+const PRICEINVESTPREMIUM_=200;
+// Fees
 const INVTFEE=0.01;
 const POOLFEE=0.01;
 const PEERFEE=0.02;
@@ -58,23 +62,23 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.transferToken started');
 
-		$accountsResult = $this->pool->returnAccounts();
+        $accountsResult = $this->pool->returnAccounts();
 
-		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
-			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
-			return self::respondWithError(40701);
-		}
+        if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
+            $this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
+            return self::respondWithError(40701);
+        }
 
-		$liqpool = $accountsResult['response'] ?? null;
+        $liqpool = $accountsResult['response'] ?? null;
 
-		if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
-			$this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
-			return self::respondWithError(30102);
-		}
+        if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
+            $this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
+            return self::respondWithError(30102);
+        }
 
-		$this->poolWallet = $liqpool['pool'];
-		$this->burnWallet = $liqpool['burn'];
-		$this->peerWallet = $liqpool['peer'];
+        $this->poolWallet = $liqpool['pool'];
+        $this->burnWallet = $liqpool['burn'];
+        $this->peerWallet = $liqpool['peer'];
 
         $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
 
@@ -349,11 +353,11 @@ class WalletMapper
             try {
                 if ($results['overall_total_numbers'] === 0) {
                     $results['overall_total_numbers'] = (float)($row['overall_total_numbers'] ?? 0);
-                    $results['overall_total_numbersq'] = (int)$this->decimalToQ64_96($results['overall_total_numbers']);
+                    $results['overall_total_numbersq'] = (int)Q96::decimalToQ64_96($results['overall_total_numbers']);
                 }
 
                 $totalNumbers = (float)$row['total_numbers'];
-                $totalNumbersQ = (int)$this->decimalToQ64_96($totalNumbers);
+                $totalNumbersQ = (int)Q96::decimalToQ64_96($totalNumbers);
 
                 $results['posts'][] = [
                     'postid' => $row['postid'],
@@ -432,7 +436,7 @@ class WalletMapper
     {
         $this->logger->info('WalletMapper.loadWalletById started');
 
-        $userId = $currentUserId;
+        $userId = $currentUserId ?? null;
         $postId = $args['postid'] ?? null;
         $fromId = $args['fromid'] ?? null;
 
@@ -742,7 +746,7 @@ class WalletMapper
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
             $stmt->bindValue(':gems', $gems, \PDO::PARAM_STR);
             $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':numbersq', Q96::decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
@@ -789,7 +793,7 @@ class WalletMapper
             $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
             $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':numbersq', Q96::decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
@@ -1182,17 +1186,20 @@ class WalletMapper
     public function deductFromWallets(string $userId, ?array $args = []): array
     {
         $this->logger->info('WalletMapper.deductFromWallets started');
-        $this->logger->info('deductFromWallets commenrs args.', ['args' => $args]);
+        $this->logger->info('WalletMapper.deductFromWallets', ['args' => $args]);
 
         $postId = $args['postid'] ?? null;
         $art = $args['art'] ?? null;
         $fromId = $args['fromid'] ?? null;
+        $price = $args['price'] ?? null;
 
         $mapping = [
             2 => ['price' => PRICELIKE, 'whereby' => LIKE_, 'text' => 'Buy like'],
             3 => ['price' => PRICEDISLIKE, 'whereby' => DISLIKE_, 'text' => 'Buy dislike'],
             4 => ['price' => PRICECOMMENT, 'whereby' => COMMENT_, 'text' => 'Buy comment'],
             5 => ['price' => PRICEPOST, 'whereby' => POST_, 'text' => 'Buy post'],
+            6 => ['price' => PRICEINVESTBASIC_, 'whereby' => POSTINVESTBASIC_, 'text' => 'Buy advertise basic'],
+            7 => ['price' => PRICEINVESTPREMIUM_, 'whereby' => POSTINVESTPREMIUM_, 'text' => 'Buy advertise pinned'],
         ];
 
         if (!isset($mapping[$art])) {
@@ -1200,7 +1207,7 @@ class WalletMapper
             return self::respondWithError(30105);
         }
 
-        $price = $mapping[$art]['price'];
+        $price = (!empty($price) && (int)$price) ? $price : $mapping[$art]['price'];
         $whereby = $mapping[$art]['whereby'];
         $text = $mapping[$art]['text'];
 
@@ -1326,7 +1333,7 @@ class WalletMapper
 
             if (!$userExists) {
                 $newLiquidity = abs($liquidity);
-                $liquiditq = abs($this->decimalToQ64_96($newLiquidity));
+                $liquiditq = abs(Q96::decimalToQ64_96($newLiquidity));
 
                 $query = "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
                           VALUES (:userid, :liquidity, :liquiditq, :updatedat)";
@@ -1340,7 +1347,7 @@ class WalletMapper
             } else {
                 $currentBalance = $this->getUserWalletBalance($userId);
                 $newLiquidity = abs($currentBalance + $liquidity);
-                $liquiditq = abs($this->decimalToQ64_96($newLiquidity));
+                $liquiditq = abs(Q96::decimalToQ64_96($newLiquidity));
 
                 $query = "UPDATE wallett
                           SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
@@ -1481,31 +1488,5 @@ class WalletMapper
             'insertCount' => $interactionCount,
             'totalFactor' => $totalFactor
         ];
-    }
-
-    private function decimalToQ64_96(float $value): string
-    {
-        $scaleFactor = \bcpow('2', '96');
-
-		// Convert float to plain decimal string 
-		$decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
-
-		$scaledValue = \bcmul($decimalString, $scaleFactor, 0);
-
-        return $scaledValue;
-    }
-
-    private function q64_96ToDecimal(string $qValue): string
-    {
-        $scaleFactor = \bcpow('2', '96');
-        
-        $decimalValue = \bcdiv($qValue, $scaleFactor, 18);
-        
-        return round($decimalValue, 2);
-    }
-
-    private function addQ64_96(string $qValue1, string $qValue2): string
-    {
-        return \bcadd($qValue1, $qValue2);
     }
 }

@@ -28,8 +28,6 @@ type Query {
   listChats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
   listChatMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
   getDailyFreeStatus: GetDailyResponse!
-  listTodaysInteractions: ListTodaysInteractionsResponse!
-  allfriends(offset: Int, limit: Int): AllUserFriends!
   balance: CurrentLiquidity!
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
@@ -40,11 +38,15 @@ type Query {
   gemsters(day: DayFilterType!): GemstersResponse!
   liquiditypool(userid: ID, postid: ID, fromid: ID, whereby: Int, offset: Int, limit: Int): LiquidityPoolResponse!
   testingpool(offset: Int, limit: Int): TestingPoolResponse!
+  allfriends(offset: Int, limit: Int): AllUserFriends!
   postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
   dailygemstatus: DailyGemStatusResponse!
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
   getReferralInfo: ReferralInfoResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
+  listTodaysInteractions: ListTodaysInteractionsResponse!
+  getActionPrices: GetActionPricesResponse!
+  getUserAdvertisementHistory(offset: Int, limit: Int): ListAdvertisementHistory!
 }
 
 type Mutation {
@@ -71,10 +73,30 @@ type Mutation {
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse!
+  advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): DefaultResponse!
+  advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!): DefaultResponse!
 }
 
 scalar Decimal
 scalar Date
+
+enum AdDuration {
+  ONE_DAY
+  TWO_DAYS
+  THREE_DAYS
+  FOUR_DAYS
+  FIVE_DAYS
+  SIX_DAYS
+  SEVEN_DAYS
+}
+
+enum AdvertisementBasicPlan {
+  BASIC
+}
+
+enum AdvertisementPinnedPlan {
+  PINNED
+}
 
 enum PostActionType {
   LIKE
@@ -99,12 +121,14 @@ type ReferralInfoResponse {
   referralUuid: ID
   referralLink: String
 }
+
 type ReferralListResponse {
   status: String!
   counter: Int!
   ResponseCode: String!
   affectedRows: ReferralUsers!
 }
+
 type ReferralUsers {
   invitedBy: ProfileUser
   iInvited: [ProfileUser!]!
@@ -133,11 +157,14 @@ enum IgnoreOption {
 
 enum PostSortType {
   NEWEST
+  OLDEST
   TRENDING
   LIKES
   DISLIKES
   VIEWS
   COMMENTS
+  FOLLOWER
+  FOLLOWED
 }
 
 enum DayFilterType {
@@ -150,6 +177,22 @@ enum DayFilterType {
   W0
   M0
   Y0
+}
+
+type ListAdvertisementHistory {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [getAdvertisementHistory]
+}
+
+type getAdvertisementHistory {
+  status: String
+  userid: String
+  advertisementid: String
+  startime: String
+  endtime: String
+  createdat: String
 }
 
 type ListTodaysInteractionsResponse {
@@ -344,7 +387,6 @@ type HelloResponse {
   userroles: Int
   currentVersion: String
   wikiLink: String
-  lastMergedPullRequestNumber: String
 }
 
 
@@ -681,7 +723,7 @@ type Post {
   media: String!
   cover: String!
   mediadescription: String!
-   createdat: Date!
+  createdat: Date!
   amountlikes: Int!
   amountviews: Int!
   amountcomments: Int!
@@ -755,4 +797,17 @@ input FeedInput {
   media: String!
   mediadescription: String
   contenttype: String!
+}
+
+type ActionPriceResult {
+    postPrice: Float!
+    likePrice: Float!
+    dislikePrice: Float!
+    commentPrice: Float!
+}
+
+type GetActionPricesResponse {
+    status: String!
+    ResponseCode: String!
+    affectedRows: ActionPriceResult!
 }
