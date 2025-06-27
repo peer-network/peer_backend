@@ -1,48 +1,58 @@
 <?php
 
 namespace Fawaz\Services;
+use FFMpeg\FFMpeg;
+use FFMpeg\Coordinate\TimeCode;
+use FFMpeg\Exception\RuntimeException as FFMpegException;
+
 
 class VideoCoverGenerator
 {
+    private FFMpeg $ffmpeg;
+    
+    public function __construct()
+    {
+        $this->ffmpeg = FFMpeg::create([
+            'ffmpeg.binaries'  => getenv('FFMPEG_PATH') ?: '/usr/bin/ffmpeg',
+            'ffprobe.binaries' => getenv('FFPROBE_PATH') ?: '/usr/bin/ffprobe',
+            'timeout'          => 30, // Seconds
+        ]);
+    }
+
     public function generate(string $videoPath): string
     {
         if (!is_file($videoPath)) {
             throw new \InvalidArgumentException("Video file not found: $videoPath");
         }
 
-        $outputPath = sys_get_temp_dir() . '/' . uniqid('cover_', true) . '.jpg';
+        $outputPath = $this->generateSecureTempPath();
 
-        $command = ['ffmpeg', '-y', '-ss', '0', '-i', $videoPath, '-vframes', '1', $outputPath];
-        $descriptors = [
-            1 => ['pipe', 'w'], 
-            2 => ['pipe', 'w'], 
-        ];
-
-        $process = proc_open($command, $descriptors, $pipes);
-
-        if (!is_resource($process)) {
-            throw new \RuntimeException('Could not start FFmpeg process');
-        }
-
-        $stdout = stream_get_contents($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
-
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-
-        $exitCode = proc_close($process);
-
-        if ($exitCode !== 0 || !file_exists($outputPath)) {
-            throw new \RuntimeException("FFmpeg failed with code $exitCode. Error: $stderr");
+        try {
+            $video = $this->ffmpeg->open($videoPath);
+            $video->frame(TimeCode::fromSeconds(0))
+                  ->save($outputPath);
+        } catch (FFMpegException $e) {
+            // Clean up if frame extraction failed mid-process
+            if (file_exists($outputPath)) {
+                @unlink($outputPath);
+            }
+            throw new \RuntimeException("Cover generation failed: " . $e->getMessage());
         }
 
         return $outputPath;
     }
+
+    private function generateSecureTempPath(): string
+    {
+        $tempFile = tempnam(sys_get_temp_dir(), 'cover_');
+        unlink($tempFile); // Remove tempnam-created file
+        return $tempFile . '.jpg';
+    }
+
     public function deleteTemporaryFile(?string $path): void
     {
-        if ($path && is_file($path)) {
-            unlink($path);
-
+        if ($path && file_exists($path)) {
+            @unlink($path);
         }
     }
 }
