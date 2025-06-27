@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
+use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
@@ -13,6 +14,8 @@ use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
+use Fawaz\config\constants\ConstantsModeration;
+use Fawaz\Services\ContentFilteringService;
 
 class PostService
 {
@@ -418,7 +421,8 @@ class PostService
         $tag = $args['tag'] ?? null; 
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
-
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
         }
@@ -454,6 +458,10 @@ class PostService
             if (!empty($invalidTypes)) {
                 return $this->respondWithError(30103);
             }
+        }
+
+        if(ContentFilteringService::validateContentFilter($contentFilterBy) == false ){
+            return $this->respondWithError(30103);
         }
 
         if ($Ignorlist !== null) {

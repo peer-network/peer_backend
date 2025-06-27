@@ -7,6 +7,8 @@ use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostMedia;
 use Fawaz\Database\Interfaces\PeerMapper;
+use Fawaz\config\constants\ConstantsConfig;
+use Tests\utils\ConfigGeneration\Constants;
 
 class PostMapper extends PeerMapper
 {
@@ -457,12 +459,16 @@ class PostMapper extends PeerMapper
     {
         $this->logger->info("PostMapper.findPostser started");
 
+        $contentSeverityLevelConstantsPath = ConstantsConfig::moderationContent()['CONTENT_SEVERITY_LEVELS'];
+        $defaultContentFilterBy = $contentSeverityLevelConstantsPath['10'];
+
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $from = $args['from'] ?? null;
         $to = $args['to'] ?? null;
         $filterBy = $args['filterBy'] ?? [];
+        $contentFilterBy = $args['contentFilterBy'] ?? $defaultContentFilterBy;
         $Ignorlist = $args['IgnorList'] ?? 'NO';
         $sortBy = $args['sortBy'] ?? null;
         $title = $args['title'] ?? null;
@@ -509,6 +515,38 @@ class PostMapper extends PeerMapper
             $whereClauses[] = "t.name = :tag";
             $params['tag'] = $tag;
         }
+        
+        $contentFilterMapping = [
+            $contentSeverityLevelConstantsPath['0'] => [
+                'WHERE' => 'pi.reports < 1 AND ui.reports < 1',
+                'JOIN' => '
+                    LEFT JOIN post_info pi ON p.postid = pi.postid 
+                    LEFT JOIN users_info ui ON p.userid = ui.userid
+                ',
+            ],
+            $defaultContentFilterBy => [
+                'WHERE' => '',
+                'JOIN' => '',
+            ],
+        ];
+
+        $contentFilterSQLExtension = $contentFilterMapping[$defaultContentFilterBy];
+
+        $joinClauses = "
+            users u ON p.userid = u.uid
+            LEFT JOIN post_tags pt ON p.postid = pt.postid
+            LEFT JOIN tags t ON pt.tagid = t.tagid
+        ";
+
+        if (!empty($contentFilterBy)) { 
+            if ($contentFilterMapping[$contentFilterBy]) {
+                $contentFilterSQLExtension = $contentFilterMapping[$contentFilterBy];
+                if (!empty($contentFilterSQLExtension['WHERE'])) {
+                    $whereClauses[] = $contentFilterSQLExtension['WHERE'];
+                    $joinClauses .= $contentFilterSQLExtension['JOIN'];
+                }
+            }
+        } 
 
         if (!empty($filterBy) && is_array($filterBy)) {
             $validTypes = [];
@@ -596,13 +634,12 @@ class PostMapper extends PeerMapper
                 EXISTS (SELECT 1 FROM follows WHERE followedid = p.userid AND followerid = :currentUserId) as isfollowed,
                 EXISTS (SELECT 1 FROM follows WHERE followerid = p.userid AND followedid = :currentUserId) as isfollowing
             FROM posts p
-            JOIN users u ON p.userid = u.uid
-            LEFT JOIN post_tags pt ON p.postid = pt.postid
-            LEFT JOIN tags t ON pt.tagid = t.tagid
+            JOIN %s
             WHERE %s
             GROUP BY p.postid, u.username, u.slug, u.img
             ORDER BY %s
             LIMIT :limit OFFSET :offset",
+            $joinClauses,
             implode(" AND ", $whereClauses),
             $orderBy
         );
