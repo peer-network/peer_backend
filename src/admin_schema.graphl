@@ -95,7 +95,7 @@ enum CommentType {
 }
 
 enum ContentFilterType {
-  MyGrandmaLikes
+  MYGRANDMALIKES
 }
 
 type ReferralInfoResponse {
