@@ -196,7 +196,7 @@ class TokenHelper
      */
     public static function initRc(){
 
-        $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/tokencalculation.dll';
+        $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.so';
 
         // Load FFI bindings
         $ffi = FFI::cdef("
