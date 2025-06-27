@@ -196,7 +196,14 @@ class TokenHelper
      */
     public static function initRc(){
 
-        $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.so';
+        if (PHP_OS_FAMILY === 'Windows') {
+            $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/tokencalculation.dll';
+        } elseif (PHP_OS_FAMILY === 'Darwin') {
+            $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.dylib';
+        } else {
+            $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.so';
+        }
+        
 
         // Load FFI bindings
         $ffi = FFI::cdef("
