@@ -278,6 +278,12 @@ jobs:
           done
           echo "Backend did not respond in time."
           exit 1
+
+      - name: Confirm PHP FFI is enabled
+        run: docker compose exec backend php -m | grep ffi || echo "FFI not listed in php -m"
+
+      - name: Verify FFI is enabled via php.ini
+        run: docker compose exec backend php -i | grep 'ffi.enable'
  
       - name: Test GraphQL Endpoint
         run: |
