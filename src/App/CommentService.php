@@ -129,7 +129,7 @@ class CommentService
                 'content' => $content,
             ];
 
-            // Post speichern
+            // Post Comment speichern
             try {
                 $comment = new Comment($commentData);
             } catch (\Throwable $e) {
