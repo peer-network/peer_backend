@@ -9,8 +9,14 @@ class ConstantsModeration
     }
 
     private const MODERATION_CONTENT = [
-        'CONTENT_LEVELS' => [
-            'MY_GRANDMA_LIKES'
+        'CONTENT_SEVERITY_LEVELS' => [
+            "0" => 'MYGRANDMALIKES',
+            "10" => 'MYGRANDMAHATES'
+        ],
+        'REPORTS_COUNT_TO_HIDE_FROM_IOS' => [
+            'POST' => 1,
+            'COMMENT' => 1,
+            'USER' => 1,
         ],
     ];
 }
