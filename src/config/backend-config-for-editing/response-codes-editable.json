@@ -951,6 +951,106 @@
         "comment": "Failure: Invalid or expired reset token. Please try again",
         "userFriendlyComment": "This password reset link isn't valid anymore. Please request a new one."
     },
+    "32001": {
+        "comment": "Invalid advertisement duration.",
+        "userFriendlyComment": "The advertisement duration you entered is not valid."      
+    },
+    "32002": {
+        "comment": "Empty postId.",
+        "userFriendlyComment": "Advertisment ID field can not be empty."
+    },
+    "32003": {
+        "comment": "Empty date.",
+        "userFriendlyComment": "Date field can not be empty."
+    },
+    "32004": {
+        "comment": "Cost plan is empty.",
+        "userFriendlyComment": "You must select a cost plan."
+    },
+    "32005": {
+        "comment": "Validation Error: Invalid CostPlan provided. Verify the value and resubmit.",
+        "userFriendlyComment": "The cost plan entered isn't valid. Please check and try again."
+    },
+    "32006": {
+        "comment": "Invalid advertising plan.",
+        "userFriendlyComment": "Invalid advertising plan."
+    },
+    "32007": {   
+        "comment": "Start date invalid or empty.",
+        "userFriendlyComment": "Start date invalid or empty."
+    },
+    "32008": {
+        "comment": "Invalid date. Date cannot be in past and must follow YY-MM-DD format.",
+        "userFriendlyComment": "Invalid date. Date cannot be in past and must follow YY-MM-DD format."
+    },
+    "32009": {
+        "comment": "Invalid duration specified.",
+        "userFriendlyComment": "Invalid duration specified."
+    },
+    "32010": {
+        "comment": "Invalid advertisement plan specified.",
+        "userFriendlyComment": "Invalid advertisement plan specified."
+    },
+    "32011": {
+        "comment": "Invalid string value.",
+        "userFriendlyComment": "The input must be a valid text string (e.g., 'Hello World')."
+    },
+    "32012": {
+        "comment": "Invalid integer value.",
+        "userFriendlyComment": "The input must be a whole number without decimals (e.g., 10)."
+    },
+    "32013": {
+        "comment": "Invalid float value.",
+        "userFriendlyComment": "The input must be a decimal number (e.g., 0.2 or 3.14)."
+    },
+    "32014": {
+        "comment": "Invalid boolean value.",
+        "userFriendlyComment": "The input must be either true or false (e.g., true)."
+    },
+    "32015": {
+        "comment": "Filter method not found.",
+        "userFriendlyComment": "The specified filter method does not exist. Please check your filter name (e.g., 'filterByDate')."
+    },
+    "32016": {
+        "comment": "Validator method not found.",
+        "userFriendlyComment": "The specified validator method does not exist. Please check your validator name (e.g., 'validateEmail')."
+    },
+    "12001": {
+        "comment": "Advertisement post created successfully.",
+        "userFriendlyComment": "Success: Advertisement post created successfully."
+    },
+    "12002": {
+        "comment": "Advertisements fetched successfully.",
+        "userFriendlyComment": "Success: Advertisements fetched successfully."
+    },
+    "12003": {
+        "comment": "Pinned advertisement cost calculated.",
+        "userFriendlyComment": "Success: Pinned advertisement cost calculated successfully."
+    },
+    "12004": {
+        "comment": "Basic advertisement cost calculated.",
+        "userFriendlyComment": "Success: Basic advertisement cost calculated successfully."
+    },
+    "42001": {
+        "comment": "Error while fetching advertisements.",
+        "userFriendlyComment": "Error while fetching advertisements."
+    },
+    "42002": {
+        "comment": "Failed to convert Euros to Tokens.",
+        "userFriendlyComment": "Failed to convert Euros to Tokens."
+    },
+    "42003": {
+        "comment": "Failed to convert Tokens to Euros.",
+        "userFriendlyComment": "Failed to convert Tokens to Euros."
+    },
+    "42004": {
+        "comment": "Unexpected system error: Failed to process date/time operation",
+        "userFriendlyComment": "Unexpected system error: Failed to process date/time operation"
+    },
+    "42005": {
+        "comment": "Cost calculation failed.",
+        "userFriendlyComment": "Unexpected Error: Cost calculation failed."
+    },
     "40301": {
         "comment": "Unexpected Error: An unexpected error occurred. Please try again later or contact support",
         "userFriendlyComment": "Something went wrong on our end. Please try again or contact support if it continues."
