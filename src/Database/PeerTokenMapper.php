@@ -731,6 +731,10 @@ class PeerTokenMapper
 
         if (TokenHelper::mulRc($peerTokenEURPrice, $numberoftokensToSwap) < 10) {
             $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
+                'btcPrice' => $btcPrice,
+                'tokenBtc' => TokenHelper::mulRc($peerTokenEURPrice, $numberoftokensToSwap),
+                'peerTokenBTCPrice' => $peerTokenBTCPrice,
+                'peerTokenEURPrice' => $peerTokenEURPrice,
                 'numberoftokens' => $numberoftokensToSwap,
                 'Balance' => $currentBalance,
             ]);
