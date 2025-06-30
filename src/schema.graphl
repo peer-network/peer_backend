@@ -35,6 +35,7 @@ type Query {
   referralList(offset: Int, limit: Int): ReferralListResponse!
   listTodaysInteractions: ListTodaysInteractionsResponse!
   getActionPrices: GetActionPricesResponse!
+  getUserAdvertisementHistory(offset: Int, limit: Int): ListAdvertisementHistory!
 }
 
 type Mutation {
@@ -61,10 +62,30 @@ type Mutation {
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse!
+  advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): DefaultResponse!
+  advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!): DefaultResponse!
 }
 
 scalar Decimal
 scalar Date
+
+enum AdDuration {
+  ONE_DAY
+  TWO_DAYS
+  THREE_DAYS
+  FOUR_DAYS
+  FIVE_DAYS
+  SIX_DAYS
+  SEVEN_DAYS
+}
+
+enum AdvertisementBasicPlan {
+  BASIC
+}
+
+enum AdvertisementPinnedPlan {
+  PINNED
+}
 
 enum PostActionType {
   LIKE
@@ -106,11 +127,14 @@ enum IgnoreOption {
 
 enum PostSortType {
   NEWEST
+  OLDEST
   TRENDING
   LIKES
   DISLIKES
   VIEWS
   COMMENTS
+  FOLLOWER
+  FOLLOWED
 }
 
 enum DayFilterType {
@@ -123,6 +147,22 @@ enum DayFilterType {
   W0
   M0
   Y0
+}
+
+type ListAdvertisementHistory {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [getAdvertisementHistory]
+}
+
+type getAdvertisementHistory {
+  status: String
+  userid: String
+  advertisementid: String
+  startime: String
+  endtime: String
+  createdat: String
 }
 
 type ListTodaysInteractionsResponse {
@@ -477,6 +517,7 @@ type Post {
   isreported: Boolean!
   isdisliked: Boolean!
   issaved: Boolean!
+  type: String!
   tags: [String]!
   user: ProfileUser!
   comments: [Comment!]!
