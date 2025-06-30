@@ -33,7 +33,7 @@ class BtcSwapTransaction
         $this->btcAmount = $data['btcAmount'] ?? 0.0;
         $this->status = $data['status'] ?? 'PENDING';
         $this->message = $data['message'] ?? null;
-        $this->createdat = $data['createdat'] ?? date('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
 
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);

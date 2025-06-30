@@ -32,7 +32,7 @@ class Transaction
         $this->tokenAmount = $data['tokenAmount'] ?? null;
         $this->transferAction = $data['transferAction'] ?? 'DEDUCT';
         $this->message = $data['message'] ?? null;
-        $this->createdat = $data['createdat'] ?? date('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
 
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
