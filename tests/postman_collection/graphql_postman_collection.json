@@ -18047,7 +18047,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation SwapTokens {\n    swapTokens(\n        btcAddress: \"1tiDfTTgr7Vx5Y6PV4sCC5sJqiekLsiSN\"\n        numberoftokens: \"11111111111111111111111111111111111111111111\"\n        password: \"{{w_password_t3}}\"\n    ) {\n        status\n        responseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            expectedBtcReturn\n        }\n    }\n}",
+						"query": "mutation SwapTokens {\n    swapTokens(\n        btcAddress: \"1tiDfTTgr7Vx5Y6PV4sCC5sJqiekLsiSN\"\n        numberoftokens: \"11111111111111111111111111\"\n        password: \"{{w_password_t3}}\"\n    ) {\n        status\n        responseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            expectedBtcReturn\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
