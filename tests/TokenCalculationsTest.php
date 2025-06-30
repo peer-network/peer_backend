@@ -12,24 +12,22 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateBtc100Swap()
     {
         $btcOut = SwapTokenHelper::calculateBtc(
-            TokenHelper::convertToQ96(10000.0),
-            TokenHelper::convertToQ96(100000.0),
-            TokenHelper::convertToQ96(1000.0)
+            (10000.0),
+            (100000.0),
+            (1000.0)
         );
-        $btcOut = (float) TokenHelper::decodeFromQ96($btcOut);
-        $this->assertSame(99.000099000, $btcOut);
+        $this->assertSame('99.000099000099000099000099', $btcOut);
     }
 
 
     public function testCalculateBtcZeroSwap()
     {
         $btcOut = SwapTokenHelper::calculateBtc(
-            TokenHelper::convertToQ96(50.0),
-            TokenHelper::convertToQ96(100.0),
-            TokenHelper::convertToQ96(0.0)
+            (50.0),
+            (100.0),
+            (0.0)
         );
-        $expected = TokenHelper::convertToQ96(0.0);
-        $this->assertSame($expected, $btcOut);
+        $this->assertSame('0', $btcOut);
     }
 
 
@@ -38,12 +36,11 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateBtcSimpleCase()
     {
         $btcOut = SwapTokenHelper::calculateBtc(
-            TokenHelper::convertToQ96(50.0),
-            TokenHelper::convertToQ96(100.0),
-            TokenHelper::convertToQ96(1.0)
+            (50.0),
+            (100.0),
+            (1.0)
         );
-        $btcOut =  (float)  TokenHelper::decodeFromQ96($btcOut);
-        $this->assertSame(0.495000495, $btcOut);
+        $this->assertSame('0.495000495000495000495000495', $btcOut);
     }
 
 
@@ -51,12 +48,11 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateBtcLargeSwap()
     {
         $btcOut = SwapTokenHelper::calculateBtc(
-            TokenHelper::convertToQ96(100.0),
-            TokenHelper::convertToQ96(10000.0),
-            TokenHelper::convertToQ96(1000.0)
+            (100.0),
+            (10000.0),
+            (1000.0)
         );
-        $btcOut = (float) TokenHelper::decodeFromQ96($btcOut);
-        $this->assertSame(9.082652134, $btcOut);
+        $this->assertSame('9.08265213442325158946412352', $btcOut);
     }
 
     // ------------------ TokenHelper::calculatePeerTokenEURPrice ------------------
@@ -65,8 +61,7 @@ class TokenCalculationsTest extends TestCase
     public function testCalculatePeerTokenEURPrice()
     {
         $price = TokenHelper::calculatePeerTokenEURPrice(30000.0, 0.0001);
-        $price = (float) TokenHelper::decodeFromQ96($price);
-        $this->assertSame(3.0, $price);
+        $this->assertSame('3.0000', $price);
     }
 
 
@@ -75,8 +70,7 @@ class TokenCalculationsTest extends TestCase
     public function testCalculatePeerTokenEURPriceZero()
     {
         $price = TokenHelper::calculatePeerTokenEURPrice(0.0, 0.0001);
-        $price = (float) TokenHelper::decodeFromQ96($price);
-        $this->assertSame(0.000000000, $price);
+        $this->assertSame('0', $price);
     }
 
 
@@ -86,10 +80,10 @@ class TokenCalculationsTest extends TestCase
     public function testCalculatePeerTokenPriceValueExact()
     {
         $price = TokenHelper::calculatePeerTokenPriceValue(
-            TokenHelper::convertToQ96(2.0),
-            TokenHelper::convertToQ96(8.0)
+            (2.0),
+            (8.0)
         );
-        $this->assertSame('0.250000000', $price);
+        $this->assertSame('0.25', $price);
     }
 
 
@@ -97,10 +91,10 @@ class TokenCalculationsTest extends TestCase
     public function testCalculatePeerTokenPriceValueRepeating()
     {
         $price = TokenHelper::calculatePeerTokenPriceValue(
-            TokenHelper::convertToQ96(1.0),
-            TokenHelper::convertToQ96(3.0)
+            (1.0),
+            (3.0)
         );
-        $this->assertSame('0.333333333', $price);
+        $this->assertSame('0.3333333333333333333333333333', $price);
     }
 
     // ------------------ TokenHelper::calculateTokenRequiredAmount ------------------
@@ -110,33 +104,30 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateTokenRequiredAmountAllFees()
     {
         $result = TokenHelper::calculateTokenRequiredAmount(
-            TokenHelper::convertToQ96(100.0),
+            (100.0),
             0.02, 0.01, 0.01, 0.01
         );
-        $result = (float) TokenHelper::decodeFromQ96($result);
-        $this->assertSame(105.0, $result);
+        $this->assertSame('105.00', $result);
     }
 
     // Same as above but no inviter fee, total fee = 4%, result = 104.0
     public function testCalculateTokenRequiredAmountDefaultInviter()
     {
         $result = TokenHelper::calculateTokenRequiredAmount(
-            TokenHelper::convertToQ96(100.0),
+            (100.0),
             0.02, 0.01, 0.01
         );
-        $result = (float) TokenHelper::decodeFromQ96($result);
-        $this->assertSame(104.0, $result);
+        $this->assertSame('104.00', $result);
     }
 
     // Extra test: simulates a higher fee structure of 11%
     public function testCalculateTokenRequiredAmountOldExampleStrict()
     {
         $result = TokenHelper::calculateTokenRequiredAmount(
-            TokenHelper::convertToQ96(100.0),
+            (100.0),
             0.05, 0.01, 0.02, 0.03
         );
-        $result = (float) TokenHelper::decodeFromQ96($result);
-        $this->assertSame(111.0, $result);
+        $this->assertSame('111.00', $result);
     }
 
 
@@ -148,8 +139,7 @@ class TokenCalculationsTest extends TestCase
         $total = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
             1.0, 2.0, 1.0, 1.0
         );
-        $expected = TokenHelper::convertToQ96(5.0);
-        $this->assertSame($expected, $total);
+        $this->assertSame('5', $total);
     }
 
     // Sums up only 3 fields (inviter defaults to 0)
@@ -160,8 +150,7 @@ class TokenCalculationsTest extends TestCase
             3.0,
             4.0
         );
-        $expected = TokenHelper::convertToQ96(9.0);
-        $this->assertSame($expected, $total);
+        $this->assertSame('9', $total);
     }
 
 
