@@ -4,7 +4,7 @@
 		"name": "NOT LOCAL Swap Limitless Graphql Automation Testing",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-3db65ead-304a-4dde-af1c-9b1a767705ee?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-3db65ead-304a-4dde-af1c-9b1a767705ee?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -14012,7 +14012,7 @@
 							"    tx.tokenamount === 0.02",
 							");",
 							"",
-							"pm.test(\"Inviter fee transaction of 1 token exists\", function () {",
+							"pm.test(\"Inviter fee transaction of 0.02 token exists\", function () {",
 							"    pm.expect(inviterFeeTx).to.not.be.undefined;",
 							"    pm.expect(inviterFeeTx.tokenamount).to.eql(0.02);",
 							"    pm.expect(inviterFeeTx.transferaction).to.eql(\"INVITER_FEE\");",
@@ -15015,7 +15015,7 @@
 							"    tx.tokenamount === 1.5",
 							");",
 							"",
-							"pm.test(\"Inviter fee transaction of 1 token exists\", function () {",
+							"pm.test(\"Inviter fee transaction of 1.5 token exists\", function () {",
 							"    pm.expect(inviterFeeTx).to.not.be.undefined;",
 							"    pm.expect(inviterFeeTx.tokenamount).to.eql(1.5);",
 							"    pm.expect(inviterFeeTx.transferaction).to.eql(\"INVITER_FEE\");",
@@ -18678,10 +18678,10 @@
 							"",
 							"const expectedAmounts = {",
 							"    \"DEDUCT\": -156.52,",
-							"    \"POOL_FEE\": 1.51,",
+							"    \"POOL_FEE\": 1.505,",
 							"    \"CREDIT\": 150.5,",
 							"    \"PEER_FEE\": 3.01,",
-							"    \"BURN_FEE\": 1.51",
+							"    \"BURN_FEE\": 1.505",
 							"};",
 							"",
 							"pm.test(\"All transactions of each transferaction have correct tokenamount\", function () {",
@@ -18725,7 +18725,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 15) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
