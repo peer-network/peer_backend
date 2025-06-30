@@ -715,6 +715,10 @@
         "comment": "The cover field must contain at most only 1 image",
         "userFriendlyComment": "Only one cover image allowed."
     },
+    "30269": {
+        "comment": "Invalid UUID format.",
+        "userFriendlyComment": "The provided ID is not in valid UUID format.Expected format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX "
+    },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
         "userFriendlyComment": "Input required. Please provide the needed information."
@@ -1125,7 +1129,7 @@
     },
     "41006": {
         "comment": "Unexpected Error: Failed to update username. Please try again later or contact support",
-        "userFriendlyComment": "We couldn't change your username. Please try again."
+        "userFriendlyComxxment": "We couldn't change your username. Please try again."
     },
     "41007": {
         "comment": "Unexpected Error: Failed to retrieve profile data. Please try again later or contact support",
