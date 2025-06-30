@@ -104,6 +104,8 @@ VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 0, 0, 0, 0, 0, 0, NULL, NUL
 
 INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 7922816251426434199159046144);
 
+INSERT INTO token_euro_price (token, europrice, updatedat) VALUES ('BTC', '91853.0000000000', '2025-06-30 10:18:32');
+
 
 --action_prices
 INSERT INTO action_prices (post_price, like_price, dislike_price, comment_price, currency) 
