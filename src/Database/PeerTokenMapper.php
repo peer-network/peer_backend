@@ -710,7 +710,7 @@ class PeerTokenMapper
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
             return self::respondWithError(30264);
         }
-        $numberoftokensToSwap = (float) $args['numberoftokens'] ?? 0.0;
+        $numberoftokensToSwap = (string) $args['numberoftokens'] ?? 0.0;
 
         // Get EUR/BTC price
         $btcPrice = BtcService::getOrUpdateBitcoinPrice($this->logger, $this->db);
