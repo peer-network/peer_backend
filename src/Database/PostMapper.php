@@ -5,10 +5,14 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
-use Fawaz\App\PostMedia;
+use Fawaz\App\PostMedia; 
 use Fawaz\Database\Interfaces\PeerMapper;
 use Fawaz\config\constants\ConstantsConfig;
-use Tests\utils\ConfigGeneration\Constants;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 class PostMapper extends PeerMapper
 {
@@ -459,16 +463,18 @@ class PostMapper extends PeerMapper
     {
         $this->logger->info("PostMapper.findPostser started");
 
-        $contentSeverityLevelConstantsPath = ConstantsConfig::moderationContent()['CONTENT_SEVERITY_LEVELS'];
-        $defaultContentFilterBy = $contentSeverityLevelConstantsPath['10'];
-
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
+        $post_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
+        $post_dismiss_moderation_amount = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
+        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
+        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
+
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
         $from = $args['from'] ?? null;
         $to = $args['to'] ?? null;
         $filterBy = $args['filterBy'] ?? [];
-        $contentFilterBy = $args['contentFilterBy'] ?? $defaultContentFilterBy;
         $Ignorlist = $args['IgnorList'] ?? 'NO';
         $sortBy = $args['sortBy'] ?? null;
         $title = $args['title'] ?? null;
@@ -477,13 +483,27 @@ class PostMapper extends PeerMapper
         $userId = $args['userid'] ?? null;
 
         $whereClauses = ["p.feedid IS NULL"];
+        $joinClausesString = "
+            users u ON p.userid = u.uid
+            LEFT JOIN post_tags pt ON p.postid = pt.postid
+            LEFT JOIN tags t ON pt.tagid = t.tagid
+            LEFT JOIN post_info pi ON p.postid = pi.postid
+            LEFT JOIN users_info ui ON p.userid = ui.userid
+        ";
+        
+        $contentFilterService = new ContentFilterServiceImpl(
+            new ListPostsContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
+
         $params = ['currentUserId' => $currentUserId];
 
         $trendlimit = 4;
         $trenddays = 17;
 
         if ($postId !== null) {
-            $whereClauses[] = "p.postid = :postId";
+            $whereClauses[] = "p.postid = :postId"; 
             $params['postId'] = $postId;
         }
 
@@ -515,38 +535,21 @@ class PostMapper extends PeerMapper
             $whereClauses[] = "t.name = :tag";
             $params['tag'] = $tag;
         }
-        
-        $contentFilterMapping = [
-            $contentSeverityLevelConstantsPath['0'] => [
-                'WHERE' => 'pi.reports < 1 AND ui.reports < 1',
-                'JOIN' => '
-                    LEFT JOIN post_info pi ON p.postid = pi.postid 
-                    LEFT JOIN users_info ui ON p.userid = ui.userid
-                ',
-            ],
-            $defaultContentFilterBy => [
-                'WHERE' => '',
-                'JOIN' => '',
-            ],
-        ];
 
-        $contentFilterSQLExtension = $contentFilterMapping[$defaultContentFilterBy];
+        // dont show posts from not active accounts
+        $whereClauses[] = 'u.status = 0 AND (u.roles_mask = 0 OR u.roles_mask = 16)';
 
-        $joinClauses = "
-            users u ON p.userid = u.uid
-            LEFT JOIN post_tags pt ON p.postid = pt.postid
-            LEFT JOIN tags t ON pt.tagid = t.tagid
-        ";
-
-        if (!empty($contentFilterBy)) { 
-            if ($contentFilterMapping[$contentFilterBy]) {
-                $contentFilterSQLExtension = $contentFilterMapping[$contentFilterBy];
-                if (!empty($contentFilterSQLExtension['WHERE'])) {
-                    $whereClauses[] = $contentFilterSQLExtension['WHERE'];
-                    $joinClauses .= $contentFilterSQLExtension['JOIN'];
-                }
-            }
-        } 
+        // here to decide whether to hide post ot not from feed
+        // send callback with post query changes to filtering object????
+        $filteringAction = $contentFilterService->getContentFilterAction(
+            ContentType::post,
+            ContentType::post
+        );
+        if ($filteringAction === ContentFilteringAction::hideContent) {
+            $whereClauses[] = '(pi.reports < :post_report_amount_to_hide OR pi.count_content_moderation_dismissed > :post_dismiss_moderation_amount) OR p.userid = :currentUserId';
+            $params['post_report_amount_to_hide'] = $post_report_amount_to_hide;
+            $params['post_dismiss_moderation_amount'] = $post_dismiss_moderation_amount;
+        }
 
         if (!empty($filterBy) && is_array($filterBy)) {
             $validTypes = [];
@@ -602,6 +605,8 @@ class PostMapper extends PeerMapper
             default => "p.createdat DESC",
         };
 
+        $whereClausesString = implode(" AND ", $whereClauses);
+
         $sql = sprintf(
             "SELECT 
                 p.postid, 
@@ -615,6 +620,10 @@ class PostMapper extends PeerMapper
                 u.username, 
 				u.slug,
                 u.img AS userimg,
+                MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
+                MAX(pi.count_content_moderation_dismissed) AS post_count_content_moderation_dismissed,
+                MAX(ui.reports) AS user_reports,
+                MAX(pi.reports) AS post_reports,
                 COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
                 (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) as amountlikes,
                 (SELECT COUNT(*) FROM user_post_dislikes WHERE postid = p.postid) as amountdislikes,
@@ -639,8 +648,8 @@ class PostMapper extends PeerMapper
             GROUP BY p.postid, u.username, u.slug, u.img
             ORDER BY %s
             LIMIT :limit OFFSET :offset",
-            $joinClauses,
-            implode(" AND ", $whereClauses),
+            $joinClausesString,
+            $whereClausesString,
             $orderBy
         );
 
@@ -655,7 +664,27 @@ class PostMapper extends PeerMapper
 				//$this->logger->info("Get post successfully");
 				while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
 					$row['tags'] = json_decode($row['tags'], true) ?? [];
-					$results[] = new PostAdvanced([
+
+                    // here to decide if to replace post/user content or not
+                    // send callback with user object changes???? 
+                    $user_reports = (int)$row['user_reports'];
+                    $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+                    if (
+                        $user_reports >= $user_report_amount_to_hide && 
+                        $user_dismiss_moderation_amount < $user_dismiss_moderation_amount_to_hide_from_ios &&
+                        $currentUserId != $row['userid']
+                    ){
+                        if ($contentFilterService->getContentFilterAction(
+                            ContentType::post,
+                            ContentType::user
+                        ) == ContentFilteringAction::replaceWithPlaceholder) {
+                            $replacer = ContentReplacementPattern::flagged;
+                            $row['username'] = $replacer->username($row['username']);
+                            $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
+                        }
+                    }
+
+                    $results[] = new PostAdvanced([
 						'postid' => $row['postid'],
 						'userid' => $row['userid'],
 						'contenttype' => $row['contenttype'],

@@ -56,7 +56,6 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
-use Fawaz\Utils\ReportTargetType;
 
 class GraphQLSchemaBuilder
 {

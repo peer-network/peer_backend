@@ -4,7 +4,6 @@ namespace Fawaz\App;
 
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
-use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
@@ -14,8 +13,8 @@ use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
-use Fawaz\config\constants\ConstantsModeration;
-use Fawaz\Services\ContentFilteringService;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 
 class PostService
 {
@@ -460,7 +459,8 @@ class PostService
             }
         }
 
-        if(ContentFilteringService::validateContentFilter($contentFilterBy) == false ){
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
             return $this->respondWithError(30103);
         }
 
