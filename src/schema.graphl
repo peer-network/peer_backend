@@ -34,6 +34,9 @@ type Query {
   getReferralInfo: ReferralInfoResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
   listTodaysInteractions: ListTodaysInteractionsResponse!
+  getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
+  getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
+  getTokenPrice: TokenPriceResponse!
   getActionPrices: GetActionPricesResponse!
 }
 
@@ -60,7 +63,8 @@ type Mutation {
   createPost(action: PostType!, input: PostInput!): PostResponse!
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
-  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse!
+  resolveTransfer(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
+  swapTokens(btcAddress: ID!, numberoftokens: Decimal!, password: String!): SwapTokenResponse!
 }
 
 scalar Decimal
@@ -74,6 +78,25 @@ enum PostActionType {
   SHARE
   SAVE
 }
+
+enum TokenMovementFilterType{
+  TRANSACTION
+  AIRDROP
+  MINT
+  PAYMENT
+  BURN
+}
+
+enum DirectionFilterType {
+  INCOME
+  DEDUCTION
+}
+
+enum SortFilterType {
+  descending
+  ascending
+}
+
 
 enum PostType {
   POST
@@ -125,6 +148,7 @@ enum DayFilterType {
   Y0
 }
 
+
 type ListTodaysInteractionsResponse {
   status: String!
   ResponseCode: String
@@ -162,6 +186,71 @@ type LogWins {
   postid: String
   action: String
   numbers: Decimal
+  createdat: String
+}
+
+type Transaction {
+  transactionid: String!
+  transuniqueid: String!
+  transactiontype: String!
+  senderid: String!
+  recipientid: String!
+  tokenamount: Decimal!
+  transferaction: String!
+  message: String!
+  createdat: String!
+}
+
+type TransactionResponse {
+  status: String!
+  responseCode: Int!
+  affectedRows: [Transaction!]
+}
+
+type LiquidityPoolHistoryResponse {
+  status: String!
+  responseCode: Int!
+  affectedRows: [LiquidityPoolTransaction!]
+}
+type TokenPriceResponse {
+  status: String!
+  responseCode: Int!
+  currentTokenPrice: String!
+  updatedAt: String
+}
+type LiquidityPoolTransaction {
+  swapid: String!
+  transactionid: String!
+  transactiontype: String!
+  senderid: String!
+  tokenamount: Decimal!
+  btcamount: Decimal!
+  status: String!
+  message: String!
+  createdat: String!
+}
+
+
+type SwapToken {
+  tokenSend: Decimal
+  tokensSubstractedFromWallet: Decimal
+  expectedBtcReturn: Decimal
+}
+
+type SwapTokenResponse {
+  status: String!
+  responseCode: Int!
+  affectedRows: SwapToken!
+}
+
+type TransferTokenResponse {
+  status: String!
+  responseCode: Int!
+  affectedRows: TransferToken!
+}
+type TransferToken {
+  tokenSend: Decimal
+  tokensSubstractedFromWallet: Decimal
   createdat: String
 }
 
