@@ -20,8 +20,8 @@ class ConstantsConfig
         return ConstantsConfig::POST;
     }
 
-    public static function moderationContent() {
-        return ConstantsModeration::moderation_content();
+    public static function contentFiltering() {
+        return ConstantsModeration::contentFiltering();
     }
 
     private const COMMENT = [

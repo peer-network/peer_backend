@@ -427,7 +427,6 @@ class User implements Hashable
             $this->username,
             $this->biography
         ]);
-        echo $content;
         return $content;
     }
 
