@@ -2,6 +2,9 @@
 
 namespace Fawaz\Services;
 
+use FFMpeg\FFMpeg;
+use FFMpeg\Coordinate\TimeCode;
+
 class VideoCoverGenerator
 {
     public function generate(string $videoPath): string
@@ -10,30 +13,15 @@ class VideoCoverGenerator
             throw new \InvalidArgumentException("Video file not found: $videoPath");
         }
 
+        $ffmpeg = FFMpeg::create();
+        $video = $ffmpeg->open($videoPath);
+
         $outputPath = sys_get_temp_dir() . '/' . uniqid('cover_', true) . '.jpg';
 
-        $command = ['ffmpeg', '-y', '-ss', '0', '-i', $videoPath, '-vframes', '1', $outputPath];
-        $descriptors = [
-            1 => ['pipe', 'w'], 
-            2 => ['pipe', 'w'], 
-        ];
+        $video->frame(TimeCode::fromSeconds(0))->save($outputPath);
 
-        $process = proc_open($command, $descriptors, $pipes);
-
-        if (!is_resource($process)) {
-            throw new \RuntimeException('Could not start FFmpeg process');
-        }
-
-        $stdout = stream_get_contents($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
-
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-
-        $exitCode = proc_close($process);
-
-        if ($exitCode !== 0 || !file_exists($outputPath)) {
-            throw new \RuntimeException("FFmpeg failed with code $exitCode. Error: $stderr");
+        if (!file_exists($outputPath)) {
+            throw new \RuntimeException("Failed to generate video frame.");
         }
 
         return $outputPath;
