@@ -27,22 +27,26 @@ CREATE TABLE IF NOT EXISTS user_reports (
 
 -- Table: users_info
 ALTER TABLE users_info
-ADD COLUMN IF NOT EXISTS reports INTEGER NOT NULL DEFAULT 0;
+ADD COLUMN IF NOT EXISTS user_reports INTEGER NOT NULL DEFAULT 0;
 
 -- Table: comment_info
 ALTER TABLE comment_info
-ADD COLUMN IF NOT EXISTS reports INTEGER NOT NULL DEFAULT 0;
+ADD COLUMN IF NOT EXISTS comment_reports INTEGER NOT NULL DEFAULT 0;
 
 -- Table: users_info
 ALTER TABLE users_info
-ADD COLUMN IF NOT EXISTS count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
+ADD COLUMN IF NOT EXISTS user_count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
 
 -- Table: comment_info
 ALTER TABLE comment_info
-ADD COLUMN IF NOT EXISTS count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
+ADD COLUMN IF NOT EXISTS comment_count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
 
 -- Table: post_info
 ALTER TABLE post_info
-ADD COLUMN IF NOT EXISTS count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
+ADD COLUMN IF NOT EXISTS post_count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
+
+-- Table: post_info
+ALTER TABLE post_info
+ADD COLUMN IF NOT EXISTS post_reports INTEGER NOT NULL DEFAULT 0;
 
 COMMIT;
