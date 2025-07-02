@@ -658,6 +658,9 @@ class GraphQLSchemaBuilder
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 },
+                'type' => function (array $root): string {
+                    return $root['type'] ?? '';
+                },
                 'tags' => function (array $root): array {
                     return $root['tags'] ?? [];
                 },
@@ -1658,7 +1661,43 @@ class GraphQLSchemaBuilder
                 'nextAttemptAt' => function (array $root): string {
                     return $root['nextAttemptAt'] ?? '';
                 },
-            ],                       
+            ],
+            'ListAdvertisementHistory' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ListAdvertisementHistory Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'counter' => function (array $root): int {
+                    return $root['counter'] ?? 0;
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): ?array {
+                    return $root['affectedRows'] ?? null;
+                },
+            ],
+            'getAdvertisementHistory' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.getAdvertisementHistory Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'userid' => function (array $root): string {
+                    return $root['userid'] ?? '';
+                },
+                'advertisementid' => function (array $root): string {
+                    return $root['advertisementid'] ?? '';
+                },
+                'startime' => function (array $root): string {
+                    return $root['timestart'] ?? '';
+                },
+                'endtime' => function (array $root): string {
+                    return $root['timeend'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ],
         ];
     }
 
