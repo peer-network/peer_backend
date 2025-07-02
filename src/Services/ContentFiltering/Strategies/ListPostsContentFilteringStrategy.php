@@ -19,7 +19,7 @@ class ListPostsContentFilteringStrategy implements ContentFilteringStrategy {
         ContentType::comment->value => [
             ContentType::post->value => null,
             ContentType::comment->value => ContentFilteringAction::replaceWithPlaceholder,
-            ContentType::user->value => null,
+            ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
         ],
     ];
 

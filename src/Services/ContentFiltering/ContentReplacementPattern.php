@@ -8,7 +8,7 @@ enum ContentReplacementPattern: string {
 
     public function postTitle(string $title): string {
         return match ($this) {
-            self::flagged   => "this post is flagged",
+            self::flagged   => "this post is hidden",
             self::suspended => "this post is deleted",
             default => $title
         };
@@ -32,7 +32,7 @@ enum ContentReplacementPattern: string {
 
     public function commentContent(string $content): string {
         return match ($this) {
-            self::flagged   => "this comment was deleted",
+            self::flagged   => "this comment is hidden",
             self::suspended => "this comment is flagged",
             default => $content
         };
@@ -40,7 +40,7 @@ enum ContentReplacementPattern: string {
 
     public function username(string $username): string {
         return match ($this) {
-            self::flagged   => "restricted user",
+            self::flagged   => "hidden account",
             self::suspended => "deleted account",
             default => $username
         };

@@ -49,6 +49,8 @@ use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -2868,8 +2870,14 @@ class GraphQLSchemaBuilder
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
+
         $data = array_map(
-            fn(PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit),
+            fn(PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit,$contentFilterBy),
             $posts
         );
         return [
@@ -2880,11 +2888,10 @@ class GraphQLSchemaBuilder
         ];
     }
 
-    protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit): array
+    protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit, ?string $contentFilterBy = null): array
     {
         $postArray = $post->getArrayCopy();
-        
-        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit);
+        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit,$contentFilterBy);
         
         $postArray['comments'] = array_map(
             fn(CommentAdvanced $comment) => $this->fetchCommentWithoutReplies($comment),

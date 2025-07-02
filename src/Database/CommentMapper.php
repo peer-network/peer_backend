@@ -6,6 +6,12 @@ use PDO;
 use Fawaz\App\Comment;
 use Fawaz\App\CommentAdvanced;
 use Fawaz\App\Commented;
+use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Psr\Log\LoggerInterface;
 
 class CommentMapper
@@ -85,25 +91,24 @@ class CommentMapper
         return $deleted;
     }
 
-    public function fetchAllByPostIdetaild(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
+    public function fetchAllByPostIdetaild(string $postId, string $currentUserId, int $offset = 0, int $limit = 10,?string $contentFilterBy = null): array
     {
         $this->logger->info("CommentMapper.fetchAllByPostIdetaild started");
 
-        $sql = "
-            SELECT 
-                c.*,
-                COALESCE(like_counts.like_count, 0) AS amountlikes,
-				COALESCE(comment_counts.comment_count, 0) AS amountreplies,
-                CASE WHEN ul.userid IS NOT NULL THEN TRUE ELSE FALSE END AS isliked,
-                u.uid,
-                u.username,
-				u.slug,
-                u.img,
-                CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
-                CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed
-            FROM 
-                comments c
-            LEFT JOIN 
+        $comment_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['COMMENT'];
+        $comment_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['COMMENT'];
+        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
+        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
+
+        $contentFilterService = new ContentFilterServiceImpl(
+            new ListPostsContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
+        $whereClauses = ["c.postid = :postId AND c.parentid IS NULL"];
+        // $whereClauses[] = 'u.status = 0 AND (u.roles_mask = 0 OR u.roles_mask = 16)';
+
+        $joinClausesString = "
                 users u ON c.userid = u.uid
             LEFT JOIN 
                 (SELECT commentid, COUNT(*) AS like_count FROM user_comment_likes GROUP BY commentid) like_counts 
@@ -120,12 +125,40 @@ class CommentMapper
             LEFT JOIN 
                 follows f2 
                 ON u.uid = f2.followedid AND f2.followerid = :currentUserId -- Is the current user following the author?
-            WHERE 
-                c.postid = :postId AND c.parentid IS NULL
+            LEFT JOIN comment_info ci
+                ON c.commentid = ci.commentid AND ci.userid = c.userid
+            LEFT JOIN users_info ui 
+                ON c.userid = ui.userid
+        ";
+
+        $whereClausesString = implode(" AND ", $whereClauses);
+
+        $sql = sprintf("
+            SELECT 
+                c.*,
+                COALESCE(like_counts.like_count, 0) AS amountlikes,
+				COALESCE(comment_counts.comment_count, 0) AS amountreplies,
+                CASE WHEN ul.userid IS NOT NULL THEN TRUE ELSE FALSE END AS isliked,
+                u.uid,
+                u.username,
+				u.slug,
+                u.img,
+                CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
+                CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed,
+                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
+                ci.count_content_moderation_dismissed AS comment_count_content_moderation_dismissed,
+                ui.reports AS user_reports,
+                u.status AS user_status,
+                ci.reports AS comment_reports
+                FROM comments c
+            LEFT JOIN %s
+            WHERE %s
             ORDER BY 
                 c.createdat ASC
-            LIMIT :limit OFFSET :offset;
-        ";
+            LIMIT :limit OFFSET :offset;",
+            $joinClausesString,
+            $whereClausesString
+        );
 
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':postId', $postId, PDO::PARAM_STR);
@@ -137,6 +170,48 @@ class CommentMapper
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$this->logger->info("Fetched comments for post counter", ['row' => $row]);
+            // here to decide if to replace comment/user content or not
+            $user_reports = (int)$row['user_reports'];
+            $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+            $comment_reports = (int)$row['comment_reports'];
+            $comment_dismiss_moderation_amount = (int)$row['comment_count_content_moderation_dismissed'];
+
+            
+            if ($row['user_status'] != 0) {
+                $replacer = ContentReplacementPattern::suspended;
+                $row['username'] = $replacer->username($row['username']);
+                $row['img'] = $replacer->profilePicturePath($row['img']);
+            }
+
+            if (
+                $user_reports >= $user_report_amount_to_hide && 
+                $user_dismiss_moderation_amount < $user_dismiss_moderation_amount_to_hide_from_ios &&
+                $currentUserId != $row['userid']
+            ){
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::comment,
+                    ContentType::user
+                ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $row['username'] = $replacer->username($row['username']);
+                    $row['img'] = $replacer->profilePicturePath($row['img']);
+                }
+            }
+
+            if (
+                $comment_reports >= $comment_report_amount_to_hide && 
+                $comment_dismiss_moderation_amount < $comment_dismiss_moderation_amount_to_hide_from_ios &&
+                $currentUserId != $row['userid']
+            ){
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::comment,
+                    ContentType::comment
+                ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $row['content'] = $replacer->commentContent($row['content']);
+                }
+            }
+
             $results[] = new CommentAdvanced([
                 'commentid' => $row['commentid'],
                 'userid' => $row['userid'],

@@ -420,7 +420,6 @@ class PostService
         $tag = $args['tag'] ?? null; 
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
         
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
@@ -457,11 +456,6 @@ class PostService
             if (!empty($invalidTypes)) {
                 return $this->respondWithError(30103);
             }
-        }
-
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
-            return $this->respondWithError(30103);
         }
 
         if ($Ignorlist !== null) {

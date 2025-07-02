@@ -467,9 +467,9 @@ class PostMapper extends PeerMapper
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $post_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
-        $post_dismiss_moderation_amount = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
+        $post_dismiss_moderation_amount = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['POST'];
         $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
-        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
+        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $from = $args['from'] ?? null;
@@ -487,7 +487,7 @@ class PostMapper extends PeerMapper
             users u ON p.userid = u.uid
             LEFT JOIN post_tags pt ON p.postid = pt.postid
             LEFT JOIN tags t ON pt.tagid = t.tagid
-            LEFT JOIN post_info pi ON p.postid = pi.postid
+            LEFT JOIN post_info pi ON p.postid = pi.postid AND pi.userid = p.userid
             LEFT JOIN users_info ui ON p.userid = ui.userid
         ";
         
@@ -669,6 +669,12 @@ class PostMapper extends PeerMapper
                     // send callback with user object changes???? 
                     $user_reports = (int)$row['user_reports'];
                     $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+
+                    if ($row['user_status'] != 0) {
+                        $replacer = ContentReplacementPattern::suspended;
+                        $row['username'] = $replacer->username($row['username']);
+                        $row['img'] = $replacer->profilePicturePath($row['img']);
+                    }
                     if (
                         $user_reports >= $user_report_amount_to_hide && 
                         $user_dismiss_moderation_amount < $user_dismiss_moderation_amount_to_hide_from_ios &&
