@@ -126,8 +126,8 @@ class ChatMessages
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => $chatConfig['CONTENT']['MIN_LENGTH'],
-                        'max' => $chatConfig['CONTENT']['MAX_LENGTH'],
+                        'min' => $chatConfig['MESSAGE']['MIN_LENGTH'],
+                        'max' => $chatConfig['MESSAGE']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
