@@ -163,7 +163,7 @@ class ConstantsConfig
             'PATTERN' => '^[a-zA-Z]+$',
         ],
         'MESSAGE' => [
-            'MIN_LENGTH' => 1,
+            'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 500,
         ],
     ];    
