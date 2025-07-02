@@ -56,8 +56,8 @@ enum ContentReplacementPattern: string {
 
     public function profilePicturePath(string $path): string {
         return match ($this) {
-            self::flagged   => "some pic to be here",
-            self::suspended => "some pic to be here",
+            self::flagged   => "some_pic_to_be_here_some_text_to_pass_validation",
+            self::suspended => "some_pic_to_be_here_some_text_to_pass_validation",
             default => $path
         };
     }

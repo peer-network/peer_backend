@@ -10,6 +10,7 @@ use Fawaz\Database\Interfaces\PeerMapper;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
@@ -144,25 +145,63 @@ class PostMapper extends PeerMapper
         return false;
     }
 
-    public function fetchPostsByType(string $userid, int $limitPerType = 5): array
+    public function fetchPostsByType(string $userid, int $limitPerType = 5, ?string $contentFilterBy = null): array
     {
-        $sql = "
-            SELECT postid, contenttype, title, media, createdat
+
+        $post_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
+        $post_dismiss_moderation_amount = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['POST'];
+        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
+        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
+        
+        $whereClauses = ["sub.row_num <= :limit"];
+        $whereClausesString = implode(" AND ", $whereClauses);
+
+        $contentFilterService = new ContentFilterServiceImpl(
+            new GetProfileContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
+
+        $sql = sprintf(
+            "SELECT sub.postid, sub.userid, sub.contenttype, sub.title, sub.media, sub.createdat
             FROM (
                 SELECT *, ROW_NUMBER() OVER (PARTITION BY contenttype ORDER BY createdat DESC) AS row_num
-                FROM posts
+                FROM posts p
                 WHERE userid = :userid AND feedid IS NULL
-            ) subquery
-            WHERE row_num <= :limit
-            ORDER BY contenttype, createdat DESC
-        ";
+            ) sub
+            LEFT JOIN users_info ui ON sub.userid = ui.userid
+            LEFT JOIN post_info pi ON sub.postid = pi.postid AND pi.userid = sub.userid
+            WHERE %s
+            ORDER BY sub.contenttype, sub.createdat DESC",
+        $whereClausesString
+        );
 
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue('userid', $userid, \PDO::PARAM_STR);
         $stmt->bindValue('limit', $limitPerType, \PDO::PARAM_INT);
         $stmt->execute();
+        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        // if ($row['user_status'] != 0) {
+        //     $replacer = ContentReplacementPattern::suspended;
+        //     $row['username'] = $replacer->username($row['username']);
+        //     $row['img'] = $replacer->profilePicturePath($row['img']);
+        // }
+        // if (
+        //     $user_reports >= $user_report_amount_to_hide && 
+        //     $user_dismiss_moderation_amount < $user_dismiss_moderation_amount_to_hide_from_ios &&
+        //     $currentUserId != $row['userid']
+        // ){
+        //     if ($contentFilterService->getContentFilterAction(
+        //         ContentType::post,
+        //         ContentType::user
+        //     ) == ContentFilteringAction::replaceWithPlaceholder) {
+        //         $replacer = ContentReplacementPattern::flagged;
+        //         $row['username'] = $replacer->username($row['username']);
+        //         $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
+        //     }
+        // }
+        return $result;
     }
 
     public function fetchComments(string $postid): array

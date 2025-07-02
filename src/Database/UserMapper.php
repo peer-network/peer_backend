@@ -994,7 +994,7 @@ class UserMapper
         $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
 
         $whereClauses = ["u.uid = :userid AND u.verified = :verified"];
-        $whereClauses[] = 'roles_mask = 0 OR roles_mask = 16';
+        // $whereClauses[] = 'u.status = 0';
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new ContentFilterServiceImpl(
