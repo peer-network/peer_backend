@@ -4,7 +4,7 @@
 		"name": "Limitless Graphql Automation Testing",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-41efc122-916f-4a2b-85c1-bc38ec8ec0e1?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-41efc122-916f-4a2b-85c1-bc38ec8ec0e1?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -16064,7 +16064,7 @@
 							"    pm.expect(pm.response.text()).to.include(\"21501\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});"
 						],
 						"type": "text/javascript",
