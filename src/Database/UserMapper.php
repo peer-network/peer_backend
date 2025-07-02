@@ -990,9 +990,6 @@ class UserMapper
 
     public function fetchProfileData(string $userid, string $currentUserId, ?string $contentFilterBy): Profile|false 
     {
-        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
-        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
-
         $whereClauses = ["u.uid = :userid AND u.verified = :verified"];
         // $whereClauses[] = 'u.status = 0';
         $whereClausesString = implode(" AND ", $whereClauses);
@@ -1047,19 +1044,15 @@ class UserMapper
                     $data['img'] = $replacer->profilePicturePath($data['img']);
                 }
 
-                if (
-                    $user_reports >= $user_report_amount_to_hide && 
-                    $user_dismiss_moderation_amount < $user_dismiss_moderation_amount_to_hide_from_ios
-                    // $currentUserId != $data['userid']
-                ){
-                    if ($contentFilterService->getContentFilterAction(
-                        ContentType::user,
-                        ContentType::user
-                    ) == ContentFilteringAction::replaceWithPlaceholder) {
-                        $replacer = ContentReplacementPattern::flagged;
-                        $data['username'] = $replacer->username($data['username']);
-                        $data['img'] = $replacer->profilePicturePath($data['img']);
-                    }
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::user,
+                    ContentType::user,
+                    $user_reports,
+                    $user_dismiss_moderation_amount
+                ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $data['username'] = $replacer->username($data['username']);
+                    $data['img'] = $replacer->profilePicturePath($data['img']);
                 }
 
                 return new Profile($data);

@@ -146,13 +146,7 @@ class PostMapper extends PeerMapper
     }
 
     public function fetchPostsByType(string $userid, int $limitPerType = 5, ?string $contentFilterBy = null): array
-    {
-
-        $post_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
-        $post_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['POST'];
-        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
-        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
-        
+    {        
         $whereClauses = ["sub.row_num <= :limit"];
         $whereClausesString = implode(" AND ", $whereClauses);
 
@@ -192,24 +186,21 @@ class PostMapper extends PeerMapper
         $result = [];
 
         foreach ($unfidtered_result as $row) {
-            // echo "here";
             $post_reports = (int)$row['post_reports'];
             $post_dismiss_moderation_amount = (int)$row['post_count_content_moderation_dismissed'];
             
-            if (
-                $post_reports >= $post_report_amount_to_hide && 
-                $post_dismiss_moderation_amount < $post_dismiss_moderation_amount_to_hide_from_ios
-                // $currentUserId != $row['userid']
-            ){
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::post,
-                    ContentType::post
-                ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $row['title'] = $replacer->postTitle($row['title']);
-                    $row['media'] = $replacer->postMedia($row['media']);
-                }
+            //if ($currentUserId != $row['userid']){
+            if ($contentFilterService->getContentFilterAction(
+                ContentType::post,
+                ContentType::post,
+                $post_reports,
+                $post_dismiss_moderation_amount
+            ) == ContentFilteringAction::replaceWithPlaceholder) {
+                $replacer = ContentReplacementPattern::flagged;
+                $row['title'] = $replacer->postTitle($row['title']);
+                $row['media'] = $replacer->postMedia($row['media']);
             }
+            //}
             $result[] = $row;
         }
         return $result;
