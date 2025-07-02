@@ -51,6 +51,24 @@ class ConstantsConfig
         'MEDIADESCRIPTION' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 500,
+        ],  
+        'MEDIALIMIT' => [
+            'AUDIO' => 1,
+            'IMAGE' => 5,
+            'TEXT' => 1,
+            'VIDEO' => 2,
+        ],
+        'COVERLIMIT' => [
+            'AUDIO' => 1,
+            'IMAGE' => 1,
+            'TEXT' => 1,
+            'VIDEO' => 1,
+        ],
+        'TAG' => [
+            'MIN_LENGTH' => 2,
+            'MAX_LENGTH' => 53,
+            'MAX_LIMIT' => 5,
+            'PATTERN' => '[a-zA-Z]+',        
         ],
         'COVER' => [
             'MAX_COUNT' => 1,
@@ -106,6 +124,11 @@ class ConstantsConfig
             'MIN_LENGTH' => 8,
             'MAX_LENGTH' => 128,
             'PATTERN' => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$',
+        ],
+        'USERNAME' => [
+            'MIN_LENGTH' => 3,
+            'MAX_LENGTH' => 23,
+            'PATTERN' => '[a-zA-Z0-9]+',
         ],
         'BIOGRAPHY' => [
             'MIN_LENGTH' => 3,
