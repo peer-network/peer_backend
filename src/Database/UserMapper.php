@@ -342,12 +342,9 @@ class UserMapper
         $trendlimit = 4;
         $trenddays = 7;
 
-        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
-        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
-
-        $whereClauses = ["verified = :verified"];
-        $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
-        $whereClausesString = implode(" AND ", $whereClauses);
+        // $whereClauses = ["verified = :verified"];
+        // $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
+        // $whereClausesString = implode(" AND ", $whereClauses);
         
         $sql = "
             SELECT 

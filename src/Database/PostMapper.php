@@ -509,8 +509,6 @@ class PostMapper extends PeerMapper
 
         $post_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
         $post_dismiss_moderation_amount = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['POST'];
-        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
-        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $from = $args['from'] ?? null;
@@ -582,11 +580,10 @@ class PostMapper extends PeerMapper
 
         // here to decide whether to hide post ot not from feed
         // send callback with post query changes to filtering object????
-        $filteringAction = $contentFilterService->getContentFilterAction(
+        if ($contentFilterService->getContentFilterAction(
             ContentType::post,
             ContentType::post
-        );
-        if ($filteringAction === ContentFilteringAction::hideContent) {
+        ) === ContentFilteringAction::hideContent) {
             $whereClauses[] = '(pi.reports < :post_report_amount_to_hide OR pi.count_content_moderation_dismissed > :post_dismiss_moderation_amount) OR p.userid = :currentUserId';
             $params['post_report_amount_to_hide'] = $post_report_amount_to_hide;
             $params['post_dismiss_moderation_amount'] = $post_dismiss_moderation_amount;
@@ -717,14 +714,11 @@ class PostMapper extends PeerMapper
                         $row['username'] = $replacer->username($row['username']);
                         $row['img'] = $replacer->profilePicturePath($row['img']);
                     }
-                    if (
-                        $user_reports >= $user_report_amount_to_hide && 
-                        $user_dismiss_moderation_amount < $user_dismiss_moderation_amount_to_hide_from_ios &&
-                        $currentUserId != $row['userid']
-                    ){
+                    if ($currentUserId != $row['userid']){
                         if ($contentFilterService->getContentFilterAction(
                             ContentType::post,
-                            ContentType::user
+                            ContentType::user,
+                            $user_reports,$user_dismiss_moderation_amount
                         ) == ContentFilteringAction::replaceWithPlaceholder) {
                             $replacer = ContentReplacementPattern::flagged;
                             $row['username'] = $replacer->username($row['username']);

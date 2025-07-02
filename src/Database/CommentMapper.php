@@ -95,11 +95,6 @@ class CommentMapper
     {
         $this->logger->info("CommentMapper.fetchAllByPostIdetaild started");
 
-        $comment_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['COMMENT'];
-        $comment_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['COMMENT'];
-        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
-        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
-
         $contentFilterService = new ContentFilterServiceImpl(
             new ListPostsContentFilteringStrategy(),
             null,
@@ -183,29 +178,21 @@ class CommentMapper
                 $row['img'] = $replacer->profilePicturePath($row['img']);
             }
 
-            if (
-                $user_reports >= $user_report_amount_to_hide && 
-                $user_dismiss_moderation_amount < $user_dismiss_moderation_amount_to_hide_from_ios &&
-                $currentUserId != $row['userid']
-            ){
+            if ($currentUserId != $row['userid']){
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::comment,
-                    ContentType::user
+                    ContentType::user,
+                    $user_reports,$user_dismiss_moderation_amount
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $row['username'] = $replacer->username($row['username']);
                     $row['img'] = $replacer->profilePicturePath($row['img']);
                 }
-            }
 
-            if (
-                $comment_reports >= $comment_report_amount_to_hide && 
-                $comment_dismiss_moderation_amount < $comment_dismiss_moderation_amount_to_hide_from_ios &&
-                $currentUserId != $row['userid']
-            ){
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::comment,
-                    ContentType::comment
+                    ContentType::comment,
+                    $comment_reports,$comment_dismiss_moderation_amount
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $row['content'] = $replacer->commentContent($row['content']);

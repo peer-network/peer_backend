@@ -56,10 +56,13 @@ class ContentFilterServiceImpl {
                 return null;
             }
             
+            // if $showingContentReportAmount $showingContentDismissModerationAmount are null
+            // (they can be null if filtration is performed in SQL query)
+            // we are bypassing this comparison, because it will be performed in SQL query directly 
             if (
+                !$showingContentReportAmount && !$showingContentDismissModerationAmount || 
                 $showingContentReportAmount >= $reportAmountToHide &&
                 $showingContentDismissModerationAmount < $dismissModerationAmounToHideFromIos
-                // $currentUserId != $row['userid']
             ) {
                 return $this->contentFilterStrategy->getAction($contentTarget,$showingContent);
             }
