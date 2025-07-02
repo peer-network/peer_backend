@@ -12,7 +12,7 @@ class GetProfileContentFilteringStrategy implements ContentFilteringStrategy {
             ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
         ],
         ContentType::post->value => [
-            ContentType::post->value => null,
+            ContentType::post->value => ContentFilteringAction::replaceWithPlaceholder,
             ContentType::comment->value => null,
             ContentType::user->value => null,
         ],

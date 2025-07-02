@@ -149,7 +149,7 @@ class PostMapper extends PeerMapper
     {
 
         $post_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
-        $post_dismiss_moderation_amount = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['POST'];
+        $post_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['POST'];
         $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
         $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
         
@@ -163,7 +163,15 @@ class PostMapper extends PeerMapper
         );
 
         $sql = sprintf(
-            "SELECT sub.postid, sub.userid, sub.contenttype, sub.title, sub.media, sub.createdat
+            "SELECT 
+                sub.postid, 
+                sub.userid, 
+                sub.contenttype, 
+                sub.title, 
+                sub.media, 
+                sub.createdat,
+                pi.reports AS post_reports,
+                pi.count_content_moderation_dismissed AS post_count_content_moderation_dismissed
             FROM (
                 SELECT *, ROW_NUMBER() OVER (PARTITION BY contenttype ORDER BY createdat DESC) AS row_num
                 FROM posts p
@@ -173,34 +181,37 @@ class PostMapper extends PeerMapper
             LEFT JOIN post_info pi ON sub.postid = pi.postid AND pi.userid = sub.userid
             WHERE %s
             ORDER BY sub.contenttype, sub.createdat DESC",
-        $whereClausesString
+            $whereClausesString
         );
 
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue('userid', $userid, \PDO::PARAM_STR);
         $stmt->bindValue('limit', $limitPerType, \PDO::PARAM_INT);
         $stmt->execute();
-        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $unfidtered_result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $result = [];
 
-        // if ($row['user_status'] != 0) {
-        //     $replacer = ContentReplacementPattern::suspended;
-        //     $row['username'] = $replacer->username($row['username']);
-        //     $row['img'] = $replacer->profilePicturePath($row['img']);
-        // }
-        // if (
-        //     $user_reports >= $user_report_amount_to_hide && 
-        //     $user_dismiss_moderation_amount < $user_dismiss_moderation_amount_to_hide_from_ios &&
-        //     $currentUserId != $row['userid']
-        // ){
-        //     if ($contentFilterService->getContentFilterAction(
-        //         ContentType::post,
-        //         ContentType::user
-        //     ) == ContentFilteringAction::replaceWithPlaceholder) {
-        //         $replacer = ContentReplacementPattern::flagged;
-        //         $row['username'] = $replacer->username($row['username']);
-        //         $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
-        //     }
-        // }
+        foreach ($unfidtered_result as $row) {
+            // echo "here";
+            $post_reports = (int)$row['post_reports'];
+            $post_dismiss_moderation_amount = (int)$row['post_count_content_moderation_dismissed'];
+            
+            if (
+                $post_reports >= $post_report_amount_to_hide && 
+                $post_dismiss_moderation_amount < $post_dismiss_moderation_amount_to_hide_from_ios
+                // $currentUserId != $row['userid']
+            ){
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::post,
+                    ContentType::post
+                ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $row['title'] = $replacer->postTitle($row['title']);
+                    $row['media'] = $replacer->postMedia($row['media']);
+                }
+            }
+            $result[] = $row;
+        }
         return $result;
     }
 

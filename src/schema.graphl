@@ -13,7 +13,7 @@ type Query {
   hello: HelloResponse!
   searchUser(userid: ID, username: String, offset: Int, limit: Int): UserListResponse!
   listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse!
-  getProfile(userid: ID, postLimit: Int): ProfileInfo!
+  getProfile(contentFilterBy: ContentFilterType,userid: ID, postLimit: Int): ProfileInfo!
   listFollowRelations(userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
   listFriends(offset: Int, limit: Int): UserFriendsResponse!
   getUserInfo: UserInfoResponse!

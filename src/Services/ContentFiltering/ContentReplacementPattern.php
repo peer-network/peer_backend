@@ -24,8 +24,8 @@ enum ContentReplacementPattern: string {
 
     public function postMedia(string $media): string {
         return match ($this) {
-            self::flagged   => "",
-            self::suspended => "",
+            self::flagged   => "some_pic_to_be_here_some_text_to_pass_validation",
+            self::suspended => "some_pic_to_be_here_some_text_to_pass_validation",
             default => $media
         };
     }
