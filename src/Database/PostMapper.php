@@ -620,6 +620,7 @@ class PostMapper extends PeerMapper
                 u.username, 
 				u.slug,
                 u.img AS userimg,
+                MAX(u.status) AS user_status,
                 MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
                 MAX(pi.count_content_moderation_dismissed) AS post_count_content_moderation_dismissed,
                 MAX(ui.reports) AS user_reports,
