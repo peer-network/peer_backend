@@ -117,60 +117,6 @@ class UserAdvanced
         return $att;
     }
 
-    public static function suspendedUser(array $data = [], array $elements = [], bool $validate = true): UserAdvanced {
-        return new UserAdvanced(
-            [
-                'uid' => $data['uid'] ?? '',
-                'email' => $data['email'] ?? '',
-                'password' => $data['password'] ?? '',
-                'username' => "deleted Account",
-                'status' => 1,
-                'verified' => 0,
-                'slug' => 0,
-                'roles_mask' => $data['roles_mask'] ?? '',
-                'ip' => $data['ip'] ?? '',
-                'img' => "",
-                'biography' => "",
-                'amountposts' => 0,
-                'amounttrending' => 0,
-                'isfollowed' => false,
-                'isfollowing' => false,
-                'amountfollower' => 0,
-                'amountfollowed' => 0,
-                'liquidity' => $data['liquidity'] ?? 0,
-                'createdat' => $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u'),
-                'updatedat' => $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u'),
-            ]
-        );
-    }
-    
-    public static function flaggedUser(array $data = [], array $elements = [], bool $validate = true): UserAdvanced {
-        return new UserAdvanced(
-            [
-                'uid' => $data['uid'] ?? '',
-                'email' => $data['email'] ?? '',
-                'password' => $data['password'] ?? '',
-                'username' => "hidden Account",
-                'status' => $data['status'] ?? '',,
-                'verified' => $data['verified'] ?? '',
-                'slug' => 0,
-                'roles_mask' => $data['roles_mask'] ?? '',
-                'ip' => $data['ip'] ?? '',
-                'img' => "",
-                'biography' => "",
-                'amountposts' => 0,
-                'amounttrending' => 0,
-                'isfollowed' => false,
-                'isfollowing' => false,
-                'amountfollower' => 0,
-                'amountfollowed' => 0,
-                'liquidity' => $data['liquidity'] ?? 0,
-                'createdat' => $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u'),
-                'updatedat' => $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u'),
-            ]
-        );
-    }
-
     // Array Update methods
     public function updateProfil(array $data): void
     {
