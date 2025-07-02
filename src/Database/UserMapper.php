@@ -14,6 +14,7 @@ use Psr\Log\LoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
@@ -225,7 +226,7 @@ class UserMapper
                 ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed
             FROM 
                 users u
-            JOIN users_info ui ON uid = ui.userid
+            LEFT JOIN users_info ui ON uid = ui.userid
             WHERE %s",
             $whereClausesString,
         );
@@ -341,6 +342,13 @@ class UserMapper
         $trendlimit = 4;
         $trenddays = 7;
 
+        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
+        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
+
+        $whereClauses = ["verified = :verified"];
+        $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
+        $whereClausesString = implode(" AND ", $whereClauses);
+        
         $sql = "
             SELECT 
                 u.uid,
@@ -980,9 +988,22 @@ class UserMapper
         }
     }
 
-    public function fetchProfileData(string $userid, string $currentUserId): Profile|false 
+    public function fetchProfileData(string $userid, string $currentUserId, ?string $contentFilterBy): Profile|false 
     {
-        $sql = "
+        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
+        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
+
+        $whereClauses = ["u.uid = :userid AND u.verified = :verified"];
+        $whereClauses[] = 'roles_mask = 0 OR roles_mask = 16';
+        $whereClausesString = implode(" AND ", $whereClauses);
+
+        $contentFilterService = new ContentFilterServiceImpl(
+            new GetProfileContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
+
+        $sql = sprintf("
             SELECT 
                 u.uid,
                 u.username,
@@ -995,13 +1016,16 @@ class UserMapper
                 ui.amountfollowed,
                 ui.amountfriends,
                 ui.amountblocked,
+                ui.reports AS user_reports,
+                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
                 COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
             FROM users u
             LEFT JOIN users_info ui ON ui.userid = u.uid
-            WHERE u.uid = :userid AND u.verified = :verified
-        ";
+            WHERE %s",
+            $whereClausesString
+         );
 
         try {
             $stmt = $this->db->prepare($sql);
@@ -1012,7 +1036,32 @@ class UserMapper
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
+
             if ($data !== false) {
+                $user_reports = (int)$data['user_reports'];
+                $user_dismiss_moderation_amount = (int)$data['user_count_content_moderation_dismissed'];
+                
+                if ($data['status'] != 0) {
+                    $replacer = ContentReplacementPattern::suspended;
+                    $data['username'] = $replacer->username($data['username']);
+                    $data['img'] = $replacer->profilePicturePath($data['img']);
+                }
+
+                if (
+                    $user_reports >= $user_report_amount_to_hide && 
+                    $user_dismiss_moderation_amount < $user_dismiss_moderation_amount_to_hide_from_ios
+                    // $currentUserId != $data['userid']
+                ){
+                    if ($contentFilterService->getContentFilterAction(
+                        ContentType::user,
+                        ContentType::user
+                    ) == ContentFilteringAction::replaceWithPlaceholder) {
+                        $replacer = ContentReplacementPattern::flagged;
+                        $data['username'] = $replacer->username($data['username']);
+                        $data['img'] = $replacer->profilePicturePath($data['img']);
+                    }
+                }
+
                 return new Profile($data);
             }
 

@@ -585,6 +585,7 @@ class UserService
 
         $userId = $args['userid'] ?? $this->currentUserId;
         $postLimit = min(max((int)($args['postLimit'] ?? 4), 1), 10);
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $this->logger->info('UserService.Profile started');
 
@@ -598,7 +599,7 @@ class UserService
         }
 
         try {
-            $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId)->getArrayCopy();
+            $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId,$contentFilterBy)->getArrayCopy();
             $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
 
             $posts = $this->postMapper->fetchPostsByType($userId, $postLimit);
