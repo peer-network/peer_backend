@@ -9,8 +9,14 @@ use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
+use Fawaz\config\constants\ConstantsConfig;
 use Psr\Log\LoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\DateService;
 
 class UserMapper
@@ -185,27 +191,44 @@ class UserMapper
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-        $sql = "
+        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
+        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
+        
+        $whereClauses = ["verified = :verified"];
+        $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
+        $whereClausesString = implode(" AND ", $whereClauses);
+
+        $contentFilterService = new ContentFilterServiceImpl(
+            new ListPostsContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
+
+        $sql = sprintf("
             SELECT 
-                uid,
-                email,
-                username,
-                password,
-                status,
-                verified,
-                slug,
-                roles_mask,
-                ip,
-                img,
-                biography,
-                createdat,
-                updatedat
+                u.uid,
+                u.email,
+                u.username,
+                u.password,
+                u.status,
+                u.verified,
+                u.slug,
+                u.roles_mask,
+                u.ip,
+                u.img,
+                u.biography,
+                u.createdat,
+                u.updatedat,
+                ui.reports AS user_reports,
+                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed
             FROM 
-                users
-            WHERE 
-                verified = :verified
-        ";
+                users u
+            JOIN users_info ui ON uid = ui.userid
+            WHERE %s",
+            $whereClausesString,
+        );
 
         $conditions = [];
         $queryParams = [':verified' => 1];
@@ -248,9 +271,33 @@ class UserMapper
             $stmt->execute();
 
             $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {    
                 $this->logger->info("UserMapper.fetchAll.row started");
                 try {
+                    $user_reports = (int)$row['user_reports'];
+                    $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+
+                    // if ($row['status'] != 0) {
+                    //     $replacer = ContentReplacementPattern::suspended;
+                    //     $row['username'] = $replacer->username($row['username']);
+                    //     $row['img'] = $replacer->profilePicturePath($row['img']);
+                    // }
+
+                    if (
+                        $user_reports >= $user_report_amount_to_hide && 
+                        $user_dismiss_moderation_amount < $user_dismiss_moderation_amount_to_hide_from_ios
+                        // $currentUserId != $row['userid']
+                    ){
+                        if ($contentFilterService->getContentFilterAction(
+                            ContentType::user,
+                            ContentType::user
+                        ) == ContentFilteringAction::replaceWithPlaceholder) {
+                            $replacer = ContentReplacementPattern::flagged;
+                            $row['username'] = $replacer->username($row['username']);
+                            $row['img'] = $replacer->profilePicturePath($row['img']);
+                        }
+                    }
+
                     $results[] = new User([
                         'uid' => $row['uid'],
                         'email' => $row['email'],
@@ -264,7 +311,7 @@ class UserMapper
                         'img' => $row['img'],
                         'biography' => $row['biography'],
                         'createdat' => $row['createdat'],
-                        'updatedat' => $row['updatedat'],
+                        'updatedat' => $row['updatedat']
                     ]);
                 } catch (\Throwable $e) {
                     $this->logger->error("Failed to map user data", ['error' => $e->getMessage(), 'data' => $row]);

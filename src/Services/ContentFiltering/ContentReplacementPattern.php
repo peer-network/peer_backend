@@ -40,8 +40,8 @@ enum ContentReplacementPattern: string {
 
     public function username(string $username): string {
         return match ($this) {
-            self::flagged   => "hidden account",
-            self::suspended => "deleted account",
+            self::flagged   => "hidden_account",
+            self::suspended => "deleted_account",
             default => $username
         };
     }
@@ -56,8 +56,8 @@ enum ContentReplacementPattern: string {
 
     public function profilePicturePath(string $path): string {
         return match ($this) {
-            self::flagged   => "",
-            self::suspended => "",
+            self::flagged   => "some pic to be here",
+            self::suspended => "some pic to be here",
             default => $path
         };
     }

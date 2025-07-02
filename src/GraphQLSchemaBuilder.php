@@ -2698,6 +2698,12 @@ class GraphQLSchemaBuilder
 
         $this->logger->info('Query.resolveUsers started');
 
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
+
         if ($this->userRoles === 16) {
             $results = $this->userService->fetchAllAdvance($args);
         } else {
@@ -2862,6 +2868,12 @@ class GraphQLSchemaBuilder
 
         $this->logger->info('Query.resolvePosts started');
 
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
+
         $posts = $this->postService->findPostser($args);
         if (isset($posts['status']) && $posts['status'] === 'error') {
             return $posts;
@@ -2870,11 +2882,6 @@ class GraphQLSchemaBuilder
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
-            return $this->respondWithError(30103);
-        }
 
         $data = array_map(
             fn(PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit,$contentFilterBy),
