@@ -448,8 +448,8 @@
         "userFriendlyComment": "Invalid user ID format. Please check and try again."
     },
     "30202": {
-        "comment": "The 'username' field (User display name) must be between 3 and 23 characters long, must contain at least one letter and can contain numbers, and underscores",
-        "userFriendlyComment": "Username must be 3-23 chars with letters, numbers, or underscores."
+        "comment": "The 'username' field (User display name) must be between {USER.USERNAME.MIN_LENGTH} and {USER.USERNAME.MAX_LENGTH} characters long, must contain at least one letter and can contain numbers, and underscores",
+        "userFriendlyComment": "Username must be {USER.USERNAME.MIN_LENGTH}-{USER.USERNAME.MAX_LENGTH} chars with letters, numbers, or underscores."
     },
     "30203": {
         "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 2147483647",
@@ -480,12 +480,12 @@
         "userFriendlyComment": "Invalid post ID format."
     },
     "30210": {
-        "comment": "The 'title' field (Title of the post to search for) must be between 2 and 63 characters long",
-        "userFriendlyComment": "Title must be 2-63 chars"
+        "comment": "The 'title' field (Title of the post to search for) must be between {POST.TITLE.MIN_LENGTH} and {POST.TITLE.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Title must be {POST.TITLE.MIN_LENGTH}–{POST.TITLE.MAX_LENGTH} chars"
     },
     "30211": {
-        "comment": "The 'tag' field (Tags to search for in posts) must be an array of up to five tags, each between 2 and 53 characters long",
-        "userFriendlyComment": "Tags must be 2-53 chars, max 5 tags."
+        "comment": "The 'tag' field (Tags to search for in posts) must be an array of up to five tags, each between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Tags must be {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} chars, max {POST.TAG.MAX_LIMIT} tags."
     },
     "30212": {
         "comment": "The 'from' field (Starting date for data retrieval) must be a valid date in the format YYYY-MM-DD",
@@ -660,12 +660,8 @@
         "userFriendlyComment": "Invalid Solana public key format."
     },
     "30255": {
-        "comment": "The 'tagName' field (Tag identifier) must be between 2 and 53 characters long, must not contain spaces, and may include letters, numbers, special characters, underscores _, and hyphens - (format: valid-tag_name-123)",
-        "userFriendlyComment": "Tag name must be 2-53 chars without spaces (can use - and _)."
-    },
-    "30256": {
-        "comment": "Title must be between 2 and 30 characters. Please adjust and try again",
-        "userFriendlyComment": "Title must be 2-30 characters."
+        "comment": "The 'tagName' field (Tag identifier) must be between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long, must not contain spaces, and may include letters, numbers, special characters, underscores _, and hyphens - (format: valid-tag_name-123)",
+        "userFriendlyComment": "Tag name must be {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} chars without spaces (can use - and _)."
     },
     "30257": {
         "comment": "Invalid IP address. Please enter a valid IPv4 (e.g. 192.168.0.1) or IPv6 (e.g. 2001:0db8:85a3:0000:0000:8a2e:0370:7334) address",
@@ -688,12 +684,12 @@
         "userFriendlyComment": "File too large. Please reduce size."
     },
     "30262": {
-        "comment": "The 'tag' field (Tags in post creation) must be an array of up to ten tags, each between 2 and 53 characters long",
-        "userFriendlyComment": "Max 10 tags, each 2-53 characters."
+        "comment": "The 'tag' field (Tags in post creation) must be an array of up to ten tags, each between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Max 10 tags, each {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} characters."
     },
     "30263": {
-        "comment": "The 'mediadescription' field (Create Post input) must be between 3 and 500 characters long",
-        "userFriendlyComment": "Media description must be 3-500 characters."
+        "comment": "The 'mediadescription' field (Create Post input) must be between {POST.MEDIADESCRIPTION.MIN_LENGTH} and {POST.MEDIADESCRIPTION.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Media description must be {POST.MEDIADESCRIPTION.MIN_LENGTH}-{POST.MEDIADESCRIPTION.MAX_LENGTH} characters."
     },
     "30264": {
         "comment": "The numberoftokens field must be a number, greater than zero, and less than the account balance",
@@ -708,8 +704,8 @@
         "userFriendlyComment": "Only one media type allowed per post."
     },
     "30267": {
-        "comment": "The media field must contain less than 5 image files, 1 text file, 1 audio file, 2 video files. ",
-        "userFriendlyComment": "Media limits: 5 images, 1 text, 1 audio, or 2 videos."
+        "comment": "The media field must contain less than {POST.MEDIALIMIT.IMAGE} image files, {POST.MEDIALIMIT.TEXT} text file, {POST.MEDIALIMIT.AUDIO} audio file, {POST.MEDIALIMIT.VIDEO} video files. ",
+        "userFriendlyComment": "Media limits: {POST.MEDIALIMIT.IMAGE} images, {POST.MEDIALIMIT.TEXT} text, {POST.MEDIALIMIT.AUDIO} audio, or {POST.MEDIALIMIT.VIDEO} videos."
     },
     "30268": {
         "comment": "The cover field must contain at most only 1 image",
