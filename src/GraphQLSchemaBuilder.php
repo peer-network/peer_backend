@@ -2645,6 +2645,12 @@ class GraphQLSchemaBuilder
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
             return $validationResult;
         }
+        
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
 
         $this->logger->info('Query.resolveFriends started');
 

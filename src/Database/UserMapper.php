@@ -766,16 +766,32 @@ class UserMapper
     public function fetchFriends(
         string $userId, 
         int $offset = 0, 
-        int $limit = 10
+        int $limit = 10,
+        ?string $contentFilterBy = null
     ): ?array {
         $this->logger->info("UserMapper.fetchFriends started", ['userId' => $userId]);
 
+        $contentFilterService = new ContentFilterServiceImpl(
+            new GetProfileContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
+
         try {
             $sql = "
-                SELECT u.uid, u.username, u.slug, u.updatedat, u.biography, u.img 
+                SELECT 
+                    u.uid, 
+                    u.username, 
+                    u.slug, 
+                    u.updatedat, 
+                    u.biography, 
+                    u.img,
+                    ui.reports AS user_reports,
+                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed
                 FROM follows f1 
                 INNER JOIN follows f2 ON f1.followedid = f2.followerid 
                 INNER JOIN users u ON f1.followedid = u.uid 
+                LEFT JOIN users_info ui ON ui.userid = u.uid
                 WHERE f1.followerid = :userId 
                 AND f2.followedid = :userId
                 ORDER BY u.username ASC
@@ -791,14 +807,32 @@ class UserMapper
             $stmt->execute();
 
             $friends = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $filtered_friends = [];
 
-            if ($friends) {
+            foreach ($friends as $row) {
+                $user_reports = (int)$row['user_reports'];
+                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::user,
+                    ContentType::user,
+                    $user_reports,
+                    $user_dismiss_moderation_amount
+                ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $row['username'] = $replacer->username($row['username']);
+                    $row['img'] = $replacer->profilePicturePath($row['img']);
+                }
+                $filtered_friends[] = $row;
+            }
+
+
+            if ($filtered_friends) {
                 $this->logger->info("fetchFriends retrieved friends", ['count' => count($friends)]);
             } else {
                 $this->logger->warning("No friends found for user", ['userId' => $userId]);
             }
 
-            return $friends ?: null;
+            return $filtered_friends ?: null;
         } catch (\Throwable $e) {
             $this->logger->error("Database error in fetchFriends", ['error' => $e->getMessage()]);
             return null;
@@ -809,9 +843,16 @@ class UserMapper
         string $userId, 
         string $currentUserId, 
         int $offset = 0, 
-        int $limit = 10
+        int $limit = 10,
+        ?string $contentFilterBy = null
     ): array {
         $this->logger->info("UserMapper.fetchFollowers started", ['userId' => $userId]);
+
+        $contentFilterService = new ContentFilterServiceImpl(
+            new GetProfileContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
 
         try {
             $sql = "
@@ -820,6 +861,8 @@ class UserMapper
                     u.username, 
                     u.slug,
                     u.img,
+                    ui.reports AS user_reports,
+                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
                     EXISTS (
                         SELECT 1 
                         FROM follows ff 
@@ -832,6 +875,7 @@ class UserMapper
                     ) AS isfollowing
                 FROM follows f
                 JOIN users u ON u.uid = f.followerid
+                LEFT JOIN users_info ui ON ui.userid = u.uid
                 WHERE f.followedid = :userId
                 ORDER BY f.createdat DESC
                 LIMIT :limit OFFSET :offset
@@ -848,8 +892,26 @@ class UserMapper
             $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
+            $filtered_results = [];
+            
+            foreach ($uniqueResults as $row) {
+                $user_reports = (int)$row['user_reports'];
+                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+                
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::user,
+                    ContentType::user,
+                    $user_reports,
+                    $user_dismiss_moderation_amount
+                ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $row['username'] = $replacer->username($row['username']);
+                    $row['img'] = $replacer->profilePicturePath($row['img']);
+                }
+                $filtered_results[] = $row;
+            }
 
-            $users = array_map(fn($row) => new ProfilUser($row), $uniqueResults);
+            $users = array_map(fn($row) => new ProfilUser($row), $filtered_results);
 
             $this->logger->info(
                 count($users) > 0 ? "fetchFollowers retrieved users" : "No users found",
@@ -867,9 +929,16 @@ class UserMapper
         string $userId, 
         string $currentUserId, 
         int $offset = 0, 
-        int $limit = 10
+        int $limit = 10,
+        ?string $contentFilterBy = null
     ): array {
         $this->logger->info("UserMapper.fetchFollowing started", ['userId' => $userId]);
+
+        $contentFilterService = new ContentFilterServiceImpl(
+            new GetProfileContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
 
         try {
             $sql = "
@@ -878,6 +947,8 @@ class UserMapper
                     u.username, 
                     u.slug,
                     u.img,
+                    ui.reports AS user_reports,
+                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
                     EXISTS (
                         SELECT 1 
                         FROM follows ff 
@@ -890,6 +961,7 @@ class UserMapper
                     ) AS isfollowing
                 FROM follows f
                 JOIN users u ON u.uid = f.followedid
+                LEFT JOIN users_info ui ON ui.userid = u.uid
                 WHERE f.followerid = :userId
                 ORDER BY f.createdat DESC
                 LIMIT :limit OFFSET :offset
@@ -906,8 +978,26 @@ class UserMapper
             $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
+            $filtered_results = [];
+            
+            foreach ($uniqueResults as $row) {
+                $user_reports = (int)$row['user_reports'];
+                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+                
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::user,
+                    ContentType::user,
+                    $user_reports,
+                    $user_dismiss_moderation_amount
+                ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $row['username'] = $replacer->username($row['username']);
+                    $row['img'] = $replacer->profilePicturePath($row['img']);
+                }
+                $filtered_results[] = $row;
+            }
 
-            $users = array_map(fn($row) => new ProfilUser($row), $uniqueResults);
+            $users = array_map(fn($row) => new ProfilUser($row), $filtered_results);
 
             $this->logger->info(
                 count($users) > 0 ? "fetchFollowing retrieved users" : "No users found",
