@@ -446,7 +446,10 @@ class UserAdvanced
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 00001, 'max' => 99999]],
+                    ['name' => 'validateIntRange', 'options' => [
+                        'min' => $userConfig['SLUG']['MIN_LENGTH'], 
+                        'max' => $userConfig['SLUG']['MAX_LENGTH']
+                        ]],
                 ],
             ],
             'roles_mask' => [
@@ -467,8 +470,8 @@ class UserAdvanced
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 0,
-                        'max' => 100,
+                        'min' => $userConfig['IMAGE']['MIN_LENGTH'],
+                        'max' => $userConfig['IMAGE']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -526,7 +529,10 @@ class UserAdvanced
                 'required' => true,
                 'filters' => [['name' => 'FloatSanitize']],
                 'validators' => [
-                    ['name' => 'ValidateFloat', 'options' => ['min' => -18250000, 'max' => 18250000]],
+                    ['name' => 'ValidateFloat', 'options' => [
+                        'min' => $userConfig['LIQUIDITY']['MIN_LENGTH'], 
+                        'max' => $userConfig['LIQUIDITY']['MAX_LENGTH']
+                        ]],
                 ],
             ],
             'createdat' => [

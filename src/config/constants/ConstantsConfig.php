@@ -57,5 +57,17 @@ class ConstantsConfig
             'MAX_LENGTH' => 21,
             'PATTERN' => '^\+?[1-9]\d{0,2}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{1,4}[\s.-]?\d{1,9}$',
         ],
+        'IMAGE' => [
+            'MIN_LENGTH' => 30,
+            'MAX_LENGTH' => 100,
+        ],
+        'SLUG' => [
+            'MIN_LENGTH' => 00001,
+            'MAX_LENGTH' => 99999,
+        ],
+        'LIQUIDITY' => [
+            'MIN_LENGTH' => -18250000,
+            'MAX_LENGTH' => 18250000,
+        ],
     ]; 
 }
