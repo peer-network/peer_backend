@@ -189,7 +189,7 @@ class PostInfoService
             $post = $this->postMapper->loadById($postId);
             if (!$post) {
                 $this->logger->error('Error while fetching comment data from db');
-                return $this->respondWithError(00000);
+                return $this->respondWithError(31510);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
@@ -199,7 +199,7 @@ class PostInfoService
             }
         } catch (\Exception $e) {
             $this->logger->error('Error while fetching data for report generation ', ['exception' => $e]);
-            return $this->respondWithError(00000);
+            return $this->respondWithError(41505);
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
@@ -208,7 +208,7 @@ class PostInfoService
         
         $contentHash = $post->hashValue();
         if (empty($contentHash)) {
-            return $this->respondWithError(00000);
+            return $this->respondWithError(41505);
         }
 
         try {
@@ -232,7 +232,7 @@ class PostInfoService
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
-            return $this->respondWithError(00000);
+            return $this->respondWithError(41505);
         }
     }
 
