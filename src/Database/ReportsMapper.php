@@ -35,7 +35,7 @@ class ReportsMapper
         string $targetid, 
         string $hash_content_sha256, 
         ?string $message = NULL
-    ): bool {
+    ): ?bool {
 
         $this->logger->info("ReportsMapper.addReports started");
 
@@ -74,6 +74,7 @@ class ReportsMapper
             if ($exists > 0) {
                 $this->db->rollBack();
                 $this->logger->warning("User activity already exists", $debugData);
+                return true;
             }
 
             $createdat = (string)(new DateTime())->format('Y-m-d H:i:s.u');
@@ -110,16 +111,16 @@ class ReportsMapper
             if ($success) {
                 $this->db->commit();
                 $this->logger->info("Report added successfully", $debugData);
-                return true;
+                return false;
             }
 
             $this->db->rollBack();
             $this->logger->warning("failed to add report", $debugData);
-            return false;
+            return null;
         } catch (\Exception $e) {
             $this->db->rollBack();
             $this->logger->error("ReportsMapper.addReport: Exception occurred", ['exception' => $e->getMessage()]);
-            return false;
+            return null;
         }
     }
 }

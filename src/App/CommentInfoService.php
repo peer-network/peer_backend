@@ -168,7 +168,11 @@ class CommentInfoService
                 $contentHash
             );
 
-            if (!$exists) {
+            if ($exists == null) {
+                return $this->respondWithError(41601);
+            }
+
+            if ($exists == true) {
                 return $this->respondWithError(31605);
             }
 

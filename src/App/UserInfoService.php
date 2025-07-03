@@ -354,11 +354,15 @@ class UserInfoService
                 $contentHash
             );
 
-            if (!$exists) {
+            if ($exists == null) {
+                return $this->respondWithError(00000); // 410xx - failed to report user
+            }
+
+            if ($exists == true) {
                 $this->logger->error('User report already exists');
                 return $this->respondWithError(00000); // report already exists
             }
-
+            
             $userInfo->setReports($userInfo->getReports() + 1);
             $this->userInfoMapper->update($userInfo);
 
