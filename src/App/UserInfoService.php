@@ -325,25 +325,25 @@ class UserInfoService
             $user = $this->userMapper->loadById($reported_userid);
 
             if (!$user) {
-                $this->logger->error('Error while fetching user data from db');
-                return $this->respondWithError(00000);
+                $this->logger->error('User not found');
+                return $this->respondWithError(31007);
             }
 
             $userInfo = $this->userInfoMapper->loadInfoById($reported_userid);
 
             if (!$userInfo) {
                 $this->logger->error('Error while fetching user data from db');
-                return $this->respondWithError(00000); 
+                return $this->respondWithError(41001); 
             }
         } catch (\Exception $e) {
             $this->logger->error('Error while fetching data for report generation ', ['exception' => $e]);
-            return $this->respondWithError(00000);
+            return $this->respondWithError(00000); // 410xx - failed to report user
         }
 
         $contentHash = $user->hashValue();
         if (empty($contentHash)) {
             $this->logger->error('Error while generation content hash');
-            return $this->respondWithError(00000);
+            return $this->respondWithError(00000); // 410xx - failed to report user
         }
 
         try {
@@ -355,8 +355,8 @@ class UserInfoService
             );
 
             if (!$exists) {
-                $this->logger->error('Error while adding report to db');
-                return $this->respondWithError(00000);
+                $this->logger->error('User report already exists');
+                return $this->respondWithError(00000); // report already exists
             }
 
             $userInfo->setReports($userInfo->getReports() + 1);
@@ -369,7 +369,7 @@ class UserInfoService
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
-            return $this->respondWithError(00000);
+            return $this->respondWithError(00000); // 410xx - failed to report user
         }
     }
 }
