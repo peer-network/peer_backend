@@ -79,7 +79,17 @@ class ConstantsConfig
         ],
         'COVER' => [
             'MAX_COUNT' => 1,
+            'MIN_LENGTH' => 0,
+            'MAX_LENGTH' => 1000,
         ],
+        'MEDIA' => [
+            'MIN_LENGTH' => 30,
+            'MAX_LENGTH' => 1000,
+        ],
+        'OPTIONS' => [
+            'MIN_LENGTH' => 0,
+            'MAX_LENGTH' => 1000,
+        ]
     ];
     private const PAGING = [
         'OFFSET' => [
@@ -128,6 +138,10 @@ class ConstantsConfig
         ],
         'TRANSACTION' => [
             'MIN_TOKENS' => 10,
+        ],
+        'SLUG' => [
+            'MIN_LENGTH' => 00001,
+            'MAX_LENGTH' => 99999,
         ],
     ];
     private const CHAT = [
