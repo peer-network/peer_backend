@@ -496,8 +496,8 @@
         "userFriendlyComment": "Title must be {POST.TITLE.MIN_LENGTH}–{POST.TITLE.MAX_LENGTH} chars"
     },
     "30211": {
-        "comment": "The 'tag' field (Tags to search for in posts) must be an array of up to five tags, each between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long",
-        "userFriendlyComment": "Tags must be {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} chars, max {POST.TAG.MAX_LIMIT} tags."
+        "comment": "The 'tag' field (Tags to search for in posts) must be an array of up to {POST.TAG.MAX_COUNT.SEARCH} tags, each between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Tags must be {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} chars, max {POST.TAG.MAX_COUNT.SEARCH} tags."
     },
     "30212": {
         "comment": "The 'from' field (Starting date for data retrieval) must be a valid date in the format YYYY-MM-DD",
@@ -696,8 +696,8 @@
         "userFriendlyComment": "File too large. Please reduce size."
     },
     "30262": {
-        "comment": "The 'tag' field (Tags in post creation) must be an array of up to ten tags, each between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long",
-        "userFriendlyComment": "Max 10 tags, each {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} characters."
+        "comment": "The 'tag' field (Tags in post creation) must be an array of up to {POST.TAG.MAX_COUNT.CREATE} tags, each between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Max {POST.TAG.MAX_COUNT.CREATE} tags, each {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} characters."
     },
     "30263": {
         "comment": "The 'mediadescription' field (Create Post input) must be between {POST.MEDIADESCRIPTION.MIN_LENGTH} and {POST.MEDIADESCRIPTION.MAX_LENGTH} characters long",
