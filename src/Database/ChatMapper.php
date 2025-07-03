@@ -7,10 +7,13 @@ use Fawaz\App\Chat;
 use Fawaz\App\ChatParticipants;
 use Fawaz\App\ChatMessages;
 use Fawaz\App\NewsFeed;
+use Fawaz\App\User;
 use Psr\Log\LoggerInterface;
 
 class ChatMapper
 {
+    const STATUS_DELETED = 6;
+
     public function __construct(protected LoggerInterface $logger, protected PDO $db)
     {
     }
@@ -119,10 +122,12 @@ class ChatMapper
                     INNER JOIN follows f2 ON f1.followedid = f2.followerid 
                     INNER JOIN users u ON f1.followedid = u.uid 
                     WHERE f1.followerid = :userid 
-                    AND f2.followedid = :userid";
+                    AND f2.followedid = :userid
+                    AND u.status != :status";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
             $stmt->execute();
 
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -315,6 +320,7 @@ class ChatMapper
                     p.userid, 
                     u.username, 
                     u.slug,
+                    u.status,
                     u.img, 
                     p.hasaccess 
                 FROM chatparticipants p 
@@ -325,6 +331,24 @@ class ChatMapper
             $participantStmt = $this->db->prepare($chatParticipantsSql);
             $participantStmt->execute(['chatid' => $chatId]);
             $chatParticipants = $participantStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+
+            $chatParticipantObj = [];
+            foreach($chatParticipants as $key => $prt){
+                $userObj = [
+                        'uid' => $prt['userid'],
+                        'status' => $prt['status'],
+                        'username' => $prt['username'],
+                        'slug' => $prt['slug'],
+                        'img' => $prt['img'],
+                        'hasaccess' => $prt['hasaccess'],
+                    ];
+                $userObj = (new User($userObj, [], false))->getArrayCopy();
+
+                $chatParticipantObj[$key] = $userObj;
+                $chatParticipantObj[$key]['userid'] = $userObj['uid'];
+                $chatParticipantObj[$key]['hasaccess'] = $prt['hasaccess'];
+            }   
 
             return [
                 'status' => 'success',
@@ -448,9 +472,10 @@ class ChatMapper
         try {
             $userid = $data['userid'];
 
-            $userExistsQuery = "SELECT COUNT(*) FROM users WHERE uid = :userid";
+            $userExistsQuery = "SELECT COUNT(*) FROM users WHERE uid = :userid AND status != :status";
             $stmt = $this->db->prepare($userExistsQuery);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
             $stmt->execute();
             $userExists = (bool) $stmt->fetchColumn();
 
@@ -504,9 +529,10 @@ class ChatMapper
         try {
             $userid = $data['userid'];
 
-            $userExistsQuery = "SELECT COUNT(*) FROM users WHERE uid = :userid";
+            $userExistsQuery = "SELECT COUNT(*) FROM users WHERE uid = :userid AND status != :status";
             $stmt = $this->db->prepare($userExistsQuery);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
             $stmt->execute();
             $userExists = (bool) $stmt->fetchColumn();
 
@@ -776,8 +802,9 @@ class ChatMapper
 
                 $chatParticipantsSql = "
                     SELECT 
-                        p.userid, 
+                        u.uid, 
                         u.username, 
+                        u.status,
 						u.slug,
                         u.img, 
                         p.hasaccess 
@@ -795,6 +822,13 @@ class ChatMapper
                 $participantStmt->execute();
                 $chatParticipants = $participantStmt->fetchAll(\PDO::FETCH_ASSOC);
 
+                $chatParticipantObj = [];
+                foreach ($chatParticipants as $key => $chatPrtcpt) {
+                    $userObj = (new User($chatPrtcpt, [], false))->getArrayCopy();
+                    $chatParticipantObj[$key] = $userObj;
+                    $chatParticipantObj[$key]['userid'] = $userObj['uid'];
+                    $chatParticipantObj[$key]['hasaccess'] = $chatPrtcpt['hasaccess'];
+                }
                 $chats[] = new Chat([
                     'chatid' => $chatRow['chatid'],
                     'creatorid' => $chatRow['creatorid'],
@@ -804,7 +838,7 @@ class ChatMapper
                     'createdat' => $chatRow['createdat'],
                     'updatedat' => $chatRow['updatedat'],
                     'chatmessages' => $chatMessages, 
-                    'chatparticipants' => $chatParticipants, 
+                    'chatparticipants' => $chatParticipantObj, 
                 ]);
             }
 

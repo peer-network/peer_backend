@@ -6,6 +6,7 @@ use PDO;
 use Fawaz\App\Comment;
 use Fawaz\App\CommentAdvanced;
 use Fawaz\App\Commented;
+use Fawaz\App\User;
 use Psr\Log\LoggerInterface;
 
 class CommentMapper
@@ -97,6 +98,7 @@ class CommentMapper
                 CASE WHEN ul.userid IS NOT NULL THEN TRUE ELSE FALSE END AS isliked,
                 u.uid,
                 u.username,
+                u.status,
 				u.slug,
                 u.img,
                 CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
@@ -137,6 +139,16 @@ class CommentMapper
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$this->logger->info("Fetched comments for post counter", ['row' => $row]);
+
+            $userObj = [
+                        'uid' => $row['uid'],
+                        'status' => $row['status'],
+                        'username' => $row['username'],
+                        'slug' => $row['slug'],
+                        'img' => $row['img'],
+                    ];
+            $userObj = (new User($userObj, [], false))->getArrayCopy();
+                
             $results[] = new CommentAdvanced([
                 'commentid' => $row['commentid'],
                 'userid' => $row['userid'],
@@ -148,10 +160,10 @@ class CommentMapper
                 'isliked' => (bool) $row['isliked'],
                 'createdat' => $row['createdat'],
                 'user' => [
-                    'uid' => $row['uid'],
-                    'username' => $row['username'],
-                    'slug' => $row['slug'],
-                    'img' => $row['img'],
+                    'uid' => $userObj['uid'],
+                    'username' => $userObj['username'],
+                    'slug' => $userObj['slug'],
+                    'img' => $userObj['img'],
                     'isfollowed' => (bool) $row['isfollowed'],
                     'isfollowing' => (bool) $row['isfollowing'],
                 ],
@@ -193,6 +205,7 @@ class CommentMapper
             c.*, 
             u.uid,
             u.username,
+            u.status,
             u.slug,
             u.img,
             u.biography,
@@ -218,13 +231,25 @@ class CommentMapper
 
         $comments = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+
+            $userObj = [
+                        'uid' => $row['userid'],
+                        'status' => $row['status'],
+                        'username' => $row['username'],
+                        'slug' => $row['slug'],
+                        'img' => $row['img'],
+                        'biography' => $row['biography'],
+                        'updatedat' => $row['updatedat'],
+                    ];
+            $userObj = (new User($userObj, [], false))->getArrayCopy();
+
             $row['user'] = [
-                'uid' => $row['userid'] ?? '',
-                'username' => $row['username'] ?? '',
-                'slug' => $row['slug'] ?? 0,
-                'img' =>  $row['img'] ?? '',
-                'biography' =>  $row['biography'] ?? '',
-                'updatedat' =>  $row['updatedat'] ?? '',
+                'uid' => $userObj['uid'] ?? '',
+                'username' => $userObj['username'] ?? '',
+                'slug' => $userObj['slug'] ?? 0,
+                'img' =>  $userObj['img'] ?? '',
+                'biography' =>  $userObj['biography'] ?? '',
+                'updatedat' =>  $userObj['updatedat'] ?? '',
             ];
             $comment = new Commented($row);
             // echo($comment['user']['id']);
@@ -257,13 +282,25 @@ class CommentMapper
 
         $subComments = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            
+            $userObj = [
+                        'uid' => $row['userid'],
+                        'status' => $row['status'],
+                        'username' => $row['username'],
+                        'slug' => $row['slug'],
+                        'img' => $row['img'],
+                        'biography' => $row['biography'],
+                        'updatedat' => $row['updatedat'],
+                    ];
+            $userObj = (new User($userObj, [], false))->getArrayCopy();
+
             $row['user'] = [
-                'uid' => $row['userid'] ?? '',
-                'username' => $row['username'] ?? '',
-                'slug' => $row['slug'] ?? 0,
-                'img' =>  $row['img'] ?? '',
-                'biography' =>  $row['biography'] ?? '',
-                'updatedat' =>  $row['updatedat'] ?? '',
+                'uid' => $userObj['uid'] ?? '',
+                'username' => $userObj['username'] ?? '',
+                'slug' => $userObj['slug'] ?? 0,
+                'img' =>  $userObj['img'] ?? '',
+                'biography' =>  $userObj['biography'] ?? '',
+                'updatedat' =>  $userObj['updatedat'] ?? '',
             ];
             $subComment = new CommentAdvanced($row);
             $subComments[] = $subComment->getArrayCopy();
@@ -303,6 +340,7 @@ class CommentMapper
 					u.uid,
 					u.username,
 					u.slug,
+					u.status,
 					u.img,
 					(f1.followerid IS NOT NULL) AS isfollowing,
 					(f2.followerid IS NOT NULL) AS isfollowed
@@ -343,6 +381,16 @@ class CommentMapper
 			$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 			$comments = array_map(function($row) {
+
+                $userObj = [
+                        'uid' => $row['uid'],
+                        'status' => $row['status'],
+                        'username' => $row['username'],
+                        'slug' => $row['slug'],
+                        'img' => $row['img'],
+                    ];
+                $userObj = (new User($userObj, [], false))->getArrayCopy();
+
 				return new CommentAdvanced([
 					'commentid' => $row['commentid'],
 					'userid' => $row['userid'],
@@ -354,10 +402,10 @@ class CommentMapper
 					'isliked' => (bool) $row['isliked'],
 					'createdat' => $row['createdat'],
 					'user' => [
-						'uid' => $row['uid'],
-						'username' => $row['username'],
-						'slug' => $row['slug'],
-						'img' => $row['img'],
+						'uid' => $userObj['uid'],
+						'username' => $userObj['username'],
+						'slug' => $userObj['slug'],
+						'img' => $userObj['img'],
 						'isfollowed' => (bool) $row['isfollowed'],
 						'isfollowing' => (bool) $row['isfollowing'],
 					],

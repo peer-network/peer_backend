@@ -15,6 +15,7 @@ use Fawaz\Utils\DateService;
 
 class UserMapper
 {
+    const STATUS_DELETED = 6;
     public function __construct(protected LoggerInterface $logger, protected PDO $db)
     {
     }
@@ -221,6 +222,8 @@ class UserMapper
                 $queryParams[':username'] = '%' . $value . '%';
             }
         }
+        $conditions[] = "status != :status";
+        $queryParams[':status'] = self::STATUS_DELETED;
 
         if ($conditions) {
             $sql .= " AND " . implode(" AND ", $conditions);
@@ -362,6 +365,9 @@ class UserMapper
                 $queryParams[':username'] = '%' . $value . '%';
             }
         }
+
+        $conditions[] = "u.status != :status";
+        $queryParams[':status'] = self::STATUS_DELETED;
 
         if ($conditions) {
             $sql .= " AND " . implode(" AND ", $conditions);
@@ -505,11 +511,12 @@ class UserMapper
         try {
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
                     FROM users 
-                    WHERE uid = :id";
+                    WHERE uid = :id AND status != :status";
             
             $stmt = $this->db->prepare($sql);
             
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
             
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -558,7 +565,7 @@ class UserMapper
         $this->logger->info("UserMapper.loadUserInfoById started", ['id' => $id]);
 
         try {
-            $sql = "SELECT uid, username, slug, img, biography, updatedat FROM users WHERE uid = :id";
+            $sql = "SELECT uid, username, status, slug, img, biography, updatedat FROM users WHERE uid = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);  // Use bindValue here
             $stmt->execute();
@@ -566,7 +573,7 @@ class UserMapper
 
             if ($data !== false) {
                 $this->logger->info("User info fetched successfully", ['id' => $id]);
-                return $data;
+                return (new User($data, [], false))->getArrayCopy();
             }
 
             $this->logger->warning("No user found with id", ['id' => $id]);
@@ -720,7 +727,7 @@ class UserMapper
 
         try {
             $sql = "
-                SELECT u.uid, u.username, u.slug, u.updatedat, u.biography, u.img 
+                SELECT u.uid, u.status, u.username, u.slug, u.updatedat, u.biography, u.img 
                 FROM follows f1 
                 INNER JOIN follows f2 ON f1.followedid = f2.followerid 
                 INNER JOIN users u ON f1.followedid = u.uid 
@@ -740,13 +747,19 @@ class UserMapper
 
             $friends = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            if ($friends) {
-                $this->logger->info("fetchFriends retrieved friends", ['count' => count($friends)]);
+
+            $frdObj = [];
+            foreach($friends as $key => $frd){
+                $frdObj[] = (new User($frd, [], false))->getArrayCopy();
+            }   
+
+            if ($frdObj) {
+                $this->logger->info("fetchFriends retrieved friends", ['count' => count($frdObj)]);
             } else {
                 $this->logger->warning("No friends found for user", ['userId' => $userId]);
             }
 
-            return $friends ?: null;
+            return $frdObj ?: null;
         } catch (\Throwable $e) {
             $this->logger->error("Database error in fetchFriends", ['error' => $e->getMessage()]);
             return null;
@@ -767,6 +780,7 @@ class UserMapper
                     f.followerid AS uid, 
                     u.username, 
                     u.slug,
+                    u.status,
                     u.img,
                     EXISTS (
                         SELECT 1 
@@ -826,6 +840,7 @@ class UserMapper
                     u.username, 
                     u.slug,
                     u.img,
+                    u.status,
                     EXISTS (
                         SELECT 1 
                         FROM follows ff 
@@ -1148,7 +1163,7 @@ class UserMapper
         ]);
 
         $query = "
-        SELECT u.uid, u.username, u.slug, u.img
+        SELECT u.uid, u.status, u.username, u.slug, u.img
         FROM users_info ui
         JOIN users u ON ui.invited = u.uid
         WHERE ui.userid = :invitee_uuid
@@ -1160,13 +1175,13 @@ class UserMapper
 
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        return $result ?: null;
+        return $result ? ((new User($result, [], false))->getArrayCopy()) : null;
     }
 
     public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array 
     {
         $query = "
-            SELECT u.uid, u.username, u.slug, u.img
+            SELECT u.uid, u.status, u.username, u.slug, u.img
             FROM users_info ui
             JOIN users u ON ui.userid = u.uid
             WHERE ui.invited = :userId
@@ -1182,12 +1197,7 @@ class UserMapper
 
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         return [
-            'iInvited' => array_map(fn($row) => [
-                'uid' => $row['uid'],
-                'username' => $row['username'],
-                'slug' => (int)$row['slug'],
-                'img' => $row['img'],
-            ], $data)
+            'iInvited' => array_map(fn($user) => (new User($user, [], false))->getArrayCopy(), $data)
         ];
     }
 
@@ -1367,15 +1377,27 @@ class UserMapper
         }
     }
 
+    /**
+     * Delete User Account.
+     * Flags the account as deleted by setting status to STATUS_DELETED.
+     *
+     * Usage of constant improves readability:
+     * const STATUS_DELETED = 6;
+     *
+     * @param string $id User unique identifier (uid).
+     * @return bool True if user was flagged as deleted, false otherwise.
+     * @throws \RuntimeException if database operation fails.
+     */
     public function delete(string $id): bool
     {
         $this->logger->info("UserMapper.delete started");
 
-        $query = "DELETE FROM users WHERE uid = :uid";
+        $query = "UPDATE users SET status = :status WHERE uid = :uid";
 
         try {
             $stmt = $this->db->prepare($query);
 
+            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
             $stmt->bindValue(':uid', $id, \PDO::PARAM_STR);
 
             $stmt->execute();
@@ -1501,8 +1523,8 @@ class UserMapper
     {
         $this->logger->info("UserMapper.fetchAllFriends started");
 
-        $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, 
-                                u2.uid AS followed, u2.username AS followedname, u2.slug AS followedslug
+        $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, u1.status as followerstatus, 
+                                u2.uid AS followed, u2.username AS followedname, u2.slug AS followedslug, u2.status as followedstatus
                 FROM follows f1
                 INNER JOIN follows f2 ON f1.followerid = f2.followedid 
                                      AND f1.followedid = f2.followerid
@@ -1517,7 +1539,29 @@ class UserMapper
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $userResultObj = [];
+            foreach($userResults as $key => $prt){
+                $userObj = [
+                        'status' => $prt['followerstatus'],
+                        'username' => $prt['followername'],
+                    ];
+                $userObj = (new User($userObj, [], false))->getArrayCopy();
+
+                $userResultObj[$key] = $prt;
+                $userResultObj[$key]['followername'] = $userObj['username'];
+
+                $userObj = [
+                        'status' => $prt['followedstatus'],
+                        'username' => $prt['followedname'],
+                    ];
+                $userObj = (new User($userObj, [], false))->getArrayCopy();
+                $userResultObj[$key]['followedname'] = $userObj['username'];
+
+            }   
+            
+            return $userResultObj;
         } catch (\Throwable $e) {
             $this->logger->error('Database error in fetchFriends: ', ['exception' => $e->getMessage()]);
             return null;

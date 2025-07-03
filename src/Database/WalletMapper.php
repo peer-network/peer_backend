@@ -47,6 +47,8 @@ class WalletMapper
     private string $burnWallet;
     private string $peerWallet;
 
+    const STATUS_DELETED = 6;
+
     public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
     {
     }
@@ -105,9 +107,10 @@ class WalletMapper
         }
 
         try {
-            $sql = "SELECT uid FROM users WHERE uid = :uid";
+            $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':uid', $recipient);
+            $stmt->bindValue(':status', self::STATUS_DELETED);
             $stmt->execute();
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
