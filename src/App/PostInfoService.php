@@ -188,28 +188,28 @@ class PostInfoService
         try {
             $post = $this->postMapper->loadById($postId);
             if (!$post) {
-                $this->logger->error('Post not found');
+                $this->logger->error('PostInfoService: reportPost: Post not found');
                 return $this->respondWithError(31510);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
             if ($postInfo === null) {
-                $this->logger->error('Error while fetching comment data from db');
+                $this->logger->error('PostInfoService: reportPost: Error while fetching comment data from db');
                 return $this->respondWithError(31602);
             }
         } catch (\Exception $e) {
-            $this->logger->error('Error while fetching data for report generation ', ['exception' => $e]);
+            $this->logger->error('PostInfoService: reportPost: Error while fetching data for report generation ', ['exception' => $e]);
             return $this->respondWithError(41505);
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
-            $this->logger->warning("User tries to report on his own post");
+            $this->logger->warning("PostInfoService: reportPost: User tries to report on his own post");
             return $this->respondWithError(31508);
         }
         
         $contentHash = $post->hashValue();
         if (empty($contentHash)) {
-            $this->logger->error('Failed to generate content hash of content');
+            $this->logger->error('PostInfoService: reportPost: Failed to generate content hash of content');
             return $this->respondWithError(41505);
         }
 
@@ -221,13 +221,13 @@ class PostInfoService
                 $contentHash
             );
 
-            if ($exists == null) {
-                $this->logger->error("Failed to add report");
+            if ($exists === null) {
+                $this->logger->error("PostInfoService: reportPost: Failed to add report");
                 return $this->respondWithError(41505);
             }
 
-            if ($exists == true) {
-                $this->logger->warning("User tries to add duplicating report");
+            if ($exists === true) {
+                $this->logger->warning("PostInfoService: reportPost: User tries to add duplicating report");
                 return $this->respondWithError(31503);
             }
 
@@ -239,7 +239,7 @@ class PostInfoService
                 'ResponseCode' => 11505,    
             ];
         } catch (\Exception $e) {
-            $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
+            $this->logger->error('PostInfoService: reportPost: Error while adding report to db or updating _info data', ['exception' => $e]);
             return $this->respondWithError(41505);
         }
     }

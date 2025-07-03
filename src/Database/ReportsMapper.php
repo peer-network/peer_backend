@@ -106,12 +106,12 @@ class ReportsMapper
 
             if ($success) {
                 $this->db->commit();
-                $this->logger->info("Report added successfully", $debugData);
+                $this->logger->info("ReportsMapper: addReport: Report added successfully", $debugData);
                 return false;
             }
 
             $this->db->rollBack();
-            $this->logger->warning("Failed to add report", $debugData);
+            $this->logger->warning("ReportsMapper: addReport: Failed to add report", $debugData);
             return null;
         } catch (\Exception $e) {
             $this->db->rollBack();
