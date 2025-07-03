@@ -137,7 +137,7 @@ class CommentInfoService
             $comment = $this->commentMapper->loadById($commentId);
             if (!$comment) {
                 $this->logger->error('Error while fetching comment data from db');
-                return $this->respondWithError(00000);
+                return $this->respondWithError(31601);
             }
 
             $commentInfo = $this->commentInfoMapper->loadById($commentId);
@@ -148,13 +148,16 @@ class CommentInfoService
             }
         } catch (\Exception $e) {
             $this->logger->error('Error while fetching data for report generation ', ['exception' => $e]);
-            return $this->respondWithError(00000);
+            return $this->respondWithError(41601);
         }
         
+        if ($commentInfo->getOwnerId() === $this->currentUserId) {
+            return $this->respondWithError(31607);
+        }
         
         $contentHash = $comment->hashValue();
         if (empty($contentHash)) {
-            return $this->respondWithError(00000);
+            return $this->respondWithError(41601);
         }
 
         try {
@@ -178,8 +181,8 @@ class CommentInfoService
                 'affectedRows' => $commentInfo->getReports(),
             ];
         } catch (\Exception $e) {
-            $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
-            return $this->respondWithError(00000);
+            $this->logger->error('Error while adding report to db or updating info data', ['exception' => $e]);
+            return $this->respondWithError(41601);
         }
     }
 
