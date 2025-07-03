@@ -24,6 +24,7 @@ use function is_object;
 use function is_string;
 use function sprintf;
 use function method_exists;
+use Fawaz\config\constants\ConstantsConfig;
 
 class ValidationException extends Exception {}
 
@@ -620,18 +621,19 @@ class PeerInputFilter
     protected function validateUsername(string $value, array $options = []): bool
     {
         $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
+        $usernameConfig = ConstantsConfig::user()['USERNAME'];
 
         if ($value === '') {
             $this->errors['username'][] = 30202;
             return false;
         }
 
-        if (strlen($value) < 3 || strlen($value) > 23) {
+        if (strlen($value) < $usernameConfig['MIN_LENGTH'] || strlen($value) > $usernameConfig['MAX_LENGTH']) {
             $this->errors['username'][] = 30202;
             return false;
         }
 
-        if (!preg_match('/^[a-zA-Z0-9_]{3,23}$/', $value)) {
+        if (!preg_match('/^' . $usernameConfig['PATTERN'] . '_*$/u', $value)) {
             $this->errors['username'][] = 30202;
             return false;
         }
@@ -651,6 +653,8 @@ class PeerInputFilter
 
     protected function validateTagName(string $value, array $options = []): bool
     {
+        $tagConfig = ConstantsConfig::post()['TAG'];
+
         if ($value === '') {
             $this->errors['tag'][] = 30101;
             return false;
@@ -659,12 +663,12 @@ class PeerInputFilter
         $value = trim($value);
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
-        if (strlen($value) < 2 || strlen($value) > 53) {
-            $this->errors['tag'][] = 30211;
+        if (strlen($value) < $tagConfig['MIN_LENGTH'] || strlen($value) > $tagConfig['MAX_LENGTH']) {
+            $this->errors['tag'][] = 30103;
             return false;
         }
 
-        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $value)) {
+        if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $value)) {
             $this->errors['tag'][] = 30103;
             return false;
         }
