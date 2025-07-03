@@ -11,11 +11,11 @@ type Subscription {
 
 type Query {
   hello: HelloResponse!
-  searchUser(userid: ID, username: String, offset: Int, limit: Int): UserListResponse!
+  searchUser(userid: ID,contentFilterBy: ContentFilterType, username: String, offset: Int, limit: Int): UserListResponse!
   listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse!
-  getProfile(contentFilterBy: ContentFilterType,userid: ID, postLimit: Int): ProfileInfo!
-  listFollowRelations(userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
-  listFriends(offset: Int, limit: Int): UserFriendsResponse!
+  getProfile(userid: ID,contentFilterBy: ContentFilterType, postLimit: Int): ProfileInfo!
+  listFollowRelations(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
+  listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!
   getUserInfo: UserInfoResponse!
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
   listPosts(filterBy: [PostFilterType!],contentFilterBy: ContentFilterType IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
