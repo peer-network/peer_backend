@@ -780,7 +780,6 @@ class UserMapper
     }
 
     public function fetchFriends(
-        string $currentUserId,
         string $userId, 
         int $offset = 0, 
         int $limit = 10,
@@ -832,8 +831,7 @@ class UserMapper
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
-                    $user_reports,$user_dismiss_moderation_amount,
-                    $currentUserId,$row['uid']
+                    $user_reports,$user_dismiss_moderation_amount
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $row['username'] = $replacer->username($row['username']);
