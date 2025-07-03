@@ -40,6 +40,8 @@ RUN mkdir -p /var/www/html/runtime-data/logs \
 && touch /var/www/html/runtime-data/logs/graphql_debug.log \
 && chmod 666 /var/www/html/runtime-data/logs/*.log \
 && chown -R www-data:www-data /var/www/html/runtime-data
+
+RUN composer require --no-update php-ffmpeg/php-ffmpeg
  
 RUN composer install --no-dev --prefer-dist --no-interaction \
 && composer dump-autoload -o
