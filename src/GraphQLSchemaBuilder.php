@@ -56,6 +56,8 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
+use Fawaz\config\constants\ConstantsConfig;
+
 
 class GraphQLSchemaBuilder
 {
@@ -2990,50 +2992,56 @@ class GraphQLSchemaBuilder
         $messageOffset = isset($args['messageOffset']) ? (int)$args['messageOffset'] : null;
         $messageLimit = isset($args['messageLimit']) ? (int)$args['messageLimit'] : null;
 
+        $paging = ConstantsConfig::paging();
+        $minOffset = $paging['OFFSET']['MIN'];
+        $maxOffset = $paging['OFFSET']['MAX'];
+        $minLimit = $paging['LIMIT']['MIN'];
+        $maxLimit = $paging['LIMIT']['MAX'];
+
         if ($offset !== null) {
-            if ($offset < 0 || $offset > INT32_MAX) {
+            if ($offset < $minOffset || $offset > $maxOffset) {
                 return $this->respondWithError(30203);
             }
         }
 
         if ($limit !== null) {
-            if ($limit < 1 || $limit > 20) {  
+            if ($limit < $minLimit || $limit > $maxLimit) {  
                 return $this->respondWithError(30204);
             }
         }
 
         if ($postOffset !== null) {
-            if ($postOffset < 0 || $postOffset > INT32_MAX) {
+            if ($postOffset < $minOffset || $postOffset > $maxOffset) {
                 return $this->respondWithError(30203);
             }
         }
 
         if ($postLimit !== null) {
-            if ($postLimit < 1 || $postLimit > 20) {  
+            if ($postLimit < $minLimit || $postLimit > $maxLimit) {  
                 return $this->respondWithError(30204);
             }
         }
 
         if ($commentOffset !== null) {
-            if ($commentOffset < 0 || $commentOffset > INT32_MAX) {
+            if ($commentOffset < $minOffset || $commentOffset > $maxOffset) {
                 return $this->respondWithError(30215);
             }
         }
 
         if ($commentLimit !== null) {
-            if ($commentLimit < 1 || $commentLimit > 20) {  
+            if ($commentLimit < $minLimit || $commentLimit > $maxLimit) {  
                 return $this->respondWithError(30216);
             }
         }
 
         if ($messageOffset !== null) {
-            if ($messageOffset < 0 || $messageOffset > INT32_MAX) {
+            if ($messageOffset < $minOffset || $messageOffset > $maxOffset) {
                 return $this->respondWithError(30219);
             }
         }
 
         if ($messageLimit !== null) {
-            if ($messageLimit < 1 || $messageLimit > 20) {  
+            if ($messageLimit < $minLimit || $messageLimit > $maxLimit) {  
                 return $this->respondWithError(30220);
             }
         }
