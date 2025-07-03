@@ -664,7 +664,7 @@ class PeerInputFilter
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
         if (strlen($value) < 2 || strlen($value) > 53) {
-            $this->errors['tag'][] = 30103;
+            $this->errors['tag'][] = 30211;
             return false;
         }
 
