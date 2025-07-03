@@ -26,7 +26,6 @@ use function sprintf;
 use function method_exists;
 use Fawaz\config\constants\ConstantsConfig;
 
-
 class ValidationException extends Exception {}
 
 const CUSTOM_FILTER_FLAG_ALLOW_INT = 1;
@@ -688,13 +687,14 @@ class PeerInputFilter
 
         $value = trim($value);
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $walletConst = ConstantsConfig::wallet();
 
-        if (strlen($value) < 43 || strlen($value) > 44) {
+        if (strlen($value) < $walletConst['SOLANA_PUBKEY']['MIN_LENGTH'] || strlen($value) > $walletConst['SOLANA_PUBKEY']['MAX_LENGTH']) {
             $this->errors['pkey'][] = 30254;
             return false;
         }
 
-        if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $value)) {
+        if (!preg_match('/' . $walletConst['SOLANA_PUBKEY']['PATTERN'] . '/', $value)) {
             $this->errors['pkey'][] = 30254;
             return false;
         }

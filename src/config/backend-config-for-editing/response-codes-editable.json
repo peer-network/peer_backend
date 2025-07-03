@@ -656,7 +656,7 @@
         "userFriendlyComment": "Phone number must be {USER.PHONENUMBER.MIN_LENGTH}-{USER.PHONENUMBER.MAX_LENGTH} digits."
     },
     "30254": {
-        "comment": "The 'Solana Public Key' field must be a String between 43 and 44 (only including Chars and Ints without 0 O I 1)",
+        "comment": "The 'Solana Public Key' field must be a String between {WALLET.SOLANA_PUBKEY.MIN_LENGTH} and {WALLET.SOLANA_PUBKEY.MAX_LENGTH} (only including Chars and Ints without 0 O I 1)",
         "userFriendlyComment": "Invalid Solana public key format."
     },
     "30255": {
