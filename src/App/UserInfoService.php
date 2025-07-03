@@ -154,9 +154,9 @@ class UserInfoService
 
         try {
             $results = $this->userInfoMapper->getBlockRelations($this->currentUserId, $offset, $limit);
-            if (isset($response['status']) && $response['status'] === 'error') {
+            if (isset($results['status']) && $results['status'] === 'error') {
                 $this->logger->info("No blocked users found for user ID: {$this->currentUserId}");
-                return $response;
+                return $results;
             }
 
             $this->logger->info("UserInfoService.loadBlocklist found", ['results' => $results]);

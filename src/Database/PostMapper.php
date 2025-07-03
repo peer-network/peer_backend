@@ -145,7 +145,7 @@ class PostMapper extends PeerMapper
         return false;
     }
 
-    public function fetchPostsByType(string $userid, int $limitPerType = 5, ?string $contentFilterBy = null): array
+    public function fetchPostsByType(string $currentUserId, string $userid, int $limitPerType = 5, ?string $contentFilterBy = null): array
     {        
         $whereClauses = ["sub.row_num <= :limit"];
         $whereClausesString = implode(" AND ", $whereClauses);
@@ -189,18 +189,17 @@ class PostMapper extends PeerMapper
             $post_reports = (int)$row['post_reports'];
             $post_dismiss_moderation_amount = (int)$row['post_count_content_moderation_dismissed'];
             
-            //if ($currentUserId != $row['userid']){
             if ($contentFilterService->getContentFilterAction(
                 ContentType::post,
                 ContentType::post,
                 $post_reports,
-                $post_dismiss_moderation_amount
+                $post_dismiss_moderation_amount,
+                $currentUserId,$row['userid']
             ) == ContentFilteringAction::replaceWithPlaceholder) {
                 $replacer = ContentReplacementPattern::flagged;
                 $row['title'] = $replacer->postTitle($row['title']);
                 $row['media'] = $replacer->postMedia($row['media']);
             }
-            //}
             $result[] = $row;
         }
         return $result;
@@ -714,16 +713,16 @@ class PostMapper extends PeerMapper
                         $row['username'] = $replacer->username($row['username']);
                         $row['img'] = $replacer->profilePicturePath($row['img']);
                     }
-                    if ($currentUserId != $row['userid']){
-                        if ($contentFilterService->getContentFilterAction(
-                            ContentType::post,
-                            ContentType::user,
-                            $user_reports,$user_dismiss_moderation_amount
-                        ) == ContentFilteringAction::replaceWithPlaceholder) {
-                            $replacer = ContentReplacementPattern::flagged;
-                            $row['username'] = $replacer->username($row['username']);
-                            $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
-                        }
+
+                    if ($contentFilterService->getContentFilterAction(
+                        ContentType::post,
+                        ContentType::user,
+                        $user_reports,$user_dismiss_moderation_amount,
+                        $currentUserId, $row['uid']
+                    ) == ContentFilteringAction::replaceWithPlaceholder) {
+                        $replacer = ContentReplacementPattern::flagged;
+                        $row['username'] = $replacer->username($row['username']);
+                        $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
                     }
 
                     $results[] = new PostAdvanced([

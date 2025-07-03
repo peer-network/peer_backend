@@ -186,16 +186,13 @@ class UserMapper
         }
     }
 
-    public function fetchAll(array $args = []): array
+    public function fetchAll(string $currentUserId, array $args = []): array
     {
         $this->logger->info("UserMapper.fetchAll started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-
-        $user_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'];
-        $user_dismiss_moderation_amount_to_hide_from_ios = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['USER'];
         
         $whereClauses = ["verified = :verified"];
         $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
@@ -284,19 +281,16 @@ class UserMapper
                     //     $row['img'] = $replacer->profilePicturePath($row['img']);
                     // }
 
-                    if (
-                        $user_reports >= $user_report_amount_to_hide && 
-                        $user_dismiss_moderation_amount < $user_dismiss_moderation_amount_to_hide_from_ios
-                        // $currentUserId != $row['userid']
-                    ){
-                        if ($contentFilterService->getContentFilterAction(
-                            ContentType::user,
-                            ContentType::user
-                        ) == ContentFilteringAction::replaceWithPlaceholder) {
-                            $replacer = ContentReplacementPattern::flagged;
-                            $row['username'] = $replacer->username($row['username']);
-                            $row['img'] = $replacer->profilePicturePath($row['img']);
-                        }
+                    
+                    if ($contentFilterService->getContentFilterAction(
+                        ContentType::user,
+                        ContentType::user,
+                        $user_reports,$user_dismiss_moderation_amount,
+                        $currentUserId,$row['uid']
+                    ) == ContentFilteringAction::replaceWithPlaceholder) {
+                        $replacer = ContentReplacementPattern::flagged;
+                        $row['username'] = $replacer->username($row['username']);
+                        $row['img'] = $replacer->profilePicturePath($row['img']);
                     }
 
                     $results[] = new User([
@@ -333,7 +327,7 @@ class UserMapper
         }
     }
 
-    public function fetchAllAdvance(array $args = [], ?string $currentUserId = null): array
+    public function fetchAllAdvance(array $args = [], ?string $currentUserId = null,?string $contentFilterBy = null): array
     {
         $this->logger->info("UserMapper.fetchAll started");
 
@@ -341,12 +335,18 @@ class UserMapper
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $trendlimit = 4;
         $trenddays = 7;
-
-        // $whereClauses = ["verified = :verified"];
-        // $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
-        // $whereClausesString = implode(" AND ", $whereClauses);
         
-        $sql = "
+        $contentFilterService = new ContentFilterServiceImpl(
+            new GetProfileContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
+
+        $whereClauses = ["verified = :verified"];
+        // $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
+        $whereClausesString = implode(" AND ", $whereClauses);
+        
+        $sql = sprintf("
             SELECT 
                 u.uid,
                 u.email,
@@ -361,6 +361,8 @@ class UserMapper
                 u.biography,
                 u.createdat,
                 u.updatedat,
+                ui.reports AS user_reports,
+                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
                 COALESCE((
                     SELECT COUNT(p.postid)
                     FROM posts p
@@ -396,9 +398,10 @@ class UserMapper
                 follows f1 ON u.uid = f1.followerid AND f1.followedid = :currentUserId -- Is the current user followed by this user?
             LEFT JOIN 
                 follows f2 ON u.uid = f2.followedid AND f2.followerid = :currentUserId -- Is the current user following this user?
-            WHERE 
-                u.verified = :verified
-        ";
+            LEFT JOIN users_info ui ON ui.userid = u.uid
+            WHERE %s",
+            $whereClausesString
+        );
 
         $conditions = [];
         $queryParams = [':verified' => 1, ':currentUserId' => $currentUserId];
@@ -445,6 +448,19 @@ class UserMapper
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 $this->logger->info("UserMapper.fetchAll.row started");
                 try {
+                    $user_reports = (int)$row['user_reports'];
+                    $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+                    if ($contentFilterService->getContentFilterAction(
+                        ContentType::user,
+                        ContentType::user,
+                        $user_reports,$user_dismiss_moderation_amount,
+                        $currentUserId,$row['uid']
+                    ) == ContentFilteringAction::replaceWithPlaceholder) {
+                        $replacer = ContentReplacementPattern::flagged;
+                        $row['username'] = $replacer->username($row['username']);
+                        $row['img'] = $replacer->profilePicturePath($row['img']);
+                    }
+
                     $results[] = new UserAdvanced([
                         'uid' => $row['uid'],
                         'email' => $row['email'],
@@ -764,6 +780,7 @@ class UserMapper
     }
 
     public function fetchFriends(
+        string $currentUserId,
         string $userId, 
         int $offset = 0, 
         int $limit = 10,
@@ -815,8 +832,8 @@ class UserMapper
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
-                    $user_reports,
-                    $user_dismiss_moderation_amount
+                    $user_reports,$user_dismiss_moderation_amount,
+                    $currentUserId,$row['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $row['username'] = $replacer->username($row['username']);
@@ -901,8 +918,8 @@ class UserMapper
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
-                    $user_reports,
-                    $user_dismiss_moderation_amount
+                    $user_reports,$user_dismiss_moderation_amount,
+                    $currentUserId,$row['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $row['username'] = $replacer->username($row['username']);
@@ -987,8 +1004,8 @@ class UserMapper
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
-                    $user_reports,
-                    $user_dismiss_moderation_amount
+                    $user_reports,$user_dismiss_moderation_amount,
+                    $currentUserId,$row['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $row['username'] = $replacer->username($row['username']);
@@ -1134,8 +1151,8 @@ class UserMapper
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
-                    $user_reports,
-                    $user_dismiss_moderation_amount
+                    $user_reports,$user_dismiss_moderation_amount,
+                    $currentUserId,$data['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $data['username'] = $replacer->username($data['username']);

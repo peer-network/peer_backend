@@ -178,25 +178,25 @@ class CommentMapper
                 $row['img'] = $replacer->profilePicturePath($row['img']);
             }
 
-            if ($currentUserId != $row['userid']){
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::comment,
-                    ContentType::user,
-                    $user_reports,$user_dismiss_moderation_amount
-                ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $row['username'] = $replacer->username($row['username']);
-                    $row['img'] = $replacer->profilePicturePath($row['img']);
-                }
+            if ($contentFilterService->getContentFilterAction(
+                ContentType::comment,
+                ContentType::user,
+                $user_reports,$user_dismiss_moderation_amount,
+                $currentUserId,$row['uid']
+            ) == ContentFilteringAction::replaceWithPlaceholder) {
+                $replacer = ContentReplacementPattern::flagged;
+                $row['username'] = $replacer->username($row['username']);
+                $row['img'] = $replacer->profilePicturePath($row['img']);
+            }
 
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::comment,
-                    ContentType::comment,
-                    $comment_reports,$comment_dismiss_moderation_amount
-                ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $row['content'] = $replacer->commentContent($row['content']);
-                }
+            if ($contentFilterService->getContentFilterAction(
+                ContentType::comment,
+                ContentType::comment,
+                $comment_reports,$comment_dismiss_moderation_amount,
+                $currentUserId,$row['uid']
+            ) == ContentFilteringAction::replaceWithPlaceholder) {
+                $replacer = ContentReplacementPattern::flagged;
+                $row['content'] = $replacer->commentContent($row['content']);
             }
 
             $results[] = new CommentAdvanced([

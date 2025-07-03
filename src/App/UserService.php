@@ -604,7 +604,7 @@ class UserService
             $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId,$contentFilterBy)->getArrayCopy();
             $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
 
-            $posts = $this->postMapper->fetchPostsByType($userId, $postLimit,$contentFilterBy);
+            $posts = $this->postMapper->fetchPostsByType($this->currentUserId,$userId, $postLimit,$contentFilterBy);
 
             $contentTypes = ['image', 'video', 'audio', 'text'];
             foreach ($contentTypes as $type) {
@@ -744,8 +744,14 @@ class UserService
 
         $this->logger->info('UserService.fetchAllAdvance started');
 
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
+
         try {
-            $users = $this->userMapper->fetchAllAdvance($args, $this->currentUserId);
+            $users = $this->userMapper->fetchAllAdvance($args, $this->currentUserId,$contentFilterBy);
             $fetchAll = array_map(fn(UserAdvanced $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {
@@ -769,7 +775,7 @@ class UserService
         $this->logger->info('UserService.fetchAll started');
 
         try {
-            $users = $this->userMapper->fetchAll($args);
+            $users = $this->userMapper->fetchAll($this->currentUserId, $args);
             $fetchAll = array_map(fn(User $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {

@@ -45,6 +45,8 @@ class ContentFilterServiceImpl {
         ContentType $showingContent,
         ?int $showingContentReportAmount = null,
         ?int $showingContentDismissModerationAmount = null,
+        ?string $currentUserId = null,
+        ?string $targetUserId = null,
     ): ?ContentFilteringAction {
         if ($this->contentFilterBy === $this->contentSeverityLevels['0']) {
             $showingContentString = strtoupper($showingContent->value);
@@ -56,6 +58,11 @@ class ContentFilterServiceImpl {
                 return null;
             }
             
+            // show all personal content
+            if ($currentUserId && $currentUserId == $targetUserId){
+                return null;
+            }
+
             // if $showingContentReportAmount $showingContentDismissModerationAmount are null
             // (they can be null if filtration is performed in SQL query)
             // we are bypassing this comparison, because it will be performed in SQL query directly 
