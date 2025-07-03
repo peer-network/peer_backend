@@ -355,6 +355,7 @@ class UserInfoService
             );
 
             if ($exists == null) {
+                $this->logger->error("Failed to add report");
                 return $this->respondWithError(00000); // 410xx - failed to report user
             }
 

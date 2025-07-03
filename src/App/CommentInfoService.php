@@ -136,7 +136,7 @@ class CommentInfoService
         try {
             $comment = $this->commentMapper->loadById($commentId);
             if (!$comment) {
-                $this->logger->error('Error while fetching comment data from db');
+                $this->logger->error('Comment not found');
                 return $this->respondWithError(31601);
             }
 
@@ -152,11 +152,13 @@ class CommentInfoService
         }
         
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
+            $this->logger->warning("User tries to report on his own comment");
             return $this->respondWithError(31607);
         }
         
         $contentHash = $comment->hashValue();
         if (empty($contentHash)) {
+            $this->logger->error('Failed to generate content hash of content');
             return $this->respondWithError(41601);
         }
 
@@ -168,11 +170,13 @@ class CommentInfoService
                 $contentHash
             );
 
-            if ($exists == null) {
+            if ($exists === null) {
+                $this->logger->error("Failed to add report");
                 return $this->respondWithError(41601);
             }
 
-            if ($exists == true) {
+            if ($exists === true) {
+                $this->logger->error('Post report already exists');
                 return $this->respondWithError(31605);
             }
 

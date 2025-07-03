@@ -718,7 +718,7 @@ class PostMapper extends PeerMapper
                         ContentType::post,
                         ContentType::user,
                         $user_reports,$user_dismiss_moderation_amount,
-                        $currentUserId, $row['uid']
+                        $currentUserId, $row['userid']
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
                         $replacer = ContentReplacementPattern::flagged;
                         $row['username'] = $replacer->username($row['username']);

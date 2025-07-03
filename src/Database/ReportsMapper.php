@@ -40,10 +40,6 @@ class ReportsMapper
         $this->logger->info("ReportsMapper.addReports started");
 
         $reportId = $this->generateUUID();
-        // if (empty($chatId)) {
-        //     $this->logger->critical('Failed to generate chat ID');
-        //     return $this->respondWithError(41808);
-        // }
 
         $targetTypeString = $targettype->value;
         $debugData = [
@@ -110,12 +106,12 @@ class ReportsMapper
 
             if ($success) {
                 $this->db->commit();
-                $this->logger->info("Report added successfully", $debugData);
+                $this->logger->info("ReportsMapper: addReport: Report added successfully", $debugData);
                 return false;
             }
 
             $this->db->rollBack();
-            $this->logger->warning("failed to add report", $debugData);
+            $this->logger->warning("ReportsMapper: addReport: Failed to add report", $debugData);
             return null;
         } catch (\Exception $e) {
             $this->db->rollBack();
