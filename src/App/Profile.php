@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class Profile
 {
@@ -125,6 +126,7 @@ class Profile
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $userConfig = ConstantsConfig::user();
         $specification = [
             'uid' => [
                 'required' => true,
@@ -148,7 +150,10 @@ class Profile
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 00001, 'max' => 99999]],
+                    ['name' => 'validateIntRange', 'options' => [
+                        'min' => $userConfig['SLUG']['MIN_LENGTH'], 
+                        'max' => $userConfig['SLUG']['MAX_LENGTH']
+                        ]],
                 ],
             ],
             'img' => [
@@ -156,8 +161,8 @@ class Profile
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 100,
+                        'min' => $userConfig['IMAGE']['MIN_LENGTH'],
+                        'max' => $userConfig['IMAGE']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -167,8 +172,8 @@ class Profile
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 500,
+                        'min' => $userConfig['BIOGRAPHY']['MIN_LENGTH'],
+                        'max' => $userConfig['BIOGRAPHY']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
