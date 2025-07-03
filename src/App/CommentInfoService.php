@@ -170,12 +170,12 @@ class CommentInfoService
                 $contentHash
             );
 
-            if ($exists == null) {
+            if ($exists === null) {
                 $this->logger->error("Failed to add report");
                 return $this->respondWithError(41601);
             }
 
-            if ($exists == true) {
+            if ($exists === true) {
                 $this->logger->error('Post report already exists');
                 return $this->respondWithError(31605);
             }
