@@ -15,6 +15,7 @@ use Fawaz\Services\Base64FileHandler;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
+use Fawaz\config\constants\ConstantsConfig;
 
 class PostService
 {
@@ -355,6 +356,7 @@ class PostService
     private function handleTags(array $tags, string $postId, string $createdAt): void
     {
         $maxTags = 10;
+        $tagNameConfig = ConstantsConfig::post()['TAG'];
         if (count($tags) > $maxTags) {
             throw new \Throwable('Maximum tag limit exceeded');
         }
@@ -362,7 +364,7 @@ class PostService
         foreach ($tags as $tagName) {
             $tagName = !empty($tagName) ? trim((string) $tagName) : '';
             
-            if (strlen($tagName) < 2 || strlen($tagName) > 53 || !preg_match('/^[a-zA-Z0-9_-]+$/', $tagName)) {
+            if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] || strlen($tagName) > $tagNameConfig['MAX_LENGTH'] || !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
                 throw new \Throwable('Invalid tag name');
             }
 
@@ -467,6 +469,7 @@ class PostService
         $tag = $args['tag'] ?? null; 
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
+        $titleConfig = ConstantsConfig::post()['TITLE'];
 
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
@@ -476,7 +479,7 @@ class PostService
             return $this->respondWithError(30201);
         }
 
-        if ($title !== null && strlen((string)$title) < 2 || strlen((string)$title) > 33) {
+        if ($title !== null && (strlen((string)$title) < $titleConfig['MIN_LENGTH'] || strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
             return $this->respondWithError(30210);
         }
 
@@ -489,7 +492,7 @@ class PostService
         }
 
         if ($tag !== null) {
-            if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
+            if (!preg_match('/' . $titleConfig['PATTERN'] . '/u', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }

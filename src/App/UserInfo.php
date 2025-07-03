@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class UserInfo
 {
@@ -197,6 +198,7 @@ class UserInfo
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $userConfig = ConstantsConfig::user();
         $specification = [
             'userid' => [
                 'required' => true,
@@ -206,7 +208,10 @@ class UserInfo
                 'required' => false,
                 'filters' => [['name' => 'FloatSanitize']],
                 'validators' => [
-                    ['name' => 'ValidateFloat', 'options' => ['min' => -18250000, 'max' => 18250000]],
+                    ['name' => 'ValidateFloat', 'options' => [
+                        'min' => $userConfig['LIQUIDITY']['MIN_LENGTH'], 
+                        'max' => $userConfig['LIQUIDITY']['MAX_LENGTH']
+                        ]],
                 ],
             ],
             'amountposts' => [
