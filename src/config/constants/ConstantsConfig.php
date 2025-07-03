@@ -54,10 +54,13 @@ class ConstantsConfig
         'TAG' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 53,
-            'MAX_LIMIT' => 5,
-            'PATTERN' => '[a-zA-Z]+',        
+            'PATTERN' => '[a-zA-Z]+',
+            'MAX_COUNT' => [
+                'CREATE' => 10,
+                'SEARCH' => 5,
+            ],
         ],
-    ];   
+    ];
     private const USER = [
         'USERNAME' => [
             'MIN_LENGTH' => 3,
