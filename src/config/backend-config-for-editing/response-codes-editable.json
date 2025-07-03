@@ -544,16 +544,16 @@
         "userFriendlyComment": "Current password required to change email."
     },
     "30226": {
-        "comment": "The 'password' field (User new password) must be between 8 and 128 characters long and contain at least one lowercase letter, one uppercase letter, and one number",
-        "userFriendlyComment": "Password must be 8-128 chars with uppercase, lowercase and numbers."
+        "comment": "The 'password' field (User new password) must be between {USER.PASSWORD.MIN_LENGTH} and {USER.PASSWORD.MAX_LENGTH} characters long and contain at least one lowercase letter, one uppercase letter, and one number",
+        "userFriendlyComment": "Password must be {USER.PASSWORD.MIN_LENGTH}-{USER.PASSWORD.MAX_LENGTH} chars with uppercase, lowercase and numbers."
     },
     "30227": {
         "comment": "The 'expassword' field (User current password) is required to update the password",
         "userFriendlyComment": "Current password required to change password."
     },
     "30228": {
-        "comment": "The 'biography' field (User biography)must be between 3 and 5000 characters long",
-        "userFriendlyComment": "Bio must be 3-5000 characters."
+        "comment": "The 'biography' field (User biography)must be between {USER.BIOGRAPHY.MIN_LENGTH} and {USER.BIOGRAPHY.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Bio must be {USER.BIOGRAPHY.MIN_LENGTH}-{USER.BIOGRAPHY.MAX_LENGTH} characters."
     },
     "30229": {
         "comment": "The 'img' field (User profile picture) must be a valid image file (JPG, PNG, or GIF) and less than 5MB in size",
@@ -652,8 +652,8 @@
         "userFriendlyComment": "Message must be 1-500 characters."
     },
     "30253": {
-        "comment": "The 'phone number' field must be an integer between 9 and 21",
-        "userFriendlyComment": "Phone number must be 9-21 digits."
+        "comment": "The 'phone number' field must be an integer between {USER.PHONENUMBER.MIN_LENGTH} and {USER.PHONENUMBER.MAX_LENGTH}",
+        "userFriendlyComment": "Phone number must be {USER.PHONENUMBER.MIN_LENGTH}-{USER.PHONENUMBER.MAX_LENGTH} digits."
     },
     "30254": {
         "comment": "The 'Solana Public Key' field must be a String between 43 and 44 (only including Chars and Ints without 0 O I 1)",
