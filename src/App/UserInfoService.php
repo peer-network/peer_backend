@@ -318,7 +318,7 @@ class UserInfoService
 
         if ($this->currentUserId === $reported_userid) {
             $this->logger->error('Error: currentUserId == $reported_userid');
-            return $this->respondWithError(00000); // you cant report on yourself
+            return $this->respondWithError(31009); // you cant report on yourself
         }
 
         try {
@@ -361,7 +361,7 @@ class UserInfoService
 
             if ($exists == true) {
                 $this->logger->error('User report already exists');
-                return $this->respondWithError(00000); // report already exists
+                return $this->respondWithError(31008); // report already exists
             }
             
             $userInfo->setReports($userInfo->getReports() + 1);
@@ -369,7 +369,7 @@ class UserInfoService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => "00000", // added user report successfully
+                'ResponseCode' => "11012", // added user report successfully
                 'affectedRows' => $userInfo->getReports(),
             ];
         } catch (\Exception $e) {
