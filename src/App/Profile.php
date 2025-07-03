@@ -157,7 +157,10 @@ class Profile
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 00001, 'max' => 99999]],
+                    ['name' => 'validateIntRange', 'options' => [
+                        'min' => $userConfig['SLUG']['MIN_LENGTH'], 
+                        'max' => $userConfig['SLUG']['MAX_LENGTH']
+                        ]],
                 ],
             ],
             'img' => [
@@ -165,8 +168,8 @@ class Profile
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 100,
+                        'min' => $userConfig['IMAGE']['MIN_LENGTH'],
+                        'max' => $userConfig['IMAGE']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
