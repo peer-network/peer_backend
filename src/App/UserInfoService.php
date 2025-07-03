@@ -317,7 +317,7 @@ class UserInfoService
         }
 
         if ($this->currentUserId === $reported_userid) {
-            $this->logger->error('Error: currentUserId == $reported_userid');
+            $this->logger->error('UserInfoService.reportUser: Error: currentUserId == $reported_userid');
             return $this->respondWithError(31009); // you cant report on yourself
         }
 
@@ -325,24 +325,24 @@ class UserInfoService
             $user = $this->userMapper->loadById($reported_userid);
 
             if (!$user) {
-                $this->logger->error('User not found');
+                $this->logger->error('UserInfoService.reportUser: User not found');
                 return $this->respondWithError(31007);
             }
 
             $userInfo = $this->userInfoMapper->loadInfoById($reported_userid);
 
             if (!$userInfo) {
-                $this->logger->error('Error while fetching user data from db');
+                $this->logger->error('UserInfoService.reportUser: Error while fetching user data from db');
                 return $this->respondWithError(41001); 
             }
         } catch (\Exception $e) {
-            $this->logger->error('Error while fetching data for report generation ', ['exception' => $e]);
+            $this->logger->error('UserInfoService.reportUser: Error while fetching data for report generation ', ['exception' => $e]);
             return $this->respondWithError(00000); // 410xx - failed to report user
         }
 
         $contentHash = $user->hashValue();
         if (empty($contentHash)) {
-            $this->logger->error('Error while generation content hash');
+            $this->logger->error('UserInfoService.reportUser: Error while generation content hash');
             return $this->respondWithError(00000); // 410xx - failed to report user
         }
 
@@ -354,13 +354,13 @@ class UserInfoService
                 $contentHash
             );
 
-            if ($exists == null) {
-                $this->logger->error("Failed to add report");
+            if ($exists === null) {
+                $this->logger->error("UserInfoService.reportUser: Failed to add report");
                 return $this->respondWithError(00000); // 410xx - failed to report user
             }
 
-            if ($exists == true) {
-                $this->logger->error('User report already exists');
+            if ($exists === true) {
+                $this->logger->error('UserInfoService.reportUser: User report already exists');
                 return $this->respondWithError(31008); // report already exists
             }
             
