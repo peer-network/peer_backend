@@ -59,6 +59,12 @@ class UserAdvanced
         $this->liquidity = $data['liquidity'] ?? 0.0;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+
+        if($this->status == 6){
+            $this->username = 'Deleted Account';
+            $this->img = '/profile/14ce7fba-2bee-4607-86a7-b098a3d62a78.jpg'; // NEEDs to replace with Delete User Image on Production
+            $this->biography = 'Bio of deleted Account';
+        }
     }
 
     // Array Copy methods
