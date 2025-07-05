@@ -54,7 +54,7 @@ class Profile
 
         if(($this->status == 6 )){
             $this->username = 'Deleted Account';
-            $this->img = '/profile/14ce7fba-2bee-4607-86a7-b098a3d62a78.jpg'; // NEEDs to replace with Delete User Image on Production
+            $this->img = '/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg';
             $this->biography = 'Bio of deleted Account';
         }
     }
