@@ -38,7 +38,7 @@ class ContentFilterServiceImpl {
             $invalidTypes = array_diff(array_map('strtoupper', $contentFilterBy), $allowedTypes);
 
             if (!empty($invalidTypes)) {
-                echo("ContentFilterServiceImpl: validateContentFilter: invalid contentFilter: $contentFilterBy" . "\n");
+                // echo("ContentFilterServiceImpl: validateContentFilter: invalid contentFilter: $contentFilterBy" . "\n");
                 return false;
             }
         }
@@ -61,7 +61,7 @@ class ContentFilterServiceImpl {
 
 
             if (!$reportAmountToHide || !$dismissModerationAmounToHideFromIos) {
-                echo("GetContentFilterAction: getContentFilterAction: reportAmountToHide, dismissModerationAmounToHideFromIos is null" . "\n");
+                // echo("GetContentFilterAction: getContentFilterAction: reportAmountToHide, dismissModerationAmounToHideFromIos is null" . "\n");
                 return null;
             }
             
@@ -78,7 +78,7 @@ class ContentFilterServiceImpl {
                 $showingContentReportAmount >= $reportAmountToHide &&
                 $showingContentDismissModerationAmount < $dismissModerationAmounToHideFromIos
             ) {
-                echo("GetContentFilterAction: getContentFilterAction: start: $this->contentFilterBy" . " / target: " .$contentTarget->value . " / show: " . $contentTarget->value . "\n");
+                // echo("GetContentFilterAction: getContentFilterAction: start: $this->contentFilterBy" . " / target: " .$contentTarget->value . " / show: " . $contentTarget->value . "\n");
                 return $this->contentFilterStrategy->getAction($contentTarget,$showingContent);
             }
         }
