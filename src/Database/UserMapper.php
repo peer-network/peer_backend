@@ -829,6 +829,13 @@ class UserMapper
             foreach ($friends as $row) {
                 $user_reports = (int)$row['user_reports'];
                 $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+
+                $frdObj = (new User($row, [], false))->getArrayCopy();
+
+                $row['username'] = $frdObj['username'];
+                $row['img'] = $frdObj['img'];
+                $row['biography'] = $frdObj['biography'];
+
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
@@ -841,27 +848,13 @@ class UserMapper
                 $filtered_friends[] = $row;
             }
 
-            $fltFriendObj = [];
-            foreach($friends as $key => $frd){
-
-                $fltFriendObj[$key] = $frd;
-
-                $frdObj = (new User($frd, [], false))->getArrayCopy();
-
-                $fltFriendObj[$key]['username'] = $frdObj['username'];
-                $fltFriendObj[$key]['status'] = $frdObj['status'];
-                $fltFriendObj[$key]['biography'] = $frdObj['biography'];
-                $fltFriendObj[$key]['img'] = $frdObj['img'];
-            }   
-
-
-            if ($fltFriendObj) {
-                $this->logger->info("fetchFriends retrieved friends", ['count' => count($friends)]);
+            if ($filtered_friends) {
+                $this->logger->info("fetchFriends retrieved friends", ['count' => count($filtered_friends)]);
             } else {
                 $this->logger->warning("No friends found for user", ['userId' => $userId]);
             }
 
-            return $fltFriendObj ?: null;
+            return $filtered_friends ?: null;
         } catch (\Throwable $e) {
             $this->logger->error("Database error in fetchFriends", ['error' => $e->getMessage()]);
             return null;
