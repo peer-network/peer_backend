@@ -70,8 +70,8 @@ class ContentFilterServiceImpl {
                 return null;
             }
 
-            if (!$showingContentReportAmount && !$showingContentDismissModerationAmount){
-                return null;
+            if ($showingContentReportAmount === null && $showingContentDismissModerationAmount === null){
+                return $this->contentFilterStrategy->getAction($contentTarget,$showingContent);
             }
 
             if (
