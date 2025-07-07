@@ -521,7 +521,7 @@ class CommentMapper
     {
         $this->logger->info("CommentMapper.loadById started");
         
-        $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.id = :id";
+        $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.commentid = :id";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute(
