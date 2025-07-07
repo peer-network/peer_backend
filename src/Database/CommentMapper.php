@@ -159,9 +159,11 @@ class CommentMapper
                 'amountreplies' => (int) $row['amountreplies'],
                 'isliked' => (bool) $row['isliked'],
                 'createdat' => $row['createdat'],
+                'userstatus' => $userObj['status'],
                 'user' => [
                     'uid' => $userObj['uid'],
                     'username' => $userObj['username'],
+                    'status' => $userObj['status'],
                     'slug' => $userObj['slug'],
                     'img' => $userObj['img'],
                     'isfollowed' => (bool) $row['isfollowed'],
@@ -179,7 +181,7 @@ class CommentMapper
     {
         $this->logger->info("CommentMapper.fetchAllByPostId started");
 
-        $sql = "SELECT * FROM comments WHERE postid = :postId AND parentid IS NULL ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.postid = :postId AND c.parentid IS NULL ORDER BY c.createdat ASC LIMIT :limit OFFSET :offset";
         $params = [
             'postId' => $postId,
             'limit' => $limit,
@@ -191,6 +193,7 @@ class CommentMapper
 
         $comments = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $row['userstatus'] = $row['status'];
             $comments[] = new Comment($row);
         }
 
@@ -251,6 +254,7 @@ class CommentMapper
                 'biography' =>  $userObj['biography'] ?? '',
                 'updatedat' =>  $userObj['updatedat'] ?? '',
             ];
+            $row['userstatus'] = $row['status'];
             $comment = new Commented($row);
             // echo($comment['user']['id']);
             $commentArray = $comment->getArrayCopy();
@@ -302,6 +306,7 @@ class CommentMapper
                 'biography' =>  $userObj['biography'] ?? '',
                 'updatedat' =>  $userObj['updatedat'] ?? '',
             ];
+            $row['userstatus'] = $row['status'];
             $subComment = new CommentAdvanced($row);
             $subComments[] = $subComment->getArrayCopy();
         }
@@ -401,9 +406,11 @@ class CommentMapper
 					'amountreplies' => (int) $row['amountreplies'],
 					'isliked' => (bool) $row['isliked'],
 					'createdat' => $row['createdat'],
+                    'userstatus' => $userObj['status'],
 					'user' => [
 						'uid' => $userObj['uid'],
 						'username' => $userObj['username'],
+                        'status' => $userObj['status'],
 						'slug' => $userObj['slug'],
 						'img' => $userObj['img'],
 						'isfollowed' => (bool) $row['isfollowed'],
@@ -429,7 +436,7 @@ class CommentMapper
     {
         $this->logger->info("CommentMapper.fetchByParentId started");
 
-        $sql = "SELECT * FROM comments WHERE parentid = :parentid ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.parentid = :parentid ORDER BY c.createdat ASC LIMIT :limit OFFSET :offset";
         $params = [
             'parentid' => $parentId,
             'limit' => $limit,
@@ -441,6 +448,7 @@ class CommentMapper
 
         $comments = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $row['userstatus'] = $row['status'];
             $comments[] = new Comment($row);
         }
 
@@ -451,12 +459,13 @@ class CommentMapper
     {
         $this->logger->info("CommentMapper.loadById started");
 
-        $sql = "SELECT * FROM comments WHERE id = :id";
+        $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data !== false) {
+            $data['userstatus'] = $data['status'];
             return new Comment($data);
         }
 

@@ -3191,7 +3191,7 @@ class GraphQLSchemaBuilder
 
             if ($user->getStatus() == 6) {
                 $this->logger->warning('Account has been deleted', ['email' => $email]);
-                return $this->respondWithError(0000); // Account has been deleted. It's no longer available
+                return $this->respondWithError(30801);
             }
 
             if (!$user->verifyPassword($password)) {

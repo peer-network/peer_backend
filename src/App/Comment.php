@@ -14,6 +14,8 @@ class Comment
     protected ?string $parentid;
     protected string $content;
     protected string $createdat;
+    protected ?int $userstatus;
+
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -28,6 +30,12 @@ class Comment
         $this->parentid = $data['parentid'] ?? null;
         $this->content = $data['content'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->userstatus = $data['userstatus'] ?? 0;
+
+        if($this->userstatus == 6){
+            $this->content = "Comment by deleted Account";
+        }
+
     }
 
     // Array Copy methods
