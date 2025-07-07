@@ -8623,6 +8623,59 @@
 			"response": []
 		},
 		{
+			"name": "Delete account incorrect password",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"31001\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation DeleteAccount {\n    deleteAccount(password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Login deleted",
 			"event": [
 				{
@@ -8706,6 +8759,53 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation {\n  register(input: {\n    email: \"{{email_t2}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh token deleted",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation RefreshToken {\n    refreshToken(refreshToken: \"{{refreshToken}}\") {\n        status\n        ResponseCode\n        accessToken\n        refreshToken\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9133,7 +9233,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm no ref fee",
+			"name": "Confirm no ref fee?",
 			"event": [
 				{
 					"listen": "test",
@@ -9161,8 +9261,8 @@
 							"        pm.expect(newLiquidity).to.be.below(oldLiquidity, \"Expected liquidity to decrease\");",
 							"    });",
 							"",
-							"    pm.test(\"Liquidity decreased by exactly 104\", function () {",
-							"        let expectedChange = 104;",
+							"    pm.test(\"Liquidity decreased by exactly 105\", function () {",
+							"        let expectedChange = 105;",
 							"        let actualChange = oldLiquidity - newLiquidity;",
 							"        pm.expect(actualChange).to.be.closeTo(expectedChange, 0.01, `Expected liquidity to decrease by ${expectedChange}, but got ${actualChange}`);",
 							"    });",
