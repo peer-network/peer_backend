@@ -14,9 +14,12 @@ use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrateg
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\App\User;
 
 class PostMapper extends PeerMapper
 {
+    const STATUS_DELETED = 6;
+
     public function isSameUser(string $userid, string $currentUserId): bool
     {
         return $userid === $currentUserId;
@@ -167,9 +170,12 @@ class PostMapper extends PeerMapper
                 pi.reports AS post_reports,
                 pi.count_content_moderation_dismissed AS post_count_content_moderation_dismissed
             FROM (
-                SELECT *, ROW_NUMBER() OVER (PARTITION BY contenttype ORDER BY createdat DESC) AS row_num
+                SELECT p.*, ROW_NUMBER() OVER (PARTITION BY p.contenttype ORDER BY p.createdat DESC) AS row_num
                 FROM posts p
-                WHERE userid = :userid AND feedid IS NULL
+                JOIN users u ON p.userid = u.uid
+                WHERE p.userid = :userid 
+                AND p.feedid IS NULL
+                AND u.status != :status
             ) sub
             LEFT JOIN users_info ui ON sub.userid = ui.userid
             LEFT JOIN post_info pi ON sub.postid = pi.postid AND pi.userid = sub.userid
@@ -179,6 +185,7 @@ class PostMapper extends PeerMapper
         );
 
         $stmt = $this->db->prepare($sql);
+        $stmt->bindValue('status', self::STATUS_DELETED, \PDO::PARAM_STR);
         $stmt->bindValue('userid', $userid, \PDO::PARAM_STR);
         $stmt->bindValue('limit', $limitPerType, \PDO::PARAM_INT);
         $stmt->execute();
@@ -376,7 +383,7 @@ class PostMapper extends PeerMapper
     {
         $this->logger->info("PostMapper.userInfoForPosts started");
 
-        $sql = "SELECT uid AS id, username, slug, img FROM users WHERE uid = :id";
+        $sql = "SELECT * FROM users WHERE uid = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -386,7 +393,7 @@ class PostMapper extends PeerMapper
             return [];
         }
 
-        return $data;
+        return (new User($data, [], false))->getArrayCopy();
     }
 
     // Create a post
@@ -549,6 +556,9 @@ class PostMapper extends PeerMapper
             $whereClauses[] = "p.userid = :userId";
             $params['userId'] = $userId;
         }
+        // Remove DELETED User's post
+        $whereClauses[] = "u.status != :status";
+        $params['status'] = self::STATUS_DELETED;   
 
         if ($title !== null) {
             $whereClauses[] = "p.title ILIKE :title";

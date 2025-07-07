@@ -13,6 +13,7 @@ use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Psr\Log\LoggerInterface;
+use Fawaz\App\User;
 
 class CommentMapper
 {
@@ -137,6 +138,7 @@ class CommentMapper
                 u.uid,
                 u.username,
 				u.slug,
+                u.status,
                 u.img,
                 CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
                 CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed,
@@ -199,6 +201,16 @@ class CommentMapper
                 $row['content'] = $replacer->commentContent($row['content']);
             }
 
+            
+            $userObj = [
+                        'uid' => $row['uid'],
+                        'status' => $row['status'],
+                        'username' => $row['username'],
+                        'slug' => $row['slug'],
+                        'img' => $row['img'],
+                    ];
+            $userObj = (new User($userObj, [], false))->getArrayCopy();
+
             $results[] = new CommentAdvanced([
                 'commentid' => $row['commentid'],
                 'userid' => $row['userid'],
@@ -209,11 +221,13 @@ class CommentMapper
                 'amountreplies' => (int) $row['amountreplies'],
                 'isliked' => (bool) $row['isliked'],
                 'createdat' => $row['createdat'],
+                'userstatus' => $userObj['status'],
                 'user' => [
-                    'uid' => $row['uid'],
-                    'username' => $row['username'],
-                    'slug' => $row['slug'],
-                    'img' => $row['img'],
+                    'uid' => $userObj['uid'],
+                    'username' => $userObj['username'],
+                    'status' => $userObj['status'],
+                    'slug' => $userObj['slug'],
+                    'img' => $userObj['img'],
                     'isfollowed' => (bool) $row['isfollowed'],
                     'isfollowing' => (bool) $row['isfollowing'],
                 ],
@@ -229,7 +243,7 @@ class CommentMapper
     {
         $this->logger->info("CommentMapper.fetchAllByPostId started");
 
-        $sql = "SELECT * FROM comments WHERE postid = :postId AND parentid IS NULL ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.postid = :postId AND c.parentid IS NULL ORDER BY c.createdat ASC LIMIT :limit OFFSET :offset";
         $params = [
             'postId' => $postId,
             'limit' => $limit,
@@ -241,6 +255,7 @@ class CommentMapper
 
         $comments = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $row['userstatus'] = $row['status'];
             $comments[] = new Comment($row);
         }
 
@@ -255,6 +270,7 @@ class CommentMapper
             c.*, 
             u.uid,
             u.username,
+            u.status,
             u.slug,
             u.img,
             u.biography,
@@ -280,14 +296,27 @@ class CommentMapper
 
         $comments = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+
+            $userObj = [
+                        'uid' => $row['userid'],
+                        'status' => $row['status'],
+                        'username' => $row['username'],
+                        'slug' => $row['slug'],
+                        'img' => $row['img'],
+                        'biography' => $row['biography'],
+                        'updatedat' => $row['updatedat'],
+                    ];
+            $userObj = (new User($userObj, [], false))->getArrayCopy();
+
             $row['user'] = [
-                'uid' => $row['userid'] ?? '',
-                'username' => $row['username'] ?? '',
-                'slug' => $row['slug'] ?? 0,
-                'img' =>  $row['img'] ?? '',
-                'biography' =>  $row['biography'] ?? '',
-                'updatedat' =>  $row['updatedat'] ?? '',
+                'uid' => $userObj['uid'] ?? '',
+                'username' => $userObj['username'] ?? '',
+                'slug' => $userObj['slug'] ?? 0,
+                'img' =>  $userObj['img'] ?? '',
+                'biography' =>  $userObj['biography'] ?? '',
+                'updatedat' =>  $userObj['updatedat'] ?? '',
             ];
+            $row['userstatus'] = $row['status'];
             $comment = new Commented($row);
             // echo($comment['user']['id']);
             $commentArray = $comment->getArrayCopy();
@@ -319,14 +348,27 @@ class CommentMapper
 
         $subComments = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            
+            $userObj = [
+                        'uid' => $row['userid'],
+                        'status' => $row['status'],
+                        'username' => $row['username'],
+                        'slug' => $row['slug'],
+                        'img' => $row['img'],
+                        'biography' => $row['biography'],
+                        'updatedat' => $row['updatedat'],
+                    ];
+            $userObj = (new User($userObj, [], false))->getArrayCopy();
+
             $row['user'] = [
-                'uid' => $row['userid'] ?? '',
-                'username' => $row['username'] ?? '',
-                'slug' => $row['slug'] ?? 0,
-                'img' =>  $row['img'] ?? '',
-                'biography' =>  $row['biography'] ?? '',
-                'updatedat' =>  $row['updatedat'] ?? '',
+                'uid' => $userObj['uid'] ?? '',
+                'username' => $userObj['username'] ?? '',
+                'slug' => $userObj['slug'] ?? 0,
+                'img' =>  $userObj['img'] ?? '',
+                'biography' =>  $userObj['biography'] ?? '',
+                'updatedat' =>  $userObj['updatedat'] ?? '',
             ];
+            $row['userstatus'] = $row['status'];
             $subComment = new CommentAdvanced($row);
             $subComments[] = $subComment->getArrayCopy();
         }
@@ -365,6 +407,7 @@ class CommentMapper
 					u.uid,
 					u.username,
 					u.slug,
+					u.status,
 					u.img,
 					(f1.followerid IS NOT NULL) AS isfollowing,
 					(f2.followerid IS NOT NULL) AS isfollowed
@@ -405,6 +448,16 @@ class CommentMapper
 			$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 			$comments = array_map(function($row) {
+
+                $userObj = [
+                        'uid' => $row['uid'],
+                        'status' => $row['status'],
+                        'username' => $row['username'],
+                        'slug' => $row['slug'],
+                        'img' => $row['img'],
+                    ];
+                $userObj = (new User($userObj, [], false))->getArrayCopy();
+
 				return new CommentAdvanced([
 					'commentid' => $row['commentid'],
 					'userid' => $row['userid'],
@@ -415,11 +468,13 @@ class CommentMapper
 					'amountreplies' => (int) $row['amountreplies'],
 					'isliked' => (bool) $row['isliked'],
 					'createdat' => $row['createdat'],
+                    'userstatus' => $userObj['status'],
 					'user' => [
-						'uid' => $row['uid'],
-						'username' => $row['username'],
-						'slug' => $row['slug'],
-						'img' => $row['img'],
+						'uid' => $userObj['uid'],
+						'username' => $userObj['username'],
+                        'status' => $userObj['status'],
+						'slug' => $userObj['slug'],
+						'img' => $userObj['img'],
 						'isfollowed' => (bool) $row['isfollowed'],
 						'isfollowing' => (bool) $row['isfollowing'],
 					],
@@ -443,7 +498,7 @@ class CommentMapper
     {
         $this->logger->info("CommentMapper.fetchByParentId started");
 
-        $sql = "SELECT * FROM comments WHERE parentid = :parentid ORDER BY createdat ASC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.parentid = :parentid ORDER BY c.createdat ASC LIMIT :limit OFFSET :offset";
         $params = [
             'parentid' => $parentId,
             'limit' => $limit,
@@ -455,6 +510,7 @@ class CommentMapper
 
         $comments = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $row['userstatus'] = $row['status'];
             $comments[] = new Comment($row);
         }
 
@@ -465,18 +521,20 @@ class CommentMapper
     {
         $this->logger->info("CommentMapper.loadById started");
         
-        $sql = "SELECT * FROM comments WHERE commentid = :commentid";
+        $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.commentid = :id";
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute(
-            ['commentid' => $commentid]
+            ['id' => $commentid]
         );
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data !== false) {
+            $data['userstatus'] = $data['status'];
             return new Comment($data);
         }
 
-        $this->logger->warning("No comment found with commentid", ['commentid' => $commentid]);
+        $this->logger->warning("No comment found with commentid", ['id' => $commentid]);
         return false;
     }
 

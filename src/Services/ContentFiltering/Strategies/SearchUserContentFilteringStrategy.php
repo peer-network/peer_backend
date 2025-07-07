@@ -5,7 +5,7 @@ use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 
 class SearchUserContentFilteringStrategy implements ContentFilteringStrategy {
-    public const array STRATEGY = [
+    public const STRATEGY = [
         ContentType::user->value => [
             ContentType::post->value => null,
             ContentType::comment->value => null,

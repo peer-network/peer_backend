@@ -3211,6 +3211,11 @@ class GraphQLSchemaBuilder
                 return $this->respondWithError(60801);
             }
 
+            if ($user->getStatus() == 6) {
+                $this->logger->warning('Account has been deleted', ['email' => $email]);
+                return $this->respondWithError(30801);
+            }
+
             if (!$user->verifyPassword($password)) {
                 $this->logger->warning('Invalid password', ['email' => $email]);
                 return $this->respondWithError(30801);
@@ -3264,6 +3269,11 @@ class GraphQLSchemaBuilder
             $decodedToken = $this->tokenService->validateToken($refreshToken, true);
 
             if (!$decodedToken) {
+                return $this->respondWithError(30901);
+            }
+
+            $users = $this->userMapper->loadById($decodedToken->uid);
+            if (!$users) {
                 return $this->respondWithError(30901);
             }
 

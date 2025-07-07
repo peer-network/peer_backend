@@ -60,12 +60,16 @@
         "userFriendlyComment": "Statistics updated successfully."
     },
     "11011": {
-        "comment": "Success: Referral info fetched successfuly ",
+        "comment": "Success: Referral info fetched successfully",
         "userFriendlyComment": "Referral information loaded."
     },
     "11012": {
         "comment": "Success: User has been reported successfully",
         "userFriendlyComment": "User was reported successfully."
+    },
+    "11013": {
+        "comment": "Success: Account deleted successfully",
+        "userFriendlyComment": "Your account has been deleted successfully."
     },
     "11101": {
         "comment": "Success: Follows data prepared successfully",
@@ -1064,8 +1068,12 @@
         "userFriendlyComment": "We couldn't update your statistics. Please try again."
     },
     "41013": {
-        "comment": "Unexpected error: Internal server error while retrieving referral info. ",
+        "comment": "Unexpected error: Internal server error while retrieving referral info.",
         "userFriendlyComment": "We're having trouble loading your referral information. Please try again."
+    },
+    "41014": {
+        "comment": "Unexpected Error: Failed to delete account.",
+        "userFriendlyComment": "We couldn't delete your account. Please try again."
     },
     "41101": {
         "comment": "Unexpected Error: Failed to retrieve friends data. Please try again later or contact support",
