@@ -583,7 +583,7 @@ class PostMapper extends PeerMapper
             ContentType::post,
             ContentType::post
         ) === ContentFilteringAction::hideContent) {
-            $whereClauses[] = '(pi.reports < :post_report_amount_to_hide OR pi.count_content_moderation_dismissed > :post_dismiss_moderation_amount) OR p.userid = :currentUserId';
+            $whereClauses[] = '((pi.reports < :post_report_amount_to_hide OR pi.count_content_moderation_dismissed > :post_dismiss_moderation_amount) OR p.userid = :currentUserId)';
             $params['post_report_amount_to_hide'] = $post_report_amount_to_hide;
             $params['post_dismiss_moderation_amount'] = $post_dismiss_moderation_amount;
         }
