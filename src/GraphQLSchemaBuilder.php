@@ -3250,6 +3250,11 @@ class GraphQLSchemaBuilder
                 return $this->respondWithError(30901);
             }
 
+            $users = $this->userMapper->loadById($decodedToken->uid);
+            if (!$users) {
+                return $this->respondWithError(30901);
+            }
+
             $payload = [
                 'iss' => 'peerapp.de',
                 'aud' => 'peerapp.de',
