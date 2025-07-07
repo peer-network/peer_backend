@@ -274,14 +274,6 @@ class UserMapper
                 try {
                     $user_reports = (int)$row['user_reports'];
                     $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
-
-                    // if ($row['status'] != 0) {
-                    //     $replacer = ContentReplacementPattern::suspended;
-                    //     $row['username'] = $replacer->username($row['username']);
-                    //     $row['img'] = $replacer->profilePicturePath($row['img']);
-                    // }
-
-                    
                     if ($contentFilterService->getContentFilterAction(
                         ContentType::user,
                         ContentType::user,
@@ -1139,12 +1131,6 @@ class UserMapper
             if ($data !== false) {
                 $user_reports = (int)$data['user_reports'];
                 $user_dismiss_moderation_amount = (int)$data['user_count_content_moderation_dismissed'];
-                
-                if ($data['status'] != 0) {
-                    $replacer = ContentReplacementPattern::suspended;
-                    $data['username'] = $replacer->username($data['username']);
-                    $data['img'] = $replacer->profilePicturePath($data['img']);
-                }
 
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
