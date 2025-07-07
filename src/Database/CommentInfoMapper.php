@@ -8,6 +8,8 @@ use Psr\Log\LoggerInterface;
 
 class CommentInfoMapper
 {
+    const STATUS_DELETED = 6;
+
     public function __construct(protected LoggerInterface $logger, protected PDO $db)
     {
     }
@@ -37,8 +39,9 @@ class CommentInfoMapper
     {
         $this->logger->info("CommentInfoMapper.isUserExistById started");
 
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :id");
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE status != :status AND uid = :id");
         $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':status', self::STATUS_DELETED);
         $stmt->execute();
 
         return $stmt->fetchColumn() > 0;

@@ -565,4 +565,47 @@ CREATE TABLE IF NOT EXISTS action_prices (
     updatedat       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+
+-- ReportFlow Feature
+
+-- Table: user_reports
+CREATE TABLE IF NOT EXISTS user_reports (
+    reportid            UUID NOT NULL PRIMARY KEY,
+    reporter_userid     UUID NOT NULL,
+    targetid            UUID NOT NULL,
+    targettype          VARCHAR(13) NOT NULL DEFAULT 'post' CHECK (targettype IN ('post', 'user', 'comment')),
+    message             VARCHAR (500) DEFAULT NULL,
+    collected           SMALLINT DEFAULT 0 NOT NULL,
+    hash_content_sha256 CHAR(64) NOT NULL,
+    createdat           TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    
+    CONSTRAINT unique_reporter_userid_targetid_user_reports 
+        UNIQUE (reporter_userid, targetid, hash_content_sha256),
+    CONSTRAINT ids_not_equal 
+        CHECK (reporter_userid <> targetid),
+    CONSTRAINT fk_reporter_user_reports_users 
+        FOREIGN KEY (reporter_userid) 
+        REFERENCES users(uid) 
+        ON DELETE CASCADE
+);
+-- CREATE INDEX idx_reporter_userid_reports_user ON user_reports(reporter_userid);
+-- CREATE INDEX idx_targetid_reports_user ON user_reports(targetid);
+
+-- Table: users_info
+ALTER TABLE users_info
+ADD COLUMN IF NOT EXISTS reports INTEGER NOT NULL DEFAULT 0;
+
+-- Table: users_info
+ALTER TABLE users_info
+ADD COLUMN IF NOT EXISTS count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
+
+-- Table: comment_info
+ALTER TABLE comment_info
+ADD COLUMN IF NOT EXISTS count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
+
+-- Table: post_info
+ALTER TABLE post_info
+ADD COLUMN IF NOT EXISTS count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
+
+
 COMMIT;

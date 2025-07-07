@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-bookworm
+FROM php:8.3-fpm-bullseye
  
 RUN apt-get update && \
     apt-get install -y \
@@ -6,9 +6,17 @@ RUN apt-get update && \
         git unzip curl libpq-dev postgresql-client \
         openssl libzip-dev zlib1g-dev libxml2-dev \
         libcurl4-openssl-dev libgmp-dev \
-    && docker-php-ext-install \
-        pgsql pdo pdo_pgsql bcmath xml curl gmp \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+        libffi-dev pkg-config \
+        ffmpeg && \
+    docker-php-ext-configure ffi && \
+    docker-php-ext-install \
+        pgsql pdo pdo_pgsql bcmath xml curl gmp ffi && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN echo "extension=/usr/local/lib/php/extensions/no-debug-non-zts-*/ffi.so" > /usr/local/etc/php/conf.d/ffi.ini && \
+    echo "ffi.enable=true" >> /usr/local/etc/php/conf.d/ffi.ini
+
+RUN php -m | grep ffi || (echo "FFI NOT FOUND after install" && exit 1)
  
 RUN which supervisord
  
@@ -32,6 +40,8 @@ RUN mkdir -p /var/www/html/runtime-data/logs \
 && touch /var/www/html/runtime-data/logs/graphql_debug.log \
 && chmod 666 /var/www/html/runtime-data/logs/*.log \
 && chown -R www-data:www-data /var/www/html/runtime-data
+
+RUN composer require --no-update php-ffmpeg/php-ffmpeg
  
 RUN composer install --no-dev --prefer-dist --no-interaction \
 && composer dump-autoload -o

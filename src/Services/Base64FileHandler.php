@@ -62,15 +62,15 @@ class Base64FileHandler
         };
     }
 
-    private function formatDuration(float $durationInSeconds): string
-    {
-        $hours = \floor($durationInSeconds / 3600);
-        $minutes = \floor(($durationInSeconds % 3600) / 60);
-        $seconds = \floor($durationInSeconds % 60);
-        $milliseconds = \round(($durationInSeconds - \floor($durationInSeconds)) * 100);
+	private function formatDuration(float $durationInSeconds): string
+	{
+		$hours = (int) \floor($durationInSeconds / 3600);
+		$minutes = (int) \floor(fmod($durationInSeconds, 3600) / 60);
+		$seconds = (int) \floor(fmod($durationInSeconds, 60));
+		$milliseconds = (int) \round(($durationInSeconds - \floor($durationInSeconds)) * 100);
 
-        return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
-    }
+		return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+	}
 
     private function formatBytes(int $bytes): string
     {
@@ -193,7 +193,7 @@ class Base64FileHandler
         return true;
     }
 
-    public function handleFileUpload(string $base64File, string $contentType, string $identifier, string $defaultSubfolder = null): array
+    public function handleFileUpload(string $base64File, string $contentType, string $identifier, string $defaultSubfolder = ''): array
     {
         if (!$this->isValidBase64Media($base64File, $contentType)) {
             return ['success' => false, 'error' => $this->errors];
@@ -265,5 +265,19 @@ class Base64FileHandler
             'path' => "/$subfolder/$identifier.$fileExtension",
             'options' => $options ?: null
         ]);
+    }
+    public function encodeFileToBase64(string $filePath, string $mimeType): string
+    {
+        if (!is_file($filePath)) {
+            throw new \InvalidArgumentException("File not found: $filePath");
+        }
+
+        $binary = file_get_contents($filePath);
+        if ($binary === false) {
+            throw new \RuntimeException("Failed to read file: $filePath");
+        }
+
+        $base64 = base64_encode($binary);
+        return "data:$mimeType;base64," . $base64;
     }
 }
