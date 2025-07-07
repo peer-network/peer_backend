@@ -134,12 +134,12 @@ class WalletMapper
         $countAmount = $feeAmount + $peerAmount + $burnAmount;
 
         try {
-            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
+            $query = "SELECT ui.invited, u.status FROM users_info ui LEFT JOIN users u ON ui.invited = u.uid WHERE ui.userid = :userid AND ui.invited IS NOT NULL";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['userid' => $userId]);
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if (isset($result['invited']) && !empty($result['invited'])) {
+            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != 6) {
                 $inviterId = $result['invited'];
                 $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
@@ -148,6 +148,14 @@ class WalletMapper
                     'invited' => $inviterId,
                 ]);
             }
+
+            // If user's account deleted then we will send that percentage amount to PEER
+            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == 6) {
+                $peerAmount = $peerAmount + round((float)$numberoftokens * INVTFEE, 2);
+                $countAmount = $feeAmount + $peerAmount + $burnAmount;
+                $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
+            }
+
 
         } catch (\Throwable $e) {
             return self::respondWithError($e->getMessage());

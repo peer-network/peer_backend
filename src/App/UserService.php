@@ -569,7 +569,7 @@ class UserService
             $this->logger->info('User deleted successfully', ['userId' => $userId]);
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000, // User has been deleted.
+                'ResponseCode' => 11012,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to delete user', ['exception' => $e]);
