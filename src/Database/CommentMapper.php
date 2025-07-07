@@ -525,7 +525,7 @@ class CommentMapper
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute(
-            ['commentid' => $commentid]
+            ['id' => $commentid]
         );
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -534,7 +534,7 @@ class CommentMapper
             return new Comment($data);
         }
 
-        $this->logger->warning("No comment found with commentid", ['commentid' => $commentid]);
+        $this->logger->warning("No comment found with commentid", ['id' => $commentid]);
         return false;
     }
 
