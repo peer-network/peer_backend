@@ -121,7 +121,19 @@ class PostAdvanced
     {
         return $this->title;
     }
-
+    
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+    public function getMediaDescription(): string
+    {
+        return $this->mediadescription;
+    }
+    public function setMediaDescription(string $mediadescription): void
+    {
+        $this->mediadescription = $mediadescription;
+    }
     public function getUserId(): string
     {
         return $this->userid;
@@ -135,6 +147,10 @@ class PostAdvanced
     public function getMedia(): string
     {
         return $this->media;
+    }
+    public function setMedia(string $media): void
+    {
+        $this->media = $media;
     }
 
     public function getContentType(): string

@@ -4,9 +4,13 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Utils\HashObject;
 
-class User
+class User implements Hashable
 {
+    use HashObject;
+
     protected string $uid;
     protected string $email;
     protected string $referral_uuid;
@@ -420,5 +424,19 @@ class User
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+    public function getHashableContent(): string {
+        $content = implode('|', [
+            $this->email,
+            $this->img,
+            $this->username,
+            $this->biography
+        ]);
+        return $content;
+    }
+
+    public function hashValue(): string {
+        return $this->hashObject($this);
     }
 }

@@ -64,6 +64,10 @@
         "userFriendlyComment": "Referral information loaded."
     },
     "11012": {
+        "comment": "Success: User has been reported successfully",
+        "userFriendlyComment": "User was reported successfully."
+    },
+    "11013": {
         "comment": "Success: Account deleted successfully",
         "userFriendlyComment": "Your account has been deleted successfully."
     },
@@ -786,6 +790,14 @@
     "31007": {
         "comment": "Information Not Found: No users found. Please refine your search or try a different query",
         "userFriendlyComment": "No users found. Try different search terms."
+    },
+    "31008": {
+        "comment": "User has already been reported.",
+        "userFriendlyComment": "You have already reported this user."
+    },
+    "31009": {
+        "comment": "User cannot report themselves.",
+        "userFriendlyComment": "You cannot report your own account." 
     },
     "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",

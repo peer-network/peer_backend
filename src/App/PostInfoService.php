@@ -3,16 +3,23 @@
 namespace Fawaz\App;
 
 use Fawaz\Database\PostInfoMapper;
+use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\CommentMapper;
+use Fawaz\Utils\ReportTargetType;
 use Psr\Log\LoggerInterface;
+use Fawaz\Database\PostMapper;
 
 class PostInfoService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected PostInfoMapper $postInfoMapper, protected CommentMapper $commentMapper)
-    {
-    }
+    public function __construct(
+        protected LoggerInterface $logger, 
+        protected PostInfoMapper $postInfoMapper, 
+        protected CommentMapper $commentMapper, 
+        protected ReportsMapper $reportMapper,
+        protected PostMapper $postMapper
+    ){}
 
     public function setCurrentUserId(string $userId): void
     {
@@ -172,34 +179,69 @@ class PostInfoService
             return $this->respondWithError(60501);
         }
 
+        $this->logger->info('PostInfoService.reportPost started');
+
         if (!self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
         }
 
-        $this->logger->info('PostInfoService.reportPost started');
+        try {
+            $post = $this->postMapper->loadById($postId);
+            if (!$post) {
+                $this->logger->error('PostInfoService: reportPost: Post not found');
+                return $this->respondWithError(31510);
+            }
 
-        $postInfo = $this->postInfoMapper->loadById($postId);
-        if ($postInfo === null) {
-            return $this->respondWithError(31602);
+            $postInfo = $this->postInfoMapper->loadById($postId);
+            if ($postInfo === null) {
+                $this->logger->error('PostInfoService: reportPost: Error while fetching comment data from db');
+                return $this->respondWithError(31602);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('PostInfoService: reportPost: Error while fetching data for report generation ', ['exception' => $e]);
+            return $this->respondWithError(41505);
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
+            $this->logger->warning("PostInfoService: reportPost: User tries to report on his own post");
             return $this->respondWithError(31508);
         }
-
-        $exists = $this->postInfoMapper->addUserActivity('reportPost', $this->currentUserId, $postId);
-
-        if (!$exists) {
-            return $this->respondWithError(31503);
+        
+        $contentHash = $post->hashValue();
+        if (empty($contentHash)) {
+            $this->logger->error('PostInfoService: reportPost: Failed to generate content hash of content');
+            return $this->respondWithError(41505);
         }
 
-        $postInfo->setReports($postInfo->getReports() + 1);
-        $this->postInfoMapper->update($postInfo);
+        try {
+            $exists = $this->reportMapper->addReport(
+                $this->currentUserId,
+                ReportTargetType::POST, 
+                $postId, 
+                $contentHash
+            );
 
-        return [
-            'status' => 'success',
-            'ResponseCode' => 11505,
-        ];
+            if ($exists === null) {
+                $this->logger->error("PostInfoService: reportPost: Failed to add report");
+                return $this->respondWithError(41505);
+            }
+
+            if ($exists === true) {
+                $this->logger->warning("PostInfoService: reportPost: User tries to add duplicating report");
+                return $this->respondWithError(31503);
+            }
+
+            $postInfo->setReports($postInfo->getReports() + 1);
+            $this->postInfoMapper->update($postInfo);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11505,    
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('PostInfoService: reportPost: Error while adding report to db or updating _info data', ['exception' => $e]);
+            return $this->respondWithError(41505);
+        }
     }
 
     public function viewPost(string $postId): array
