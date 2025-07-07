@@ -4,9 +4,13 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Utils\HashObject;
 
-class User
+class User implements Hashable
 {
+    use HashObject;
+
     protected string $uid;
     protected string $email;
     protected string $referral_uuid;
@@ -43,6 +47,12 @@ class User
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
+
+        if($this->status == 6){
+            $this->username = 'Deleted Account';
+            $this->img = '/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg';
+            $this->biography = '/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt';
+        }
     }
 
     // Array Copy methods
@@ -414,5 +424,19 @@ class User
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+    public function getHashableContent(): string {
+        $content = implode('|', [
+            $this->email,
+            $this->img,
+            $this->username,
+            $this->biography
+        ]);
+        return $content;
+    }
+
+    public function hashValue(): string {
+        return $this->hashObject($this);
     }
 }

@@ -90,6 +90,9 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
+
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
  
       - name: Fix log directory permissions
         run: sudo chown -R 33:33 runtime-data/logs
@@ -275,6 +278,12 @@ jobs:
           done
           echo "Backend did not respond in time."
           exit 1
+
+      - name: Confirm PHP FFI is enabled
+        run: docker compose exec backend php -m | grep ffi || echo "FFI not listed in php -m"
+
+      - name: Verify FFI is enabled via php.ini
+        run: docker compose exec backend php -i | grep 'ffi.enable'
  
       - name: Test GraphQL Endpoint
         run: |
@@ -652,10 +661,16 @@ jobs:
           git fetch origin gh-pages
           git checkout gh-pages
 
-      - name: Clean up old reports (older than 1 day)
+      - name: Clean up old reports (keep only last 20)
         run: |
           echo "Cleaning old reports..."
-          find reports -mindepth 1 -maxdepth 1 -type d -mtime +1 -print -exec rm -rf {} +
+          cd reports
+          total=$(ls -1d */ | wc -l)
+          keep=20
+          if [ "$total" -gt "$keep" ]; then
+            remove=$(($total - $keep))
+            ls -1dt */ | tail -n $remove | xargs rm -rf
+          fi
  
       - name: Download HTMLExtra report for PHP 8.2
         uses: actions/download-artifact@v4
@@ -676,7 +691,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git pull origin gh-pages --rebase
+          git pull --rebase --autostash origin gh-pages
           git add reports/${{ github.run_id }}
           git commit -m "Add Newman HTML reports for run ${{ github.run_id }}" || echo "Nothing to commit"
           git push origin gh-pages
@@ -713,10 +728,16 @@ jobs:
           git fetch origin gh-pages
           git checkout gh-pages
 
-      - name: Clean up old reports (older than 1 day)
+      - name: Clean up old reports (keep only last 20)
         run: |
           echo "Cleaning old reports..."
-          find reports -mindepth 1 -maxdepth 1 -type d -mtime +1 -print -exec rm -rf {} +
+          cd reports
+          total=$(ls -1d */ | wc -l)
+          keep=20
+          if [ "$total" -gt "$keep" ]; then
+            remove=$(($total - $keep))
+            ls -1dt */ | tail -n $remove | xargs rm -rf
+          fi
  
       - name: Download HTMLExtra report for PHP 8.2
         uses: actions/download-artifact@v4
@@ -737,7 +758,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git pull origin gh-pages --rebase
+          git pull --rebase --autostash origin gh-pages
           git add reports/${{ github.run_id }}
           git commit -m "Add Newman HTML reports for successful run ${{ github.run_id }}" || echo "Nothing to commit"
           git push origin gh-pages

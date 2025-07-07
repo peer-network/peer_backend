@@ -47,6 +47,8 @@ class WalletMapper
     private string $burnWallet;
     private string $peerWallet;
 
+    const STATUS_DELETED = 6;
+
     public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
     {
     }
@@ -105,9 +107,10 @@ class WalletMapper
         }
 
         try {
-            $sql = "SELECT uid FROM users WHERE uid = :uid";
+            $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':uid', $recipient);
+            $stmt->bindValue(':status', self::STATUS_DELETED);
             $stmt->execute();
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
@@ -116,7 +119,7 @@ class WalletMapper
 
         if (empty($row)) {
             $this->logger->warning('Unknown Id Exception.');
-            return self::respondWithError(31003);
+            return self::respondWithError(31007);
         }
 
         if ((string)$row === $userId) {
@@ -131,12 +134,12 @@ class WalletMapper
         $countAmount = $feeAmount + $peerAmount + $burnAmount;
 
         try {
-            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
+            $query = "SELECT ui.invited, u.status FROM users_info ui LEFT JOIN users u ON ui.invited = u.uid WHERE ui.userid = :userid AND ui.invited IS NOT NULL";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['userid' => $userId]);
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if (isset($result['invited']) && !empty($result['invited'])) {
+            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != 6) {
                 $inviterId = $result['invited'];
                 $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
@@ -145,6 +148,14 @@ class WalletMapper
                     'invited' => $inviterId,
                 ]);
             }
+
+            // If user's account deleted then we will send that percentage amount to PEER
+            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == 6) {
+                $peerAmount = $peerAmount + round((float)$numberoftokens * INVTFEE, 2);
+                $countAmount = $feeAmount + $peerAmount + $burnAmount;
+                $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
+            }
+
 
         } catch (\Throwable $e) {
             return self::respondWithError($e->getMessage());
@@ -1485,24 +1496,27 @@ class WalletMapper
 
     private function decimalToQ64_96(float $value): string
     {
-        $scaleFactor = bcpow('2', '96');
-        
-        $scaledValue = bcmul((string)$value, $scaleFactor, 0);
-        
+        $scaleFactor = \bcpow('2', '96');
+
+		// Convert float to plain decimal string 
+		$decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
+
+		$scaledValue = \bcmul($decimalString, $scaleFactor, 0);
+
         return $scaledValue;
     }
 
     private function q64_96ToDecimal(string $qValue): string
     {
-        $scaleFactor = bcpow('2', '96');
+        $scaleFactor = \bcpow('2', '96');
         
-        $decimalValue = bcdiv($qValue, $scaleFactor, 18);
+        $decimalValue = \bcdiv($qValue, $scaleFactor, 18);
         
         return round($decimalValue, 2);
     }
 
     private function addQ64_96(string $qValue1, string $qValue2): string
     {
-        return bcadd($qValue1, $qValue2);
+        return \bcadd($qValue1, $qValue2);
     }
 }
