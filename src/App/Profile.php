@@ -51,6 +51,12 @@ class Profile
         $this->textposts = isset($data['textposts']) && is_array($data['textposts']) ? $data['textposts'] : [];
         $this->videoposts = isset($data['videoposts']) && is_array($data['videoposts']) ? $data['videoposts'] : [];
         $this->audioposts = isset($data['audioposts']) && is_array($data['audioposts']) ? $data['audioposts'] : [];
+
+        if(($this->status == 6 )){
+            $this->username = 'Deleted Account';
+            $this->img = '/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg';
+            $this->biography = '/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt';
+        }
     }
 
     // Array Copy methods

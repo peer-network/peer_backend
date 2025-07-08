@@ -8,6 +8,8 @@ use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Mail\UserWelcomeMail;
 use Fawaz\Services\Base64FileHandler;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
@@ -569,7 +571,7 @@ class UserService
             $this->logger->info('User deleted successfully', ['userId' => $userId]);
             return [
                 'status' => 'success',
-                'message' => 11010,
+                'ResponseCode' => 11012,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to delete user', ['exception' => $e]);
@@ -585,6 +587,7 @@ class UserService
 
         $userId = $args['userid'] ?? $this->currentUserId;
         $postLimit = min(max((int)($args['postLimit'] ?? 4), 1), 10);
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $this->logger->info('UserService.Profile started');
 
@@ -598,10 +601,10 @@ class UserService
         }
 
         try {
-            $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId)->getArrayCopy();
+            $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId,$contentFilterBy)->getArrayCopy();
             $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
 
-            $posts = $this->postMapper->fetchPostsByType($userId, $postLimit);
+            $posts = $this->postMapper->fetchPostsByType($this->currentUserId,$userId, $postLimit,$contentFilterBy);
 
             $contentTypes = ['image', 'video', 'audio', 'text'];
             foreach ($contentTypes as $type) {
@@ -630,6 +633,11 @@ class UserService
         $userId = $args['userid'] ?? $this->currentUserId;
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
@@ -640,8 +648,8 @@ class UserService
             return self::respondWithError(31007);
         }
         try {
-            $followers = $this->userMapper->fetchFollowers($userId, $this->currentUserId, $offset, $limit);
-            $following = $this->userMapper->fetchFollowing($userId, $this->currentUserId, $offset, $limit);
+            $followers = $this->userMapper->fetchFollowers($userId, $this->currentUserId, $offset, $limit,$contentFilterBy);
+            $following = $this->userMapper->fetchFollowing($userId, $this->currentUserId, $offset, $limit,$contentFilterBy);
             
             $counter = count($followers) + count($following);
 
@@ -674,11 +682,12 @@ class UserService
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $this->logger->info('Fetching friends list', ['currentUserId' => $this->currentUserId, 'offset' => $offset, 'limit' => $limit]);
 
         try {
-            $users = $this->userMapper->fetchFriends($this->currentUserId, $offset, $limit);
+            $users = $this->userMapper->fetchFriends($this->currentUserId, $offset, $limit,$contentFilterBy);
 
             if (!empty($users)) {
                 $this->logger->info('Friends list retrieved successfully', ['userCount' => count($users)]);
@@ -735,8 +744,14 @@ class UserService
 
         $this->logger->info('UserService.fetchAllAdvance started');
 
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
+
         try {
-            $users = $this->userMapper->fetchAllAdvance($args, $this->currentUserId);
+            $users = $this->userMapper->fetchAllAdvance($args, $this->currentUserId,$contentFilterBy);
             $fetchAll = array_map(fn(UserAdvanced $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {
@@ -760,7 +775,7 @@ class UserService
         $this->logger->info('UserService.fetchAll started');
 
         try {
-            $users = $this->userMapper->fetchAll($args);
+            $users = $this->userMapper->fetchAll($this->currentUserId, $args);
             $fetchAll = array_map(fn(User $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {

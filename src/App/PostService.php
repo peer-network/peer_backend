@@ -15,6 +15,8 @@ use Fawaz\Services\Base64FileHandler;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 
 class PostService
 {
@@ -467,7 +469,7 @@ class PostService
         $tag = $args['tag'] ?? null; 
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
-
+        
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
         }
