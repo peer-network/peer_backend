@@ -1,6 +1,7 @@
 <?php
 
 namespace Fawaz\config\constants;
+use Fawaz\config\constants\ConstantsModeration;
 
 class ConstantsConfig
 {
@@ -19,6 +20,10 @@ class ConstantsConfig
         return ConstantsConfig::POST;
     }
 
+    public static function contentFiltering() {
+        return ConstantsModeration::contentFiltering();
+    }
+
     private const COMMENT = [
         'CONTENT' => [
             'MIN_LENGTH' => 2,
@@ -35,5 +40,5 @@ class ConstantsConfig
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 500,
         ],
-    ];    
+    ];
 }
