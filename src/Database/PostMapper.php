@@ -648,6 +648,14 @@ class PostMapper extends PeerMapper
         }
         if ($sortBy === 'FOR_ME') {
             $whereClauses[] = "p.userid != :currentUserId";
+
+            if (!in_array('VIEWED', $filterBy, true)) {
+                $whereClauses[] = "NOT EXISTS (
+                    SELECT 1 FROM user_post_views upv
+                    WHERE upv.postid = p.postid
+                    AND upv.userid = :currentUserId
+                )";
+            }
         }
 
         $orderBy = match ($sortBy) {
