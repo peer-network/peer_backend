@@ -464,7 +464,7 @@ class PostMapper extends PeerMapper
         $to = $args['to'] ?? null;
         $filterBy = $args['filterBy'] ?? [];
         $Ignorlist = $args['IgnorList'] ?? 'NO';
-        $sortBy = $args['sortBy'] ?? null;
+        $sortBy = $args['sortBy'] ?? 'FOR_ME';
         $title = $args['title'] ?? null;
         $tag = $args['tag'] ?? null; 
         $postId = $args['postid'] ?? null;
@@ -533,6 +533,13 @@ class PostMapper extends PeerMapper
                     $userFilters[] = $userMapping[$type]; 
                 }
             }
+            if (in_array('VIEWED', $filterBy, true)) {
+                $whereClauses[] = "EXISTS (
+                    SELECT 1 FROM user_post_views upv
+                    WHERE upv.postid = p.postid
+                    AND upv.userid = :currentUserId
+                )";
+            }
 
             if (!empty($validTypes)) {
                 $placeholders = implode(", ", array_map(fn($k) => ":filter$k", array_keys($validTypes)));
@@ -551,8 +558,37 @@ class PostMapper extends PeerMapper
         if (!empty($Ignorlist) && $Ignorlist === 'YES') {
             $whereClauses[] = "p.userid NOT IN (SELECT blockedid FROM user_block_user WHERE blockerid = :currentUserId)";
         }
+        if ($sortBy === 'FOR_ME') {
+            $whereClauses[] = "p.userid != :currentUserId";
+        }
 
         $orderBy = match ($sortBy) {
+            'FOR_ME' => "CASE
+                            WHEN EXISTS (
+                                SELECT 1 FROM follows f1
+                                WHERE f1.followerid = :currentUserId
+                                AND f1.followedid = p.userid
+                                AND EXISTS (
+                                    SELECT 1 FROM follows f2
+                                    WHERE f2.followerid = p.userid
+                                    AND f2.followedid = :currentUserId
+                                )
+                            ) THEN 1
+                            WHEN EXISTS (
+                                SELECT 1 FROM follows f1
+                                WHERE f1.followerid = :currentUserId
+                                AND f1.followedid = p.userid
+                            ) THEN 2
+                            WHEN EXISTS (
+                                SELECT 1 FROM follows f1
+                                WHERE f1.followerid IN (
+                                SELECT followedid FROM follows WHERE followerid = :currentUserId
+                                )
+                                AND f1.followedid = p.userid
+                            ) THEN 3
+                            ELSE 4
+                            END,
+                            p.createdat DESC",
             'NEWEST' => "p.createdat DESC",
             'FOLLOWER' => "isfollowing DESC, p.createdat DESC",
             'FOLLOWED' => "isfollowed DESC, p.createdat DESC",
