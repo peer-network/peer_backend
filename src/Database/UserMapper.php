@@ -2009,8 +2009,8 @@ class UserMapper
     
         $this->logger->info("Referral info query result", ['result' => $result]);
 
-        if (isset($result['referral_uuid']) && $this->poolWallet == $result['referral_uuid'] || $this->burnWallet == $result['referral_uuid'] || $this->peerWallet == $result['referral_uuid']) {
-            $this->logger->warning('Unauthorized to send token');
+        if (isset($result['referral_uuid']) && ($this->poolWallet == $result['referral_uuid'] || $this->burnWallet == $result['referral_uuid'] || $this->peerWallet == $result['referral_uuid'])) {
+            $this->logger->warning('Unauthorized to refer pool account');
             return null;
         }
 

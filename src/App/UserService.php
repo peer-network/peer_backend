@@ -313,7 +313,7 @@ class UserService
             $users = $this->userMapper->getValidReferralInfoByLink($referralString);
 
             if(!$users){
-                return self::respondWithError(00000); // No valid referral found
+                return self::respondWithError(00000); // No valid referral information found
             }
             $userObj = (new User($users, [], false))->getArrayCopy();
 
@@ -324,7 +324,7 @@ class UserService
             ];
 
         } catch (\Throwable $e) {
-            $this->logger->error('Error verifying account.', ['exception' => $e]);
+            $this->logger->error('Error verifying referral info.', ['exception' => $e]);
             return self::respondWithError(0000); // Error while retriving Referral Info
         }
         return self::respondWithError(0000); // Error while retriving Referral Info
