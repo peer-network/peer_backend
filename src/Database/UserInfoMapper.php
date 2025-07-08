@@ -74,6 +74,7 @@ class UserInfoMapper
                           amountfriends = :amountfriends, 
                           amountblocked = :amountblocked, 
                           isprivate = :isprivate, 
+                          reports = :reports, 
                           invited = :invited,
                           phone = :phone,                          
                           pkey = :pkey,
@@ -89,6 +90,7 @@ class UserInfoMapper
             $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
             $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
+            $stmt->bindValue(':reports', $data['reports'], \PDO::PARAM_INT);
             $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
             $stmt->bindValue(':phone', $data['phone'], \PDO::PARAM_STR);
             $stmt->bindValue(':pkey', $data['pkey'], \PDO::PARAM_STR);
