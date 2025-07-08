@@ -799,6 +799,10 @@
         "comment": "User cannot report themselves.",
         "userFriendlyComment": "You cannot report your own account." 
     },
+    "31010": {
+        "comment": "Invalid Referral String: The referral code provided is invalid or does not match any existing records.",
+        "userFriendlyComment": "The referral code you entered is invalid. Please check and try again."
+    },
     "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",
         "userFriendlyComment": "This action is only available for friends."
