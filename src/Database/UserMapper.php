@@ -18,12 +18,18 @@ use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrateg
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\DateService;
 
 class UserMapper
 {
     const STATUS_DELETED = 6;
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    private string $poolWallet;
+    private string $burnWallet;
+    private string $peerWallet;
+    private string $btcpool;
+
+    public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
     {
     }
 
@@ -1972,5 +1978,42 @@ class UserMapper
             return null;
         }
         return null;
+    }
+
+    public function getValidReferralInfoByLink(string $referralLink): array|null
+    {
+        $this->logger->info("UserMapper.getValidReferralInfoByLink started", [
+            'referralLink' => $referralLink,
+        ]);
+
+        $accountsResult = $this->pool->returnAccounts();
+
+
+		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
+			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
+			return null;
+		}
+        
+        $this->poolWallet = $accountsResult['response']['pool'];
+        $this->burnWallet = $accountsResult['response']['burn'];
+        $this->peerWallet = $accountsResult['response']['peer'];
+        // $this->btcpool = $accountsResult['response']['btcpool'];
+    
+        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.user_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':referral_uuid', $referralLink, \PDO::PARAM_STR);
+        $stmt->execute();
+    
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+    
+        $this->logger->info("Referral info query result", ['result' => $result]);
+
+        if (isset($result['referral_uuid']) && $this->poolWallet == $result['referral_uuid'] || $this->burnWallet == $result['referral_uuid'] || $this->peerWallet == $result['referral_uuid']) {
+            $this->logger->warning('Unauthorized to send token');
+            return null;
+        }
+
+        return $result ?: null;
     }
 }

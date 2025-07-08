@@ -303,6 +303,33 @@ class UserService
 		];
     }
 
+    public function verifyReferral(string $referralString): array
+    {
+        if (empty($referralString)) {
+            return self::respondWithError(0000); // Invalid referral string
+        }
+
+        try {
+            $users = $this->userMapper->getValidReferralInfoByLink($referralString);
+
+            if(!$users){
+                return self::respondWithError(00000); // No valid referral found
+            }
+            $userObj = (new User($users, [], false))->getArrayCopy();
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 0000, // Referral Info retrived
+                'affectedRows' => $userObj
+            ];
+
+        } catch (\Throwable $e) {
+            $this->logger->error('Error verifying account.', ['exception' => $e]);
+            return self::respondWithError(0000); // Error while retriving Referral Info
+        }
+        return self::respondWithError(0000); // Error while retriving Referral Info
+    }
+
     public function referralList(string $userId, int $offset = 0, int $limit = 20): array
     {
         $data = $this->userMapper->getReferralRelations($userId, $offset, $limit);
