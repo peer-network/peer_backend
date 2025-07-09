@@ -521,7 +521,7 @@ class PostMapper extends PeerMapper
         $to = $args['to'] ?? null;
         $filterBy = $args['filterBy'] ?? [];
         $Ignorlist = $args['IgnorList'] ?? 'NO';
-        $sortBy = $args['sortBy'] ?? 'FOR_ME';
+        $sortBy = $args['sortBy'] ?? null;
         $title = $args['title'] ?? null;
         $tag = $args['tag'] ?? null; 
         $postId = $args['postid'] ?? null;
