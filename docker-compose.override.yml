@@ -6,7 +6,7 @@ services:
     # mount your working tree in for iterative development
     volumes:
       - ./:/var/www/html
-      - ./test_assets:/var/www/html/test_assets
+     # - ./test_assets:/var/www/html/test_assets
     networks:
       - my-network
  
@@ -32,3 +32,5 @@ services:
 networks:
   my-network:
     external: true
+
+ 
