@@ -1,7 +1,6 @@
 export IMAGE_TAG := local
 
-VOLUME_NAME = peer_backend_ci-cd_peer_backend_ci-cd_db-datae
-
+VOLUME_NAME=peer_backend-18_peer_backend_ci-cd_db-data
 env:
 	cp .env.dev .env
 	@echo ".env created from .env.dev"
@@ -14,8 +13,8 @@ init:
 	@echo "SQL files copied and renamed to sql_files_for_import_tmp"
 
 clean-volume:
+	@echo "Cleaning Docker volume: $(VOLUME_NAME)"
 	-@docker volume rm $(VOLUME_NAME) 2>/dev/null || echo "Volume $(VOLUME_NAME) does not exist or is in use."
-
 reset:
 	docker-compose down -v
 	$(MAKE) clean-volume
