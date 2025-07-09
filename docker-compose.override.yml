@@ -1,0 +1,34 @@
+services:
+  backend:
+    depends_on:
+      db:
+        condition: service_healthy
+    # mount your working tree in for iterative development
+    volumes:
+      - ./:/var/www/html
+      - ./test_assets:/var/www/html/test_assets
+    networks:
+      - my-network
+ 
+  db:
+    # point Postgres at the init-scripts you built in tmp
+    volumes:
+      - ./sql_files_for_import_tmp:/docker-entrypoint-initdb.d
+      - peer_backend_ci-cd_db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - my-network
+ 
+  newman:
+    # we don’t actually run tests until you `docker-compose run newman`
+    #entrypoint: ["sleep", "infinity"]
+    networks:
+      - my-network
+ 
+networks:
+  my-network:
+    external: true
