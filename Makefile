@@ -1,6 +1,8 @@
 export IMAGE_TAG := local
 
-VOLUME_NAME=peer_backend_ci-cd_db-data
+VOLUME_NAME=peer_backend_local_db_data
+COMPOSE_OVERRIDE = docker-compose.override.local.yml
+COMPOSE_FILES = -f docker-compose.yml $(if $(wildcard $(COMPOSE_OVERRIDE)),-f $(COMPOSE_OVERRIDE))
 
 env:
 	cp .env.dev .env
@@ -31,31 +33,32 @@ clean-volume:
 	-@docker volume rm $(VOLUME_NAME) 2>/dev/null || echo "Volume $(VOLUME_NAME) already removed or in use."
 
 reset:
-	docker-compose down -v
+	docker-compose $(COMPOSE_FILES) down -v
 	$(MAKE) clean-volume
 
 dev: env reset check-volume init
 	@echo "Building all services..."
-	docker-compose build
+	docker-compose $(COMPOSE_FILES) build
 
 	@echo "Starting DB only..."
-	docker-compose up -d db
+	docker-compose $(COMPOSE_FILES) up -d db
 
 	@echo "Waiting for Postgres to be healthy..."
-	until docker-compose exec db pg_isready -U postgres | grep -q "accepting connections"; do \
+	until docker-compose $(COMPOSE_FILES) exec db pg_isready -U postgres | grep -q "accepting connections"; do \
 		echo "Waiting for DB..."; sleep 2; \
 	done
 
 	@echo "Starting backend..."
-	docker-compose up -d backend
+	docker-compose $(COMPOSE_FILES) up -d backend
 
 	@echo "Installing Composer dependencies..."
-	docker-compose exec backend composer install --no-interaction --prefer-dist
+	docker-compose $(COMPOSE_FILES) exec backend composer install --no-interaction --prefer-dist
+
 
 	@echo "Setting up backend runtime..."
-	docker-compose exec backend mkdir -p /var/www/html/runtime-data/cover
-	docker-compose exec backend chmod 777 /var/www/html/runtime-data/cover
-	docker-compose exec backend chown www-data:www-data /var/www/html/runtime-data/cover
+	docker-compose $(COMPOSE_FILES) exec backend mkdir -p /var/www/html/runtime-data/cover
+	docker-compose $(COMPOSE_FILES) exec backend chmod 777 /var/www/html/runtime-data/cover
+	docker-compose $(COMPOSE_FILES) exec backend chown www-data:www-data /var/www/html/runtime-data/cover
 
 	@echo "Waiting for backend to be healthy..."
 	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
@@ -66,10 +69,10 @@ dev: env reset check-volume init
 
 test:
 	@echo "Building Newman container..."
-	docker-compose build newman
+	docker-compose $(COMPOSE_FILES) build newman
 
 	@echo "Starting Newman container..."
-	docker-compose up -d newman
+	docker-compose $(COMPOSE_FILES) up -d newman
 
 	@echo "Patching copied Postman collection to use local backend..."
 	jq '(.item[] | select(.request.url.raw != null) | .request.url) |= { \
@@ -87,7 +90,7 @@ test:
 	mv tests/postman_collection/tmp_env_patched.json tests/postman_collection/tmp_env.json
 
 	@echo "Running Newman tests inside the container..."
-	docker-compose run --rm newman newman run /etc/newman/tmp_collection.json \
+	docker-compose $(COMPOSE_FILES) run --rm newman newman run /etc/newman/tmp_collection.json \
 		--environment /etc/newman/tmp_env.json \
 		--reporters cli,htmlextra \
 		--reporter-htmlextra-export /etc/newman/reports/report.html
@@ -100,5 +103,4 @@ clean-all: reset
 	@rm -f .env
 	@rm -f supervisord.pid
 	@rm -f runtime-data/logs/errorlog.txt
-	@rm -rf test_assets
 	@rm -f tests/postman_collection/tmp_*.json
