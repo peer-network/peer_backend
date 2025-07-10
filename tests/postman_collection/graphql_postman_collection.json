@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "9a272a27-2ec4-4d8a-bfbe-106f35ce4120",
-		"name": "Limitless Graphql Automation Testing",
+		"_postman_id": "05732a9c-3838-4486-831d-adee3d420661",
+		"name": "back_graphql_postman_collection",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-6963c9f4-d7f6-4338-b0c0-5022efbc69b0?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-05732a9c-3838-4486-831d-adee3d420661?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -2613,6 +2613,466 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t3}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login tester 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create post photo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(",
+							"        responseText.includes(\"11513\") || responseText.includes(\"11508\")",
+							"    ).to.be.true;",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postResponse = {};",
+							"try {",
+							"    postResponse = pm.response.json();",
+							"} catch (err) {",
+							"    console.log(\"Failed to parse response as JSON:\", err);",
+							"}",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    try {",
+							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
+							"        if (postId) {",
+							"            pm.environment.set(\"postid\", postId);",
+							"            console.log(\"postid set to:\", postId);",
+							"        } else {",
+							"            console.log(\"No postid found in response.\");",
+							"        }",
+							"    } catch (err) {",
+							"        console.log(\"Couldn't access post ID:\", err);",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping postid set.\");",
+							"}",
+							"",
+							"let postResponseCode = \"\";",
+							"try {",
+							"    postResponseCode = postResponse?.data?.createPost?.ResponseCode || \"\";",
+							"} catch (err) {",
+							"    console.log(\"Couldn't access ResponseCode:\", err);",
+							"}",
+							"",
+							"if (postResponseCode === \"11513\") {",
+							"    pm.environment.set(\"isDailyFreePost\", \"true\");",
+							"    console.log(\"This was a Daily Free Post (code 11513).\");",
+							"} else {",
+							"    pm.environment.unset(\"isDailyFreePost\");",
+							"    console.log(\"Not a Daily Free Post (code not 11513).\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Follow friend",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Account is now followed\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"true\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{w_userid_t1}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login friend of a friend",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t1}}\",\n    password: \"{{w_password_t1}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create post photo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(",
+							"        responseText.includes(\"11513\") || responseText.includes(\"11508\")",
+							"    ).to.be.true;",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postResponse = {};",
+							"try {",
+							"    postResponse = pm.response.json();",
+							"} catch (err) {",
+							"    console.log(\"Failed to parse response as JSON:\", err);",
+							"}",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    try {",
+							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
+							"        if (postId) {",
+							"            pm.environment.set(\"postid\", postId);",
+							"            console.log(\"postid set to:\", postId);",
+							"        } else {",
+							"            console.log(\"No postid found in response.\");",
+							"        }",
+							"    } catch (err) {",
+							"        console.log(\"Couldn't access post ID:\", err);",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping postid set.\");",
+							"}",
+							"",
+							"let postResponseCode = \"\";",
+							"try {",
+							"    postResponseCode = postResponse?.data?.createPost?.ResponseCode || \"\";",
+							"} catch (err) {",
+							"    console.log(\"Couldn't access ResponseCode:\", err);",
+							"}",
+							"",
+							"if (postResponseCode === \"11513\") {",
+							"    pm.environment.set(\"isDailyFreePost\", \"true\");",
+							"    console.log(\"This was a Daily Free Post (code 11513).\");",
+							"} else {",
+							"    pm.environment.unset(\"isDailyFreePost\");",
+							"    console.log(\"Not a Daily Free Post (code not 11513).\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Follow tester 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Account is now followed\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"true\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6073,6 +6533,111 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create post photo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(",
+							"        responseText.includes(\"11513\") || responseText.includes(\"11508\")",
+							"    ).to.be.true;",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postResponse = {};",
+							"try {",
+							"    postResponse = pm.response.json();",
+							"} catch (err) {",
+							"    console.log(\"Failed to parse response as JSON:\", err);",
+							"}",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    try {",
+							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
+							"        if (postId) {",
+							"            pm.environment.set(\"postid\", postId);",
+							"            console.log(\"postid set to:\", postId);",
+							"        } else {",
+							"            console.log(\"No postid found in response.\");",
+							"        }",
+							"    } catch (err) {",
+							"        console.log(\"Couldn't access post ID:\", err);",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping postid set.\");",
+							"}",
+							"",
+							"let postResponseCode = \"\";",
+							"try {",
+							"    postResponseCode = postResponse?.data?.createPost?.ResponseCode || \"\";",
+							"} catch (err) {",
+							"    console.log(\"Couldn't access ResponseCode:\", err);",
+							"}",
+							"",
+							"if (postResponseCode === \"11513\") {",
+							"    pm.environment.set(\"isDailyFreePost\", \"true\");",
+							"    console.log(\"This was a Daily Free Post (code 11513).\");",
+							"} else {",
+							"    pm.environment.unset(\"isDailyFreePost\");",
+							"    console.log(\"Not a Daily Free Post (code not 11513).\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -19873,6 +20438,291 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Fetchwinslog {\n    listWinLogs(day: D0) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            from\n            token\n            userid\n            postid\n            action\n            numbers\n            createdat\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login tester with friends",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check for_me sorting",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Check post user order: userid/userid_t1, then w_userid_t1, then w_userid_t2\", function () {",
+							"    const posts = pm.response.json()?.data?.listPosts?.affectedRows || [];",
+							"",
+							"    const idA = pm.environment.get(\"userid\");",
+							"    const idB = pm.environment.get(\"userid_t1\");",
+							"    const idC = pm.environment.get(\"w_userid_t1\");",
+							"    const idD = pm.environment.get(\"w_userid_t2\");",
+							"",
+							"    if (!idA || !idB || !idC || !idD) {",
+							"        throw new Error(\"One or more required environment variables are not set.\");",
+							"    }",
+							"",
+							"    const sequence = posts.map(p => p.user?.id);",
+							"",
+							"    const firstTwo = sequence.slice(0, 2);",
+							"    const indexC = sequence.indexOf(idC);",
+							"    const indexD = sequence.indexOf(idD);",
+							"",
+							"    const conditionFirstTwo =",
+							"        firstTwo.includes(idA) &&",
+							"        firstTwo.includes(idB);",
+							"",
+							"    pm.expect(conditionFirstTwo, \"First two posts should be from userid and userid_t1\").to.be.true;",
+							"    pm.expect(indexC, \"w_userid_t1 should appear in list\").to.be.above(-1);",
+							"    pm.expect(indexD, \"w_userid_t2 should appear in list\").to.be.above(-1);",
+							"    pm.expect(indexD > indexC, \"w_userid_t2 should come after w_userid_t1\").to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(sortBy: FOR_ME, limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Follow tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Account is not followed\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"true\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{w_userid_t2}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check for_me sorting",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Check post user order: userid/userid_t1, then w_userid_t2, then w_userid_t1\", function () {",
+							"    const posts = pm.response.json()?.data?.listPosts?.affectedRows || [];",
+							"",
+							"    const idA = pm.environment.get(\"userid\");",
+							"    const idB = pm.environment.get(\"userid_t1\");",
+							"    const idC = pm.environment.get(\"w_userid_t1\");",
+							"    const idD = pm.environment.get(\"w_userid_t2\");",
+							"",
+							"    if (!idA || !idB || !idC || !idD) {",
+							"        throw new Error(\"One or more required environment variables are not set.\");",
+							"    }",
+							"",
+							"    const sequence = posts.map(p => p.user?.id);",
+							"",
+							"    const firstTwo = sequence.slice(0, 2);",
+							"    const conditionFirstTwo =",
+							"        firstTwo.includes(idA) &&",
+							"        firstTwo.includes(idB);",
+							"",
+							"    const indexD = sequence.indexOf(idD); // w_userid_t2",
+							"    const indexC = sequence.indexOf(idC); // w_userid_t1",
+							"",
+							"    pm.expect(conditionFirstTwo, \"First two posts should be from userid and userid_t1\").to.be.true;",
+							"    pm.expect(indexD, \"w_userid_t2 should appear in list\").to.be.above(-1);",
+							"    pm.expect(indexC, \"w_userid_t1 should appear in list\").to.be.above(-1);",
+							"    pm.expect(indexC > indexD, \"w_userid_t1 should come after w_userid_t2\").to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(sortBy: FOR_ME, limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
