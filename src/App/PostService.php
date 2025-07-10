@@ -17,6 +17,14 @@ use Psr\Log\LoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\JWTService;
+
+// USER PAY
+const PRICELIKE=3;
+const PRICEDISLIKE=5;
+const PRICECOMMENT=0.5;
+const PRICEPOST=20;
+const DISLIKE_=3;// whereby DISLIKE
 
 class PostService
 {
@@ -33,6 +41,9 @@ class PostService
         protected FileUploadDispatcher $base64filehandler,
         protected VideoCoverGenerator $videoCoverGenerator,
         protected Base64FileHandler $base64Encoder,
+        protected DailyFreeService $dailyFreeService,
+        protected WalletService $walletService,
+        protected JWTService $tokenService
     ) {}
 
     public function setCurrentUserId(string $userid): void
@@ -613,4 +624,125 @@ class PostService
 
         return $this->respondWithError(41510);
     }
+
+    
+    /**
+     * Check for If user eligibile to make a post or not
+     * 
+     * @returns with Suggested PostId, JWT which will be valid for certain time
+     */
+    public function postEligibility(): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->info('GraphQLSchemaBuilder.postEligibility started');
+
+        try {
+            $dailyLimits = [
+                'like' => DAILYFREELIKE,
+                'comment' => DAILYFREECOMMENT,
+                'post' => DAILYFREEPOST,
+                'dislike' => DAILYFREEDISLIKE,
+            ];
+
+            $actionPrices = [
+                'like' => PRICELIKE,
+                'comment' => PRICECOMMENT,
+                'post' => PRICEPOST,
+                'dislike' => PRICEDISLIKE,
+            ];
+
+            $actionMaps = [
+                'like' => LIKE_,
+                'comment' => COMMENT_,
+                'post' => POST_,
+                'dislike' => DISLIKE_,
+            ];
+
+            $limit = $dailyLimits['post'];
+            $price = $actionPrices['post'];
+            $actionMap = $actionMaps['post'];
+
+            $response = [
+                        'status' => 'error',
+                        'ResponseCode' => 0000, // Not eligible for upload for post
+                    ];
+            if ($limit > 0) {
+                $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
+
+                if ($DailyUsage < $limit) {
+                    // generate PostId and JWT
+
+                    $response = [
+                        'status' => 'success',
+                        'ResponseCode' => 0000, // You are eligible for post upload
+                    ];
+                    $response['postId'] = self::generateUUID();
+                    $response['eligibilityToken'] = self::generateJwt();
+
+                    return $response;
+                }
+            }
+
+            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
+            // Return ResponseCode with Daily Free Code
+            if ($balance < $price) {
+                $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                return $this->respondWithError(51301);
+            }
+
+            // generate PostId and JWT
+            $response = [
+                        'status' => 'success',
+                        'ResponseCode' => 0000, // You are eligible for post upload
+                    ];
+            $response['postId'] = self::generateUUID();
+            $response['eligibilityToken'] = self::generateJwt();
+
+            return $response;
+            
+        } catch (\Throwable $e) {
+            $this->logger->error('Query.resolveActionPrices exception', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError(41301);
+        }
+    }
+
+    /**
+     * Check for If user eligibile to make a post or not
+     * 
+     * @returns with JWT which will be valid for certain time
+     */
+    protected function generateJwt(){
+        $payload = [
+                'iss' => 'peerapp.de',
+                'aud' => 'peerapp.de',
+                'uid' => $this->currentUserId
+        ];
+        $jwtToken = $this->tokenService->createAccessTokenWithCustomExpriy($payload, 180);
+        return $jwtToken;
+    }
+    
+
+    /**
+     * generate UUID
+     * 
+     * @returns with Suggested PostId
+     */
+    private static function generateUUID(): string
+    {
+        return \sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0x0fff) | 0x4000,
+            \mt_rand(0, 0x3fff) | 0x8000,
+            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+        );
+    }
+
 }

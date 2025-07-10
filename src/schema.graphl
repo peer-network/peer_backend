@@ -35,6 +35,7 @@ type Query {
   referralList(offset: Int, limit: Int): ReferralListResponse!
   listTodaysInteractions: ListTodaysInteractionsResponse!
   getActionPrices: GetActionPricesResponse!
+  postEligibility: PostEligibilityResponse!
 }
 
 type Mutation {
@@ -187,6 +188,13 @@ type DailyFreeResponse {
   name: String!
   used: Int!
   available: Int!
+}
+
+type PostEligibilityResponse {
+  status: String!
+  ResponseCode: String!
+  postId: String!
+  eligibilityToken: String!
 }
 
 type CurrentLiquidity {

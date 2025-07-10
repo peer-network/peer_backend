@@ -1661,7 +1661,22 @@ class GraphQLSchemaBuilder
                 'nextAttemptAt' => function (array $root): string {
                     return $root['nextAttemptAt'] ?? '';
                 },
-            ],                       
+            ],
+            'PostEligibilityResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.PostEligibilityResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'postId' => function (array $root): string {
+                    return $root['postId'] ?? '';
+                },
+                'eligibilityToken' => function (array $root): string {
+                    return $root['eligibilityToken'] ?? '';
+                }
+            ],
         ];
     }
 
@@ -1705,6 +1720,7 @@ class GraphQLSchemaBuilder
             'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
+            'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
         ];
     }
 
@@ -3311,4 +3327,5 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(40901);
         }
     }
+
 }

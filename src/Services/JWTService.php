@@ -90,4 +90,27 @@ class JWTService
             return null;
         }
     }
+
+
+    /**
+     * generate UUID
+     * 
+     * @param $expiryAfter in seconds
+     * 
+     * @returns JWR decoded token with provided expiry time
+     */
+    public function createAccessTokenWithCustomExpriy(array $data, int $expiryAfter): string
+    {
+        $issuedAt = time();
+        $expirationTime = $issuedAt + $expiryAfter;
+        $payload = array_merge($data, [
+            'iat' => $issuedAt,
+            'exp' => $expirationTime
+        ]);
+
+        $this->logger->info('Creating access token', ['data' => $data]);
+
+        return JWT::encode($payload, $this->privateKey, 'RS256');
+    }
+
 }
