@@ -16,7 +16,22 @@ type Mutation {
   requestPasswordReset(email: String!): ResetPasswordRequestResponse!
   resetPassword(token: String!, password: String!): DefaultResponse
   refreshToken(refreshToken: String!): AuthPayload!
+  verifyReferralString(referralString: String!): ReferralResponse!
   contactus(name: String!, email: String!, message: String!): ContactusResponse!
+}
+
+
+type ReferralResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: ReferralInfo
+}
+
+type ReferralInfo {
+  uid: String
+  username: String
+  slug: String
+  img: String
 }
 
 type ContactusResponsePayload {
