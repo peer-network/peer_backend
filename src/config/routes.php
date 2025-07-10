@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use Fawaz\Handler\GraphQLHandler;
 use Fawaz\Handler\NotFoundHandler;
+use Fawaz\Handler\MultiPartFileHandler;
 use Slim\App;
 
 return static function (App $app) {
@@ -30,5 +31,6 @@ return static function (App $app) {
 
     // Routes
     $app->post('/graphql', GraphQLHandler::class);
+    $app->post('/upload-post', MultiPartFileHandler::class);
     $app->any('/{routes:.*}', NotFoundHandler::class);
 };
