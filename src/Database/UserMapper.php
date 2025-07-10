@@ -1999,7 +1999,7 @@ class UserMapper
         $this->peerWallet = $accountsResult['response']['peer'];
         // $this->btcpool = $accountsResult['response']['btcpool'];
     
-        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.user_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid";
+        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.referral_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid";
 
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':referral_uuid', $referralLink, \PDO::PARAM_STR);
