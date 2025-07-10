@@ -309,11 +309,14 @@ class UserService
             return self::respondWithError(31010); // Invalid referral string
         }
 
+        if (!self::isValidUUID($referralString)) {
+            return self::respondWithError(31010);
+        }
         try {
             $users = $this->userMapper->getValidReferralInfoByLink($referralString);
 
             if(!$users){
-                return self::respondWithError(21003); // No valid referral information found
+                return self::respondWithError(31007); // No valid referral information found
             }
             $userObj = (new User($users, [], false))->getArrayCopy();
 
