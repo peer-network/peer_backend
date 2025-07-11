@@ -1,4 +1,5 @@
-export IMAGE_TAG := local
+IMAGE_TAG=local
+export IMAGE_TAG
 
 VOLUME_NAME=peer_backend_local_db_data
 COMPOSE_OVERRIDE = docker-compose.override.local.yml
