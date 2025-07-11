@@ -2,7 +2,7 @@ services:
   db:
     volumes:
       - ./sql_files_for_import_tmp:/docker-entrypoint-initdb.d
-      - peer_backend_local_db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -47,8 +47,7 @@ services:
 
 networks:
   my-network:
-    external: true
+    name: ${COMPOSE_PROJECT_NAME}_network
 
 volumes:
-  peer_backend_local_db_data:
-    external: true
+  db_data: {}
