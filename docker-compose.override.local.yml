@@ -12,6 +12,11 @@ services:
       - my-network
 
   backend:
+    build:
+      context: .
+      args:
+        IMAGE_TAG: ${IMAGE_TAG}
+    image: peer-backend:${IMAGE_TAG}
     depends_on:
       db:
         condition: service_healthy
