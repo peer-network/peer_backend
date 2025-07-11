@@ -54,10 +54,10 @@ VALUES ('7e0b2d21-d2b0-4af5-8b73-5f8efc04b11f', 'burn@system.com', 'burn_account
 INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('7e0b2d21-d2b0-4af5-8b73-5f8efc04b11f', 0, 0, 0);
 
 INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
-VALUES ('7e0b2d21-d2b0-4af5-8b73-5f8efc04b11f', 5000, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
+VALUES ('7e0b2d21-d2b0-4af5-8b73-5f8efc04b11f', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
 
-INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('7e0b2d21-d2b0-4af5-8b73-5f8efc04b11f', 0, 5000);
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('7e0b2d21-d2b0-4af5-8b73-5f8efc04b11f', 0, 0);
 
 
 -- lp_account

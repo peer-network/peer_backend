@@ -1,67 +1,111 @@
-Running Local CI with Makefile
-This project includes a local CI setup using Docker and Make. It runs your backend and database, sets up the environment, and executes API tests with Postman collections via Newman.
+# Running Local CI with Makefile
 
-  Prerequisites
+This project includes a local CI and development setup using **Docker, Make, and Newman**.  
+It runs your backend and database, sets up the environment, and executes API tests with Postman collections via Newman.
+
+---
+
+## 🛠 Prerequisites
+
 Make sure you have the following installed:
 
-Docker
+- Docker
+- Docker Compose
+- make
+- jq
+- composer
+- curl
 
-Docker Compose
+(If `jq` is missing, `make` will auto-install it on Ubuntu/WSL via `sudo apt install jq`.)
 
-make
+---
 
-jq
+## 🚀 Getting Started
 
-Getting Started
-1. Clone the repository or pull the latest changes
+### 1. Clone the repository or pull the latest changes
 
-git clone <your-repo-url>
-
+```bash
+git clone https://github.com/peer-network/peer_backend
+cd peer_backend
 git pull origin development
+```
 
-2. Start the full development stack and prepare test data
- Run:
- 'make dev'
+---
+
+### 2. Start the full development stack and prepare test data
+
+Run:
+
+```bash
+make dev
+```
+
 This will:
 
-Create .env from .env.dev
-
-Reset and initialize your database volume
-
-Copy SQL files and Postman test files
-
-Start DB and backend containers
-
-Wait for backend health
-
-Set up composer dependencies.
+- Create `.env` from `.env.dev`  
+- Reset Docker containers, images and volumes (full clean)  
+- Copy SQL files and Postman test files  
+- Install PHP dependencies via composer on your host  
+- Set permissions (777/666 for local dev)  
+- Start DB and backend containers, wait for health checks  
 
 This may take a few minutes on first run.
 
-3. Run Postman (Newman) Tests Locally
+---
+
+### 3. Soft restart (fresh DB with existing code & vendors)
+
+If you only want to reset the database (fresh schema & data) but keep current code & vendors:
+
+```bash
+make restart
+```
+
+This drops the DB volume, recreates it, runs your migrations / seed and starts the backend.
+
+---
+
+### 4. Run Postman (Newman) Tests Locally
+
 Once the backend and database are up, run:
- 'make test'
 
- This will:
-
-Build the Newman container
-
-Patch the Postman collection and environment to use http://backend/graphql
-
-Run API tests using Newman
-
-4. Cleaning Up
-To stop and remove everything (containers, volumes, files):
- 'make clean-all'
+```bash
+make test
+```
 
 This will:
 
-Shut down and remove containers and volumes
+- Build the Newman container  
+- Patch the Postman collection and environment to point to `http://backend/graphql`  
+- Run API tests using Newman inside Docker  
+- Generate an HTML report and attempt to open it automatically (WSL `wslview`, Linux `xdg-open`, macOS `open`)
 
-Delete .env, vendor, temp SQL, Postman test files, and reports
+---
 
-5. Only Remove Docker Volume
-   The command for this is:
-'make clean-volume'
+### 5. Full Cleanup
 
-This removes only the local Postgres Docker volume (peer_backend_ci-cd_db-data). Useful when the DB is corrupted or you want a fresh schema.
+To stop and remove everything (containers, volumes, files):
+
+```bash
+make clean-all
+```
+
+This will:
+
+- Stop Docker containers and remove volumes
+- Delete `.env`, `vendor/`, temp SQL, Postman tmp files, reports, logs
+
+---
+
+## Local-first workflow
+
+This setup is optimized for local development:
+
+- Uses directory binds, not build-time copies, so your live code updates instantly.
+- Composer runs on your host for speed and compatibility.
+- Database uses a Docker volume for persistence (named like `peer_backend_local_<user>_db_data`).
+- Tests are fully containerized.
+
+---
+
+## Happy hacking & testing! 🚀

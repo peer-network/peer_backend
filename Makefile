@@ -25,26 +25,45 @@ init:
 	cp tests/postman_collection/graphql_postman_collection.json tests/postman_collection/tmp_collection.json
 	cp tests/postman_collection/graphql_postman_environment.json tests/postman_collection/tmp_env.json
 
-check-volume:
-	@docker volume inspect $(VOLUME_NAME) >/dev/null 2>&1 && echo "✔ Volume exists: $(VOLUME_NAME)" || \
-	( \
-		echo "✘ Volume not found: $(VOLUME_NAME)"; \
-		echo "Docker Compose will create it automatically."; \
-	)
+reset:
+	@echo "Bringing down docker-compose stack with volumes..."
+	-@docker-compose $(COMPOSE_FILES) down -v
 
-clean-volume:
-	@echo "Cleaning Docker volume: $(VOLUME_NAME)"
+	@echo "Removing docker volume ..."
 	-@docker volume rm $(VOLUME_NAME) 2>/dev/null || echo "Volume $(VOLUME_NAME) already removed or in use."
 
-reset:
-	docker-compose $(COMPOSE_FILES) down -v
-	$(MAKE) clean-volume
+	@echo "Removing local peer-backend images..."
+	-@docker images "peer-backend" -q | xargs -r docker rmi -f
 
-dev: env reset check-volume init
-	@echo "Building all services..."
+	@echo "Removing local postgres images built by this project..."
+	-@docker images "postgres" -q | xargs -r docker rmi -f
+	
+	@echo "Removing local newman images..."
+	-@docker images "newman" -q | xargs -r docker rmi -f
+
+
+	@echo "✅ Docker environment for this project reset."
+
+dev: env reset init
+	@echo "Installing Composer dependencies on local host..."
+	composer install --no-dev --prefer-dist --no-interaction
+
+	@echo "Checking for root-owned files to fix ownership if needed..."
+	@if [ "$$(find . ! -user $(USER) | wc -l)" -ne 0 ]; then \
+		echo "⚠️  Root-owned files found. Running sudo chown..."; \
+		sudo chown -R $(USER):$(USER) .; \
+	else \
+		echo "✅ No root-owned files found. Skipping sudo chown."; \
+	fi
+
+	@echo "Setting local file permissions to 777/666 for local dev..."
+	find . -type d -exec chmod 777 {} \;
+	find . -type f -exec chmod 666 {} \;
+
+	@echo "Building images..."
 	docker-compose $(COMPOSE_FILES) build
 
-	@echo "Starting DB only..."
+	@echo "Starting DB..."
 	docker-compose $(COMPOSE_FILES) up -d db
 
 	@echo "Waiting for Postgres to be healthy..."
@@ -54,57 +73,97 @@ dev: env reset check-volume init
 
 	@echo "Starting backend..."
 	docker-compose $(COMPOSE_FILES) up -d backend
+	
+	@echo "Waiting for backend to be healthy..."
+	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
+		echo "Waiting for Backend..."; sleep 2; \
+	done
 
-	@echo "Installing Composer dependencies..."
-	docker-compose $(COMPOSE_FILES) exec backend composer install --no-interaction --prefer-dist
+	@echo "✅ Backend is healthy and ready!"
 
+restart:
+	@echo "Stopping and removing Docker stack (incl. volumes)..."
+	docker-compose $(COMPOSE_FILES) down -v
 
-	@echo "Setting up backend runtime..."
-	docker-compose $(COMPOSE_FILES) exec backend mkdir -p /var/www/html/runtime-data/cover
-	docker-compose $(COMPOSE_FILES) exec backend chmod 777 /var/www/html/runtime-data/cover
-	docker-compose $(COMPOSE_FILES) exec backend chown www-data:www-data /var/www/html/runtime-data/cover
+	@echo "✅ Docker stack removed. Starting fresh DB + Backend with existing code & vendors..."
+	docker-compose $(COMPOSE_FILES) up -d db
+
+	@echo "Waiting for Postgres healthcheck..."
+	until [ "$$(docker inspect --format='{{.State.Health.Status}}' $$(docker-compose $(COMPOSE_FILES) ps -q db))" = "healthy" ]; do \
+		echo "Waiting for DB..."; sleep 2; \
+	done
+
+	@echo "Starting backend with current code..."
+	docker-compose $(COMPOSE_FILES) up -d backend
 
 	@echo "Waiting for backend to be healthy..."
 	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
 		echo "Waiting for Backend..."; sleep 2; \
 	done
 
-	@echo "Backend is healthy and ready!"
+	@echo "✅ Soft restart completed. DB is clean and current code is live!"
 
-test:
+ensure-jq:
+	@command -v jq >/dev/null 2>&1 || { \
+		echo "⚠️  jq not found. Installing via apt..."; \
+		sudo apt update && sudo apt install -y jq; \
+	}
+
+test: ensure-jq
+	@echo "Checking if tmp files exist..."
+	@test -f tests/postman_collection/tmp_collection.json || (echo "🚨 tmp_collection.json missing, run make dev first." && exit 1)
+	@test -f tests/postman_collection/tmp_env.json || (echo "🚨 tmp_env.json missing, run make dev first." && exit 1)
+
 	@echo "Building Newman container..."
 	docker-compose $(COMPOSE_FILES) build newman
 
 	@echo "Starting Newman container..."
 	docker-compose $(COMPOSE_FILES) up -d newman
 
-	@echo "Patching copied Postman collection to use local backend..."
-	jq '(.item[] | select(.request.url.raw != null) | .request.url) |= { \
-		raw: "{{BACKEND_URL}}/graphql", \
-		protocol: "http", \
-		host: ["backend"], \
-		path: ["graphql"] \
-	}' tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection_patched.json
+	jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {raw: "{{BACKEND_URL}}/graphql", protocol: "http", host: ["backend"], path: ["graphql"]}' \
+	tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection_patched.json
 	mv tests/postman_collection/tmp_collection_patched.json tests/postman_collection/tmp_collection.json
 
-	@echo "Injecting BACKEND_URL into copied environment file..."
-	jq 'del(.values[] | select(.key == "BACKEND_URL")) | \
-	.values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
+	jq 'del(.values[] | select(.key == "BACKEND_URL")) | .values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
 	tests/postman_collection/tmp_env.json > tests/postman_collection/tmp_env_patched.json
 	mv tests/postman_collection/tmp_env_patched.json tests/postman_collection/tmp_env.json
 
-	@echo "Running Newman tests inside the container..."
+	@echo "✅ Running Newman tests inside the container..."
 	docker-compose $(COMPOSE_FILES) run --rm newman newman run /etc/newman/tmp_collection.json \
 		--environment /etc/newman/tmp_env.json \
 		--reporters cli,htmlextra \
-		--reporter-htmlextra-export /etc/newman/reports/report.html
+		--reporter-htmlextra-export /etc/newman/reports/report.html || true
+
+	@sudo chown -R $(USER):$(USER) newman
+	@echo "🎉 Newman tests completed! Attempting to open HTML report..."
+
+		@{ \
+		if command -v wslview >/dev/null 2>&1; then \
+			echo '📂 Opening report with wslview...'; \
+			wslview newman/reports/report.html; \
+		elif command -v xdg-open >/dev/null 2>&1; then \
+			echo '📂 Opening report with xdg-open...'; \
+			xdg-open newman/reports/report.html; \
+		elif command -v open >/dev/null 2>&1; then \
+			echo '📂 Opening report with open (macOS)...'; \
+			open newman/reports/report.html; \
+		else \
+			echo '⚠️  Could not detect browser opener. Please open newman/reports/report.html manually.'; \
+		fi; \
+		true; \
+	}
+	
 
 clean-all: reset
 	@rm -f composer.lock
 	@rm -rf vendor
 	@rm -rf sql_files_for_import_tmp
-	@rm -rf newman
+	@rm -rf newman || { \
+		echo "⚠️  Could not remove newman folder (report.html). Might need sudo or manual cleanup."; \
+		true; \
+	}
 	@rm -f .env
 	@rm -f supervisord.pid
 	@rm -f runtime-data/logs/errorlog.txt
 	@rm -f tests/postman_collection/tmp_*.json
+	@echo "✅ Local project cleanup complete."

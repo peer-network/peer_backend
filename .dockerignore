@@ -30,3 +30,4 @@ npm-debug.log
  
 # Ignore local-only override file if it ever exists
 docker-compose.override.yml
+docker-compose.override.local.yml
