@@ -1,9 +1,12 @@
 IMAGE_TAG=local
 export IMAGE_TAG
 
-VOLUME_NAME=peer_backend_local_db_data
+VOLUME_NAME = $(COMPOSE_PROJECT_NAME)_db_data
 COMPOSE_OVERRIDE = docker-compose.override.local.yml
 COMPOSE_FILES = -f docker-compose.yml $(if $(wildcard $(COMPOSE_OVERRIDE)),-f $(COMPOSE_OVERRIDE))
+
+PROJECT_NAME ?= peer_backend_local_$(USER)
+export COMPOSE_PROJECT_NAME := $(PROJECT_NAME)
 
 env:
 	cp .env.dev .env
@@ -23,10 +26,10 @@ init:
 	cp tests/postman_collection/graphql_postman_environment.json tests/postman_collection/tmp_env.json
 
 check-volume:
-	@docker volume inspect $(VOLUME_NAME) >/dev/null 2>&1 || \
-	(\
-		echo "$(VOLUME_NAME) not found. Creating..."; \
-		docker volume create $(VOLUME_NAME) >/dev/null && echo "Created volume: $(VOLUME_NAME)" \
+	@docker volume inspect $(VOLUME_NAME) >/dev/null 2>&1 && echo "✔ Volume exists: $(VOLUME_NAME)" || \
+	( \
+		echo "✘ Volume not found: $(VOLUME_NAME)"; \
+		echo "Docker Compose will create it automatically."; \
 	)
 
 clean-volume:
