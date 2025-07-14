@@ -15,7 +15,6 @@ use Fawaz\Services\Base64FileHandler;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
-use Fawaz\config\constants\ConstantsConfig;
 
 class PostService
 {
@@ -356,7 +355,7 @@ class PostService
     private function handleTags(array $tags, string $postId, string $createdAt): void
     {
         $maxTags = 10;
-        $tagNameConfig = ConstantsConfig::post()['TAG'];
+        $tagNameConfig = constants()::post()['TAG'];
         if (count($tags) > $maxTags) {
             throw new \Throwable('Maximum tag limit exceeded');
         }
@@ -469,7 +468,7 @@ class PostService
         $tag = $args['tag'] ?? null; 
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
-        $titleConfig = ConstantsConfig::post()['TITLE'];
+        $titleConfig = constants()::post()['TITLE'];
 
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this->respondWithError(30209);

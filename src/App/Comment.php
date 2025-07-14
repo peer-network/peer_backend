@@ -4,7 +4,6 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
-use Fawaz\config\constants\ConstantsConfig;
 
 class Comment
 {
@@ -125,7 +124,7 @@ class Comment
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $commentConfig = ConstantsConfig::comment();
+        $commentConfig = constants()::comment();
         $specification = [
             'commentid' => [
                 'required' => true,

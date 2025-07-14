@@ -10,7 +10,6 @@ use Fawaz\Services\Base64FileHandler;
 use Psr\Log\LoggerInterface;
 use Ratchet\Client\Connector;
 use React\EventLoop\Factory as EventLoopFactory;
-use Fawaz\config\constants\ConstantsConfig;
 
 class ChatService
 {
@@ -531,7 +530,7 @@ class ChatService
         if (empty($chatId) || empty($content)) {
             return $this->respondWithError(30252);
         }
-        $chatConfig = ConstantsConfig::chat();
+        $chatConfig = constants()::chat();
         $minLength = $chatConfig['MESSAGE']['MIN_LENGTH'];
         $maxLength = $chatConfig['MESSAGE']['MAX_LENGTH'];
 

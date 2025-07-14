@@ -5,7 +5,6 @@ namespace Fawaz\App;
 use Fawaz\App\Contactus;
 use Fawaz\Database\ContactusMapper;
 use Psr\Log\LoggerInterface;
-use Fawaz\config\constants\ConstantsConfig;
 
 class ContactusService
 {
@@ -48,7 +47,7 @@ class ContactusService
 
     private function isValidName(?string $Name): bool
     {
-        $contactConfig = ConstantsConfig::contact();
+        $contactConfig = constants()::contact();
         return $Name &&
             strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] && 
             strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] && 

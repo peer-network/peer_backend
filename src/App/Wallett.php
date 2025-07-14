@@ -4,7 +4,6 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
-use Fawaz\config\constants\ConstantsConfig;
 
 class Wallett
 {
@@ -117,7 +116,7 @@ class Wallett
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $wallettConst = ConstantsConfig::wallett();
+        $wallettConst = constants()::wallett();
         $specification = [
             'userid' => [
                 'required' => true,

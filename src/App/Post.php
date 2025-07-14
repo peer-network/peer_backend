@@ -4,7 +4,6 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
-use Fawaz\config\constants\ConstantsConfig;
 
 class Post
 {
@@ -112,7 +111,7 @@ class Post
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $postConst = ConstantsConfig::post();
+        $postConst = constants()::post();
         $specification = [
             'postid' => [
                 'required' => true,
@@ -131,8 +130,8 @@ class Post
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
-                        'max' => ConstantsConfig::post()['TITLE']['MAX_LENGTH'],
+                        'min' => $postConst['TITLE']['MIN_LENGTH'],
+                        'max' => $postConst['TITLE']['MAX_LENGTH'],
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
@@ -172,8 +171,8 @@ class Post
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],
-                        'max' => ConstantsConfig::post()['MEDIADESCRIPTION']['MAX_LENGTH'],
+                        'min' => $postConst['MEDIADESCRIPTION']['MIN_LENGTH'],
+                        'max' => $postConst['MEDIADESCRIPTION']['MAX_LENGTH'],
                         'errorCode' => 30263
                     ]],
                     ['name' => 'isString'],

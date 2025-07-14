@@ -56,7 +56,6 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
-use Fawaz\config\constants\ConstantsConfig;
 
 
 class GraphQLSchemaBuilder
@@ -2529,7 +2528,7 @@ class GraphQLSchemaBuilder
         }
 
         $username = isset($args['username']) ? trim($args['username']) : null;
-        $usernameConfig = ConstantsConfig::user()['USERNAME'];
+        $usernameConfig = constants()::user()['USERNAME'];
         $userId = $args['userid'] ?? null;
         $email = $args['email'] ?? null;
         $status = $args['status'] ?? null;
@@ -2993,7 +2992,7 @@ class GraphQLSchemaBuilder
         $messageOffset = isset($args['messageOffset']) ? (int)$args['messageOffset'] : null;
         $messageLimit = isset($args['messageLimit']) ? (int)$args['messageLimit'] : null;
 
-        $paging = ConstantsConfig::paging();
+        $paging = constants()::paging();
         $minOffset = $paging['OFFSET']['MIN'];
         $maxOffset = $paging['OFFSET']['MAX'];
         $minLimit = $paging['LIMIT']['MIN'];

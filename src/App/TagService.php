@@ -5,7 +5,6 @@ namespace Fawaz\App;
 use Fawaz\App\Tag;
 use Fawaz\Database\TagMapper;
 use Psr\Log\LoggerInterface;
-use Fawaz\config\constants\ConstantsConfig;
 
 class TagService
 {
@@ -52,7 +51,7 @@ class TagService
             return false;
         }
 
-        $tagNameConfig = ConstantsConfig::post()['TAG'];
+        $tagNameConfig = constants()::post()['TAG'];
         $tagName = htmlspecialchars($tagName, ENT_QUOTES, 'UTF-8'); // Schutz vor XSS
 
         $length = strlen($tagName);

@@ -4,7 +4,6 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
-use Fawaz\config\constants\ConstantsConfig;
 
 class ChatParticipants
 {
@@ -94,7 +93,7 @@ class ChatParticipants
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $chatConfig = ConstantsConfig::chat();
+        $chatConfig = constants()::chat();
         $specification = [
             'userid' => [
                 'required' => true,

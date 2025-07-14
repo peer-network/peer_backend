@@ -24,7 +24,6 @@ use function is_object;
 use function is_string;
 use function sprintf;
 use function method_exists;
-use Fawaz\config\constants\ConstantsConfig;
 
 class ValidationException extends Exception {}
 
@@ -600,7 +599,7 @@ class PeerInputFilter
 
     protected function validatePassword(string $value, array $options = []): bool
     {
-        $passwordConfig = ConstantsConfig::user()['PASSWORD'];
+        $passwordConfig = constants()::user()['PASSWORD'];
 
         if ($value === '') {
             $this->errors['password'][] = 30101;
@@ -623,7 +622,7 @@ class PeerInputFilter
     protected function validateUsername(string $value, array $options = []): bool
     {
         $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
-        $usernameConfig = ConstantsConfig::user()['USERNAME'];
+        $usernameConfig = constants()::user()['USERNAME'];
 
         if ($value === '') {
             $this->errors['username'][] = 30202;
@@ -655,7 +654,7 @@ class PeerInputFilter
 
     protected function validateTagName(string $value, array $options = []): bool
     {
-        $tagConfig = ConstantsConfig::post()['TAG'];
+        $tagConfig = constants()::post()['TAG'];
 
         if ($value === '') {
             $this->errors['tag'][] = 30101;
@@ -687,7 +686,7 @@ class PeerInputFilter
 
         $value = trim($value);
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-        $walletConst = ConstantsConfig::wallet();
+        $walletConst = constants()::wallet();
 
         if (strlen($value) < $walletConst['SOLANA_PUBKEY']['MIN_LENGTH'] || strlen($value) > $walletConst['SOLANA_PUBKEY']['MAX_LENGTH']) {
             $this->errors['pkey'][] = 30254;
@@ -704,7 +703,7 @@ class PeerInputFilter
 
     protected function validatePhoneNumber(string $value, array $options = []): bool
     {
-        $phoneConfig = ConstantsConfig::user()['PHONENUMBER'];
+        $phoneConfig = constants()::user()['PHONENUMBER'];
 
         if ($value === '') {
             $this->errors['phone'][] = 30103;

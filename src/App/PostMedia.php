@@ -4,7 +4,6 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
-use Fawaz\config\constants\ConstantsConfig;
 
 class PostMedia
 {
@@ -84,7 +83,7 @@ class PostMedia
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $postConst = ConstantsConfig::post();
+        $postConst = constants()::post();
         $specification = [
             'postid' => [
                 'required' => true,

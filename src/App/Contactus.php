@@ -4,7 +4,6 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
-use Fawaz\config\constants\ConstantsConfig;
 
 class Contactus
 {
@@ -130,7 +129,7 @@ class Contactus
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $contactConfig = ConstantsConfig::contact();
+        $contactConfig = constants()::contact();
         $specification = [
             'msgid' => [
                 'required' => false,

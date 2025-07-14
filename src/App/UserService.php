@@ -11,7 +11,6 @@ use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
-use Fawaz\config\constants\ConstantsConfig;
 
 class UserService
 {
@@ -46,7 +45,7 @@ class UserService
 
     private function validatePassword(string $password): array
     {
-        $passwordConfig = ConstantsConfig::user()['PASSWORD'];
+        $passwordConfig = constants()::user()['PASSWORD'];
 
         if (!preg_match('/' . $passwordConfig['PATTERN'] . '/', $password)) {
             return self::respondWithError(30226);

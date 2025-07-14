@@ -5,7 +5,6 @@ namespace Fawaz\App;
 use Fawaz\App\TagPost;
 use Fawaz\Database\TagPostMapper;
 use Psr\Log\LoggerInterface;
-use Fawaz\config\constants\ConstantsConfig;
 
 
 class TagPostService
@@ -49,7 +48,7 @@ class TagPostService
 
     private function isValidTagName(?string $tagName): bool
     {
-        $tagNameConfig = ConstantsConfig::post()['TAGNAME'];
+        $tagNameConfig = constants()::post()['TAGNAME'];
         return $tagName && 
             strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] && 
             strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] && 
@@ -62,7 +61,7 @@ class TagPostService
             return $this->respondWithError(30101);
         }
 
-        $tagNameConfig = ConstantsConfig::post()['TAGNAME'];
+        $tagNameConfig = constants()::post()['TAGNAME'];
 
         if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] ||
             strlen($tagName) > $tagNameConfig['MAX_LENGTH'] ||
@@ -151,7 +150,7 @@ class TagPostService
 
     private function isValidTagName(?string $tagName): bool
     {
-        $tagNameConfig = ConstantsConfig::post()['TAGNAME'];
+        $tagNameConfig = constants()::post()['TAGNAME'];
         return (
             $tagName &&
             strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] &&
