@@ -59,6 +59,7 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
+use ReflectionNamedType;
 
 class GraphQLSchemaBuilder
 {
@@ -483,27 +484,6 @@ class GraphQLSchemaBuilder
                 },
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
-                },
-            ],
-            'Userinfo' => [
-                'userid' => function (array $root): string {
-                    $this->logger->info('Query.Userinfo Resolvers');
-                    return $root['uid'] ?? '';
-                },
-                'img' => function (array $root): string {
-                    return $root['img'] ?? '';
-                },
-                'username' => function (array $root): string {
-                    return $root['username'] ?? '';
-                },
-                'slug' => function (array $root): int {
-                    return $root['slug'] ?? 0;
-                },
-                'biography' => function (array $root): string {
-                    return $root['biography'] ?? '';
-                },
-                'updatedat' => function (array $root): string {
-                    return $root['updatedat'] ?? '';
                 },
             ],
             'BlockedUser' => [
@@ -1107,18 +1087,6 @@ class GraphQLSchemaBuilder
                 },
             ],
             'ListTodaysInteractionsResponse' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.StandardResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-                'affectedRows' => function (array $root): array {
-                    return $root['affectedRows'] ?? [];
-                },
-            ],
-            'PercentBeforeTransactionResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
