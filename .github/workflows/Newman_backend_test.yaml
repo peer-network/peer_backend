@@ -6,6 +6,7 @@ on:
       - development
       - main
       - pre-release
+      - ALI/config/combined-final
 
 permissions:
   contents: write
