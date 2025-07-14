@@ -14,6 +14,7 @@ services:
   backend:
     build:
       context: .
+      dockerfile: Dockerfile.local
       args:
         IMAGE_TAG: ${IMAGE_TAG}
     image: peer-backend:${IMAGE_TAG}
