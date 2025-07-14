@@ -486,6 +486,27 @@ class GraphQLSchemaBuilder
                     return $root['isfollowing'] ?? false;
                 },
             ],
+            'Userinfo' => [
+                'userid' => function (array $root): string {
+                    $this->logger->info('Query.Userinfo Resolvers');
+                    return $root['uid'] ?? '';
+                },
+                'img' => function (array $root): string {
+                    return $root['img'] ?? '';
+                },
+                'username' => function (array $root): string {
+                    return $root['username'] ?? '';
+                },
+                'slug' => function (array $root): int {
+                    return $root['slug'] ?? 0;
+                },
+                'biography' => function (array $root): string {
+                    return $root['biography'] ?? '';
+                },
+                'updatedat' => function (array $root): string {
+                    return $root['updatedat'] ?? '';
+                },
+            ],
             'BlockedUser' => [
                 'userid' => function (array $root): string {
                     $this->logger->info('Query.BlockedUser Resolvers');
