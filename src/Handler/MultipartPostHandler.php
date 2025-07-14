@@ -2,23 +2,18 @@
 
 namespace Fawaz\Handler;
 
-use Fawaz\App\MultiPartFileService;
-use Fawaz\GraphQLSchemaBuilder;
-use GraphQL\Server\ServerConfig;
-use GraphQL\Server\StandardServer;
-use GraphQL\Error\FormattedError;
-use GraphQL\Validator\Rules\QueryComplexity;
+use Fawaz\App\MultipartPostService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Psr7\Response;
 
-class MultiPartFileHandler implements RequestHandlerInterface
+class MultipartPostHandler implements RequestHandlerInterface
 {
     public function __construct(
         protected LoggerInterface $logger,
-        protected MultiPartFileService $multipartFileService,
+        protected MultipartPostService $multipartPostService
     ) {
     }
 
@@ -39,19 +34,18 @@ class MultiPartFileHandler implements RequestHandlerInterface
             }
         }
 
-        $rawBody = $request->getUploadedFiles();
+        $mediaFiles = $request->getUploadedFiles();
+        $rawBody = $request->getParsedBody();
 
-        if (!is_array($rawBody) || empty($rawBody) || !isset($rawBody['media']) || !is_array($rawBody['media'])) {
-            return $this->errorResponse("Invalid Request format. Expected a valid Request.", 400);
-        }
-
-        $this->multipartFileService->setCurrentUserId($bearerToken);
-        $response = $this->multipartFileService->uploadFile($rawBody['media']);
-
-        $responseBody = [
-            'success' => true,
-            'data' => $response
+        $requestObj = [
+            'postId' => isset($rawBody['postId']) ? $rawBody['postId'] : '',
+            'eligibilityToken' => isset($rawBody['eligibilityToken']) ? $rawBody['eligibilityToken'] : '',
+            'media' => isset($mediaFiles['media']) && is_array($mediaFiles['media']) ? $mediaFiles['media'] : [],
         ];
+        $this->multipartPostService->setCurrentUserId($bearerToken);
+
+        $responseBody = $this->multipartPostService->handleFileUpload($requestObj);
+
         $response = new Response();
         $response->getBody()->write(json_encode($responseBody));
 
