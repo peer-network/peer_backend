@@ -209,9 +209,5 @@ class ConstantsConfig
         'TRANSACTION' => [
             'MIN_TOKENS' => 10,
         ],
-        'SLUG' => [
-            'MIN_LENGTH' => 00001,
-            'MAX_LENGTH' => 99999,
-        ],
     ]; 
 }
