@@ -7,8 +7,8 @@ services:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ./sql_files_for_import_tmp:/docker-entrypoint-initdb.d
-      - db_data:/var/lib/postgresql/data
+      - ./sql_files_for_import:/docker-entrypoint-initdb.d
+      - peer_backend_ci-cd_db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
@@ -22,7 +22,6 @@ services:
     image: peer-backend:${IMAGE_TAG}
     build:
       context: .
-      dockerfile: Dockerfile
     depends_on:
       db:
         condition: service_healthy
@@ -71,8 +70,6 @@ services:
       BURN_ACCOUNT: ${BURN_ACCOUNT}
       LIQUIDITY_POOL: ${LIQUIDITY_POOL}
       BTC_POOL: ${BTC_POOL}
-    volumes:
-      - .:/var/www/html
     networks:
       - my-network
     command: >
@@ -103,7 +100,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.newman
-    image: newman:latest
     depends_on:
       backend:
         condition: service_healthy
@@ -126,5 +122,4 @@ networks:
     name: my-network
  
 volumes:
-  db_data:
-    name: ${COMPOSE_PROJECT_NAME}_db_data
+  peer_backend_ci-cd_db-data:
