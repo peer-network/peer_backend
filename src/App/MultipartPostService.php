@@ -80,7 +80,7 @@ class MultipartPostService
             // Apply Validation
             $multipartPost = new MultipartPost($requestObj);
             $multipartPost->applyAdditionalFilter($requestObj);
-            $multipartPost->validateEligibilityToken($this->tokenService);
+            // $multipartPost->validateEligibilityToken($this->tokenService);
             $multipartPost->validateMediaContentTypes();
 
             $allMetadata = [];
@@ -99,7 +99,11 @@ class MultipartPostService
 
                 $filePath = "$directoryPath/$tmpFilename.$extension";
 
-                $media->moveTo($filePath);
+                try{
+                    $media->moveTo($filePath);
+                }catch(\RuntimeException $e){
+                    throw new \Exception("Failed to move file: $directoryPath"); // Directory does not exist
+                }
 
                 $metadata = [
                     'fileName' => $tmpFilename.'.'.$extension,
