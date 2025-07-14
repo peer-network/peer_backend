@@ -60,8 +60,16 @@
         "userFriendlyComment": "Statistics updated successfully."
     },
     "11011": {
-        "comment": "Success: Referral info fetched successfuly ",
+        "comment": "Success: Referral info fetched successfully",
         "userFriendlyComment": "Referral information loaded."
+    },
+    "11012": {
+        "comment": "Success: User has been reported successfully",
+        "userFriendlyComment": "User was reported successfully."
+    },
+    "11013": {
+        "comment": "Success: Account deleted successfully",
+        "userFriendlyComment": "Your account has been deleted successfully."
     },
     "11101": {
         "comment": "Success: Follows data prepared successfully",
@@ -779,6 +787,14 @@
         "comment": "Information Not Found: No users found. Please refine your search or try a different query",
         "userFriendlyComment": "No users found. Try different search terms."
     },
+    "31008": {
+        "comment": "User has already been reported.",
+        "userFriendlyComment": "You have already reported this user."
+    },
+    "31009": {
+        "comment": "User cannot report themselves.",
+        "userFriendlyComment": "You cannot report your own account." 
+    },
     "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",
         "userFriendlyComment": "This action is only available for friends."
@@ -1048,8 +1064,12 @@
         "userFriendlyComment": "We couldn't update your statistics. Please try again."
     },
     "41013": {
-        "comment": "Unexpected error: Internal server error while retrieving referral info. ",
+        "comment": "Unexpected error: Internal server error while retrieving referral info.",
         "userFriendlyComment": "We're having trouble loading your referral information. Please try again."
+    },
+    "41014": {
+        "comment": "Unexpected Error: Failed to delete account.",
+        "userFriendlyComment": "We couldn't delete your account. Please try again."
     },
     "41101": {
         "comment": "Unexpected Error: Failed to retrieve friends data. Please try again later or contact support",

@@ -1,7 +1,5 @@
 <?php
-
 namespace Fawaz\config\constants;
-
 class ConstantsConfig
 {
     public function getData() {
@@ -20,7 +18,6 @@ class ConstantsConfig
     public static function comment() {
         return ConstantsConfig::COMMENT;
     }
-
     public static function post() {
         return ConstantsConfig::POST;
     }
@@ -49,7 +46,6 @@ class ConstantsConfig
             'MAX_LENGTH' => 200,
         ], 
     ];
-
     private const POST = [
         'TITLE' => [
             'MIN_LENGTH' => 2,
@@ -58,7 +54,7 @@ class ConstantsConfig
         'MEDIADESCRIPTION' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 500,
-        ],
+        ],   
         'COVER' => [
             'MAX_COUNT' => 1,
             'MIN_LENGTH' => 0,

@@ -16,6 +16,7 @@ class CommentAdvanced
     protected ?int $amountlikes;
     protected ?int $amountreplies;
     protected ?bool $isliked;
+    protected ?int $userstatus;
     protected ?array $user = [];
     
 
@@ -35,7 +36,12 @@ class CommentAdvanced
         $this->amountlikes = $data['amountlikes'] ?? 0;
         $this->amountreplies = $data['amountreplies'] ?? 0;
         $this->isliked = $data['isliked'] ?? false;
+        $this->userstatus = $data['userstatus'] ?? 0;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
+
+        if($this->userstatus == 6){
+            $this->content = "Comment by deleted Account";
+        }
     }
 
     // Array Copy methods
