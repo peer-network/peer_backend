@@ -5,7 +5,7 @@ It runs your backend and database, sets up the environment, and executes API tes
 
 ---
 
-## 🛠 Prerequisites
+## Prerequisites
 
 Make sure you have the following installed:
 
