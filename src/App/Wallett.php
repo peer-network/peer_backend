@@ -116,6 +116,7 @@ class Wallett
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $wallettConst = constants()::wallett();
         $specification = [
             'userid' => [
                 'required' => true,
@@ -125,14 +126,14 @@ class Wallett
                 'required' => true,
                 'filters' => [['name' => 'FloatSanitize']],
                 'validators' => [
-                    ['name' => 'ValidateFloat', 'options' => ['min' => -5000.0, 'max' => 18250000.0]],
+                    ['name' => 'ValidateFloat', 'options' => ['min' => $wallettConst['LIQUIDITY']['MIN'], 'max' => $wallettConst['LIQUIDITY']['MAX']]],
                 ],
             ],
             'liquiditq' => [
                 'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 99999999999999999999999999999]],
+                    ['name' => 'validateIntRange', 'options' => ['min' => $wallettConst['LIQUIDITQ']['MIN'], 'max' => $wallettConst['LIQUIDITQ']['MAX']]],
                 ],
             ],
             'updatedat' => [

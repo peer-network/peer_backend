@@ -137,6 +137,7 @@ class Comment implements Hashable
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $commentConfig = constants()::comment();
         $specification = [
             'commentid' => [
                 'required' => true,
@@ -161,8 +162,8 @@ class Comment implements Hashable
                     [
                         'name' => 'StringLength', 
                         'options' => [
-                            'min' => ConstantsConfig::comment()['CONTENT']['MIN_LENGTH'],
-                            'max' => ConstantsConfig::comment()['CONTENT']['MAX_LENGTH'],
+                            'min' => $commentConfig['CONTENT']['MIN_LENGTH'],
+                            'max' => $commentConfig['CONTENT']['MAX_LENGTH'],
                             'errorCode' => 30265,
                             ]
                         ],

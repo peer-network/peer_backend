@@ -47,7 +47,11 @@ class ContactusService
 
     private function isValidName(?string $Name): bool
     {
-        return $Name && strlen($Name) >= 2 && strlen($Name) <= 50 && preg_match('/^[a-zA-Z]+$/', $Name);
+        $contactConfig = constants()::contact();
+        return $Name &&
+            strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] && 
+            strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] && 
+            preg_match('/' . $contactConfig['NAME']['PATTERN'] . '/', $Name);
     }
 
     private function respondWithError(string $message): array

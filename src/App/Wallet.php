@@ -155,14 +155,15 @@ class Wallet
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $walletConst = constants()::wallet();
         $specification = [
             'token' => [
                 'required' => true,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 12,
-                        'max' => 12,
+                        'min' => $walletConst['TOKEN']['LENGTH'],
+                        'max' => $walletConst['TOKEN']['LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -183,21 +184,21 @@ class Wallet
                 'required' => true,
                 'filters' => [['name' => 'FloatSanitize']],
                 'validators' => [
-                    ['name' => 'ValidateFloat', 'options' => ['min' => -5000.0, 'max' => 5000.0]],
+                    ['name' => 'ValidateFloat', 'options' => ['min' => $walletConst['NUMBERS']['MIN'], 'max' => $walletConst['NUMBERS']['MAX']]],
                 ],
             ],
             'numbersq' => [
                 'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 99999999999999999999999999999]],
+                    ['name' => 'validateIntRange', 'options' => ['min' => $walletConst['NUMBERSQ']['MIN'], 'max' => $walletConst['NUMBERSQ']['MAX']]],
                 ],
             ],
             'whereby' => [
                 'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 1, 'max' => 100]],
+                    ['name' => 'validateIntRange', 'options' => ['min' => $walletConst['WHEREBY']['MIN'], 'max' => $walletConst['WHEREBY']['MAX']]],
                 ],
             ],
             'createdat' => [

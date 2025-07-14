@@ -116,6 +116,7 @@ class Post implements Hashable
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $postConst = constants()::post();
         $specification = [
             'postid' => [
                 'required' => true,
@@ -134,8 +135,8 @@ class Post implements Hashable
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
-                        'max' => ConstantsConfig::post()['TITLE']['MAX_LENGTH'],
+                        'min' => $postConst['TITLE']['MIN_LENGTH'],
+                        'max' => $postConst['TITLE']['MAX_LENGTH'],
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
@@ -154,8 +155,8 @@ class Post implements Hashable
                 'required' => true,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 1000,
+                        'min' => $postConst['MEDIA']['MIN_LENGTH'],
+                        'max' => $postConst['MEDIA']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -164,8 +165,8 @@ class Post implements Hashable
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 0,
-                        'max' => 1000,
+                        'min' => $postConst['COVER']['MIN_LENGTH'],
+                        'max' => $postConst['COVER']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -175,8 +176,8 @@ class Post implements Hashable
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],
-                        'max' => ConstantsConfig::post()['MEDIADESCRIPTION']['MAX_LENGTH'],
+                        'min' => $postConst['MEDIADESCRIPTION']['MIN_LENGTH'],
+                        'max' => $postConst['MEDIADESCRIPTION']['MAX_LENGTH'],
                         'errorCode' => 30263
                     ]],
                     ['name' => 'isString'],

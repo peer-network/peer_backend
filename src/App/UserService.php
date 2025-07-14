@@ -47,7 +47,9 @@ class UserService
 
     private function validatePassword(string $password): array
     {
-        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
+        $passwordConfig = constants()::user()['PASSWORD'];
+
+        if (!preg_match('/' . $passwordConfig['PATTERN'] . '/', $password)) {
             return self::respondWithError(30226);
         }
 

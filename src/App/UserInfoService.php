@@ -207,7 +207,9 @@ class UserInfoService
             return $this->respondWithError(60501);
         }
 
-        if (trim($biography) === '' || strlen($biography) < 3 || strlen($biography) > 5000) {
+        $bioConfig = constants()::user()['BIOGRAPHY'];
+
+        if (trim($biography) === '' || strlen($biography) < $bioConfig['MIN_LENGTH'] || strlen($biography) > $bioConfig['MAX_LENGTH']) {
             return $this->respondWithError(30228);
         }
 

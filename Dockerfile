@@ -43,10 +43,16 @@ RUN mkdir -p /var/www/html/runtime-data/logs \
 
 RUN composer require --no-update php-ffmpeg/php-ffmpeg
  
+<<<<<<< HEAD
 RUN composer install --no-dev --prefer-dist --no-interaction \
 && composer dump-autoload -o
 
 RUN php -r "require 'vendor/autoload.php'; echo '✓ Autoload success';"
+=======
+RUN composer config --global process-timeout 600 \
+ && composer install --no-dev --prefer-dist --no-interaction \
+ && composer dump-autoload -o
+>>>>>>> origin/ALI/config/combined-final
  
 RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
 && echo "display_errors = Off" >> /usr/local/etc/php/conf.d/docker-php-error.ini \

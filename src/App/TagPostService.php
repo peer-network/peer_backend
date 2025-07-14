@@ -6,6 +6,7 @@ use Fawaz\App\TagPost;
 use Fawaz\Database\TagPostMapper;
 use Psr\Log\LoggerInterface;
 
+
 class TagPostService
 {
     protected ?string $currentUserId = null;
@@ -47,7 +48,11 @@ class TagPostService
 
     private function isValidTagName(?string $tagName): bool
     {
-        return $tagName && strlen($tagName) >= 2 && strlen($tagName) <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
+        $tagNameConfig = constants()::post()['TAGNAME'];
+        return $tagName && 
+            strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] && 
+            strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] && 
+            preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName);
     }
 
     private function validateTagName(string $tagName): array|bool
@@ -56,7 +61,11 @@ class TagPostService
             return $this->respondWithError(30101);
         }
 
-        if (strlen($tagName) < 2 || strlen($tagName) > 50 || !preg_match('/^[a-zA-Z]+$/', $tagName)) {
+        $tagNameConfig = constants()::post()['TAGNAME'];
+
+        if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] ||
+            strlen($tagName) > $tagNameConfig['MAX_LENGTH'] ||
+            !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
             return $this->respondWithError(30255);
         }
 
@@ -141,7 +150,13 @@ class TagPostService
 
     private function isValidTagName(?string $tagName): bool
     {
-        return $tagName && strlen($tagName) >= 2 && strlen($tagName) <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
+        $tagNameConfig = constants()::post()['TAGNAME'];
+        return (
+            $tagName &&
+            strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] &&
+            strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] &&
+            preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)
+        );
     }
 
     private function respondWithError(string $message): array

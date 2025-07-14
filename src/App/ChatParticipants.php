@@ -93,6 +93,7 @@ class ChatParticipants
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $chatConfig = constants()::chat();
         $specification = [
             'userid' => [
                 'required' => true,
@@ -106,7 +107,10 @@ class ChatParticipants
                 'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],
+                    ['name' => 'validateIntRange', 'options' => [
+                        'min' => $chatConfig['ACCESS_LEVEL']['MIN'], 
+                        'max' => $chatConfig['ACCESS_LEVEL']['MAX'],
+                        ]],
                 ],
             ],
             'createdat' => [

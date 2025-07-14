@@ -530,8 +530,11 @@ class ChatService
         if (empty($chatId) || empty($content)) {
             return $this->respondWithError(30252);
         }
+        $chatConfig = constants()::chat();
+        $minLength = $chatConfig['MESSAGE']['MIN_LENGTH'];
+        $maxLength = $chatConfig['MESSAGE']['MAX_LENGTH'];
 
-        if (strlen($content) < 1 || strlen($content) > 500) {
+        if (strlen($content) < $minLength || strlen($content) > $maxLength) {
             return $this->respondWithError(30252);
         }
 
@@ -547,7 +550,7 @@ class ChatService
             return $chat; // Immediately return if chat is invalid
         }
 
-        if ($chat->getIsPublic() === 9) {
+        if ($chat->getIsPublic() === $chatConfig['IS_PUBLIC']['SUSPENDED']) {
             return $this->respondWithError(41809);
         }
 
