@@ -206,7 +206,6 @@ jobs:
  
       - name: Set Docker Image Tag
         run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
- 
       - name: Create ordered SQL init files in CI
         run: |
           mkdir tmp_sql
