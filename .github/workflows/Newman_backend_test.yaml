@@ -211,9 +211,6 @@ jobs:
           mkdir tmp_sql
           cp sql_files_for_import/structure.psql tmp_sql/01.sql
           cp sql_files_for_import/additional_data.sql tmp_sql/02.sql
-          if [ -f sql_files_for_import/report-flow.psql ]; then
-            cp sql_files_for_import/report-flow.psql tmp_sql/03.sql
-          fi
           rm -rf sql_files_for_import/*
           cp -a tmp_sql/. sql_files_for_import/
  
