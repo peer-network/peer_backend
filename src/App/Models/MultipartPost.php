@@ -134,7 +134,11 @@ class MultipartPost
 
         // Detect the first media type
         $detectedTypes = [];
+        $maxFileSize = 1024 * 1024 * 500; // 500MB
         foreach ($this->media as $key => $media) {
+            if ($media->getSize() > $maxFileSize) {
+                throw new ValidationException("Maximum file upload should be less than 500MB", [0000]); // Maximum file upload should be less than 500MB
+            }
             $type = $this->detectMediaType($media);
             if (!$type) {
                 throw new ValidationException("Unknown media type detected at index $key.", [0000]); // Unknown media type detected at index
