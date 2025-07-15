@@ -70,11 +70,9 @@ if ($db_driver === 'postgres') {
 
             pg_close($conn);
 
-            if (isset($dsn)) {
-                $pdo = new PDO($dsn, $user, $password);
-                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            }
+            $pdo = new PDO($dsn, $user, $password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
         } else {
 			error_log("Failed to connect to PostgreSQL: " . pg_last_error(), 0);

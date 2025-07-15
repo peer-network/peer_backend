@@ -132,6 +132,8 @@ class WalletMapper
         $peerAmount = round((float)$numberoftokens * PEERFEE, 2);
         $burnAmount = round((float)$numberoftokens * BURNFEE, 2);
         $countAmount = $feeAmount + $peerAmount + $burnAmount;
+        $inviterId = null;
+        $inviterWin = 0.0;
 
         try {
             $query = "SELECT ui.invited, u.status FROM users_info ui LEFT JOIN users u ON ui.invited = u.uid WHERE ui.userid = :userid AND ui.invited IS NOT NULL";
@@ -1084,7 +1086,7 @@ class WalletMapper
             $this->insertWinToPool($userId, end($args[$userId]['details']));
         }
 
-        if (!empty($data)) {
+        
             try {
                 $gemIds = array_column($data, 'gemid');
                 $quotedGemIds = array_map(fn($gemId) => $this->db->quote($gemId), $gemIds);
@@ -1102,7 +1104,6 @@ class WalletMapper
                 'ResponseCode' => 11208,
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
-        }
     }
 
     public function getPercentBeforeTransaction(string $userId, int $tokenAmount) : array
@@ -1304,12 +1305,11 @@ class WalletMapper
     public function updateUserLiquidity(string $userId, float $liquidity): bool
     {
         try {
-            $totalNumbers = $liquidity ?? 0;
 
             $sqlUpdate = "UPDATE users_info SET liquidity = :liquidity, updatedat = CURRENT_TIMESTAMP WHERE userid = :userid";
             $stmt = $this->db->prepare($sqlUpdate);
 
-            $stmt->bindValue(':liquidity', $totalNumbers, \PDO::PARAM_STR);
+            $stmt->bindValue(':liquidity', $liquidity, \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
 
             $stmt->execute();

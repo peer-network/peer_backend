@@ -167,7 +167,7 @@ class McapMapper
 
             $resultLastData = $this->refreshMarketData();
             if ($resultLastData['status'] !== 'success') {
-                $this->logger->info(resultLastData['ResponseCode'], ['resultLastData' => $resultLastData]);
+                $this->logger->info($resultLastData['ResponseCode'], ['resultLastData' => $resultLastData]);
                 return $this->respondWithError(41217);
             }
 
