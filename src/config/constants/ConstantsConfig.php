@@ -1,6 +1,7 @@
 <?php
 
 namespace Fawaz\config\constants;
+use Fawaz\config\constants\ConstantsModeration;
 
 class ConstantsConfig
 {
@@ -41,6 +42,10 @@ class ConstantsConfig
     }
     public static function paging() {
         return ConstantsConfig::PAGING;
+    }
+
+    public static function contentFiltering() {
+        return ConstantsModeration::contentFiltering();
     }
 
     private const COMMENT = [
@@ -218,4 +223,3 @@ class ConstantsConfig
             'MAX_LENGTH' => 99999,
         ],
     ]; 
-}

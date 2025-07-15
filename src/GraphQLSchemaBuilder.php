@@ -49,6 +49,9 @@ use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\SearchUserContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -1736,6 +1739,7 @@ class GraphQLSchemaBuilder
             'deletePost' => fn(mixed $root, array $args) => $this->postService->deletePost($args['id']),
             'likeComment' => fn(mixed $root, array $args) => $this->commentInfoService->likeComment($args['commentid']),
             'reportComment' => fn(mixed $root, array $args) => $this->commentInfoService->reportComment($args['commentid']),
+            'reportUser' => fn(mixed $root, array $args) => $this->userInfoService->reportUser($args['userid']),
             'contactus' => fn(mixed $root, array $args) => $this->ContactUs($args),
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
@@ -2643,6 +2647,12 @@ class GraphQLSchemaBuilder
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
             return $validationResult;
         }
+        
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
 
         $this->logger->info('Query.resolveFriends started');
 
@@ -2696,6 +2706,12 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->info('Query.resolveUsers started');
+
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
 
         if ($this->userRoles === 16) {
             $results = $this->userService->fetchAllAdvance($args);
@@ -2861,6 +2877,12 @@ class GraphQLSchemaBuilder
 
         $this->logger->info('Query.resolvePosts started');
 
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
+
         $posts = $this->postService->findPostser($args);
         if (isset($posts['status']) && $posts['status'] === 'error') {
             return $posts;
@@ -2869,8 +2891,9 @@ class GraphQLSchemaBuilder
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
+
         $data = array_map(
-            fn(PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit),
+            fn(PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit,$contentFilterBy),
             $posts
         );
         return [
@@ -2881,11 +2904,10 @@ class GraphQLSchemaBuilder
         ];
     }
 
-    protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit): array
+    protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit, ?string $contentFilterBy = null): array
     {
         $postArray = $post->getArrayCopy();
-        
-        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit);
+        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit,$contentFilterBy);
         
         $postArray['comments'] = array_map(
             fn(CommentAdvanced $comment) => $this->fetchCommentWithoutReplies($comment),
@@ -3197,6 +3219,11 @@ class GraphQLSchemaBuilder
                 return $this->respondWithError(60801);
             }
 
+            if ($user->getStatus() == 6) {
+                $this->logger->warning('Account has been deleted', ['email' => $email]);
+                return $this->respondWithError(30801);
+            }
+
             if (!$user->verifyPassword($password)) {
                 $this->logger->warning('Invalid password', ['email' => $email]);
                 return $this->respondWithError(30801);
@@ -3250,6 +3277,11 @@ class GraphQLSchemaBuilder
             $decodedToken = $this->tokenService->validateToken($refreshToken, true);
 
             if (!$decodedToken) {
+                return $this->respondWithError(30901);
+            }
+
+            $users = $this->userMapper->loadById($decodedToken->uid);
+            if (!$users) {
                 return $this->respondWithError(30901);
             }
 

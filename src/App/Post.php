@@ -5,8 +5,14 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
-class Post
+use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Utils\HashObject;
+
+
+class Post implements Hashable
 {
+    use HashObject;
+
     protected string $postid;
     protected string $userid;
     protected ?string $feedid;
@@ -192,5 +198,19 @@ class Post
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+    public function getHashableContent(): string {
+        return implode('|', [
+            $this->title,
+            $this->contenttype,
+            $this->media,
+            $this->cover ?? '',
+            $this->mediadescription,
+        ]);
+    }
+
+    public function hashValue(): string {
+        return $this->hashObject($this);
     }
 }
