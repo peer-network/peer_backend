@@ -247,7 +247,6 @@ class PoolMapper
             $whereby = $mapping[$whereby]['text'];
         }
 
-        if (!empty($data)) {
 
             return [
                 'status' => 'success',
@@ -255,9 +254,6 @@ class PoolMapper
                 'ResponseCode' => 11208,
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
-        }
-
-        return $this->respondWithError(40301);
     }
 
     private function decimalToQ64_96(float $value): string

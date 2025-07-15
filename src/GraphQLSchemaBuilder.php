@@ -108,10 +108,6 @@ class GraphQLSchemaBuilder
             $schema = 'admin_schema.graphl';
         }
 
-        if (empty($schema)){
-            $this->logger->error('Invalid schema', ['schema' => $schema]);
-            return $this->respondWithError(40301);
-        }
 
         $contents = \file_get_contents(__DIR__ . '/' . $schema);
         $schema = BuildSchema::build($contents);
@@ -1823,13 +1819,8 @@ class GraphQLSchemaBuilder
         if (empty($response['counter'])) {
             return $this->createSuccessResponse(11107, [], false);
         }
-
-        if (is_array($response) || !empty($response)) {
-            return $response;
-        }
-
-        $this->logger->warning('Query.resolveBlocklist No data found');
-        return $this->respondWithError(41105);
+       
+        return $response;
     }
 
     protected function resolveFetchWinsLog(array $args): ?array
@@ -1858,12 +1849,7 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse(21202, [], false);
         }
 
-        if (is_array($response) || !empty($response)) {
-            return $this->createSuccessResponse(11203, $response);
-        }
-
-        $this->logger->warning('Query.resolveFetchWinsLog No records found');
-        return $this->createSuccessResponse(21202);
+        return $this->createSuccessResponse(11203, $response);
     }
 
     protected function resolveFetchPaysLog(array $args): ?array
@@ -1892,12 +1878,7 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse(21202, [], false);
         }
 
-        if (is_array($response) || !empty($response)) {
-            return $this->createSuccessResponse(11203, $response);
-        }
-
-        $this->logger->warning('Query.resolveFetchPaysLog No records found');
-        return $this->createSuccessResponse(21202);
+        return $this->createSuccessResponse(11203, $response);
     }
     
     protected function resolveReferralInfo(): ?array
@@ -2072,12 +2053,7 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse(21806, [], false);
         }
 
-        if (is_array($response) || !empty($response)) {
-            return $this->createSuccessResponse(11807, $response, true);
-        }
-
-        $this->logger->warning('Query.resolveChatMessages No messages found');
-        return $this->createSuccessResponse(21806);
+        return $this->createSuccessResponse(11807, $response, true);
     }
 
     protected function resolveTestingPool(array $args): ?array
@@ -2115,20 +2091,20 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.resolvePool started');
 
         $response = $this->walletService->fetchPool($args);
+
+        if (!is_array($response)) {
+            return $this->respondWithError(41201);
+        }
+
         if (isset($response['status']) && $response['status'] === 'error') {
             return $response;
         }
 
         if (empty($response)) {
-            return $this->respondWithError(41214, [], false);
+            return $this->respondWithError(41214);
         }
 
-        if (is_array($response) || !empty($response)) {
-            return $this->createSuccessResponse(11204, $response, true, 'posts');
-        }
-
-        $this->logger->warning('Query.resolvePool No transactions found');
-        return $this->respondWithError(41201);
+        return $this->createSuccessResponse(11204, $response, true, 'posts');
     }
 
     protected function resolveActionPost(?array $args = []): ?array
@@ -2345,11 +2321,7 @@ class GraphQLSchemaBuilder
 
         $results = array_map(fn(CommentAdvanced $comment) => $comment->getArrayCopy(), $comments);
 
-        if (is_array($results) || !empty($results)) {
-            return $this->createSuccessResponse(11607, $results);
-        }
-
-        return $this->createSuccessResponse(21601);
+        return $this->createSuccessResponse(11607, $results);
     }
 
     protected function resolvePostComments(array $args): array
@@ -2363,6 +2335,11 @@ class GraphQLSchemaBuilder
         }
 
         $comments = $this->commentService->fetchAllByPostId($args);
+
+        if (!is_array($comments)) {
+            return $this->createSuccessResponse(21601, [], false);
+        }
+
         if (isset($comments['status']) && $comments['status'] === 'error') {
             return $comments;
         }
@@ -2371,13 +2348,8 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse(21601, [], false);
         }
 
-        if (is_array($comments) || !empty($comments)) {
-            $this->logger->info('Query.resolveTags successful');
-
-            return $this->createSuccessResponse(11601, $comments);
-        }
-
-        return $this->createSuccessResponse(21601);
+        $this->logger->info('Query.resolvePostComments successful');
+        return $this->createSuccessResponse(11601, $comments);
     }
 
     protected function resolveTags(array $args): ?array
@@ -2821,25 +2793,20 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        if (empty($postId)) {
+        if (trim($postId) === '') {
             return $this->respondWithError(30101);
         }
 
-        if (!empty($postId) && !self::isValidUUID($postId)) {
+        if (!self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
         }
 
         $this->logger->info('Query.resolvePostInfo started');
 
-        $postId = isset($postId) ? trim($postId) : '';
+        $posts = $this->postInfoService->findPostInfo($postId);
 
-        if (!empty($postId)) {
-            $posts = $this->postInfoService->findPostInfo($postId);
-            if (isset($posts['status']) && $posts['status'] === 'error') {
-                return $posts;
-            }
-        } else {
-            return $this->createSuccessResponse(21504);
+        if (isset($posts['status']) && $posts['status'] === 'error') {
+            return $posts;
         }
 
         return $this->createSuccessResponse(11502, $posts);
@@ -2851,26 +2818,20 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        if (empty($commentId)) {
-            return $this->respondWithError(30101);
+        if (trim($commentId) === '') {
+            return $this->respondWithError(30101); 
         }
 
-        if (!empty($commentId) && !self::isValidUUID($commentId)) {
+        if (!self::isValidUUID($commentId)) {
             return $this->respondWithError(30217);
         }
 
         $this->logger->info('Query.resolveCommentInfo started');
 
-        $commentId = isset($commentId) ? trim($commentId) : '';
+        $comments = $this->commentInfoService->findCommentInfo($commentId);
 
-        if (!empty($commentId)) {
-            $comments = $this->commentInfoService->findCommentInfo($commentId);
-
-            if ($comments === false) {
-                return $this->createSuccessResponse(21505);
-            }
-        } else {
-            return $this->createSuccessResponse(21506);
+        if ($comments === false) {
+            return $this->createSuccessResponse(21505);
         }
 
         return [
