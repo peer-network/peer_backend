@@ -70,7 +70,7 @@ class TagPostService
             return $this->respondWithError(60501);
         }
 
-        $maxTags = min(max((int)($maxTags ?? 5), 1), 10);
+        $maxTags = min(max($maxTags, 1), 10);
         if (count($tags) > $maxTags) {
             return $this->respondWithError(30211);
         }
