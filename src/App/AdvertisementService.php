@@ -134,7 +134,7 @@ class AdvertisementService
         $advertisementId = self::generateUUID();
         if (empty($advertisementId)) {
             $this->logger->critical('Fehler beim Generieren der AdvertisementId-ID');
-            return $this->respondWithError(00000); // Fehler beim Generieren der AdvertisementId-ID
+            return $this->respondWithError(42006); // Fehler beim Generieren der AdvertisementId-ID
         }
 
         $postId = $args['postid'] ?? null;
@@ -170,12 +170,12 @@ class AdvertisementService
                     $this->logger->info('PLAN IS BASIC');
                 } else {
                     $this->logger->warning('BASIC: es fehlt eine teil von (postid, date, costplan)');
-                    return self::respondWithError(100000); // BASIC: es fehlt eine teil von (postid, date, costplan)
+                    return self::respondWithError(32017); // BASIC: es fehlt eine teil von (postid, date, costplan)
                 }
 
                 if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend)) {
                     $this->logger->warning('Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
-                    return self::respondWithError(200000); // Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
+                    return self::respondWithError(32018); // Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
             } 
             elseif (!empty($CostPlan) && $CostPlan === self::PLAN_PINNED) 
@@ -183,7 +183,7 @@ class AdvertisementService
                 if ($this->advertisementMapper->isAdvertisementIdExist($postId, \strtolower($CostPlan)) === true && empty($forcing)) 
                 {
                     $this->logger->info('Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).', ['advertisementid' => $advertisementId, 'postId' => $postId]);
-                    return self::respondWithError(300000); // Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).
+                    return self::respondWithError(22001); // Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).
                 }
 
                 $timestart = (new \DateTime())->format('Y-m-d H:i:s.u'); // Setze timestart
@@ -193,7 +193,7 @@ class AdvertisementService
             else 
             {
                 $this->logger->warning('Fehler, Falsche CostPlan angegeben.', ['CostPlan' => $CostPlan]);
-                return self::respondWithError(400000); // Fehler, Falsche CostPlan angegeben
+                return self::respondWithError(42007); // Fehler, Falsche CostPlan angegeben
             }
 
             $advertisementData = [
@@ -220,7 +220,7 @@ class AdvertisementService
             {
                 $resp = $this->advertisementMapper->insert($advertisement);
                 $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
-                $rescode = 500000; // Advertisement post erfolgreich erstellt.
+                $rescode = 12001; // Advertisement post erfolgreich erstellt.
             } 
             elseif ($CostPlan === self::PLAN_PINNED) 
             {
@@ -236,19 +236,19 @@ class AdvertisementService
                     $this->logger->info('Befor Update Get Advertisement Data', ['data' => $data->getArrayCopy()]);
                     $resp = $this->advertisementMapper->update($data);
                     $this->logger->info('Update Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
-                    $rescode = 600000; // Advertisement post erfolgreich aktualisiert.
+                    $rescode = 12005; // Advertisement post erfolgreich aktualisiert.
                 } 
                 else 
                 {
                     $resp = $this->advertisementMapper->insert($advertisement);
                     $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
-                    $rescode = 700000; // Advertisement post erfolgreich erstellt.
+                    $rescode = 12001; // Advertisement post erfolgreich erstellt.
                 }
             }
             else 
             {
                 $this->logger->warning('Fehler, Falsche CostPlan angegeben.');
-                return self::respondWithError(800000); // Fehler, Falsche CostPlan angegeben.
+                return self::respondWithError(32005); // Fehler, Falsche CostPlan angegeben.
             }
 
             $data = $resp->getArrayCopy();
@@ -257,7 +257,7 @@ class AdvertisementService
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to create Post Advertisement', ['exception' => $e]);
-            return self::respondWithError(900000); // Erstellen der Post Advertisement fehlgeschlagen.
+            return self::respondWithError(42007); // Erstellen der Post Advertisement fehlgeschlagen.
         }
     }
 
@@ -346,7 +346,7 @@ class AdvertisementService
                 return $fetchPrices;
             }
 
-            return self::respondWithError(42003); // 
+            return self::respondWithError(42005); // 
         } catch (\Throwable $e) {
             return self::respondWithError(42005);
         }
