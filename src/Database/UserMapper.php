@@ -19,18 +19,13 @@ use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrateg
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\DateService;
 use Fawaz\App\Status;
 
 class UserMapper
 {
-    private string $poolWallet;
-    private string $burnWallet;
-    private string $peerWallet;
-    private string $btcpool;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
+    public function __construct(protected LoggerInterface $logger, protected PDO $db)
     {
     }
 
@@ -1987,12 +1982,13 @@ class UserMapper
             'referralLink' => $referralLink,
         ]);
 
-        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.referral_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid AND u.roles_mask IN (:role1, :role2)";
+        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.referral_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid AND u.roles_mask IN (:role1, :role2, :role3)";
 
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':referral_uuid', $referralLink, \PDO::PARAM_STR);
         $stmt->bindValue(':role1', Role::USER, \PDO::PARAM_INT);
         $stmt->bindValue(':role2', Role::ADMIN, \PDO::PARAM_INT);
+        $stmt->bindValue(':role3', Role::COMPANY_ACCOUNT, \PDO::PARAM_INT);
         $stmt->execute();
     
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
