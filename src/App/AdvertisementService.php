@@ -102,7 +102,7 @@ class AdvertisementService
         }
 
         // Fix microsecond 000000
-        $microseconds = str_pad(random_int(160, 999999), 6, '0', STR_PAD_LEFT);
+        $microseconds = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
 
         // Startdatum um 00:00:00
         $start = $startDate->setTime(0, 0, 0);
