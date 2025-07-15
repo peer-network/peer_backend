@@ -98,9 +98,9 @@ class UserService
 
     private function createPayload(string $email, string $username, string $verificationCode): array
     {
-        $email = isset($email) ? trim($email) : '';
-        $username = isset($username) ? trim($username) : '';
-        $verificationCode = isset($verificationCode) ? trim($verificationCode) : '';
+        $email = trim($email);
+        $username = trim($username);
+        $verificationCode = trim($verificationCode);
 
 		if (empty($email) || empty($username) || empty($verificationCode)){
 			return self::respondWithError(40701);
@@ -306,12 +306,10 @@ class UserService
         $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
 
         try {
-            if(isset($id)){
-                $data = [
-                    'username' => $username
-                ];
-                (new UserWelcomeMail($data))->send($email);
-            }
+            $data = [
+                'username' => $username
+            ];
+            (new UserWelcomeMail($data))->send($email);
         } catch (\Throwable $e) {
             $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
         }
@@ -872,7 +870,7 @@ class UserService
                 ];
             }
 
-            return $this->respondWithError(31007, []);
+            return $this->respondWithError(31007);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
