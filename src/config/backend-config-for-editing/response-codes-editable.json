@@ -306,7 +306,7 @@
     "11901": {
         "comment": "Success: An email will be sent to your mail address if an account associated with it exists",
         "userFriendlyComment": "If an account exists, you'll receive an email with instructions."
-    },
+    }, 
     "21001": {
         "comment": "Information Not Found: No users found. Please refine your search or try a different query",
         "userFriendlyComment": "No users found. Try different search terms."
