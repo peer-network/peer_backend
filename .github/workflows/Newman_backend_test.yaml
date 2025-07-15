@@ -370,13 +370,16 @@ jobs:
        
       - name: Replace Hardcoded URL in Postman Collection (using jq)
         run: |
-          jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {
-            raw: "{{BACKEND_URL}}/graphql",
-            protocol: "http",
-            host: ["backend"],
-            path: ["graphql"]
-          }' tests/postman_collection/graphql_postman_collection.json > temp.json
-          mv temp.json tests/postman_collection/graphql_postman_collection.json
+          for file in tests/postman_collection/001_graphql_postman_collection.json \
+                tests/postman_collection/002_graphql_postman_collection.json \
+                tests/postman_collection/003_graphql_postman_collection.json; do
+            jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {
+              raw: "{{BACKEND_URL}}/graphql",
+              protocol: "http",
+              host: ["backend"],
+              path: ["graphql"]
+            }' "$file" > temp.json && mv temp.json "$file"
+          done
  
       - name: Inject BACKEND_URL into Postman Environment
         run: |
