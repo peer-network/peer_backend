@@ -1,13 +1,11 @@
 <?php
 
-use Fawaz\config\constants\ConstantsConfig;
-
 if (!function_exists('constants')) {
-    function constants(): ConstantsConfig {
+    function constants(): \Fawaz\config\constants\ConstantsConfig {
         static $instance = null;
 
         if ($instance === null) {
-            $instance = new ConstantsConfig();
+            $instance = new \Fawaz\config\constants\ConstantsConfig();
         }
 
         return $instance;
