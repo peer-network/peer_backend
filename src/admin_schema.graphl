@@ -45,6 +45,7 @@ type Query {
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
   getReferralInfo: ReferralInfoResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
+  advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
 }
 
 type Mutation {
@@ -72,10 +73,30 @@ type Mutation {
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse!
   reportUser(userid: ID!): DefaultResponse!
+  advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): ListAdvertisementData!
+  advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!, forceUpdate: Boolean): ListAdvertisementData!
 }
 
 scalar Decimal
 scalar Date
+
+enum AdDuration {
+  ONE_DAY
+  TWO_DAYS
+  THREE_DAYS
+  FOUR_DAYS
+  FIVE_DAYS
+  SIX_DAYS
+  SEVEN_DAYS
+}
+
+enum AdvertisementBasicPlan {
+  BASIC
+}
+
+enum AdvertisementPinnedPlan {
+  PINNED
+}
 
 enum PostActionType {
   LIKE
@@ -155,6 +176,57 @@ enum DayFilterType {
   W0
   M0
   Y0
+}
+
+enum AdvertisementType {
+  PINNED
+  BASIC
+}
+
+enum AdvertisementSort {
+  NEWEST
+  OLDEST
+  BIGGEST_COST
+  SMALLEST_COST
+}
+
+type Advertisement {
+  id: ID!
+  createdAt: Date!
+  type: String!
+  creatorId: ID!
+  postId: ID!
+  timeframeStart: Date!
+  timeframeEnd: Date!
+  totalTokenCost: Float!
+  totalEuroCost: Float!
+  gemsEarned: Float!
+  views: Int!
+}
+
+type AdvertisementHistoryStats {
+  totalTokenSpent: Float!
+  totalEuroSpent: Float!
+  totalAds: Int!
+  totalGemsEarned: Int!
+}
+
+type AdvertisementHistoryResult {
+  stats: AdvertisementHistoryStats
+  advertisements: [Advertisement]
+}
+  
+type ListAdvertisementData {
+  status: String!
+  ResponseCode: String
+  affectedRows: [Advertisement]
+}
+
+type ListedAdvertisementData {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: AdvertisementHistoryResult
 }
 
 type ListTodaysInteractionsResponse {
@@ -760,4 +832,13 @@ input FeedInput {
   media: String!
   mediadescription: String
   contenttype: String!
+}
+
+input AdvertisementHistoryFilter {
+  from: Date
+  to: Date
+  type: AdvertisementType
+  advertisementId: ID
+  postId: ID
+  userId: ID
 }

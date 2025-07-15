@@ -11,27 +11,31 @@ use Psr\Log\LoggerInterface;
 
 const TABLESTOGEMS = true;
 const DAILY_NUMBER_TOKEN= 5000;
+// Whereby
 const VIEW_=1;
 const LIKE_=2;
 const DISLIKE_=3;
 const COMMENT_=4;
 const POST_=5;
+const POSTINVESTBASIC_=6;
+const POSTINVESTPREMIUM_=7;
 const INVITATION_=11;
-
+const DIRECTDEBIT_=14;
+const CREDIT_=15;
+const TRANSFER_=18;
+// Recieve
 const RECEIVELIKE=5;
 const RECEIVEDISLIKE=4;
 const RECEIVECOMMENT=2;
 const RECEIVEPOSTVIEW=0.25;
-
+// Price
 const PRICELIKE=3;
 const PRICEDISLIKE=5;
 const PRICECOMMENT=0.5;
 const PRICEPOST=20;
-
-const DIRECTDEBIT_=14;
-const CREDIT_=15;
-const TRANSFER_=18;
-
+const PRICEINVESTBASIC_=50;
+const PRICEINVESTPREMIUM_=200;
+// Fees
 const INVTFEE=0.01;
 const POOLFEE=0.01;
 const PEERFEE=0.02;
@@ -443,7 +447,7 @@ class WalletMapper
     {
         $this->logger->info('WalletMapper.loadWalletById started');
 
-        $userId = $currentUserId;
+        $userId = $currentUserId ?? null;
         $postId = $args['postid'] ?? null;
         $fromId = $args['fromid'] ?? null;
 
@@ -1193,17 +1197,20 @@ class WalletMapper
     public function deductFromWallets(string $userId, ?array $args = []): array
     {
         $this->logger->info('WalletMapper.deductFromWallets started');
-        $this->logger->info('deductFromWallets commenrs args.', ['args' => $args]);
+        $this->logger->info('WalletMapper.deductFromWallets', ['args' => $args]);
 
         $postId = $args['postid'] ?? null;
         $art = $args['art'] ?? null;
         $fromId = $args['fromid'] ?? null;
+        $price = $args['price'] ?? null;
 
         $mapping = [
             2 => ['price' => PRICELIKE, 'whereby' => LIKE_, 'text' => 'Buy like'],
             3 => ['price' => PRICEDISLIKE, 'whereby' => DISLIKE_, 'text' => 'Buy dislike'],
             4 => ['price' => PRICECOMMENT, 'whereby' => COMMENT_, 'text' => 'Buy comment'],
             5 => ['price' => PRICEPOST, 'whereby' => POST_, 'text' => 'Buy post'],
+            6 => ['price' => PRICEINVESTBASIC_, 'whereby' => POSTINVESTBASIC_, 'text' => 'Buy advertise basic'],
+            7 => ['price' => PRICEINVESTPREMIUM_, 'whereby' => POSTINVESTPREMIUM_, 'text' => 'Buy advertise pinned'],
         ];
 
         if (!isset($mapping[$art])) {
@@ -1211,7 +1218,7 @@ class WalletMapper
             return self::respondWithError(30105);
         }
 
-        $price = $mapping[$art]['price'];
+        $price = (!empty($price) && (int)$price) ? $price : $mapping[$art]['price'];
         $whereby = $mapping[$art]['whereby'];
         $text = $mapping[$art]['text'];
 
