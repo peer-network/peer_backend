@@ -221,6 +221,11 @@ jobs:
  
       - name: Force DB init by removing the volume
         run: docker volume rm peer_backend_ci-cd_db-data || true
+
+      - name: Create DB volume if missing
+        run: |
+          docker volume inspect peer_backend_ci-cd_db-data > /dev/null 2>&1 || \
+          docker volume create peer_backend_ci-cd_db-data
  
       - name: Build And Start Docker Containers
         run: |
