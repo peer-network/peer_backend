@@ -5,9 +5,9 @@ namespace Fawaz\App;
 final class Role {
 
     const USER = 0;
-    const SYSTEM_ACCOUNT = 1;
-    const ADVANCED = 2;
-    const EXPERT = 4;
+    const SYSTEM_ACCOUNT = 1; // LP Account
+    const COMPANY_ACCOUNT = 2; // PEER BANK ACCOUNT
+    const BURN_ACCOUNT = 4;
     const WEB3_BRIDGE_USER = 8;
     const ADMIN = 16;
     const CONTRIBUTOR = 32;
@@ -26,9 +26,6 @@ final class Role {
     const SUPER_ADMIN = 262144;
     const MANAGER = 524288;
     const DEVELOPER = 1048576;
-    const COMPANY_ACCOUNT = 3;
-    const BURN_ACCOUNT = 5;
-    const LOOP_ACCOUNT = 6;
 
     public static function getMap() : array
     {
