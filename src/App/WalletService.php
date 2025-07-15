@@ -5,6 +5,7 @@ namespace Fawaz\App;
 use Fawaz\App\Wallet;
 use Fawaz\Database\WalletMapper;
 use Psr\Log\LoggerInterface;
+use \Exception;
 
 class WalletService
 {
