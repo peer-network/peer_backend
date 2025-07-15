@@ -7,6 +7,7 @@ use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
+use Fawaz\App\Role;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
 use Fawaz\config\constants\ConstantsConfig;
@@ -1986,10 +1987,12 @@ class UserMapper
             'referralLink' => $referralLink,
         ]);
 
-        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.referral_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid";
+        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.referral_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid AND u.roles_mask IN (:role1, :role2)";
 
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':referral_uuid', $referralLink, \PDO::PARAM_STR);
+        $stmt->bindValue(':role1', Role::USER, \PDO::PARAM_INT);
+        $stmt->bindValue(':role2', Role::ADMIN, \PDO::PARAM_INT);
         $stmt->execute();
     
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
