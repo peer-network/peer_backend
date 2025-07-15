@@ -77,6 +77,63 @@ jobs:
           echo " PR branch is behind the base branch."
           exit 1
 
+  validate_sql_files:
+    name: Ensure Only Valid SQL Files Are Changed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+ 
+      - name: Fetch Base Branch
+        run: |
+          git fetch origin ${{ github.base_ref }}
+ 
+      - name: Check for Unauthorized Changes in sql_files_for_import
+        run: |
+          echo "Checking SQL file changes..."
+          changed_files=$(git diff --name-only origin/${{ github.base_ref }} HEAD -- sql_files_for_import)
+          echo "Changed files:"
+          echo "$changed_files"
+ 
+          for file in $changed_files; do
+            if [[ "$file" != "sql_files_for_import/additional_data.sql" ]]; then
+              if git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- "$file" | grep -q "$file"; then
+                echo "New file allowed: $file"
+              else
+                echo "Unauthorized modification detected: $file"
+                echo "Only additional_data.sql may be modified. Others can only be added, not edited."
+                exit 1
+              fi
+            fi
+          done
+          echo "SQL file check passed."
+ 
+  notify_invalid_sql_change:
+    name: Notify on Invalid SQL File Change
+    runs-on: ubuntu-latest
+    needs: [validate_sql_files, map_pr_to_discord]
+    if: failure() && needs.validate_sql_files.result == 'failure'
+    steps:
+      - name: Send Discord Notification for Invalid SQL File Change
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+        run: |
+          MESSAGE=":x: **CI Failed invalid SQL File Change Detected**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="Link: <$PR_URL>\n"
+          MESSAGE+="Author: $DISCORD_MENTION\n"
+          MESSAGE+="Only \`additional_data.sql\` may be modified in \`sql_files_for_import/\`. Other existing files cannot be changed. New files are allowed."
+ 
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"$MESSAGE\"}" \
+               "$DISCORD_WEBHOOK_URL"
+
   build_and_test:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
