@@ -36,6 +36,7 @@ use Fawaz\App\CommentInfoService;
 use Fawaz\App\CommentService;
 use Fawaz\App\ContactusService;
 use Fawaz\App\DailyFreeService;
+use Fawaz\App\Helpers\FeesAccountHelper;
 use Fawaz\App\McapService;
 use Fawaz\App\PoolService;
 use Fawaz\App\Post;
@@ -253,6 +254,9 @@ class GraphQLSchemaBuilder
                 },
                 'lastMergedPullRequestNumber' => function (array $root): string {
                     return $root['lastMergedPullRequestNumber'] ?? '';
+                },
+                'companyAccountId' => function (array $root): string {
+                    return $root['companyAccountId'] ?? '';
                 },
             ],
             'RegisterResponse' => [
@@ -1793,7 +1797,8 @@ class GraphQLSchemaBuilder
         return [
             'userroles' => $this->userRoles,
             'currentuserid' => $this->currentUserId,
-            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? ""
+            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
+            'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
         ];
     }
 

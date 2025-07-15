@@ -1986,18 +1986,6 @@ class UserMapper
             'referralLink' => $referralLink,
         ]);
 
-        $accountsResult = $this->pool->returnAccounts();
-
-		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
-			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
-			return null;
-		}
-        
-        $this->poolWallet = $accountsResult['response']['pool'];
-        $this->burnWallet = $accountsResult['response']['burn'];
-        $this->peerWallet = $accountsResult['response']['peer'];
-        // $this->btcpool = $accountsResult['response']['btcpool'];
-    
         $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.referral_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid";
 
         $stmt = $this->db->prepare($query);
@@ -2008,10 +1996,6 @@ class UserMapper
     
         $this->logger->info("Referral info query result", ['result' => $result]);
 
-        if (isset($result['referral_uuid']) && ($this->poolWallet == $result['referral_uuid'] || $this->burnWallet == $result['referral_uuid'] || $this->peerWallet == $result['referral_uuid'])) {
-            $this->logger->warning('Unauthorized to refer pool account');
-            return null;
-        }
 
         return $result ?: null;
     }
