@@ -109,10 +109,28 @@ services:
       - ./tests/postman_collection:/etc/newman
       - ./newman/reports:/etc/newman/reports
     entrypoint: >
-      newman run /etc/newman/graphql_postman_collection.json
-      --environment /etc/newman/graphql_postman_environment.json
-      --reporters cli,htmlextra
-      --reporter-htmlextra-export /etc/newman/reports/report.html
+      sh -c '
+        mkdir -p /etc/newman/reports &&
+        exit_code=0 &&
+        newman run /etc/newman/001_graphql_postman_collection.json \
+          --environment /etc/newman/graphql_postman_environment.json \
+          --reporters cli,htmlextra \
+          --reporter-htmlextra-export /etc/newman/reports/report.html || exit_code=$$? &&
+
+        newman run /etc/newman/002_graphql_postman_collection.json \
+          --environment /etc/newman/graphql_postman_environment.json \
+          --reporters cli,htmlextra \
+          --reporter-htmlextra-export /etc/newman/reports/report.html \
+          --reporter-htmlextra-logs true || exit_code=$$? &&
+
+        newman run /etc/newman/003_graphql_postman_collection.json \
+          --environment /etc/newman/graphql_postman_environment.json \
+          --reporters cli,htmlextra \
+          --reporter-htmlextra-export /etc/newman/reports/report.html \
+          --reporter-htmlextra-logs true || exit_code=$$? &&
+
+        exit $$exit_code
+      '
     restart: "no"
     networks:
       - my-network
