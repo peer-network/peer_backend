@@ -36,6 +36,7 @@ use Fawaz\App\CommentInfoService;
 use Fawaz\App\CommentService;
 use Fawaz\App\ContactusService;
 use Fawaz\App\DailyFreeService;
+use Fawaz\App\Helpers\FeesAccountHelper;
 use Fawaz\App\McapService;
 use Fawaz\App\PoolService;
 use Fawaz\App\Post;
@@ -251,6 +252,9 @@ class GraphQLSchemaBuilder
                 'lastMergedPullRequestNumber' => function (array $root): string {
                     return $root['lastMergedPullRequestNumber'] ?? '';
                 },
+                'companyAccountId' => function (array $root): string {
+                    return $root['companyAccountId'] ?? '';
+                },
             ],
             'RegisterResponse' => [
                 'status' => function (array $root): string {
@@ -264,6 +268,34 @@ class GraphQLSchemaBuilder
                     return $root['userid'] ?? '';
                 },
             ],
+            'ReferralResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ReferralResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'ReferralInfo' => [
+                'uid' => function (array $root): string {
+                    $this->logger->info('Query.ReferralInfo Resolvers');
+                    return $root['uid'] ?? '';
+                },
+                'username' => function (array $root): string {
+                    return $root['username'] ?? '';
+                },
+                'slug' => function (array $root): string {
+                    return $root['slug'] ?? '';
+                },
+                'img' => function (array $root): string {
+                    return $root['img'] ?? '';
+                },
+            ],
+
             'User' => [
                 'id' => function (array $root): string {
                     $this->logger->info('Query.User Resolvers');
@@ -1673,6 +1705,7 @@ class GraphQLSchemaBuilder
             'verifyAccount' => fn(mixed $root, array $args) => $this->verifyAccount($args['userid']),
             'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
+            'verifyReferralString' => fn(mixed $root, array $args) => $this->userService->verifyReferral($args['referralString']),
             'updateUsername' => fn(mixed $root, array $args) => $this->userService->setUsername($args),
             'updateEmail' => fn(mixed $root, array $args) => $this->userService->setEmail($args),
             'updatePassword' => fn(mixed $root, array $args) => $this->userService->setPassword($args),
@@ -1719,7 +1752,8 @@ class GraphQLSchemaBuilder
         return [
             'userroles' => $this->userRoles,
             'currentuserid' => $this->currentUserId,
-            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? ""
+            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
+            'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
         ];
     }
 

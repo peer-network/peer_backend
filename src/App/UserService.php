@@ -126,7 +126,7 @@ class UserService
     {
         $this->logger->info('UserService.createUser started');
 
-        $requiredFields = ['username', 'email', 'password'];
+        $requiredFields = ['username', 'email', 'password', 'referralUuid'];
         $validationErrors = self::validateRequiredFields($args, $requiredFields);
         if (!empty($validationErrors)) {
             return $validationErrors;
@@ -299,6 +299,36 @@ class UserService
 			'ResponseCode' => 10601,
 			'userid' => $id,
 		];
+    }
+
+    public function verifyReferral(string $referralString): array
+    {
+        if (empty($referralString)) {
+            return self::respondWithError(31010); // Invalid referral string
+        }
+
+        if (!self::isValidUUID($referralString)) {
+            return self::respondWithError(31010);
+        }
+        try {
+            $users = $this->userMapper->getValidReferralInfoByLink($referralString);
+
+            if(!$users){
+                return self::respondWithError(31007); // No valid referral information found
+            }
+            $userObj = (new User($users, [], false))->getArrayCopy();
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11011, // Referral Info retrived
+                'affectedRows' => $userObj
+            ];
+
+        } catch (\Throwable $e) {
+            $this->logger->error('Error verifying referral info.', ['exception' => $e]);
+            return self::respondWithError(41013); // Error while retriving Referral Info
+        }
+        return self::respondWithError(31010); // Error while retriving Referral Info
     }
 
     public function referralList(string $userId, int $offset = 0, int $limit = 20): array

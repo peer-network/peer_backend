@@ -16,7 +16,22 @@ type Mutation {
   requestPasswordReset(email: String!): ResetPasswordRequestResponse!
   resetPassword(token: String!, password: String!): DefaultResponse
   refreshToken(refreshToken: String!): AuthPayload!
+  verifyReferralString(referralString: String!): ReferralResponse!
   contactus(name: String!, email: String!, message: String!): ContactusResponse!
+}
+
+
+type ReferralResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: ReferralInfo
+}
+
+type ReferralInfo {
+  uid: String
+  username: String
+  slug: String
+  img: String
 }
 
 type ContactusResponsePayload {
@@ -39,6 +54,7 @@ type HelloResponse {
   currentVersion: String
   wikiLink: String
   lastMergedPullRequestNumber: String
+  companyAccountId: ID
 }
 
 type RegisterResponse {
@@ -70,6 +86,6 @@ input RegistrationInput {
   password: String!
   username: String!
   pkey: String
-  referralUuid: ID
+  referralUuid: ID!
 }
 
