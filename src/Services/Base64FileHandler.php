@@ -109,8 +109,7 @@ class Base64FileHandler
             $information['ratiofrm'] = isset($ratio) ? $ratio : null;
             $information['resolution'] = isset($auflg) ? $auflg : null;
 
-            return isset($information) ? (array)$information : null;
-            
+            return $information;            
         } catch (\Exception $e) {
             \error_log("getID3 Error: " . $e->getMessage());
             return null;

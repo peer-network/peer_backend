@@ -80,7 +80,7 @@ class Rechnen {
     }
 
     // @return float val
-    public static function calculate_total_burn_feesum(float $price = 1, float $sum = 1, float $tax = SAVEDFEE): float 
+    public static function calculate_total_burn_feesum(float $price = 1, float $sum = 1, float $tax = PEERFEE): float 
     {
         if ($price == 0 || $sum == 0) {
             return 0;
