@@ -141,6 +141,7 @@ class Mcap
             
             throw new ValidationException($errorMessageString);
         }
+        return [];
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter

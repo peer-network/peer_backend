@@ -5,6 +5,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\Post;
 use Psr\Log\LoggerInterface;
+use Fawaz\App\NewsFeed;
 
 class NewsFeedMapper
 {
