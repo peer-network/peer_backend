@@ -126,7 +126,7 @@ class UserService
     {
         $this->logger->info('UserService.createUser started');
 
-        $requiredFields = ['username', 'email', 'password'];
+        $requiredFields = ['username', 'email', 'password', 'referralUuid'];
         $validationErrors = self::validateRequiredFields($args, $requiredFields);
         if (!empty($validationErrors)) {
             return $validationErrors;

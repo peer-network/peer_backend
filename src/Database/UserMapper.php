@@ -20,10 +20,10 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\DateService;
+use Fawaz\App\Status;
 
 class UserMapper
 {
-    const STATUS_DELETED = 6;
     private string $poolWallet;
     private string $burnWallet;
     private string $peerWallet;
@@ -250,7 +250,7 @@ class UserMapper
             }
         }
         $conditions[] = "status != :status";
-        $queryParams[':status'] = self::STATUS_DELETED;
+        $queryParams[':status'] = Status::DELETED;
 
         if ($conditions) {
             $sql .= " AND " . implode(" AND ", $conditions);
@@ -420,7 +420,7 @@ class UserMapper
         }
 
         $conditions[] = "u.status != :status";
-        $queryParams[':status'] = self::STATUS_DELETED;
+        $queryParams[':status'] = Status::DELETED;
 
         if ($conditions) {
             $sql .= " AND " . implode(" AND ", $conditions);
@@ -582,7 +582,7 @@ class UserMapper
             $stmt = $this->db->prepare($sql);
             
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
-            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_STR);
             
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -1564,10 +1564,10 @@ class UserMapper
 
     /**
      * Delete User Account.
-     * Flags the account as deleted by setting status to STATUS_DELETED.
+     * Flags the account as deleted by setting status to Status::DELETED.
      *
      * Usage of constant improves readability:
-     * const STATUS_DELETED = 6;
+     * const Status::DELETED = 6;
      *
      * @param string $id User unique identifier (uid).
      * @return bool True if user was flagged as deleted, false otherwise.
@@ -1582,7 +1582,7 @@ class UserMapper
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_STR);
             $stmt->bindValue(':uid', $id, \PDO::PARAM_STR);
 
             $stmt->execute();
@@ -1987,7 +1987,6 @@ class UserMapper
         ]);
 
         $accountsResult = $this->pool->returnAccounts();
-
 
 		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
 			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
