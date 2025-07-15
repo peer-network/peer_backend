@@ -5,6 +5,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\DailyFree;
 use Psr\Log\LoggerInterface;
+use \InvalidArgumentException;
 
 class DailyFreeMapper
 {
