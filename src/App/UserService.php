@@ -366,7 +366,7 @@ class UserService
         ];
     }
     
-    private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
+    private function uploadMedia(string $mediaFile, string $userId, string $folder): array|string|null
     {
         try {
 
@@ -403,7 +403,16 @@ class UserService
         }
 
         try {
-            return $this->userMapper->verifyAccount($userId);
+            $success = $this->userMapper->verifyAccount($userId);
+
+            if (!$success) {
+                return self::respondWithError(40701);
+            }
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 10701,
+            ];
         } catch (\Throwable $e) {
             $this->logger->error('Error verifying account.', ['exception' => $e]);
             return self::respondWithError(40701);
@@ -413,7 +422,8 @@ class UserService
     public function deleteUnverifiedUsers(): bool
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
+            $this->logger->warning('Unauthorized access to deleteUnverifiedUsers.');
+            return false;
         }
 
         try {
