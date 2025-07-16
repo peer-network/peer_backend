@@ -9,11 +9,11 @@ final class PopulateUserSettingsForExistingUsers extends AbstractMigration
    public function up()
     {
         $this->execute("
-            INSERT INTO user_settings (userid)
+            INSERT INTO user_preferences (userid)
             SELECT uid
             FROM users
             WHERE uid NOT IN (
-                SELECT userid FROM user_settings
+                SELECT userid FROM user_preferences
             );
         ");
     }
@@ -22,7 +22,7 @@ final class PopulateUserSettingsForExistingUsers extends AbstractMigration
     {
         // Optional: Remove the inserted rows if rolling back
         $this->execute("
-            DELETE FROM user_settings
+            DELETE FROM user_preferences
             WHERE userid IN (
                 SELECT uid FROM users
             );

@@ -20,22 +20,23 @@ final class UserSettingsAndContentViewPreferences extends AbstractMigration
     public function up()
     {
         $this->execute("
-            CREATE TABLE IF NOT EXISTS user_settings (
+            CREATE TABLE IF NOT EXISTS user_preferences (
                 userid UUID PRIMARY KEY,
-                content_filtering_severity_level INT DEFAULT NULL,
-                CONSTRAINT fk_user_settings_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+                content_filtering_severity_level SMALLINT DEFAULT NULL,
+                updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                CONSTRAINT fk_user_preferences_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
             );
         ");
 
         $this->execute("
-            ALTER TABLE user_settings
+            ALTER TABLE user_preferences
             ADD CONSTRAINT chk_content_view_preferences_range
-            CHECK (content_filtering_severity_level IS NULL OR (content_filtering_severity_level >= 0 AND content_view_preferences <= 10));
+            CHECK (content_filtering_severity_level IS NULL OR (content_filtering_severity_level >= 0 AND content_filtering_severity_level <= 10));
         ");
     }
 
     public function down()
     {
-        $this->execute("DROP TABLE IF EXISTS user_settings CASCADE;");
+        $this->execute("DROP TABLE IF EXISTS user_preferences CASCADE;");
     }
 }
