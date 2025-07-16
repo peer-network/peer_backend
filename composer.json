@@ -3,7 +3,10 @@
         "psr-4": {
             "Fawaz\\": "src/",
             "Tests\\": "tests/"
-        }
+        },
+            "files": [
+        "src/Utils/constants.php"
+    ]
     },
     "require": {
         "php": "^8.1 || <8.4",
