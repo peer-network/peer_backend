@@ -2257,7 +2257,7 @@ class GraphQLSchemaBuilder
 
                 if (!$deducted) {
                     $this->logger->error('Failed to deduct from wallet', ['userId' => $this->currentUserId]);
-                    return $this->respondWithError($deducted['ResponseCode']);
+                    return $this->respondWithError(40301);
                 }
 
                 return $response;

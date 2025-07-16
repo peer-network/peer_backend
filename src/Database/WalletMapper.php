@@ -737,8 +737,8 @@ class WalletMapper
 
         $id = self::generateUUID();
         if (empty($id)) {
-            $this->logger->critical('Failed to generate logwins ID');
-            return self::respondWithError(41401);
+            $this->logger->critical('Failed to generate logwins ID. Responding with 41401');
+            return false;
         }
 
         $sql = "INSERT INTO logwins 
@@ -1512,7 +1512,7 @@ class WalletMapper
         
         $decimalValue = \bcdiv($qValue, $scaleFactor, 18);
         
-        return round($decimalValue, 2);
+        return (string) round($decimalValue, 2);
     }
 
     private function addQ64_96(string $qValue1, string $qValue2): string
