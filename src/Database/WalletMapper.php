@@ -132,6 +132,8 @@ class WalletMapper
         $peerAmount = round((float)$numberoftokens * PEERFEE, 2);
         $burnAmount = round((float)$numberoftokens * BURNFEE, 2);
         $countAmount = $feeAmount + $peerAmount + $burnAmount;
+        $inviterId = null;
+        $inviterWin = 0.0;
 
         try {
             $query = "SELECT ui.invited, u.status FROM users_info ui LEFT JOIN users u ON ui.invited = u.uid WHERE ui.userid = :userid AND ui.invited IS NOT NULL";
