@@ -1,0 +1,24 @@
+BEGIN;
+
+-- Table: user_settings
+CREATE TABLE IF NOT EXISTS user_settings (
+    userid                              UUID PRIMARY KEY,
+    content_view_preferences INT DEFAULT NULL CHECK (
+        content_view_preferences IS NULL OR 
+        (content_view_preferences >= 0 AND content_view_preferences <= 10)
+    ),
+    
+    CONSTRAINT fk_user_settings_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+-- CREATE INDEX idx_userid_user_settings ON user_settings(userid);
+
+
+-- Table: user_settings
+INSERT INTO user_settings (userid)
+    SELECT uid
+    FROM users
+    WHERE uid NOT IN (
+        SELECT userid FROM user_settings
+    );
+
+COMMIT;
