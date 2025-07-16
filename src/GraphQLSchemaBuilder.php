@@ -179,10 +179,22 @@ class GraphQLSchemaBuilder
             'Query' => $this->buildQueryResolvers(),
             'Mutation' => $this->buildMutationResolvers(),
             'Subscription' => $this->buildSubscriptionResolvers(),
+            'UserPreferencesResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.DefaultResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
             'UserPreferences' => [
-                'totalInteractions' => function (array $root): string {
+                'contentFilteringSeverityLevel' => function (array $root): string {
                     $this->logger->info('Query.UserPreferences Resolvers');
-                    return $root['contentFiltering'] ?? '';
+                    return $root['contentFilteringSeverityLevel'] ?? '';
                 }
             ],
             'TodaysInteractionsData' => [

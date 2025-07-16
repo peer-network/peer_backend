@@ -38,7 +38,7 @@ type Query {
 }
 
 type Mutation {
-  updateUserPreferences(userPreferences: UserPreferencesInput): DefaultResponse!
+  updateUserPreferences(userPreferences: UserPreferencesInput): UserPreferencesResponse!
   updateUsername(username: String!, password: String!): DefaultResponse!
   updateEmail(email: String!, password: String!): DefaultResponse!
   updatePassword(password: String!, expassword: String!): DefaultResponse!
@@ -86,7 +86,8 @@ enum CommentType {
 }
 
 enum ContentFilterType {
-  MYGRANDMALIKES
+  MYGRANDMALIKES,
+  MYGRANDMAHATES
 }
 
 enum ContentType {
@@ -134,11 +135,11 @@ enum DayFilterType {
 }
 
 input UserPreferencesInput {
-  contentFiltering: ContentFilterType
+  contentFilteringSeverityLevel: ContentFilterType
 }
 
 type UserPreferences {
-  contentFiltering: ContentFilterType
+  contentFilteringSeverityLevel: ContentFilterType
 }
 
 type ListTodaysInteractionsResponse {
@@ -304,6 +305,12 @@ type ProfilePostMedia {
 type DefaultResponse {
   status: String!
   ResponseCode: String
+}
+
+type UserPreferencesResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: UserPreferences
 }
 
 type AddPostResponse {
