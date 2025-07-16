@@ -158,7 +158,7 @@ class MultipartPost
     /**
      * Helper to determine media type based on file's mime type
      */
-    public function detectMediaType(\Slim\Psr7\UploadedFile $media): ?string
+    private function detectMediaType(\Slim\Psr7\UploadedFile $media): ?string
     {
         $mimeType = $media->getClientMediaType();
 
@@ -183,7 +183,47 @@ class MultipartPost
     }
 
 
+    /**
+     * Move Uploaded File to Tmp Folder
+     */
+    public function moveFileToTmp(){
+        $allMetadata = [];
 
+        foreach ($this->getMedia() as $key => $media) {
+            $originalType = $media->getClientMediaType();
+            $fileName = $media->getClientFilename();
+            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+            
+            $tmpFilename = self::generateUUID();
+            $directoryPath = __DIR__ . "/../../../runtime-data/media/tmp";
+            
+            if (!is_dir($directoryPath)) {
+                try{
+                    mkdir($directoryPath, 0777, true);
+                }catch(\RuntimeException $e){
+                    throw new \Exception("Directory does not exist: $directoryPath"); // Directory does not exist
+                }
+            }
+
+            $filePath = "$directoryPath/$tmpFilename.$extension";
+
+            try{
+                $media->moveTo($filePath);
+            }catch(\RuntimeException $e){
+                throw new \Exception("Failed to move file: $directoryPath"); // Failed to move file
+            }
+
+            $metadata = [
+                'fileName' => $tmpFilename.'.'.$extension,
+                'mimeType' => $originalType,
+                'mediaType' => $extension,
+            ];
+
+            $allMetadata[] = $metadata;
+        }
+
+        return $allMetadata ;
+    }
     /**
      * Define validation
      */
@@ -218,5 +258,21 @@ class MultipartPost
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+
+    /**
+     * Generate UUID
+     */
+    private function generateUUID(): string
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
     }
 }

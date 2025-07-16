@@ -80,48 +80,18 @@ class MultipartPostService
             // Apply Validation
             $multipartPost = new MultipartPost($requestObj);
             $multipartPost->applyAdditionalFilter($requestObj);
-            // $multipartPost->validateEligibilityToken($this->tokenService);
+            $multipartPost->validateEligibilityToken($this->tokenService);
             $multipartPost->validateMediaContentTypes();
 
-            $allMetadata = [];
-
-            foreach ($multipartPost->getMedia() as $key => $media) {
-                $originalType = $media->getClientMediaType();
-                $fileName = $media->getClientFilename();
-                $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-                
-                $tmpFilename = self::generateUUID();
-                $directoryPath = __DIR__ . "/../../runtime-data/media/tmp";
-                
-                if (!is_dir($directoryPath)) {
-                    throw new ValidationException("Directory does not exist: $directoryPath", [5465]); // Directory does not exist
-                }
-
-                $filePath = "$directoryPath/$tmpFilename.$extension";
-
-                try{
-                    $media->moveTo($filePath);
-                }catch(\RuntimeException $e){
-                    throw new \Exception("Failed to move file: $directoryPath"); // Directory does not exist
-                }
-
-                $metadata = [
-                    'fileName' => $tmpFilename.'.'.$extension,
-                    'mimeType' => $originalType,
-                    'mediaType' => $extension,
-                ];
-
-                $allMetadata[] = $metadata;
-            }
+            // Move file to tmp folder
+            $allMetadata = $multipartPost->moveFileToTmp();
 
             return [
                 'status' => 'success',
-                'message' => 0000, // Files uploaded successfully
-                'data' => $allMetadata,
+                'ResponseCode' => 0000, // Files uploaded successfully
+                'affectedRows' => $allMetadata,
             ];
-
-        }
-        catch (ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
             return $this->respondWithError($e->getErrors()[0]);
         } catch(\Exception $e){
