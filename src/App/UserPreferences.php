@@ -17,7 +17,6 @@ class UserPreferences
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
         }
-
         $this->userid = $data['userid'] ?? '';
         $this->contentFilteringSeverityLevel = $data['contentFilteringSeverityLevel'];
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -40,12 +39,12 @@ class UserPreferences
         return $this->userid;
     }
 
-    public function getContentFilteringSeverityLevel(): string
+    public function getContentFilteringSeverityLevel(): ?int
     {
         return $this->contentFilteringSeverityLevel;
     }
 
-    public function getUpdatedAt(): ?string
+    public function getUpdatedAt(): string
     {
         return $this->updatedat;
     }
@@ -53,6 +52,11 @@ class UserPreferences
     public function setUpdatedAt(): void
     {
         $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
+    }
+
+    public function setContentFilteringSeverityLevel(int $contentFilteringSeverityLevel): void
+    {
+        $this->contentFilteringSeverityLevel = $contentFilteringSeverityLevel;
     }
     
     // Validation and Array Filtering methods
@@ -90,7 +94,7 @@ class UserPreferences
                 'required' => false,
                 'filters' => [],
                 'validators' => [
-                    ['name' => 'ValidateInt', 'options' => ['min' => 0, 'max' => 10]],
+                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],
                 ],
             ],
             'updatedat' => [

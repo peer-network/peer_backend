@@ -4,8 +4,10 @@ namespace Fawaz\App;
 
 use Fawaz\Database\UserInfoMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\ReportsMapper;
 use Fawaz\Services\Base64FileHandler;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Utils\ReportTargetType;
 use Psr\Log\LoggerInterface;
 
@@ -18,6 +20,7 @@ class UserInfoService
         protected LoggerInterface $logger,
         protected UserInfoMapper $userInfoMapper,
         protected UserMapper $userMapper,
+        protected UserPreferencesMapper $userPreferencesMapper,
         protected ReportsMapper $reportsMapper,
     ) {
         $this->base64filehandler = new Base64FileHandler();
@@ -74,9 +77,19 @@ class UserInfoService
         try {
             $results = $this->userInfoMapper->loadInfoById($this->currentUserId);
 
-            if ($results !== false) {
+            $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
+
+
+            if ($results !== false && $userPreferences !== false) {
                 $affectedRows = $results->getArrayCopy();
+                $resultPreferences = $userPreferences->getArrayCopy();
                 $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
+                
+                $contentFilterService = new ContentFilterServiceImpl();
+                $resultPreferences['contentFilteringSeverityLevel'] = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
+
+                $affectedRows['userPreferences'] = $resultPreferences;
+
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 11002,

@@ -3,7 +3,6 @@
 namespace Fawaz\Database;
 
 use PDO;
-use Fawaz\App\User;
 use Fawaz\App\UserPreferences;
 use Psr\Log\LoggerInterface;
 
@@ -13,18 +12,13 @@ class UserPreferencesMapper
     {
     }
 
-    public function isSameUser(string $userId, string $currentUserId): bool
-    {
-        return $userId === $currentUserId;
-    }
-
     public function loadPreferencesById(string $id): UserPreferences|false
     {
         $this->logger->info('UserPreferencesMapper.loadPreferencesById started', ['id' => $id]);
 
         try {
             $stmt = $this->db->prepare(
-                'SELECT userid, contentFilteringSeverityLevel, updatedat 
+                'SELECT userid, content_filtering_severity_level, updatedat
                  FROM user_preferences 
                  WHERE userid = :id'
             );
@@ -33,9 +27,10 @@ class UserPreferencesMapper
             $stmt->execute();
 
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
+            
             if ($data) {
                 $this->logger->info('User preferences loaded successfully', ['id' => $id, 'data' => $data]);
+                $data['contentFilteringSeverityLevel'] = $data['content_filtering_severity_level'];
                 return new UserPreferences($data);
             } else {
                 $this->logger->warning("No user found with given ID", ['id' => $id]);
@@ -59,26 +54,23 @@ class UserPreferencesMapper
     public function update(UserPreferences $userPreferences): UserPreferences
     {
         $this->logger->info('UserPreferences.update started', ['userid' => $userPreferences->getUserId()]);
-
         try {
             $userPreferences->setUpdatedAt();
             $data = $userPreferences->getArrayCopy();
-
             $query = "UPDATE user_preferences 
-                      SET contentFilteringSeverityLevel = :contentFilteringSeverityLevel, 
+                      SET content_filtering_severity_level = :content_filtering_severity_level, 
                           updatedat = :updatedat 
                       WHERE userid = :userid";
 
             $stmt = $this->db->prepare($query);
-
-            $stmt->bindValue(':contentFilteringSeverityLevel', $data['contentFilteringSeverityLevel'], \PDO::PARAM_INT);
+            $stmt->bindValue(':content_filtering_severity_level', $data['contentFilteringSeverityLevel'], \PDO::PARAM_INT);
             $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
             if ($stmt->rowCount() > 0) {
-                $this->logger->info("UserPreferences updated successfully", ['userid' => $data['userid']]);
+                $this->logger->info("UserPreferences updated successfully", ['data' => $data]);
             } else {
                 $this->logger->warning("No changes made to UserPreferences", ['userid' => $data['userid']]);
             }
