@@ -524,7 +524,7 @@ class PostService
         return $results;
     }
 
-    public function getChatFeedsByID(string $feedid): ?array
+    public function getChatFeedsByID(string $feedid, string $currentUserId): ?array
     {
         if (!$this->checkAuthentication() || !self::isValidUUID($feedid)) {
             return $this->respondWithError(30103);
@@ -536,7 +536,7 @@ class PostService
             $posts = $this->postMapper->getChatFeedsByID($feedid);
 
             $result = array_map(
-                fn(Post $post) => $this->mapFeedsWithComments($post),
+                fn(Post $post) => $this->mapFeedsWithComments($post,$currentUserId),
                 $posts
             );
 
@@ -551,11 +551,11 @@ class PostService
         }
     }
 
-    public function mapFeedsWithComments(Post $post): array
+    public function mapFeedsWithComments(Post $post, string  $currentUserId): array
     {
         $postArray = $post->getArrayCopy();
 
-        $comments = $this->commentMapper->fetchAllByPostId($post->getPostId());
+        $comments = $this->commentMapper->fetchAllByPostId($post->getPostId(), $currentUserId);
         $postArray['comments'] = $this->mapCommentsWithReplies($comments);
 
         return $postArray;
