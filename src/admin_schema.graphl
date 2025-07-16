@@ -48,6 +48,7 @@ type Query {
 }
 
 type Mutation {
+  updateUserPreferences(userPreferences: UserPreferencesInput): DefaultResponse!
   updateUsername(username: String!, password: String!): DefaultResponse!
   updateEmail(email: String!, password: String!): DefaultResponse!
   updatePassword(password: String!, expassword: String!): DefaultResponse!
@@ -96,6 +97,14 @@ enum CommentType {
 
 enum ContentFilterType {
   MYGRANDMALIKES
+}
+
+input UserPreferencesInput {
+  contentFiltering: ContentFilterType
+}
+
+type UserPreferences {
+  contentFiltering: ContentFilterType
 }
 
 type ReferralInfoResponse {
@@ -407,6 +416,7 @@ type UserInfo {
   amountfriends: Int!
   invited: ID!
   updatedat: Date
+  userPreferences: UserPreferences
 }
 
 type PostInfoResponse {

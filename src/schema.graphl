@@ -38,6 +38,7 @@ type Query {
 }
 
 type Mutation {
+  updateUserPreferences(userPreferences: UserPreferencesInput): DefaultResponse!
   updateUsername(username: String!, password: String!): DefaultResponse!
   updateEmail(email: String!, password: String!): DefaultResponse!
   updatePassword(password: String!, expassword: String!): DefaultResponse!
@@ -132,6 +133,14 @@ enum DayFilterType {
   Y0
 }
 
+input UserPreferencesInput {
+  contentFiltering: ContentFilterType
+}
+
+type UserPreferences {
+  contentFiltering: ContentFilterType
+}
+
 type ListTodaysInteractionsResponse {
   status: String!
   ResponseCode: String
@@ -214,6 +223,7 @@ type UserInfo {
   amountfriends: Int!
   invited: ID!
   updatedat: Date
+  userPreferences: UserPreferences
 }
 
 type PostInfoResponse {
