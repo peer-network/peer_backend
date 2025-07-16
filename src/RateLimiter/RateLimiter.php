@@ -77,4 +77,8 @@ class RateLimiter
 
         return true;
     }
+    public function getLimit(): int
+    {
+        return $this->rateLimit;
+    }
 }

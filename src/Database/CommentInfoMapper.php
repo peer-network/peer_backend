@@ -66,6 +66,25 @@ class CommentInfoMapper
             return false;
         }
     }
+    public function delete(string $commentid): bool
+    {
+        $this->logger->info("CommentInfoMapper.delete started");
+
+        $query = "DELETE FROM comment_info WHERE commentid = :commentid";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['commentid' => $commentid]);
+
+        $deleted = (bool)$stmt->rowCount();
+
+        if ($deleted) {
+            $this->logger->info("Deleted comment from database", ['commentid' => $commentid]);
+        } else {
+            $this->logger->warning("No comment found to delete in database for", ['commentid' => $commentid]);
+        }
+
+        return $deleted;
+    }
 
     public function update(CommentInfo $commentInfo): void
     {

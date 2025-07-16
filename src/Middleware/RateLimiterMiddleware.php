@@ -44,7 +44,7 @@ class RateLimiterMiddleware implements MiddlewareInterface
             return $response
                 ->withStatus(429)
                 ->withHeader('Content-Type', 'application/json')
-                ->withHeader('X-RateLimit-Limit', $this->rateLimiter->getLimit($ipAddress))
+                ->withHeader('X-RateLimit-Limit', $this->rateLimiter->getLimit())
                 ->withHeader('X-RateLimit-Remaining', 0)
                 ->withHeader('X-RateLimit-Reset', time() + 60);
         }
