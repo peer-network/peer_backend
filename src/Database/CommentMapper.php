@@ -547,4 +547,33 @@ class CommentMapper
         $stmt->execute(['commentId' => $commentId]);
         return (bool) $stmt->fetchColumn();
     }
+    
+    public function fetchAllByParentId(string $parentId, int $offset = 0, int $limit = 10): array
+    {
+        $this->logger->info("CommentMapper.fetchAllByParentId started");
+
+        $sql = "
+            SELECT 
+                commentid,
+                userid,
+                postid,
+                parentid,
+                content,
+                createdat
+            FROM comments
+            WHERE parentid = :parentId
+            ORDER BY createdat ASC
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':parentId', $parentId, \PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(fn($row) => new Comment($row), $rows);
+    }
 }

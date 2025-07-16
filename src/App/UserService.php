@@ -1015,18 +1015,27 @@ class UserService
 
 
     /**
-     * Update password for NON logged in user
-     * 
-     * Get sent Token and New password to update it 
-     * 
-     * @param string $token
-     * @param string $newPassword
-     * 
-     * Response: 11005; Success: Password updated successfully.
-     * Response: 21001; Information Not Found: No users found. Please refine your search or try a different query.
-     * Response: 41004; Unexpected Error: Failed to update password. Please try again later or contact support.
-     * 
-     * @return array
+     * Update password for NON logged in user.
+     *
+     * Expects an array with:
+     * - 'password': new password string
+     * - 'token': password reset token sent to user's email
+     *
+     * @param array{
+     *     password?: string,
+     *     token?: string
+     * }|null $args  The input data including reset token and new password
+     *
+     * @return array{
+     *     status: string,
+     *     ResponseCode: int
+     * }
+     *
+     * Response Codes:
+     * - 11005: Password updated successfully.
+     * - 21001: No user found for token.
+     * - 31904: Invalid or expired reset token.
+     * - 41004: Unexpected error during password reset.
      */
     public function resetPassword(?array $args): array
     {
