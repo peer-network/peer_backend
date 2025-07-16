@@ -3,9 +3,9 @@ BEGIN;
 -- Table: user_settings
 CREATE TABLE IF NOT EXISTS user_settings (
     userid                              UUID PRIMARY KEY,
-    content_view_preferences INT DEFAULT NULL CHECK (
-        content_view_preferences IS NULL OR 
-        (content_view_preferences >= 0 AND content_view_preferences <= 10)
+    content_filtering_severity_level INT DEFAULT NULL CHECK (
+        content_filtering_severity_level IS NULL OR 
+        (content_filtering_severity_level >= 0 AND content_filtering_severity_level <= 10)
     ),
     
     CONSTRAINT fk_user_settings_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE

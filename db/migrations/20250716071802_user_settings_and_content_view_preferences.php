@@ -22,7 +22,7 @@ final class UserSettingsAndContentViewPreferences extends AbstractMigration
         $this->execute("
             CREATE TABLE IF NOT EXISTS user_settings (
                 userid UUID PRIMARY KEY,
-                content_view_preferences INT DEFAULT NULL,
+                content_filtering_severity_level INT DEFAULT NULL,
                 CONSTRAINT fk_user_settings_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
             );
         ");
@@ -30,7 +30,7 @@ final class UserSettingsAndContentViewPreferences extends AbstractMigration
         $this->execute("
             ALTER TABLE user_settings
             ADD CONSTRAINT chk_content_view_preferences_range
-            CHECK (content_view_preferences IS NULL OR (content_view_preferences >= 0 AND content_view_preferences <= 10));
+            CHECK (content_filtering_severity_level IS NULL OR (content_filtering_severity_level >= 0 AND content_view_preferences <= 10));
         ");
     }
 
