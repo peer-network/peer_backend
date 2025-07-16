@@ -1812,6 +1812,10 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.resolveBlocklist started');
 
         $response = $this->userInfoService->loadBlocklist($args);
+        if (!is_array($response)) {
+            $this->logger->warning('Query.resolveBlocklist No data found');
+            return $this->respondWithError(41105);
+        }
         if (isset($response['status']) && $response['status'] === 'error') {
             return $response;
         }
@@ -1819,13 +1823,8 @@ class GraphQLSchemaBuilder
         if (empty($response['counter'])) {
             return $this->createSuccessResponse(11107, [], false);
         }
-
-        if (is_array($response) || !empty($response)) {
-            return $response;
-        }
-
-        $this->logger->warning('Query.resolveBlocklist No data found');
-        return $this->respondWithError(41105);
+        
+        return $response;
     }
 
     protected function resolveFetchWinsLog(array $args): ?array
@@ -2798,26 +2797,21 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        if (empty($postId)) {
+        if (trim($postId) === '') {
             return $this->respondWithError(30101);
         }
 
-        if (!empty($postId) && !self::isValidUUID($postId)) {
+        if (!self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
         }
 
         $this->logger->info('Query.resolvePostInfo started');
 
-        $postId = isset($postId) ? trim($postId) : '';
+        $posts = $this->postInfoService->findPostInfo($postId);
 
-        if (!empty($postId)) {
-            $posts = $this->postInfoService->findPostInfo($postId);
-            if (isset($posts['status']) && $posts['status'] === 'error') {
-                return $posts;
-            }
-        } else {
-            return $this->createSuccessResponse(21504);
-        }
+        if (isset($posts['status']) && $posts['status'] === 'error') {
+            return $posts;
+        }            
 
         return $this->createSuccessResponse(11502, $posts);
     }
@@ -2828,26 +2822,21 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        if (empty($commentId)) {
+        if (trim($commentId) === '') {
             return $this->respondWithError(30101);
         }
 
-        if (!empty($commentId) && !self::isValidUUID($commentId)) {
+        if (!self::isValidUUID($commentId)) {
             return $this->respondWithError(30217);
         }
 
         $this->logger->info('Query.resolveCommentInfo started');
 
-        $commentId = isset($commentId) ? trim($commentId) : '';
 
-        if (!empty($commentId)) {
-            $comments = $this->commentInfoService->findCommentInfo($commentId);
+        $comments = $this->commentInfoService->findCommentInfo($commentId);
 
-            if ($comments === false) {
-                return $this->createSuccessResponse(21505);
-            }
-        } else {
-            return $this->createSuccessResponse(21506);
+        if ($comments === false) {
+            return $this->createSuccessResponse(21505);
         }
 
         return [
