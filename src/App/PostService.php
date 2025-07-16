@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
+use Fawaz\App\Models\MultipartPost;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
@@ -160,7 +161,7 @@ class PostService
             return $this->respondWithError(30101);
         }
 
-        foreach (['title', 'media', 'contenttype'] as $field) {
+        foreach (['title', 'contenttype'] as $field) {
             if (empty($args[$field])) {
                 return $this->respondWithError(30210);
             }
@@ -201,7 +202,7 @@ class PostService
         try {
             $this->postMapper->beginTransaction();
             // Media Upload
-            if ($this->isValidMedia($args['media'])) {
+            if (isset($args['media']) && $this->isValidMedia($args['media'])) {
                 $validateContentCountResult = $this->validateContentCount($args);
                 if (isset($validateContentCountResult['error'])) {
                     return $this->respondWithError($validateContentCountResult['error']);
@@ -219,6 +220,31 @@ class PostService
                 } else {
                     return $this->respondWithError(30251);
                 }
+            }else if ($args['uploadedFiles'] && !empty($args['uploadedFiles'])) {
+                
+                $fileObjs = explode(',',$args['uploadedFiles']);
+
+                $filePath = __DIR__ . '/../../runtime-data/media/tmp/';
+
+                $uploadedFileArray = [];
+                foreach ($fileObjs as $key => $file) {
+                    // Open the file stream
+                    $stream = new \Slim\Psr7\Stream(fopen($filePath.$file, 'r'));
+
+                    // Create the UploadedFile object
+                    $uploadedFile = new \Slim\Psr7\UploadedFile(
+                        $stream, 
+                        null, 
+                        null
+                    );
+                    $multipartPost = new MultipartPost(['media' => [$uploadedFile]], [], false);
+                    $uploadedFileArray[] = $multipartPost->moveFileTmpToMedia($file);
+                
+                }
+
+                $mediaPath['path'] = $uploadedFileArray;
+
+               
             } else {
                 return $this->respondWithError(30101);
             }

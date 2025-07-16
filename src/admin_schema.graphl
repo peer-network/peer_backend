@@ -740,9 +740,10 @@ input PostInput {
   title: String!
   mediadescription: String
   contenttype: ContentType!
-  media: [String!]
-  cover: [String!]
+  media: [String]
+  cover: [String]
   tags: [String!]
+  uploadedFiles: String
 }
 
 input ChatInput {

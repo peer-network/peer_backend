@@ -20,9 +20,24 @@ class MultipartPostService
     /**
      * Set Current UserId of Logged In user
      */
-    public function setCurrentUserId(string $userId): void
+    public function setCurrentUserId(string $bearerToken): void
     {
-        $this->currentUserId = $userId;
+        if ($bearerToken !== null && $bearerToken !== '') {
+            try {
+                $decodedToken = $this->tokenService->validateToken($bearerToken);
+                if ($decodedToken) {
+                    $this->currentUserId = $decodedToken->uid;
+                    $this->logger->info('Query.setCurrentUserId started');
+                } else {
+                    $this->currentUserId = null;
+                }
+            } catch (\Throwable $e) {
+                $this->logger->error('Invalid token', ['exception' => $e]);
+                $this->currentUserId = null;
+            }
+        } else {
+            $this->currentUserId = null;
+        }
     }
 
     /**
@@ -89,7 +104,7 @@ class MultipartPostService
             return [
                 'status' => 'success',
                 'ResponseCode' => 0000, // Files uploaded successfully
-                'affectedRows' => $allMetadata,
+                'affectedRows' => implode(', ', $allMetadata),
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);

@@ -194,7 +194,7 @@ class MultipartPost
             $fileName = $media->getClientFilename();
             $extension = pathinfo($fileName, PATHINFO_EXTENSION);
             
-            $tmpFilename = self::generateUUID();
+            $tmpFilename = self::generateUUID(); 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/tmp";
             
             if (!is_dir($directoryPath)) {
@@ -219,11 +219,104 @@ class MultipartPost
                 'mediaType' => $extension,
             ];
 
-            $allMetadata[] = $metadata;
+            $allMetadata[] = $tmpFilename.'.'.$extension;
         }
 
         return $allMetadata ;
     }
+
+    
+    /**
+     * Move Uploaded File to Tmp Folder
+     */
+    public function moveFileTmpToMedia(string $file){
+        $allMetadata = [];
+
+        foreach ($this->getMedia() as $key => $media) {
+            $tmpFolder = __DIR__ . "/../../../runtime-data/media/tmp/";
+
+            // Calculate Subfolder
+            $extension = pathinfo($tmpFolder.$file, PATHINFO_EXTENSION);
+            $subFolder = $this->getSubfolder($extension);
+
+            $directoryPath = __DIR__ . "/../../../runtime-data/media/".$subFolder;
+
+            $filePath = "$directoryPath/$file";
+
+            try {
+                $media->moveTo($filePath);
+            } catch (\RuntimeException $e) {
+                throw new \Exception("Failed to move file: $filePath");
+            }
+
+            $fileDetails = $this->getFileDetails($filePath);
+
+            $options = [
+                'size'       => $fileDetails['size'],
+                'duration'   => null, // Keine PHP-only Funktion für Video-Dauer
+                'ratio'      => $fileDetails['ratio'] ?? null,
+                'resolution' => isset($fileDetails['width']) ? "{$fileDetails['width']}x{$fileDetails['height']}" : null,
+            ];
+
+            $allMetadata[] = [
+                'success' => true,
+                'path'    => "/$subFolder/$file",
+                'options' => $options,
+            ];
+        }
+
+        return isset($allMetadata[0]) ? $allMetadata[0] : [];
+    }
+
+
+    /**
+     * generate File meta data
+     */
+    public function getFileDetails(string $filePath): array
+    {
+        if (!file_exists($filePath)) {
+            throw new \Exception("File does not exist: $filePath");
+        }
+
+        $details = [
+            'basename'   => basename($filePath),
+            'dirname'    => dirname($filePath),
+            'extension'  => pathinfo($filePath, PATHINFO_EXTENSION),
+            'size'       => filesize($filePath), // in Bytes
+            'mime_type'  => mime_content_type($filePath),
+        ];
+
+        // Wenn es ein Bild ist
+        $imageInfo = @getimagesize($filePath);
+        if ($imageInfo !== false) {
+            $details['width']  = $imageInfo[0];
+            $details['height'] = $imageInfo[1];
+            $details['ratio']  = round($imageInfo[0] / $imageInfo[1], 2);
+        }
+
+        return $details;
+    }
+
+    /**
+     * Subfolder options
+     */
+    private function getSubfolder(string $fileType): string
+    {
+        if(in_array($fileType, ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'])){
+            return 'image';
+        }elseif(in_array($fileType, ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'webm', 'quicktime'])){
+            return 'video';
+        }elseif(in_array($fileType, ['mp3', 'wav'])){
+            return 'audio';
+        }elseif(in_array($fileType, ['txt'])){
+            return 'text';
+        }else{
+            throw new \Exception("Cannot accept more file extension: $fileType"); // Cannot accept more file extension
+        }
+
+    }
+
+
     /**
      * Define validation
      */
