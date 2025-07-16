@@ -215,6 +215,12 @@ class UserService
             'updatedat' => $createdat,
         ];
 
+        $userPreferencesSrc = [
+            'userid' => $id,
+            'contentFilteringSeverityLevel' => null,
+            'updatedat' => $createdat,
+        ];
+
         $walletData = [
             'userid' => $id,
             'liquidity' => 0.0,
@@ -253,6 +259,15 @@ class UserService
             $userinfo = new UserInfo($infoData);
             $this->userMapper->insertinfo($userinfo);
             unset($infoData, $userinfo);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Error registering User::UserInfo.', ['exception' => $e]);
+            return self::respondWithError($e->getMessage());
+        }
+
+        try {
+            $userPreferences = new UserPreferences($userPreferencesSrc);
+            $this->userPreferencesMapper->insert($userPreferences);
+            unset($userPreferencesSrc, $userPreferences);
         } catch (\Throwable $e) {
             $this->logger->warning('Error registering User::UserInfo.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());

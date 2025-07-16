@@ -51,6 +51,38 @@ class UserPreferencesMapper
         }
     }
 
+    public function insert(UserPreferences $user): UserPreferences
+    {
+        $this->logger->info("UserPreferencesMapper.insert started");
+
+        $data = $user->getArrayCopy();
+
+        $query = "INSERT INTO user_preferences
+                  (userid, content_filtering_severity_level, updatedat)
+                  VALUES 
+                  (:userid, :content_filtering_severity_level , :updatedat)";
+
+        try {
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':content_filtering_severity_level', $data['contentFilteringSeverityLevel'], \PDO::PARAM_INT);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+
+            $stmt->execute();
+
+            $this->logger->info("Inserted new user preferences into database", ['userid' => $data['userid']]);
+
+            return new UserPreferences($data);
+        } catch (\Throwable $e) {
+            $this->logger->error("UserMapper.insert: Exception occurred while inserting user preferences", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new \RuntimeException("Failed to insert UserPreferences into database: " . $e->getMessage());
+        }
+    }
+
     public function update(UserPreferences $userPreferences): UserPreferences
     {
         $this->logger->info('UserPreferences.update started', ['userid' => $userPreferences->getUserId()]);
