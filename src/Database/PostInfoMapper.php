@@ -152,7 +152,7 @@ class PostInfoMapper
 
     public function delete(string $postid): bool
     {
-        $this->logger->info("PostInfoMapper.delete started");
+        $this->logger->info("PostMapper.delete started");
 
         try {
             $this->db->beginTransaction();
@@ -164,7 +164,8 @@ class PostInfoMapper
                 'user_post_saves',
                 'user_post_shares',
                 'user_post_views',
-                'post_info'
+                'post_info',
+                'posts'
             ];
 
             foreach ($tables as $table) {
@@ -175,11 +176,11 @@ class PostInfoMapper
             }
 
             $this->db->commit();
-            $this->logger->info("Deleted post info and related user activities successfully", ['postid' => $postid]);
+            $this->logger->info("Deleted post and related user activities successfully", ['postid' => $postid]);
             return true;
         } catch (\Exception $e) {
             $this->db->rollBack();
-            $this->logger->error("Failed to delete post info and related user activities", [
+            $this->logger->error("Failed to delete post and related user activities", [
                 'postid' => $postid,
                 'exception' => $e->getMessage()
             ]);
