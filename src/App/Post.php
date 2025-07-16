@@ -113,6 +113,7 @@ class Post implements Hashable
             $errorMessageString = implode("", $errorMessages);
             throw new ValidationException($errorMessageString);
         }
+        return [];
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter

@@ -359,7 +359,7 @@ class PostService
         $maxTags = 10;
         $tagNameConfig = constants()::post()['TAG'];
         if (count($tags) > $maxTags) {
-            throw new \Throwable('Maximum tag limit exceeded');
+            throw new \Exception('Maximum tag limit exceeded');
         }
 
         foreach ($tags as $tagName) {
@@ -367,6 +367,7 @@ class PostService
             
             if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] || strlen($tagName) > $tagNameConfig['MAX_LENGTH'] || !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
                 throw new \Throwable('Invalid tag name');
+
             }
 
             $tag = $this->tagMapper->loadByName($tagName);
@@ -379,7 +380,7 @@ class PostService
             
             if (!$tag) {
                 $this->logger->error('Failed to load or create tag', ['tagName' => $tagName]);
-                throw new \Throwable('Failed to load or create tag: ' . $tagName);
+                throw new \Exception('Failed to load or create tag: ' . $tagName);
             }
 
             $tagPost = new TagPost([
@@ -396,7 +397,7 @@ class PostService
                     'tagName' => $tagName,
                     'exception' => $e->getMessage(),
                 ]);
-                throw new \Throwable('Failed to insert tag-post relationship: ' . $tagName);
+                throw new \Exception('Failed to insert tag-post relationship: ' . $tagName);
             }
         }
     }
@@ -519,7 +520,7 @@ class PostService
         $this->logger->info("PostService.findPostser started");
 
         $results = $this->postMapper->findPostser($this->currentUserId, $args);
-        if (empty($results)) {
+        if (empty($results) && $postId != null) {
             return $this->respondWithError(31510); 
         }
 
@@ -578,7 +579,7 @@ class PostService
 
     public function deletePost(string $id): array
     {
-        if (!$this->checkAuthentication() || !self::isValidUUID($feedid)) {
+        if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
             return $this->respondWithError('Invalid feed ID');
         }
 

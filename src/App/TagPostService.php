@@ -5,13 +5,14 @@ namespace Fawaz\App;
 use Fawaz\App\TagPost;
 use Fawaz\Database\TagPostMapper;
 use Psr\Log\LoggerInterface;
+use Fawaz\Database\TagMapper;
 
 
 class TagPostService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected TagPostMapper $tagPostMapper)
+    public function __construct(protected LoggerInterface $logger, protected TagPostMapper $tagPostMapper, protected TagMapper $tagMapper)
     {
     }
 
@@ -158,7 +159,7 @@ class TagPostService
             preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)
         );
     }
-
+  
     private function respondWithError(string $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];

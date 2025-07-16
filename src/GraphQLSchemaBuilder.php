@@ -36,6 +36,7 @@ use Fawaz\App\CommentInfoService;
 use Fawaz\App\CommentService;
 use Fawaz\App\ContactusService;
 use Fawaz\App\DailyFreeService;
+use Fawaz\App\Helpers\FeesAccountHelper;
 use Fawaz\App\McapService;
 use Fawaz\App\PoolService;
 use Fawaz\App\Post;
@@ -59,6 +60,7 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
+use ReflectionNamedType;
 
 
 class GraphQLSchemaBuilder
@@ -255,6 +257,9 @@ class GraphQLSchemaBuilder
                 'lastMergedPullRequestNumber' => function (array $root): string {
                     return $root['lastMergedPullRequestNumber'] ?? '';
                 },
+                'companyAccountId' => function (array $root): string {
+                    return $root['companyAccountId'] ?? '';
+                },
             ],
             'RegisterResponse' => [
                 'status' => function (array $root): string {
@@ -268,6 +273,34 @@ class GraphQLSchemaBuilder
                     return $root['userid'] ?? '';
                 },
             ],
+            'ReferralResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ReferralResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'ReferralInfo' => [
+                'uid' => function (array $root): string {
+                    $this->logger->info('Query.ReferralInfo Resolvers');
+                    return $root['uid'] ?? '';
+                },
+                'username' => function (array $root): string {
+                    return $root['username'] ?? '';
+                },
+                'slug' => function (array $root): string {
+                    return $root['slug'] ?? '';
+                },
+                'img' => function (array $root): string {
+                    return $root['img'] ?? '';
+                },
+            ],
+
             'User' => [
                 'id' => function (array $root): string {
                     $this->logger->info('Query.User Resolvers');
@@ -327,36 +360,6 @@ class GraphQLSchemaBuilder
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
-                },
-            ],
-            'UserInfo' => [
-                'postid' => function (array $root): string {
-                    $this->logger->info('Query.UserInfo Resolvers');
-                    return $root['postid'] ?? '';
-                },
-                'userid' => function (array $root): string {
-                    return $root['userid'] ?? '';
-                },
-                'likes' => function (array $root): int {
-                    return $root['likes'] ?? 0;
-                },
-                'dislikes' => function (array $root): int {
-                    return $root['dislikes'] ?? 0;
-                },
-                'reports' => function (array $root): int {
-                    return $root['reports'] ?? 0;
-                },
-                'views' => function (array $root): int {
-                    return $root['views'] ?? 0;
-                },
-                'saves' => function (array $root): int {
-                    return $root['saves'] ?? 0;
-                },
-                'shares' => function (array $root): int {
-                    return $root['shares'] ?? 0;
-                },
-                'comments' => function (array $root): int {
-                    return $root['comments'] ?? 0;
                 },
             ],
             'UserListResponse' => [
@@ -1131,18 +1134,6 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'PercentBeforeTransactionResponse' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.StandardResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-                'affectedRows' => function (array $root): array {
-                    return $root['affectedRows'] ?? [];
-                },
-            ],
             'PercentBeforeTransactionData' => [
                 'inviterId' => function (array $root): string {
                     $this->logger->info('Query.PercentBeforeTransactionResponse Resolvers');
@@ -1719,6 +1710,7 @@ class GraphQLSchemaBuilder
             'verifyAccount' => fn(mixed $root, array $args) => $this->verifyAccount($args['userid']),
             'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
+            'verifyReferralString' => fn(mixed $root, array $args) => $this->userService->verifyReferral($args['referralString']),
             'updateUsername' => fn(mixed $root, array $args) => $this->userService->setUsername($args),
             'updateEmail' => fn(mixed $root, array $args) => $this->userService->setEmail($args),
             'updatePassword' => fn(mixed $root, array $args) => $this->userService->setPassword($args),
@@ -1765,7 +1757,8 @@ class GraphQLSchemaBuilder
         return [
             'userroles' => $this->userRoles,
             'currentuserid' => $this->currentUserId,
-            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? ""
+            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
+            'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
         ];
     }
 
@@ -2899,7 +2892,7 @@ class GraphQLSchemaBuilder
         return [
             'status' => 'success',
             'counter' => count($data),
-            'ResponseCode' => empty($data) ? 21518 : 11501,
+            'ResponseCode' => empty($data) ? 21501 : 11501,
             'affectedRows' => $data,
         ];
     }

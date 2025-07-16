@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "05732a9c-3838-4486-831d-adee3d420661",
+		"_postman_id": "46f78eeb-44ba-4b32-a2cd-b51638137ec0",
 		"name": "back_graphql_postman_collection",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-05732a9c-3838-4486-831d-adee3d420661?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-46f78eeb-44ba-4b32-a2cd-b51638137ec0?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -17,6 +17,15 @@
 							"pm.test(\"Null is in there\", function () {",
 							"    let responseJson = pm.response.json();",
 							"    pm.expect(responseJson.data.hello.currentuserid).to.eql(\"\");",
+							"});",
+							"",
+							"pm.test(\"Save companyAccountId as referralUuid\", function () {",
+							"    const response = pm.response.json();",
+							"    const id = response.data?.hello?.companyAccountId;",
+							"",
+							"    pm.expect(id, \"companyAccountId should exist\").to.be.a(\"string\").that.is.not.empty;",
+							"",
+							"    pm.environment.set(\"referralUuid\", id);",
 							"});"
 						],
 						"type": "text/javascript",
@@ -40,7 +49,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Hello {\n    hello {\n        currentuserid\n    }\n}\n",
+						"query": "query Hello {\n    hello {\n        currentuserid\n        currentVersion\n        wikiLink\n        lastMergedPullRequestNumber\n        companyAccountId\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -210,7 +219,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\", \n    password: \"{{password}}\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\", \n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -929,22 +938,19 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"// Check if the username exists in the environment; if not, set a default one",
 							"let username = pm.environment.get(\"username\");",
 							"",
 							"if (!username) {",
-							"    username = \"testUser\"; // Set a default username if it doesn't exist",
+							"    username = \"testUser\"; ",
 							"    pm.environment.set(\"username\", username);",
 							"}",
 							"",
-							"// Function to add a random emoji",
 							"function addRandomEmoji(name) {",
 							"    const emojis = [\"🔥\", \"🚀\", \"💎\", \"🎉\", \"💡\", \"🐱\", \"⚡\", \"🦄\"]; // Emoji list",
 							"    let randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];",
 							"    return `${name} ${randomEmoji}`;",
 							"}",
 							"",
-							"// Update the username with an emoji and save it as invalid_username",
 							"let invalidUsername = addRandomEmoji(username);",
 							"pm.environment.set(\"invalid_username\", invalidUsername);",
 							"console.log(\"Invalid Username:\", invalidUsername);"
@@ -2354,7 +2360,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{email_t1}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{email_t1}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -2414,7 +2420,178 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{email_t2}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{email_t2}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verification of referral string (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"31010\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation VerifyReferralString {\n    verifyReferralString(referralString: \"123\") {\n        status\n        ResponseCode\n        affectedRows {\n            uid\n            username\n            slug\n            img\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verification of postid instead of ref.id (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"31007\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation VerifyReferralString {\n    verifyReferralString(referralString: \"{{uuid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            uid\n            username\n            slug\n            img\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verification of referral string",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11011\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation VerifyReferralString {\n    verifyReferralString(referralString: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            uid\n            username\n            slug\n            img\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8999,7 +9176,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{email_t2}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{email_t2}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -9047,6 +9224,53 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation RefreshToken {\n    refreshToken(refreshToken: \"{{refreshToken}}\") {\n        status\n        ResponseCode\n        accessToken\n        refreshToken\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verification deleted uuid",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"31007\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation VerifyReferralString {\n    verifyReferralString(referralString: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            uid\n            username\n            slug\n            img\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -20741,6 +20965,390 @@
 			"response": []
 		},
 		{
+			"name": "Check if RC is correct",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: FOLLOWED\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check if RC is correct 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"21501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: \"1111-11-11\"\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check if RC is correct 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"21501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: \"2070-10-22\"\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check if RC is correct 4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"21501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: \"{{uuid}}\"\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check if RC is correct 5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"21501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: \"shegeci trakshi\"\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check if RC is correct 6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"21501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: \"shegecitrakshi\"\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Posts type injection test 3",
 			"event": [
 				{
@@ -20829,69 +21437,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Getallposts {\n    listPosts(\n        offset: 99999999\n        limit: 999999999\n        commentOffset: 999999\n        commentLimit: 99999999\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                amountlikes\n                isliked\n                createdat\n                user {\n                    id\n                    username\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Posts type injection test 9",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"31510\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: \"{{uuid}}\"\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -21762,7 +22307,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"'1'='1'\",\n    password: \"'1'='1'\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"'1'='1'\",\n    password: \"'1'='1'\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -21805,7 +22350,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"1=1--\",\n    password: \"1=1--\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"1=1--\",\n    password: \"1=1--\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -21848,7 +22393,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"test@example.com' OR SLEEP(5)--\",\n    password: \"{{password}}\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"test@example.com' OR SLEEP(5)--\",\n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -21891,7 +22436,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"' OR 1=1 UNION SELECT null,@@version--\",\n    password: \"{{password}}\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"' OR 1=1 UNION SELECT null,@@version--\",\n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -21934,7 +22479,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"'; EXEC xp_cmdshell('ping attacker.com')--\",\n    password: \"{{password}}\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"'; EXEC xp_cmdshell('ping attacker.com')--\",\n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -21991,7 +22536,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"{{invalid_username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"{{invalid_username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -22048,7 +22593,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"! @ # $ © ® ™ ±\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"! @ # $ © ® ™ ±\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -22105,7 +22650,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"validuservaliduservaliduser\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"validuservaliduservaliduser\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -22162,7 +22707,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"va\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"va\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -22215,7 +22760,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{invalid_email}}\",\n    password: \"{{password}}\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{invalid_email}}\",\n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -22268,7 +22813,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{w_email_t3}}\",\n    password: \"{{password}}\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{w_email_t3}}\",\n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -22325,7 +22870,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{invalid_username}}\",\n    username: \"{{username}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{invalid_username}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -22383,6 +22928,63 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{invalid_username}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{uuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reg invalid empty ref id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30301\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// generate random email",
+							"let randomEmail = `user_${Math.floor(Math.random() * 1000000)}@example.com`;",
+							"",
+							"// save",
+							"pm.environment.set(\"random_email\", randomEmail);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{invalid_username}}\",\n    username: \"{{username}}\",\n    referralUuid: \"\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
