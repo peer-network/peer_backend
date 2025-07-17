@@ -446,13 +446,15 @@ class UserService
         try {
             $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
             if (!$userPreferences) {
-                return $this->respondWithError(00000); // 402xx
+                $this->logger->error('UserService.updateUserPreferences: failed to load user preferences for updating');
+                return $this->respondWithError(00000); // 402x1
             }
 
             if ($contentFiltering && !empty($contentFiltering)) {
                 $contentFilteringSeverityLevel = $contentFilterService->getContentFilteringSeverityLevel($contentFiltering);
                 
                 if($contentFilteringSeverityLevel === null){
+                    $this->logger->error('UserService.updateUserPreferences: failed to get ContentFilteringSeverityLevel');
                     return $this->respondWithError(30103);
                 }
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
@@ -461,7 +463,13 @@ class UserService
 
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
-            $resultPreferences['contentFilteringSeverityLevel'] = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
+            $contentFilteringSeverityLevelString = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
+
+            if ($contentFilteringSeverityLevelString === null) {
+                $this->logger->error('UserService.updateUserPreferences: failed to get contentFilteringSeverityLevelString');
+                return self::respondWithError(00000); // 402x1
+            }
+            $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
             $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
             
@@ -472,7 +480,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update user preferences', ['exception' => $e]);
-            return self::respondWithError(00000); // 402xx
+            return self::respondWithError(00000); // 402x1
         }
     }
 
