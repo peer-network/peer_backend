@@ -18,7 +18,7 @@ type Query {
   listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!
   getUserInfo: UserInfoResponse!
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
-  listPosts(filterBy: [PostFilterType!],contentFilterBy: ContentFilterType IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
+  listPosts(filterBy: [PostFilterType!], contentFilterBy: ContentFilterType, IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
   getPostInfo(postid: ID!): PostInfoResponse!
   getCommentInfo(commentId: ID!): CommentInfoResponse!
   listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
@@ -38,6 +38,7 @@ type Query {
 }
 
 type Mutation {
+  updateUserPreferences(userPreferences: UserPreferencesInput): UserPreferencesResponse!
   updateUsername(username: String!, password: String!): DefaultResponse!
   updateEmail(email: String!, password: String!): DefaultResponse!
   updatePassword(password: String!, expassword: String!): DefaultResponse!
@@ -85,7 +86,8 @@ enum CommentType {
 }
 
 enum ContentFilterType {
-  MYGRANDMALIKES
+  MYGRANDMALIKES,
+  MYGRANDMAHATES
 }
 
 enum ContentType {
@@ -102,6 +104,7 @@ enum PostFilterType {
   TEXT
   FOLLOWED
   FOLLOWER
+  VIEWED
 }
 
 enum IgnoreOption {
@@ -116,6 +119,7 @@ enum PostSortType {
   DISLIKES
   VIEWS
   COMMENTS
+  FOR_ME
 }
 
 enum DayFilterType {
@@ -128,6 +132,14 @@ enum DayFilterType {
   W0
   M0
   Y0
+}
+
+input UserPreferencesInput {
+  contentFilteringSeverityLevel: ContentFilterType
+}
+
+type UserPreferences {
+  contentFilteringSeverityLevel: ContentFilterType
 }
 
 type ListTodaysInteractionsResponse {
@@ -158,6 +170,7 @@ type HelloResponse {
   currentVersion: String
   wikiLink: String
   lastMergedPullRequestNumber: String
+  companyAccountId: ID
 }
 
 type LogWins {
@@ -211,6 +224,7 @@ type UserInfo {
   amountfriends: Int!
   invited: ID!
   updatedat: Date
+  userPreferences: UserPreferences
 }
 
 type PostInfoResponse {
@@ -291,6 +305,12 @@ type ProfilePostMedia {
 type DefaultResponse {
   status: String!
   ResponseCode: String
+}
+
+type UserPreferencesResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: UserPreferences
 }
 
 type AddPostResponse {

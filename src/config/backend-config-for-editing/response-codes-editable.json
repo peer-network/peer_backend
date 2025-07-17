@@ -71,6 +71,10 @@
         "comment": "Success: Account deleted successfully",
         "userFriendlyComment": "Your account has been deleted successfully."
     },
+    "11014": {
+       "comment": "User preferences updated successfully.",
+       "userFriendlyComment": "Your preferences have been updated successfully."
+   },
     "11101": {
         "comment": "Success: Follows data prepared successfully",
         "userFriendlyComment": "Following/followers list loaded."
@@ -799,6 +803,10 @@
         "comment": "User cannot report themselves.",
         "userFriendlyComment": "You cannot report your own account." 
     },
+    "31010": {
+        "comment": "Invalid Referral String: The referral code provided is invalid or does not match any existing records.",
+        "userFriendlyComment": "The referral code you entered is invalid. Please check and try again."
+    },
     "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",
         "userFriendlyComment": "This action is only available for friends."
@@ -1074,6 +1082,14 @@
     "41014": {
         "comment": "Unexpected Error: Failed to delete account.",
         "userFriendlyComment": "We couldn't delete your account. Please try again."
+    },
+    "41015": {
+        "comment": "Unexpected error: Internal server error while reporting user.",
+        "userFriendlyComment": "We're having trouble reporting the user right now. Please try again later."
+    },
+    "41016": {
+        "comment": "Failed to update user preferences.",
+        "userFriendlyComment": "We couldn’t update your preferences. Please try again later."
     },
     "41101": {
         "comment": "Unexpected Error: Failed to retrieve friends data. Please try again later or contact support",

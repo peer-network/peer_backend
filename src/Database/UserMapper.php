@@ -7,6 +7,7 @@ use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
+use Fawaz\App\Role;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
 use Fawaz\config\constants\ConstantsConfig;
@@ -19,10 +20,11 @@ use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\DateService;
+use Fawaz\App\Status;
 
 class UserMapper
 {
-    const STATUS_DELETED = 6;
+
     public function __construct(protected LoggerInterface $logger, protected PDO $db)
     {
     }
@@ -244,7 +246,7 @@ class UserMapper
             }
         }
         $conditions[] = "status != :status";
-        $queryParams[':status'] = self::STATUS_DELETED;
+        $queryParams[':status'] = Status::DELETED;
 
         if ($conditions) {
             $sql .= " AND " . implode(" AND ", $conditions);
@@ -414,7 +416,7 @@ class UserMapper
         }
 
         $conditions[] = "u.status != :status";
-        $queryParams[':status'] = self::STATUS_DELETED;
+        $queryParams[':status'] = Status::DELETED;
 
         if ($conditions) {
             $sql .= " AND " . implode(" AND ", $conditions);
@@ -576,7 +578,7 @@ class UserMapper
             $stmt = $this->db->prepare($sql);
             
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
-            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
             
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -1558,10 +1560,10 @@ class UserMapper
 
     /**
      * Delete User Account.
-     * Flags the account as deleted by setting status to STATUS_DELETED.
+     * Flags the account as deleted by setting status to Status::DELETED.
      *
      * Usage of constant improves readability:
-     * const STATUS_DELETED = 6;
+     * const Status::DELETED = 6;
      *
      * @param string $id User unique identifier (uid).
      * @return bool True if user was flagged as deleted, false otherwise.
@@ -1576,7 +1578,7 @@ class UserMapper
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
             $stmt->bindValue(':uid', $id, \PDO::PARAM_STR);
 
             $stmt->execute();
@@ -1972,5 +1974,28 @@ class UserMapper
             return null;
         }
         return null;
+    }
+
+    public function getValidReferralInfoByLink(string $referralLink): array|null
+    {
+        $this->logger->info("UserMapper.getValidReferralInfoByLink started", [
+            'referralLink' => $referralLink,
+        ]);
+
+        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.referral_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid AND u.roles_mask IN (:role1, :role2, :role3)";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':referral_uuid', $referralLink, \PDO::PARAM_STR);
+        $stmt->bindValue(':role1', Role::USER, \PDO::PARAM_INT);
+        $stmt->bindValue(':role2', Role::ADMIN, \PDO::PARAM_INT);
+        $stmt->bindValue(':role3', Role::COMPANY_ACCOUNT, \PDO::PARAM_INT);
+        $stmt->execute();
+    
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+    
+        $this->logger->info("Referral info query result", ['result' => $result]);
+
+
+        return $result ?: null;
     }
 }

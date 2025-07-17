@@ -48,6 +48,7 @@ type Query {
 }
 
 type Mutation {
+  updateUserPreferences(userPreferences: UserPreferencesInput): UserPreferencesResponse!
   updateUsername(username: String!, password: String!): DefaultResponse!
   updateEmail(email: String!, password: String!): DefaultResponse!
   updatePassword(password: String!, expassword: String!): DefaultResponse!
@@ -95,7 +96,16 @@ enum CommentType {
 }
 
 enum ContentFilterType {
-  MYGRANDMALIKES
+  MYGRANDMALIKES,
+  MYGRANDMAHATES
+}
+
+input UserPreferencesInput {
+  contentFiltering: ContentFilterType
+}
+
+type UserPreferences {
+  contentFiltering: ContentFilterType
 }
 
 type ReferralInfoResponse {
@@ -129,6 +139,7 @@ enum PostFilterType {
   TEXT
   FOLLOWED
   FOLLOWER
+  VIEWED
 }
 
 enum IgnoreOption {
@@ -143,6 +154,7 @@ enum PostSortType {
   DISLIKES
   VIEWS
   COMMENTS
+  FOR_ME
 }
 
 enum DayFilterType {
@@ -350,6 +362,7 @@ type HelloResponse {
   currentVersion: String
   wikiLink: String
   lastMergedPullRequestNumber: String
+  companyAccountId: ID
 }
 
 
@@ -404,6 +417,7 @@ type UserInfo {
   amountfriends: Int!
   invited: ID!
   updatedat: Date
+  userPreferences: UserPreferences
 }
 
 type PostInfoResponse {
@@ -484,6 +498,12 @@ type ProfilePostMedia {
 type DefaultResponse {
   status: String!
   ResponseCode: String
+}
+
+type UserPreferencesResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: UserPreferences
 }
 
 type AddPostResponse {
