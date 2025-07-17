@@ -446,7 +446,7 @@ class UserService
         try {
             $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
             if (!$userPreferences) {
-                return $this->respondWithError(00000); // 402xx
+                return $this->respondWithError(40301); // 402xx
             }
 
             if ($contentFiltering && !empty($contentFiltering)) {
@@ -467,12 +467,12 @@ class UserService
             
             return [
                 'status' => 'success',
-                'ResponseCode' => 00000,  // 102xx
+                'ResponseCode' => 11014,  // 102xx
                 'affectedRows' => $resultPreferences,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update user preferences', ['exception' => $e]);
-            return self::respondWithError(00000); // 402xx
+            return self::respondWithError(41016); // 402xx
         }
     }
 
