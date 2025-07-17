@@ -117,4 +117,4 @@ INSERT INTO advertisements (advertisementid, postid, userid, status, timestart, 
 VALUES ('a1111111-aaaa-1111-aaaa-111111111111', '4008c0dd-296c-46d3-811d-f90a2c077757', 'b9e94945-abd7-46a5-8c92-59037f1d73bf', 'basic', date_trunc('day', NOW()) - INTERVAL '1 day', date_trunc('day', NOW()) + INTERVAL '3 days');
 
 INSERT INTO advertisements_log (advertisementid, postid, userid, status, timestart, timeend, tokencost, eurocost, createdat) 
-VALUES ('a1111111-aaaa-1111-aaaa-111111111111', '4008c0dd-296c-46d3-811d-f90a2c077757', 'b9e94945-abd7-46a5-8c92-59037f1d73bf', 'basic', date_trunc('day', NOW()) - INTERVAL '1 day', date_trunc('day', NOW()) + INTERVAL '3 days', 500.00000, 50.00000, date_trunc('day', NOW()) - INTERVAL '2 days');
+VALUES ('a1111111-aaaa-1111-aaaa-111111111111', '4008c0dd-296c-46d3-811d-f90a2c077757', 'b9e94945-abd7-46a5-8c92-59037f1d73bf', 'basic', date_trunc('day', NOW()) - INTERVAL '1 day', date_trunc('day', NOW()) + INTERVAL '3 days', 2000.00000, 200.00000, date_trunc('day', NOW()) - INTERVAL '2 days');
