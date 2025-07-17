@@ -92,7 +92,7 @@ class Wallett
     }
 
     // Validation and Array Filtering methods (Unchanged)
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -112,7 +112,7 @@ class Wallett
             
             throw new ValidationException($errorMessageString);
         }
-        return [];
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
