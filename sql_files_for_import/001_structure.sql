@@ -1,0 +1,611 @@
+BEGIN;
+
+-- Table: users
+CREATE TABLE IF NOT EXISTS users (
+    uid UUID PRIMARY KEY,
+    email VARCHAR(249) NOT NULL UNIQUE,
+    username VARCHAR(33) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    status SMALLINT DEFAULT 0 NOT NULL,
+    verified SMALLINT DEFAULT 0 NOT NULL,
+    slug INTEGER NOT NULL,
+    roles_mask INTEGER DEFAULT 0 NOT NULL,
+    ip INET NOT NULL,
+    img VARCHAR(100),
+    biography TEXT,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT unique_username_slug UNIQUE (username, slug)
+);
+CREATE INDEX IF NOT EXISTS idx_users_uid ON users(uid);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_username_slug ON users(username, slug);
+
+-- Table: users_info
+CREATE TABLE IF NOT EXISTS users_info (
+    userid UUID PRIMARY KEY,
+    liquidity NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    amountposts INTEGER DEFAULT 0 NOT NULL,
+    amountfollower INTEGER DEFAULT 0 NOT NULL,
+    amountfollowed INTEGER DEFAULT 0 NOT NULL,
+    amountfriends INTEGER DEFAULT 0 NOT NULL,
+    amountblocked INTEGER DEFAULT 0 NOT NULL,
+    isprivate SMALLINT DEFAULT 0 NOT NULL,
+    invited UUID DEFAULT NULL,
+    phone VARCHAR(21) DEFAULT NULL,
+    pkey VARCHAR(44) DEFAULT NULL,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_users_info_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_users_info_invited FOREIGN KEY (invited) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_users_info_invited ON users_info(userid);
+
+-- Table: follows
+CREATE TABLE IF NOT EXISTS follows (
+    followerid UUID NOT NULL,
+    followedid UUID NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT pk_follows PRIMARY KEY (followerid, followedid),
+    CONSTRAINT fk_follows_follower FOREIGN KEY (followerid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_follows_followed FOREIGN KEY (followedid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_follows_followerid ON follows(followerid);
+CREATE INDEX IF NOT EXISTS idx_follows_followedid ON follows(followedid);
+
+-- Table: user_referral_info
+CREATE TABLE IF NOT EXISTS user_referral_info (
+    uid UUID PRIMARY KEY,
+    referral_link VARCHAR(255) NOT NULL,
+    qr_code_url VARCHAR(255) DEFAULT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    referral_uuid UUID UNIQUE NOT NULL,
+
+    CONSTRAINT fk_user_referral_info_user FOREIGN KEY (uid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_user_referral_info_uid ON user_referral_info(uid);
+
+
+-- Table: access_tokens
+CREATE TABLE IF NOT EXISTS access_tokens (
+    userid UUID PRIMARY KEY,
+    access_token TEXT NOT NULL,
+    createdat INTEGER NOT NULL,
+    expiresat INTEGER NOT NULL,
+    CONSTRAINT fk_access_tokens_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+
+-- Table: chats
+CREATE TABLE IF NOT EXISTS chats (
+    chatid UUID PRIMARY KEY,
+    creatorid UUID NOT NULL,
+    name VARCHAR(50) DEFAULT NULL,
+    image VARCHAR(100) DEFAULT NULL,
+    ispublic SMALLINT DEFAULT 1 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_chats_users FOREIGN KEY (creatorid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_chats_creatorid ON chats(creatorid);
+
+-- Table: newsfeed
+CREATE TABLE IF NOT EXISTS newsfeed (
+    feedid UUID PRIMARY KEY,
+    creatorid UUID NOT NULL,
+    name VARCHAR(50) DEFAULT NULL,
+    image VARCHAR(100) DEFAULT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_newsfeed_users FOREIGN KEY (creatorid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_newsfeed_feedid FOREIGN KEY (feedid) REFERENCES chats(chatid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_newsfeed_creatorid ON newsfeed(creatorid);
+
+-- Table: chatmessages
+CREATE TABLE IF NOT EXISTS chatmessages (
+    messid BIGSERIAL PRIMARY KEY,
+    chatid UUID NOT NULL,
+    userid UUID NOT NULL,
+    content TEXT NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_chatmessages_chats FOREIGN KEY (chatid) REFERENCES chats(chatid) ON DELETE CASCADE,
+    CONSTRAINT fk_chatmessages_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_chatmessages_chatid ON chatmessages(chatid);
+CREATE INDEX IF NOT EXISTS idx_chatmessages_userid ON chatmessages(userid);
+
+-- Table: chatparticipants
+CREATE TABLE IF NOT EXISTS chatparticipants (
+    chatid UUID NOT NULL,
+    userid UUID NOT NULL,
+    hasaccess SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT pk_chatparticipants PRIMARY KEY (chatid, userid),
+    CONSTRAINT fk_chatparticipants_chats FOREIGN KEY (chatid) REFERENCES chats(chatid) ON DELETE CASCADE,
+    CONSTRAINT fk_chatparticipants_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_chatparticipants_chatid ON chatparticipants(chatid);
+CREATE INDEX IF NOT EXISTS idx_chatparticipants_userid ON chatparticipants(userid);
+
+-- Table: posts
+CREATE TABLE IF NOT EXISTS posts (
+    postid UUID PRIMARY KEY,
+    userid UUID NOT NULL,
+    feedid UUID DEFAULT NULL,
+    contenttype VARCHAR(13) NOT NULL DEFAULT 'text' CHECK (contenttype IN ('image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery', 'secretgallery')),
+    title VARCHAR(63) NOT NULL,
+    mediadescription VARCHAR (500) DEFAULT NULL,
+    media TEXT NOT NULL,
+    cover TEXT DEFAULT NULL,
+    options TEXT DEFAULT NULL,
+    status SMALLINT DEFAULT 10 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_posts_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_posts_feedid FOREIGN KEY (feedid) REFERENCES newsfeed(feedid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_posts_userid ON posts(userid);
+CREATE INDEX IF NOT EXISTS idx_posts_postid ON posts(postid);
+CREATE INDEX IF NOT EXISTS idx_posts_feedid ON posts(feedid);
+CREATE INDEX IF NOT EXISTS idx_posts_createdat ON posts(createdat);
+
+-- Table: post_info
+CREATE TABLE IF NOT EXISTS post_info (
+    postid UUID PRIMARY KEY,
+    userid UUID,
+    likes INTEGER DEFAULT 0 NOT NULL,
+    dislikes INTEGER DEFAULT 0 NOT NULL,
+    reports INTEGER DEFAULT 0 NOT NULL,
+    views INTEGER DEFAULT 0 NOT NULL,
+    saves INTEGER DEFAULT 0 NOT NULL,
+    shares INTEGER DEFAULT 0 NOT NULL,
+    comments INTEGER DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_post_info_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE,
+    CONSTRAINT fk_post_info_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_post_info_postid ON post_info(postid);
+CREATE INDEX IF NOT EXISTS idx_post_info_userid ON post_info(userid);
+
+-- Table: posts_media
+CREATE TABLE IF NOT EXISTS posts_media (
+    postid UUID NOT NULL,
+    contenttype VARCHAR(13) NOT NULL DEFAULT 'text' CHECK (contenttype IN ('image', 'text', 'video', 'audio', 'cover')),
+    media VARCHAR(500) NOT NULL,
+    options VARCHAR(500) DEFAULT NULL,
+    CONSTRAINT fk_posts_media_postid FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE,
+    PRIMARY KEY (postid, media)
+);
+CREATE INDEX IF NOT EXISTS idx_posts_media_postid ON posts_media(postid);
+
+-- Table: comments
+CREATE TABLE IF NOT EXISTS comments (
+    commentid UUID PRIMARY KEY,
+    userid UUID NOT NULL,
+    postid UUID NOT NULL,
+    parentid UUID DEFAULT NULL,
+    content TEXT NOT NULL,
+    status SMALLINT DEFAULT 10 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_comments_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_comments_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE,
+    CONSTRAINT fk_comments_parentid FOREIGN KEY (parentid) REFERENCES comments(commentid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_comments_postid ON comments(postid);
+CREATE INDEX IF NOT EXISTS idx_comments_parentid ON comments(parentid);
+
+-- Table: comment_info
+CREATE TABLE IF NOT EXISTS comment_info (
+    commentid UUID PRIMARY KEY,
+    userid UUID,
+    likes INTEGER DEFAULT 0 NOT NULL,
+    reports INTEGER DEFAULT 0 NOT NULL,
+    comments INTEGER DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_comment_info_comments FOREIGN KEY (commentid) REFERENCES comments(commentid) ON DELETE CASCADE,
+    CONSTRAINT fk_comment_info_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_comment_info_commentid ON comment_info(commentid);
+CREATE INDEX IF NOT EXISTS idx_comment_info_userid ON comment_info(userid);
+
+-- Table: contactus
+CREATE TABLE IF NOT EXISTS contactus (
+    msgid BIGSERIAL PRIMARY KEY,
+    email VARCHAR(249) NOT NULL,
+    name VARCHAR(33) NOT NULL,
+    message VARCHAR(500) NOT NULL,
+    ip INET NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS contactus_rate_limit (
+    ip INET PRIMARY KEY,
+    request_count INT DEFAULT 0 NOT NULL,
+    last_request TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Table: dailyfree
+CREATE TABLE IF NOT EXISTS dailyfree (
+    userid UUID PRIMARY KEY,
+    liken SMALLINT DEFAULT 0 NOT NULL,
+    comments SMALLINT DEFAULT 0 NOT NULL,
+    posten SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_dailyfree_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_dailyfree_createdat ON dailyfree(createdat);
+
+-- Table: gems
+CREATE TABLE IF NOT EXISTS gems (
+    gemid UUID PRIMARY KEY,
+    userid UUID NOT NULL,
+    postid UUID NOT NULL,
+    fromid UUID DEFAULT NULL,
+    gems NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    whereby INTEGER NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_gems_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_gems_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_gems_userid ON gems(userid);
+CREATE INDEX IF NOT EXISTS idx_gems_postid ON gems(postid);
+
+-- Table: invisibles
+CREATE TABLE IF NOT EXISTS invisibles (
+    invis_id UUID PRIMARY KEY,
+    CONSTRAINT fk_invisibles_users FOREIGN KEY (invis_id) 
+        REFERENCES users(uid) 
+        ON DELETE CASCADE 
+);
+
+-- Table: logdata
+CREATE TABLE IF NOT EXISTS logdata (
+    logid BIGSERIAL PRIMARY KEY,
+    userid UUID NOT NULL,
+    ip INET NOT NULL,
+    browser VARCHAR(255),
+    action_type VARCHAR(30),
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+--CREATE INDEX idx_logdata_userid ON logdata(userid);
+--CREATE INDEX idx_logdata_createdat ON logdata(createdat);
+
+-- Table: logdaten
+CREATE TABLE IF NOT EXISTS logdaten (
+    logid BIGSERIAL PRIMARY KEY,
+    userid UUID NOT NULL,
+    ip INET NOT NULL,
+    browser VARCHAR(255) NOT NULL,
+    url VARCHAR(255) NOT NULL,
+    http_method VARCHAR(10) NOT NULL,
+    status_code INTEGER NOT NULL,
+    response_time DECIMAL(10, 2) NOT NULL, -- In milliseconds
+    location VARCHAR(255) DEFAULT NULL,
+    action_type VARCHAR(30) NOT NULL,
+    request_payload TEXT DEFAULT NULL,
+    auth_status VARCHAR(50) NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+-- CREATE INDEX idx_logdaten_userid ON logdaten(userid);
+-- CREATE INDEX idx_logdaten_createdat ON logdaten(createdat);
+-- CREATE INDEX idx_logdaten_ip ON logdaten(ip);
+
+-- Table: logwins
+CREATE TABLE IF NOT EXISTS logwins (
+    token UUID PRIMARY KEY,
+    userid UUID NOT NULL,
+    postid UUID DEFAULT NULL,
+    fromid UUID DEFAULT NULL,
+    gems NUMERIC(30,10) DEFAULT NULL,
+    numbers NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    numbersq NUMERIC(64) DEFAULT 0 NOT NULL,
+    whereby INTEGER DEFAULT 0  NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_logwins_userid ON logwins(userid);
+CREATE INDEX IF NOT EXISTS idx_logwins_postid ON logwins(postid);
+
+-- Table: mcap
+CREATE TABLE IF NOT EXISTS mcap (
+    capid SERIAL PRIMARY KEY,
+    coverage NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    tokenprice NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    gemprice NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    daygems NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    daytokens NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    totaltokens NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Table: token_holders
+CREATE TABLE IF NOT EXISTS token_holders (
+    token VARCHAR(128) PRIMARY KEY,
+    userid UUID NOT NULL,
+    attempt SMALLINT DEFAULT 0 NOT NULL,
+    expiresat INTEGER NOT NULL CHECK (expiresat >= 0),
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS token_holders_email_expires ON token_holders (userid, expiresat);
+
+-- Table: password_resets
+CREATE TABLE IF NOT EXISTS password_resets (
+    token VARCHAR(128) PRIMARY KEY,
+    userid UUID NOT NULL,
+    attempt SMALLINT DEFAULT 0 NOT NULL,
+    expiresat INTEGER NOT NULL CHECK (expiresat >= 0),
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS password_resets_expires ON password_resets (userid, expiresat);
+
+-- Table: tags
+CREATE TABLE IF NOT EXISTS tags (
+    tagid BIGSERIAL PRIMARY KEY,
+    name VARCHAR(62) NOT NULL
+);
+
+-- Table: post_tags
+CREATE TABLE IF NOT EXISTS post_tags (
+    postid UUID NOT NULL,
+    tagid INTEGER NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT pk_post_tags PRIMARY KEY (postid, tagid),
+    CONSTRAINT fk_post_tags_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE,
+    CONSTRAINT fk_post_tags_tags FOREIGN KEY (tagid) REFERENCES tags(tagid) ON DELETE CASCADE
+);
+
+-- Table: refresh_tokens
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    userid UUID PRIMARY KEY,
+    refresh_token TEXT NOT NULL,
+    createdat INTEGER NOT NULL,
+    expiresat INTEGER NOT NULL,
+    CONSTRAINT fk_refresh_tokens_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+
+-- Table: user_block_user
+CREATE TABLE IF NOT EXISTS user_block_user (
+    blockerid UUID NOT NULL,
+    blockedid UUID NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT pk_user_block_user PRIMARY KEY (blockerid, blockedid),
+    CONSTRAINT fk_user_block_user_blocker FOREIGN KEY (blockerid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_block_user_blocked FOREIGN KEY (blockedid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_user_block_user_blockerid ON user_block_user(blockerid);
+CREATE INDEX IF NOT EXISTS idx_user_block_user_blockedid ON user_block_user(blockedid);
+
+-- Table: user_chat_status
+CREATE TABLE IF NOT EXISTS user_chat_status (
+    userid UUID NOT NULL,
+    chatid UUID NOT NULL,
+    last_seen_message_id INTEGER DEFAULT 0,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT pk_user_chat_status PRIMARY KEY (userid, chatid),
+    CONSTRAINT fk_user_chat_status_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_chat_status_chats FOREIGN KEY (chatid) REFERENCES chats(chatid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_chat_status_last_seen FOREIGN KEY (last_seen_message_id) REFERENCES chatmessages(messid) ON DELETE NO ACTION ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_user_chat_status_userid ON user_chat_status(userid);
+CREATE INDEX IF NOT EXISTS idx_user_chat_status_chatid ON user_chat_status(chatid);
+
+-- Table: user_comment_likes
+CREATE TABLE IF NOT EXISTS user_comment_likes (
+    userid UUID NOT NULL,
+    commentid UUID NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT pk_user_comment_likes PRIMARY KEY (userid, commentid),
+    CONSTRAINT fk_user_comment_likes_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_comment_likes_comments FOREIGN KEY (commentid) REFERENCES comments(commentid) ON DELETE CASCADE
+);
+--CREATE INDEX idx_user_comment_likes_userid ON user_comment_likes(userid);
+
+-- Table: user_comment_reports
+CREATE TABLE IF NOT EXISTS user_comment_reports (
+    userid UUID NOT NULL,
+    commentid UUID NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT pk_user_comment_reports PRIMARY KEY (userid, commentid),
+    CONSTRAINT fk_user_comment_reports_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_comment_reports_comments FOREIGN KEY (commentid) REFERENCES comments(commentid) ON DELETE CASCADE
+);
+-- CREATE INDEX idx_user_comment_reports_userid ON user_comment_reports(userid);
+-- CREATE INDEX idx_user_comment_reports_postid ON user_comment_reports(postid);
+
+-- Table: user_post_comments
+CREATE TABLE IF NOT EXISTS user_post_comments (
+    commentid UUID PRIMARY KEY,
+    userid UUID NOT NULL,
+    postid UUID NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_user_post_comments_commentid FOREIGN KEY (commentid) REFERENCES comments(commentid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_post_comments_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_post_comments_postid FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_user_post_comments_userid ON user_post_comments(userid);
+CREATE INDEX IF NOT EXISTS idx_user_post_comments_postid ON user_post_comments(postid);
+
+-- Table: user_post_dislikes
+CREATE TABLE IF NOT EXISTS user_post_dislikes (
+    userid UUID NOT NULL,
+    postid UUID NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT unique_user_post_dislikes PRIMARY KEY (userid, postid),
+    CONSTRAINT fk_user_post_dislikes_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_post_dislikes_postid FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_user_post_dislikes_userid ON user_post_dislikes(userid);
+CREATE INDEX IF NOT EXISTS idx_user_post_dislikes_postid ON user_post_dislikes(postid);
+
+-- Table: user_post_likes
+CREATE TABLE IF NOT EXISTS user_post_likes (
+    userid UUID NOT NULL,
+    postid UUID NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT unique_user_post_likes PRIMARY KEY (userid, postid),
+    CONSTRAINT fk_user_post_likes_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_post_likes_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_user_post_likes_userid ON user_post_likes(userid);
+CREATE INDEX IF NOT EXISTS idx_user_post_likes_postid ON user_post_likes(postid);
+
+-- Table: user_post_reports
+CREATE TABLE IF NOT EXISTS user_post_reports (
+    userid UUID NOT NULL,
+    postid UUID NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT unique_user_post_reports PRIMARY KEY (userid, postid),
+    CONSTRAINT fk_user_post_reports_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_post_reports_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
+);
+-- CREATE INDEX idx_user_post_reports_userid ON user_post_reports(userid);
+-- CREATE INDEX idx_user_post_reports_postid ON user_post_reports(postid);
+
+-- Table: user_post_saves
+CREATE TABLE IF NOT EXISTS user_post_saves (
+    userid UUID NOT NULL,
+    postid UUID NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT unique_user_post_saves PRIMARY KEY (userid, postid),
+    CONSTRAINT fk_user_post_saves_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_post_saves_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
+);
+-- CREATE INDEX idx_user_post_saves_userid ON user_post_saves(userid);
+-- CREATE INDEX idx_user_post_saves_postid ON user_post_saves(postid);
+
+-- Table: user_post_shares
+CREATE TABLE IF NOT EXISTS user_post_shares (
+    userid UUID NOT NULL,
+    postid UUID NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT unique_user_post_shares PRIMARY KEY (userid, postid),
+    CONSTRAINT fk_user_post_shares_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_post_shares_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
+);
+-- CREATE INDEX idx_user_post_shares_userid ON user_post_shares(userid);
+-- CREATE INDEX idx_user_post_shares_postid ON user_post_shares(postid);
+
+-- Table: Versionierung
+CREATE TABLE IF NOT EXISTS versions (
+    versid UUID PRIMARY KEY,
+    version NUMERIC(3,2) DEFAULT 0.0 NOT NULL,
+    wikiLink TEXT DEFAULT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Table: user_post_views
+CREATE TABLE IF NOT EXISTS user_post_views (
+    userid UUID NOT NULL,
+    postid UUID NOT NULL,
+    collected SMALLINT DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT unique_user_post_views PRIMARY KEY (userid, postid),
+    CONSTRAINT fk_user_post_views_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_user_post_views_posts FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_user_post_views_userid ON user_post_views(userid);
+CREATE INDEX IF NOT EXISTS idx_user_post_views_postid ON user_post_views(postid);
+
+-- Table: wallet
+CREATE TABLE IF NOT EXISTS wallet (
+    token VARCHAR(12) PRIMARY KEY,
+    userid UUID NOT NULL,
+    postid UUID DEFAULT NULL,
+    fromid UUID DEFAULT NULL,
+    numbers NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    numbersq NUMERIC(64) DEFAULT 0.0 NOT NULL,
+    whereby INTEGER DEFAULT 0 NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_wallet_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_wallet_userid ON wallet(userid);
+
+-- Table: wallett
+CREATE TABLE IF NOT EXISTS wallett (
+    userid UUID PRIMARY KEY,
+    liquidity NUMERIC(30,10) DEFAULT 0.0 NOT NULL,
+    liquiditq NUMERIC(64) DEFAULT 0.0 NOT NULL,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_wallett_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_wallett_userid ON wallett(userid);
+
+-- Table: password_reset_requests
+CREATE TABLE IF NOT EXISTS password_reset_requests (
+    user_id UUID NOT NULL,
+    token VARCHAR(255) NOT NULL,
+	collected boolean DEFAULT false NOT NULL,
+	attempt_count INTEGER DEFAULT 1 NOT NULL,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    last_attempt TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	expires_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users(uid) ON DELETE CASCADE
+);
+-- Table: action_prices
+CREATE TABLE IF NOT EXISTS action_prices (
+    post_price      NUMERIC(10, 4) NOT NULL DEFAULT 0.00,
+    like_price      NUMERIC(10, 4) NOT NULL DEFAULT 0.00,
+    dislike_price   NUMERIC(10, 4) NOT NULL DEFAULT 0.00,
+    comment_price   NUMERIC(10, 4) NOT NULL DEFAULT 0.00,
+    currency        VARCHAR(10) DEFAULT 'EUR',
+    createdat       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedat       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- ReportFlow Feature
+
+-- Table: user_reports
+CREATE TABLE IF NOT EXISTS user_reports (
+    reportid            UUID NOT NULL PRIMARY KEY,
+    reporter_userid     UUID NOT NULL,
+    targetid            UUID NOT NULL,
+    targettype          VARCHAR(13) NOT NULL DEFAULT 'post' CHECK (targettype IN ('post', 'user', 'comment')),
+    message             VARCHAR (500) DEFAULT NULL,
+    collected           SMALLINT DEFAULT 0 NOT NULL,
+    hash_content_sha256 CHAR(64) NOT NULL,
+    createdat           TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    
+    CONSTRAINT unique_reporter_userid_targetid_user_reports 
+        UNIQUE (reporter_userid, targetid, hash_content_sha256),
+    CONSTRAINT ids_not_equal 
+        CHECK (reporter_userid <> targetid),
+    CONSTRAINT fk_reporter_user_reports_users 
+        FOREIGN KEY (reporter_userid) 
+        REFERENCES users(uid) 
+        ON DELETE CASCADE
+);
+-- CREATE INDEX idx_reporter_userid_reports_user ON user_reports(reporter_userid);
+-- CREATE INDEX idx_targetid_reports_user ON user_reports(targetid);
+
+-- Table: users_info
+ALTER TABLE users_info
+ADD COLUMN IF NOT EXISTS reports INTEGER NOT NULL DEFAULT 0;
+
+-- Table: users_info
+ALTER TABLE users_info
+ADD COLUMN IF NOT EXISTS count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
+
+-- Table: comment_info
+ALTER TABLE comment_info
+ADD COLUMN IF NOT EXISTS count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
+
+-- Table: post_info
+ALTER TABLE post_info
+ADD COLUMN IF NOT EXISTS count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
+
+
+COMMIT;
