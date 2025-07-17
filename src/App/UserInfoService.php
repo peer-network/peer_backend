@@ -350,13 +350,13 @@ class UserInfoService
             }
         } catch (\Exception $e) {
             $this->logger->error('UserInfoService.reportUser: Error while fetching data for report generation ', ['exception' => $e]);
-            return $this->respondWithError(00000); // 410xx - failed to report user
+            return $this->respondWithError(41015); // 410xx - failed to report user
         }
 
         $contentHash = $user->hashValue();
         if (empty($contentHash)) {
             $this->logger->error('UserInfoService.reportUser: Error while generation content hash');
-            return $this->respondWithError(00000); // 410xx - failed to report user
+            return $this->respondWithError(41015); // 410xx - failed to report user
         }
 
         try {
@@ -369,7 +369,7 @@ class UserInfoService
 
             if ($exists === null) {
                 $this->logger->error("UserInfoService.reportUser: Failed to add report");
-                return $this->respondWithError(00000); // 410xx - failed to report user
+                return $this->respondWithError(41015); // 410xx - failed to report user
             }
 
             if ($exists === true) {
@@ -387,7 +387,7 @@ class UserInfoService
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
-            return $this->respondWithError(00000); // 410xx - failed to report user
+            return $this->respondWithError(41015); // 410xx - failed to report user
         }
     }
 }
