@@ -272,8 +272,8 @@ jobs:
  
       - name: Build And Start Docker Containers
         run: |
-          docker compose -f ./docker-compose.yaml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}
-          docker compose -f ./docker-compose.yaml up -d
+          docker compose -f ./docker-compose.yml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}
+          docker compose -f ./docker-compose.yml up -d
  
       - name: Set PHP upload limits
         run: |
@@ -384,7 +384,7 @@ jobs:
         continue-on-error: true
         run: |
           result=0
-          docker compose -f ./docker-compose.yaml run --rm newman || result=$?
+          docker compose -f ./docker-compose.yml run --rm newman || result=$?
           echo "$result" > newman_exit_code.txt
  
       - name: Set newman outcome output
@@ -462,7 +462,7 @@ jobs:
  
       - name: Tear Down Docker Containers
         if: always()
-        run: docker compose -f ./docker-compose.yaml down
+        run: docker compose -f ./docker-compose.yml down
  
       - name: Set build outcome flag
         id: outcome
