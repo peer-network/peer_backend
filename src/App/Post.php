@@ -151,7 +151,7 @@ class Post implements Hashable
                 ],
             ],
             'media' => [
-                'required' => true,
+                'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,

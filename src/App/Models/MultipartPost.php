@@ -229,22 +229,31 @@ class MultipartPost
     /**
      * Move Uploaded File to Tmp Folder
      */
-    public function moveFileTmpToMedia(string $file){
+    public function moveFileTmpToMedia(): array {
         $allMetadata = [];
 
-        foreach ($this->getMedia() as $key => $media) {
-            $tmpFolder = __DIR__ . "/../../../runtime-data/media/tmp/";
+        $tmpFolder = __DIR__ . "/../../../runtime-data/media/tmp/";
 
+        foreach ($this->getMedia() as $key => $media) {
+             // Open the file stream
+            $stream = new \Slim\Psr7\Stream(fopen($tmpFolder.$media, 'r'));
+
+            // Create the UploadedFile object
+            $uploadedFile = new \Slim\Psr7\UploadedFile(
+                $stream, 
+                null, 
+                null
+            );
             // Calculate Subfolder
-            $extension = pathinfo($tmpFolder.$file, PATHINFO_EXTENSION);
+            $extension = pathinfo($tmpFolder.$media, PATHINFO_EXTENSION);
             $subFolder = $this->getSubfolder($extension);
 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/".$subFolder;
 
-            $filePath = "$directoryPath/$file";
+            $filePath = "$directoryPath/$media";
 
             try {
-                $media->moveTo($filePath);
+                $uploadedFile->moveTo($filePath);
             } catch (\RuntimeException $e) {
                 throw new \Exception("Failed to move file: $filePath");
             }
@@ -253,20 +262,58 @@ class MultipartPost
 
             $options = [
                 'size'       => $fileDetails['size'],
-                'duration'   => null, // Keine PHP-only Funktion für Video-Dauer
+                'duration'   => null,
                 'ratio'      => $fileDetails['ratio'] ?? null,
                 'resolution' => isset($fileDetails['width']) ? "{$fileDetails['width']}x{$fileDetails['height']}" : null,
             ];
 
             $allMetadata[] = [
-                'success' => true,
-                'path'    => "/$subFolder/$file",
+                'path'    => "/$subFolder/$media",
                 'options' => $options,
             ];
         }
 
-        return isset($allMetadata[0]) ? $allMetadata[0] : [];
+        return isset($allMetadata) && is_array($allMetadata) ? $allMetadata : [];
     }
+
+        
+    /**
+     * Move Uploaded File to Tmp Folder
+     */
+    public function revertFileToTmp(): void 
+    {
+        $tmpFolder = __DIR__ . "/../../../runtime-data/media/tmp/";
+
+        foreach ($this->getMedia() as $key => $media) {        
+
+            // Calculate Subfolder
+            $extension = pathinfo($media, PATHINFO_EXTENSION);
+            $subFolder = $this->getSubfolder($extension);
+
+
+            $directoryPath = __DIR__ . "/../../../runtime-data/media/".$subFolder;
+
+            $filePath = "$directoryPath/$media";
+
+            // Open the file stream
+            $stream = new \Slim\Psr7\Stream(fopen($filePath, 'r'));
+
+            // Create the UploadedFile object
+            $uploadedFile = new \Slim\Psr7\UploadedFile(
+                $stream, 
+                null, 
+                null
+            );
+
+            try {
+                $uploadedFile->moveTo($tmpFolder.$media);
+            } catch (\RuntimeException $e) {
+                throw new \Exception("Failed to move file: $filePath");
+            }
+
+        }
+    }
+
 
 
     /**
