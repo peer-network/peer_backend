@@ -47,9 +47,6 @@ class ContentFilterServiceImpl {
         $allowedTypes = $this->contentSeverityLevels;
 
         $key = array_search($contentFilterBy, $allowedTypes);
-        if ($key === null) {
-            return null;
-        }
         return $key;
     }
 
