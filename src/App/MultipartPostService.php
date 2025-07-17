@@ -104,7 +104,7 @@ class MultipartPostService
             return [
                 'status' => 'success',
                 'ResponseCode' => 0000, // Files uploaded successfully
-                'affectedRows' => implode(', ', $allMetadata),
+                'uploadedFiles' => implode(',', $allMetadata),
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
