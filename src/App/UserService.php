@@ -446,6 +446,7 @@ class UserService
         try {
             $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
             if (!$userPreferences) {
+                $this->logger->error('UserService.updateUserPreferences: failed to load user preferences for updating');
                 return $this->respondWithError(40301); // 402xx
             }
 
@@ -453,6 +454,7 @@ class UserService
                 $contentFilteringSeverityLevel = $contentFilterService->getContentFilteringSeverityLevel($contentFiltering);
                 
                 if($contentFilteringSeverityLevel === null){
+                    $this->logger->error('UserService.updateUserPreferences: failed to get ContentFilteringSeverityLevel');
                     return $this->respondWithError(30103);
                 }
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
@@ -461,7 +463,13 @@ class UserService
 
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
-            $resultPreferences['contentFilteringSeverityLevel'] = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
+            $contentFilteringSeverityLevelString = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
+
+            if ($contentFilteringSeverityLevelString === null) {
+                $this->logger->error('UserService.updateUserPreferences: failed to get contentFilteringSeverityLevelString');
+                return self::respondWithError(00000); // 402x1
+            }
+            $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
             $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
             
