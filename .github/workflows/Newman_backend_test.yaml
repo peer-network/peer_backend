@@ -264,14 +264,6 @@ jobs:
       - name: Set Docker Image Tag
         run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
  
-      - name: Create ordered SQL init files in CI
-        run: |
-          mkdir tmp_sql
-          cp sql_files_for_import/structure.psql tmp_sql/01.sql
-          cp sql_files_for_import/additional_data.sql tmp_sql/02.sql
-          rm -rf sql_files_for_import/*
-          cp -a tmp_sql/. sql_files_for_import/
- 
       - name: Reset Docker volumes (force initdb scripts to run)
         run: docker compose down -v
  
