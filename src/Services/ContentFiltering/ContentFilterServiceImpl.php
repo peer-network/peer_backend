@@ -3,6 +3,7 @@
 namespace Fawaz\Services\ContentFiltering;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
@@ -14,21 +15,18 @@ class ContentFilterServiceImpl {
     private ?string $contentFilterBy;
     
     function __construct(
-        ContentFilteringStrategy $contentFilterStrategy,
+        ?ContentFilteringStrategy $contentFilterStrategy = null,
         ?array $contentSeverityLevels = null,
         ?string $contentFilterBy = null
     ) {
-        // wirte validation here
         $contentFiltering = ConstantsConfig::contentFiltering();
         $this->contentSeverityLevels = $contentSeverityLevels ?? $contentFiltering['CONTENT_SEVERITY_LEVELS'];
         $this->reports_amount_to_hide_content = $contentFiltering['REPORTS_COUNT_TO_HIDE_FROM_IOS'];
         $this->moderationsDismissAmountToRestoreContent = $contentFiltering['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS'];
-        $this->contentFilterStrategy = $contentFilterStrategy;
+        
+        $this->contentFilterStrategy = $contentFilterStrategy ?? new ListPostsContentFilteringStrategy();
+        
         $this->contentFilterBy = $contentFilterBy;
-
-        // if ($contentFilterBy) { 
-        //     echo("ContentFilterServiceImpl: constructor: contentFilterBy: $contentFilterBy" . "\n");
-        // }
     }
 
     public function validateContentFilter(?string $contentFilterBy): bool {
@@ -45,6 +43,28 @@ class ContentFilterServiceImpl {
         return true;
     }
 
+    public function getContentFilteringSeverityLevel(string $contentFilterBy): ?int {
+        $allowedTypes = $this->contentSeverityLevels;
+
+        $key = array_search($contentFilterBy, $allowedTypes);
+        return $key;
+    }
+
+    public function getContentFilteringStringFromSeverityLevel(?int $contentFilterSeverityLevel): ?string {
+        $allowedTypes = $this->contentSeverityLevels;
+        
+        if ($contentFilterSeverityLevel && isset($allowedTypes[$contentFilterSeverityLevel]) && !empty($allowedTypes[$contentFilterSeverityLevel])) {
+            return $allowedTypes[$contentFilterSeverityLevel];
+        }
+        return $this->getDefaultContentFilteringString();
+    }
+
+    public function getDefaultContentFilteringString(): string {
+        $allowedTypes = $this->contentSeverityLevels;
+    
+        return $allowedTypes[0];
+    }
+
     public function getContentFilterAction(
         ContentType $contentTarget, 
         ContentType $showingContent,
@@ -53,7 +73,7 @@ class ContentFilterServiceImpl {
         ?string $currentUserId = null,
         ?string $targetUserId = null,
     ): ?ContentFilteringAction {
-        if ($this->contentFilterBy === $this->contentSeverityLevels['0']) {
+        if ($this->contentFilterBy === $this->contentSeverityLevels[0]) {
             $showingContentString = strtoupper($showingContent->value);
 
             $reportAmountToHide = $this->reports_amount_to_hide_content[$showingContentString];
