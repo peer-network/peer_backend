@@ -269,7 +269,7 @@ class UserService
             $this->userPreferencesMapper->insert($userPreferences);
             unset($userPreferencesSrc, $userPreferences);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::UserInfo.', ['exception' => $e]);
+            $this->logger->warning('Error registering User::UserPreferences.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());
         }
 
