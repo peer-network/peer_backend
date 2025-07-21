@@ -101,11 +101,11 @@ enum ContentFilterType {
 }
 
 input UserPreferencesInput {
-  contentFiltering: ContentFilterType
+  contentFilteringSeverityLevel: ContentFilterType
 }
 
 type UserPreferences {
-  contentFiltering: ContentFilterType
+  contentFilteringSeverityLevel: ContentFilterType
 }
 
 type ReferralInfoResponse {
@@ -278,7 +278,7 @@ type PostCommentsData {
   createdat: Date
   amountlikes: Decimal
   isliked: Boolean
-  user: Userinfo
+  user: BasicUserInfo
   subcomments: [PostSubCommentsData]
 }
 
@@ -292,7 +292,7 @@ type PostSubCommentsData {
   amountlikes: Decimal
   amountreplies: Decimal,
   isliked: Boolean
-  user: Userinfo
+  user: BasicUserInfo
 }
 
 type PercentBeforeTransactionResponse {
@@ -546,13 +546,13 @@ type ChatMessageInfo {
   createdat: Date
 }
 
-type Userinforesponse {
+type BasicUserInforesponse {
   status: String!
   ResponseCode: String
-  affectedRows: Userinfo
+  affectedRows: BasicUserInfo
 }
 
-type Userinfo {
+type BasicUserInfo {
   userid: ID
   img: String
   username: String
@@ -565,7 +565,7 @@ type UserFriendsResponse {
   status: String!
   counter: Int!
   ResponseCode: String
-  affectedRows: [Userinfo]
+  affectedRows: [BasicUserInfo]
 }
 
 type AllUserInfo {
