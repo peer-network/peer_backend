@@ -93,6 +93,7 @@ class PostInfoMapper
                     'exception' => $e->getMessage()
                 ]
             );
+            return false;
         }
     }
 
