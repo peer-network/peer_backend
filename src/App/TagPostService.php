@@ -57,7 +57,11 @@ class TagPostService
             return $this->respondWithError(30101);
         }
 
-        if (strlen($tagName) < 2 || strlen($tagName) > 50 || !preg_match('/^[a-zA-Z]+$/', $tagName)) {
+        $tagNameConfig = ConstantsConfig::post()['TAGNAME'];
+
+        if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] ||
+            strlen($tagName) > $tagNameConfig['MAX_LENGTH'] ||
+            !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
             return $this->respondWithError(30255);
         }
 
@@ -138,6 +142,17 @@ class TagPostService
         } finally {
             $this->logger->debug('createTag function execution completed');
         }
+    }
+
+    private function isValidTagName(?string $tagName): bool
+    {
+        $tagNameConfig = ConstantsConfig::post()['TAGNAME'];
+        return (
+            $tagName &&
+            strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] &&
+            strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] &&
+            preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)
+        );
     }
 
     private function respondWithError(string $message): array
