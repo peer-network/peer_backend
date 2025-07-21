@@ -4,8 +4,10 @@ namespace Fawaz\App;
 
 use Fawaz\Database\UserInfoMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\ReportsMapper;
 use Fawaz\Services\Base64FileHandler;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Utils\ReportTargetType;
 use Psr\Log\LoggerInterface;
 
@@ -18,6 +20,7 @@ class UserInfoService
         protected LoggerInterface $logger,
         protected UserInfoMapper $userInfoMapper,
         protected UserMapper $userMapper,
+        protected UserPreferencesMapper $userPreferencesMapper,
         protected ReportsMapper $reportsMapper,
     ) {
         $this->base64filehandler = new Base64FileHandler();
@@ -74,9 +77,19 @@ class UserInfoService
         try {
             $results = $this->userInfoMapper->loadInfoById($this->currentUserId);
 
-            if ($results !== false) {
+            $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
+
+
+            if ($results !== false && $userPreferences !== false) {
                 $affectedRows = $results->getArrayCopy();
+                $resultPreferences = $userPreferences->getArrayCopy();
                 $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
+                
+                $contentFilterService = new ContentFilterServiceImpl();
+                $resultPreferences['contentFilteringSeverityLevel'] = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
+
+                $affectedRows['userPreferences'] = $resultPreferences;
+
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 11002,
@@ -332,13 +345,13 @@ class UserInfoService
             }
         } catch (\Exception $e) {
             $this->logger->error('UserInfoService.reportUser: Error while fetching data for report generation ', ['exception' => $e]);
-            return $this->respondWithError(00000); // 410xx - failed to report user
+            return $this->respondWithError(41015); // 410xx - failed to report user
         }
 
         $contentHash = $user->hashValue();
         if (empty($contentHash)) {
             $this->logger->error('UserInfoService.reportUser: Error while generation content hash');
-            return $this->respondWithError(00000); // 410xx - failed to report user
+            return $this->respondWithError(41015); // 410xx - failed to report user
         }
 
         try {
@@ -351,7 +364,7 @@ class UserInfoService
 
             if ($exists === null) {
                 $this->logger->error("UserInfoService.reportUser: Failed to add report");
-                return $this->respondWithError(00000); // 410xx - failed to report user
+                return $this->respondWithError(41015); // 410xx - failed to report user
             }
 
             if ($exists === true) {
@@ -369,7 +382,7 @@ class UserInfoService
             ];
         } catch (\Exception $e) {
             $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
-            return $this->respondWithError(00000); // 410xx - failed to report user
+            return $this->respondWithError(41015); // 410xx - failed to report user
         }
     }
 }

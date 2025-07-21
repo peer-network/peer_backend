@@ -175,6 +175,24 @@ class GraphQLSchemaBuilder
             'Query' => $this->buildQueryResolvers(),
             'Mutation' => $this->buildMutationResolvers(),
             'Subscription' => $this->buildSubscriptionResolvers(),
+            'UserPreferencesResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.DefaultResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'UserPreferences' => [
+                'contentFilteringSeverityLevel' => function (array $root): string {
+                    $this->logger->info('Query.UserPreferences Resolvers');
+                    return $root['contentFilteringSeverityLevel'] ?? '';
+                }
+            ],
             'TodaysInteractionsData' => [
                 'totalInteractions' => function (array $root): int {
                     $this->logger->info('Query.TodaysInteractionsData Resolvers');
@@ -1092,6 +1110,9 @@ class GraphQLSchemaBuilder
                 'updatedat' => function (array $root): string {
                     return $root['updatedat'] ?? '';
                 },
+                'userPreferences' => function (array $root): array {
+                    return $root['userPreferences'] ?? [];
+                },
             ],
             'StandardResponse' => [
                 'status' => function (array $root): string {
@@ -1706,6 +1727,7 @@ class GraphQLSchemaBuilder
             'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
             'verifyReferralString' => fn(mixed $root, array $args) => $this->userService->verifyReferral($args['referralString']),
+            'updateUserPreferences' => fn(mixed $root, array $args) => $this->userService->updateUserPreferences($args),
             'updateUsername' => fn(mixed $root, array $args) => $this->userService->setUsername($args),
             'updateEmail' => fn(mixed $root, array $args) => $this->userService->setEmail($args),
             'updatePassword' => fn(mixed $root, array $args) => $this->userService->setPassword($args),
