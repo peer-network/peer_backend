@@ -220,7 +220,7 @@ class PostService
                 } else {
                     return $this->respondWithError(30251);
                 }
-            }else if ($args['uploadedFiles'] && !empty($args['uploadedFiles'])) {
+            }else if (isset($args['uploadedFiles']) && !empty($args['uploadedFiles'])) {
                 
                 $uploadedFileArray = $this->postMapper->handelFileMoveToMedia($args['uploadedFiles']);
                
@@ -229,7 +229,7 @@ class PostService
                 if (!empty($mediaPath['path'])) {
                     $postData['media'] = $this->argsToJsString($mediaPath['path']);
                 } else {
-                    return $this->respondWithError(30251);
+                    return $this->respondWithError(30101); 
                 }
                
             } else {
@@ -244,7 +244,9 @@ class PostService
                 if (!empty($coverPath['path'])) {
                     $postData['cover'] = $this->argsToJsString($coverPath['path']);
                 } else {
-                    $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                    if(isset($args['uploadedFiles'])){
+                        $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                    }
                     return $this->respondWithError(40306);
                 }
             }
@@ -264,7 +266,9 @@ class PostService
                 $post = new Post($postData);
             } catch (\Throwable $e) {
                 $this->postMapper->rollback();
-                $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                if(isset($args['uploadedFiles'])){
+                    $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                }
                 return $this->respondWithError($e->getMessage());
             }
             $this->postMapper->insert($post);
@@ -305,7 +309,9 @@ class PostService
                 } 
             } catch (\Throwable $e) {
                 $this->postMapper->rollback();
-                $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                if(isset($args['uploadedFiles'])){
+                    $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                }
                 return $this->respondWithError(30262);
             }
 
@@ -331,7 +337,9 @@ class PostService
 
         } catch (\Throwable $e) {
             $this->postMapper->rollback();
-            $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+            if(isset($args['uploadedFiles'])){
+                $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+            }
             $this->logger->error('Failed to create post', ['exception' => $e]);
             return $this->respondWithError(41508);
         }

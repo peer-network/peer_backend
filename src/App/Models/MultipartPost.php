@@ -5,6 +5,7 @@ namespace Fawaz\App\Models;
 use Fawaz\App\ValidationException;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Services\JWTService;
+use getID3;
 
 class MultipartPost
 {
@@ -260,12 +261,29 @@ class MultipartPost
 
             $fileDetails = $this->getFileDetails($filePath);
 
-            $options = [
-                'size'       => $fileDetails['size'],
-                'duration'   => null,
-                'ratio'      => $fileDetails['ratio'] ?? null,
-                'resolution' => isset($fileDetails['width']) ? "{$fileDetails['width']}x{$fileDetails['height']}" : null,
-            ];
+            $getfileinfo = $this->getMediaDuration($filePath);
+
+            $duration = $ratiofrm = $resolution = null;
+            $size = $this->formatBytes($fileDetails['size']);
+
+            if (in_array($subFolder, ['audio', 'video'])) {
+                $duration = $getfileinfo['duration'] ?? null;
+            }
+
+            if ($subFolder === 'video') {
+                $ratiofrm = $getfileinfo['ratiofrm'] ?? null;
+            }
+
+            if (in_array($subFolder, ['image', 'video'])) {
+                $resolution = $getfileinfo['resolution'] ?? null;
+            }
+
+            $options = array_filter([
+                'size' => $size,
+                'duration' => $duration ? $this->formatDuration($duration) : null,
+                'ratio' => $ratiofrm,
+                'resolution' => $resolution
+            ]);
 
             $allMetadata[] = [
                 'path'    => "/$subFolder/$media",
@@ -276,6 +294,62 @@ class MultipartPost
         return isset($allMetadata) && is_array($allMetadata) ? $allMetadata : [];
     }
 
+
+    private function formatDuration(float $durationInSeconds): string
+	{
+		$hours = (int) \floor($durationInSeconds / 3600);
+		$minutes = (int) \floor(fmod($durationInSeconds, 3600) / 60);
+		$seconds = (int) \floor(fmod($durationInSeconds, 60));
+		$milliseconds = (int) \round(($durationInSeconds - \floor($durationInSeconds)) * 100);
+
+		return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+	}
+
+    
+    private function formatBytes(int $bytes): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+        $index = 0;
+
+        while ($bytes >= 1024 && $index < count($units) - 1) {
+            $bytes /= 1024;
+            $index++;
+        }
+
+        return \sprintf('%.2f %s', $bytes, $units[$index]);
+    }
+    
+    private function getMediaDuration(string $filePath): ?array
+    {
+        if (!\file_exists($filePath)) {
+            return null;
+        }
+
+        try {
+            $getID3 = new getID3();
+            $fileInfo = $getID3->analyze($filePath);
+            $information = [];
+
+            if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
+              $width = $fileInfo['video']['resolution_x'];
+              $height = $fileInfo['video']['resolution_y'];
+
+              $gcd = gmp_intval(gmp_gcd($width, $height));
+              $ratio = ($width / $gcd) . ':' . ($height / $gcd);
+              $auflg = "{$width}x{$height}";
+            }
+
+            $information['duration'] = isset($fileInfo['playtime_seconds']) ? (float)$fileInfo['playtime_seconds'] : null;
+            $information['ratiofrm'] = isset($ratio) ? $ratio : null;
+            $information['resolution'] = isset($auflg) ? $auflg : null;
+
+            return isset($information) ? (array)$information : null;
+            
+        } catch (\Exception $e) {
+            \error_log("getID3 Error: " . $e->getMessage());
+            return null;
+        }
+    }
         
     /**
      * Move Uploaded File to Tmp Folder
