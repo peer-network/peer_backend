@@ -189,7 +189,7 @@ class ConstantsConfig
         'USERNAME' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 23,
-            'PATTERN' => '/[a-zA-Z0-9_]+/',
+            'PATTERN' => '^[a-zA-Z0-9_-]+$',
         ],  
         'BIOGRAPHY' => [
             'MIN_LENGTH' => 3,

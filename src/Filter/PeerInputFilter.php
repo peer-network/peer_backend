@@ -635,7 +635,7 @@ class PeerInputFilter
             return false;
         }
 
-        if (!preg_match($usernameConfig['PATTERN'], $value)) {
+        if (!preg_match('/' . $usernameConfig['PATTERN'] . '/', $value)) {
             $this->errors['username'][] = 30202;
             return false;
         }
