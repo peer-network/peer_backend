@@ -5,12 +5,10 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
-class Tokenize
+class UserPreferences
 {
-    protected string $token;
     protected string $userid;
-    protected int $attempt;
-    protected int $expiresat;
+    protected ?int $contentFilteringSeverityLevel;
     protected string $updatedat;
 
     // Constructor
@@ -19,11 +17,8 @@ class Tokenize
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
         }
-
-        $this->token = $data['token'] ?? '';
         $this->userid = $data['userid'] ?? '';
-        $this->attempt = $data['attempt'] ?? 0;
-        $this->expiresat = $data['expiresat'] ?? 0;
+        $this->contentFilteringSeverityLevel = $data['contentFilteringSeverityLevel'];
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
@@ -31,68 +26,41 @@ class Tokenize
     public function getArrayCopy(): array
     {
         $att = [
-            'token' => $this->token,
             'userid' => $this->userid,
-            'attempt' => $this->attempt,
-            'expiresat' => $this->expiresat,
-            'updatedat' => $this->updatedat
+            'contentFilteringSeverityLevel' => $this->contentFilteringSeverityLevel,
+            'updatedat' => $this->updatedat,
         ];
         return $att;
     }
 
     // Getter and Setter
-    public function getToken(): string
-    {
-        return $this->token;
-    }
-
-    public function setToken(string $token): void
-    {
-        $this->token = $token;
-    }
-
     public function getUserId(): string
     {
         return $this->userid;
     }
 
-    public function setUserId(string $userid): void
+    public function getContentFilteringSeverityLevel(): ?int
     {
-        $this->userid = $userid;
+        return $this->contentFilteringSeverityLevel;
     }
 
-    public function getAttempt(): int
-    {
-        return $this->attempt;
-    }
-
-    public function setAttempt(int $attempt): void
-    {
-        $this->attempt = $attempt;
-    }
-
-    public function getExpires(): int
-    {
-        return $this->expiresat;
-    }
-
-    public function setExpires(int $expiresat): void
-    {
-        $this->expiresat = $expiresat;
-    }
-
-    public function getUpdatedAt(): ?string
+    public function getUpdatedAt(): string
     {
         return $this->updatedat;
     }
 
-    public function setUpdatedAt(?string $updatedat): void
+    public function setUpdatedAt(): void
     {
-        $this->updatedat = $updatedat;
+        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
+    public function setContentFilteringSeverityLevel(int $contentFilteringSeverityLevel): void
+    {
+        $this->contentFilteringSeverityLevel = $contentFilteringSeverityLevel;
+    }
+    
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array|false
+    public function validate(array $data, array $elements = []): array
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -105,42 +73,28 @@ class Tokenize
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
-                //$errorMessages[] = $error;
-				$errorMessages[] = ": $error";
+                $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
             
             throw new ValidationException($errorMessageString);
         }
-        return false;
+        return [];
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
         $specification = [
-            'token' => [
-                'required' => true,
-                'filters' => [['name' => 'HtmlEntities']],
-                'validators' => [['name' => 'validateActivationToken']],
-            ],
             'userid' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'attempt' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+            'contentFilteringSeverityLevel' => [
+                'required' => false,
+                'filters' => [],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 3]],
-                ],
-            ],
-            'expiresat' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
-                'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => \time(), 'max' => \time()+1800]],
+                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],
                 ],
             ],
             'updatedat' => [
