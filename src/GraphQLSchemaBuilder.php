@@ -502,9 +502,9 @@ class GraphQLSchemaBuilder
                     return $root['isfollowing'] ?? false;
                 },
             ],
-            'Userinfo' => [
+            'BasicUserInfo' => [
                 'userid' => function (array $root): string {
-                    $this->logger->info('Query.Userinfo Resolvers');
+                    $this->logger->info('Query.BasicUserInfo Resolvers');
                     return $root['uid'] ?? '';
                 },
                 'img' => function (array $root): string {
@@ -601,9 +601,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'Userinforesponse' => [
+            'BasicUserInfoResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.Userinforesponse Resolvers');
+                    $this->logger->info('Query.BasicUserInfoResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
