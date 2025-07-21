@@ -64,7 +64,7 @@ class TagPostService
         return true;
     }
 
-    public function handleTags(array $tags, string $postId, int $maxTags = 10): array
+    public function handleTags(array $tags, string $postId, int $maxTags = 10): ?array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
@@ -90,8 +90,6 @@ class TagPostService
             ]);
             $this->tagPostMapper->insert($tagPost);
         }
-
-        return [];
     }
 
     public function createTag(string $tagName): array
