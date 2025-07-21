@@ -3,3 +3,7 @@ FROM node:alpine
 RUN npm install -g newman newman-reporter-htmlextra
  
 WORKDIR /etc/newman
+
+# Copy Postman collections and merge script into container
+COPY tests/postman_collection/*.json /etc/newman/
+COPY tests/postman_collection/merge-collections.js /etc/newman/

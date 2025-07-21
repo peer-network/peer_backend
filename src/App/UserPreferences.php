@@ -5,13 +5,11 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
-class Wallett
+class UserPreferences
 {
     protected string $userid;
-    protected float $liquidity;
-    protected int $liquiditq;
+    protected ?int $contentFilteringSeverityLevel;
     protected string $updatedat;
-    protected string $createdat;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -19,12 +17,9 @@ class Wallett
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
         }
-
         $this->userid = $data['userid'] ?? '';
-        $this->liquidity = $data['liquidity'] ?? 0.0;
-        $this->liquiditq = $data['liquiditq'] ?? 0;
+        $this->contentFilteringSeverityLevel = $data['contentFilteringSeverityLevel'];
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
@@ -32,10 +27,8 @@ class Wallett
     {
         $att = [
             'userid' => $this->userid,
-            'liquidity' => $this->liquidity,
-            'liquiditq' => $this->liquiditq,
+            'contentFilteringSeverityLevel' => $this->contentFilteringSeverityLevel,
             'updatedat' => $this->updatedat,
-            'createdat' => $this->createdat,
         ];
         return $att;
     }
@@ -46,42 +39,12 @@ class Wallett
         return $this->userid;
     }
 
-    public function setUserId(string $userid): void
+    public function getContentFilteringSeverityLevel(): ?int
     {
-        $this->userid = $userid;
+        return $this->contentFilteringSeverityLevel;
     }
 
-    public function getLiquidity(): float
-    {
-        return $this->liquidity;
-    }
-
-    public function setLiquidity(float $liquidity): void
-    {
-        $this->liquidity = $liquidity;
-    }
-
-    public function getLiquiditq(): int
-    {
-        return $this->liquiditq;
-    }
-
-    public function setLiquiditq(int $liquiditq): void
-    {
-        $this->liquiditq = $liquiditq;
-    }
-
-    public function getCreatedAt(): ?string
-    {
-        return $this->createdat;
-    }
-
-    public function setCreatedAt(?string $createdat): void
-    {
-        $this->createdat = $createdat;
-    }
-
-    public function getUpdatedAt(): ?string
+    public function getUpdatedAt(): string
     {
         return $this->updatedat;
     }
@@ -91,8 +54,13 @@ class Wallett
         $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
-    // Validation and Array Filtering methods (Unchanged)
-    public function validate(array $data, array $elements = []): array|false
+    public function setContentFilteringSeverityLevel(int $contentFilteringSeverityLevel): void
+    {
+        $this->contentFilteringSeverityLevel = $contentFilteringSeverityLevel;
+    }
+    
+    // Validation and Array Filtering methods
+    public function validate(array $data, array $elements = []): array
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -112,38 +80,24 @@ class Wallett
             
             throw new ValidationException($errorMessageString);
         }
-        return false;
+        return [];
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $wallettConst = constants()::wallett();
         $specification = [
             'userid' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'liquidity' => [
-                'required' => true,
-                'filters' => [['name' => 'FloatSanitize']],
+            'contentFilteringSeverityLevel' => [
+                'required' => false,
+                'filters' => [],
                 'validators' => [
-                    ['name' => 'ValidateFloat', 'options' => ['min' => $wallettConst['LIQUIDITY']['MIN'], 'max' => $wallettConst['LIQUIDITY']['MAX']]],
-                ],
-            ],
-            'liquiditq' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
-                'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => $wallettConst['LIQUIDITQ']['MIN'], 'max' => $wallettConst['LIQUIDITQ']['MAX']]],
+                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],
                 ],
             ],
             'updatedat' => [
-                'required' => true,
-                'validators' => [
-                    ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                ],
-            ],
-            'createdat' => [
                 'required' => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],

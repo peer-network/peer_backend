@@ -578,7 +578,7 @@ class UserMapper
             $stmt = $this->db->prepare($sql);
             
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
-            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
             
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -1578,7 +1578,7 @@ class UserMapper
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
             $stmt->bindValue(':uid', $id, \PDO::PARAM_STR);
 
             $stmt->execute();

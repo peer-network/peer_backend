@@ -5,7 +5,8 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
-use Fawaz\App\PostMedia; 
+use Fawaz\App\PostMedia;
+use Fawaz\App\Status;
 use Fawaz\Database\Interfaces\PeerMapper;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
@@ -185,7 +186,7 @@ class PostMapper extends PeerMapper
         );
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue('status', self::STATUS_DELETED, \PDO::PARAM_STR);
+        $stmt->bindValue('status', Status::DELETED, \PDO::PARAM_INT);
         $stmt->bindValue('userid', $userid, \PDO::PARAM_STR);
         $stmt->bindValue('limit', $limitPerType, \PDO::PARAM_INT);
         $stmt->execute();

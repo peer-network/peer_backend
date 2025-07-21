@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Mail\UserWelcomeMail;
@@ -24,6 +25,7 @@ class UserService
         protected LoggerInterface $logger,
         protected DailyFreeMapper $dailyFreeMapper,
         protected UserMapper $userMapper,
+        protected UserPreferencesMapper $userPreferencesMapper,
         protected PostMapper $postMapper,
         protected WalletMapper $walletMapper,
 		protected Mailer $mailer
@@ -215,6 +217,12 @@ class UserService
             'updatedat' => $createdat,
         ];
 
+        $userPreferencesSrc = [
+            'userid' => $id,
+            'contentFilteringSeverityLevel' => null,
+            'updatedat' => $createdat,
+        ];
+
         $walletData = [
             'userid' => $id,
             'liquidity' => 0.0,
@@ -255,6 +263,15 @@ class UserService
             unset($infoData, $userinfo);
         } catch (\Throwable $e) {
             $this->logger->warning('Error registering User::UserInfo.', ['exception' => $e]);
+            return self::respondWithError($e->getMessage());
+        }
+
+        try {
+            $userPreferences = new UserPreferences($userPreferencesSrc);
+            $this->userPreferencesMapper->insert($userPreferences);
+            unset($userPreferencesSrc, $userPreferences);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Error registering User::UserPreferences.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());
         }
 
@@ -407,6 +424,65 @@ class UserService
         } catch (\Throwable $e) {
             $this->logger->error('Error deleting unverified users.', ['exception' => $e]);
             return false;
+        }
+    }
+
+
+    public function updateUserPreferences(?array $args = []): array {
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        if (empty($args)) {
+            return self::respondWithError(30101);
+        }
+        $contentFilterService = new ContentFilterServiceImpl();
+
+        $this->logger->info('UserService.updateUserPreferences started');
+
+        $newUserPreferences = $args['userPreferences'];
+
+        $contentFiltering = $newUserPreferences['contentFilteringSeverityLevel'] ?? null;
+        
+        try {
+            $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
+            if (!$userPreferences) {
+                $this->logger->error('UserService.updateUserPreferences: failed to load user preferences for updating');
+                return $this->respondWithError(40301); // 402xx
+            }
+
+            if ($contentFiltering && !empty($contentFiltering)) {
+                $contentFilteringSeverityLevel = $contentFilterService->getContentFilteringSeverityLevel($contentFiltering);
+                
+                if($contentFilteringSeverityLevel === null){
+                    $this->logger->error('UserService.updateUserPreferences: failed to get ContentFilteringSeverityLevel');
+                    return $this->respondWithError(30103);
+                }
+                $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
+                $userPreferences->setUpdatedAt();
+            }
+
+            $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
+
+            $contentFilteringSeverityLevelString = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
+
+            if ($contentFilteringSeverityLevelString === null) {
+                $this->logger->error('UserService.updateUserPreferences: failed to get contentFilteringSeverityLevelString');
+                return self::respondWithError(00000); // 402x1
+            }
+            $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
+
+            $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
+            
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11014,  // 102xx
+                'affectedRows' => $resultPreferences,
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to update user preferences', ['exception' => $e]);
+            return self::respondWithError(41016); // 402xx
         }
     }
 
