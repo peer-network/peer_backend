@@ -221,15 +221,26 @@ class PostService
                     return $this->respondWithError(30251);
                 }
             }else if (isset($args['uploadedFiles']) && !empty($args['uploadedFiles'])) {
-                
-                $uploadedFileArray = $this->postMapper->handelFileMoveToMedia($args['uploadedFiles']);
-               
-                $mediaPath['path'] = $uploadedFileArray;
 
-                if (!empty($mediaPath['path'])) {
-                    $postData['media'] = $this->argsToJsString($mediaPath['path']);
-                } else {
-                    return $this->respondWithError(30101); 
+                $validateSameMediaType = new MultipartPost(['media' => explode(',',$args['uploadedFiles'])], [], false);
+                $hasSameMediaType = $validateSameMediaType->validateSameContentTypes();
+
+                if($hasSameMediaType){
+                    $postData['contenttype'] = $hasSameMediaType;
+                    $uploadedFileArray = $this->postMapper->handelFileMoveToMedia($args['uploadedFiles']);
+                    
+                    $mediaPath['path'] = $uploadedFileArray;
+
+                    if (!empty($mediaPath['path'])) {
+                        $postData['media'] = $this->argsToJsString($mediaPath['path']);
+                    } else {
+                        if(isset($args['uploadedFiles'])){
+                            $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                        }
+                        return $this->respondWithError(30101); 
+                    }
+                }else{
+                    return $this->respondWithError(0000); // Provided files should have same type 
                 }
                
             } else {
@@ -748,7 +759,7 @@ class PostService
                 'aud' => 'peerapp.de',
                 'uid' => $this->currentUserId
         ];
-        $jwtToken = $this->tokenService->createAccessTokenWithCustomExpriy($payload, 180);
+        $jwtToken = $this->tokenService->createAccessTokenWithCustomExpriy($payload, 300);
         return $jwtToken;
     }
     

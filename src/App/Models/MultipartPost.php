@@ -157,6 +157,41 @@ class MultipartPost
     }
 
     /**
+     * Ensure all media files in the array have the same content type.
+     *
+     * @throws ValidationException
+     */
+    public function validateSameContentTypes(): string|bool
+    {
+        if(empty($this->media) && !is_array($this->media)){
+            return false;
+        }
+
+        // Detect the first media type
+        $detectedTypes = [];
+        foreach ($this->media as $key => $media) {
+            $extension = pathinfo($media, PATHINFO_EXTENSION);
+          
+            $fileType = $this->getSubfolder($extension);
+            
+            if (!$fileType) {
+                return false;
+            }
+            $detectedTypes[] = $fileType;
+        }
+
+        // Check all media types are the same
+        $firstType = $detectedTypes[0];
+        foreach ($detectedTypes as $index => $type) {
+            if ($type !== $firstType) {
+                return false;
+            }
+        }
+        return $firstType;
+    }
+
+
+    /**
      * Helper to determine media type based on file's mime type
      */
     private function detectMediaType(\Slim\Psr7\UploadedFile $media): ?string
