@@ -64,7 +64,6 @@ class ConstantsConfig
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 500,
         ],
-<<<<<<< HEAD
         'COVER' => [
             'MAX_COUNT' => 1,
             'MIN_LENGTH' => 0,
@@ -223,8 +222,5 @@ class ConstantsConfig
             'MIN_LENGTH' => 00001,
             'MAX_LENGTH' => 99999,
         ],
-    ]; 
-=======
     ];
->>>>>>> origin/development
 }
