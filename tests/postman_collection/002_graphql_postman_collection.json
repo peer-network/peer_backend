@@ -4414,7 +4414,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"query": "mutation {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -7385,7 +7385,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"query": "mutation {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -7985,7 +7985,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"query": "mutation {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -9324,7 +9324,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"query": "mutation {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -9895,6 +9895,122 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query GetProfile {\n    getProfile(userid: \"{{w_userid_t2}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            isfollowed\n            isfollowing\n            amountposts\n            amounttrending\n            amountfollowed\n            amountfollower\n            amountfriends\n            amountblocked\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check preferences",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Check contentFilteringSeverityLevel = MYGRANDMALIKES\", function () {",
+							"    const response = pm.response.json();",
+							"    const level = response?.data?.getUserInfo?.affectedRows?.userPreferences?.contentFilteringSeverityLevel;",
+							"",
+							"    pm.expect(level, \"contentFilteringSeverityLevel should be MYGRANDMALIKES\")",
+							"        .to.eql(\"MYGRANDMALIKES\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetUserInfo {\n    getUserInfo {\n        status\n        ResponseCode\n        affectedRows {\n            userid\n            liquidity\n            amountposts\n            amountblocked\n            amountfollower\n            amountfollowed\n            amountfriends\n            invited\n            updatedat\n            userPreferences {\n                contentFilteringSeverityLevel\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update preferences",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11014\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UpdateUserPreferences {\n    updateUserPreferences(\n        userPreferences: { contentFilteringSeverityLevel: MYGRANDMAHATES }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            contentFilteringSeverityLevel\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
