@@ -353,7 +353,7 @@ type ChatMessageInfo {
   createdat: Date
 }
 
-type BasicUserInforesponse {
+type BasicUserInfoResponse {
   status: String!
   ResponseCode: String
   affectedRows: BasicUserInfo
