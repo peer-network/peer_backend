@@ -5,9 +5,13 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Utils\HashObject;
 
-class Post
+class Post implements Hashable
 {
+    use HashObject;
+
     protected string $postid;
     protected string $userid;
     protected ?string $feedid;
@@ -89,7 +93,7 @@ class Post
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -108,6 +112,7 @@ class Post
             $errorMessageString = implode("", $errorMessages);
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
@@ -193,5 +198,19 @@ class Post
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+    public function getHashableContent(): string {
+        return implode('|', [
+            $this->title,
+            $this->contenttype,
+            $this->media,
+            $this->cover ?? '',
+            $this->mediadescription,
+        ]);
+    }
+
+    public function hashValue(): string {
+        return $this->hashObject($this);
     }
 }

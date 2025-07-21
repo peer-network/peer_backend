@@ -24,3 +24,7 @@ runtime-data/ratelimiter/*
 !/**/placeholder.txt
 !/**/response-codes.json
 *_rate_limiter_storage.json
+tests/postman_collection/tmp_*.json
+newman/reports/
+sql_files_for_import_tmp/
+supervisord.pid

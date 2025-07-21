@@ -3,7 +3,12 @@
 namespace Fawaz\App;
 
 use Fawaz\Database\UserInfoMapper;
+use Fawaz\Database\UserMapper;
+use Fawaz\Database\UserPreferencesMapper;
+use Fawaz\Database\ReportsMapper;
 use Fawaz\Services\Base64FileHandler;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Utils\ReportTargetType;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 
@@ -14,7 +19,10 @@ class UserInfoService
 
     public function __construct(
         protected LoggerInterface $logger,
-        protected UserInfoMapper $userInfoMapper
+        protected UserInfoMapper $userInfoMapper,
+        protected UserMapper $userMapper,
+        protected UserPreferencesMapper $userPreferencesMapper,
+        protected ReportsMapper $reportsMapper,
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -70,9 +78,19 @@ class UserInfoService
         try {
             $results = $this->userInfoMapper->loadInfoById($this->currentUserId);
 
-            if ($results !== false) {
+            $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
+
+
+            if ($results !== false && $userPreferences !== false) {
                 $affectedRows = $results->getArrayCopy();
+                $resultPreferences = $userPreferences->getArrayCopy();
                 $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
+                
+                $contentFilterService = new ContentFilterServiceImpl();
+                $resultPreferences['contentFilteringSeverityLevel'] = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
+
+                $affectedRows['userPreferences'] = $resultPreferences;
+
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 11002,
@@ -150,9 +168,9 @@ class UserInfoService
 
         try {
             $results = $this->userInfoMapper->getBlockRelations($this->currentUserId, $offset, $limit);
-            if (isset($response['status']) && $response['status'] === 'error') {
+            if (isset($results['status']) && $results['status'] === 'error') {
                 $this->logger->info("No blocked users found for user ID: {$this->currentUserId}");
-                return $response;
+                return $results;
             }
 
             $this->logger->info("UserInfoService.loadBlocklist found", ['results' => $results]);
@@ -299,6 +317,80 @@ class UserInfoService
         } catch (\Exception $e) {
             $this->logger->error('Error setting profile picture', ['exception' => $e]);
             return $this->respondWithError(41003);
+        }
+    }
+
+    public function reportUser(string $reported_userid): array
+    {
+        $this->logger->info('UserInfoService.reportUser started');
+
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }   
+
+        if (!self::isValidUUID($reported_userid)) {
+            return $this->respondWithError(30201);
+        }
+
+        if ($this->currentUserId === $reported_userid) {
+            $this->logger->error('UserInfoService.reportUser: Error: currentUserId == $reported_userid');
+            return $this->respondWithError(31009); // you cant report on yourself
+        }
+
+        try {
+            $user = $this->userMapper->loadById($reported_userid);
+
+            if (!$user) {
+                $this->logger->error('UserInfoService.reportUser: User not found');
+                return $this->respondWithError(31007);
+            }
+
+            $userInfo = $this->userInfoMapper->loadInfoById($reported_userid);
+
+            if (!$userInfo) {
+                $this->logger->error('UserInfoService.reportUser: Error while fetching user data from db');
+                return $this->respondWithError(41001); 
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('UserInfoService.reportUser: Error while fetching data for report generation ', ['exception' => $e]);
+            return $this->respondWithError(41015); // 410xx - failed to report user
+        }
+
+        $contentHash = $user->hashValue();
+        if (empty($contentHash)) {
+            $this->logger->error('UserInfoService.reportUser: Error while generation content hash');
+            return $this->respondWithError(41015); // 410xx - failed to report user
+        }
+
+        try {
+            $exists = $this->reportsMapper->addReport(
+                $this->currentUserId,
+                ReportTargetType::USER, 
+                $reported_userid, 
+                $contentHash
+            );
+
+            if ($exists === null) {
+                $this->logger->error("UserInfoService.reportUser: Failed to add report");
+                return $this->respondWithError(41015); // 410xx - failed to report user
+            }
+
+            if ($exists === true) {
+                $this->logger->error('UserInfoService.reportUser: User report already exists');
+                return $this->respondWithError(31008); // report already exists
+            }
+            
+            $userInfo->setReports($userInfo->getReports() + 1);
+            $this->userInfoMapper->update($userInfo);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => "11012", // added user report successfully
+                'affectedRows' => $userInfo->getReports(),
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
+            return $this->respondWithError(41015); // 410xx - failed to report user
         }
     }
 }

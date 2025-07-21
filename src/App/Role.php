@@ -4,11 +4,11 @@ namespace Fawaz\App;
 
 final class Role {
 
-    const BEGINNER = 0;
-    const INTERMEDIATE = 1;
-    const ADVANCED = 2;
-    const EXPERT = 4;
-    const MASTER = 8;
+    const USER = 0;
+    const SYSTEM_ACCOUNT = 1; // LP Account
+    const COMPANY_ACCOUNT = 2; // PEER BANK ACCOUNT
+    const BURN_ACCOUNT = 4;
+    const WEB3_BRIDGE_USER = 8;
     const ADMIN = 16;
     const CONTRIBUTOR = 32;
     const COORDINATOR = 64;

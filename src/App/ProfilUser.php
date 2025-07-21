@@ -14,6 +14,7 @@ class ProfilUser
     protected ?string $img;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
+    protected int $status;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -28,6 +29,11 @@ class ProfilUser
         $this->img = $data['img'] ?? '';
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
+
+        if(isset($data['status']) && $data['status'] == 6){
+            $this->username = 'Deleted Account';
+            $this->img = '/profile/14ce7fba-2bee-4607-86a7-b098a3d62a78.jpg'; // NEEDs to replace with Delete User Image on Production
+        }
     }
 
     // Array Copy methods
@@ -81,7 +87,7 @@ class ProfilUser
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -101,6 +107,7 @@ class ProfilUser
             
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter

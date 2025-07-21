@@ -11,14 +11,14 @@ type Subscription {
 
 type Query {
   hello: HelloResponse!
-  searchUser(userid: ID, username: String, offset: Int, limit: Int): UserListResponse!
-  listUsers (offset: Int, limit: Int): UserListResponse!
-  getProfile(userid: ID, postLimit: Int): ProfileInfo!
-  listFollowRelations(userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
-  listFriends(offset: Int, limit: Int): UserFriendsResponse!
+  searchUser(userid: ID,contentFilterBy: ContentFilterType, username: String, offset: Int, limit: Int): UserListResponse!
+  listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse!
+  getProfile(userid: ID,contentFilterBy: ContentFilterType, postLimit: Int): ProfileInfo!
+  listFollowRelations(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
+  listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!
   getUserInfo: UserInfoResponse!
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
-  listPosts(filterBy: [PostFilterType!], IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
+  listPosts(filterBy: [PostFilterType!], contentFilterBy: ContentFilterType, IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
   getPostInfo(postid: ID!): PostInfoResponse!
   getCommentInfo(commentId: ID!): CommentInfoResponse!
   listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
@@ -38,6 +38,7 @@ type Query {
 }
 
 type Mutation {
+  updateUserPreferences(userPreferences: UserPreferencesInput): UserPreferencesResponse!
   updateUsername(username: String!, password: String!): DefaultResponse!
   updateEmail(email: String!, password: String!): DefaultResponse!
   updatePassword(password: String!, expassword: String!): DefaultResponse!
@@ -56,6 +57,7 @@ type Mutation {
   createChatFeed(input: FeedInput!): AddPostResponse!
   likeComment(commentid: ID!): DefaultResponse!
   reportComment(commentid: ID!): DefaultResponse!
+  reportUser(userid: ID!): DefaultResponse!
   deletePost(id: ID!): DefaultResponse!
   createPost(action: PostType!, input: PostInput!): PostResponse!
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
@@ -83,6 +85,11 @@ enum CommentType {
   COMMENT
 }
 
+enum ContentFilterType {
+  MYGRANDMALIKES,
+  MYGRANDMAHATES
+}
+
 enum ContentType {
   image
   audio
@@ -97,6 +104,7 @@ enum PostFilterType {
   TEXT
   FOLLOWED
   FOLLOWER
+  VIEWED
 }
 
 enum IgnoreOption {
@@ -111,6 +119,7 @@ enum PostSortType {
   DISLIKES
   VIEWS
   COMMENTS
+  FOR_ME
 }
 
 enum DayFilterType {
@@ -123,6 +132,14 @@ enum DayFilterType {
   W0
   M0
   Y0
+}
+
+input UserPreferencesInput {
+  contentFilteringSeverityLevel: ContentFilterType
+}
+
+type UserPreferences {
+  contentFilteringSeverityLevel: ContentFilterType
 }
 
 type ListTodaysInteractionsResponse {
@@ -153,6 +170,7 @@ type HelloResponse {
   currentVersion: String
   wikiLink: String
   lastMergedPullRequestNumber: String
+  companyAccountId: ID
 }
 
 type LogWins {
@@ -206,6 +224,7 @@ type UserInfo {
   amountfriends: Int!
   invited: ID!
   updatedat: Date
+  userPreferences: UserPreferences
 }
 
 type PostInfoResponse {
@@ -288,6 +307,12 @@ type DefaultResponse {
   ResponseCode: String
 }
 
+type UserPreferencesResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: UserPreferences
+}
+
 type AddPostResponse {
   status: String!
   ResponseCode: String
@@ -328,13 +353,13 @@ type ChatMessageInfo {
   createdat: Date
 }
 
-type Userinforesponse {
+type BasicUserInfoResponse {
   status: String!
   ResponseCode: String
-  affectedRows: Userinfo
+  affectedRows: BasicUserInfo
 }
 
-type Userinfo {
+type BasicUserInfo {
   userid: ID
   img: String
   username: String
@@ -347,7 +372,7 @@ type UserFriendsResponse {
   status: String!
   counter: Int!
   ResponseCode: String
-  affectedRows: [Userinfo]
+  affectedRows: [BasicUserInfo]
 }
 
 type User {

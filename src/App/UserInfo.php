@@ -16,6 +16,7 @@ class UserInfo
     protected int $amountfriends;
     protected int $amountblocked;
     protected int $isprivate;
+    protected int $reports;
     protected ?string $invited;
     protected ?string $phone;
     protected ?string $pkey;
@@ -36,6 +37,7 @@ class UserInfo
         $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->isprivate = $data['isprivate'] ?? 0;
+        $this->reports = $data['reports'] ?? 0;
         $this->invited = $data['invited'] ?? null;
         $this->phone = $data['phone'] ?? null;
         $this->pkey = $data['pkey'] ?? null;
@@ -54,6 +56,7 @@ class UserInfo
             'amountfriends' => $this->amountfriends,
             'amountblocked' => $this->amountblocked,
             'isprivate' => $this->isprivate,
+            'reports' => $this->reports,
             'invited' => $this->invited,
             'phone' => $this->phone,
             'pkey' => $this->pkey,
@@ -63,6 +66,10 @@ class UserInfo
     }
 
     // Getter and Setter
+    public function getUserId(): string
+    {
+        return $this->userid;
+    }
     public function getLiquidity(): float
     {
         return $this->liquidity;
@@ -173,8 +180,18 @@ class UserInfo
         $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
+    public function getReports(): int
+    {
+        return $this->reports;
+    }
+
+    public function setReports(int $reports): void
+    {
+        $this->reports = $reports;
+    }
+    
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -194,6 +211,7 @@ class UserInfo
             
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
@@ -245,6 +263,11 @@ class UserInfo
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 1]],
                 ],
+            ],
+            'reports' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
             ],
             'invited' => [
                 'required' => false,

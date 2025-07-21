@@ -1,6 +1,7 @@
 <?php
 
 namespace Fawaz\config\constants;
+use Fawaz\config\constants\ConstantsModeration;
 
 class ConstantsConfig
 {
@@ -43,6 +44,10 @@ class ConstantsConfig
         return ConstantsConfig::PAGING;
     }
 
+    public static function contentFiltering() {
+        return ConstantsModeration::contentFiltering();
+    }
+
     private const COMMENT = [
         'CONTENT' => [
             'MIN_LENGTH' => 2,
@@ -59,6 +64,7 @@ class ConstantsConfig
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 500,
         ],
+<<<<<<< HEAD
         'COVER' => [
             'MAX_COUNT' => 1,
             'MIN_LENGTH' => 0,
@@ -218,4 +224,7 @@ class ConstantsConfig
             'MAX_LENGTH' => 99999,
         ],
     ]; 
+=======
+    ];
+>>>>>>> origin/development
 }

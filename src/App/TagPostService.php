@@ -5,6 +5,7 @@ namespace Fawaz\App;
 use Fawaz\App\TagPost;
 use Fawaz\Database\TagPostMapper;
 use Psr\Log\LoggerInterface;
+use Fawaz\Database\TagMapper;
 use Fawaz\config\constants\ConstantsConfig;
 
 
@@ -12,7 +13,7 @@ class TagPostService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected TagPostMapper $tagPostMapper)
+    public function __construct(protected LoggerInterface $logger, protected TagPostMapper $tagPostMapper, protected TagMapper $tagMapper)
     {
     }
 

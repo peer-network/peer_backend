@@ -121,7 +121,19 @@ class PostAdvanced
     {
         return $this->title;
     }
-
+    
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+    public function getMediaDescription(): string
+    {
+        return $this->mediadescription;
+    }
+    public function setMediaDescription(string $mediadescription): void
+    {
+        $this->mediadescription = $mediadescription;
+    }
     public function getUserId(): string
     {
         return $this->userid;
@@ -136,6 +148,10 @@ class PostAdvanced
     {
         return $this->media;
     }
+    public function setMedia(string $media): void
+    {
+        $this->media = $media;
+    }
 
     public function getContentType(): string
     {
@@ -143,7 +159,7 @@ class PostAdvanced
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -163,6 +179,7 @@ class PostAdvanced
             
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
