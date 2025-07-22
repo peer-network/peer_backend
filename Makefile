@@ -148,8 +148,11 @@ test: ensure-jq
 		fi; \
 		true; \
 	}
-	
 
+phpstan-dev:
+	@docker-compose $(COMPOSE_FILES) run --rm backend \
+		sh -c "composer install --prefer-dist --no-interaction && phpstan analyse --configuration=phpstan.neon --memory-limit=512M"
+	
 clean-all: reset
 	@rm -f composer.lock
 	@rm -rf vendor
