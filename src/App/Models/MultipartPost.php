@@ -118,7 +118,7 @@ class MultipartPost
         $isValidated = $tokenService->validateToken($this->eligibilityToken);
            
         if(empty($isValidated)){
-            throw new ValidationException("Token Should be valid.", [30901]); // Token Should be valid
+            throw new ValidationException("Token Should be valid.", [40902]);
         }
 
     }
@@ -220,6 +220,28 @@ class MultipartPost
         return null;
     }
 
+
+    /**
+     * Check if file exists
+     */
+    public function isFilesExists(){
+        $isFileExists = true;
+
+        foreach ($this->getMedia() as $key => $media) {
+
+            $directoryPath = __DIR__ . "/../../../runtime-data/media/tmp";
+            
+            $filePath = "$directoryPath/$media";
+
+            if(!file_exists($filePath)){
+                $isFileExists = false;
+                break;
+            }
+
+        }
+
+        return $isFileExists;
+    }
 
     /**
      * Move Uploaded File to Tmp Folder
@@ -406,20 +428,22 @@ class MultipartPost
 
             $filePath = "$directoryPath/$media";
 
-            // Open the file stream
-            $stream = new \Slim\Psr7\Stream(fopen($filePath, 'r'));
+            if(file_exists($filePath)){
+               // Open the file stream
+                $stream = new \Slim\Psr7\Stream(fopen($filePath, 'r'));
 
-            // Create the UploadedFile object
-            $uploadedFile = new \Slim\Psr7\UploadedFile(
-                $stream, 
-                null, 
-                null
-            );
+                // Create the UploadedFile object
+                $uploadedFile = new \Slim\Psr7\UploadedFile(
+                    $stream, 
+                    null, 
+                    null
+                );
 
-            try {
-                $uploadedFile->moveTo($tmpFolder.$media);
-            } catch (\RuntimeException $e) {
-                throw new \Exception("Failed to move file: $filePath");
+                try {
+                    $uploadedFile->moveTo($tmpFolder.$media);
+                } catch (\RuntimeException $e) {
+                    throw new \Exception("Failed to move file: $filePath");
+                } 
             }
 
         }

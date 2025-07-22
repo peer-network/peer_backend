@@ -223,6 +223,11 @@ class PostService
             }else if (isset($args['uploadedFiles']) && !empty($args['uploadedFiles'])) {
 
                 $validateSameMediaType = new MultipartPost(['media' => explode(',',$args['uploadedFiles'])], [], false);
+
+                if(!$validateSameMediaType->isFilesExists()){
+                    return $this->respondWithError(40305);
+                }
+
                 $hasSameMediaType = $validateSameMediaType->validateSameContentTypes();
 
                 if($hasSameMediaType){
@@ -725,7 +730,7 @@ class PostService
             // generate PostId and JWT
             $response = [
                         'status' => 'success',
-                        'ResponseCode' => 11508, // You are eligible for post upload
+                        'ResponseCode' => 10901, // You are eligible for post upload
                     ];
             $response['postId'] = self::generateUUID();
             $response['eligibilityToken'] = $this->tokenService->createAccessTokenWithCustomExpriy($this->currentUserId, 300);
@@ -733,11 +738,11 @@ class PostService
             return $response;
             
         } catch (\Throwable $e) {
-            $this->logger->error('Query.resolveActionPrices exception', [
+            $this->logger->error('PostService.postEligibility exception', [
                 'message' => $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError(41301);
+            return $this->respondWithError(40301);
         }
     }
 

@@ -68,7 +68,7 @@ class MultipartPostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11508, // Files uploaded successfully
+                'ResponseCode' => 11515,
                 'uploadedFiles' => implode(',', $allMetadata),
             ];
         } catch (ValidationException $e) {
@@ -76,7 +76,7 @@ class MultipartPostService
             return self::respondWithError($e->getErrors()[0]);
         } catch(\Exception $e){
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
-            return self::respondWithError(40301);
+            return self::respondWithError(41514);
         }
 
     }
