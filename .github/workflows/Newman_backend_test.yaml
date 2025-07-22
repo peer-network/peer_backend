@@ -134,6 +134,46 @@ jobs:
                -d "{\"content\": \"$MESSAGE\"}" \
                "$DISCORD_WEBHOOK_URL"
 
+  phpstan_analysis:
+    name: Static Analysis with PHPStan
+    runs-on: ubuntu-latest
+    needs: [validate_sql_files, build_and_test]
+    if: needs.validate_sql_files.result == 'success' && needs.build_and_test.outputs.outcome == 'success'
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+ 
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image-${{ matrix.php-version }}
+          path: .
+ 
+      - name: Load Docker image and tag it
+        run: |
+          IMAGE_NAME=$(docker load -i peer-backend.tar | tee /dev/stderr | grep 'Loaded image:' | awk '{print $3}')
+          docker tag $IMAGE_NAME peer-backend:${{ matrix.php-version }}
+ 
+      - name: Run PHPStan inside container
+        run: |
+          docker run --rm \
+            peer-backend:${{ matrix.php-version }} \
+              sh -c "phpstan analyse --configuration=phpstan.neon --memory-limit=512M"
+ 
+      - name: Mark PHPStan failure
+        if: failure()
+        run: echo "true" > phpstan_failed.txt
+ 
+      - name: Upload PHPStan failure flag
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpstan-failed-${{ matrix.php-version }}
+          path: phpstan_failed.txt
+
   build_and_test:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
@@ -583,8 +623,7 @@ jobs:
   aggregate_outcome:
     name: Aggregate Matrix Job Outcomes
     runs-on: ubuntu-latest
-    needs: [build_and_test]
- 
+    needs: [build_and_test, phpstan_analysis]
     if: always()
     outputs:
       final_outcome: ${{ steps.aggregate.outputs.final_outcome }}
@@ -593,6 +632,11 @@ jobs:
         with:
           pattern: outcome-*
           path: outcomes
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: phpstan-failed-*
+          path: phpstan_flags
  
       - id: aggregate
         run: |
@@ -606,6 +650,14 @@ jobs:
               result="newman_failed"
             fi
           done
+
+          for f in phpstan_flags/**/phpstan_failed.txt; do
+            if grep -q true "$f"; then
+              result="phpstan_failed"
+              break
+            fi
+          done
+
           echo "final_outcome=$result" >> $GITHUB_OUTPUT
  
       - run: echo "Aggregated final outcome ${{ steps.aggregate.outputs.final_outcome }}"
@@ -916,6 +968,35 @@ jobs:
           MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
           MESSAGE+="<@1355093873323671742>"  # vidkazan
           MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
+ 
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"${MESSAGE}\"}" \
+               "$DISCORD_WEBHOOK_URL"
+
+  send_phpstan_failure_discord_notification:
+    name: Notify PHPStan Failure
+    runs-on: ubuntu-latest
+    needs: [aggregate_outcome, map_pr_to_discord]
+    if: always()
+    steps:
+      - name: Send Discord Alert for PHPStan Failure
+        if: needs.aggregate_outcome.outputs.final_outcome == 'phpstan_failed'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+          MAINTAINER_MENTION: <@1362087975906967736>
+        run: |
+          MESSAGE=":x: **PHPStan Static Analysis Failed!**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="PR Link: <$PR_URL>\n"
+          MESSAGE+="CI Run: <$RUN_URL>\n"
+          MESSAGE+="Maintainer: $MAINTAINER_MENTION\n"
+          MESSAGE+="Author: $PR_MENTION"
+          MESSAGE+="\n**Note**: You can download Artifacts in the Actions tab to inspect logs and output immediately."
  
           curl -H "Content-Type: application/json" \
                -X POST \
