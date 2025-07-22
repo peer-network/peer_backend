@@ -43,8 +43,12 @@ RUN mkdir -p /var/www/html/runtime-data/logs \
 
 RUN composer require --no-update php-ffmpeg/php-ffmpeg
  
-RUN composer install --no-dev --prefer-dist --no-interaction \
+RUN composer install --prefer-dist --no-interaction \
 && composer dump-autoload -o
+
+#Install PHPStan globally
+RUN curl -Ls https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar -o /usr/local/bin/phpstan && \
+chmod +x /usr/local/bin/phpstan
  
 RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
 && echo "display_errors = Off" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
