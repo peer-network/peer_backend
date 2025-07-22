@@ -240,7 +240,7 @@ class PostService
                         return $this->respondWithError(30101); 
                     }
                 }else{
-                    return $this->respondWithError(0000); // Provided files should have same type 
+                    return $this->respondWithError(30266); // Provided files should have same type 
                 }
                
             } else {
@@ -703,7 +703,7 @@ class PostService
 
             $response = [
                         'status' => 'error',
-                        'ResponseCode' => 0000, // Not eligible for upload for post
+                        'ResponseCode' => 40301, // Not eligible for upload for post
                     ];
             if ($limit > 0) {
                 $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
@@ -713,7 +713,7 @@ class PostService
 
                     $response = [
                         'status' => 'success',
-                        'ResponseCode' => 0000, // You are eligible for post upload
+                        'ResponseCode' => 11508, // You are eligible for post upload
                     ];
                     $response['postId'] = self::generateUUID();
                     $response['eligibilityToken'] = self::generateJwt();
@@ -732,7 +732,7 @@ class PostService
             // generate PostId and JWT
             $response = [
                         'status' => 'success',
-                        'ResponseCode' => 0000, // You are eligible for post upload
+                        'ResponseCode' => 11508, // You are eligible for post upload
                     ];
             $response['postId'] = self::generateUUID();
             $response['eligibilityToken'] = self::generateJwt();

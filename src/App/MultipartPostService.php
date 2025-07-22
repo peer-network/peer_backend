@@ -103,7 +103,7 @@ class MultipartPostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 0000, // Files uploaded successfully
+                'ResponseCode' => 11508, // Files uploaded successfully
                 'uploadedFiles' => implode(',', $allMetadata),
             ];
         } catch (ValidationException $e) {
