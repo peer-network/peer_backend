@@ -64,13 +64,13 @@ class TagPostService
         return true;
     }
 
-    public function handleTags(array $tags, string $postId, int $maxTags = 10): void
+    public function handleTags(array $tags, string $postId, int $maxTags = 10): ?array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
         }
 
-        $maxTags = min(max((int)($maxTags ?? 5), 1), 10);
+        $maxTags = min(max($maxTags, 1), 10);
         if (count($tags) > $maxTags) {
             return $this->respondWithError(30211);
         }

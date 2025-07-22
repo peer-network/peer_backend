@@ -109,8 +109,7 @@ class Base64FileHandler
             $information['ratiofrm'] = isset($ratio) ? $ratio : null;
             $information['resolution'] = isset($auflg) ? $auflg : null;
 
-            return isset($information) ? (array)$information : null;
-            
+            return $information;            
         } catch (\Exception $e) {
             \error_log("getID3 Error: " . $e->getMessage());
             return null;
@@ -125,20 +124,6 @@ class Base64FileHandler
             $this->errors['Base64'][] = 'Invalid Base64 format: ' . substr($input, 0, 100);
         }
         return $input;
-    }
-
-    private function sanitizeBase64Data(string $inputs): array {
-        $sanitizedBase64Array = [];
-
-        foreach ((array) $inputs as $input) {
-            if (preg_match('/data:[a-zA-Z0-9+.-]+\/([a-zA-Z0-9+.-]+);base64,([A-Za-z0-9+\/=\r\n]+)/', $input, $matches)) {
-                $sanitizedBase64Array[] = $matches[0];
-            } else {
-                $this->errors['Base64'][] = 'Invalid Base64 format: ' . substr($input, 0, 100);
-            }
-        }
-
-        return $sanitizedBase64Array;
     }
 
     public function isValidBase64Media(string $base64File, string $contentType, array $options = []): bool

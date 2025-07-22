@@ -232,7 +232,6 @@ class UserInfoService
                 return $this->createSuccessResponse(21001);
             }
 
-            if (!empty($biography)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($biography, 'text', $this->currentUserId, 'userData');
                 $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
 
@@ -245,10 +244,6 @@ class UserInfoService
                 } else {
                     return $this->respondWithError(40306);
                 }
-
-            } else {
-                return $this->respondWithError(40307);
-            }
 
             $user->setBiography($mediaPathFile);
             $updatedUser = $this->userInfoMapper->updateUsers($user);

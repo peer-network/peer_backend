@@ -95,9 +95,9 @@ class UserService
 
     private function createPayload(string $email, string $username, string $verificationCode): array
     {
-        $email = isset($email) ? trim($email) : '';
-        $username = isset($username) ? trim($username) : '';
-        $verificationCode = isset($verificationCode) ? trim($verificationCode) : '';
+        $email = trim($email);
+        $username = trim($username);
+        $verificationCode = trim($verificationCode);
 
 		if (empty($email) || empty($username) || empty($verificationCode)){
 			return self::respondWithError(40701);
@@ -303,12 +303,10 @@ class UserService
         $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
 
         try {
-            if(isset($id)){
-                $data = [
-                    'username' => $username
-                ];
-                (new UserWelcomeMail($data))->send($email);
-            }
+            $data = [
+                'username' => $username
+            ];
+            (new UserWelcomeMail($data))->send($email);
         } catch (\Throwable $e) {
             $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
         }
@@ -365,7 +363,7 @@ class UserService
         ];
     }
     
-    private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
+    private function uploadMedia(string $mediaFile, string $userId, string $folder): array|string|null
     {
         try {
 
@@ -402,7 +400,16 @@ class UserService
         }
 
         try {
-            return $this->userMapper->verifyAccount($userId);
+            $success = $this->userMapper->verifyAccount($userId);
+
+            if (!$success) {
+                return self::respondWithError(40701);
+            }
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 10701,
+            ];
         } catch (\Throwable $e) {
             $this->logger->error('Error verifying account.', ['exception' => $e]);
             return self::respondWithError(40701);
@@ -412,7 +419,8 @@ class UserService
     public function deleteUnverifiedUsers(): bool
     {
         if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
+            $this->logger->warning('Unauthorized access to deleteUnverifiedUsers.');
+            return false;
         }
 
         try {
@@ -869,7 +877,7 @@ class UserService
                 ];
             }
 
-            return $this->respondWithError(31007, []);
+            return $this->respondWithError(31007);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
@@ -1014,18 +1022,27 @@ class UserService
 
 
     /**
-     * Update password for NON logged in user
-     * 
-     * Get sent Token and New password to update it 
-     * 
-     * @param string $token
-     * @param string $newPassword
-     * 
-     * Response: 11005; Success: Password updated successfully.
-     * Response: 21001; Information Not Found: No users found. Please refine your search or try a different query.
-     * Response: 41004; Unexpected Error: Failed to update password. Please try again later or contact support.
-     * 
-     * @return array
+     * Update password for NON logged in user.
+     *
+     * Expects an array with:
+     * - 'password': new password string
+     * - 'token': password reset token sent to user's email
+     *
+     * @param array{
+     *     password?: string,
+     *     token?: string
+     * }|null $args  The input data including reset token and new password
+     *
+     * @return array{
+     *     status: string,
+     *     ResponseCode: int
+     * }
+     *
+     * Response Codes:
+     * - 11005: Password updated successfully.
+     * - 21001: No user found for token.
+     * - 31904: Invalid or expired reset token.
+     * - 41004: Unexpected error during password reset.
      */
     public function resetPassword(?array $args): array
     {

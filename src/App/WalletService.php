@@ -224,7 +224,7 @@ class WalletService
                     
             $affectedRows = [
                 'winStatus' => $winstatus ?? [],
-                'userStatus' => $userStatus ?? [],
+                'userStatus' => $userStatus,
             ];  
             
             return [
