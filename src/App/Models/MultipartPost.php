@@ -94,15 +94,15 @@ class MultipartPost
     public function applyAdditionalFilter(): void
     {
         if(empty($this->postId)){
-            throw new ValidationException("postId should not be empty.", [0000]); // postId should not be empty
+            throw new ValidationException("postId should not be empty.", [30102]); // postId should not be empty
         }
 
         if(empty($this->eligibilityToken)){
-            throw new ValidationException("Token Should not be empty.", [0000]); // Token Should not be empty
+            throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty
         }
 
         if(empty($this->media) && !is_array($this->media)){
-            throw new ValidationException("Media should not be empty", [0000]); // Media should not be empty
+            throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
         }
     }
 
@@ -113,12 +113,12 @@ class MultipartPost
     public function validateEligibilityToken($tokenService): void
     {
         if(empty($this->eligibilityToken)){
-            throw new ValidationException("Token Should not be empty.", [0000]); // Token Should not be empty
+            throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty
         }
         $isValidated = $tokenService->validateToken($this->eligibilityToken);
            
         if(empty($isValidated)){
-            throw new ValidationException("Token Should be valid.", [0000]); // Token Should be valid
+            throw new ValidationException("Token Should be valid.", [30901]); // Token Should be valid
         }
 
     }
@@ -132,7 +132,7 @@ class MultipartPost
     public function validateMediaContentTypes(): void
     {
         if(empty($this->media) && !is_array($this->media)){
-            throw new ValidationException("Media should not be empty", [0000]); // Media should not be empty
+            throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
         }
 
         // Detect the first media type
@@ -140,11 +140,11 @@ class MultipartPost
         $maxFileSize = 1024 * 1024 * 500; // 500MB
         foreach ($this->media as $key => $media) {
             if ($media->getSize() > $maxFileSize) {
-                throw new ValidationException("Maximum file upload should be less than 500MB", [0000]); // Maximum file upload should be less than 500MB
+                throw new ValidationException("Maximum file upload should be less than 500MB", [30261]); // Maximum file upload should be less than 500MB
             }
             $type = $this->detectMediaType($media);
             if (!$type) {
-                throw new ValidationException("Unknown media type detected at index $key.", [0000]); // Unknown media type detected at index
+                throw new ValidationException("Unknown media type detected at index $key.", [30259]); // Unknown media type detected at index
             }
             $detectedTypes[] = $type;
         }
@@ -153,7 +153,7 @@ class MultipartPost
         $firstType = $detectedTypes[0];
         foreach ($detectedTypes as $index => $type) {
             if ($type !== $firstType) {
-                throw new ValidationException("Media content types mismatch: index $index is of type $type, expected $firstType.", [0000]); // Media content types mismatch
+                throw new ValidationException("Media content types mismatch: index $index is of type $type, expected $firstType.", [30266]); // Media content types mismatch
             }
         }
     }
