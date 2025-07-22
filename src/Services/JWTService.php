@@ -99,16 +99,20 @@ class JWTService
      * 
      * @returns JWR decoded token with provided expiry time
      */
-    public function createAccessTokenWithCustomExpriy(array $data, int $expiryAfter): string
+    public function createAccessTokenWithCustomExpriy(string $userId, int $expiryAfter): string
     {
         $issuedAt = time();
         $expirationTime = $issuedAt + $expiryAfter;
-        $payload = array_merge($data, [
+        
+        $payload = [
+            'iss' => 'peerapp.de',
+            'aud' => 'peerapp.de',
+            'uid' => $userId,
             'iat' => $issuedAt,
             'exp' => $expirationTime
-        ]);
+        ];
 
-        $this->logger->info('Creating access token', ['data' => $data]);
+        $this->logger->info('Creating access token', ['data' => $payload]);
 
         return JWT::encode($payload, $this->privateKey, 'RS256');
     }

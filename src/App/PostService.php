@@ -705,26 +705,19 @@ class PostService
                         'status' => 'error',
                         'ResponseCode' => 0000, // Not eligible for upload for post
                     ];
+            $hasFreeDaily = false;
+
             if ($limit > 0) {
                 $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
-
                 if ($DailyUsage < $limit) {
                     // generate PostId and JWT
-
-                    $response = [
-                        'status' => 'success',
-                        'ResponseCode' => 0000, // You are eligible for post upload
-                    ];
-                    $response['postId'] = self::generateUUID();
-                    $response['eligibilityToken'] = self::generateJwt();
-
-                    return $response;
+                    $hasFreeDaily = true;
                 }
             }
 
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             // Return ResponseCode with Daily Free Code
-            if ($balance < $price) {
+            if ($balance < $price && !$hasFreeDaily) {
                 $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
                 return $this->respondWithError(51301);
             }
@@ -735,7 +728,7 @@ class PostService
                         'ResponseCode' => 0000, // You are eligible for post upload
                     ];
             $response['postId'] = self::generateUUID();
-            $response['eligibilityToken'] = self::generateJwt();
+            $response['eligibilityToken'] = $this->tokenService->createAccessTokenWithCustomExpriy($this->currentUserId, 300);
 
             return $response;
             
@@ -747,21 +740,5 @@ class PostService
             return $this->respondWithError(41301);
         }
     }
-
-    /**
-     * Check for If user eligibile to make a post or not
-     * 
-     * @returns with JWT which will be valid for certain time
-     */
-    protected function generateJwt(){
-        $payload = [
-                'iss' => 'peerapp.de',
-                'aud' => 'peerapp.de',
-                'uid' => $this->currentUserId
-        ];
-        $jwtToken = $this->tokenService->createAccessTokenWithCustomExpriy($payload, 300);
-        return $jwtToken;
-    }
-    
 
 }

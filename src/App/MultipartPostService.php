@@ -44,19 +44,6 @@ class MultipartPostService
     }
 
 
-
-    /**
-     * Validate Authenticated User
-     */
-    protected function checkAuthentication(): bool
-    {
-        if ($this->currentUserId === null) {
-            $this->logger->warning('Unauthorized access attempt');
-            return false;
-        }
-        return true;
-    }
-
     /**
      * Handle File Upload
      * 
@@ -66,6 +53,10 @@ class MultipartPostService
     public function handleFileUpload(array $requestObj): array
     {
         try{
+            if (!self::checkAuthentication($this->currentUserId)) {
+                return self::respondWithError(60501);
+            }
+
             // Apply Validation
             $multipartPost = new MultipartPost($requestObj);
             $multipartPost->applyAdditionalFilter($requestObj);
