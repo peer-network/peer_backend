@@ -49,7 +49,7 @@ RUN composer install --prefer-dist --no-interaction \
 #Install PHPStan globally
 RUN curl -Ls https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar -o /usr/local/bin/phpstan && \
 chmod +x /usr/local/bin/phpstan
- 
+
 RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
 && echo "display_errors = Off" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
 && echo "display_startup_errors = Off" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
