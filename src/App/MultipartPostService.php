@@ -5,9 +5,12 @@ namespace Fawaz\App;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\Services\JWTService;
 use Psr\Log\LoggerInterface;
+use Fawaz\Utils\ResponseHelper;
 
 class MultipartPostService
 {
+	use ResponseHelper;
+
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -40,36 +43,7 @@ class MultipartPostService
         }
     }
 
-    /**
-     * Generate UUID
-     */
-    private function generateUUID(): string
-    {
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000,
-            mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-        );
-    }
 
-    /**
-     * Validate UUID
-     */
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
-    }
-
-    /**
-     * Return Structured Response
-     */
-    protected function respondWithError(string $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
 
     /**
      * Validate Authenticated User
@@ -108,10 +82,10 @@ class MultipartPostService
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
-            return $this->respondWithError($e->getErrors()[0]);
+            return self::respondWithError($e->getErrors()[0]);
         } catch(\Exception $e){
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
-            return $this->respondWithError(40301);
+            return self::respondWithError(40301);
         }
 
     }

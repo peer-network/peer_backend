@@ -5,10 +5,12 @@ namespace Fawaz\App\Models;
 use Fawaz\App\ValidationException;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Services\JWTService;
+use Fawaz\Utils\ResponseHelper;
 use getID3;
 
 class MultipartPost
 {
+    use ResponseHelper;
     protected string $postId;
     protected string $eligibilityToken;
     protected array $media = [];
@@ -509,19 +511,4 @@ class MultipartPost
         return (new PeerInputFilter($specification));
     }
 
-
-    /**
-     * Generate UUID
-     */
-    private function generateUUID(): string
-    {
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000,
-            mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-        );
-    }
 }
