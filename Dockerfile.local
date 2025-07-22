@@ -11,6 +11,10 @@ RUN apt-get update && \
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Install PHPStan globally
+RUN curl -Ls https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar -o /usr/local/bin/phpstan && \
+    chmod +x /usr/local/bin/phpstan
+
 WORKDIR /var/www/html
 
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
