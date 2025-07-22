@@ -657,7 +657,6 @@ jobs:
               break
             fi
           done
-
           echo "final_outcome=$result" >> $GITHUB_OUTPUT
  
       - run: echo "Aggregated final outcome ${{ steps.aggregate.outputs.final_outcome }}"
