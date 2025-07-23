@@ -173,7 +173,6 @@ enum DayFilterType {
 type PostEligibilityResponse {
   status: String!
   ResponseCode: String!
-  postId: String!
   eligibilityToken: String!
 }
 

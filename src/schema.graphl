@@ -206,7 +206,6 @@ type DailyFreeResponse {
 type PostEligibilityResponse {
   status: String!
   ResponseCode: String!
-  postId: String!
   eligibilityToken: String!
 }
 

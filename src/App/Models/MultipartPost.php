@@ -11,7 +11,6 @@ use getID3;
 class MultipartPost
 {
     use ResponseHelper;
-    protected string $postId;
     protected string $eligibilityToken;
     protected array $media = [];
     protected JWTService $tokenService;
@@ -22,7 +21,6 @@ class MultipartPost
             $data = $this->validate($data, $elements);
         }
 
-        $this->postId = $data['postId'] ?? '';
         $this->eligibilityToken = $data['eligibilityToken'] ?? '';
         $this->media = $data['media'] ?? [];
     }
@@ -33,7 +31,6 @@ class MultipartPost
     public function getArrayCopy(): array
     {
         $att = [
-            'postId' => $this->postId,
             'eligibilityToken' => $this->eligibilityToken,
             'media' => $this->media,
         ];
@@ -44,11 +41,6 @@ class MultipartPost
     /**
      * State Getter
      */
-    public function getPostId(): string
-    {
-        return $this->postId;
-    }
-
     public function getEligibilityToken(): string
     {
         return $this->eligibilityToken;
@@ -93,9 +85,6 @@ class MultipartPost
      */
     public function applyAdditionalFilter(): void
     {
-        if(empty($this->postId)){
-            throw new ValidationException("postId should not be empty.", [30102]); // postId should not be empty
-        }
 
         if(empty($this->eligibilityToken)){
             throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty
@@ -505,10 +494,6 @@ class MultipartPost
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
         $specification = [
-            'postId' => [
-                'required' => true,
-                'validators' => [['name' => 'Uuid']],
-            ],
             'eligibilityToken' => [
                 'required' => true,
                 'validators' => [

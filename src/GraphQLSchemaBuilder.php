@@ -1682,9 +1682,6 @@ class GraphQLSchemaBuilder
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
-                'postId' => function (array $root): string {
-                    return $root['postId'] ?? '';
-                },
                 'eligibilityToken' => function (array $root): string {
                     return $root['eligibilityToken'] ?? '';
                 }

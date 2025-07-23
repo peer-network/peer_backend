@@ -38,7 +38,6 @@ class MultipartPostHandler implements RequestHandlerInterface
         $rawBody = $request->getParsedBody();
 
         $requestObj = [
-            'postId' => isset($rawBody['postId']) ? $rawBody['postId'] : '',
             'eligibilityToken' => isset($rawBody['eligibilityToken']) ? $rawBody['eligibilityToken'] : '',
             'media' => isset($mediaFiles['media']) && is_array($mediaFiles['media']) ? $mediaFiles['media'] : [],
         ];
