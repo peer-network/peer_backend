@@ -9,6 +9,12 @@ class ConstantsConfig
         return [
             "POST" => $this::post(),
             "COMMENT" => $this::comment(),
+            "USER" => $this::user(),
+            "CHAT" => $this::chat(),
+            "CONTACT" => $this::contact(),
+            "PAGING" => $this::paging(),
+            "WALLET" => $this::wallet(),
+            "WALLETT" => $this::wallett(),        
         ];
     }
 
@@ -18,6 +24,24 @@ class ConstantsConfig
 
     public static function post() {
         return ConstantsConfig::POST;
+    }
+    public static function wallet() {
+        return ConstantsConfig::WALLET;
+    }
+    public static function wallett() {
+        return ConstantsConfig::WALLETT;
+    }
+    public static function user() {
+        return ConstantsConfig::USER;
+    }
+    public static function chat() {
+        return ConstantsConfig::CHAT;
+    }
+    public static function contact() {
+        return ConstantsConfig::CONTACT;
+    }
+    public static function paging() {
+        return ConstantsConfig::PAGING;
     }
 
     public static function contentFiltering() {
@@ -39,6 +63,160 @@ class ConstantsConfig
         'MEDIADESCRIPTION' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 500,
+        ],
+        'COVER' => [
+            'MAX_COUNT' => 1,
+            'MIN_LENGTH' => 0,
+            'MAX_LENGTH' => 1000,
+        ],
+        'MEDIA' => [
+            'MIN_LENGTH' => 30,
+            'MAX_LENGTH' => 1000,
+        ],
+        'OPTIONS' => [
+            'MIN_LENGTH' => 0,
+            'MAX_LENGTH' => 1000,
+        ],
+        'MEDIALIMIT' => [
+            'AUDIO' => 1,
+            'IMAGE' => 5,
+            'TEXT' => 1,
+            'VIDEO' => 2,
+        ],
+        'COVERLIMIT' => [
+            'AUDIO' => 1,
+            'IMAGE' => 1,
+            'TEXT' => 1,
+            'VIDEO' => 1,
+        ],
+        'TAG' => [
+            'MIN_LENGTH' => 2,
+            'MAX_LENGTH' => 53,
+            'PATTERN' => '[a-zA-Z]+',
+            'MAX_COUNT' => [
+                'CREATE' => 10,
+                'SEARCH' => 5,
+            ],
+        ],
+    ];
+    private const WALLET = [
+        'SOLANA_PUBKEY' => [
+            'MIN_LENGTH' => 43,
+            'MAX_LENGTH' => 44,
+            'PATTERN' => '^[1-9A-HJ-NP-Za-km-z]{43,44}$',
+        ],
+        'TOKEN' => [
+            'LENGTH' => 12,
+        ],
+        'NUMBERS' => [
+            'MIN' => -5000.0,
+            'MAX' => 5000.0,
+        ],
+        'NUMBERSQ' => [
+            'MIN' => 0,
+            'MAX' => 99999999999999999999999999999,
+        ],
+        'WHEREBY' => [
+            'MIN' => 1,
+            'MAX' => 100,
+        ],
+    ];
+    private const WALLETT = [
+        'LIQUIDITY' => [
+            'MIN' => -5000.0,
+            'MAX' => 18250000.0,
+        ],
+        'LIQUIDITQ' => [
+            'MIN' => 0,
+            'MAX' => 99999999999999999999999999999,
+        ],
+    ];
+
+    private const CHAT = [
+        'MESSAGE' => [
+            'MIN_LENGTH' => 1,
+            'MAX_LENGTH' => 500,
+        ],
+        'NAME' => [
+            'MIN_LENGTH' => 3,
+            'MAX_LENGTH' => 53,
+        ],
+        'IMAGE' => [
+            'MIN_LENGTH' => 30,
+            'MAX_LENGTH' => 100,
+        ],
+        'IS_PUBLIC' => [
+            'MIN' => 0,
+            'MAX' => 10,
+            'SUSPENDED' => 9,
+        ],
+        'ACCESS_LEVEL' => [
+            'MIN' => 0,
+            'MAX' => 10,
+            'USER' => 0,
+            'ADMIN' => 10,
+        ],
+    ];
+
+    private const CONTACT = [
+        'NAME' => [
+            'MIN_LENGTH' => 3,
+            'MAX_LENGTH' => 53,
+            'PATTERN' => '^[a-zA-Z]+$',
+        ],
+        'MESSAGE' => [
+            'MIN_LENGTH' => 3,
+            'MAX_LENGTH' => 500,
+        ],
+    ];
+    private const PAGING = [
+        'OFFSET' => [
+            'MIN' => 0,
+            'MAX' => 2147483647,
+        ],
+        'LIMIT' => [
+            'MIN' => 1,
+            'MAX' => 20,
+        ],
+    ];  
+
+    private const USER = [
+        'PASSWORD' => [
+            'MIN_LENGTH' => 8,
+            'MAX_LENGTH' => 128,
+            'PATTERN' => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$',
+        ],
+        'USERNAME' => [
+            'MIN_LENGTH' => 3,
+            'MAX_LENGTH' => 23,
+            'PATTERN' => '^[a-zA-Z0-9_-]+$',
+        ],  
+        'BIOGRAPHY' => [
+            'MIN_LENGTH' => 3,
+            'MAX_LENGTH' => 5000,
+        ],
+        'PHONENUMBER' => [
+            'MIN_LENGTH' => 9,
+            'MAX_LENGTH' => 21,
+            'PATTERN' => '^\+?[1-9]\d{0,2}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{1,4}[\s.-]?\d{1,9}$',
+        ],
+        'IMAGE' => [
+            'MIN_LENGTH' => 0,
+            'MAX_LENGTH' => 100,
+        ],
+        'SLUG' => [
+            'MIN_LENGTH' => 00001,
+            'MAX_LENGTH' => 99999,
+        ],
+        'LIQUIDITY' => [
+            'MIN_LENGTH' => -18250000,
+            'MAX_LENGTH' => 18250000,
+        ],
+        'AVATAR' => [
+            'MAX_SIZE_MB' => 5,
+        ],
+        'TRANSACTION' => [
+            'MIN_TOKENS' => 10,
         ],
     ];
 }
