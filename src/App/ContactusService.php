@@ -52,7 +52,7 @@ class ContactusService
         return $Name &&
             strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] && 
             strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] && 
-            preg_match('/' . $contactConfig['NAME']['PATTERN'] . '/', $Name);
+            preg_match('/' . $contactConfig['NAME']['PATTERN'] . '/u', $Name);
     }
 
     private function respondWithError(string $message): array

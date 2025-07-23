@@ -612,7 +612,7 @@ class PeerInputFilter
             return false;
         }
 
-        if (!preg_match('/' . $passwordConfig['PATTERN'] . '/', $value)) {
+        if (!preg_match('/' . $passwordConfig['PATTERN'] . '/u', $value)) {
             $this->errors['password'][] = 30226;
             return false;
         }
@@ -635,7 +635,7 @@ class PeerInputFilter
             return false;
         }
 
-        if (!preg_match('/' . $usernameConfig['PATTERN'] . '/', $value)) {
+        if (!preg_match('/' . $usernameConfig['PATTERN'] . '/u', $value)) {
             $this->errors['username'][] = 30202;
             return false;
         }
@@ -694,7 +694,7 @@ class PeerInputFilter
             return false;
         }
 
-        if (!preg_match('/' . $walletConst['SOLANA_PUBKEY']['PATTERN'] . '/', $value)) {
+        if (!preg_match('/' . $walletConst['SOLANA_PUBKEY']['PATTERN'] . '/u', $value)) {
             $this->errors['pkey'][] = 30254;
             return false;
         }
@@ -715,7 +715,7 @@ class PeerInputFilter
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
 
-        if (!preg_match('/' . $phoneConfig['PATTERN'] . '/', $value)) {
+        if (!preg_match('/' . $phoneConfig['PATTERN'] . '/u', $value)) {
             $this->errors['phone'][] = 30253;
             return false;
         }

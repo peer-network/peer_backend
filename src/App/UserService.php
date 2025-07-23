@@ -52,7 +52,10 @@ class UserService
     {
         $passwordConfig = ConstantsConfig::user()['PASSWORD'];
 
-        if (!preg_match('/' . $passwordConfig['PATTERN'] . '/', $password)) {
+        if (strlen($password) < $passwordConfig['MIN_LENGTH'] || strlen($password) > $passwordConfig['MAX_LENGTH']) {
+            return self::respondWithError(30226);
+        }
+        if (!preg_match('/' . $passwordConfig['PATTERN'] . '/u', $password)) {
             return self::respondWithError(30226);
         }
 

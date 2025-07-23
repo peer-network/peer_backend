@@ -201,7 +201,7 @@ class ConstantsConfig
             'PATTERN' => '^\+?[1-9]\d{0,2}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{1,4}[\s.-]?\d{1,9}$',
         ],
         'IMAGE' => [
-            'MIN_LENGTH' => 30,
+            'MIN_LENGTH' => 0,
             'MAX_LENGTH' => 100,
         ],
         'SLUG' => [
@@ -217,10 +217,6 @@ class ConstantsConfig
         ],
         'TRANSACTION' => [
             'MIN_TOKENS' => 10,
-        ],
-        'SLUG' => [
-            'MIN_LENGTH' => 00001,
-            'MAX_LENGTH' => 99999,
         ],
     ];
 }
