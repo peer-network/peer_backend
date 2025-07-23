@@ -61,6 +61,7 @@ use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use ReflectionNamedType;
+use Fawaz\App\PeerTokenService;
 
 class GraphQLSchemaBuilder
 {
@@ -85,6 +86,7 @@ class GraphQLSchemaBuilder
         protected CommentInfoService $commentInfoService,
         protected ChatService $chatService,
         protected WalletService $walletService,
+        protected PeerTokenService $peerTokenService,
         protected JWTService $tokenService
     ) {
         $this->resolvers = $this->buildResolvers();
@@ -158,6 +160,7 @@ class GraphQLSchemaBuilder
         $this->chatService->setCurrentUserId($userid);
         $this->mcapService->setCurrentUserId($userid);
         $this->walletService->setCurrentUserId($userid);
+        $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
     }
 
@@ -1673,7 +1676,48 @@ class GraphQLSchemaBuilder
                 'nextAttemptAt' => function (array $root): string {
                     return $root['nextAttemptAt'] ?? '';
                 },
-            ],                       
+            ],
+             'TransactionResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.TransactionResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'responseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'Transaction' => [
+                'transactionid' => function (array $root): string {
+                    return $root['transactionid'] ?? '';
+                },
+                'transuniqueid' => function (array $root): string {
+                    return $root['transuniqueid'] ?? '';
+                },
+                'transactiontype' => function (array $root): string {
+                    return $root['transactiontype'] ?? '';
+                },
+                'senderid' => function (array $root): string {
+                    return $root['senderid'] ?? '';
+                },
+                'recipientid' => function (array $root): string {
+                    return $root['recipientid'] ?? '';
+                },
+                'tokenamount' => function (array $root): float {
+                    return $root['tokenamount'] ?? 0;
+                },
+                'transferaction' => function (array $root): string {
+                    return $root['transferaction'] ?? '';
+                },
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ], 
         ];
     }
 
@@ -1717,6 +1761,7 @@ class GraphQLSchemaBuilder
             'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
+            'getTransactionHistory' => fn(mixed $root, array $args) => $this->peerTokenService->transactionsHistory($args),
         ];
     }
 
