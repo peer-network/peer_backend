@@ -163,7 +163,7 @@ class MultipartPost
         foreach ($this->media as $key => $media) {
             $extension = pathinfo($media, PATHINFO_EXTENSION);
           
-            $fileType = $this->getSubfolder($extension);
+            $fileType = $this->getSubfolder(strtolower($extension));
             
             if (!$fileType) {
                 return false;
@@ -295,7 +295,7 @@ class MultipartPost
             );
             // Calculate Subfolder
             $extension = pathinfo($tmpFolder.$media, PATHINFO_EXTENSION);
-            $subFolder = $this->getSubfolder($extension);
+            $subFolder = $this->getSubfolder(strtolower($extension));
 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/".$subFolder;
 
@@ -410,8 +410,9 @@ class MultipartPost
 
             // Calculate Subfolder
             $extension = pathinfo($media, PATHINFO_EXTENSION);
-            $subFolder = $this->getSubfolder($extension);
+            $subFolder = $this->getSubfolder(strtolower($extension));
 
+            var_dump($subFolder); exit;
 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/".$subFolder;
 
