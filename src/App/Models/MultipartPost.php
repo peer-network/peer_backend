@@ -194,11 +194,11 @@ class MultipartPost
             return 'image';
         }
 
-        if (in_array($mimeType, ['video/mp4', 'video/avi', 'video/mov', 'video/mkv', 'video/webm', 'video/quicktime'])) {
+        if (in_array($mimeType, ['video/mp4', 'video/avi', 'video/mov', 'video/mkv', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/x-msvideo', 'video/3gpp', 'video/x-matroska'])) {
             return 'video';
         }
 
-        if (in_array($mimeType, ['audio/mpeg', 'audio/wav', 'audio/aac', 'audio/ogg'])) {
+        if (in_array($mimeType, ['audio/mpeg', 'audio/wav', 'audio/webm'])) {
             return 'audio';
         }
 
