@@ -194,7 +194,7 @@ class MultipartPost
             return 'image';
         }
 
-        if (in_array($mimeType, ['video/mp4', 'video/avi', 'video/mov', 'video/mkv', 'video/webm'])) {
+        if (in_array($mimeType, ['video/mp4', 'video/avi', 'video/mov', 'video/mkv', 'video/webm', 'video/quicktime'])) {
             return 'video';
         }
 
