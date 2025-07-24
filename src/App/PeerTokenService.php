@@ -22,25 +22,6 @@ class PeerTokenService
         $this->currentUserId = $userId;
     }
 
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
-            }
-        }
-
-        return $response;
-    }
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
