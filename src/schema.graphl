@@ -83,8 +83,8 @@ enum DirectionFilterType {
 }
 
 enum SortFilterType {
-  descending
-  ascending
+  NEWEST
+  OLDEST
 }
 enum PostActionType {
   LIKE

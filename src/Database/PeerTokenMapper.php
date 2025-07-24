@@ -95,9 +95,9 @@ class PeerTokenMapper
         $sortDirection = 'DESC'; // default
         if (isset($args['sort'])) {
             $sortValue = strtoupper(trim($args['sort']));
-            if ($sortValue === 'ASCENDING') {
+            if ($sortValue === 'OLDEST') {
                 $sortDirection = 'ASC';
-            } elseif ($sortValue === 'DESCENDING') {
+            } elseif ($sortValue === 'NEWEST') {
                 $sortDirection = 'DESC';
             }
         }
