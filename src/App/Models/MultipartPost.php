@@ -127,15 +127,19 @@ class MultipartPost
         // Detect the first media type
         $detectedTypes = [];
         $maxFileSize = 1024 * 1024 * 500; // 500MB
+        $currentMediaSize = 0;
         foreach ($this->media as $key => $media) {
-            if ($media->getSize() > $maxFileSize) {
-                throw new ValidationException("Maximum file upload should be less than 500MB", [30261]); // Maximum file upload should be less than 500MB
-            }
+            $currentMediaSize += $media->getSize();
+            
             $type = $this->detectMediaType($media);
             if (!$type) {
                 throw new ValidationException("Unknown media type detected at index $key.", [30259]); // Unknown media type detected at index
             }
             $detectedTypes[] = $type;
+        }
+
+        if ($currentMediaSize > $maxFileSize) {
+            throw new ValidationException("Maximum file upload should be less than 500MB", [30261]); // Maximum file upload should be less than 500MB
         }
 
         // Check all media types are the same
@@ -146,6 +150,57 @@ class MultipartPost
             }
         }
     }
+
+    /**
+     * Ensure all media files has 20 Photos, 2 Videos and 1 Audio.
+     *
+     * @throws ValidationException
+     */
+    public function validateMediaAllow(): void
+    {
+        if(empty($this->media) && !is_array($this->media)){
+            throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
+        }
+
+        // Detect the first media type
+        $imageCount = 0;
+        $videoCount = 0;
+        $audioCount = 0;
+        $textCount = 0;
+        foreach ($this->media as $key => $media) {
+            $type = $this->detectMediaType($media);
+            switch ($type) {
+                case 'image':
+                    $imageCount++;
+                    break;
+                case 'video':
+                    $videoCount++;
+                    break;
+                case 'audio':
+                    $audioCount++;
+                    break;
+                case 'text':
+                    $textCount++;
+                    break;
+                default:
+                    break;
+            }
+            if ($imageCount > 20) {
+                throw new ValidationException("Image should not be more than 20", [30267]); // Image should not be more than 20
+            }
+            if ($videoCount > 2) {
+                throw new ValidationException("Video should not be more than 2", [30267]); // Video should not be more than 2
+            }
+            if ($audioCount > 1) {
+                throw new ValidationException("Audio should not be more than 1", [30267]); // Audio should not be more than 1
+            }
+            if ($textCount > 1) {
+                throw new ValidationException("Text should not be more than 1", [30267]); // Text should not be more than 1
+            }
+        }     
+
+    }
+
 
     /**
      * Ensure all media files in the array have the same content type.

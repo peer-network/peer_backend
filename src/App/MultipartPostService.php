@@ -62,6 +62,7 @@ class MultipartPostService
             $multipartPost->applyAdditionalFilter($requestObj);
             $multipartPost->validateEligibilityToken($this->tokenService);
             $multipartPost->validateMediaContentTypes();
+            $multipartPost->validateMediaAllow();
 
             // Move file to tmp folder
             $allMetadata = $multipartPost->moveFileToTmp();
