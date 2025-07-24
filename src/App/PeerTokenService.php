@@ -30,33 +30,6 @@ class PeerTokenService
         }
         return true;
     }
-    
-    /**
-     * Validation for Offset and Limit values
-     * 
-     * @param args array
-     * 
-     * @return array with Response Object
-     */
-    protected function validateOffsetAndLimit(array $args = []): ?array
-    {
-        $offset = isset($args['offset']) ? (int)$args['offset'] : null;
-        $limit = isset($args['limit']) ? (int)$args['limit'] : null;
-
-        if ($offset !== null) {
-            if ($offset < 0 || $offset > 200) {
-                return self::respondWithError(30203);
-            }
-        }
-
-        if ($limit !== null) {
-            if ($limit < 1 || $limit > 20) {  
-                return self::respondWithError(30204);
-            }
-        }
-        return null;
-    }
-    
 
 
     /**
@@ -66,16 +39,7 @@ class PeerTokenService
      */
     public function transactionsHistory(array $args): array
     {
-        $this->logger->info('WalletService.transactionsHistory started');
-
-        if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
-        }
-
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
-        }
+        $this->logger->info('PeerTokenService.transactionsHistory started');
 
         try {
             $results = $this->peerTokenMapper->getTransactions($this->currentUserId, $args);
@@ -85,9 +49,9 @@ class PeerTokenService
                 'ResponseCode' => $results['ResponseCode'],
                 'affectedRows' => $results['affectedRows']
             ];
-        } catch (\Exception $e) {
-            $this->logger->error("Error in WalletService.transactionsHistory", ['exception' => $e->getMessage()]);
-            return self::respondWithError(41226);  // Error occurred while retrieving transaction history
+        }catch (\Exception $e) {
+            $this->logger->error("Error in PeerTokenService.transactionsHistory", ['exception' => $e->getMessage()]);
+            throw new \RuntimeException("Database error while fetching transactions: " . $e->getMessage());
         }
 
     }

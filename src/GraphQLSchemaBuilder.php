@@ -1763,7 +1763,7 @@ class GraphQLSchemaBuilder
             'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
-            'getTransactionHistory' => fn(mixed $root, array $args) => $this->peerTokenService->transactionsHistory($args),
+            'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
         ];
     }
 
@@ -2924,6 +2924,39 @@ class GraphQLSchemaBuilder
             'affectedRows' => $comments,
         ];
     }
+
+    /**
+     * Get transcation history with Filter
+     * 
+     */
+    public function transactionsHistory(array $args): array
+    {
+        $this->logger->info('GraphQLSchemaBuilder.transactionsHistory started');
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        try {
+            $results = $this->peerTokenService->transactionsHistory($args);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+                'affectedRows' => $results['affectedRows']
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
+            return self::respondWithError(41226);  // Error occurred while retrieving transaction history
+        }
+
+    }
+
 
     protected function resolvePosts(array $args): ?array
     {
