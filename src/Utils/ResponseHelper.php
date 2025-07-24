@@ -5,37 +5,37 @@ namespace Fawaz\Utils;
 trait ResponseHelper
 {
     private static function argsToJsString($args) 
-    {
+	{
         return json_encode($args);
     }
 
-    private static function hashObject(object $object): string 
-    {
-        // Konvertiere Objekt in ein assoziatives Array mit öffentlichen Properties
-        $data = json_decode(json_encode($object, JSON_THROW_ON_ERROR), true);
+	private static function hashObject(object $object): string 
+	{
+		// Konvertiere Objekt in ein assoziatives Array mit öffentlichen Properties
+		$data = json_decode(json_encode($object, JSON_THROW_ON_ERROR), true);
 
-        // Optional: Sortiere rekursiv nach Schlüsseln für stabile Hashes
-        $sorted = self::recursiveKeySort($data);
+		// Optional: Sortiere rekursiv nach Schlüsseln für stabile Hashes
+		$sorted = self::recursiveKeySort($data);
 
-        // Kodieren & hashen
-        $json = json_encode($sorted, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		// Kodieren & hashen
+		$json = json_encode($sorted, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-        return hash('sha256', $json);
-    }
+		return hash('sha256', $json);
+	}
 
-    private static function recursiveKeySort(array $array): array 
-    {
-        foreach ($array as &$value) {
-            if (is_array($value)) {
-                $value = self::recursiveKeySort($value);
-            }
-        }
-        ksort($array);
-        return $array;
-    }
+	private static function recursiveKeySort(array $array): array 
+	{
+		foreach ($array as &$value) {
+			if (is_array($value)) {
+				$value = self::recursiveKeySort($value);
+			}
+		}
+		ksort($array);
+		return $array;
+	}
 
     private static function argsToString($args) 
-    {
+	{
         return serialize($args);
     }
 
@@ -43,7 +43,7 @@ trait ResponseHelper
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return self::respondWithError(30301);
+                return self::respondWithError(30265);
             }
         }
         return [];
@@ -88,5 +88,15 @@ trait ResponseHelper
     private static function isValidUUID(string $uuid): bool
     {
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
+    }
+
+    private static function validateDate($date, $format = 'Y-m-d') {
+        $d = \DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) === $date;
+    }
+
+    private static function isSameUser(string $userId, string $currentUserId): bool
+    {
+        return $userId === $currentUserId;
     }
 }

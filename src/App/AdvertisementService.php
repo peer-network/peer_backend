@@ -268,21 +268,28 @@ class AdvertisementService
 
         $this->logger->info('AdvertisementService.fetchAll started');
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $from = $args['filter']['from'] ?? null;
+        $to = $args['filter']['to'] ?? null;
+
+        $this->logger->info('AdvertisementService.fetchAll Befor check');
+		if ($from !== null && !self::validateDate($from)) {
+			        $this->logger->info('AdvertisementService.fetchAll im check');
+            return self::respondWithError(30212);
+        }
+
+        $this->logger->info('AdvertisementService.fetchAll Befor 2 check');
+        if ($to !== null && !self::validateDate($to)) {
+			        $this->logger->info('AdvertisementService.fetchAll im 2 check');
+            return self::respondWithError(30213);
+        }
 
         try {
-            $posts = $this->advertisementMapper->fetchAll($offset, $limit);
-            $result = array_map(fn(Advertisements $post) => $post->getArrayCopy(), $posts);
+            $result = $this->advertisementMapper->fetchAllWithStats($args);
 
-            $this->logger->info('Advertisements fetched successfully', ['count' => count($result)]);
-            return self::createSuccessResponse(12002, ['advertisements' => $result]);
+            return self::createSuccessResponse(12002, $result['affectedRows'], true, 'advertisements');
 
         } catch (\Throwable $e) {
-            $this->logger->error('Error fetching Advertisements', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+            $this->logger->error('Error fetching Advertisements', ['error' => $e->getMessage()]);
             return self::respondWithError(42001);
         }
     }
@@ -327,25 +334,6 @@ class AdvertisementService
             }
 
             return self::respondWithError(42002);
-        } catch (\Throwable $e) {
-            return self::respondWithError(42005);
-        }
-    }
-
-    public function convertTokensToEuro(int $amount = 0, int $rescode = 0): array
-    {
-
-        $this->logger->info('AdvertisementService.convertTokensToEuro started');
-
-        try {
-            $fetchPrices = $this->advertisementMapper->convertTokensToEuro($amount, $rescode);
-
-            if ($fetchPrices) {
-                $fetchPrices['ResponseCode'] = json_encode ($fetchPrices['affectedRows']);
-                return $fetchPrices;
-            }
-
-            return self::respondWithError(42003); // 
         } catch (\Throwable $e) {
             return self::respondWithError(42005);
         }

@@ -12,36 +12,145 @@ class AdvertisementMapper
     {
     }
 
-    public function isSameUser(string $userId, string $currentUserId): bool
+    public function fetchAllWithStats(?array $args = []): array
     {
-        return $userId === $currentUserId;
-    }
+        $this->logger->info("AdvertisementMapper.fetchAllWithStats started");
 
-    public function fetchAll(int $offset, int $limit): array
-    {
-        $this->logger->info("AdvertisementMapper.fetchAll started");
+        $offset = $args['offset'] ?? 0;
+        $limit = $args['limit'] ?? 10;
+        $filterBy = $args['filter'] ?? [];
+        $sortBy = strtoupper($args['sort'] ?? 'NEWEST');
 
-        $sql = "SELECT advertisementid, postid, userid, status, timestart, timeend, tokencost, eurocost FROM advertisements_log ORDER BY status DESC, createdat DESC LIMIT :limit OFFSET :offset";
+        $conditions = [];
+        $params = [];
+
+        if (!empty($filterBy)) {
+            if (!empty($filterBy['from'])) {
+                $conditions[] = "al.createdat >= :from";
+                $params[':from'] = $filterBy['from'];
+            }
+
+            if (!empty($filterBy['to'])) {
+                $conditions[] = "al.createdat <= :to";
+                $params[':to'] = $filterBy['to'];
+            }
+
+            if (!empty($filterBy['type'])) {
+                $typeMap = [
+                    'PINNED' => 'pinned',
+                    'BASIC' => 'basic',
+                ];
+                if (isset($typeMap[$filterBy['type']])) {
+                    $conditions[] = "al.status = :type";
+                    $params[':type'] = $typeMap[$filterBy['type']];
+                }
+            }
+
+            if (!empty($filterBy['advertisementId'])) {
+                $conditions[] = "al.advertisementid = :advertisementId";
+                $params[':advertisementId'] = $filterBy['advertisementId'];
+            }
+
+            if (!empty($filterBy['postId'])) {
+                $conditions[] = "al.postid = :postId";
+                $params[':postId'] = $filterBy['postId'];
+            }
+
+            if (!empty($filterBy['userId'])) {
+                $conditions[] = "al.userid = :userId";
+                $params[':userId'] = $filterBy['userId'];
+            }
+        }
+
+        $whereClause = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+
+        $orderByMap = [
+            'NEWEST' => 'al.createdat DESC',
+            'OLDEST' => 'al.createdat ASC',
+            'BIGGEST_COST' => 'al.tokencost DESC',
+            'SMALLEST_COST' => 'al.tokencost ASC',
+        ];
+
+        $orderByClause = $orderByMap[$sortBy] ?? $orderByMap['NEWEST'];
+
+        $sSql = "
+            SELECT 
+                COALESCE(SUM(al.tokencost), 0) AS total_token_spent,
+                COALESCE(SUM(al.eurocost), 0) AS total_euro_spent,
+                COUNT(al.postid) AS total_ads,
+                COALESCE(SUM(g.gems), 0) AS total_gems_earned
+            FROM advertisements_log al
+            LEFT JOIN gems g ON g.postid = al.postid AND g.collected = 1
+            $whereClause
+        ";
+
+        $dSql = "
+            SELECT 
+                al.advertisementid,
+                al.createdat,
+                al.status,
+                al.userid,
+                al.postid,
+                al.timestart,
+                al.timeend,
+                al.tokencost,
+                al.eurocost,
+                (
+                    SELECT COALESCE(SUM(g2.gems), 0)
+                    FROM gems g2
+                    WHERE g2.postid = al.postid AND g2.collected = 1
+                ) AS gemsEarned,
+                (
+                    SELECT COUNT(pv.postid)
+                    FROM user_post_views pv
+                    WHERE pv.postid = al.postid
+                ) AS view
+            FROM advertisements_log al
+            $whereClause
+            ORDER BY $orderByClause
+            LIMIT :limit OFFSET :offset
+        ";
 
         try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-            $stmt->execute();
+            $statsStmt = $this->db->prepare($sSql);
+            foreach ($params as $key => $val) {
+                $statsStmt->bindValue($key, $val);
+            }
+            $statsStmt->execute();
+            $stats = $statsStmt->fetch(\PDO::FETCH_ASSOC);
 
-            $results = array_map(fn($row) => new Advertisements($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+            $dataStmt = $this->db->prepare($dSql);
+            foreach ($params as $key => $val) {
+                $dataStmt->bindValue($key, $val);
+            }
+            $dataStmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $dataStmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $dataStmt->execute();
+            $ads = $dataStmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            $this->logger->info(
-                $results ? "Fetched advertisements successfully" : "No advertisements found",
-                ['count' => count($results)]
-            );
-
-            return $results;
+            return [
+                'counter' => count($ads),
+                'affectedRows' => [
+                    'stats' => [
+                        'totaltokenspent' => (float)($stats['total_token_spent'] ?? 0),
+                        'totaleurospent' => (float)($stats['total_euro_spent'] ?? 0),
+                        'totalads' => (int)($stats['total_ads'] ?? 0),
+                        'totalgemsearned' => (float)($stats['total_gems_earned'] ?? 0),
+                    ],
+                    'advertisements' => $ads,
+                ],
+            ];
         } catch (\Throwable $e) {
-            $this->logger->error("Error fetching advertisements from database", [
+            $this->logger->error("Error fetching advertisement stats or data", [
                 'error' => $e->getMessage(),
             ]);
-            return [];
+            return [
+                'counter' => 0,
+                'affectedRows' => [
+                    'stats' => null,
+                    'advertisements' => [],
+                ],
+            ];
         }
     }
 
@@ -128,66 +237,6 @@ class AdvertisementMapper
                 'error' => $e->getMessage()
             ]);
             return false;
-        }
-    }
-
-    public function getFutureAdvertisementIdData(string $postId): array
-    {
-        $this->logger->info("AdvertisementMapper.getFutureAdvertisementIdData started", [
-            'postid' => $postId
-        ]);
-
-        $sql = "SELECT advertisementid, postid, userid, status, timestart, timeend, tokencost, eurocost 
-                FROM advertisements_log 
-                WHERE timestart < NOW() AND timeend > NOW() AND postid = :postId";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':postId', $postId, \PDO::PARAM_STR);
-            $stmt->execute();
-
-            $results = array_map(fn($row) => new Advertisements($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
-
-            $this->logger->info(
-                $results ? "Fetched advertisementId successfully" : "No advertisements found for postId.",
-                ['count' => count($results)]
-            );
-
-            return $results;
-        } catch (\Throwable $e) {
-            $this->logger->error("Error fetching advertisementId from database", [
-                'error' => $e->getMessage()
-            ]);
-            return [];
-        }
-    }
-
-    public function fetchByUserID(string $userId, int $offset, int $limit): array
-    {
-        $this->logger->info("AdvertisementMapper.fetchByUserID started");
-
-        $sql = "SELECT advertisementid, postid, userid, status, timestart, timeend, tokencost, eurocost FROM advertisements_log WHERE userid = :userId ORDER BY status DESC, createdat DESC LIMIT :limit OFFSET :offset";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-            $stmt->execute();
-
-            $results = array_map(fn($row) => new Advertisements($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
-
-            $this->logger->info(
-                $results ? "Fetched userid advertisements successfully" : "No advertisements found for userid.",
-                ['count' => count($results)]
-            );
-
-            return $results;
-        } catch (\Throwable $e) {
-            $this->logger->error("Error fetching advertisements for userid from database", [
-                'error' => $e->getMessage(),
-            ]);
-            return [];
         }
     }
 
@@ -396,27 +445,6 @@ class AdvertisementMapper
         ];
 
         $this->logger->info('convertEuroToTokens response', ['response' => $response]);
-        return $response;
-    }
-
-    public function convertTokensToEuro(int $tokenAmount, int $rescode): array
-    {
-        $this->logger->info('AdvertisementMapper.convertTokensToEuro started', ['tokenAmount' => $tokenAmount]);
-
-        $tokenPrice = 0.01; // Fixed price: 1 cent
-        $euroValue = $tokenAmount * $tokenPrice;
-
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $rescode,
-            'affectedRows' => [
-                'TokenAmount' => $tokenAmount,
-                'TokenPriceFixedEUR' => $tokenPrice,
-                'TotalEUR' => round($euroValue, 2),
-            ]
-        ];
-
-        $this->logger->info('convertTokensToEuro response:', ['response' => $response]);
         return $response;
     }
 }
