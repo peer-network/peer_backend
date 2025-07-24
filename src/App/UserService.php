@@ -14,6 +14,7 @@ use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
+use Fawaz\config\constants\ConstantsConfig;
 
 class UserService
 {
@@ -49,7 +50,12 @@ class UserService
 
     private function validatePassword(string $password): array
     {
-        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
+        $passwordConfig = ConstantsConfig::user()['PASSWORD'];
+
+        if (strlen($password) < $passwordConfig['MIN_LENGTH'] || strlen($password) > $passwordConfig['MAX_LENGTH']) {
+            return self::respondWithError(30226);
+        }
+        if (!preg_match('/' . $passwordConfig['PATTERN'] . '/u', $password)) {
             return self::respondWithError(30226);
         }
 

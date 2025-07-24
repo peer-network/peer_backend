@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class PostMedia
 {
@@ -84,6 +85,7 @@ class PostMedia
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $postConst = ConstantsConfig::post();
         $specification = [
             'postid' => [
                 'required' => true,
@@ -103,8 +105,8 @@ class PostMedia
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 0,
-                        'max' => 1000,
+                        'min' => $postConst['MEDIA']['MIN_LENGTH'],
+                        'max' => $postConst['MEDIA']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -114,8 +116,8 @@ class PostMedia
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 0,
-                        'max' => 1000,
+                        'min' => $postConst['OPTIONS']['MIN_LENGTH'],
+                        'max' => $postConst['OPTIONS']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
