@@ -77,44 +77,41 @@ class AdvertisementService
         return true;
     }
 
-    private function formatWithRandomMicroseconds(\DateTimeImmutable $date): string
-    {
-        // Generiere zufällige Mikrosekunden zwischen 100000 und 999999
-        $microseconds = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
-        return $date->format("Y-m-d H:i:s") . '.' . $microseconds;
-    }
+	private function formatStartAndEndTimestamps(\DateTimeImmutable $startDate, string $durationKey): array
+	{
+		$dateFilters = [
+			'ONE_DAY' => '+1 days',
+			'TWO_DAYS' => '+2 days',
+			'THREE_DAYS' => '+3 days',
+			'FOUR_DAYS' => '+4 days',
+			'FIVE_DAYS' => '+5 days',
+			'SIX_DAYS' => '+6 days',
+			'SEVEN_DAYS' => '+7 days',
+		];
 
-    private function formatStartAndEndTimestamps(\DateTimeImmutable $startDate, string $durationKey): array
-    {
-        $dateFilters = [
-            'ONE_DAY' => '+1 days',
-            'TWO_DAYS' => '+2 days',
-            'THREE_DAYS' => '+3 days',
-            'FOUR_DAYS' => '+4 days',
-            'FIVE_DAYS' => '+5 days',
-            'SIX_DAYS' => '+6 days',
-            'SEVEN_DAYS' => '+7 days',
-        ];
+		if (!isset($dateFilters[$durationKey])) {
+			$this->logger->warning("Ungültige Werbedauer: $durationKey");
+			return self::respondWithError(32001);
+		}
 
-        if (!isset($dateFilters[$durationKey])) {
-            $this->logger->warning("Ungültige Werbedauer: $durationKey");
-            return self::respondWithError(32001);
-        }
-
-        // Fix microsecond 000000
-        $microseconds = str_pad(random_int(100000, 999998), 6, '0', STR_PAD_LEFT);
+        // Fix microsecond. 
+		do {
+			$microseconds = (string) random_int(100000, 999999);
+			$firstDigit = $microseconds[0];
+			$lastDigit = $microseconds[5];
+		} while ($firstDigit === '0' || $lastDigit === '0' || $lastDigit === '1');
 
         // Startdatum um 00:00:00
-        $start = $startDate->setTime(0, 0, 0);
-
+		$start = $startDate->setTime(0, 0, 0);
+		
         // Enddatum = start + duration - 1 Second, Geandert weil es hat konflikte mit dem enddate gehabt.
-        $end = $start->modify($dateFilters[$durationKey])->modify('-1 second');
+		$end = $start->modify($dateFilters[$durationKey])->modify('-1 second');
 
-        return [
-            'timestart' => $start->format("Y-m-d H:i:s") . '.' . $microseconds,
-            'timeend' => $end->format("Y-m-d H:i:s") . '.' . $microseconds,
-        ];
-    }
+		return [
+			'timestart' => $start->format("Y-m-d H:i:s") . '.' . $microseconds,
+			'timeend' => $end->format("Y-m-d H:i:s") . '.' . $microseconds,
+		];
+	}
 
     public function createAdvertisement(array $args = []): array
     {
