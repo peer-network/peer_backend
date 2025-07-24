@@ -44,6 +44,10 @@ class ConstantsConfig
         return ConstantsConfig::PAGING;
     }
 
+    public static function transaction() {
+        return ConstantsConfig::TRANSACTION;
+    }
+
     public static function contentFiltering() {
         return ConstantsModeration::contentFiltering();
     }
@@ -54,6 +58,18 @@ class ConstantsConfig
             'MAX_LENGTH' => 200,
         ], 
     ];
+
+    private const TRANSACTION = [
+        'ACTIONTYPE' => [
+            'MIN_LENGTH' => 0,
+            'MAX_LENGTH' => 200,
+        ], 
+        'TYPE' => [
+            'MIN_LENGTH' => 2,
+            'MAX_LENGTH' => 63,
+        ], 
+    ];
+    
 
     private const POST = [
         'TITLE' => [
