@@ -73,7 +73,7 @@ class MultipartPost
             }
             $errorMessageString = implode("", $errorMessages);
             
-            throw new ValidationException($errorMessageString);
+            throw new ValidationException($errorMessageString, [30102]);
         }
         return [];
     }
