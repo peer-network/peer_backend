@@ -4,20 +4,24 @@ namespace Fawaz\Utils;
 
 trait ResponseHelper
 {
-    private static function argsToJsString($args) 
+	private static function argsToJsString(array $args): string 
 	{
-        return json_encode($args);
-    }
+		$result = json_encode($args);
+		return $result === false ? '' : $result;
+	}
+
+	private static function argsToString(array $args): string 
+	{
+		$result = serialize($args);
+		return is_string($result) ? $result : '';
+	}
 
 	private static function hashObject(object $object): string 
 	{
-		// Konvertiere Objekt in ein assoziatives Array mit öffentlichen Properties
 		$data = json_decode(json_encode($object, JSON_THROW_ON_ERROR), true);
 
-		// Optional: Sortiere rekursiv nach Schlüsseln für stabile Hashes
 		$sorted = self::recursiveKeySort($data);
 
-		// Kodieren & hashen
 		$json = json_encode($sorted, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 		return hash('sha256', $json);
@@ -33,11 +37,6 @@ trait ResponseHelper
 		ksort($array);
 		return $array;
 	}
-
-    private static function argsToString($args) 
-	{
-        return serialize($args);
-    }
 
     private static function validateRequiredFields(array $args, array $requiredFields): array
     {
@@ -90,10 +89,15 @@ trait ResponseHelper
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
-    private static function validateDate($date, $format = 'Y-m-d') {
-        $d = \DateTime::createFromFormat($format, $date);
-        return $d && $d->format($format) === $date;
-    }
+	private static function validateDate(string $date, string $format = 'Y-m-d'): bool 
+	{
+		if (!is_string($date)) {
+			return false;
+		}
+
+		$d = \DateTime::createFromFormat($format, $date);
+		return $d && $d->format($format) === $date;
+	}
 
     private static function isSameUser(string $userId, string $currentUserId): bool
     {
