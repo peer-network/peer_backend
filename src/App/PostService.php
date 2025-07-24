@@ -20,7 +20,7 @@ use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy
 
 class PostService
 {
-	use ResponseHelper;
+    use ResponseHelper;
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -612,5 +612,22 @@ class PostService
         }
 
         return $this->respondWithError(41510);
+    }
+
+    public function postExistsById(string $postId): bool
+    {
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $this->logger->info('PostService.postExistsById started');
+
+        try {
+            return $this->postMapper->postExistsById($postId);
+
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed fetch Post', ['postId' => $postId, 'exception' => $e]);
+            return false;
+        }
     }
 }

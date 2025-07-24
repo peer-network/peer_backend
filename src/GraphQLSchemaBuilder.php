@@ -1923,6 +1923,11 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(21517);
         }
 
+        if ($this->postService->postExistsById($postId) === false) 
+        {
+            return $this->respondWithError(21516);
+        }
+
         $advertiseActions = ['BASIC', 'PINNED'];
 
         // Werbeplan validieren

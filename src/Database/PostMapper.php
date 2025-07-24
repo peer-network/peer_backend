@@ -70,6 +70,17 @@ class PostMapper extends PeerMapper
         return (bool) $stmt->fetchColumn();
     }
 
+    public function postExistsById(string $postId): bool
+    {
+        $this->logger->info("PostMapper.postExistsById started");
+
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM posts WHERE postid = :postId");
+        $stmt->bindValue(':postId', $postId, \PDO::PARAM_STR);
+        $stmt->execute();
+
+        return (bool) $stmt->fetchColumn();
+    }
+
     public function isNewsFeedExist(string $feedid): bool
     {
         $this->logger->info("PostMapper.isNewsFeedExist started");
