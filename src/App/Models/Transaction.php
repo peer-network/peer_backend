@@ -5,6 +5,7 @@ namespace Fawaz\App\Models;
 
 use DateTime;
 use Fawaz\App\ValidationException;
+use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Utils\ResponseHelper;
 
@@ -48,6 +49,8 @@ class Transaction
      */    
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $tranConfig = ConstantsConfig::transaction();
+
         $specification = [
             'transactionid' => [
                 'required' => false,
@@ -70,8 +73,8 @@ class Transaction
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 63,
+                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
+                        'max' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
@@ -84,8 +87,8 @@ class Transaction
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 63,
+                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
+                        'max' => $tranConfig['ACTIONTYPE']['MAX_LENGTH'],
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
@@ -95,8 +98,8 @@ class Transaction
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 0,
-                        'max' => 200,
+                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
+                        'max' => $tranConfig['ACTIONTYPE']['MAX_LENGTH'],
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
@@ -144,120 +147,85 @@ class Transaction
     }
 
     /**
-     * Getter and Setter methods for transactionid
+     * Getter method for transactionid
      */
     public function getTransactionId(): string
     {
         return $this->transactionid;
     }
-    public function setTransactionId(string $transactionid): void
-    {
-        $this->transactionid = $transactionid;
-    }
 
     
     /**
-     * Getter and Setter methods for transuniqueid
+     * Getter method for transuniqueid
      */
     public function getTransUniqueId(): string
     {
         return $this->transuniqueid;
     }
-    public function setTransUniqueId(string $transuniqueid): void
-    {
-        $this->transuniqueid = $transuniqueid;
-    }
 
 
     /**
-     * Getter and Setter methods for senderid
+     * Getter method for senderid
      */
     public function getSenderId(): string
     {
         return $this->senderid;
     }
-    public function setSenderId(string $senderid): void
-    {
-        $this->senderid = $senderid;
-    }
 
 
     /**
-     * Getter and Setter methods for recipientid
+     * Getter method for recipientid
      */
     public function getRecipientId(): string|null
     {
         return $this->recipientid;
     }
-    public function setRecipientId(string $recipientid): void
-    {
-        $this->recipientid = $recipientid;
-    }
+
 
 
     /**
-     * Getter and Setter methods for transactiontype
+     * Getter method for transactiontype
      */
     public function getTransactionType(): string|null
     {
         return $this->transactiontype;
     }
-    public function setTransactionType(string $transactiontype): void
-    {
-        $this->transactiontype = $transactiontype;
-    }
+
 
     
     /**
-     * Getter and Setter methods for tokenamount
+     * Getter method for tokenamount
      */
     public function getTokenAmount(): string
     {
         return $this->tokenamount;
     }
-    public function setTokenAmount(string $tokenamount): void
-    {
-        $this->tokenamount = $tokenamount;
-    }
+
     
     
     /**
-     * Getter and Setter methods for transferaction
+     * Getter method for transferaction
      */
     public function getTransferAction(): string
     {
         return $this->transferaction;
     }
-    public function setTransferAction(string $transferaction): void
-    {
-        $this->transferaction = $transferaction;
-    }
-    
 
     /**
-     * Getter and Setter methods for message
+     * Getter method for message
      */
     public function getMessage(): string|null
     {
         return $this->message;
     }
-    public function setMessage(string $message): void
-    {
-        $this->message = $message;
-    }
-    
-    
+
 
     /**
-     * Getter and Setter methods for createdat
+     * Getter method for createdat
      */
     public function getCreatedat(): string
     {
         return $this->createdat;
-    }
-    public function setCreatedat(string $createdat): void
-    {
-        $this->createdat = $createdat;
     }
 
 }
