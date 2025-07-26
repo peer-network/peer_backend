@@ -148,8 +148,8 @@ enum PostFilterType {
   AUDIO
   VIDEO
   TEXT
-  FOLLOWED
   FOLLOWER
+  FOLLOWED
 }
 
 enum IgnoreOption {
@@ -159,11 +159,14 @@ enum IgnoreOption {
 
 enum PostSortType {
   NEWEST
+  OLDEST
   TRENDING
   LIKES
   DISLIKES
   VIEWS
   COMMENTS
+  FOLLOWER
+  FOLLOWED
 }
 
 enum DayFilterType {
@@ -338,7 +341,7 @@ type PostCommentsData {
   createdat: Date
   amountlikes: Decimal
   isliked: Boolean
-  user: Userinfo
+  user: BasicUserInfo
   subcomments: [PostSubCommentsData]
 }
 
@@ -352,7 +355,7 @@ type PostSubCommentsData {
   amountlikes: Decimal
   amountreplies: Decimal,
   isliked: Boolean
-  user: Userinfo
+  user: BasicUserInfo
 }
 
 type PercentBeforeTransactionResponse {
@@ -601,10 +604,10 @@ type ChatMessageInfo {
 type Userinforesponse {
   status: String!
   ResponseCode: String
-  affectedRows: Userinfo
+  affectedRows: BasicUserInfo
 }
 
-type Userinfo {
+type BasicUserInfo {
   userid: ID
   img: String
   username: String
@@ -617,7 +620,7 @@ type UserFriendsResponse {
   status: String!
   counter: Int!
   ResponseCode: String
-  affectedRows: [Userinfo]
+  affectedRows: [BasicUserInfo]
 }
 
 type AllUserInfo {
@@ -758,7 +761,7 @@ type Post {
   media: String!
   cover: String!
   mediadescription: String!
-   createdat: Date!
+  createdat: Date!
   amountlikes: Int!
   amountviews: Int!
   amountcomments: Int!
@@ -769,6 +772,7 @@ type Post {
   isreported: Boolean!
   isdisliked: Boolean!
   issaved: Boolean!
+  type: String!
   tags: [String]!
   user: ProfileUser!
   comments: [Comment!]!

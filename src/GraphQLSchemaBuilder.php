@@ -337,36 +337,6 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'UserInfo' => [
-                'postid' => function (array $root): string {
-                    $this->logger->info('Query.UserInfo Resolvers');
-                    return $root['postid'] ?? '';
-                },
-                'userid' => function (array $root): string {
-                    return $root['userid'] ?? '';
-                },
-                'likes' => function (array $root): int {
-                    return $root['likes'] ?? 0;
-                },
-                'dislikes' => function (array $root): int {
-                    return $root['dislikes'] ?? 0;
-                },
-                'reports' => function (array $root): int {
-                    return $root['reports'] ?? 0;
-                },
-                'views' => function (array $root): int {
-                    return $root['views'] ?? 0;
-                },
-                'saves' => function (array $root): int {
-                    return $root['saves'] ?? 0;
-                },
-                'shares' => function (array $root): int {
-                    return $root['shares'] ?? 0;
-                },
-                'comments' => function (array $root): int {
-                    return $root['comments'] ?? 0;
-                },
-            ],
             'UserListResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.UserListResponse Resolvers');
@@ -494,9 +464,9 @@ class GraphQLSchemaBuilder
                     return $root['isfollowing'] ?? false;
                 },
             ],
-            'Userinfo' => [
+            'BasicUserInfo' => [
                 'userid' => function (array $root): string {
-                    $this->logger->info('Query.Userinfo Resolvers');
+                    $this->logger->info('Query.BasicUserInfo Resolvers');
                     return $root['uid'] ?? '';
                 },
                 'img' => function (array $root): string {
@@ -593,9 +563,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'Userinforesponse' => [
+            'BasicUserInfoResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.Userinforesponse Resolvers');
+                    $this->logger->info('Query.BasicUserInfoResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -669,6 +639,9 @@ class GraphQLSchemaBuilder
                 },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
+                },
+                'type' => function (array $root): string {
+                    return $root['type'] ?? '';
                 },
                 'tags' => function (array $root): array {
                     return $root['tags'] ?? [];
@@ -1498,7 +1471,7 @@ class GraphQLSchemaBuilder
             ],
             'LogWins' => [
                 'from' => function (array $root): string {
-                    $this->logger->info('Query.UserInfo Resolvers');
+                    $this->logger->info('Query.LogWins Resolvers');
                     return $root['from'] ?? '';
                 },
                 'token' => function (array $root): string {
