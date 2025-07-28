@@ -687,7 +687,7 @@ jobs:
       - name: Construct HTMLExtra report URLs
         id: urls
         run: |
-          BASE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          BASE_URL="https://peer-network.github.io/peer-backend-reports"
           echo "php82_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.2/report.html" >> $GITHUB_OUTPUT
           echo "php83_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.3/report.html" >> $GITHUB_OUTPUT
  
@@ -796,7 +796,7 @@ jobs:
       - name: Construct HTMLExtra report URLs
         id: urls
         run: |
-          BASE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          BASE_URL="https://peer-network.github.io/peer-backend-reports"
           echo "php82_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.2/report.html" >> $GITHUB_OUTPUT
           echo "php83_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.3/report.html" >> $GITHUB_OUTPUT
  
