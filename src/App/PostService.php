@@ -51,12 +51,12 @@ class PostService
         return $d && $d->format($format) === $date;
     }
 
-    private function respondWithError(string $responseCode): array
+    private function respondWithError(int $responseCode): array
     {
         return ['status' => 'error', 'ResponseCode' => $responseCode];
     }
 
-    private function createSuccessResponse(string $message, array $data = []): array
+    private function createSuccessResponse(int $message, array $data = []): array
     {
         return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
     }

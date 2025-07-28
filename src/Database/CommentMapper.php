@@ -21,7 +21,7 @@ class CommentMapper
     {
     }
 
-    protected function respondWithError(string $message): array
+    protected function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
