@@ -463,6 +463,9 @@ class GraphQLSchemaBuilder
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
                 },
+                'isfriend' => function (array $root): bool {
+                    return $root['isfriend'] ?? false;
+                },
             ],
             'BasicUserInfo' => [
                 'userid' => function (array $root): string {

@@ -140,6 +140,8 @@ enum PostSortType {
   COMMENTS
   FOLLOWER
   FOLLOWED
+  RELEVANT
+  FRIENDS
 }
 
 enum DayFilterType {
@@ -408,7 +410,7 @@ type ChatMessageInfo {
   createdat: Date
 }
 
-type Userinforesponse {
+type BasicUserInfoResponse {
   status: String!
   ResponseCode: String
   affectedRows: BasicUserInfo
@@ -475,6 +477,7 @@ type ProfileUser {
   img: String
   isfollowed: Boolean
   isfollowing: Boolean
+  isfriend: Boolean
 }
 
 type FollowRelations {
