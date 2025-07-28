@@ -3,6 +3,7 @@
 namespace Fawaz\Handler;
 
 use Fawaz\App\MultipartPostService;
+use Fawaz\App\PostService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -26,24 +27,32 @@ class MultipartPostHandler implements RequestHandlerInterface
         $this->logger->info("PostFileHandler processing request.");
 
         $authorizationHeader = $request->getHeader('Authorization');
+        $contentType = $request->getHeader('Content-Type');
+        $contentLength = $request->getHeader('Content-Length');
+
+        $responseBody = $this->multipartPostService->checkForBasicValidation(['contentType' => $contentType, 'contentLength' => $contentLength]);
+
         $bearerToken = null;
-        if (!empty($authorizationHeader)) {
-            $parts = explode(' ', $authorizationHeader[0]);
-            if (count($parts) === 2 && strtolower($parts[0]) === 'bearer') {
-                $bearerToken = $parts[1];
+        if(isset($responseBody['status']) && $responseBody['status'] != 'error'){
+            if (!empty($authorizationHeader)) {
+                $parts = explode(' ', $authorizationHeader[0]);
+                if (count($parts) === 2 && strtolower($parts[0]) === 'bearer') {
+                    $bearerToken = $parts[1];
+                }
             }
+
+            $mediaFiles = $request->getUploadedFiles();
+            $rawBody = $request->getParsedBody();
+
+            $requestObj = [
+                'eligibilityToken' => isset($rawBody['eligibilityToken']) ? $rawBody['eligibilityToken'] : '',
+                'media' => isset($mediaFiles['media']) && is_array($mediaFiles['media']) ? $mediaFiles['media'] : [],
+            ];
+            $this->multipartPostService->setCurrentUserId($bearerToken);
+
+            $responseBody = $this->multipartPostService->handleFileUpload($requestObj);
         }
-
-        $mediaFiles = $request->getUploadedFiles();
-        $rawBody = $request->getParsedBody();
-
-        $requestObj = [
-            'eligibilityToken' => isset($rawBody['eligibilityToken']) ? $rawBody['eligibilityToken'] : '',
-            'media' => isset($mediaFiles['media']) && is_array($mediaFiles['media']) ? $mediaFiles['media'] : [],
-        ];
-        $this->multipartPostService->setCurrentUserId($bearerToken);
-
-        $responseBody = $this->multipartPostService->handleFileUpload($requestObj);
+        
 
         $response = new Response();
         $response->getBody()->write(json_encode($responseBody));

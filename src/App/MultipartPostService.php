@@ -2,10 +2,12 @@
 
 namespace Fawaz\App;
 
+use DateTime;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\Services\JWTService;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\ResponseHelper;
+use PDO;
 
 class MultipartPostService
 {
@@ -15,6 +17,8 @@ class MultipartPostService
 
     public function __construct(
         protected LoggerInterface $logger,
+        protected PDO $db,
+        protected PostService $postService,
         protected JWTService $tokenService
 
     ) {
@@ -44,6 +48,42 @@ class MultipartPostService
     }
 
 
+    
+
+    /**
+     * Handle File Upload
+     * 
+     * Apply Validation, includes request params, media file
+     * 
+     */
+    public function checkForBasicValidation(array $requestObj): array
+    {
+        try{
+            if(isset($requestObj['contentType'][0]) && !str_contains($requestObj['contentType'][0], 'multipart/form-data')){
+                throw new ValidationException("Invalid header format", [41514]); // Invalid header format
+            }
+            
+            $maxFileSize = 1024 * 1024 * 500; // 500MB
+            
+            if (isset($requestObj['contentLength'][0]) && $requestObj['contentLength'][0] > $maxFileSize) {
+                throw new ValidationException("Maximum file upload should be less than 500MB", [30261]); // Maximum file upload should be less than 500MB
+            }
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11515,
+            ];
+        } catch (ValidationException $e) {
+            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
+            return self::respondWithError($e->getErrors()[0]);
+        } catch(\Exception $e){
+            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
+            return self::respondWithError(41514);
+        }
+
+    }
+
+
     /**
      * Handle File Upload
      * 
@@ -56,16 +96,31 @@ class MultipartPostService
             if (!self::checkAuthentication($this->currentUserId)) {
                 return self::respondWithError(60501);
             }
+            // Check For Wallet Balance
+            $this->postService->setCurrentUserId($this->currentUserId);
+            $hasPostCredits = $this->postService->postEligibility();
+
+            if(isset($hasPostCredits['status']) && $hasPostCredits['status'] == 'error'){
+                throw new ValidationException("Post Eligibility failed ", [$hasPostCredits['ResponseCode']]); // Post Eligibility failed
+            }
+
+            $tokenObj = [
+                'userid' => $this->currentUserId,
+                'token' => $requestObj['eligibilityToken']
+            ];
+
+            $this->checkTokenExpiry($tokenObj);
 
             // Apply Validation
             $multipartPost = new MultipartPost($requestObj);
-            $multipartPost->applyAdditionalFilter($requestObj);
-            $multipartPost->validateEligibilityToken($this->tokenService);
+            $multipartPost->validateRequiredFields($requestObj);
             $multipartPost->validateMediaContentTypes();
             $multipartPost->validateMediaAllow();
 
             // Move file to tmp folder
             $allMetadata = $multipartPost->moveFileToTmp();
+            
+            $this->tokenExpires($tokenObj);
 
             return [
                 'status' => 'success',
@@ -81,5 +136,74 @@ class MultipartPostService
         }
 
     }
-   
+
+    /**
+     * Expire Token
+     * 
+     */
+    public function tokenExpires($data): void
+    {
+        $this->logger->info("MultipartPostService.tokenExpires started");
+
+        $query = "INSERT INTO token_expires 
+                  (userid, token, expiresat)
+                  VALUES 
+                  (:userid, :token, :expiresat)";
+
+        try {
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindValue(':token', $data['token'], \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':expiresat', (new DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_INT);
+
+            $stmt->execute();
+
+            $this->logger->info("Inserted new token into database", ['userid' => $data['userid']]);
+
+        } catch (\Throwable $e) {
+            $this->logger->error("MultipartPostService.tokenExpires: Exception occurred while inserting token", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    }
+
+    /**
+     * Check for Expire Token
+     * 
+     */
+    public function checkTokenExpiry($requestObj): void
+    {
+        $this->logger->info("MultipartPostService.checkTokenExpiry started");
+
+        if(empty($requestObj['token'])){
+            throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty
+        }
+        $isValidated = $this->tokenService->validateToken($requestObj['token']);
+           
+        if(empty($isValidated)){
+            throw new ValidationException("Token Should be valid.", [40902]);
+        }
+
+        try {
+            $sql = "SELECT 1 FROM token_expires WHERE token = :token";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':token', $requestObj['token']);
+            $stmt->execute();
+            $tokenExists = $stmt->fetchColumn(); 
+        } catch (\Exception $e) {
+            $this->logger->error("MultipartPostService.checkTokenExpiry: Exception occurred while getting token", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new ValidationException("Something went wrong", [41514]);
+        }
+        
+        if($tokenExists){
+            throw new ValidationException("Eligibility Token has been expired", [40902]);
+        }
+    }
+
+    
 }

@@ -83,7 +83,7 @@ class MultipartPost
     /**
      * Apply Additional Validation on provided request object
      */
-    public function applyAdditionalFilter(): void
+    public function validateRequiredFields(): void
     {
 
         if(empty($this->eligibilityToken)){
@@ -94,24 +94,6 @@ class MultipartPost
             throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
         }
     }
-
-        
-    /**
-     * Apply Additional Validation on provided request object
-     */
-    public function validateEligibilityToken($tokenService): void
-    {
-        if(empty($this->eligibilityToken)){
-            throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty
-        }
-        $isValidated = $tokenService->validateToken($this->eligibilityToken);
-           
-        if(empty($isValidated)){
-            throw new ValidationException("Token Should be valid.", [40902]);
-        }
-
-    }
-    
 
     /**
      * Ensure all media files in the array have the same content type.
@@ -466,8 +448,6 @@ class MultipartPost
             // Calculate Subfolder
             $extension = pathinfo($media, PATHINFO_EXTENSION);
             $subFolder = $this->getSubfolder(strtolower($extension));
-
-            var_dump($subFolder); exit;
 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/".$subFolder;
 
