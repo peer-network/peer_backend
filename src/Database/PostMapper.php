@@ -521,11 +521,11 @@ class PostMapper extends PeerMapper
 	{
 		$this->logger->info("PostMapper.findPostser started");
 
-		$offset = max((int)($args['offset'] ?? 0), 0);
-		$limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-		$postNumCutter = ($limit < 10) ? $limit : 10;
+		$offset = $args['offset'] ?? 0;
+		$limit = $args['limit'] ?? 10;
+		$postNumCutter = ($limit < 10) ? $limit : \bindec('1010');
 
-		$trenddays = 7;
+		$trenddays = \bindec('0111');
 
 		$from = $args['from'] ?? null;
 		$to = $args['to'] ?? null;
