@@ -3,6 +3,7 @@
 namespace Fawaz\App\Models;
 
 use Fawaz\App\ValidationException;
+use Fawaz\config\ContentLimitsPerPost;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Services\JWTService;
 use Fawaz\Utils\ResponseHelper;
@@ -167,16 +168,16 @@ class MultipartPost
                 default:
                     break;
             }
-            if ($imageCount > 20) {
+            if ($imageCount > (ContentLimitsPerPost::from('image')->mediaLimit())) {
                 throw new ValidationException("Image should not be more than 20", [30267]); // Image should not be more than 20
             }
-            if ($videoCount > 2) {
+            if ($videoCount > (ContentLimitsPerPost::from('video')->mediaLimit())) {
                 throw new ValidationException("Video should not be more than 2", [30267]); // Video should not be more than 2
             }
-            if ($audioCount > 1) {
+            if ($audioCount > (ContentLimitsPerPost::from('audio')->mediaLimit())) {
                 throw new ValidationException("Audio should not be more than 1", [30267]); // Audio should not be more than 1
             }
-            if ($textCount > 1) {
+            if ($textCount > (ContentLimitsPerPost::from('text')->mediaLimit())) {
                 throw new ValidationException("Text should not be more than 1", [30267]); // Text should not be more than 1
             }
         }     
