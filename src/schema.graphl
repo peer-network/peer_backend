@@ -141,7 +141,6 @@ enum PostSortType {
   FOLLOWER
   FOLLOWED
   RELEVANT
-  FRIENDS
 }
 
 enum DayFilterType {

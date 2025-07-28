@@ -534,7 +534,6 @@ class PostMapper extends PeerMapper
 		$sortBy = $args['sortBy'] ?? null;
 		$title = $args['title'] ?? null;
 		$tag = $args['tag'] ?? null;
-		$tags = $args['tags'] ?? [];
 		$postId = $args['postid'] ?? null;
 		$userId = $args['userid'] ?? null;
 
@@ -565,16 +564,8 @@ class PostMapper extends PeerMapper
 			$whereClauses[] = "t.name = :tag";
 			$params['tag'] = $tag;
 		}
-		if (!empty($tags)) {
-			$tagPlaceholders = [];
-			foreach ($tags as $i => $tg) {
-				$tagPlaceholders[] = ":tag$i";
-				$params["tag$i"] = $tg;
-			}
-			$whereClauses[] = "t.name IN (" . implode(", ", $tagPlaceholders) . ")";
-		}
 
-		if (!empty($filterBy)) {
+		if (!empty($filterBy) && is_array($filterBy)) {
 			$validTypes = [];
 			$userFilters = [];
 
