@@ -156,7 +156,7 @@ class Post implements Hashable
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 30,
-                        'max' => 1000,
+                        'max' => 3000, // because we are now allow 20 images files
                     ]],
                     ['name' => 'isString'],
                 ],
