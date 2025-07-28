@@ -232,6 +232,7 @@ class PostService
 
                 if($hasSameMediaType){
                     $postData['contenttype'] = $hasSameMediaType;
+                    $args['contenttype'] = $hasSameMediaType;
                     $uploadedFileArray = $this->postMapper->handelFileMoveToMedia($args['uploadedFiles']);
                     
                     $mediaPath['path'] = $uploadedFileArray;
