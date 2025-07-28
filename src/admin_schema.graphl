@@ -150,6 +150,7 @@ enum PostFilterType {
   TEXT
   FOLLOWER
   FOLLOWED
+  FRIENDS
 }
 
 enum IgnoreOption {
@@ -168,6 +169,7 @@ enum PostSortType {
   FOLLOWER
   FOLLOWED
   RELEVANT
+  FRIENDS
 }
 
 enum DayFilterType {
