@@ -3,6 +3,7 @@
 namespace Fawaz\Database;
 
 use PDO;
+use Fawaz\App\Status;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
 use Fawaz\Services\LiquidityPool;
@@ -11,27 +12,31 @@ use Psr\Log\LoggerInterface;
 
 const TABLESTOGEMS = true;
 const DAILY_NUMBER_TOKEN= 5000;
+// Whereby
 const VIEW_=1;
 const LIKE_=2;
 const DISLIKE_=3;
 const COMMENT_=4;
 const POST_=5;
+const POSTINVESTBASIC_=6;
+const POSTINVESTPREMIUM_=7;
 const INVITATION_=11;
-
+const DIRECTDEBIT_=14;
+const CREDIT_=15;
+const TRANSFER_=18;
+// Recieve
 const RECEIVELIKE=5;
 const RECEIVEDISLIKE=4;
 const RECEIVECOMMENT=2;
 const RECEIVEPOSTVIEW=0.25;
-
+// Price
 const PRICELIKE=3;
 const PRICEDISLIKE=5;
 const PRICECOMMENT=0.5;
 const PRICEPOST=20;
-
-const DIRECTDEBIT_=14;
-const CREDIT_=15;
-const TRANSFER_=18;
-
+const PRICEINVESTBASIC_=50;
+const PRICEINVESTPREMIUM_=200;
+// Fees
 const INVTFEE=0.01;
 const POOLFEE=0.01;
 const PEERFEE=0.02;
@@ -46,8 +51,6 @@ class WalletMapper
     private string $poolWallet;
     private string $burnWallet;
     private string $peerWallet;
-
-    const STATUS_DELETED = 6;
 
     public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
     {
@@ -110,7 +113,7 @@ class WalletMapper
             $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':uid', $recipient);
-            $stmt->bindValue(':status', self::STATUS_DELETED);
+            $stmt->bindValue(':status', Status::DELETED);
             $stmt->execute();
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
@@ -139,7 +142,7 @@ class WalletMapper
             $stmt->execute(['userid' => $userId]);
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != 6) {
+            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != Status::DELETED) {
                 $inviterId = $result['invited'];
                 $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
@@ -150,7 +153,7 @@ class WalletMapper
             }
 
             // If user's account deleted then we will send that percentage amount to PEER
-            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == 6) {
+            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == Status::DELETED) {
                 $peerAmount = $peerAmount + round((float)$numberoftokens * INVTFEE, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount;
                 $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
@@ -209,7 +212,7 @@ class WalletMapper
                 $this->insertWinToPool($row, $args);
             }
 
-            if (isset($result['invited']) && !empty($result['invited'])) {
+            if (isset($result['invited']) && is_string($result['invited'])) {
                 // 3 . INVITER: Fees To inviter Account (if exist)
                 if ($inviterWin) {
                     $id = self::generateUUID();
@@ -360,11 +363,11 @@ class WalletMapper
             try {
                 if ($results['overall_total_numbers'] === 0) {
                     $results['overall_total_numbers'] = (float)($row['overall_total_numbers'] ?? 0);
-                    $results['overall_total_numbersq'] = (int)$this->decimalToQ64_96($results['overall_total_numbers']);
+                    $results['overall_total_numbersq'] = (int)Q96::decimalToQ64_96($results['overall_total_numbers']);
                 }
 
                 $totalNumbers = (float)$row['total_numbers'];
-                $totalNumbersQ = (int)$this->decimalToQ64_96($totalNumbers);
+                $totalNumbersQ = (int)Q96::decimalToQ64_96($totalNumbers);
 
                 $results['posts'][] = [
                     'postid' => $row['postid'],
@@ -443,7 +446,7 @@ class WalletMapper
     {
         $this->logger->info('WalletMapper.loadWalletById started');
 
-        $userId = $currentUserId;
+        $userId = $currentUserId ?? null;
         $postId = $args['postid'] ?? null;
         $fromId = $args['fromid'] ?? null;
 
@@ -753,7 +756,7 @@ class WalletMapper
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
             $stmt->bindValue(':gems', $gems, \PDO::PARAM_STR);
             $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':numbersq', Q96::decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
@@ -800,7 +803,7 @@ class WalletMapper
             $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
             $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':numbersq', Q96::decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
@@ -935,7 +938,7 @@ class WalletMapper
         ];
     }
 
-    public function getTimeSorted()
+    public function getTimeSorted(): array
     {
         try {
 
@@ -1193,17 +1196,20 @@ class WalletMapper
     public function deductFromWallets(string $userId, ?array $args = []): array
     {
         $this->logger->info('WalletMapper.deductFromWallets started');
-        $this->logger->info('deductFromWallets commenrs args.', ['args' => $args]);
+        $this->logger->info('WalletMapper.deductFromWallets', ['args' => $args]);
 
         $postId = $args['postid'] ?? null;
         $art = $args['art'] ?? null;
         $fromId = $args['fromid'] ?? null;
+        $price = $args['price'] ?? null;
 
         $mapping = [
             2 => ['price' => PRICELIKE, 'whereby' => LIKE_, 'text' => 'Buy like'],
             3 => ['price' => PRICEDISLIKE, 'whereby' => DISLIKE_, 'text' => 'Buy dislike'],
             4 => ['price' => PRICECOMMENT, 'whereby' => COMMENT_, 'text' => 'Buy comment'],
             5 => ['price' => PRICEPOST, 'whereby' => POST_, 'text' => 'Buy post'],
+            6 => ['price' => PRICEINVESTBASIC_, 'whereby' => POSTINVESTBASIC_, 'text' => 'Buy advertise basic'],
+            7 => ['price' => PRICEINVESTPREMIUM_, 'whereby' => POSTINVESTPREMIUM_, 'text' => 'Buy advertise pinned'],
         ];
 
         if (!isset($mapping[$art])) {
@@ -1211,7 +1217,7 @@ class WalletMapper
             return self::respondWithError(30105);
         }
 
-        $price = $mapping[$art]['price'];
+        $price = (!empty($price) && (int)$price) ? $price : $mapping[$art]['price'];
         $whereby = $mapping[$art]['whereby'];
         $text = $mapping[$art]['text'];
 
@@ -1295,7 +1301,7 @@ class WalletMapper
             $this->logger->info('Fetched wallet balance', ['balance' => $balance]);
 
             return (float) $balance;
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Database error in getUserWalletBalance: ' . $e->getMessage());
             throw new \RuntimeException('Unable to fetch wallet balance');
         }
@@ -1337,7 +1343,7 @@ class WalletMapper
 
             if (!$userExists) {
                 $newLiquidity = abs($liquidity);
-                $liquiditq = abs($this->decimalToQ64_96($newLiquidity));
+                $liquiditq = abs(Q96::decimalToQ64_96($newLiquidity));
 
                 $query = "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
                           VALUES (:userid, :liquidity, :liquiditq, :updatedat)";
@@ -1351,7 +1357,7 @@ class WalletMapper
             } else {
                 $currentBalance = $this->getUserWalletBalance($userId);
                 $newLiquidity = abs($currentBalance + $liquidity);
-                $liquiditq = abs($this->decimalToQ64_96($newLiquidity));
+                $liquiditq = abs(Q96::decimalToQ64_96($newLiquidity));
 
                 $query = "UPDATE wallett
                           SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
@@ -1463,17 +1469,6 @@ class WalletMapper
 
             $totalFactor = $interactionCount * $factor;
 
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error fetching entries for $tableName", [
-                'userId' => $userId,
-                'tableName' => $tableName,
-                'error' => $e->getMessage()
-            ]);
-
-            return [
-                'status' => 'error',
-                'message' => "Database error: " . $e->getMessage()
-            ];
         } catch (\Throwable $e) {
             $this->logger->error("Unexpected error fetching entries for $tableName", [
                 'userId' => $userId,
@@ -1492,31 +1487,5 @@ class WalletMapper
             'insertCount' => $interactionCount,
             'totalFactor' => $totalFactor
         ];
-    }
-
-    private function decimalToQ64_96(float $value): string
-    {
-        $scaleFactor = \bcpow('2', '96');
-
-		// Convert float to plain decimal string 
-		$decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
-
-		$scaledValue = \bcmul($decimalString, $scaleFactor, 0);
-
-        return $scaledValue;
-    }
-
-    private function q64_96ToDecimal(string $qValue): string
-    {
-        $scaleFactor = \bcpow('2', '96');
-        
-        $decimalValue = \bcdiv($qValue, $scaleFactor, 18);
-        
-        return round($decimalValue, 2);
-    }
-
-    private function addQ64_96(string $qValue1, string $qValue2): string
-    {
-        return \bcadd($qValue1, $qValue2);
     }
 }
