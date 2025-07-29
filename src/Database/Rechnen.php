@@ -179,12 +179,7 @@ class Rechnen {
     // @return float val i make it to get sum by user of $auth->callsetExange();
     public static function array_all_by_col(array $arr, string $sumcol): array 
     {
-        $array = \array_values(\array_unique(\array_column($arr, $sumcol)));
-        if (\is_iterable($array)){
-            return $array;
-        } else {
-            return [];
-        }
+        return array_values(\array_unique(\array_column($arr, $sumcol)));
     }
 
     private function __construct() {}

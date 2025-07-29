@@ -142,6 +142,20 @@ class Base64FileHandler
         return $input;
     }
 
+    private function sanitizeBase64Data(string $inputs): array {
+        $sanitizedBase64Array = [];
+
+        foreach ((array) $inputs as $input) {
+            if (preg_match('/data:[a-zA-Z0-9+.-]+\/([a-zA-Z0-9+.-]+);base64,([A-Za-z0-9+\/=\r\n]+)/', $input, $matches)) {
+                $sanitizedBase64Array[] = $matches[0];
+            } else {
+                $this->errors['Base64'][] = 'Invalid Base64 format: ' . substr($input, 0, 100);
+            }
+        }
+
+        return $sanitizedBase64Array;
+    }
+
     public function isValidBase64Media(string $base64File, string $contentType, array $options = []): bool
     {
         $maxFileSize = $options['max_size'] ?? 79 * 1024 * 1024;
