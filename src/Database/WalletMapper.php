@@ -449,7 +449,7 @@ class WalletMapper
         $postId = $args['postid'] ?? null;
         $fromId = $args['fromid'] ?? null;
 
-        if ($userId === null && $postId === null && $fromId === null) {
+        if (empty($postId) && empty($fromId)) {
             $this->logger->warning('WalletMapper.loadWalletById missing required identifiers in args');
             return false;
         }
@@ -461,7 +461,7 @@ class WalletMapper
             $conditions = [];
             $params = [];
 
-            if ($userId !== null) {
+            if (empty($userId)) {
                 $conditions[] = "userid = :userid";
                 $params['userid'] = $userId;
             }
@@ -723,7 +723,7 @@ class WalletMapper
         }
     }
 
-    protected function insertWinToLog(string $userId, array $args): bool
+    protected function insertWinToLog(string $userId, array $args): bool|array
     {
         \ignore_user_abort(true);
 
@@ -737,8 +737,8 @@ class WalletMapper
 
         $id = self::generateUUID();
         if (empty($id)) {
-            $this->logger->critical('Failed to generate logwins ID. Responding with 41401');
-            return false;
+            $this->logger->critical('Failed to generate logwins ID');
+            return self::respondWithError(41401);
         }
 
         $sql = "INSERT INTO logwins 
@@ -1135,12 +1135,11 @@ class WalletMapper
             $percent = round((float)$tokenAmount * INVTFEE, 2);
             $tosend = round((float)$tokenAmount - $percent, 2);
 
-            if ($result) {
-                $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
+            $id = self::generateUUID();
+            if (empty($id)) {
+                $this->logger->critical('Failed to generate logwins ID');
+                return self::respondWithError(41401);
+            }
 
                 $args = [
                     'token' => $id,
@@ -1150,11 +1149,8 @@ class WalletMapper
                     'whereby' => INVITATION_,
                     'createdat' => $createdat,
                 ];
-
                 $this->insertWinToLog($userId, $args);
-            }
 
-            if ($result) {
                 $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
@@ -1171,7 +1167,6 @@ class WalletMapper
                 ];
 
                 $this->insertWinToLog($inviterId, $args);
-            }
 
             return [
                 'status' => 'success', 
@@ -1187,8 +1182,6 @@ class WalletMapper
             $this->logger->error('Throwable occurred during transaction', ['exception' => $e]);
             return self::respondWithError(41401);
         }
-
-        return self::respondWithError(41401);
     }
 
     public function deductFromWallets(string $userId, ?array $args = []): array
@@ -1337,7 +1330,7 @@ class WalletMapper
 
             if (!$userExists) {
                 $newLiquidity = abs($liquidity);
-                $liquiditq = abs($this->decimalToQ64_96($newLiquidity));
+                $liquiditq = abs((float)$this->decimalToQ64_96($newLiquidity));
 
                 $query = "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
                           VALUES (:userid, :liquidity, :liquiditq, :updatedat)";
@@ -1351,7 +1344,7 @@ class WalletMapper
             } else {
                 $currentBalance = $this->getUserWalletBalance($userId);
                 $newLiquidity = abs($currentBalance + $liquidity);
-                $liquiditq = abs($this->decimalToQ64_96($newLiquidity));
+                $liquiditq = abs((float)$this->decimalToQ64_96($newLiquidity));
 
                 $query = "UPDATE wallett
                           SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
@@ -1512,7 +1505,7 @@ class WalletMapper
         
         $decimalValue = \bcdiv($qValue, $scaleFactor, 18);
         
-        return (string) round($decimalValue, 2);
+        return (string) round((float) $decimalValue, 2);
     }
 
     private function addQ64_96(string $qValue1, string $qValue2): string

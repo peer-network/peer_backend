@@ -94,7 +94,7 @@ class GraphQLSchemaBuilder
         $this->resolvers = $this->buildResolvers();
     }
 
-    public function build(): Schema
+    public function build(): Schema|array
     {
         if ($this->currentUserId === null) {
             $schema = 'schemaguest.graphl';
@@ -110,6 +110,10 @@ class GraphQLSchemaBuilder
             $schema = 'admin_schema.graphl';
         }
 
+        if (empty($schema)){
+            $this->logger->error('Invalid schema', ['schema' => $schema]);
+            return $this->respondWithError(40301);
+        }
 
         $contents = \file_get_contents(__DIR__ . '/' . $schema);
         $schema = BuildSchema::build($contents);
@@ -1545,13 +1549,13 @@ class GraphQLSchemaBuilder
                     return $root['follower'] ?? '';
                 },
                 'followername' => function (array $root): string {
-                    return $root['followername'].'.'.$root['followerslug'] ?? '';
+                    return ($root['followername'] ?? '') . '.' . ($root['followerslug'] ?? '');
                 },
                 'followedid' => function (array $root): string {
                     return $root['followed'] ?? '';
                 },
                 'followedname' => function (array $root): string {
-                    return $root['followedname'].'.'.$root['followedslug'] ?? '';
+                    return ($root['followedname'] ?? '') . '.' . ($root['followedslug'] ?? '');
                 },
             ],
             'AllUserFriends' => [
@@ -1911,7 +1915,12 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse(21202, [], false);
         }
 
-        return $this->createSuccessResponse(11203, $response);
+        if (is_array($response) || !empty($response)) {
+            return $this->createSuccessResponse(11203, $response);
+        }
+
+        $this->logger->warning('Query.resolveFetchWinsLog No records found');
+        return $this->createSuccessResponse(21202);
     }
 
     protected function resolveFetchPaysLog(array $args): ?array
@@ -1940,7 +1949,12 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse(21202, [], false);
         }
 
-        return $this->createSuccessResponse(11203, $response);
+        if (is_array($response) || !empty($response)) {
+            return $this->createSuccessResponse(11203, $response);
+        }
+
+        $this->logger->warning('Query.resolveFetchPaysLog No records found');
+        return $this->createSuccessResponse(21202);    
     }
     
     protected function resolveReferralInfo(): ?array
@@ -2048,19 +2062,22 @@ class GraphQLSchemaBuilder
         try {
             $result = $this->poolService->getActionPrices();
 
-            return [
-                'status'        => 'success',
-                'ResponseCode'  => 11304,
-                'affectedRows'  => [
-                    'postPrice'     => isset($result['post_price']) ? (float) $result['post_price'] : 0.0,
-                    'likePrice'     => isset($result['like_price']) ? (float) $result['like_price'] : 0.0,
-                    'dislikePrice'  => isset($result['dislike_price']) ? (float) $result['dislike_price'] : 0.0,
-                    'commentPrice'  => isset($result['comment_price']) ? (float) $result['comment_price'] : 0.0,
-                ]
-            ];
 
-            $this->logger->info('resolveActionPrices: Successfully fetched prices', $response['affectedRows']);
-            
+         $affectedRows = [
+                'postPrice'     => isset($result['post_price']) ? (float) $result['post_price'] : 0.0,
+                'likePrice'     => isset($result['like_price']) ? (float) $result['like_price'] : 0.0,
+                'dislikePrice'  => isset($result['dislike_price']) ? (float) $result['dislike_price'] : 0.0,
+                'commentPrice'  => isset($result['comment_price']) ? (float) $result['comment_price'] : 0.0,
+        ];
+
+        $this->logger->info('resolveActionPrices: Successfully fetched prices', $affectedRows);
+
+        return [
+            'status'        => 'success',
+            'ResponseCode'  => 11304,
+            'affectedRows'  => $affectedRows
+        ];
+
         } catch (\Throwable $e) {
             $this->logger->error('Query.resolveActionPrices exception', [
                 'message' => $e->getMessage(),
@@ -2115,7 +2132,12 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse(21806, [], false);
         }
 
-        return $this->createSuccessResponse(11807, $response, true);
+        if (is_array($response) || !empty($response)) {
+            return $this->createSuccessResponse(11807, $response, true);
+        }
+
+        $this->logger->warning('Query.resolveChatMessages No messages found');
+        return $this->createSuccessResponse(21806);
     }
 
     protected function resolveTestingPool(array $args): ?array
@@ -2154,19 +2176,20 @@ class GraphQLSchemaBuilder
 
         $response = $this->walletService->fetchPool($args);
 
-        if (!is_array($response)) {
-            return $this->respondWithError(41201);
-        }
-
         if (isset($response['status']) && $response['status'] === 'error') {
             return $response;
         }
 
         if (empty($response)) {
-            return $this->respondWithError(41214);
+            return $this->respondWithError(41214, [], false);
         }
 
-        return $this->createSuccessResponse(11204, $response, true, 'posts');
+        if (is_array($response) || !empty($response)) {
+            return $this->createSuccessResponse(11204, $response, true, 'posts');
+        }
+
+        $this->logger->warning('Query.resolvePool No transactions found');
+        return $this->respondWithError(41201);  
     }
 
     protected function resolveActionPost(?array $args = []): ?array
@@ -2288,56 +2311,35 @@ class GraphQLSchemaBuilder
                 return $this->respondWithError(51301);
             }
 
-            if ($action === 'comment') 
-            {
-                $response = $this->commentService->createComment($args);
-                if (isset($response['status']) && $response['status'] === 'error') {
-                    return $response;
+            switch ($action) {
+                case 'comment':
+                    $response = $this->commentService->createComment($args);
+                    $response['ResponseCode'] = 11605;
+                    break;
+                case 'post':
+                    $response = $this->postService->createPost($args['input']);
+                    $response['ResponseCode'] = 11508;
+                    if (!empty($response['affectedRows']['postid'])) {
+                        unset($args['input'], $args['action']);
+                        $args['postid'] = $response['affectedRows']['postid'];
+                    }
+                    break;
+                case 'like':
+                    $response = $this->postInfoService->likePost($postId);
+                    $response['ResponseCode'] = 11503;
+                    break;
+                case 'dislike':
+                    $response = $this->postInfoService->dislikePost($postId);
+                    $response['ResponseCode'] = 11504;
+                    break;
+                default:
+                    return $this->respondWithError(30105);
                 }
-                $response['ResponseCode'] = 11605;
-            }
-            elseif ($action === 'post') 
-            {
-                $response = $this->postService->createPost($args['input']);
-                if (isset($response['status']) && $response['status'] === 'error') {
-                    return $response;
-                }
-                $response['ResponseCode'] = 11508;
 
-                if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])){
-
-                    unset($args['input'], $args['action']);
-                    $args['postid'] = $response['affectedRows']['postid'];
-                }
-            }
-            elseif ($action === 'like') 
-            {
-                $response = $this->postInfoService->likePost($postId);
-                if (isset($response['status']) && $response['status'] === 'error') {
-                    return $response;
-                }
-                $response['ResponseCode'] = 11503;
-            }
-            elseif ($action === 'dislike') 
-            {
-                $response = $this->postInfoService->dislikePost($postId);
-                if (isset($response['status']) && $response['status'] === 'error') {
-                    return $response;
-                }
-                $response['ResponseCode'] = 11504;
-            }
-            else 
-            {
-                return $this->respondWithError(30105);
-            }
-
-            if (isset($response['status']) && $response['status'] === 'success') {
+            if ($response['status'] === 'success') {
                 $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
-                if (isset($deducted['status']) && $deducted['status'] === 'error') {
-                    return $deducted;
-                }
 
-                if (!$deducted) {
+                if (!$deducted || ($deducted['status'] ?? null) === 'error') {
                     $this->logger->error('Failed to deduct from wallet', ['userId' => $this->currentUserId]);
                     return $this->respondWithError(40301);
                 }
@@ -2383,7 +2385,11 @@ class GraphQLSchemaBuilder
 
         $results = array_map(fn(CommentAdvanced $comment) => $comment->getArrayCopy(), $comments);
 
-        return $this->createSuccessResponse(11607, $results);
+        if (is_array($results) || !empty($results)) {
+            return $this->createSuccessResponse(11607, $results);
+        }
+
+        return $this->createSuccessResponse(21601);
     }
 
     protected function resolvePostComments(array $args): array
@@ -2410,8 +2416,13 @@ class GraphQLSchemaBuilder
             return $this->createSuccessResponse(21601, [], false);
         }
 
-        $this->logger->info('Query.resolvePostComments successful');
-        return $this->createSuccessResponse(11601, $comments);
+        if (is_array($comments) || !empty($comments)) {
+            $this->logger->info('Query.resolveTags successful');
+
+            return $this->createSuccessResponse(11601, $comments);
+        }
+
+        return $this->createSuccessResponse(21601);
     }
 
     protected function resolveTags(array $args): ?array
@@ -2477,7 +2488,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30242);
         }
 
-        $tokenAmount = (int)$args['tokenAmount'] ?? 0;
+        $tokenAmount = (int)$args['tokenAmount'];
 
         if ($tokenAmount < 10) {
             return $this->respondWithError(30243);
@@ -2623,7 +2634,7 @@ class GraphQLSchemaBuilder
 
         $data = $this->userService->fetchAllAdvance($args);
 
-        if ($data && count($data) > 0) {
+        if (!empty($data)) {
             $this->logger->info('Query.resolveSearchUser.fetchAll successful', ['userCount' => count($data)]);
 
             return $data;
@@ -2867,9 +2878,14 @@ class GraphQLSchemaBuilder
 
         $posts = $this->postInfoService->findPostInfo($postId);
 
-        if (isset($posts['status']) && $posts['status'] === 'error') {
-            return $posts;
-        }            
+        if (!empty($postId)) {
+            $posts = $this->postInfoService->findPostInfo($postId);
+            if (isset($posts['status']) && $posts['status'] === 'error') {
+                return $posts;
+            }
+        } else {
+            return $this->createSuccessResponse(21504);
+        }           
 
         return $this->createSuccessResponse(11502, $posts);
     }
@@ -2891,12 +2907,16 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.resolveCommentInfo started');
 
 
-        $comments = $this->commentInfoService->findCommentInfo($commentId);
+        $commentId = isset($commentId) ? trim($commentId) : '';
 
-        if ($comments === false) {
-            return $this->createSuccessResponse(21505);
+        if (!empty($commentId)) {
+            $comments = $this->commentInfoService->findCommentInfo($commentId);
+            if ($comments === false) {
+                return $this->createSuccessResponse(21505);
+            }
+        } else {
+            return $this->createSuccessResponse(21506);
         }
-
         return [
             'status' => 'success',
             'ResponseCode' => 11602,
@@ -3060,7 +3080,7 @@ class GraphQLSchemaBuilder
                     if ($firstParamType instanceof ReflectionNamedType 
                         && !$firstParamType->isBuiltin() 
                         && $firstParamType->getName() !== 'mixed' 
-                        && !($source instanceof ($firstParamType->getName() ?? ''))) {
+                        && !($source instanceof ($firstParamType->getName()))) {
 
                         throw new \TypeError("Resolver for '{$fieldName}' expected type '{$firstParamType->getName()}', but received " . gettype($source));
                     }
@@ -3077,8 +3097,6 @@ class GraphQLSchemaBuilder
             $this->logger->alert("Unhandled error in resolver for '{$fieldName}': " . $e->getMessage(), ['exception' => (string)$e]);
             throw new \GraphQL\Error\UserError("An unexpected error occurred while resolving field '{$fieldName}'.");
         }
-
-        return Executor::defaultFieldResolver($source, $args, $context, $info);
     }
 
     protected static function isValidUUID(string $uuid): bool

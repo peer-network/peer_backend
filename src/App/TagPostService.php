@@ -92,7 +92,10 @@ class TagPostService
                 return $this->respondWithError(30255);
             }
 
-            $tag = $this->tagMapper->loadByName($tagName) ?? $this->createTag($tagName);
+            $tag = $this->tagMapper->loadByName($tagName);
+            if (!$tag){
+                $tag = $this->createTag($tagName);
+            }
             $tagPost = new TagPost([
                 'postid' => $postId,
                 'tagid' => $tag->getTagId(),
@@ -148,17 +151,6 @@ class TagPostService
         } finally {
             $this->logger->debug('createTag function execution completed');
         }
-    }
-
-    private function isValidTagName(?string $tagName): bool
-    {
-        $tagNameConfig = ConstantsConfig::post()['TAGNAME'];
-        return (
-            $tagName &&
-            strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] &&
-            strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] &&
-            preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)
-        );
     }
 
     private function respondWithError(int $message): array

@@ -16,6 +16,17 @@ class LiquidityPool
     // Method to return accounts or environment data with a status
     public function returnAccounts(): array
     {
-        return ['status' => 'success', 'response' => $this->envi];
+        $response = $this->envi;
+
+        if (is_array($response)) 
+        {
+            // Return success status along with the data
+            return ['status' => 'success', 'response' => $response];
+        }
+        else 
+        {
+            // Return error status with an empty array if not an array
+            return ['status' => 'error', 'response' => []];
+        }
     }
 }

@@ -235,10 +235,11 @@ class UserInfoService
                 return $this->createSuccessResponse(21001);
             }
 
+                if (!empty($biography)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($biography, 'text', $this->currentUserId, 'userData');
                 $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
 
-                if ($mediaPath === '') {
+                if (empty($mediaPath)) {
                     return $this->respondWithError(30251);
                 }
 
@@ -247,12 +248,15 @@ class UserInfoService
                 } else {
                     return $this->respondWithError(40306);
                 }
+            } else {
+                return $this->respondWithError(40307);
+            }
 
             $user->setBiography($mediaPathFile);
             $updatedUser = $this->userInfoMapper->updateUsers($user);
             $responseMessage = 11003;
 
-            $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
+            $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
 
             return [
                 'status' => 'success', 
@@ -285,7 +289,7 @@ class UserInfoService
             if (!empty($mediaFile)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $this->currentUserId, 'profile');
 
-                if ($mediaPath === '') {
+                if (empty($mediaPath)) {
                     return $this->respondWithError(30251);
                 }
 
@@ -303,7 +307,7 @@ class UserInfoService
             $updatedUser = $this->userInfoMapper->updateUsers($user);
             $responseMessage = 11004;
 
-            $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
+            $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
 
             return [
                 'status' => 'success', 

@@ -150,44 +150,6 @@ class PostInfoMapper
         }
     }
 
-    public function delete(string $postid): bool
-    {
-        $this->logger->info("PostMapper.delete started");
-
-        try {
-            $this->db->beginTransaction();
-
-            $tables = [
-                'user_post_likes',
-                'user_post_dislikes',
-                'user_post_reports',
-                'user_post_saves',
-                'user_post_shares',
-                'user_post_views',
-                'post_info',
-                'posts'
-            ];
-
-            foreach ($tables as $table) {
-                $sql = "DELETE FROM $table WHERE postid = :postid";
-                $stmt = $this->db->prepare($sql);
-                $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
-                $stmt->execute();
-            }
-
-            $this->db->commit();
-            $this->logger->info("Deleted post and related user activities successfully", ['postid' => $postid]);
-            return true;
-        } catch (\Exception $e) {
-            $this->db->rollBack();
-            $this->logger->error("Failed to delete post and related user activities", [
-                'postid' => $postid,
-                'exception' => $e->getMessage()
-            ]);
-            return false;
-        }
-    }
-
     public function addUserActivity(string $action, string $userid, string $postid): bool
     {
         $this->logger->info("PostInfoMapper.addUserActivity started");

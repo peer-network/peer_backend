@@ -41,7 +41,8 @@ class CommentInfoMapper
 
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE status != :status AND uid = :id");
         $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':status', self::STATUS_DELETED);
+        $status = self::STATUS_DELETED;
+        $stmt->bindParam(':status', $status);
         $stmt->execute();
 
         return $stmt->fetchColumn() > 0;
@@ -65,25 +66,6 @@ class CommentInfoMapper
             $this->logger->warning("Failed to insert new comment info into database", ['commentid' => $data['commentid']]);
             return false;
         }
-    }
-    public function delete(string $commentid): bool
-    {
-        $this->logger->info("CommentInfoMapper.delete started");
-
-        $query = "DELETE FROM comment_info WHERE commentid = :commentid";
-
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['commentid' => $commentid]);
-
-        $deleted = (bool)$stmt->rowCount();
-
-        if ($deleted) {
-            $this->logger->info("Deleted comment from database", ['commentid' => $commentid]);
-        } else {
-            $this->logger->warning("No comment found to delete in database for", ['commentid' => $commentid]);
-        }
-
-        return $deleted;
     }
 
     public function update(CommentInfo $commentInfo): void

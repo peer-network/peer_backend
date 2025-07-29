@@ -248,9 +248,7 @@ class UserMapper
         $conditions[] = "status != :status";
         $queryParams[':status'] = Status::DELETED;
 
-        if ($conditions) {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        }
+        $sql .= " AND " . implode(" AND ", $conditions);
 
         $sql .= " ORDER BY uid LIMIT :limit OFFSET :offset";
         $queryParams[':limit'] = $limit;
@@ -418,9 +416,7 @@ class UserMapper
         $conditions[] = "u.status != :status";
         $queryParams[':status'] = Status::DELETED;
 
-        if ($conditions) {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        }
+        $sql .= " AND " . implode(" AND ", $conditions);
 
         $sql .= " ORDER BY u.createdat DESC LIMIT :limit OFFSET :offset";
         $queryParams[':limit'] = $limit;
@@ -1204,7 +1200,7 @@ class UserMapper
             $userid = $userData->getUserId();
             $password = $userData->getPassword();
 
-            $hashedPassword = method_exists($this, 'setPassword') ? $this->setPassword($password) : \password_hash($password, \PASSWORD_BCRYPT, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
+            $hashedPassword = $this->setPassword($password);
             $userData->setPassword($hashedPassword);
 
             if (!$userData->getReferralUuid()) {
@@ -1973,7 +1969,6 @@ class UserMapper
             ]);
             return null;
         }
-        return null;
     }
 
     public function getValidReferralInfoByLink(string $referralLink): array|null

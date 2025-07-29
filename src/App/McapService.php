@@ -89,7 +89,10 @@ class McapService
         $this->logger->info('McapService.fetchAll started');
 
         try {
-            $users = $this->mcapMapper->fetchAll($args, $this->currentUserId);
+            $offset = isset($args['offset']) ? (int) $args['offset'] : 0;
+            $limit = isset($args['limit']) ? (int) $args['limit'] : null;
+
+            $users = $this->mcapMapper->fetchAll($offset, $limit);
             $fetchAll = array_map(fn(User $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {

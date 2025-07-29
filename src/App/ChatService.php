@@ -146,7 +146,7 @@ class ChatService
                     $mediaPath = $this->base64filehandler->handleFileUpload($image, 'image', $chatId, 'chat');
                     $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
-                    if ($mediaPath === '') {
+                    if (empty($mediaPath)) {
                         return $this->respondWithError(40304);
                     }
 
@@ -256,7 +256,7 @@ class ChatService
             }
         }
 
-        $chatId = $args['chatid'] ?? null;
+        $chatId = $args['chatid'];
         $name = $args['name'] ?? null;
         $image = $args['image'] ?? null;
 
@@ -286,7 +286,7 @@ class ChatService
                 $chatImage = $chatId . '-' . uniqid();
                 $mediaPath = $this->base64filehandler->handleFileUpload($image, 'image', $chatImage);
                 $this->logger->info('mediaPath', ['mediaPath' => $mediaPath]);
-                if ($mediaPath !== null) {
+                if (!empty($mediaPath['path'])) {
                     $image = $mediaPath['path'];
                 }
             }
@@ -739,7 +739,7 @@ class ChatService
             return $this->respondWithError(60501);
         }
 
-        $results = $this->chatMapper->getChatMessages($chatId);
+        $results = $this->chatMapper->getChatMessages(['chatId' => $chatId]);
         $requestData = [
             'type' => 'getMessages',
             'chatId' => $chatId,
