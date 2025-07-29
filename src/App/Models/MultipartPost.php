@@ -237,7 +237,7 @@ class MultipartPost
             return 'video';
         }
 
-        if (in_array($mimeType, ['audio/mpeg', 'audio/wav', 'audio/webm'])) {
+        if (in_array($mimeType, ['audio/mpeg', 'audio/wav', 'audio/ogg'])) {
             return 'audio';
         }
 
@@ -300,12 +300,6 @@ class MultipartPost
             }catch(\RuntimeException $e){
                 throw new \Exception("Failed to move file: $directoryPath"); // Failed to move file
             }
-
-            $metadata = [
-                'fileName' => $tmpFilename.'.'.$extension,
-                'mimeType' => $originalType,
-                'mediaType' => $extension,
-            ];
 
             $allMetadata[] = $tmpFilename.'.'.$extension;
         }
