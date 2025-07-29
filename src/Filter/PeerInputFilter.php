@@ -24,7 +24,6 @@ use function is_object;
 use function is_string;
 use function sprintf;
 use function method_exists;
-use Fawaz\config\constants\ConstantsConfig;
 
 class ValidationException extends Exception {}
 
@@ -246,6 +245,26 @@ class PeerInputFilter
         return $inclusive ? $valueTimestamp <= $maxTimestamp : $valueTimestamp < $maxTimestamp;
     }
 
+    protected function TimeEndAfterTimeStart(string $timeend, array $options = []): bool
+    {
+        $timestart = $options['timestart'] ?? null;
+
+        if (!$timestart) {
+            $this->errors['timestart'][] = 30251;
+            return false;
+        }
+
+        $start = DateTime::createFromFormat('Y-m-d H:i:s.u', $timestart);
+        $end = DateTime::createFromFormat('Y-m-d H:i:s.u', $timeend);
+
+        if (!$start || !$end) {
+            $this->errors['datetime'][] = 30252;
+            return false;
+        }
+
+        return $end > $start;
+    }
+
     protected function validateIntRange(mixed $value, array $options = []): bool
     {
         if (!is_numeric($value) || (int)$value != $value) {
@@ -302,23 +321,28 @@ class PeerInputFilter
     protected function ArrayValues(mixed $value, array $options = []): bool
     {
         if (!is_array($value)) {
+            $this->errors['ArrayValues'][] = 222214; // Value must be an array.
             return false;
         }
 
         $validator = $options['validator'] ?? null;
-        if (!$validator || !isset($validator['name'])) {
-            $this->errors['ArrayValues'][] = 40301;
+        if (!$validator || !isset($validator[0]['name'])) {
+            $this->errors['ArrayValues'][] = 32016; // No valid validator provided.
+            return false;
         }
 
-        $validatorName = $validator['name'];
-        $validatorOptions = $validator['options'] ?? [];
+        $validatorName = $validator[0]['name'];
+        $validatorOptions = $validator[0]['options'] ?? [];
+        //error_log(json_encode($validatorOptions));
 
-        foreach ($value as $item) {
-            if (!method_exists($this, $validatorName)) {
-                $this->errors['ArrayValues'][] = "Validator method $validatorName does not exist.";
-            }
+        if (!method_exists($this, $validatorName)) {
+            $this->errors['ArrayValues'][] = 32016; // Validator method '$validatorName' does not exist.
+            return false;
+        }
 
+        foreach ($value as $index => $item) {
             if (!$this->$validatorName($item, $validatorOptions)) {
+                $this->errors['ArrayValues'][] = 32016; // Element at index $index failed validation for '$validatorName'.
                 return false;
             }
         }
@@ -600,19 +624,17 @@ class PeerInputFilter
 
     protected function validatePassword(string $value, array $options = []): bool
     {
-        $passwordConfig = ConstantsConfig::user()['PASSWORD'];
-
         if ($value === '') {
             $this->errors['password'][] = 30101;
             return false;
         }
 
-        if (strlen($value) < $passwordConfig['MIN_LENGTH'] || strlen($value) > $passwordConfig['MAX_LENGTH']) {
+        if (strlen($value) < 8 || strlen($value) > 128) {
             $this->errors['password'][] = 30226;
             return false;
         }
 
-        if (!preg_match('/' . $passwordConfig['PATTERN'] . '/u', $value)) {
+        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $value)) {
             $this->errors['password'][] = 30226;
             return false;
         }
@@ -623,19 +645,18 @@ class PeerInputFilter
     protected function validateUsername(string $value, array $options = []): bool
     {
         $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
-        $usernameConfig = ConstantsConfig::user()['USERNAME'];
 
         if ($value === '') {
             $this->errors['username'][] = 30202;
             return false;
         }
 
-        if (strlen($value) < $usernameConfig['MIN_LENGTH'] || strlen($value) > $usernameConfig['MAX_LENGTH']) {
+        if (strlen($value) < 3 || strlen($value) > 23) {
             $this->errors['username'][] = 30202;
             return false;
         }
 
-        if (!preg_match('/' . $usernameConfig['PATTERN'] . '/u', $value)) {
+        if (!preg_match('/^[a-zA-Z0-9_]{3,23}$/', $value)) {
             $this->errors['username'][] = 30202;
             return false;
         }
@@ -655,8 +676,6 @@ class PeerInputFilter
 
     protected function validateTagName(string $value, array $options = []): bool
     {
-        $tagConfig = ConstantsConfig::post()['TAG'];
-
         if ($value === '') {
             $this->errors['tag'][] = 30101;
             return false;
@@ -665,12 +684,12 @@ class PeerInputFilter
         $value = trim($value);
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
-        if (strlen($value) < $tagConfig['MIN_LENGTH'] || strlen($value) > $tagConfig['MAX_LENGTH']) {
-            $this->errors['tag'][] = 30103;
+        if (strlen($value) < 2 || strlen($value) > 53) {
+            $this->errors['tag'][] = 30211;
             return false;
         }
 
-        if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $value)) {
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $value)) {
             $this->errors['tag'][] = 30103;
             return false;
         }
@@ -687,14 +706,13 @@ class PeerInputFilter
 
         $value = trim($value);
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-        $walletConst = ConstantsConfig::wallet();
 
-        if (strlen($value) < $walletConst['SOLANA_PUBKEY']['MIN_LENGTH'] || strlen($value) > $walletConst['SOLANA_PUBKEY']['MAX_LENGTH']) {
+        if (strlen($value) < 43 || strlen($value) > 44) {
             $this->errors['pkey'][] = 30254;
             return false;
         }
 
-        if (!preg_match('/' . $walletConst['SOLANA_PUBKEY']['PATTERN'] . '/u', $value)) {
+        if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $value)) {
             $this->errors['pkey'][] = 30254;
             return false;
         }
@@ -704,8 +722,6 @@ class PeerInputFilter
 
     protected function validatePhoneNumber(string $value, array $options = []): bool
     {
-        $phoneConfig = ConstantsConfig::user()['PHONENUMBER'];
-
         if ($value === '') {
             $this->errors['phone'][] = 30103;
             return false;
@@ -714,8 +730,9 @@ class PeerInputFilter
         $value = trim($value);
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
+        $pattern = '/^\+?[1-9]\d{0,2}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{1,4}[\s.-]?\d{1,9}$/';
 
-        if (!preg_match('/' . $phoneConfig['PATTERN'] . '/u', $value)) {
+        if (!preg_match($pattern, $value)) {
             $this->errors['phone'][] = 30253;
             return false;
         }
