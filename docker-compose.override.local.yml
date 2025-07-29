@@ -37,8 +37,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.newman
-    volumes:
+      volumes:
       - ./tests/postman_collection:/etc/newman
+      - ./tests/media_files:/etc/newman/media_files
       - ./newman/reports:/etc/newman/reports
     entrypoint: []
     command: tail -f /dev/null
