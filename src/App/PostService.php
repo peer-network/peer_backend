@@ -21,7 +21,8 @@ use Fawaz\config\constants\ConstantsConfig;
 
 class PostService
 {
-	use ResponseHelper;
+    use ResponseHelper;
+
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -73,11 +74,6 @@ class PostService
     private function argsToJsString($args) {
         return json_encode($args);
     }
-
-    private function argsToString($args) {
-        return serialize($args);
-    }
-
 
     private function validateCoverCount(array $args, string $contenttype): array {
         if (!is_array($args['cover'])) {
@@ -358,7 +354,6 @@ class PostService
     private function handleTags(array $tags, string $postId, string $createdAt): void
     {
         $maxTags = 10;
-        $tagNameConfig = ConstantsConfig::post()['TAG'];
         if (count($tags) > $maxTags) {
             throw new \Exception('Maximum tag limit exceeded');
         }
@@ -501,7 +496,7 @@ class PostService
         }
 
         if (!empty($filterBy) && is_array($filterBy)) {
-            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED'];
+            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED', 'FRIENDS'];
 
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
@@ -579,8 +574,8 @@ class PostService
 
     public function deletePost(string $id): array
     {
-        if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
-            return $this->respondWithError('Invalid feed ID');
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
         }
 
         if (!self::isValidUUID($id)) {
@@ -615,5 +610,22 @@ class PostService
         }
 
         return $this->respondWithError(41510);
+    }
+
+    public function postExistsById(string $postId): bool
+    {
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $this->logger->info('PostService.postExistsById started');
+
+        try {
+            return $this->postMapper->postExistsById($postId);
+
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed fetch Post', ['postId' => $postId, 'exception' => $e]);
+            return false;
+        }
     }
 }
