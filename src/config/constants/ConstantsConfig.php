@@ -87,7 +87,7 @@ class ConstantsConfig
         ],
         'MEDIA' => [
             'MIN_LENGTH' => 30,
-            'MAX_LENGTH' => 1000,
+            'MAX_LENGTH' => 3000, // because we are now allow 20 images files
         ],
         'OPTIONS' => [
             'MIN_LENGTH' => 0,
