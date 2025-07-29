@@ -124,6 +124,9 @@ class MultipartPost
         if ($currentMediaSize > $maxFileSize) {
             throw new ValidationException("Maximum file upload should be less than 500MB", [30261]); // Maximum file upload should be less than 500MB
         }
+        if ($currentMediaSize == 0) {
+            throw new ValidationException("Empty File not allowed", [40307]); // Maximum file upload should be less than 500MB
+        }
 
         // Check all media types are the same
         $firstType = $detectedTypes[0];
@@ -237,7 +240,7 @@ class MultipartPost
             return 'video';
         }
 
-        if (in_array($mimeType, ['audio/mpeg', 'audio/wav', 'audio/ogg'])) {
+        if (in_array($mimeType, ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/webm'])) {
             return 'audio';
         }
 
