@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class ChatParticipantInfo
 {
@@ -84,6 +85,7 @@ class ChatParticipantInfo
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $chatConfig = ConstantsConfig::chat();
         $specification = [
             'userid' => [
                 'required' => true,
@@ -101,8 +103,8 @@ class ChatParticipantInfo
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 100,
+                        'min' => $chatConfig['IMAGE']['MIN_LENGTH'],
+                        'max' => $chatConfig['IMAGE']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -111,7 +113,10 @@ class ChatParticipantInfo
                 'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],
+                    ['name' => 'validateIntRange', 'options' => [
+                        'min' => $chatConfig['ACCESS_LEVEL']['MIN'],
+                        'max' => $chatConfig['ACCESS_LEVEL']['MAX'],
+                        ]],
                 ],
             ],
         ];

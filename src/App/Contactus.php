@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class Contactus
 {
@@ -130,6 +131,7 @@ class Contactus
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $contactConfig = ConstantsConfig::contact();
         $specification = [
             'msgid' => [
                 'required' => false,
@@ -148,8 +150,8 @@ class Contactus
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 53,
+                        'min' => $contactConfig['NAME']['MIN_LENGTH'],
+                        'max' => $contactConfig['NAME']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -159,8 +161,8 @@ class Contactus
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 500,
+                        'min' => $contactConfig['MESSAGE']['MIN_LENGTH'],
+                        'max' => $contactConfig['MESSAGE']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
