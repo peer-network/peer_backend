@@ -594,14 +594,6 @@ class PostMapper extends PeerMapper
 				}
 			}
 
-            if (in_array('VIEWED', $filterBy, true)) {
-                $whereClauses[] = "EXISTS (
-                    SELECT 1 FROM user_post_views upv
-                    WHERE upv.postid = p.postid
-                    AND upv.userid = :currentUserId
-                )";
-            }
-
 			if (!empty($validTypes)) {
 				$placeholders = implode(", ", array_map(fn($k) => ":filter$k", array_keys($validTypes)));
 				$whereClauses[] = "p.contenttype IN ($placeholders)";
@@ -635,32 +627,7 @@ class PostMapper extends PeerMapper
         }
 
 		$orderByClause = match ($sortBy) {
-            'FOR_ME' => "ORDER BY CASE
-                    WHEN EXISTS (
-                        SELECT 1 FROM follows f1
-                        WHERE f1.followerid = :currentUserId
-                        AND f1.followedid = userid
-                        AND EXISTS (
-                            SELECT 1 FROM follows f2
-                            WHERE f2.followerid = userid
-                            AND f2.followedid = :currentUserId
-                        )
-                    ) THEN 1
-                    WHEN EXISTS (
-                        SELECT 1 FROM follows f1
-                        WHERE f1.followerid = :currentUserId
-                        AND f1.followedid = userid
-                    ) THEN 2
-                    WHEN EXISTS (
-                        SELECT 1 FROM follows f1
-                        WHERE f1.followerid IN (
-                            SELECT followedid FROM follows WHERE followerid = :currentUserId
-                        )
-                        AND f1.followedid = userid
-                    ) THEN 3
-                    ELSE 4
-                END,
-                createdat DESC",
+			'FOR_ME' => "ORDER BY isfriend DESC, isfollowed DESC, isfollowing DESC, createdat DESC",
 			'NEWEST' => "ORDER BY createdat DESC",
 			'OLDEST' => "ORDER BY createdat ASC",
 			'TRENDING' => "ORDER BY amounttrending DESC, createdat DESC",
