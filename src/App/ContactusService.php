@@ -109,7 +109,7 @@ class ContactusService
         ]);
 
         try {
-            $exist = ($type === 'id') ? $this->contactUsMapper->loadById($value) : $this->contactUsMapper->loadByName($value);
+            $exist = ($type === 'id') ? $this->contactUsMapper->loadById((int)$value) : $this->contactUsMapper->loadByName($value);
 
             if ($exist === null) {
                 return $this->respondWithError(40401);
@@ -153,7 +153,7 @@ class ContactusService
         try {
             $exist = $this->contactUsMapper->fetchAll($args);
 
-            if ($exist === null) {
+            if (empty($exist)) {
                 return $this->respondWithError(40401);
             }
 

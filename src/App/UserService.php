@@ -89,7 +89,7 @@ class UserService
         $attempts = 0;
         do {
             $slug = $this->createNumbersAsString(1, 9, 5);
-            if (!$this->userMapper->checkIfNameAndSlugExist($username, $slug)) {
+            if (!$this->userMapper->checkIfNameAndSlugExist($username, (int) $slug)) {
                 return (string) $slug;
             }
             $attempts++;
@@ -369,7 +369,7 @@ class UserService
         ];
     }
     
-    private function uploadMedia(string $mediaFile, string $userId, string $folder): array|string|null
+    private function uploadMedia(string $mediaFile, string $userId, string $folder): array|string
     {
         try {
 
@@ -377,7 +377,7 @@ class UserService
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $userId, $folder);
                 $this->logger->info('UserService.uploadMedia mediaPath', ['mediaPath' => $mediaPath]);
 
-                if ($mediaPath === '') {
+                if (empty($mediaPath)) {
                     return self::respondWithError(30251);
                 }
 
@@ -396,7 +396,7 @@ class UserService
             $this->logger->error('Error uploading media.', ['exception' => $e]);
         }
 
-        return null;
+        return self::respondWithError(40307);
     }
 
     public function verifyAccount(string $userId): array
@@ -422,11 +422,10 @@ class UserService
         }
     }
 
-    public function deleteUnverifiedUsers(): bool
+    public function deleteUnverifiedUsers(): bool|array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->warning('Unauthorized access to deleteUnverifiedUsers.');
-            return false;
+            return self::respondWithError(60501);
         }
 
         try {
@@ -620,7 +619,7 @@ class UserService
 
         $this->logger->info('UserService.setUsername started');
 
-        $username = trim($args['username'] ?? '');
+        $username = trim($args['username']);
         $password = $args['password'] ?? null;
 
         try {
@@ -645,7 +644,7 @@ class UserService
             }
 
             $user->setName($username);
-            $user->setSlug($slug);
+            $user->setSlug((int)($slug));
 
             $data = $this->userMapper->updateProfil($user);
             $affectedRows = $data->getArrayCopy();

@@ -103,9 +103,9 @@ class TagService
 
             return $this->createSuccessResponse(11702, [$tagData]);
 
-        } catch (\Throwable $e) {
-            return $this->respondWithError(40301);
         } catch (ValidationException $e) {
+            return $this->respondWithError(40301);
+        } catch (\Throwable $e) {
             return $this->respondWithError(40301);
         } finally {
             $this->logger->debug('createTag function execution completed');

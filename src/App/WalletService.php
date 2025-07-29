@@ -276,13 +276,7 @@ class WalletService
         $this->logger->info('WalletService.getUserWalletBalance started');
 
         try {
-            $results = $this->walletMapper->getUserWalletBalance($userId);
-
-            if ($results !== false) {
-                return $results;
-            }
-
-            return 0.0;
+            return $this->walletMapper->getUserWalletBalance($userId);
         } catch (\Exception $e) {
             return 0.0;
         }
