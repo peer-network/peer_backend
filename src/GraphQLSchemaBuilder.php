@@ -2298,37 +2298,58 @@ class GraphQLSchemaBuilder
                 return $this->respondWithError(51301);
             }
 
-            switch ($action) {
-                case 'comment':
-                    $response = $this->commentService->createComment($args);
-                    $response['ResponseCode'] = 11605;
-                    break;
-                case 'post':
-                    $response = $this->postService->createPost($args['input']);
-                    $response['ResponseCode'] = 11508;
-                    if (!empty($response['affectedRows']['postid'])) {
-                        unset($args['input'], $args['action']);
-                        $args['postid'] = $response['affectedRows']['postid'];
-                    }
-                    break;
-                case 'like':
-                    $response = $this->postInfoService->likePost($postId);
-                    $response['ResponseCode'] = 11503;
-                    break;
-                case 'dislike':
-                    $response = $this->postInfoService->dislikePost($postId);
-                    $response['ResponseCode'] = 11504;
-                    break;
-                default:
-                    return $this->respondWithError(30105);
+            if ($action === 'comment') 
+            {
+                $response = $this->commentService->createComment($args);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    return $response;
+                }
+                $response['ResponseCode'] = 11605;
+            }
+            elseif ($action === 'post') 
+            {
+                $response = $this->postService->createPost($args['input']);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    return $response;
+                }
+                $response['ResponseCode'] = 11508;
+
+                if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])){
+
+                    unset($args['input'], $args['action']);
+                    $args['postid'] = $response['affectedRows']['postid'];
+                }
+            }
+            elseif ($action === 'like') 
+                            {
+                $response = $this->postInfoService->likePost($postId);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    return $response;
+                }
+                $response['ResponseCode'] = 11503;
+            }
+            elseif ($action === 'dislike') 
+            {
+                $response = $this->postInfoService->dislikePost($postId);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    return $response;
+                }
+                $response['ResponseCode'] = 11504;
+            }
+            else 
+            {
+                return $this->respondWithError(30105);
+            }
+
+            if (isset($response['status']) && $response['status'] === 'success') {
+                $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
+                if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    return $deducted;
                 }
 
-            if ($response['status'] === 'success') {
-                $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
-
-                if (!$deducted || ($deducted['status'] ?? null) === 'error') {
+                if (!$deducted) {
                     $this->logger->error('Failed to deduct from wallet', ['userId' => $this->currentUserId]);
-                    return $this->respondWithError(40301);
+                    return $this->respondWithError($deducted['ResponseCode']);
                 }
 
                 return $response;
