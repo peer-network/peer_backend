@@ -138,11 +138,11 @@ jobs:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
     needs: [
-      check_branch_sync, 
+      check_branch_sync
       # validate_sql_files
     ]
     if: 
-      needs.check_branch_sync.outputs.is_behind == 'false' && 
+      needs.check_branch_sync.outputs.is_behind == 'false'
       # needs.validate_sql_files.result == 'success'
     strategy:
       matrix:
