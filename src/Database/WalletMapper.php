@@ -134,6 +134,7 @@ class WalletMapper
         $feeAmount = round((float)$numberoftokens * POOLFEE, 2);
         $peerAmount = round((float)$numberoftokens * PEERFEE, 2);
         $burnAmount = round((float)$numberoftokens * BURNFEE, 2);
+        $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
         $countAmount = $feeAmount + $peerAmount + $burnAmount;
 
         try {
@@ -144,7 +145,6 @@ class WalletMapper
 
             if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != Status::DELETED) {
                 $inviterId = $result['invited'];
-                $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
                 $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
                 $this->logger->info('Invited By', [
