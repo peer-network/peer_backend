@@ -8,6 +8,7 @@ use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Services\JWTService;
 use Fawaz\Utils\ResponseHelper;
 use getID3;
+use FFMpeg\FFProbe;
 
 class MultipartPost
 {
@@ -206,7 +207,9 @@ class MultipartPost
             $extension = pathinfo($media, PATHINFO_EXTENSION);
           
             $fileType = $this->getSubfolder(strtolower($extension));
-            
+            if(strtolower($extension) == 'webm'){
+                $fileType = $this->checkForWebmFormat($media);
+            }
             if (!$fileType) {
                 return false;
             }
@@ -332,6 +335,9 @@ class MultipartPost
             // Calculate Subfolder
             $extension = pathinfo($tmpFolder.$media, PATHINFO_EXTENSION);
             $subFolder = $this->getSubfolder(strtolower($extension));
+            if(strtolower($extension) == 'webm'){
+                $subFolder = $this->checkForWebmFormat($media);
+            }
 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/".$subFolder;
 
@@ -447,6 +453,9 @@ class MultipartPost
             // Calculate Subfolder
             $extension = pathinfo($media, PATHINFO_EXTENSION);
             $subFolder = $this->getSubfolder(strtolower($extension));
+            if(strtolower($extension) == 'webm'){
+                $subFolder = $this->checkForWebmFormat($media);
+            }
 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/".$subFolder;
 
@@ -522,6 +531,47 @@ class MultipartPost
 
     }
 
+    /**
+     * Subfolder options for Audio and Video only for webm file format
+     */
+    private function checkForWebmFormat(string $media): string
+    {
+        
+        $tempDirectoryPath = __DIR__ . "/../../../runtime-data/media/tmp/";
+        $audioDirectoryPath = __DIR__ . "/../../../runtime-data/media/audio/";
+        $VideoDirectoryPath = __DIR__ . "/../../../runtime-data/media/video/";
+
+
+        if(file_exists($tempDirectoryPath.$media)){
+            $filePath = $tempDirectoryPath.$media;
+        }elseif(file_exists($audioDirectoryPath.$media)){
+            $filePath = $audioDirectoryPath.$media;
+        }elseif(file_exists($VideoDirectoryPath.$media)){
+            $filePath = $VideoDirectoryPath.$media;
+        }else{
+            throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
+        }
+
+        if(file_exists($filePath)){
+             $ffprobe = FFProbe::create();
+            $streams = $ffprobe->streams($filePath);
+
+            $videoStrim = [];
+            foreach ($streams as $stream) {
+                $videoStrim[] = $stream->get('codec_type');
+            }
+
+            if(in_array('video', $videoStrim)){
+                return 'video';
+            }elseif(in_array('audio', $videoStrim)){
+                return 'audio';
+            }else{
+                throw new ValidationException("Invalid file type", [30102]); // Media should not be empty
+            }
+        }
+
+        throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
+    }
 
     /**
      * Define validation
