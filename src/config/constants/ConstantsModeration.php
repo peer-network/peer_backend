@@ -10,8 +10,8 @@ class ConstantsModeration
 
     private const CONTENT_FILTERING = [
         'CONTENT_SEVERITY_LEVELS' => [
-            "0" => 'MYGRANDMALIKES',
-            "10" => 'MYGRANDMAHATES'
+            0 => 'MYGRANDMALIKES',
+            10 => 'MYGRANDMAHATES'
         ],
         'REPORTS_COUNT_TO_HIDE_FROM_IOS' => [
             'POST' => 1,

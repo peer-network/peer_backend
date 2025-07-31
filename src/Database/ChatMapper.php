@@ -7,6 +7,7 @@ use Fawaz\App\Chat;
 use Fawaz\App\ChatParticipants;
 use Fawaz\App\ChatMessages;
 use Fawaz\App\NewsFeed;
+use Fawaz\App\Status;
 use Fawaz\App\User;
 use Psr\Log\LoggerInterface;
 
@@ -127,7 +128,7 @@ class ChatMapper
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
             $stmt->execute();
 
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -475,7 +476,7 @@ class ChatMapper
             $userExistsQuery = "SELECT COUNT(*) FROM users WHERE uid = :userid AND status != :status";
             $stmt = $this->db->prepare($userExistsQuery);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
             $stmt->execute();
             $userExists = (bool) $stmt->fetchColumn();
 
@@ -532,7 +533,7 @@ class ChatMapper
             $userExistsQuery = "SELECT COUNT(*) FROM users WHERE uid = :userid AND status != :status";
             $stmt = $this->db->prepare($userExistsQuery);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':status', self::STATUS_DELETED, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
             $stmt->execute();
             $userExists = (bool) $stmt->fetchColumn();
 

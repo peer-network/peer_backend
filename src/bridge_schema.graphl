@@ -28,6 +28,7 @@ type HelloResponse {
   currentVersion: String
   wikiLink: String
   lastMergedPullRequestNumber: String
+  companyAccountId: ID
 }
 
 type DailyGemStatusResponse {
