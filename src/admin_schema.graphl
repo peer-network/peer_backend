@@ -46,6 +46,7 @@ type Query {
   getReferralInfo: ReferralInfoResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
+  postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
 }
 
 type Mutation {
@@ -86,6 +87,14 @@ enum TokenMovementFilterType{
   PAYMENT
   BURN
 }
+
+enum GetOnly {
+  VIEW
+  LIKE
+  DISLIKE
+  COMMENTLIKE
+}
+
 
 enum DirectionFilterType {
   INCOME
@@ -212,6 +221,12 @@ type ListTodaysInteractionsResponse {
   status: String!
   ResponseCode: String
   affectedRows: TodaysInteractionsData
+}
+
+type PostInteractionResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: [ProfileUser!]
 }
 
 type TodaysInteractionsData {
