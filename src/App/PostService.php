@@ -623,6 +623,7 @@ class PostService
     public function postInteractions(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->info("PostService.postInteractions failed due to authentication");
             return $this->respondWithError(60501);
         }
 
@@ -636,10 +637,12 @@ class PostService
 
 
         if($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])){
+            $this->logger->info("PostService.postInteractions failed due to empty or invalid arguments");
             return $this->respondWithError(30103);
         }
 
         if(!self::isValidUUID($postOrCommentId)){
+            $this->logger->info("PostService.postInteractions failed due to invalid postOrCommentId");
             return $this->respondWithError(30201);
         }
 

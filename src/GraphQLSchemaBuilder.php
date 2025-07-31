@@ -2980,6 +2980,7 @@ class GraphQLSchemaBuilder
         $this->logger->info('GraphQLSchemaBuilder.postInteractions started');
 
         if (!$this->checkAuthentication()) {
+            $this->logger->info("GraphQLSchemaBuilder.postInteractions failed due to authentication");
             return self::respondWithError(60501);
         }
 
