@@ -636,7 +636,7 @@ class PostService
 
 
         if($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])){
-            return $this->respondWithError(0000);
+            return $this->respondWithError(30103);
         }
 
         if(!self::isValidUUID($postOrCommentId)){
@@ -647,7 +647,7 @@ class PostService
             $result = $this->postMapper->getInteractions($getOnly, $postOrCommentId, $this->currentUserId, $offset, $limit);
 
             $this->logger->info("Interaction fetched successfully", ['count' => count($result)]);
-            return $this->createSuccessResponse(0000, $result); // Interaction fetched successfully
+            return $this->createSuccessResponse(11205, $result);
 
         } catch (\Throwable $e) {
             $this->logger->error("Error fetching Posts", [
