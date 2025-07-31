@@ -4,7 +4,7 @@
 		"name": "Current Development",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "32542010",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-2af7416e-0845-40a2-9fed-f5459d29fc68?action=share&source=collection_link&creator=32542010"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-2af7416e-0845-40a2-9fed-f5459d29fc68?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -2961,6 +2961,89 @@
 			"response": []
 		},
 		{
+			"name": "Conten Engagement(Comment)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let responseCode = \"\";",
+							"let status = \"\";",
+							"let affectedId = \"\";",
+							"",
+							"try {",
+							"    status = postInteractionResponse?.data?.postInteractions?.status || \"\";",
+							"    responseCode = postInteractionResponse?.data?.postInteractions?.ResponseCode || \"\";",
+							"    affectedId = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0]?.id || \"\";",
+							"} catch (e) {",
+							"    console.log(\"Error accessing response properties:\", e);",
+							"}",
+							"",
+							"// Validate ResponseCode",
+							"pm.test(\"ResponseCode is 11205\", function () {",
+							"    pm.expect(responseCode).to.eql(\"11205\");",
+							"});",
+							"",
+							"// Validate Status",
+							"pm.test(\"Status is success\", function () {",
+							"    pm.expect(status).to.eql(\"success\");",
+							"});",
+							"",
+							"// Validate affectedRows[0].id equals environment variable w_userid_t2",
+							"const expectedId = pm.environment.get(\"w_userid_t2\");",
+							"pm.test(\"Affected user ID matches w_userid_t2\", function () {",
+							"    pm.expect(affectedId).to.eql(expectedId);",
+							"    console.log(\"Affected ID:\", affectedId);",
+							"    console.log(\"Expected ID (w_userid_t2):\", expectedId);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: COMMENT, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Check current liquidity",
 			"event": [
 				{
@@ -5862,6 +5945,100 @@
 			"response": []
 		},
 		{
+			"name": "Content Engagement(LIKE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let responseCode = \"\";",
+							"let status = \"\";",
+							"let affectedId = \"\";",
+							"",
+							"try {",
+							"    status = postInteractionResponse?.data?.postInteractions?.status || \"\";",
+							"    responseCode = postInteractionResponse?.data?.postInteractions?.ResponseCode || \"\";",
+							"    affectedId = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0]?.id || \"\";",
+							"} catch (e) {",
+							"    console.log(\"Error accessing response properties:\", e);",
+							"}",
+							"",
+							"// Validate ResponseCode",
+							"pm.test(\"ResponseCode is 11205\", function () {",
+							"    pm.expect(responseCode).to.eql(\"11205\");",
+							"});",
+							"",
+							"// Validate Status",
+							"pm.test(\"Status is success\", function () {",
+							"    pm.expect(status).to.eql(\"success\");",
+							"});",
+							"",
+							"// Validate affectedRows[0].id equals environment variable w_userid_t3",
+							"const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"    pm.expect(affectedId).to.eql(expectedId);",
+							"    console.log(\"Affected ID:\", affectedId);",
+							"    console.log(\"Expected ID (w_userid_t3):\", expectedId);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: LIKE, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Check current liquidity",
 			"event": [
 				{
@@ -6097,6 +6274,100 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation ResolveActionPost {\n    resolvePostAction(postid:\"{{postid}}\" , action: DISLIKE) {\n        status\n        ResponseCode\n    } \n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Content Engagement(DISLIKE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let responseCode = \"\";",
+							"let status = \"\";",
+							"let affectedId = \"\";",
+							"",
+							"try {",
+							"    status = postInteractionResponse?.data?.postInteractions?.status || \"\";",
+							"    responseCode = postInteractionResponse?.data?.postInteractions?.ResponseCode || \"\";",
+							"    affectedId = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0]?.id || \"\";",
+							"} catch (e) {",
+							"    console.log(\"Error accessing response properties:\", e);",
+							"}",
+							"",
+							"// Validate ResponseCode",
+							"pm.test(\"ResponseCode is 11205\", function () {",
+							"    pm.expect(responseCode).to.eql(\"11205\");",
+							"});",
+							"",
+							"// Validate Status",
+							"pm.test(\"Status is success\", function () {",
+							"    pm.expect(status).to.eql(\"success\");",
+							"});",
+							"",
+							"// Validate affectedRows[0].id equals environment variable w_userid_t3",
+							"const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"    pm.expect(affectedId).to.eql(expectedId);",
+							"    console.log(\"Affected ID:\", affectedId);",
+							"    console.log(\"Expected ID (w_userid_t3):\", expectedId);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: DISLIKE, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6704,6 +6975,100 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation LikeComment {\n    likeComment(commentid: \"{{commentid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Content Engagement(LIKECOMMENT)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let responseCode = \"\";",
+							"let status = \"\";",
+							"let affectedId = \"\";",
+							"",
+							"try {",
+							"    status = postInteractionResponse?.data?.postInteractions?.status || \"\";",
+							"    responseCode = postInteractionResponse?.data?.postInteractions?.ResponseCode || \"\";",
+							"    affectedId = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0]?.id || \"\";",
+							"} catch (e) {",
+							"    console.log(\"Error accessing response properties:\", e);",
+							"}",
+							"",
+							"// Validate ResponseCode",
+							"pm.test(\"ResponseCode is 11205\", function () {",
+							"    pm.expect(responseCode).to.eql(\"11205\");",
+							"});",
+							"",
+							"// Validate Status",
+							"pm.test(\"Status is success\", function () {",
+							"    pm.expect(status).to.eql(\"success\");",
+							"});",
+							"",
+							"// Validate affectedRows[0].id equals environment variable w_userid_t3",
+							"const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"    pm.expect(affectedId).to.eql(expectedId);",
+							"    console.log(\"Affected ID:\", affectedId);",
+							"    console.log(\"Expected ID (w_userid_t3):\", expectedId);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: LIKECOMMENT, postOrCommentId: \"{{commentid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
