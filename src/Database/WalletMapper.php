@@ -889,17 +889,20 @@ class WalletMapper
             $entry_ids = array_map(fn($row) => isset($row['userid']) && is_string($row['userid']) ? $this->db->quote($row['userid']) : null, $entries);
             $entry_ids = array_filter($entry_ids);
 
-            foreach ($entries as $row) {
-                try {
+            $this->db->beginTransaction();
+            
+            $sql = "INSERT INTO gems (gemid, userid, postid, fromid, gems, whereby, createdat) 
+                    VALUES (:gemid, :userid, :postid, :fromid, :gems, :whereby, :createdat)";
+            $stmt = $this->db->prepare($sql);
+
+            try {
+                foreach ($entries as $row) {
                     $id = self::generateUUID();
                     if (empty($id)) {
                         $this->logger->critical('Failed to generate gems ID');
                         return self::respondWithError(41401);
                     }
 
-                    $sql = "INSERT INTO gems (gemid, userid, postid, fromid, gems, whereby, createdat) 
-                            VALUES (:gemid, :userid, :postid, :fromid, :gems, :whereby, :createdat)";
-                    $stmt = $this->db->prepare($sql);
                     $stmt->execute([
                         ':gemid' => $id,
                         ':userid' => $row['poster'],
@@ -911,18 +914,28 @@ class WalletMapper
                     ]);
 
                     $insertCount++;
-                } catch (\Throwable $e) {
-                    $this->logger->error('Error inserting into gems for ' . $tableName, ['exception' => $e]);
-                    return self::respondWithError(41210);
                 }
+                $this->db->commit();
+
+            } catch (\Throwable $e) {
+                $this->db->rollback();
+                $this->logger->error('Error inserting into gems for ' . $tableName, ['exception' => $e]);
+                return self::respondWithError(41210);
             }
 
             if (!empty($entry_ids)) {
                 try {
-                    $quoted_ids = implode(',', $entry_ids);
-                    $sql = "UPDATE $tableName SET collected = 1 WHERE userid IN ($quoted_ids)";
-                    $this->db->query($sql);
+                    $this->db->beginTransaction();
+
+                    $placeholders = implode(',', array_fill(0, count($entry_ids), '?'));
+                    $sql = "UPDATE $tableName SET collected = 1 WHERE collected = 0 AND userid IN ($placeholders)";
+                    $stmt = $this->db->prepare($sql);
+                    $stmt->execute($entry_ids);
+
+                    $this->db->commit();
+                    
                 } catch (\Throwable $e) {
+                    $this->db->rollback();
                     $this->logger->error('Error updating collected status for ' . $tableName, ['exception' => $e]);
                     return self::respondWithError(41211);
                 }
