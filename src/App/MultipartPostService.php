@@ -145,8 +145,8 @@ class MultipartPostService
     {
         $this->logger->info("MultipartPostService.tokenExpires started");
 
-        $query = "INSERT INTO token_expires 
-                  (userid, token, expiresat)
+        $query = "INSERT INTO eligibility_token_expires 
+                  (userid, eligibility_token, expiresat)
                   VALUES 
                   (:userid, :token, :expiresat)";
 
@@ -187,7 +187,7 @@ class MultipartPostService
         }
 
         try {
-            $sql = "SELECT 1 FROM token_expires WHERE token = :token";
+            $sql = "SELECT 1 FROM eligibility_token_expires WHERE eligibility_token = :token";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':token', $requestObj['token']);
             $stmt->execute();
