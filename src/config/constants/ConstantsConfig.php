@@ -18,32 +18,117 @@ class ConstantsConfig
         ];
     }
 
+    /**
+     * @return array{
+     *     CONTENT: array{MIN_LENGTH: int, MAX_LENGTH: int}
+     * }
+     */
     public static function comment() {
         return ConstantsConfig::COMMENT;
     }
-
-    public static function post() {
+    /**
+     * @return array{
+     *     TITLE: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN: string},
+     *     MEDIADESCRIPTION: array{MIN_LENGTH: int, MAX_LENGTH: int},
+     *     COVER: array{MAX_COUNT: int, MIN_LENGTH: int, MAX_LENGTH: int},
+     *     MEDIA: array{MIN_LENGTH: int, MAX_LENGTH: int},
+     *     OPTIONS: array{MIN_LENGTH: int, MAX_LENGTH: int},
+     *     MEDIALIMIT: array{AUDIO: int, IMAGE: int, TEXT: int, VIDEO: int},
+     *     COVERLIMIT: array{AUDIO: int, IMAGE: int, TEXT: int, VIDEO: int},
+     *     TAG: array{
+     *         MIN_LENGTH: int,
+     *         MAX_LENGTH: int,
+     *         PATTERN: string,
+     *         MAX_COUNT: array{
+     *             CREATE: int,
+     *             SEARCH: int
+     *         }
+     *     }
+     * }
+     */
+    public static function post(): array {
         return ConstantsConfig::POST;
     }
+
+    /**
+     * @return array{
+     *     SOLANA_PUBKEY: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN: string},
+     *     TOKEN: array{LENGTH: int},
+     *     NUMBERS: array{MIN: float, MAX: float},
+     *     NUMBERSQ: array{MIN: int, MAX: int},
+     *     WHEREBY: array{MIN: int, MAX: int}
+     * }
+     */
     public static function wallet() {
         return ConstantsConfig::WALLET;
     }
+
+    /**
+     * @return array{
+     *     LIQUIDITY: array{MIN: float, MAX: float},
+     *     LIQUIDITQ: array{MIN: int, MAX: int}
+     * }
+     */
     public static function wallett() {
         return ConstantsConfig::WALLETT;
     }
+
+    /**
+     * @return array{
+     *     PASSWORD: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN: string},
+     *     USERNAME: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN: string},
+     *     BIOGRAPHY: array{MIN_LENGTH: int, MAX_LENGTH: int},
+     *     PHONENUMBER: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN: string},
+     *     IMAGE: array{MIN_LENGTH: int, MAX_LENGTH: int},
+     *     SLUG: array{MIN_LENGTH: int, MAX_LENGTH: int},
+     *     LIQUIDITY: array{MIN_LENGTH: int, MAX_LENGTH: int},
+     *     AVATAR: array{MAX_SIZE_MB: int},
+     *     TRANSACTION: array{MIN_TOKENS: int}
+     * }
+     */
     public static function user() {
         return ConstantsConfig::USER;
     }
+
+    /**
+     * @return array{
+     *     MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int},
+     *     NAME: array{MIN_LENGTH: int, MAX_LENGTH: int},
+     *     IMAGE: array{MIN_LENGTH: int, MAX_LENGTH: int},
+     *     IS_PUBLIC: array{MIN: int, MAX: int, SUSPENDED: int},
+     *     ACCESS_LEVEL: array{MIN: int, MAX: int, USER: int, ADMIN: int}
+     * }
+     */
     public static function chat() {
         return ConstantsConfig::CHAT;
     }
+
+    /**
+     * @return array{
+     *     NAME: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN: string},
+     *     MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int}
+     * }
+     */
     public static function contact() {
         return ConstantsConfig::CONTACT;
     }
+
+    /**
+     * @return array{
+     *     OFFSET: array{MIN: int, MAX: int},
+     *     LIMIT: array{MIN: int, MAX: int}
+     * }
+     */
     public static function paging() {
         return ConstantsConfig::PAGING;
     }
 
+    /**
+     * @return array{
+     *     ACTIONTYPE: array{MIN_LENGTH: int, MAX_LENGTH: int},
+     *     TYPE: array{MIN_LENGTH: int, MAX_LENGTH: int}
+     * }
+     */
     public static function transaction() {
         return ConstantsConfig::TRANSACTION;
     }
@@ -70,11 +155,12 @@ class ConstantsConfig
         ], 
     ];
     
-
+    
     private const POST = [
         'TITLE' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 63,
+            'PATTERN' => '^[a-zA-Z0-9_]+$'
         ],
         'MEDIADESCRIPTION' => [
             'MIN_LENGTH' => 3,
@@ -115,6 +201,7 @@ class ConstantsConfig
             ],
         ],
     ];
+
     private const WALLET = [
         'SOLANA_PUBKEY' => [
             'MIN_LENGTH' => 43,
@@ -137,6 +224,7 @@ class ConstantsConfig
             'MAX' => 100,
         ],
     ];
+
     private const WALLETT = [
         'LIQUIDITY' => [
             'MIN' => -5000.0,
@@ -185,6 +273,7 @@ class ConstantsConfig
             'MAX_LENGTH' => 500,
         ],
     ];
+
     private const PAGING = [
         'OFFSET' => [
             'MIN' => 0,
@@ -195,7 +284,7 @@ class ConstantsConfig
             'MAX' => 20,
         ],
     ];  
-
+ 
     private const USER = [
         'PASSWORD' => [
             'MIN_LENGTH' => 8,
