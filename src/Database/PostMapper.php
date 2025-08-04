@@ -865,4 +865,79 @@ class PostMapper extends PeerMapper
             $this->logger->info("PostMapper.revertFileToTmp Error". $e->getMessage());
         }
     }
+    
+    /**
+     * Get Interactions based on Filter 
+     */
+    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit): array
+    {
+        $this->logger->info("PostMapper.getInteractions started");
+
+        try {
+            $this->logger->info("PostMapper.fetchViews started");
+
+            $needleTable = 'user_post_likes';
+            $needleColumn = 'postid';
+
+            if($getOnly == 'VIEW'){
+                $needleTable = 'user_post_views';
+            }elseif($getOnly == 'LIKE'){
+                $needleTable = 'user_post_likes';
+            }elseif($getOnly == 'DISLIKE'){
+                $needleTable = 'user_post_dislikes';
+            }elseif($getOnly == 'COMMENTLIKE'){
+                $needleTable = 'user_comment_likes';
+                $needleColumn = 'commentid';
+            }
+
+            $sql = "SELECT 
+                        u.uid, 
+                        u.username, 
+                        u.slug, 
+                        u.img, 
+                        u.status, 
+                        (f1.followerid IS NOT NULL) AS isfollowing,
+                        (f2.followerid IS NOT NULL) AS isfollowed
+                    FROM $needleTable uv 
+                    LEFT JOIN users u ON u.uid = uv.userid  
+                    LEFT JOIN 
+                        follows f1 
+                        ON u.uid = f1.followerid AND f1.followedid = :currentUserId 
+                    LEFT JOIN 
+                        follows f2 
+                        ON u.uid = f2.followedid AND f2.followerid = :currentUserId
+                    WHERE $needleColumn = :postid
+                    LIMIT :limit OFFSET :offset";
+
+            $stmt = $this->db->prepare($sql);
+			$stmt->bindParam(':postid', $postOrCommentId, \PDO::PARAM_STR);
+			$stmt->bindParam(':currentUserId', $currentUserId, \PDO::PARAM_STR);
+			$stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+			$stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
+
+			$stmt->execute();
+
+            $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $userResultObj = [];
+            foreach($userResults as $key => $prt){
+                $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
+                $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
+                $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
+            }  
+            
+            return $userResultObj;
+        } catch (\PDOException $e) {
+            $this->logger->error("Error fetching posts from database", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            $this->logger->error("Error fetching posts from database", [
+                'error' => $e->getMessage(),
+            ]);
+            return [];
+        }
+    }
 }

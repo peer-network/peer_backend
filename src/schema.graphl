@@ -37,6 +37,7 @@ type Query {
   getActionPrices: GetActionPricesResponse!
   postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
+  postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
 }
 
 type Mutation {
@@ -76,6 +77,12 @@ enum TokenMovementFilterType{
   MINT
   PAYMENT
   BURN
+}
+enum GetOnly {
+  VIEW
+  LIKE
+  DISLIKE
+  COMMENTLIKE
 }
 
 enum DirectionFilterType {
@@ -191,6 +198,12 @@ type TodaysInteractionsData {
   totalInteractions: Decimal
   totalScore: Decimal
   totalDetails: TodaysInteractionsDetailsData
+}
+
+type PostInteractionResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: [ProfileUser!]
 }
 
 type TodaysInteractionsDetailsData {

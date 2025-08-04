@@ -1731,7 +1731,19 @@ class GraphQLSchemaBuilder
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 },
-            ], 
+            ],
+            'PostInteractionResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.PostInteractionResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
         ];
     }
 
@@ -1777,6 +1789,7 @@ class GraphQLSchemaBuilder
             'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
+            'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
         ];
     }
 
@@ -2966,6 +2979,40 @@ class GraphQLSchemaBuilder
         } catch (\Exception $e) {
             $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
             return self::respondWithError(41226);  // Error occurred while retrieving transaction history
+        }
+
+    }
+
+
+    /**
+     * Get Post Interaction history with Post and Comment
+     * 
+     */
+    public function postInteractions(array $args): array
+    {
+        $this->logger->info('GraphQLSchemaBuilder.postInteractions started');
+
+        if (!$this->checkAuthentication()) {
+            $this->logger->info("GraphQLSchemaBuilder.postInteractions failed due to authentication");
+            return self::respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        try {
+            $results = $this->postService->postInteractions($args);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+                'affectedRows' => isset($results['affectedRows']) ? $results['affectedRows'] : []
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.postInteractions", ['exception' => $e->getMessage()]);
+            return self::respondWithError(41226);  // Error occurred while retrieving Post, Comment Interactions
         }
 
     }
