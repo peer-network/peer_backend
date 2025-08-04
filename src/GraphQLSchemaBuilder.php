@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz;
 
@@ -2646,7 +2647,7 @@ class GraphQLSchemaBuilder
         }
 
         if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
-            return $this->respondWithError("The IP '$ip' is not a valid IP address.");
+            return $this->respondWithError(00000);//"The IP '$ip' is not a valid IP address."
         }
 
         $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);

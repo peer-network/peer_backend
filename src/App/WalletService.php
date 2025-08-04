@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -333,7 +334,7 @@ class WalletService
             }
 
         } catch (\Exception $e) {
-            return $this->respondWithError('Unknown Error.');
+            return $this->respondWithError(40301);
         }
     }
 }

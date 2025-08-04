@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -133,7 +134,11 @@ class CommentService
             try {
                 $comment = new Comment($commentData);
             } catch (\Throwable $e) {
-                return $this->respondWithError($e->getMessage());
+                $this->logger->error('CommentService.createComment exception', [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                return $this->respondWithError(40301);
             }
 
             $result = $this->commentMapper->insert($comment);

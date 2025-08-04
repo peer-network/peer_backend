@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -126,7 +127,7 @@ class UserService
             return $payload;
         } catch (\Throwable $e) {
             $this->logger->error('Error create payload.', ['exception' => $e]);
-            return self::respondWithError('Error create payload.');
+            return self::respondWithError(40301);
         }
     }
 
@@ -248,8 +249,11 @@ class UserService
             $this->userMapper->createUser($user);
             unset($args);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::User.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::User.',  [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         try {
@@ -257,8 +261,11 @@ class UserService
 			$this->userMapper->insertoken($toInsert);
             unset($verificationData, $toInsert);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::Tokenize.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::Tokenize.', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         try {
@@ -266,8 +273,11 @@ class UserService
             $this->userMapper->insertinfo($userinfo);
             unset($infoData, $userinfo);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::UserInfo.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::UserInfo.', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         try {
@@ -275,8 +285,11 @@ class UserService
             $this->userPreferencesMapper->insert($userPreferences);
             unset($userPreferencesSrc, $userPreferences);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::UserPreferences.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::UserPreferences.', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         try {
@@ -292,8 +305,11 @@ class UserService
             $this->walletMapper->insertt($userwallet);
             unset($walletData, $userwallet);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::Wallett.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::Wallett.', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         try {
@@ -301,8 +317,11 @@ class UserService
             $this->dailyFreeMapper->insert($createuserDaily);
             unset($dailyData, $createuserDaily);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::DailyFree.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::DailyFree.', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         $this->userMapper->logLoginDaten($id);

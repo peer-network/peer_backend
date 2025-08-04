@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -103,6 +104,8 @@ class TagPostService
             ]);
             $this->tagPostMapper->insert($tagPost);
         }
+        
+        return ['status' => 'success'];
     }
 
     public function createTag(string $tagName): array

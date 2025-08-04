@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -92,7 +93,7 @@ class PostInfoService
 
         $this->logger->info('PostInfoService.deletePostInfo started');
 
-        if ($this->postInfoMapper->delete($postId)) {
+        if ($this->postMapper->delete($postId)) {
             return ['status' => 'success', 'ResponseCode' => 11510,];
         } else {
             return $this->respondWithError(41510);

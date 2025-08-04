@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -69,7 +70,7 @@ class ContactusService
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return $this->respondWithError("$field is required");
+                return $this->respondWithError(00000);  //"$field is required"
             }
         }
         return [];
@@ -115,7 +116,7 @@ class ContactusService
                 return $this->respondWithError(40401);
             }
 
-            $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $exist);
+            $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), is_array($exist) ? $exist : [$exist]);
 
             $this->logger->info("ContactusService.loadById successfully fetched contact", [
                 'type' => $type,

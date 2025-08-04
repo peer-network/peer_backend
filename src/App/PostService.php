@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -240,7 +241,11 @@ class PostService
                 $post = new Post($postData);
             } catch (\Throwable $e) {
                 $this->postMapper->rollback();
-                return $this->respondWithError($e->getMessage());
+                $this->logger->error('PostService.createPost exception during Post instantiation', [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                return $this->respondWithError(40301);
             }
             $this->postMapper->insert($post);
 
@@ -580,7 +585,7 @@ class PostService
     public function deletePost(string $id): array
     {
         if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
-            return $this->respondWithError('Invalid feed ID');
+            return $this->respondWithError(30209);
         }
 
         if (!self::isValidUUID($id)) {
@@ -597,7 +602,7 @@ class PostService
         $post = $posts->getArrayCopy();
 
         if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
-            return $this->respondWithError('Unauthorized: You can only delete your own posts.');
+            return $this->respondWithError(00000); // 'Unauthorized: You can only delete your own posts.'
         }
 
         try {
