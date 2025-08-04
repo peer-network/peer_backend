@@ -100,8 +100,11 @@ class ContactusService
             return $this->respondWithError(30102);
         }
 
-        if ($type === 'id' && !self::isValidUUID($value)) {
-            return $this->respondWithError(30105);
+        if ($type === 'id') {
+            if (!ctype_digit($value)) {
+                return $this->respondWithError(30105);
+            }
+            $value = (int)$value;
         }
 
         $this->logger->info("ContactusService.loadById started", [
@@ -110,7 +113,7 @@ class ContactusService
         ]);
 
         try {
-            $exist = ($type === 'id') ? $this->contactUsMapper->loadById((int)$value) : $this->contactUsMapper->loadByName($value);
+            $exist = ($type === 'id') ? $this->contactUsMapper->loadById($value) : $this->contactUsMapper->loadByName($value);
 
             if ($exist === null) {
                 return $this->respondWithError(40401);

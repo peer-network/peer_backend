@@ -90,7 +90,7 @@ class UserService
         $attempts = 0;
         do {
             $slug = $this->createNumbersAsString(1, 9, 5);
-            if (!$this->userMapper->checkIfNameAndSlugExist($username, (int) $slug)) {
+            if (!$this->userMapper->checkIfNameAndSlugExist($username, $slug)) {
                 return (string) $slug;
             }
             $attempts++;
@@ -388,7 +388,7 @@ class UserService
         ];
     }
     
-    private function uploadMedia(string $mediaFile, string $userId, string $folder): array|string
+    private function uploadMedia(string $mediaFile, string $userId, string $folder): array
     {
         try {
 

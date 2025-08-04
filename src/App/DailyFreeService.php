@@ -76,7 +76,7 @@ class DailyFreeService
             $results = $this->dailyFreeMapper->getUserDailyUsage($userId, $artType);
             $this->logger->info('DailyFreeService.getUserDailyUsage results', ['results' => $results]);
 
-            return (int)$results;
+            return $results;
         } catch (\Throwable $e) {
             $this->logger->error('Error in getUserDailyUsage', ['exception' => $e->getMessage()]);
             return 0;
