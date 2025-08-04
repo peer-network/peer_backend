@@ -553,16 +553,16 @@
               "let oldLiquidity = pm.environment.get(\"liquidity\");",
               "let isDailyFreePost = pm.environment.get(\"isDailyFreePost\");",
               "",
-              "console.log(`💰 Old Liquidity: ${oldLiquidity}`);",
-              "console.log(`💰 New Liquidity: ${newLiquidity}`);",
-              "console.log(`🆓 isDailyFreePost exists?: ${isDailyFreePost !== undefined}`);",
+              "console.log(`\ud83d\udcb0 Old Liquidity: ${oldLiquidity}`);",
+              "console.log(`\ud83d\udcb0 New Liquidity: ${newLiquidity}`);",
+              "console.log(`\ud83c\udd93 isDailyFreePost exists?: ${isDailyFreePost !== undefined}`);",
               "",
               "pm.test(\"Previous liquidity exists\", function () {",
               "    pm.expect(oldLiquidity).to.be.a(\"number\");",
               "});",
               "",
               "if (isDailyFreePost !== undefined) {",
-              "    console.log(\"⏩ This was a Daily Free Post, skipping liquidity check.\");",
+              "    console.log(\"\u23e9 This was a Daily Free Post, skipping liquidity check.\");",
               "} else {",
               "    pm.test(\"Liquidity should decrease after spending\", function () {",
               "        pm.expect(newLiquidity).to.be.below(oldLiquidity, \"Expected liquidity to decrease\");",
@@ -1945,7 +1945,7 @@
         "body": {
           "mode": "graphql",
           "graphql": {
-            "query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"🎉🔥 Test Post! @#$%^&*()\"\n            media: \"{{new_profile_pic}}\"\n            mediadescription: \"Testing special characters: 💡📝❗️\"\n            contenttype: image\n        }\n        action: POST\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+            "query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"\ud83c\udf89\ud83d\udd25 Test Post! @#$%^&*()\"\n            media: \"{{new_profile_pic}}\"\n            mediadescription: \"Testing special characters: \ud83d\udca1\ud83d\udcdd\u2757\ufe0f\"\n            contenttype: image\n        }\n        action: POST\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
             "variables": ""
           }
         },
@@ -2165,28 +2165,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "/etc/newman/media_files/1f068756-c1bd-40f0-827c-6c559a669374",
-                "/etc/newman/media_files/1f068756-c2d8-4430-b437-a13be0a14d85",
-                "/etc/newman/media_files/1f068756-c1c1-4f10-ab76-aa078c543c64",
-                "/etc/newman/media_files/1f068756-c1c9-4440-95b4-b2973344d817",
-                "/etc/newman/media_files/1f068756-c1d5-4790-baad-1e5b81bbf6de",
-                "/etc/newman/media_files/1f068756-ca5c-4170-a570-34bdf58e8ed4",
-                "/etc/newman/media_files/1f068756-c9ee-43a0-8389-c25a141ad456",
-                "/etc/newman/media_files/1f068756-ca09-4150-9497-d3f726d5e15f",
-                "/etc/newman/media_files/1f068756-cad8-49a0-b8d5-e79b7b004389",
-                "/etc/newman/media_files/1f068756-ca2b-4430-ad15-398817df656b",
-                "/etc/newman/media_files/1f068756-cd9a-42b0-9969-9dc61d44b126",
-                "/etc/newman/media_files/1f068756-ce08-4080-8780-11df23530617",
-                "/etc/newman/media_files/1f068756-cdb9-4e80-a518-62152e199c15",
-                "/etc/newman/media_files/1f068756-ce4e-4d50-9a0b-cfdb76dc1305",
-                "/etc/newman/media_files/1f068756-ce98-4130-bb71-159df0c9e666",
-                "/etc/newman/media_files/1f068756-d1b8-4db0-b2fa-233ab5a06230",
-                "/etc/newman/media_files/1f068756-d1c9-4f20-8611-77f266baa9ca",
-                "/etc/newman/media_files/1f068756-d226-4b80-92fe-468e3008f613",
-                "/etc/newman/media_files/1f068756-d2cc-4bc0-8d5e-162e817d47c8",
-                "/etc/newman/media_files/1f068756-d399-4d00-ab8e-621da769ed42"
-              ]
+              "src": "tests/media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_20.jpg"
             }
           ]
         },
@@ -2562,10 +2636,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "/etc/newman/media_files/File Example AVI 1920 2.3MB.avi",
-                "/etc/newman/media_files/File Example WEBM 1280 3MB.webm"
-              ]
+              "src": "tests/media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_20.jpg"
             }
           ]
         },
@@ -2878,7 +3044,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "/etc/newman/media_files/MP3 5MB Example.mp3"
+              "src": "media_files/unknown.bin"
             }
           ]
         },
@@ -3209,7 +3375,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "/etc/newman/media_files/Sample Text File 10kb.txt"
+              "src": "media_files/unknown.bin"
             }
           ]
         },
@@ -3530,7 +3696,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "/etc/newman/media_files/IMG_9440.MOV"
+              "src": "media_files/unknown.bin"
             }
           ]
         },
@@ -3601,7 +3767,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "/etc/newman/media_files/1f068756-c1bd-40f0-827c-6c559a669374"
+              "src": "media_files/unknown.bin"
             }
           ]
         },
@@ -3744,29 +3910,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "/etc/newman/media_files/1f068756-c1bd-40f0-827c-6c559a669374",
-                "/etc/newman/media_files/1f068756-c2d8-4430-b437-a13be0a14d85",
-                "/etc/newman/media_files/1f068756-c1c1-4f10-ab76-aa078c543c64",
-                "/etc/newman/media_files/1f068756-c1c9-4440-95b4-b2973344d817",
-                "/etc/newman/media_files/1f068756-c1d5-4790-baad-1e5b81bbf6de",
-                "/etc/newman/media_files/1f068756-ca5c-4170-a570-34bdf58e8ed4",
-                "/etc/newman/media_files/1f068756-c9ee-43a0-8389-c25a141ad456",
-                "/etc/newman/media_files/1f068756-ca09-4150-9497-d3f726d5e15f",
-                "/etc/newman/media_files/1f068756-cad8-49a0-b8d5-e79b7b004389",
-                "/etc/newman/media_files/1f068756-ca2b-4430-ad15-398817df656b",
-                "/etc/newman/media_files/1f068756-cd9a-42b0-9969-9dc61d44b126",
-                "/etc/newman/media_files/1f068756-ce08-4080-8780-11df23530617",
-                "/etc/newman/media_files/1f068756-cdb9-4e80-a518-62152e199c15",
-                "/etc/newman/media_files/1f068756-ce4e-4d50-9a0b-cfdb76dc1305",
-                "/etc/newman/media_files/1f068756-ce98-4130-bb71-159df0c9e666",
-                "/etc/newman/media_files/1f068756-d1c9-4f20-8611-77f266baa9ca",
-                "/etc/newman/media_files/1f068756-d226-4b80-92fe-468e3008f613",
-                "/etc/newman/media_files/1f068756-d1b8-4db0-b2fa-233ab5a06230",
-                "/etc/newman/media_files/1f068756-d2cc-4bc0-8d5e-162e817d47c8",
-                "/etc/newman/media_files/1f068756-d399-4d00-ab8e-621da769ed42",
-                "/etc/newman/media_files/Sample HEIF 3.heif"
-              ]
+              "src": "tests/media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_20.jpg"
             }
           ]
         },
@@ -3909,11 +4148,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "/etc/newman/media_files/File Example AVI 1920 2.3MB.avi",
-                "/etc/newman/media_files/File Example WEBM 1280 3MB.webm",
-                "/etc/newman/media_files/MP4 Example 1920 18MB.mp4"
-              ]
+              "src": "tests/media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_20.jpg"
             }
           ]
         },
@@ -4056,10 +4386,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "/etc/newman/media_files/bullshit.txt",
-                "/etc/newman/media_files/Sample Text File 10kb.txt"
-              ]
+              "src": "tests/media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_20.jpg"
             }
           ]
         },
@@ -4202,10 +4624,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "/etc/newman/media_files/MP3 5MB Example.mp3",
-                "/etc/newman/media_files/noise.webm"
-              ]
+              "src": "tests/media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_20.jpg"
             }
           ]
         },
@@ -4348,7 +4862,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "/etc/newman/media_files/empty.txt"
+              "src": "media_files/unknown.bin"
             }
           ]
         },
@@ -4491,12 +5005,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "/etc/newman/media_files/MP3 5MB Example.mp3",
-                "/etc/newman/media_files/Sample Text File 10kb.txt",
-                "/etc/newman/media_files/File Example AVI 1920 2.3MB.avi",
-                "/etc/newman/media_files/Sample HEIF 3.heif"
-              ]
+              "src": "tests/media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "tests/media_files/image_20.jpg"
             }
           ]
         },
@@ -5639,7 +6243,7 @@
               "});",
               "",
               "if (isDailyFreeComment !== undefined) {",
-              "    console.log(\"⏩ This was a Daily Free Comment, skipping liquidity check.\");",
+              "    console.log(\"\u23e9 This was a Daily Free Comment, skipping liquidity check.\");",
               "} else {",
               "    pm.test(\"Liquidity should decrease after commenting\", function () {",
               "        pm.expect(newLiquidityAfterComment).to.be.below(oldLiquidity);",
@@ -8368,7 +8972,7 @@
               "});",
               "",
               "if (isDailyFreeComment !== undefined) {",
-              "    console.log(\"⏩ This was a Daily Free Comment, skipping liquidity check.\");",
+              "    console.log(\"\u23e9 This was a Daily Free Comment, skipping liquidity check.\");",
               "} else {",
               "    pm.test(\"Liquidity should decrease after commenting\", function () {",
               "        pm.expect(newLiquidityAfterComment).to.be.below(oldLiquidity);",
@@ -8540,7 +9144,7 @@
               "});",
               "",
               "if (isDailyFreeLike !== undefined) {",
-              "    console.log(\"⏩ This was a Daily Free Like, skipping liquidity check.\");",
+              "    console.log(\"\u23e9 This was a Daily Free Like, skipping liquidity check.\");",
               "} else {",
               "    pm.test(\"Liquidity should decrease after liking\", function () {",
               "        pm.expect(newLiquidityAfterLike).to.be.below(oldLiquidity);",
@@ -10373,8 +10977,8 @@
               "    pm.expect(diff).to.eql(1);",
               "});",
               "",
-              "console.log(`Posts: ${originalPostCount} → ${currentPostCount}`);",
-              "console.log(`Comments: ${originalCommentCount} → ${currentCommentCount}`);",
+              "console.log(`Posts: ${originalPostCount} \u2192 ${currentPostCount}`);",
+              "console.log(`Comments: ${originalCommentCount} \u2192 ${currentCommentCount}`);",
               ""
             ],
             "type": "text/javascript",
