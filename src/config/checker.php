@@ -21,8 +21,7 @@ if (!in_array($db_driver, ['postgres'])) {
 
 if ($db_driver === 'postgres') {
     function is_pg_server_running($host, $port) {
-        $connection = @fsockopen($host, $port, $errno, $errstr, 5);
-
+        $connection = @fsockopen($host, (int)$port, $errno, $errstr, 5);
         if ($connection) {
             fclose($connection);
             return true;
