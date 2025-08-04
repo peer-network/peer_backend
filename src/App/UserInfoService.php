@@ -10,6 +10,7 @@ use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Utils\ReportTargetType;
 use Psr\Log\LoggerInterface;
+use Fawaz\config\constants\ConstantsConfig;
 
 class UserInfoService
 {
@@ -220,7 +221,9 @@ class UserInfoService
             return $this->respondWithError(60501);
         }
 
-        if (trim($biography) === '' || strlen($biography) < 3 || strlen($biography) > 5000) {
+        $bioConfig = ConstantsConfig::user()['BIOGRAPHY'];
+
+        if (trim($biography) === '' || strlen($biography) < $bioConfig['MIN_LENGTH'] || strlen($biography) > $bioConfig['MAX_LENGTH']) {
             return $this->respondWithError(30228);
         }
 

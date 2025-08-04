@@ -17,6 +17,7 @@ use Psr\Log\LoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\config\constants\ConstantsConfig;
 
 class PostService
 {
@@ -357,6 +358,7 @@ class PostService
     private function handleTags(array $tags, string $postId, string $createdAt): void
     {
         $maxTags = 10;
+        $tagNameConfig = ConstantsConfig::post()['TAG'];
         if (count($tags) > $maxTags) {
             throw new \Exception('Maximum tag limit exceeded');
         }
@@ -469,7 +471,8 @@ class PostService
         $tag = $args['tag'] ?? null; 
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
-        
+        $titleConfig = ConstantsConfig::post()['TITLE'];
+
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
         }
@@ -478,7 +481,7 @@ class PostService
             return $this->respondWithError(30201);
         }
 
-        if ($title !== null && strlen((string)$title) < 2 || strlen((string)$title) > 33) {
+        if ($title !== null && (strlen((string)$title) < $titleConfig['MIN_LENGTH'] || strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
             return $this->respondWithError(30210);
         }
 
@@ -491,7 +494,7 @@ class PostService
         }
 
         if ($tag !== null) {
-            if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
+            if (!preg_match('/' . $titleConfig['PATTERN'] . '/u', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }
@@ -612,5 +615,49 @@ class PostService
         }
 
         return $this->respondWithError(41510);
+    }
+
+    /**
+     * Get Interaction with post or comment
+     */
+    public function postInteractions(?array $args = []): array|false
+    {
+        if (!$this->checkAuthentication()) {
+            $this->logger->info("PostService.postInteractions failed due to authentication");
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->info("PostService.postInteractions started");
+
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+
+        $getOnly = $args['getOnly'] ?? null;
+        $postOrCommentId = $args['postOrCommentId'] ?? null;
+
+
+        if($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])){
+            $this->logger->info("PostService.postInteractions failed due to empty or invalid arguments");
+            return $this->respondWithError(30103);
+        }
+
+        if(!self::isValidUUID($postOrCommentId)){
+            $this->logger->info("PostService.postInteractions failed due to invalid postOrCommentId");
+            return $this->respondWithError(30201);
+        }
+
+        try {
+            $result = $this->postMapper->getInteractions($getOnly, $postOrCommentId, $this->currentUserId, $offset, $limit);
+
+            $this->logger->info("Interaction fetched successfully", ['count' => count($result)]);
+            return $this->createSuccessResponse(11205, $result);
+
+        } catch (\Throwable $e) {
+            $this->logger->error("Error fetching Posts", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError(41513);
+        }
     }
 }

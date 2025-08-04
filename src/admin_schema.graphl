@@ -45,6 +45,8 @@ type Query {
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
   getReferralInfo: ReferralInfoResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
+  getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
+  postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
 }
 
 type Mutation {
@@ -78,6 +80,32 @@ type Mutation {
 scalar Decimal
 scalar Date
 
+enum TokenMovementFilterType{
+  TRANSACTION
+  AIRDROP
+  MINT
+  PAYMENT
+  BURN
+}
+
+enum GetOnly {
+  VIEW
+  LIKE
+  DISLIKE
+  COMMENTLIKE
+}
+
+
+enum DirectionFilterType {
+  INCOME
+  DEDUCTION
+}
+
+enum SortFilterType {
+  NEWEST
+  OLDEST
+}
+
 enum PostActionType {
   LIKE
   DISLIKE
@@ -103,6 +131,26 @@ enum ContentFilterType {
 input UserPreferencesInput {
   contentFilteringSeverityLevel: ContentFilterType
 }
+
+
+type Transaction {
+  transactionid: String!
+  transuniqueid: String!
+  transactiontype: String!
+  senderid: String!
+  recipientid: String!
+  tokenamount: Decimal!
+  transferaction: String!
+  message: String!
+  createdat: String!
+}
+
+type TransactionResponse {
+  status: String!
+  responseCode: Int!
+  affectedRows: [Transaction!]
+}
+
 
 type UserPreferences {
   contentFilteringSeverityLevel: ContentFilterType
@@ -173,6 +221,12 @@ type ListTodaysInteractionsResponse {
   status: String!
   ResponseCode: String
   affectedRows: TodaysInteractionsData
+}
+
+type PostInteractionResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: [ProfileUser!]
 }
 
 type TodaysInteractionsData {

@@ -61,6 +61,9 @@ use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use ReflectionNamedType;
+use Fawaz\App\PeerTokenService;
+use Fawaz\config\constants\ConstantsConfig;
+
 
 class GraphQLSchemaBuilder
 {
@@ -85,6 +88,7 @@ class GraphQLSchemaBuilder
         protected CommentInfoService $commentInfoService,
         protected ChatService $chatService,
         protected WalletService $walletService,
+        protected PeerTokenService $peerTokenService,
         protected JWTService $tokenService
     ) {
         $this->resolvers = $this->buildResolvers();
@@ -158,6 +162,7 @@ class GraphQLSchemaBuilder
         $this->chatService->setCurrentUserId($userid);
         $this->mcapService->setCurrentUserId($userid);
         $this->walletService->setCurrentUserId($userid);
+        $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
     }
 
@@ -1673,7 +1678,60 @@ class GraphQLSchemaBuilder
                 'nextAttemptAt' => function (array $root): string {
                     return $root['nextAttemptAt'] ?? '';
                 },
-            ],                       
+            ],
+             'TransactionResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.TransactionResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'responseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'Transaction' => [
+                'transactionid' => function (array $root): string {
+                    return $root['transactionid'] ?? '';
+                },
+                'transuniqueid' => function (array $root): string {
+                    return $root['transuniqueid'] ?? '';
+                },
+                'transactiontype' => function (array $root): string {
+                    return $root['transactiontype'] ?? '';
+                },
+                'senderid' => function (array $root): string {
+                    return $root['senderid'] ?? '';
+                },
+                'recipientid' => function (array $root): string {
+                    return $root['recipientid'] ?? '';
+                },
+                'tokenamount' => function (array $root): float {
+                    return $root['tokenamount'] ?? 0;
+                },
+                'transferaction' => function (array $root): string {
+                    return $root['transferaction'] ?? '';
+                },
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ],
+            'PostInteractionResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.PostInteractionResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
         ];
     }
 
@@ -1717,6 +1775,8 @@ class GraphQLSchemaBuilder
             'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
+            'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
+            'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
         ];
     }
 
@@ -2546,6 +2606,7 @@ class GraphQLSchemaBuilder
         }
 
         $username = isset($args['username']) ? trim($args['username']) : null;
+        $usernameConfig = ConstantsConfig::user()['USERNAME'];
         $userId = $args['userid'] ?? null;
         $email = $args['email'] ?? null;
         $status = $args['status'] ?? null;
@@ -2564,11 +2625,11 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30201);
         }
 
-        if ($username !== null && (strlen($username) < 3 || strlen($username) > 23)) {
+        if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
             return $this->respondWithError(30202);
         }
 
-        if ($username !== null && !preg_match('/^[a-zA-Z0-9]+$/', $username)) {
+        if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
             return $this->respondWithError(30202);
         }
 
@@ -2877,6 +2938,73 @@ class GraphQLSchemaBuilder
         ];
     }
 
+    /**
+     * Get transcation history with Filter
+     * 
+     */
+    public function transactionsHistory(array $args): array
+    {
+        $this->logger->info('GraphQLSchemaBuilder.transactionsHistory started');
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        try {
+            $results = $this->peerTokenService->transactionsHistory($args);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+                'affectedRows' => $results['affectedRows']
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
+            return self::respondWithError(41226);  // Error occurred while retrieving transaction history
+        }
+
+    }
+
+
+    /**
+     * Get Post Interaction history with Post and Comment
+     * 
+     */
+    public function postInteractions(array $args): array
+    {
+        $this->logger->info('GraphQLSchemaBuilder.postInteractions started');
+
+        if (!$this->checkAuthentication()) {
+            $this->logger->info("GraphQLSchemaBuilder.postInteractions failed due to authentication");
+            return self::respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        try {
+            $results = $this->postService->postInteractions($args);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+                'affectedRows' => isset($results['affectedRows']) ? $results['affectedRows'] : []
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.postInteractions", ['exception' => $e->getMessage()]);
+            return self::respondWithError(41226);  // Error occurred while retrieving Post, Comment Interactions
+        }
+
+    }
+
+
     protected function resolvePosts(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
@@ -3027,50 +3155,56 @@ class GraphQLSchemaBuilder
         $messageOffset = isset($args['messageOffset']) ? (int)$args['messageOffset'] : null;
         $messageLimit = isset($args['messageLimit']) ? (int)$args['messageLimit'] : null;
 
+        $paging = ConstantsConfig::paging();
+        $minOffset = $paging['OFFSET']['MIN'];
+        $maxOffset = $paging['OFFSET']['MAX'];
+        $minLimit = $paging['LIMIT']['MIN'];
+        $maxLimit = $paging['LIMIT']['MAX'];
+
         if ($offset !== null) {
-            if ($offset < 0 || $offset > INT32_MAX) {
+            if ($offset < $minOffset || $offset > $maxOffset) {
                 return $this->respondWithError(30203);
             }
         }
 
         if ($limit !== null) {
-            if ($limit < 1 || $limit > 20) {  
+            if ($limit < $minLimit || $limit > $maxLimit) {  
                 return $this->respondWithError(30204);
             }
         }
 
         if ($postOffset !== null) {
-            if ($postOffset < 0 || $postOffset > INT32_MAX) {
+            if ($postOffset < $minOffset || $postOffset > $maxOffset) {
                 return $this->respondWithError(30203);
             }
         }
 
         if ($postLimit !== null) {
-            if ($postLimit < 1 || $postLimit > 20) {  
+            if ($postLimit < $minLimit || $postLimit > $maxLimit) {  
                 return $this->respondWithError(30204);
             }
         }
 
         if ($commentOffset !== null) {
-            if ($commentOffset < 0 || $commentOffset > INT32_MAX) {
+            if ($commentOffset < $minOffset || $commentOffset > $maxOffset) {
                 return $this->respondWithError(30215);
             }
         }
 
         if ($commentLimit !== null) {
-            if ($commentLimit < 1 || $commentLimit > 20) {  
+            if ($commentLimit < $minLimit || $commentLimit > $maxLimit) {  
                 return $this->respondWithError(30216);
             }
         }
 
         if ($messageOffset !== null) {
-            if ($messageOffset < 0 || $messageOffset > INT32_MAX) {
+            if ($messageOffset < $minOffset || $messageOffset > $maxOffset) {
                 return $this->respondWithError(30219);
             }
         }
 
         if ($messageLimit !== null) {
-            if ($messageLimit < 1 || $messageLimit > 20) {  
+            if ($messageLimit < $minLimit || $messageLimit > $maxLimit) {  
                 return $this->respondWithError(30220);
             }
         }
