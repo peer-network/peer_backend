@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 $db_driver = $_ENV['DB_DRIVER'] ?? '';
 $host = $_ENV['DB_HOST'] ?? '';
