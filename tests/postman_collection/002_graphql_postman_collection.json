@@ -2165,102 +2165,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_01.jpg"
+              "src": "/etc/newman/media_files/image_01.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_02.jpg"
+              "src": "/etc/newman/media_files/image_02.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_03.jpg"
+              "src": "/etc/newman/media_files/image_03.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_04.jpg"
+              "src": "/etc/newman/media_files/image_04.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_05.jpg"
+              "src": "/etc/newman/media_files/image_05.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_06.jpg"
+              "src": "/etc/newman/media_files/image_06.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_07.jpg"
+              "src": "/etc/newman/media_files/image_07.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_08.jpg"
+              "src": "/etc/newman/media_files/image_08.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_09.jpg"
+              "src": "/etc/newman/media_files/image_09.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_10.jpg"
+              "src": "/etc/newman/media_files/image_10.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_11.jpg"
+              "src": "/etc/newman/media_files/image_11.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_12.jpg"
+              "src": "/etc/newman/media_files/image_12.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_13.jpg"
+              "src": "/etc/newman/media_files/image_13.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_14.jpg"
+              "src": "/etc/newman/media_files/image_14.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_15.jpg"
+              "src": "/etc/newman/media_files/image_15.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_16.jpg"
+              "src": "/etc/newman/media_files/image_16.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_17.jpg"
+              "src": "/etc/newman/media_files/image_17.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_18.jpg"
+              "src": "/etc/newman/media_files/image_18.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_19.jpg"
+              "src": "/etc/newman/media_files/image_19.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_20.jpg"
+              "src": "/etc/newman/media_files/image_20.jpg"
             }
           ]
         },
@@ -2636,102 +2636,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_01.jpg"
+              "src": "/etc/newman/media_files/image_01.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_02.jpg"
+              "src": "/etc/newman/media_files/image_02.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_03.jpg"
+              "src": "/etc/newman/media_files/image_03.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_04.jpg"
+              "src": "/etc/newman/media_files/image_04.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_05.jpg"
+              "src": "/etc/newman/media_files/image_05.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_06.jpg"
+              "src": "/etc/newman/media_files/image_06.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_07.jpg"
+              "src": "/etc/newman/media_files/image_07.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_08.jpg"
+              "src": "/etc/newman/media_files/image_08.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_09.jpg"
+              "src": "/etc/newman/media_files/image_09.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_10.jpg"
+              "src": "/etc/newman/media_files/image_10.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_11.jpg"
+              "src": "/etc/newman/media_files/image_11.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_12.jpg"
+              "src": "/etc/newman/media_files/image_12.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_13.jpg"
+              "src": "/etc/newman/media_files/image_13.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_14.jpg"
+              "src": "/etc/newman/media_files/image_14.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_15.jpg"
+              "src": "/etc/newman/media_files/image_15.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_16.jpg"
+              "src": "/etc/newman/media_files/image_16.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_17.jpg"
+              "src": "/etc/newman/media_files/image_17.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_18.jpg"
+              "src": "/etc/newman/media_files/image_18.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_19.jpg"
+              "src": "/etc/newman/media_files/image_19.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_20.jpg"
+              "src": "/etc/newman/media_files/image_20.jpg"
             }
           ]
         },
@@ -3044,7 +3044,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "media_files/unknown.bin"
+              "src": "/etc/newman/media_files/unknown.bin"
             }
           ]
         },
@@ -3375,7 +3375,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "media_files/unknown.bin"
+              "src": "/etc/newman/media_files/unknown.bin"
             }
           ]
         },
@@ -3696,7 +3696,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "media_files/unknown.bin"
+              "src": "/etc/newman/media_files/unknown.bin"
             }
           ]
         },
@@ -3767,7 +3767,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "media_files/unknown.bin"
+              "src": "/etc/newman/media_files/unknown.bin"
             }
           ]
         },
@@ -3910,102 +3910,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_01.jpg"
+              "src": "/etc/newman/media_files/image_01.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_02.jpg"
+              "src": "/etc/newman/media_files/image_02.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_03.jpg"
+              "src": "/etc/newman/media_files/image_03.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_04.jpg"
+              "src": "/etc/newman/media_files/image_04.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_05.jpg"
+              "src": "/etc/newman/media_files/image_05.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_06.jpg"
+              "src": "/etc/newman/media_files/image_06.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_07.jpg"
+              "src": "/etc/newman/media_files/image_07.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_08.jpg"
+              "src": "/etc/newman/media_files/image_08.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_09.jpg"
+              "src": "/etc/newman/media_files/image_09.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_10.jpg"
+              "src": "/etc/newman/media_files/image_10.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_11.jpg"
+              "src": "/etc/newman/media_files/image_11.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_12.jpg"
+              "src": "/etc/newman/media_files/image_12.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_13.jpg"
+              "src": "/etc/newman/media_files/image_13.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_14.jpg"
+              "src": "/etc/newman/media_files/image_14.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_15.jpg"
+              "src": "/etc/newman/media_files/image_15.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_16.jpg"
+              "src": "/etc/newman/media_files/image_16.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_17.jpg"
+              "src": "/etc/newman/media_files/image_17.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_18.jpg"
+              "src": "/etc/newman/media_files/image_18.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_19.jpg"
+              "src": "/etc/newman/media_files/image_19.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_20.jpg"
+              "src": "/etc/newman/media_files/image_20.jpg"
             }
           ]
         },
@@ -4148,102 +4148,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_01.jpg"
+              "src": "/etc/newman/media_files/image_01.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_02.jpg"
+              "src": "/etc/newman/media_files/image_02.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_03.jpg"
+              "src": "/etc/newman/media_files/image_03.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_04.jpg"
+              "src": "/etc/newman/media_files/image_04.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_05.jpg"
+              "src": "/etc/newman/media_files/image_05.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_06.jpg"
+              "src": "/etc/newman/media_files/image_06.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_07.jpg"
+              "src": "/etc/newman/media_files/image_07.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_08.jpg"
+              "src": "/etc/newman/media_files/image_08.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_09.jpg"
+              "src": "/etc/newman/media_files/image_09.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_10.jpg"
+              "src": "/etc/newman/media_files/image_10.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_11.jpg"
+              "src": "/etc/newman/media_files/image_11.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_12.jpg"
+              "src": "/etc/newman/media_files/image_12.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_13.jpg"
+              "src": "/etc/newman/media_files/image_13.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_14.jpg"
+              "src": "/etc/newman/media_files/image_14.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_15.jpg"
+              "src": "/etc/newman/media_files/image_15.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_16.jpg"
+              "src": "/etc/newman/media_files/image_16.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_17.jpg"
+              "src": "/etc/newman/media_files/image_17.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_18.jpg"
+              "src": "/etc/newman/media_files/image_18.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_19.jpg"
+              "src": "/etc/newman/media_files/image_19.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_20.jpg"
+              "src": "/etc/newman/media_files/image_20.jpg"
             }
           ]
         },
@@ -4386,102 +4386,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_01.jpg"
+              "src": "/etc/newman/media_files/image_01.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_02.jpg"
+              "src": "/etc/newman/media_files/image_02.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_03.jpg"
+              "src": "/etc/newman/media_files/image_03.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_04.jpg"
+              "src": "/etc/newman/media_files/image_04.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_05.jpg"
+              "src": "/etc/newman/media_files/image_05.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_06.jpg"
+              "src": "/etc/newman/media_files/image_06.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_07.jpg"
+              "src": "/etc/newman/media_files/image_07.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_08.jpg"
+              "src": "/etc/newman/media_files/image_08.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_09.jpg"
+              "src": "/etc/newman/media_files/image_09.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_10.jpg"
+              "src": "/etc/newman/media_files/image_10.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_11.jpg"
+              "src": "/etc/newman/media_files/image_11.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_12.jpg"
+              "src": "/etc/newman/media_files/image_12.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_13.jpg"
+              "src": "/etc/newman/media_files/image_13.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_14.jpg"
+              "src": "/etc/newman/media_files/image_14.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_15.jpg"
+              "src": "/etc/newman/media_files/image_15.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_16.jpg"
+              "src": "/etc/newman/media_files/image_16.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_17.jpg"
+              "src": "/etc/newman/media_files/image_17.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_18.jpg"
+              "src": "/etc/newman/media_files/image_18.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_19.jpg"
+              "src": "/etc/newman/media_files/image_19.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_20.jpg"
+              "src": "/etc/newman/media_files/image_20.jpg"
             }
           ]
         },
@@ -4624,102 +4624,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_01.jpg"
+              "src": "/etc/newman/media_files/image_01.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_02.jpg"
+              "src": "/etc/newman/media_files/image_02.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_03.jpg"
+              "src": "/etc/newman/media_files/image_03.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_04.jpg"
+              "src": "/etc/newman/media_files/image_04.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_05.jpg"
+              "src": "/etc/newman/media_files/image_05.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_06.jpg"
+              "src": "/etc/newman/media_files/image_06.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_07.jpg"
+              "src": "/etc/newman/media_files/image_07.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_08.jpg"
+              "src": "/etc/newman/media_files/image_08.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_09.jpg"
+              "src": "/etc/newman/media_files/image_09.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_10.jpg"
+              "src": "/etc/newman/media_files/image_10.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_11.jpg"
+              "src": "/etc/newman/media_files/image_11.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_12.jpg"
+              "src": "/etc/newman/media_files/image_12.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_13.jpg"
+              "src": "/etc/newman/media_files/image_13.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_14.jpg"
+              "src": "/etc/newman/media_files/image_14.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_15.jpg"
+              "src": "/etc/newman/media_files/image_15.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_16.jpg"
+              "src": "/etc/newman/media_files/image_16.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_17.jpg"
+              "src": "/etc/newman/media_files/image_17.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_18.jpg"
+              "src": "/etc/newman/media_files/image_18.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_19.jpg"
+              "src": "/etc/newman/media_files/image_19.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_20.jpg"
+              "src": "/etc/newman/media_files/image_20.jpg"
             }
           ]
         },
@@ -4862,7 +4862,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "media_files/unknown.bin"
+              "src": "/etc/newman/media_files/unknown.bin"
             }
           ]
         },
@@ -5005,102 +5005,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_01.jpg"
+              "src": "/etc/newman/media_files/image_01.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_02.jpg"
+              "src": "/etc/newman/media_files/image_02.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_03.jpg"
+              "src": "/etc/newman/media_files/image_03.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_04.jpg"
+              "src": "/etc/newman/media_files/image_04.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_05.jpg"
+              "src": "/etc/newman/media_files/image_05.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_06.jpg"
+              "src": "/etc/newman/media_files/image_06.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_07.jpg"
+              "src": "/etc/newman/media_files/image_07.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_08.jpg"
+              "src": "/etc/newman/media_files/image_08.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_09.jpg"
+              "src": "/etc/newman/media_files/image_09.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_10.jpg"
+              "src": "/etc/newman/media_files/image_10.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_11.jpg"
+              "src": "/etc/newman/media_files/image_11.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_12.jpg"
+              "src": "/etc/newman/media_files/image_12.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_13.jpg"
+              "src": "/etc/newman/media_files/image_13.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_14.jpg"
+              "src": "/etc/newman/media_files/image_14.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_15.jpg"
+              "src": "/etc/newman/media_files/image_15.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_16.jpg"
+              "src": "/etc/newman/media_files/image_16.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_17.jpg"
+              "src": "/etc/newman/media_files/image_17.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_18.jpg"
+              "src": "/etc/newman/media_files/image_18.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_19.jpg"
+              "src": "/etc/newman/media_files/image_19.jpg"
             },
             {
               "key": "media[]",
               "type": "file",
-              "src": "tests/media_files/image_20.jpg"
+              "src": "/etc/newman/media_files/image_20.jpg"
             }
           ]
         },
