@@ -883,7 +883,12 @@ class WalletMapper
             return self::respondWithError(41208);
         }
 
+        if (empty($entries)) {
+            return ['status' => 'success', 'insertCount' => 0];
+        }
+
         $insertCount = 0; 
+        $entry_ids = [];
 
         if (!empty($entries)) {
             $entry_ids = array_map(fn($row) => isset($row['userid']) && is_string($row['userid']) ? $this->db->quote($row['userid']) : null, $entries);
@@ -900,6 +905,7 @@ class WalletMapper
                     $id = self::generateUUID();
                     if (empty($id)) {
                         $this->logger->critical('Failed to generate gems ID');
+                        $this->db->rollback();
                         return self::respondWithError(41401);
                     }
 
@@ -915,30 +921,19 @@ class WalletMapper
 
                     $insertCount++;
                 }
+
+                if (!empty($entry_ids)) {
+                    $placeholders = implode(',', array_fill(0, count($entry_ids), '?'));
+                    $sql = "UPDATE $tableName SET collected = 1 WHERE collected = 0 AND userid IN ($placeholders)";
+                    $stmt = $this->db->prepare($sql);
+                    $stmt->execute($entry_ids);
+                }
                 $this->db->commit();
 
             } catch (\Throwable $e) {
                 $this->db->rollback();
                 $this->logger->error('Error inserting into gems for ' . $tableName, ['exception' => $e]);
                 return self::respondWithError(41210);
-            }
-
-            if (!empty($entry_ids)) {
-                try {
-                    $this->db->beginTransaction();
-
-                    $placeholders = implode(',', array_fill(0, count($entry_ids), '?'));
-                    $sql = "UPDATE $tableName SET collected = 1 WHERE collected = 0 AND userid IN ($placeholders)";
-                    $stmt = $this->db->prepare($sql);
-                    $stmt->execute($entry_ids);
-
-                    $this->db->commit();
-                    
-                } catch (\Throwable $e) {
-                    $this->db->rollback();
-                    $this->logger->error('Error updating collected status for ' . $tableName, ['exception' => $e]);
-                    return self::respondWithError(41211);
-                }
             }
         }
 
