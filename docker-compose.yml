@@ -106,8 +106,9 @@ services:
     environment:
       BACKEND_URL: "http://backend:80"
     volumes:
-      - ./tests/postman_collection:/etc/newman
-      - ./newman/reports:/etc/newman/reports
+        - ./tests/postman_collection:/etc/newman
+        - ./tests/media_files:/etc/newman/media_files
+        - ./newman/reports:/etc/newman/reports
     entrypoint: >
       sh -c '
         mkdir -p /etc/newman/reports &&
