@@ -1330,7 +1330,7 @@ class WalletMapper
 
             if (!$userExists) {
                 $newLiquidity = abs($liquidity);
-                $liquiditq = abs((float)$this->decimalToQ64_96($newLiquidity));
+                $liquiditq = ((float)$this->decimalToQ64_96($newLiquidity));
 
                 $query = "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
                           VALUES (:userid, :liquidity, :liquiditq, :updatedat)";
@@ -1344,7 +1344,7 @@ class WalletMapper
             } else {
                 $currentBalance = $this->getUserWalletBalance($userId);
                 $newLiquidity = abs($currentBalance + $liquidity);
-                $liquiditq = abs((float)$this->decimalToQ64_96($newLiquidity));
+                $liquiditq = ((float)$this->decimalToQ64_96($newLiquidity));
 
                 $query = "UPDATE wallett
                           SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
@@ -1499,14 +1499,14 @@ class WalletMapper
         return $scaledValue;
     }
 
-    private function q64_96ToDecimal(string $qValue): string
+    /*private function q64_96ToDecimal(string $qValue): string
     {
         $scaleFactor = \bcpow('2', '96');
         
         $decimalValue = \bcdiv($qValue, $scaleFactor, 18);
         
         return (string) round((float) $decimalValue, 2);
-    }
+    }*/
 
     private function addQ64_96(string $qValue1, string $qValue2): string
     {

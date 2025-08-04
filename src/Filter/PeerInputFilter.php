@@ -83,9 +83,13 @@ class PeerInputFilter
                     $options = $validator['options'] ?? [];
                     if (method_exists($this, $validatorName)) {
                         if (!$this->$validatorName($this->data[$field], $options)) {
-                            if (!empty($this->errors[$field])) {
-                                continue;
+                            if (isset($this->errors[$field])) {
+                                if (!empty($this->errors[$field][0])) {
+                                    continue;
                             }
+                        } elseif (!empty($this->errors[$field])) {
+                            continue;
+                        }
                             $this->errors[$field][] = $field;
                             if (!empty($validator['break_chain_on_failure'])) {
                                 break;
