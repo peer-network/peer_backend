@@ -50,7 +50,7 @@ class TagPostService
 
     private function isValidTagName(?string $tagName): bool
     {
-        $tagNameConfig = ConstantsConfig::post()['TAGNAME'];
+        $tagNameConfig = ConstantsConfig::post()['TAG'];
         return $tagName && 
             strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] && 
             strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] && 
@@ -63,7 +63,7 @@ class TagPostService
             return $this->respondWithError(30101);
         }
 
-        $tagNameConfig = ConstantsConfig::post()['TAGNAME'];
+        $tagNameConfig = ConstantsConfig::post()['TAG'];
 
         if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] ||
             strlen($tagName) > $tagNameConfig['MAX_LENGTH'] ||
@@ -103,6 +103,8 @@ class TagPostService
             ]);
             $this->tagPostMapper->insert($tagPost);
         }
+
+        return ['status' => 'success'];
     }
 
     public function createTag(string $tagName): array
@@ -155,7 +157,7 @@ class TagPostService
     
     private function isValidTagName(?string $tagName): bool
     {
-        $tagNameConfig = ConstantsConfig::post()['TAGNAME'];
+        $tagNameConfig = ConstantsConfig::post()['TAG'];
         return $tagName && 
             strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] && 
             strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] && 
