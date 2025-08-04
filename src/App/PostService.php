@@ -616,4 +616,48 @@ class PostService
 
         return $this->respondWithError(41510);
     }
+
+    /**
+     * Get Interaction with post or comment
+     */
+    public function postInteractions(?array $args = []): array|false
+    {
+        if (!$this->checkAuthentication()) {
+            $this->logger->info("PostService.postInteractions failed due to authentication");
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->info("PostService.postInteractions started");
+
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+
+        $getOnly = $args['getOnly'] ?? null;
+        $postOrCommentId = $args['postOrCommentId'] ?? null;
+
+
+        if($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])){
+            $this->logger->info("PostService.postInteractions failed due to empty or invalid arguments");
+            return $this->respondWithError(30103);
+        }
+
+        if(!self::isValidUUID($postOrCommentId)){
+            $this->logger->info("PostService.postInteractions failed due to invalid postOrCommentId");
+            return $this->respondWithError(30201);
+        }
+
+        try {
+            $result = $this->postMapper->getInteractions($getOnly, $postOrCommentId, $this->currentUserId, $offset, $limit);
+
+            $this->logger->info("Interaction fetched successfully", ['count' => count($result)]);
+            return $this->createSuccessResponse(11205, $result);
+
+        } catch (\Throwable $e) {
+            $this->logger->error("Error fetching Posts", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError(41513);
+        }
+    }
 }

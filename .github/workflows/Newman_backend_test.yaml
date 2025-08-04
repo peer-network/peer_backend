@@ -781,19 +781,26 @@ jobs:
  
           cp reports/php-8.2/report.html final_reports/reports/${{ github.run_id }}/php-8.2/report.html
           cp reports/php-8.3/report.html final_reports/reports/${{ github.run_id }}/php-8.3/report.html
- 
-      - name: Deploy HTMLExtra Reports to peer_backend_reports
+
+      - name: Clone gh-pages branch
         run: |
-          cd final_reports
-          git init
-          git checkout -b gh-pages
+          git clone --depth=1 --branch=gh-pages https://x-access-token:${{ secrets.REPORTS_DEPLOY_TOKEN }}@github.com/peer-network/peer-backend-reports.git gh-pages-clone
+          cp -r final_reports/reports/${{ github.run_id }} gh-pages-clone/reports/
+
+      - name: Keep only last 10 reports
+        run: |
+          cd gh-pages-clone/reports
+          ls -1d */ | sed 's#/##' | sort -nr | tail -n +11 | xargs -I{} rm -rf {}
+
+      - name: Commit and push updated reports
+        run: |
+          cd gh-pages-clone
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
-          git remote add origin https://x-access-token:${{ secrets.REPORTS_DEPLOY_TOKEN }}@github.com/peer-network/peer-backend-reports.git
-          git add .
-          git commit -m "Deploy reports for run $GITHUB_RUN_ID"
-          git push --force origin gh-pages
- 
+          git add reports
+          git commit -m "Deploy reports for run $GITHUB_RUN_ID (keep last 10)" || echo "No changes to commit"
+          git push origin gh-pages
+          
   send_success_discord_notification:
     name: Send Discord Notification for Successful CI
     runs-on: ubuntu-latest

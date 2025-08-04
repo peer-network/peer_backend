@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "fbb5ae74-edae-44e3-8c3e-17fc50ae2622",
-		"name": "2_back_graphql_postman_collection",
+		"_postman_id": "2af7416e-0845-40a2-9fed-f5459d29fc68",
+		"name": "Current Development",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-fbb5ae74-edae-44e3-8c3e-17fc50ae2622?action=share&source=collection_link&creator=43606001"
+		"_exporter_id": "32542010",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-2af7416e-0845-40a2-9fed-f5459d29fc68?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -5862,6 +5862,105 @@
 			"response": []
 		},
 		{
+			"name": "Content Engagement(LIKE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let interactionResponseCode = \"\";",
+							"let affectedId = \"\";",
+							"",
+							"try {",
+							"    interactionResponseCode = postInteractionResponse?.data?.postInteractions?.ResponseCode || \"\";",
+							"    affectedId = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0]?.id || \"\";",
+							"} catch (e) {",
+							"    console.log(\"Error extracting fields:\", e);",
+							"}",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"",
+							"    if (affectedId) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedId).to.eql(expectedId);",
+							"        });",
+							"        console.log(\"Affected ID:\", affectedId);",
+							"        console.log(\"Expected ID (w_userid_t3):\", expectedId);",
+							"    } else {",
+							"        console.log(\"No affectedId found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping ID test.\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: LIKE, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Check current liquidity",
 			"event": [
 				{
@@ -6097,6 +6196,105 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation ResolveActionPost {\n    resolvePostAction(postid:\"{{postid}}\" , action: DISLIKE) {\n        status\n        ResponseCode\n    } \n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Content Engagement(DISLIKE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let interactionResponseCode = \"\";",
+							"let affectedId = \"\";",
+							"",
+							"try {",
+							"    interactionResponseCode = postInteractionResponse?.data?.postInteractions?.ResponseCode || \"\";",
+							"    affectedId = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0]?.id || \"\";",
+							"} catch (e) {",
+							"    console.log(\"Error extracting fields:\", e);",
+							"}",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"",
+							"    if (affectedId) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedId).to.eql(expectedId);",
+							"        });",
+							"        console.log(\"Affected ID:\", affectedId);",
+							"        console.log(\"Expected ID (w_userid_t3):\", expectedId);",
+							"    } else {",
+							"        console.log(\"No affectedId found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping ID test.\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: DISLIKE, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6456,6 +6654,95 @@
 			"response": []
 		},
 		{
+			"name": "Conten Engagement(View)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let interactionResponseCode = \"\";",
+							"let affectedId = \"\";",
+							"",
+							"try {",
+							"    interactionResponseCode = postInteractionResponse?.data?.postInteractions?.ResponseCode || \"\";",
+							"    affectedId = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0]?.id || \"\";",
+							"} catch (e) {",
+							"    console.log(\"Error extracting fields:\", e);",
+							"}",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"",
+							"    if (affectedId) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedId).to.eql(expectedId);",
+							"        });",
+							"        console.log(\"Affected ID:\", affectedId);",
+							"        console.log(\"Expected ID (w_userid_t3):\", expectedId);",
+							"    } else {",
+							"        console.log(\"No affectedId found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping ID test.\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: VIEW, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Double view post (fail)",
 			"event": [
 				{
@@ -6704,6 +6991,105 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation LikeComment {\n    likeComment(commentid: \"{{commentid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Content Engagement(LIKECOMMENT)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let interactionResponseCode = \"\";",
+							"let affectedId = \"\";",
+							"",
+							"try {",
+							"    interactionResponseCode = postInteractionResponse?.data?.postInteractions?.ResponseCode || \"\";",
+							"    affectedId = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0]?.id || \"\";",
+							"} catch (e) {",
+							"    console.log(\"Error extracting fields:\", e);",
+							"}",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"",
+							"    if (affectedId) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedId).to.eql(expectedId);",
+							"        });",
+							"        console.log(\"Affected ID:\", affectedId);",
+							"        console.log(\"Expected ID (w_userid_t3):\", expectedId);",
+							"    } else {",
+							"        console.log(\"No affectedId found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping ID test.\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: COMMENTLIKE, postOrCommentId: \"{{commentid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
