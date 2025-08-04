@@ -39,9 +39,9 @@ class CommentInfoMapper
     {
         $this->logger->info("CommentInfoMapper.isUserExistById started");
 
+        $status = self::STATUS_DELETED;
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE status != :status AND uid = :id");
         $stmt->bindParam(':id', $id);
-        $status = self::STATUS_DELETED;
         $stmt->bindParam(':status', $status);
         $stmt->execute();
 

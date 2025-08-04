@@ -2424,11 +2424,6 @@ class GraphQLSchemaBuilder
         }
 
         $comments = $this->commentService->fetchAllByPostId($args);
-
-        if (!is_array($comments)) {
-            return $this->createSuccessResponse(21601, [], false);
-        }
-
         if (isset($comments['status']) && $comments['status'] === 'error') {
             return $comments;
         }
@@ -2887,17 +2882,17 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        if (trim($postId) === '') {
+        if (empty($postId)) {
             return $this->respondWithError(30101);
         }
 
-        if (!self::isValidUUID($postId)) {
+        if (!empty($postId) && !self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
         }
 
         $this->logger->info('Query.resolvePostInfo started');
 
-        $posts = $this->postInfoService->findPostInfo($postId);
+        $postId = isset($postId) ? trim($postId) : '';
 
         if (!empty($postId)) {
             $posts = $this->postInfoService->findPostInfo($postId);
@@ -2906,7 +2901,7 @@ class GraphQLSchemaBuilder
             }
         } else {
             return $this->createSuccessResponse(21504);
-        }           
+        }
 
         return $this->createSuccessResponse(11502, $posts);
     }
