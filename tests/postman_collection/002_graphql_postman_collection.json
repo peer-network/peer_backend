@@ -553,16 +553,16 @@
               "let oldLiquidity = pm.environment.get(\"liquidity\");",
               "let isDailyFreePost = pm.environment.get(\"isDailyFreePost\");",
               "",
-              "console.log(`💰 Old Liquidity: ${oldLiquidity}`);",
-              "console.log(`💰 New Liquidity: ${newLiquidity}`);",
-              "console.log(`🆓 isDailyFreePost exists?: ${isDailyFreePost !== undefined}`);",
+              "console.log(`\ud83d\udcb0 Old Liquidity: ${oldLiquidity}`);",
+              "console.log(`\ud83d\udcb0 New Liquidity: ${newLiquidity}`);",
+              "console.log(`\ud83c\udd93 isDailyFreePost exists?: ${isDailyFreePost !== undefined}`);",
               "",
               "pm.test(\"Previous liquidity exists\", function () {",
               "    pm.expect(oldLiquidity).to.be.a(\"number\");",
               "});",
               "",
               "if (isDailyFreePost !== undefined) {",
-              "    console.log(\"⏩ This was a Daily Free Post, skipping liquidity check.\");",
+              "    console.log(\"\u23e9 This was a Daily Free Post, skipping liquidity check.\");",
               "} else {",
               "    pm.test(\"Liquidity should decrease after spending\", function () {",
               "        pm.expect(newLiquidity).to.be.below(oldLiquidity, \"Expected liquidity to decrease\");",
@@ -1945,7 +1945,7 @@
         "body": {
           "mode": "graphql",
           "graphql": {
-            "query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"🎉🔥 Test Post! @#$%^&*()\"\n            media: \"{{new_profile_pic}}\"\n            mediadescription: \"Testing special characters: 💡📝❗️\"\n            contenttype: image\n        }\n        action: POST\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+            "query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"\ud83c\udf89\ud83d\udd25 Test Post! @#$%^&*()\"\n            media: \"{{new_profile_pic}}\"\n            mediadescription: \"Testing special characters: \ud83d\udca1\ud83d\udcdd\u2757\ufe0f\"\n            contenttype: image\n        }\n        action: POST\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
             "variables": ""
           }
         },
@@ -2165,28 +2165,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_20.jpg"
             }
           ]
         },
@@ -2562,28 +2636,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_20.jpg"
             }
           ]
         },
@@ -2896,28 +3044,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/unknown.bin"
             }
           ]
         },
@@ -3248,28 +3375,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/unknown.bin"
             }
           ]
         },
@@ -3590,28 +3696,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/unknown.bin"
             }
           ]
         },
@@ -3682,28 +3767,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/unknown.bin"
             }
           ]
         },
@@ -3846,28 +3910,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_20.jpg"
             }
           ]
         },
@@ -4010,28 +4148,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_20.jpg"
             }
           ]
         },
@@ -4174,28 +4386,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_20.jpg"
             }
           ]
         },
@@ -4338,28 +4624,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_20.jpg"
             }
           ]
         },
@@ -4502,28 +4862,7 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/unknown.bin"
             }
           ]
         },
@@ -4666,28 +5005,102 @@
             {
               "key": "media[]",
               "type": "file",
-              "src": [
-                "media_files/image_01.jpg",
-                "media_files/image_02.jpg",
-                "media_files/image_03.jpg",
-                "media_files/image_04.jpg",
-                "media_files/image_05.jpg",
-                "media_files/image_06.jpg",
-                "media_files/image_07.jpg",
-                "media_files/image_08.jpg",
-                "media_files/image_09.jpg",
-                "media_files/image_10.jpg",
-                "media_files/image_11.jpg",
-                "media_files/image_12.jpg",
-                "media_files/image_13.jpg",
-                "media_files/image_14.jpg",
-                "media_files/image_15.jpg",
-                "media_files/image_16.jpg",
-                "media_files/image_17.jpg",
-                "media_files/image_18.jpg",
-                "media_files/image_19.jpg",
-                "media_files/image_20.jpg"
-              ]
+              "src": "media_files/image_01.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_02.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_03.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_04.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_05.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_06.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_07.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_08.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_09.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_10.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_11.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_12.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_13.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_14.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_15.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_16.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_17.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_18.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_19.jpg"
+            },
+            {
+              "key": "media[]",
+              "type": "file",
+              "src": "media_files/image_20.jpg"
             }
           ]
         },
@@ -5830,7 +6243,7 @@
               "});",
               "",
               "if (isDailyFreeComment !== undefined) {",
-              "    console.log(\"⏩ This was a Daily Free Comment, skipping liquidity check.\");",
+              "    console.log(\"\u23e9 This was a Daily Free Comment, skipping liquidity check.\");",
               "} else {",
               "    pm.test(\"Liquidity should decrease after commenting\", function () {",
               "        pm.expect(newLiquidityAfterComment).to.be.below(oldLiquidity);",
@@ -8559,7 +8972,7 @@
               "});",
               "",
               "if (isDailyFreeComment !== undefined) {",
-              "    console.log(\"⏩ This was a Daily Free Comment, skipping liquidity check.\");",
+              "    console.log(\"\u23e9 This was a Daily Free Comment, skipping liquidity check.\");",
               "} else {",
               "    pm.test(\"Liquidity should decrease after commenting\", function () {",
               "        pm.expect(newLiquidityAfterComment).to.be.below(oldLiquidity);",
@@ -8731,7 +9144,7 @@
               "});",
               "",
               "if (isDailyFreeLike !== undefined) {",
-              "    console.log(\"⏩ This was a Daily Free Like, skipping liquidity check.\");",
+              "    console.log(\"\u23e9 This was a Daily Free Like, skipping liquidity check.\");",
               "} else {",
               "    pm.test(\"Liquidity should decrease after liking\", function () {",
               "        pm.expect(newLiquidityAfterLike).to.be.below(oldLiquidity);",
@@ -10564,8 +10977,8 @@
               "    pm.expect(diff).to.eql(1);",
               "});",
               "",
-              "console.log(`Posts: ${originalPostCount} → ${currentPostCount}`);",
-              "console.log(`Comments: ${originalCommentCount} → ${currentCommentCount}`);",
+              "console.log(`Posts: ${originalPostCount} \u2192 ${currentPostCount}`);",
+              "console.log(`Comments: ${originalCommentCount} \u2192 ${currentCommentCount}`);",
               ""
             ],
             "type": "text/javascript",
