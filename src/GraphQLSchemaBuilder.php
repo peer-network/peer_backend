@@ -1791,6 +1791,7 @@ class GraphQLSchemaBuilder
             'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
             'verifyReferralString' => fn(mixed $root, array $args) => $this->userService->verifyReferral($args['referralString']),
+            'verifyAccessToken' => fn(mixed $root, array $args) => $this->verifyAccessToken($args['token']),
             'updateUserPreferences' => fn(mixed $root, array $args) => $this->userService->updateUserPreferences($args),
             'updateUsername' => fn(mixed $root, array $args) => $this->userService->setUsername($args),
             'updateEmail' => fn(mixed $root, array $args) => $this->userService->setEmail($args),
@@ -3288,6 +3289,32 @@ class GraphQLSchemaBuilder
             ]);
             return $this->respondWithError(30401);
         }
+    }
+
+
+    protected function verifyAccessToken(?string $token): array | false {
+
+        $this->logger->info('Query.verifyAccessToken started', ['token' => $token]);
+
+        
+        if (!$token) {
+            return $this->respondWithError(30101);
+        }
+
+        $decodedToken = $this->tokenService->validateToken($token);
+
+        if ($decodedToken) {
+            $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
+            
+            if ($user) {
+                return [
+                    'currentuserid' => $decodedToken->uid,
+                    'lastMergedPullRequestNumber' => "",
+                    'companyAccountId' => "",
+                ];
+            }
+        }
+        return false; 
     }
 
     protected function verifyAccount(string $userid = ''): array
