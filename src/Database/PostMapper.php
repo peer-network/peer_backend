@@ -741,7 +741,7 @@ class PostMapper extends PeerMapper
         }
 
         $orderByClause = match ($sortBy) {
-            'FOR_ME' => "ORDER BY isfriend, isfollowing, isfollowed",
+            'FOR_ME' => "ORDER BY isfriend, isfollowing, isfollowed, createdat DESC",
             'NEWEST' => "ORDER BY createdat DESC",
             'OLDEST' => "ORDER BY createdat ASC",
             'TRENDING' => "ORDER BY amounttrending DESC, createdat DESC",
