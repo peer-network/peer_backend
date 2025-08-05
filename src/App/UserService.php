@@ -84,13 +84,13 @@ class UserService
         return implode('', array_slice($numbers, 0, $count));
     }
 
-    private function generateUniqueSlug(string $username, int $maxRetries = 5): ?string
+    private function generateUniqueSlug(string $username, int $maxRetries = 5): ?int
     {
         $attempts = 0;
         do {
             $slug = $this->createNumbersAsString(1, 9, 5);
             if (!$this->userMapper->checkIfNameAndSlugExist($username, $slug)) {
-                return (string) $slug;
+                return (int) $slug;
             }
             $attempts++;
         } while ($attempts < $maxRetries);
@@ -644,7 +644,7 @@ class UserService
             }
 
             $user->setName($username);
-            $user->setSlug((int)($slug));
+            $user->setSlug($slug);
 
             $data = $this->userMapper->updateProfil($user);
             $affectedRows = $data->getArrayCopy();
