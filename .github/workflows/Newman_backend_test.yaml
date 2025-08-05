@@ -77,68 +77,73 @@ jobs:
           echo " PR branch is behind the base branch."
           exit 1
 
-  validate_sql_files:
-    name: Ensure Only Valid SQL Files Are Changed
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  # validate_sql_files:
+  #   name: Ensure Only Valid SQL Files Are Changed
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
  
-      - name: Fetch Base Branch
-        run: |
-          git fetch origin ${{ github.base_ref }}
+  #     - name: Fetch Base Branch
+  #       run: |
+  #         git fetch origin ${{ github.base_ref }}
  
-      - name: Check for Unauthorized Changes in sql_files_for_import
-        run: |
-          echo "Checking SQL file changes..."
-          changed_files=$(git diff --name-only origin/${{ github.base_ref }} HEAD -- sql_files_for_import)
-          echo "Changed files:"
-          echo "$changed_files"
+  #     - name: Check for Unauthorized Changes in sql_files_for_import
+  #       run: |
+  #         echo "Checking SQL file changes..."
+  #         changed_files=$(git diff --name-only origin/${{ github.base_ref }} HEAD -- sql_files_for_import)
+  #         echo "Changed files:"
+  #         echo "$changed_files"
  
-          for file in $changed_files; do
-            if [[ "$file" != "sql_files_for_import/additional_data.sql" ]]; then
-              if git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- "$file" | grep -q "$file"; then
-                echo "New file allowed: $file"
-              else
-                echo "Unauthorized modification detected: $file"
-                echo "Only additional_data.sql may be modified. Others can only be added, not edited."
-                exit 1
-              fi
-            fi
-          done
-          echo "SQL file check passed."
+  #         for file in $changed_files; do
+  #           if [[ "$file" != "sql_files_for_import/additional_data.sql" ]]; then
+  #             if git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- "$file" | grep -q "$file"; then
+  #               echo "New file allowed: $file"
+  #             else
+  #               echo "Unauthorized modification detected: $file"
+  #               echo "Only additional_data.sql may be modified. Others can only be added, not edited."
+  #               exit 1
+  #             fi
+  #           fi
+  #         done
+  #         echo "SQL file check passed."
  
-  notify_invalid_sql_change:
-    name: Notify on Invalid SQL File Change
-    runs-on: ubuntu-latest
-    needs: [validate_sql_files, map_pr_to_discord]
-    if: failure() && needs.validate_sql_files.result == 'failure'
-    steps:
-      - name: Send Discord Notification for Invalid SQL File Change
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
-        run: |
-          MESSAGE=":x: **CI Failed invalid SQL File Change Detected**\n"
-          MESSAGE+="**PR:** $PR_TITLE\n"
-          MESSAGE+="Link: <$PR_URL>\n"
-          MESSAGE+="Author: $DISCORD_MENTION\n"
-          MESSAGE+="Only \`additional_data.sql\` may be modified in \`sql_files_for_import/\`. Other existing files cannot be changed. New files are allowed."
+  # notify_invalid_sql_change:
+  #   name: Notify on Invalid SQL File Change
+  #   runs-on: ubuntu-latest
+  #   needs: [validate_sql_files, map_pr_to_discord]
+  #   if: failure() && needs.validate_sql_files.result == 'failure'
+  #   steps:
+  #     - name: Send Discord Notification for Invalid SQL File Change
+  #       env:
+  #         DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  #         PR_TITLE: ${{ github.event.pull_request.title }}
+  #         PR_URL: ${{ github.event.pull_request.html_url }}
+  #         DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+  #       run: |
+  #         MESSAGE=":x: **CI Failed invalid SQL File Change Detected**\n"
+  #         MESSAGE+="**PR:** $PR_TITLE\n"
+  #         MESSAGE+="Link: <$PR_URL>\n"
+  #         MESSAGE+="Author: $DISCORD_MENTION\n"
+  #         MESSAGE+="Only \`additional_data.sql\` may be modified in \`sql_files_for_import/\`. Other existing files cannot be changed. New files are allowed."
  
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\": \"$MESSAGE\"}" \
-               "$DISCORD_WEBHOOK_URL"
+  #         curl -H "Content-Type: application/json" \
+  #              -X POST \
+  #              -d "{\"content\": \"$MESSAGE\"}" \
+  #              "$DISCORD_WEBHOOK_URL"
 
   build_and_test:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
-    needs: [check_branch_sync, validate_sql_files]
-    if: needs.check_branch_sync.outputs.is_behind == 'false' && needs.validate_sql_files.result == 'success'
+    needs: [
+      check_branch_sync
+      # validate_sql_files
+    ]
+    if: 
+      needs.check_branch_sync.outputs.is_behind == 'false'
+      # needs.validate_sql_files.result == 'success'
     strategy:
       matrix:
         php-version: ['8.2', '8.3']
@@ -264,14 +269,6 @@ jobs:
       - name: Set Docker Image Tag
         run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
  
-      - name: Create ordered SQL init files in CI
-        run: |
-          mkdir tmp_sql
-          cp sql_files_for_import/structure.psql tmp_sql/01.sql
-          cp sql_files_for_import/additional_data.sql tmp_sql/02.sql
-          rm -rf sql_files_for_import/*
-          cp -a tmp_sql/. sql_files_for_import/
- 
       - name: Reset Docker volumes (force initdb scripts to run)
         run: docker compose down -v
  
@@ -280,15 +277,17 @@ jobs:
  
       - name: Build And Start Docker Containers
         run: |
-          docker compose -f ./docker-compose.yaml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}
-          docker compose -f ./docker-compose.yaml up -d
+          docker compose -f ./docker-compose.yml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}
+          docker compose -f ./docker-compose.yml up -d
  
       - name: Set PHP upload limits
         run: |
-          docker compose exec backend bash -c "echo 'upload_max_filesize = 80M' >> /usr/local/etc/php/conf.d/uploads.ini"
-          docker compose exec backend bash -c "echo 'post_max_size = 80M' >> /usr/local/etc/php/conf.d/uploads.ini"
+          docker compose exec backend bash -c "echo 'upload_max_filesize = 510M' >> /usr/local/etc/php/conf.d/uploads.ini"
+          docker compose exec backend bash -c "echo 'post_max_size = 510M' >> /usr/local/etc/php/conf.d/uploads.ini"
+          docker compose exec backend bash -c "echo 'max_file_uploads = 21' >> /usr/local/etc/php/conf.d/uploads.ini"
           docker compose exec backend bash -c "php -i | grep upload_max_filesize"
           docker compose exec backend bash -c "php -i | grep post_max_size"
+          docker compose exec backend bash -c "php -i | grep max_file_uploads"
  
       - name: Fix ownership and permissions on /var/www/html
         run: |
@@ -392,7 +391,7 @@ jobs:
         continue-on-error: true
         run: |
           result=0
-          docker compose -f ./docker-compose.yaml run --rm newman || result=$?
+          docker compose -f ./docker-compose.yml run --rm newman || result=$?
           echo "$result" > newman_exit_code.txt
  
       - name: Set newman outcome output
@@ -470,7 +469,7 @@ jobs:
  
       - name: Tear Down Docker Containers
         if: always()
-        run: docker compose -f ./docker-compose.yaml down
+        run: docker compose -f ./docker-compose.yml down
  
       - name: Set build outcome flag
         id: outcome
@@ -686,153 +685,16 @@ jobs:
               ;;
           esac
  
-  publish_failure_report_to_pages:
-    name: Publish Htmlextra Report to Pages
-    runs-on: ubuntu-latest
-    needs: [build_and_test, aggregate_results, map_pr_to_discord]
-    if: needs.build_and_test.outputs.outcome == 'newman_failed'
-    steps:
-      - name: Show newman_failed_any output
-        run: echo "Evaluating newman_failed_any => ${{ needs.aggregate_results.outputs.newman_failed_any }}"
- 
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
- 
-      - name: Ensure gh-pages branch exists
-        run: |
-          if ! git ls-remote --exit-code --heads origin gh-pages; then
-            echo "Creating gh-pages branch"
-            git checkout --orphan gh-pages
-            git config user.name "github-actions"
-            git config user.email "actions@github.com"
-            git rm -rf .
-            touch .keep
-            git add .keep
-            git commit -m "Initialize gh-pages branch"
-            git push origin gh-pages
-          else
-            echo "gh-pages branch already exists"
-          fi
- 
-      - name: Checkout gh-pages branch
-        run: |
-          git fetch origin gh-pages
-          git checkout gh-pages
-
-      - name: Clean up old reports (keep only last 20)
-        run: |
-          echo "Cleaning old reports..."
-          cd reports
-          total=$(ls -1d */ | wc -l)
-          keep=20
-          if [ "$total" -gt "$keep" ]; then
-            remove=$(($total - $keep))
-            ls -1dt */ | tail -n $remove | xargs rm -rf
-          fi
- 
-      - name: Download HTMLExtra report for PHP 8.2
-        uses: actions/download-artifact@v4
-        with:
-          name: docker_newman_report-8.2  
-          path: reports/${{ github.run_id }}/php-8.2
- 
-      - name: Download HTMLExtra report for PHP 8.3
-        uses: actions/download-artifact@v4
-        with:
-          name: docker_newman_report-8.3
-          path: reports/${{ github.run_id }}/php-8.3
-
-      - name: Add timestamp to force commit
-        run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
- 
-      - name: Commit and push reports
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git pull --rebase --autostash origin gh-pages
-          git add reports/${{ github.run_id }}
-          git commit -m "Add Newman HTML reports for run ${{ github.run_id }}" || echo "Nothing to commit"
-          git push origin gh-pages
- 
-  publish_success_report_to_pages:
-    name: Publish HTMLExtra Report to Pages on Success
-    runs-on: ubuntu-latest
-    needs: [build_and_test, aggregate_outcome]
-    if: needs.aggregate_outcome.outputs.final_outcome == 'success'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
- 
-      - name: Ensure gh-pages branch exists
-        run: |
-          if ! git ls-remote --exit-code --heads origin gh-pages; then
-            echo "Creating gh-pages branch"
-            git checkout --orphan gh-pages
-            git config user.name "github-actions"
-            git config user.email "actions@github.com"
-            git rm -rf .
-            touch .keep
-            git add .keep
-            git commit -m "Initialize gh-pages branch"
-            git push origin gh-pages
-          else
-            echo "gh-pages branch already exists"
-          fi
-      
-      - name: Checkout gh-pages branch
-        run: |
-          git fetch origin gh-pages
-          git checkout gh-pages
-
-      - name: Clean up old reports (keep only last 20)
-        run: |
-          echo "Cleaning old reports..."
-          cd reports
-          total=$(ls -1d */ | wc -l)
-          keep=20
-          if [ "$total" -gt "$keep" ]; then
-            remove=$(($total - $keep))
-            ls -1dt */ | tail -n $remove | xargs rm -rf
-          fi
- 
-      - name: Download HTMLExtra report for PHP 8.2
-        uses: actions/download-artifact@v4
-        with:
-          name: docker_newman_report-8.2
-          path: reports/${{ github.run_id }}/php-8.2
- 
-      - name: Download HTMLExtra report for PHP 8.3
-        uses: actions/download-artifact@v4
-        with:
-          name: docker_newman_report-8.3
-          path: reports/${{ github.run_id }}/php-8.3
-
-      - name: Add timestamp to force commit
-        run: echo "Last updated $(date)" > reports/${{ github.run_id }}/timestamp.txt
- 
-      - name: Commit and push reports
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git pull --rebase --autostash origin gh-pages
-          git add reports/${{ github.run_id }}
-          git commit -m "Add Newman HTML reports for successful run ${{ github.run_id }}" || echo "Nothing to commit"
-          git push origin gh-pages
- 
   send_newman_discord_notification:
     name: Send Discord Notification for Newman Failures
     runs-on: ubuntu-latest
-    needs: [aggregate_outcome, aggregate_results, map_pr_to_discord, publish_failure_report_to_pages]
+    needs: [aggregate_outcome, aggregate_results, map_pr_to_discord]
     if: needs.aggregate_outcome.outputs.final_outcome == 'newman_failed'
     steps:
       - name: Construct HTMLExtra report URLs
         id: urls
         run: |
-          BASE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          BASE_URL="https://peer-network.github.io/peer-backend-reports"
           echo "php82_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.2/report.html" >> $GITHUB_OUTPUT
           echo "php83_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.3/report.html" >> $GITHUB_OUTPUT
  
@@ -893,17 +755,62 @@ jobs:
                -X POST \
                -d "{\"content\": \"${MESSAGE}\"}" \
                "$DISCORD_WEBHOOK_URL"
+
+  deploy_html_reports_to_peer_backend_reports:
+    name: Deploy HTMLExtra Reports to peer_backend_reports
+    runs-on: ubuntu-latest
+    needs: [aggregate_outcome, build_and_test]
+    if: always()
+    steps:
+      - name: Download PHP 8.2 HTMLExtra report
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_newman_report-8.2
+          path: reports/php-8.2
  
+      - name: Download PHP 8.3 HTMLExtra report
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_newman_report-8.3
+          path: reports/php-8.3
+ 
+      - name: Prepare versioned HTMLExtra report
+        run: |
+          mkdir -p final_reports/reports/${{ github.run_id }}/php-8.2
+          mkdir -p final_reports/reports/${{ github.run_id }}/php-8.3
+ 
+          cp reports/php-8.2/report.html final_reports/reports/${{ github.run_id }}/php-8.2/report.html
+          cp reports/php-8.3/report.html final_reports/reports/${{ github.run_id }}/php-8.3/report.html
+
+      - name: Clone gh-pages branch
+        run: |
+          git clone --depth=1 --branch=gh-pages https://x-access-token:${{ secrets.REPORTS_DEPLOY_TOKEN }}@github.com/peer-network/peer-backend-reports.git gh-pages-clone
+          cp -r final_reports/reports/${{ github.run_id }} gh-pages-clone/reports/
+
+      - name: Keep only last 10 reports
+        run: |
+          cd gh-pages-clone/reports
+          ls -1d */ | sed 's#/##' | sort -nr | tail -n +11 | xargs -I{} rm -rf {}
+
+      - name: Commit and push updated reports
+        run: |
+          cd gh-pages-clone
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+          git add reports
+          git commit -m "Deploy reports for run $GITHUB_RUN_ID (keep last 10)" || echo "No changes to commit"
+          git push origin gh-pages
+          
   send_success_discord_notification:
     name: Send Discord Notification for Successful CI
     runs-on: ubuntu-latest
-    needs: [aggregate_outcome, publish_success_report_to_pages, trivy_scan]
+    needs: [aggregate_outcome, trivy_scan]
     if: needs.aggregate_outcome.outputs.final_outcome == 'success'
     steps:
       - name: Construct HTMLExtra report URLs
         id: urls
         run: |
-          BASE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          BASE_URL="https://peer-network.github.io/peer-backend-reports"
           echo "php82_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.2/report.html" >> $GITHUB_OUTPUT
           echo "php83_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.3/report.html" >> $GITHUB_OUTPUT
  

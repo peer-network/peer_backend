@@ -27,7 +27,12 @@ const PRICELIKE=3;
 const PRICEDISLIKE=5;
 const PRICECOMMENT=0.5;
 const PRICEPOST=20;
+// Advertise
+const BASIC = 50;
+const PINNED = 200;
 
+use Fawaz\App\Advertisements;
+use Fawaz\App\AdvertisementService;
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
 use Fawaz\App\Comment;
@@ -60,7 +65,9 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
-use ReflectionNamedType;
+use Fawaz\App\PeerTokenService;
+use Fawaz\config\constants\ConstantsConfig;
+use DateTimeImmutable;
 
 class GraphQLSchemaBuilder
 {
@@ -85,6 +92,8 @@ class GraphQLSchemaBuilder
         protected CommentInfoService $commentInfoService,
         protected ChatService $chatService,
         protected WalletService $walletService,
+        protected PeerTokenService $peerTokenService,
+        protected AdvertisementService $advertisementService,
         protected JWTService $tokenService
     ) {
         $this->resolvers = $this->buildResolvers();
@@ -158,7 +167,9 @@ class GraphQLSchemaBuilder
         $this->chatService->setCurrentUserId($userid);
         $this->mcapService->setCurrentUserId($userid);
         $this->walletService->setCurrentUserId($userid);
+        $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
+        $this->advertisementService->setCurrentUserId($userid);
     }
 
     protected function getStatusNameByID(int $status): ?string
@@ -179,6 +190,24 @@ class GraphQLSchemaBuilder
             'Query' => $this->buildQueryResolvers(),
             'Mutation' => $this->buildMutationResolvers(),
             'Subscription' => $this->buildSubscriptionResolvers(),
+            'UserPreferencesResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.DefaultResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'UserPreferences' => [
+                'contentFilteringSeverityLevel' => function (array $root): string {
+                    $this->logger->info('Query.UserPreferences Resolvers');
+                    return $root['contentFilteringSeverityLevel'] ?? '';
+                }
+            ],
             'TodaysInteractionsData' => [
                 'totalInteractions' => function (array $root): int {
                     $this->logger->info('Query.TodaysInteractionsData Resolvers');
@@ -299,7 +328,6 @@ class GraphQLSchemaBuilder
                     return $root['img'] ?? '';
                 },
             ],
-
             'User' => [
                 'id' => function (array $root): string {
                     $this->logger->info('Query.User Resolvers');
@@ -487,10 +515,13 @@ class GraphQLSchemaBuilder
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
                 },
+                'isfriend' => function (array $root): bool {
+                    return $root['isfriend'] ?? false;
+                },
             ],
-            'Userinfo' => [
+            'BasicUserInfo' => [
                 'userid' => function (array $root): string {
-                    $this->logger->info('Query.Userinfo Resolvers');
+                    $this->logger->info('Query.BasicUserInfo Resolvers');
                     return $root['uid'] ?? '';
                 },
                 'img' => function (array $root): string {
@@ -587,9 +618,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'Userinforesponse' => [
+            'BasicUserInfoResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.Userinforesponse Resolvers');
+                    $this->logger->info('Query.BasicUserInfoResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -663,6 +694,9 @@ class GraphQLSchemaBuilder
                 },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
+                },
+                'type' => function (array $root): string {
+                    return $root['type'] ?? '';
                 },
                 'tags' => function (array $root): array {
                     return $root['tags'] ?? [];
@@ -1095,6 +1129,9 @@ class GraphQLSchemaBuilder
                 },
                 'updatedat' => function (array $root): string {
                     return $root['updatedat'] ?? '';
+                },
+                'userPreferences' => function (array $root): array {
+                    return $root['userPreferences'] ?? [];
                 },
             ],
             'StandardResponse' => [
@@ -1614,7 +1651,7 @@ class GraphQLSchemaBuilder
                 'iInvited' => function (array $root): array {
                     return $root['iInvited'] ?? [];
                 },
-            ],      
+            ],
             'GetActionPricesResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.GetActionPricesResponse Resolvers');
@@ -1652,7 +1689,147 @@ class GraphQLSchemaBuilder
                 'nextAttemptAt' => function (array $root): string {
                     return $root['nextAttemptAt'] ?? '';
                 },
-            ],                       
+            ],
+            'TransactionResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.TransactionResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'responseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'Transaction' => [
+                'transactionid' => function (array $root): string {
+                    return $root['transactionid'] ?? '';
+                },
+                'transuniqueid' => function (array $root): string {
+                    return $root['transuniqueid'] ?? '';
+                },
+                'transactiontype' => function (array $root): string {
+                    return $root['transactiontype'] ?? '';
+                },
+                'senderid' => function (array $root): string {
+                    return $root['senderid'] ?? '';
+                },
+                'recipientid' => function (array $root): string {
+                    return $root['recipientid'] ?? '';
+                },
+                'tokenamount' => function (array $root): float {
+                    return $root['tokenamount'] ?? 0;
+                },
+                'transferaction' => function (array $root): string {
+                    return $root['transferaction'] ?? '';
+                },
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ], 
+            'PostInteractionResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.PostInteractionResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'ListAdvertisementData' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ListAdvertisementData Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): ?array {
+                    return $root['affectedRows'] ?? null;
+                },
+            ],
+            'ListedAdvertisementData' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ListedAdvertisementData Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'counter' => function (array $root): int {
+                    return $root['counter'] ?? 0;
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): ?array {
+                    return $root['affectedRows'] ?? null;
+                },
+            ],
+            'Advertisement' => [
+                'id' => function (array $root): string {
+                    $this->logger->info('Query.Advertisement Resolvers');
+                    return $root['advertisementid'] ?? '';
+                },
+                'createdAt' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'type' => function (array $root): string {
+                    return $root['status'] ?? '';
+                },
+                'creatorId' => function (array $root): string {
+                    return $root['userid'] ?? '';
+                },
+                'postId' => function (array $root): string {
+                    return $root['postid'] ?? '';
+                },
+                'timeframeStart' => function (array $root): string {
+                    return $root['timestart'] ?? '';
+                },
+                'timeframeEnd' => function (array $root): string {
+                    return $root['timeend'] ?? '';
+                },
+                'totalTokenCost' => function (array $root): float {
+                    return $root['tokencost'] ?? 0.0;
+                },
+                'totalEuroCost' => function (array $root): float {
+                    return $root['eurocost'] ?? 0.0;
+                },
+                'gemsEarned' => function (array $root): float {
+                    return $root['gemsEarned'] ?? 0.0;
+                },
+                'views' => function (array $root): int {
+                    return $root['view'] ?? 0;
+                },
+            ],
+            'AdvertisementHistoryStats' => [
+                'totalTokenSpent' => function (array $root): float {
+                    $this->logger->info('Query.AdvertisementHistoryStats Resolvers');
+                    return $root['totaltokenspent'] ?? 0.0;
+                },
+                'totalEuroSpent' => function (array $root): float {
+                    return $root['totaleurospent'] ?? 0.0;
+                },
+                'totalAds' => function (array $root): int {
+                    return $root['totalads'] ?? 0;
+                },
+                'totalGemsEarned' => function (array $root): int {
+                    return $root['totalgemsearned'] ?? 0;
+                },
+            ],
+            'AdvertisementHistoryResult' => [
+                'stats' => function (array $root): array {
+                    $this->logger->info('Query.AdvertisementHistoryResult Resolvers');
+                    return $root['stats'] ?? [];
+                },
+                'advertisements' => function (array $root): array {
+                    return $root['advertisements'] ?? [];
+                },
+            ],
         ];
     }
 
@@ -1696,6 +1873,9 @@ class GraphQLSchemaBuilder
             'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
+            'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
+            'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
+            'advertisementHistory' => fn(mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
         ];
     }
 
@@ -1710,6 +1890,7 @@ class GraphQLSchemaBuilder
             'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
             'verifyReferralString' => fn(mixed $root, array $args) => $this->userService->verifyReferral($args['referralString']),
+            'updateUserPreferences' => fn(mixed $root, array $args) => $this->userService->updateUserPreferences($args),
             'updateUsername' => fn(mixed $root, array $args) => $this->userService->setUsername($args),
             'updateEmail' => fn(mixed $root, array $args) => $this->userService->setEmail($args),
             'updatePassword' => fn(mixed $root, array $args) => $this->userService->setPassword($args),
@@ -1736,6 +1917,8 @@ class GraphQLSchemaBuilder
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
+            'advertisePostBasic' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
+            'advertisePostPinned' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
         ];
     }
 
@@ -1759,6 +1942,244 @@ class GraphQLSchemaBuilder
             'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
             'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
         ];
+    }
+
+    // Berechne den Basispreis des Beitrags
+    protected function advertisePostBasicResolver(?array $args = []): int
+    {
+        try {
+            $this->logger->info('Query.advertisePostBasicResolver started');
+
+            $postId = $args['postid'];
+            $duration = $args['durationInDays'];
+
+            $price = $this->advertisementService::calculatePrice($this->advertisementService::PLAN_BASIC, $duration);
+
+            return $price;
+        } catch (\Throwable $e) {
+            $this->logger->warning('Invalid price provided.', ['Error' => $e]);
+            return 0;
+        }
+    }
+
+    // Berechne den Preis für angehefteten Beitrag
+    protected function advertisePostPinnedResolver(?array $args = []): int
+    {
+        try {
+            $this->logger->info('Query.advertisePostPinnedResolver started');
+
+            $postId = $args['postid'];
+
+            $price = $this->advertisementService::calculatePrice($this->advertisementService::PLAN_PINNED);
+
+            return $price;
+        } catch (\Throwable $e) {
+            $this->logger->warning('Invalid price provided.', ['Error' => $e]);
+            return 0;
+        }
+    }
+
+    // Werbeanzeige prüfen, validieren und freigeben
+    protected function resolveAdvertisePost(?array $args = []): ?array
+    {
+        // Authentifizierung prüfen
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        //$this->logger->info('Query.resolveAdvertisePost gestartet');
+
+        $postId = $args['postid'] ?? null;
+        $durationInDays = $args['durationInDays'] ?? null;
+        $startdayInput = $args['startday'] ?? null;
+        $advertisePlan = $args['advertisePlan'] ?? null;
+        $reducePrice = false;
+        $CostPlan = 0;
+
+        // postId validieren
+        if ($postId !== null && !self::isValidUUID($postId)) {
+            return $this->respondWithError(21517);
+        }
+
+        if ($this->postService->postExistsById($postId) === false) 
+        {
+            return $this->respondWithError(21516);
+        }
+
+        $advertiseActions = ['BASIC', 'PINNED'];
+
+        // Werbeplan validieren
+        if (!in_array($advertisePlan, $advertiseActions, true)) {
+            $this->logger->error('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
+            return $this->respondWithError(32006);
+        }
+
+        $actionPrices = [
+            'BASIC' => BASIC,
+            'PINNED' => PINNED,
+        ];
+
+        // Preisvalidierung
+        if (!isset($actionPrices[$advertisePlan])) {
+            $this->logger->error('Ungültiger Preisplan', ['advertisePlan' => $advertisePlan]);
+            return $this->respondWithError(32005);
+        }
+
+        if ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
+            // Startdatum validieren
+            if (isset($startdayInput) && empty($startdayInput)) {
+                $this->logger->error('Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
+                return $this->respondWithError(32007);
+            }
+
+            // Startdatum prüfen und Format validieren
+            $startday = DateTimeImmutable::createFromFormat('Y-m-d', $startdayInput);
+            $errors = DateTimeImmutable::getLastErrors();
+
+            if (!$startday) {
+                $this->logger->error("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
+                return $this->respondWithError(32008);
+            }
+
+            if (isset($errors['warning_count']) && $errors['warning_count'] > 0 || isset($errors['error_count']) && $errors['error_count'] > 0) {
+                $this->logger->error("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
+                return $this->respondWithError(42004);
+            }
+
+            // Prüfen, ob das Startdatum in der Vergangenheit liegt
+            $tomorrow = new DateTimeImmutable('tomorrow');
+            if ($startday < $tomorrow) {
+                $this->logger->error('Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
+                return $this->respondWithError(32008);
+            }
+
+            $durationActions = ['ONE_DAY', 'TWO_DAYS', 'THREE_DAYS', 'FOUR_DAYS', 'FIVE_DAYS', 'SIX_DAYS', 'SEVEN_DAYS'];
+
+            // Laufzeit validieren
+            if ($durationInDays !== null && !in_array($durationInDays, $durationActions, true)) {
+                $this->logger->error('Ungültige Laufzeit', ['durationInDays' => $durationInDays]);
+                return $this->respondWithError(32009);
+            }
+        }
+
+        if ($this->advertisementService->isAdvertisementDurationValid($postId) === true) 
+        {
+            $reducePrice = true;
+        }
+
+        if ($reducePrice === false) 
+        {
+            if ($this->advertisementService->hasShortActiveAdWithUpcomingAd($postId) === true) 
+            {
+                $reducePrice = true;
+            }
+        }
+
+        // Kosten berechnen je nach Plan (BASIC oder PINNED)
+        if ($advertisePlan === $this->advertisementService::PLAN_PINNED) {
+            $CostPlan = $this->advertisePostPinnedResolver($args); // PINNED Kosten berechnen
+
+            // 20% discount weil advertisement >= 24 stunde aktive noch
+            if ($reducePrice === true) 
+            {
+                $CostPlan = $CostPlan - ($CostPlan * 0.20); // 80% vom ursprünglichen Wert
+                //$CostPlan *= 0.80; // 80% vom ursprünglichen Wert
+                $this->logger->info('20% Discount Exestiert:', ['CostPlan' => $CostPlan]);
+            }
+
+            $this->logger->info('Werbeanzeige PINNED', ['CostPlan' => $CostPlan]);
+            $rescode = 12003;
+        } elseif ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
+            $CostPlan = $this->advertisePostBasicResolver($args); // BASIC Kosten berechnen
+            $this->logger->info('Werbeanzeige BASIC', ["Kosten für $durationInDays Tage: " => $CostPlan]);
+            $rescode = 12004;
+        } else {
+            $this->logger->error('Ungültige Ads Plan', ['CostPlan' => $CostPlan]);
+            return $this->respondWithError(32005);
+        }
+
+        // Wenn Kosten leer oder 0 sind, Fehler zurückgeben
+        $args['eurocost'] = $CostPlan;
+        if (empty($CostPlan) || (int)$CostPlan === 0) {
+            $this->logger->warning('Kostenprüfung fehlgeschlagen', ['CostPlan' => $CostPlan]);
+            return $this->respondWithError(42005);
+        }
+
+        // Euro in PeerTokens umrechnen
+        $results = $this->advertisementService->convertEuroToTokens($CostPlan, $rescode);
+        if (isset($results['status']) && $results['status'] === 'error') {
+            $this->logger->warning('Fehler bei convertEuroToTokens', ['results' => $results]);
+            return $results;
+        }
+        if (isset($results['status']) && $results['status'] === 'success') {
+            $this->logger->info('Umrechnung erfolgreich', ["€$CostPlan in PeerTokens: " => $results['affectedRows']['TokenAmount']]);
+            $CostPlan = $results['affectedRows']['TokenAmount'];
+            $args['tokencost'] = $CostPlan;
+        }
+
+        try {
+            // Wallet prüfen
+            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
+            if ($balance < $CostPlan) {
+                $this->logger->warning('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
+                return $this->respondWithError(51301);
+            }
+
+            // Werbeanzeige erstellen
+            $response = $this->advertisementService->createAdvertisement($args);
+            if (isset($response['status']) && $response['status'] === 'success') {
+                $args['art'] = ($advertisePlan === $this->advertisementService::PLAN_BASIC) ? 6 : (($advertisePlan === $this->advertisementService::PLAN_PINNED) ? 7 : null);
+                $args['price'] = $CostPlan ?? null;
+
+                $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
+                if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    return $deducted;
+                }
+
+                if (!$deducted) {
+                    $this->logger->error('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
+                    return $this->respondWithError($deducted['ResponseCode']);
+                }
+
+                return $response;
+            }
+
+            return $response;
+
+        } catch (\Throwable $e) {
+            return $this->respondWithError(40301);
+        }
+    }
+
+    // Werbeanzeige historie abrufen
+    protected function resolveAdvertisementHistory(?array $args = []): ?array
+    {
+        // Authentifizierung prüfen
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        $this->logger->info('Query.resolveAdvertisementHistory gestartet');
+
+        try {
+            // Werbeanzeige function abrufen
+            $response = $this->advertisementService->fetchAll($args);
+
+            if (isset($response['status']) && $response['status'] === 'success') {
+
+                return $response;
+            }
+
+            return $response;
+
+        } catch (\Throwable $e) {
+            return $this->respondWithError(40301);
+        }
     }
 
     protected function createUser(array $args): ?array
@@ -2524,6 +2945,7 @@ class GraphQLSchemaBuilder
         }
 
         $username = isset($args['username']) ? trim($args['username']) : null;
+        $usernameConfig = ConstantsConfig::user()['USERNAME'];
         $userId = $args['userid'] ?? null;
         $email = $args['email'] ?? null;
         $status = $args['status'] ?? null;
@@ -2542,11 +2964,11 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30201);
         }
 
-        if ($username !== null && (strlen($username) < 3 || strlen($username) > 23)) {
+        if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
             return $this->respondWithError(30202);
         }
 
-        if ($username !== null && !preg_match('/^[a-zA-Z0-9]+$/', $username)) {
+        if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
             return $this->respondWithError(30202);
         }
 
@@ -2855,6 +3277,72 @@ class GraphQLSchemaBuilder
         ];
     }
 
+    /**
+     * Get transcation history with Filter
+     * 
+     */
+    public function transactionsHistory(array $args): array
+    {
+        $this->logger->info('GraphQLSchemaBuilder.transactionsHistory started');
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        try {
+            $results = $this->peerTokenService->transactionsHistory($args);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+                'affectedRows' => $results['affectedRows']
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
+            return self::respondWithError(41226);  // Error occurred while retrieving transaction history
+        }
+
+    }
+
+
+    /**
+     * Get Post Interaction history with Post and Comment
+     * 
+     */
+    public function postInteractions(array $args): array
+    {
+        $this->logger->info('GraphQLSchemaBuilder.postInteractions started');
+
+        if (!$this->checkAuthentication()) {
+            $this->logger->info("GraphQLSchemaBuilder.postInteractions failed due to authentication");
+            return self::respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        try {
+            $results = $this->postService->postInteractions($args);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+                'affectedRows' => isset($results['affectedRows']) ? $results['affectedRows'] : []
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.postInteractions", ['exception' => $e->getMessage()]);
+            return self::respondWithError(41226);  // Error occurred while retrieving Post, Comment Interactions
+        }
+
+    }
+
     protected function resolvePosts(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
@@ -2941,7 +3429,7 @@ class GraphQLSchemaBuilder
                 if (!empty($params)) {
                     $firstParamType = $params[0]->getType();
 
-                    if ($firstParamType instanceof ReflectionNamedType 
+                    if ($firstParamType instanceof \ReflectionNamedType 
                         && !$firstParamType->isBuiltin() 
                         && $firstParamType->getName() !== 'mixed' 
                         && !($source instanceof ($firstParamType->getName() ?? ''))) {
@@ -3005,50 +3493,56 @@ class GraphQLSchemaBuilder
         $messageOffset = isset($args['messageOffset']) ? (int)$args['messageOffset'] : null;
         $messageLimit = isset($args['messageLimit']) ? (int)$args['messageLimit'] : null;
 
+        $paging = ConstantsConfig::paging();
+        $minOffset = $paging['OFFSET']['MIN'];
+        $maxOffset = $paging['OFFSET']['MAX'];
+        $minLimit = $paging['LIMIT']['MIN'];
+        $maxLimit = $paging['LIMIT']['MAX'];
+
         if ($offset !== null) {
-            if ($offset < 0 || $offset > INT32_MAX) {
+            if ($offset < $minOffset || $offset > $maxOffset) {
                 return $this->respondWithError(30203);
             }
         }
 
         if ($limit !== null) {
-            if ($limit < 1 || $limit > 20) {  
+            if ($limit < $minLimit || $limit > $maxLimit) {  
                 return $this->respondWithError(30204);
             }
         }
 
         if ($postOffset !== null) {
-            if ($postOffset < 0 || $postOffset > INT32_MAX) {
+            if ($postOffset < $minOffset || $postOffset > $maxOffset) {
                 return $this->respondWithError(30203);
             }
         }
 
         if ($postLimit !== null) {
-            if ($postLimit < 1 || $postLimit > 20) {  
+            if ($postLimit < $minLimit || $postLimit > $maxLimit) {  
                 return $this->respondWithError(30204);
             }
         }
 
         if ($commentOffset !== null) {
-            if ($commentOffset < 0 || $commentOffset > INT32_MAX) {
+            if ($commentOffset < $minOffset || $commentOffset > $maxOffset) {
                 return $this->respondWithError(30215);
             }
         }
 
         if ($commentLimit !== null) {
-            if ($commentLimit < 1 || $commentLimit > 20) {  
+            if ($commentLimit < $minLimit || $commentLimit > $maxLimit) {  
                 return $this->respondWithError(30216);
             }
         }
 
         if ($messageOffset !== null) {
-            if ($messageOffset < 0 || $messageOffset > INT32_MAX) {
+            if ($messageOffset < $minOffset || $messageOffset > $maxOffset) {
                 return $this->respondWithError(30219);
             }
         }
 
         if ($messageLimit !== null) {
-            if ($messageLimit < 1 || $messageLimit > 20) {  
+            if ($messageLimit < $minLimit || $messageLimit > $maxLimit) {  
                 return $this->respondWithError(30220);
             }
         }

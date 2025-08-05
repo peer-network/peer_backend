@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class ChatParticipants
 {
@@ -69,7 +70,7 @@ class ChatParticipants
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -89,11 +90,12 @@ class ChatParticipants
             
             throw new ValidationException($errorMessageString);
         }
-        return [];
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $chatConfig = ConstantsConfig::chat();
         $specification = [
             'userid' => [
                 'required' => true,
@@ -107,7 +109,10 @@ class ChatParticipants
                 'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],
+                    ['name' => 'validateIntRange', 'options' => [
+                        'min' => $chatConfig['ACCESS_LEVEL']['MIN'], 
+                        'max' => $chatConfig['ACCESS_LEVEL']['MAX'],
+                        ]],
                 ],
             ],
             'createdat' => [

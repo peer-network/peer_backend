@@ -16,10 +16,21 @@ let merged = {
 };
  
 collections.forEach((file) => {
-  const collection = JSON.parse(fs.readFileSync(`${path}/${file}`, "utf8"));
-  if (collection.item) {
-    merged.item.push(...collection.item);
+  const filePath = `${path}/${file}`;
+  if (fs.existsSync(filePath)) {
+    const collection = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    if (collection.item) {
+      merged.item.push(...collection.item);
+    }
+  } else {
+    console.warn(`Skipping missing file: ${filePath}`);
   }
 });
- 
+
+fs.mkdirSync(`${path}/reports`, { recursive: true });
 fs.writeFileSync(`${path}/reports/merged.json`, JSON.stringify(merged, null, 2));
+fs.writeFileSync(`${path}/tmp_collection.json`, JSON.stringify(merged, null, 2));
+
+console.log("Merged collection written to:");
+console.log("  - /etc/newman/reports/merged.json");
+console.log("  - /etc/newman/tmp_collection.json");

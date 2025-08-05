@@ -71,6 +71,10 @@
         "comment": "Success: Account deleted successfully",
         "userFriendlyComment": "Your account has been deleted successfully."
     },
+    "11014": {
+       "comment": "User preferences updated successfully.",
+       "userFriendlyComment": "Your preferences have been updated successfully."
+   },
     "11101": {
         "comment": "Success: Follows data prepared successfully",
         "userFriendlyComment": "Following/followers list loaded."
@@ -456,20 +460,20 @@
         "userFriendlyComment": "Invalid user ID format. Please check and try again."
     },
     "30202": {
-        "comment": "The 'username' field (User display name) must be between 3 and 23 characters long, must contain at least one letter and can contain numbers, and underscores",
-        "userFriendlyComment": "Username must be 3-23 chars with letters, numbers, or underscores."
+        "comment": "The 'username' field (User display name) must be between {USER.USERNAME.MIN_LENGTH} and {USER.USERNAME.MAX_LENGTH} characters long, must contain at least one letter and can contain numbers, and underscores",
+        "userFriendlyComment": "Username must be {USER.USERNAME.MIN_LENGTH}-{USER.USERNAME.MAX_LENGTH} chars with letters, numbers, or underscores."
     },
     "30203": {
-        "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between 0 and 2147483647",
-        "userFriendlyComment": "Offset must be a number between 0 and 2147483647."
+        "comment": "The 'offset' field (Pagination offset for retrieved data) must be an integer between {PAGING.OFFSET.MIN} and {PAGING.OFFSET.MAX}",
+        "userFriendlyComment": "Offset must be a number between {PAGING.OFFSET.MIN} and {PAGING.OFFSET.MAX}."
     },
     "30204": {
-        "comment": "The 'limit' field (Number of data objects to retrieve) must be an integer between 1 and 20",
-        "userFriendlyComment": "Limit must be a number between 1 and 20."
+        "comment": "The 'limit' field (Number of data objects to retrieve) must be an integer between {PAGING.LIMIT.MIN} and {PAGING.LIMIT.MAX}",
+        "userFriendlyComment": "Limit must be a number between {PAGING.LIMIT.MIN} and {PAGING.LIMIT.MAX}."
     },
     "30205": {
-        "comment": "The 'postLimit' field (Number of posts to retrieve) must be an integer between 1 and 20",
-        "userFriendlyComment": "Post limit must be 1-20."
+        "comment": "The 'postLimit' field (Number of posts to retrieve) must be an integer between {PAGING.LIMIT.MIN} and {PAGING.LIMIT.MAX}",
+        "userFriendlyComment": "Post limit must be {PAGING.LIMIT.MIN}-{PAGING.LIMIT.MAX}."
     },
     "30206": {
         "comment": "The 'filterBy' field (Post filter criteria) must be an array containing only valid ENUM options: IMAGE, AUDIO, TEXT, VIDEO, FOLLOWED, FOLLOWER",
@@ -488,12 +492,12 @@
         "userFriendlyComment": "Invalid post ID format."
     },
     "30210": {
-        "comment": "The 'title' field (Title of the post to search for) must be between 2 and 63 characters long",
-        "userFriendlyComment": "Title must be 2-63 chars"
+        "comment": "The 'title' field (Title of the post to search for) must be between {POST.TITLE.MIN_LENGTH} and {POST.TITLE.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Title must be {POST.TITLE.MIN_LENGTH}–{POST.TITLE.MAX_LENGTH} chars"
     },
     "30211": {
-        "comment": "The 'tag' field (Tags to search for in posts) must be an array of up to five tags, each between 2 and 53 characters long",
-        "userFriendlyComment": "Tags must be 2-53 chars, max 5 tags."
+        "comment": "The 'tag' field (Tags to search for in posts) must be an array of up to {POST.TAG.MAX_COUNT.SEARCH} tags, each between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Tags must be {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} chars, max {POST.TAG.MAX_COUNT.SEARCH} tags."
     },
     "30212": {
         "comment": "The 'from' field (Starting date for data retrieval) must be a valid date in the format YYYY-MM-DD",
@@ -512,8 +516,8 @@
         "userFriendlyComment": "Comment offset must be a number."
     },
     "30216": {
-        "comment": "The 'commentLimit' field (Number of comments to retrieve) must be an integer between 1 and 20",
-        "userFriendlyComment": "Comment limit must be 1-20."
+        "comment": "The 'commentLimit' field (Number of comments to retrieve) must be an integer between {PAGING.LIMIT.MIN} and {PAGING.LIMIT.MAX}",
+        "userFriendlyComment": "Comment limit must be {PAGING.LIMIT.MIN}-{PAGING.LIMIT.MAX}."
     },
     "30217": {
         "comment": "The 'commentid' field (Comment identifier) must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
@@ -528,8 +532,8 @@
         "userFriendlyComment": "Message offset must be a number."
     },
     "30220": {
-        "comment": "The 'messageLimit' field (Number of chat messages to retrieve) must be an integer between 1 and 20",
-        "userFriendlyComment": "Message limit must be 1-20."
+        "comment": "The 'messageLimit' field (Number of chat messages to retrieve) must be an integer between {PAGING.LIMIT.MIN} and {PAGING.LIMIT.MAX}",
+        "userFriendlyComment": "Message limit must be {PAGING.LIMIT.MIN}-{PAGING.LIMIT.MAX}."
     },
     "30221": {
         "comment": "The 'searchChatByName' field (Search for chats by name) must be a valid string",
@@ -552,20 +556,20 @@
         "userFriendlyComment": "Current password required to change email."
     },
     "30226": {
-        "comment": "The 'password' field (User new password) must be between 8 and 128 characters long and contain at least one lowercase letter, one uppercase letter, and one number",
-        "userFriendlyComment": "Password must be 8-128 chars with uppercase, lowercase and numbers."
+        "comment": "The 'password' field (User new password) must be between {USER.PASSWORD.MIN_LENGTH} and {USER.PASSWORD.MAX_LENGTH} characters long and contain at least one lowercase letter, one uppercase letter, and one number",
+        "userFriendlyComment": "Password must be {USER.PASSWORD.MIN_LENGTH}-{USER.PASSWORD.MAX_LENGTH} chars with uppercase, lowercase and numbers."
     },
     "30227": {
         "comment": "The 'expassword' field (User current password) is required to update the password",
         "userFriendlyComment": "Current password required to change password."
     },
     "30228": {
-        "comment": "The 'biography' field (User biography)must be between 3 and 5000 characters long",
-        "userFriendlyComment": "Bio must be 3-5000 characters."
+        "comment": "The 'biography' field (User biography)must be between {USER.BIOGRAPHY.MIN_LENGTH} and {USER.BIOGRAPHY.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Bio must be {USER.BIOGRAPHY.MIN_LENGTH}-{USER.BIOGRAPHY.MAX_LENGTH} characters."
     },
     "30229": {
-        "comment": "The 'img' field (User profile picture) must be a valid image file (JPG, PNG, or GIF) and less than 5MB in size",
-        "userFriendlyComment": "Profile pic must be JPG/PNG/GIF under 5MB."
+        "comment": "The 'img' field (User profile picture) must be a valid image file (JPG, PNG, or GIF) and less than {USER.AVATAR.MAX_SIZE_MB}MB in size",
+        "userFriendlyComment": "Profile pic must be JPG/PNG/GIF under {USER.AVATAR.MAX_SIZE_MB}MB."
     },
     "30230": {
         "comment": "You are not authorized to perform this action on the specified chat",
@@ -620,8 +624,8 @@
         "userFriendlyComment": "Transaction ID is required."
     },
     "30243": {
-        "comment": "The 'tokenAmount' field (Transaction amount) must be more than 10 tokens",
-        "userFriendlyComment": "Minimum transaction is 10 tokens."
+        "comment": "The 'tokenAmount' field (Transaction amount) must be more than {USER.TRANSACTION.MIN_TOKENS} tokens",
+        "userFriendlyComment": "Minimum transaction is {USER.TRANSACTION.MIN_TOKENS} tokens."
     },
     "30244": {
         "comment": "The 'value' field must be an integer",
@@ -656,24 +660,20 @@
         "userFriendlyComment": "Invalid media format. Please upload again."
     },
     "30252": {
-        "comment": "The 'message' field must be between 1 and 500 characters long",
-        "userFriendlyComment": "Message must be 1-500 characters."
+        "comment": "The 'message' field must be between {CHAT.MESSAGE.MIN_LENGTH} and {CHAT.MESSAGE.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Message must be {CHAT.MESSAGE.MIN_LENGTH}-{CHAT.MESSAGE.MAX_LENGTH} characters."
     },
     "30253": {
-        "comment": "The 'phone number' field must be an integer between 9 and 21",
-        "userFriendlyComment": "Phone number must be 9-21 digits."
+        "comment": "The 'phone number' field must be an integer between {USER.PHONENUMBER.MIN_LENGTH} and {USER.PHONENUMBER.MAX_LENGTH}",
+        "userFriendlyComment": "Phone number must be {USER.PHONENUMBER.MIN_LENGTH}-{USER.PHONENUMBER.MAX_LENGTH} digits."
     },
     "30254": {
-        "comment": "The 'Solana Public Key' field must be a String between 43 and 44 (only including Chars and Ints without 0 O I 1)",
+        "comment": "The 'Solana Public Key' field must be a String between {WALLET.SOLANA_PUBKEY.MIN_LENGTH} and {WALLET.SOLANA_PUBKEY.MAX_LENGTH} (only including Chars and Ints without 0 O I 1)",
         "userFriendlyComment": "Invalid Solana public key format."
     },
     "30255": {
-        "comment": "The 'tagName' field (Tag identifier) must be between 2 and 53 characters long, must not contain spaces, and may include letters, numbers, special characters, underscores _, and hyphens - (format: valid-tag_name-123)",
-        "userFriendlyComment": "Tag name must be 2-53 chars without spaces (can use - and _)."
-    },
-    "30256": {
-        "comment": "Title must be between 2 and 30 characters. Please adjust and try again",
-        "userFriendlyComment": "Title must be 2-30 characters."
+        "comment": "The 'tagName' field (Tag identifier) must be between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long, must not contain spaces, and may include letters, numbers, special characters, underscores _, and hyphens - (format: valid-tag_name-123)",
+        "userFriendlyComment": "Tag name must be {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} chars without spaces (can use - and _)."
     },
     "30257": {
         "comment": "Invalid IP address. Please enter a valid IPv4 (e.g. 192.168.0.1) or IPv6 (e.g. 2001:0db8:85a3:0000:0000:8a2e:0370:7334) address",
@@ -696,12 +696,12 @@
         "userFriendlyComment": "File too large. Please reduce size."
     },
     "30262": {
-        "comment": "The 'tag' field (Tags in post creation) must be an array of up to ten tags, each between 2 and 53 characters long",
-        "userFriendlyComment": "Max 10 tags, each 2-53 characters."
+        "comment": "The 'tag' field (Tags in post creation) must be an array of up to {POST.TAG.MAX_COUNT.CREATE} tags, each between {POST.TAG.MIN_LENGTH} and {POST.TAG.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Max {POST.TAG.MAX_COUNT.CREATE} tags, each {POST.TAG.MIN_LENGTH}-{POST.TAG.MAX_LENGTH} characters."
     },
     "30263": {
-        "comment": "The 'mediadescription' field (Create Post input) must be between 3 and 500 characters long",
-        "userFriendlyComment": "Media description must be 3-500 characters."
+        "comment": "The 'mediadescription' field (Create Post input) must be between {POST.MEDIADESCRIPTION.MIN_LENGTH} and {POST.MEDIADESCRIPTION.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Media description must be {POST.MEDIADESCRIPTION.MIN_LENGTH}-{POST.MEDIADESCRIPTION.MAX_LENGTH} characters."
     },
     "30264": {
         "comment": "The numberoftokens field must be a number, greater than zero, and less than the account balance",
@@ -716,12 +716,12 @@
         "userFriendlyComment": "Only one media type allowed per post."
     },
     "30267": {
-        "comment": "The media field must contain less than 5 image files, 1 text file, 1 audio file, 2 video files. ",
-        "userFriendlyComment": "Media limits: 5 images, 1 text, 1 audio, or 2 videos."
+        "comment": "The media field must contain less than {POST.MEDIALIMIT.IMAGE} image files, {POST.MEDIALIMIT.TEXT} text file, {POST.MEDIALIMIT.AUDIO} audio file, {POST.MEDIALIMIT.VIDEO} video files. ",
+        "userFriendlyComment": "Media limits: {POST.MEDIALIMIT.IMAGE} images, {POST.MEDIALIMIT.TEXT} text, {POST.MEDIALIMIT.AUDIO} audio, or {POST.MEDIALIMIT.VIDEO} videos."
     },
     "30268": {
-        "comment": "The cover field must contain at most only 1 image",
-        "userFriendlyComment": "Only one cover image allowed."
+        "comment": "The cover field must contain at most only {POST.COVER.MAX_COUNT} image",
+        "userFriendlyComment": "Only {POST.COVER.MAX_COUNT} cover image allowed."
     },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
@@ -1078,6 +1078,14 @@
     "41014": {
         "comment": "Unexpected Error: Failed to delete account.",
         "userFriendlyComment": "We couldn't delete your account. Please try again."
+    },
+    "41015": {
+        "comment": "Unexpected error: Internal server error while reporting user.",
+        "userFriendlyComment": "We're having trouble reporting the user right now. Please try again later."
+    },
+    "41016": {
+        "comment": "Failed to update user preferences.",
+        "userFriendlyComment": "We couldn’t update your preferences. Please try again later."
     },
     "41101": {
         "comment": "Unexpected Error: Failed to retrieve friends data. Please try again later or contact support",

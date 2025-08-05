@@ -113,7 +113,7 @@ class Comment implements Hashable
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -133,11 +133,12 @@ class Comment implements Hashable
             
             throw new ValidationException($errorMessageString);
         }
-        return [];
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $commentConfig = ConstantsConfig::comment();
         $specification = [
             'commentid' => [
                 'required' => true,
@@ -162,8 +163,8 @@ class Comment implements Hashable
                     [
                         'name' => 'StringLength', 
                         'options' => [
-                            'min' => ConstantsConfig::comment()['CONTENT']['MIN_LENGTH'],
-                            'max' => ConstantsConfig::comment()['CONTENT']['MAX_LENGTH'],
+                            'min' => $commentConfig['CONTENT']['MIN_LENGTH'],
+                            'max' => $commentConfig['CONTENT']['MAX_LENGTH'],
                             'errorCode' => 30265,
                             ]
                         ],

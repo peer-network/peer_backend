@@ -29,7 +29,9 @@ class PostAdvanced
     protected ?bool $issaved;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
+    protected ?bool $isfriend;
     protected string $createdat;
+    protected ?string $type;
     protected ?array $tags = [];
     protected ?array $user = [];
     protected ?array $comments = [];
@@ -62,7 +64,9 @@ class PostAdvanced
         $this->issaved = $data['issaved'] ?? false;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
+        $this->isfriend = $data['isfriend'] ?? false;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->type = $data['type'] ?? null;
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->comments = isset($data['comments']) && is_array($data['comments']) ? $data['comments'] : [];
@@ -93,7 +97,9 @@ class PostAdvanced
             'issaved' => $this->issaved,
             'isfollowed' => $this->isfollowed,
             'isfollowing' => $this->isfollowing,
+            'isfriend' => $this->isfriend,
             'createdat' => $this->createdat,
+            'type' => $this->type,
             'tags' => $this->tags, // Include tags
             'user' => $this->user,
             'comments' => $this->comments,
@@ -158,32 +164,33 @@ class PostAdvanced
         return $this->contenttype;
     }
 
-    // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
-    {
-        $inputFilter = $this->createInputFilter($elements);
-        $inputFilter->setData($data);
+    // Renew Validation and Array Filtering methods
+	public function validate(array $data, array $elements = []): array
+	{
+		$inputFilter = $this->createInputFilter($elements);
+		$inputFilter->setData($data);
 
-        if ($inputFilter->isValid()) {
-            return $inputFilter->getValues();
-        }
+		if ($inputFilter->isValid()) {
+			return $inputFilter->getValues();
+		}
 
-        $validationErrors = $inputFilter->getMessages();
+		$validationErrors = $inputFilter->getMessages();
+		$errorMessages = [];
 
-        foreach ($validationErrors as $field => $errors) {
-            $errorMessages = [];
-            foreach ($errors as $error) {
-                $errorMessages[] = $error;
-            }
-            $errorMessageString = implode("", $errorMessages);
-            
-            throw new ValidationException($errorMessageString);
-        }
-        return [];
-    }
+		foreach ($validationErrors as $field => $errors) {
+			foreach ($errors as $error) {
+				$errorMessages[] = $error;
+			}
+		}
+
+		throw new ValidationException(implode("", $errorMessages));
+
+		return [];
+	}
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $postConst = ConstantsConfig::post();
         $specification = [
             'postid' => [
                 'required' => true,
@@ -213,8 +220,8 @@ class PostAdvanced
                 'required' => true,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 1000,
+                        'min' => $postConst['MEDIA']['MIN_LENGTH'],
+                        'max' => $postConst['MEDIA']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -223,8 +230,8 @@ class PostAdvanced
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 0,
-                        'max' => 1000,
+                        'min' => $postConst['COVER']['MIN_LENGTH'],
+                        'max' => $postConst['COVER']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -308,6 +315,10 @@ class PostAdvanced
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
             ],
+            'isfriend' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
             'tags' => [
                 'required' => false,
                 'validators' => [
@@ -316,7 +327,7 @@ class PostAdvanced
                         'name' => 'ArrayValues',
                         'options' => [
                             'validator' => [
-                                'name' => 'IsString',
+                                ['name' => 'validateTagName'],
                             ],
                         ],
                     ],
@@ -327,6 +338,12 @@ class PostAdvanced
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                     ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                ],
+            ],
+            'type' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'isString'],
                 ],
             ],
             'user' => [

@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class NewsFeed
 {
@@ -114,7 +115,7 @@ class NewsFeed
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -134,11 +135,12 @@ class NewsFeed
             
             throw new ValidationException($errorMessageString);
         }
-        return [];
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $chatConfig = ConstantsConfig::chat();
         $specification = [
             'feedid' => [
                 'required' => true,
@@ -153,8 +155,8 @@ class NewsFeed
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 100,
+                        'min' => $chatConfig['IMAGE']['MIN_LENGTH'],
+                        'max' => $chatConfig['IMAGE']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -164,8 +166,8 @@ class NewsFeed
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 53,
+                        'min' => $chatConfig['NAME']['MIN_LENGTH'],
+                        'max' => $chatConfig['NAME']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],

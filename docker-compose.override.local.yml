@@ -1,0 +1,55 @@
+services:
+  db:
+    volumes:
+      - ./sql_files_for_import:/docker-entrypoint-initdb.d
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - my-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+      args:
+        IMAGE_TAG: ${IMAGE_TAG}
+    image: peer-backend:${IMAGE_TAG}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8888:80"
+    volumes:
+      - ./:/var/www/html
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/graphql"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - my-network
+
+  newman:
+    build:
+      context: .
+      dockerfile: Dockerfile.newman
+    volumes:
+      - ./tests/postman_collection:/etc/newman
+      - ./tests/media_files:/etc/newman/media_files
+      - ./newman/reports:/etc/newman/reports
+    entrypoint: []
+    command: tail -f /dev/null
+    mem_limit: 2g
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    name: ${COMPOSE_PROJECT_NAME}_network
+
+volumes:
+  db_data: {}
