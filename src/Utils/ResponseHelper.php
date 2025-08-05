@@ -63,15 +63,13 @@ trait ResponseHelper
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
-    /**
-     * Validate Authenticated User
-     */
-    private function checkAuthentication($currentUserId): bool
+    private static function validateDate(string $date, string $format = 'Y-m-d'): bool 
     {
-        if ($currentUserId === null) {
+        if (!is_string($date)) {
             return false;
         }
-        return true;
-    }
 
+        $d = \DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) === $date;
+    }
 }

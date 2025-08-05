@@ -31,7 +31,8 @@ use Fawaz\Database\Interfaces\TransactionManager;
 
 class PostService
 {
-	use ResponseHelper;
+    use ResponseHelper;
+
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -91,7 +92,6 @@ class PostService
     private function argsToString($args) {
         return serialize($args);
     }
-
 
     private function validateCoverCount(array $args, string $contenttype): array {
         if (!is_array($args['cover'])) {
@@ -560,7 +560,7 @@ class PostService
         }
 
         if (!empty($filterBy) && is_array($filterBy)) {
-            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED'];
+            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED', 'FRIENDS'];
 
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
@@ -806,26 +806,20 @@ class PostService
         }
     }
 
-    /**
-     * Get Guest List Post
-     */
-    public function getGuestListPost(?array $args = []): array|false
+    public function postExistsById(string $postId): bool
     {
-        $postId = $args['postid'] ?? null;
-
-        if ($postId == null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(30209);
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
         }
 
-        $this->logger->info("PostService.getGuestListPost started");
+        $this->logger->info('PostService.postExistsById started');
 
-        $results = $this->postMapper->getGuestListPost($args);
+        try {
+            return $this->postMapper->postExistsById($postId);
 
-        if (empty($results)) {
-            return $this->respondWithError(31510); 
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed fetch Post', ['postId' => $postId, 'exception' => $e]);
+            return false;
         }
-
-        return $results;
     }
-    
 }
