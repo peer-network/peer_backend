@@ -1758,6 +1758,18 @@ class GraphQLSchemaBuilder
                     return $root['createdat'] ?? '';
                 },
             ], 
+            'PostInteractionResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.PostInteractionResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
             'ListAdvertisementData' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.ListAdvertisementData Resolvers');
@@ -2063,7 +2075,7 @@ class GraphQLSchemaBuilder
             }
 
             // Prüfen, ob das Startdatum in der Vergangenheit liegt
-			$tomorrow = new DateTimeImmutable('tomorrow');
+            $tomorrow = new DateTimeImmutable('tomorrow');
             if ($startday < $tomorrow) {
                 $this->logger->error('Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
                 return $this->respondWithError(32008);
