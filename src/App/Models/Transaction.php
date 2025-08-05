@@ -69,7 +69,7 @@ class Transaction
                 'validators' => [['name' => 'Uuid']],
             ],
             'transactiontype' => [
-                'required' => true,
+                'required' => false,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [

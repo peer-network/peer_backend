@@ -835,6 +835,10 @@
         "comment": "Not Allowed: You are not allowed to initiate transfers to your own address",
         "userFriendlyComment": "You can't transfer to yourself."
     },
+    "31203": {
+        "comment": "Unauthorized to initiate transfers to Pool accounts.",
+        "userFriendlyComment": "You are not authorized to transfer to pool accounts."
+    },
     "31501": {
         "comment": "Invalid Action: You have already liked this post",
         "userFriendlyComment": "You've already liked this post."
