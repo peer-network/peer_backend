@@ -155,15 +155,6 @@ class TagPostService
         }
     }
     
-    private function isValidTagName(?string $tagName): bool
-    {
-        $tagNameConfig = ConstantsConfig::post()['TAG'];
-        return $tagName && 
-            strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] && 
-            strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] && 
-            preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName);
-    }
-
     private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];

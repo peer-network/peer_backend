@@ -1874,10 +1874,6 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.resolveBlocklist started');
 
         $response = $this->userInfoService->loadBlocklist($args);
-        if (!is_array($response)) {
-            $this->logger->warning('Query.resolveBlocklist No data found');
-            return $this->respondWithError(41105);
-        }
         if (isset($response['status']) && $response['status'] === 'error') {
             return $response;
         }
@@ -1885,8 +1881,13 @@ class GraphQLSchemaBuilder
         if (empty($response['counter'])) {
             return $this->createSuccessResponse(11107, [], false);
         }
-        
-        return $response;
+
+        if (is_array($response) || !empty($response)) {
+            return $response;
+        }
+
+        $this->logger->warning('Query.resolveBlocklist No data found');
+        return $this->respondWithError(41105);
     }
 
     protected function resolveFetchWinsLog(array $args): ?array
@@ -2334,7 +2335,7 @@ class GraphQLSchemaBuilder
                 }
             }
             elseif ($action === 'like') 
-                            {
+            {
                 $response = $this->postInfoService->likePost($postId);
                 if (isset($response['status']) && $response['status'] === 'error') {
                     return $response;

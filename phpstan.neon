@@ -23,5 +23,3 @@ parameters:
         - '#Offset .+ does not exist on array\{\}#'
         - '#Call to static method .+ on an unknown class .+#'
         - '#Invoking callable on an unknown class .+#'
-        - '#Method Fawaz\\config\\constants\\ConstantsConfig::wallet\(\) should return array\{.+NUMBERSQ.+\} but returns array\{.+NUMBERSQ.+1\.0E\+29.+\}#'
-        - '#Method Fawaz\\config\\constants\\ConstantsConfig::wallett\(\) should return array\{.+LIQUIDITQ.+\} but returns array\{.+LIQUIDITQ.+1\.0E\+29.+\}#'
