@@ -111,9 +111,11 @@ services:
         - ./newman/reports:/etc/newman/reports
     entrypoint: >
       sh -c '
-        echo "📂 Debug: Listing media files inside /etc/newman/media_files..." &&
+        echo "Debug: Listing media files inside /etc/newman/media_files..." &&
+        chown -R node:node /etc/newman/media_files &&
+        chmod -R u+rwX,go+rX /etc/newman/media_files &&
         ls -lah /etc/newman/media_files || echo "Failed to list media_files directory" &&
-        echo "🧪 Starting merge and Newman tests..." &&
+        echo "Starting merge and Newman tests..." &&
         mkdir -p /etc/newman/reports &&
         node /etc/newman/merge-collections.js &&
         newman run /etc/newman/reports/merged.json \
