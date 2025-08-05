@@ -386,10 +386,10 @@ jobs:
             tests/postman_collection/graphql_postman_environment.json > temp_env.json
           mv temp_env.json tests/postman_collection/graphql_postman_environment.json
 
-      - name: Set permissions on media files
-        run: |
-          chmod -R 644 tests/media_files
-          find tests/media_files -type d -exec chmod 755 {} +
+#      - name: Set permissions on media files
+#        run: |
+#          chmod -R 644 tests/media_files
+#          find tests/media_files -type d -exec chmod 755 {} +
 
       - name: Debug media_files before running Newman
         run: |
