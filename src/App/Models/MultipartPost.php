@@ -243,7 +243,7 @@ class MultipartPost
             return 'video';
         }
 
-        if (in_array($mimeType, ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/webm'])) {
+        if (in_array($mimeType, ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/x-wav', 'audio/webm'])) {
             return 'audio';
         }
 
