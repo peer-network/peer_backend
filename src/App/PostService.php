@@ -51,12 +51,12 @@ class PostService
         return $d && $d->format($format) === $date;
     }
 
-    private function respondWithError(string $responseCode): array
+    private function respondWithError(int $responseCode): array
     {
         return ['status' => 'error', 'ResponseCode' => $responseCode];
     }
 
-    private function createSuccessResponse(string $message, array $data = []): array
+    private function createSuccessResponse(int $message, array $data = []): array
     {
         return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
     }
@@ -224,7 +224,7 @@ class PostService
                     return $this->respondWithError(40306);
                 }
             }
-            elseif ($args['contenttype'] === 'video' && !empty($mediaPath['path'])) {
+                elseif ($args['contenttype'] === 'video') {
                 $videoRelativePath = $mediaPath['path'][0]['path'];
                 $videoFilePath = __DIR__ . '/../../runtime-data/media' . $videoRelativePath;
 
@@ -261,7 +261,7 @@ class PostService
 
             if (isset($coverPath['path']) && !empty($coverPath['path'])) {
                 // Cover Posts_media
-                $coverDecoded = $coverPath['path'] ?? null;
+                $coverDecoded = $coverPath['path'];
                 $coverMed = [
                     'postid' => $postId,
                     'contenttype' => 'cover',
@@ -402,7 +402,7 @@ class PostService
         }
     }
 
-    private function createTag(string $tagName): Tag|false|array
+    private function createTag(string $tagName): Tag|false
     {
         $tagId = 0;
         $tagData = ['tagid' => $tagId, 'name' => $tagName];
@@ -558,7 +558,7 @@ class PostService
     {
         $postArray = $post->getArrayCopy();
 
-        $comments = $this->commentMapper->fetchAllByPostId($post->getPostId());
+        $comments = $this->commentMapper->fetchAllByPostId($post->getPostId(), $this->currentUserId);
         $postArray['comments'] = $this->mapCommentsWithReplies($comments);
 
         return $postArray;

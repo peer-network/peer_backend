@@ -29,12 +29,12 @@ class McapService
         return true;
     }
 
-    private function respondWithError(string $message): array
+    private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -89,7 +89,10 @@ class McapService
         $this->logger->info('McapService.fetchAll started');
 
         try {
-            $users = $this->mcapMapper->fetchAll($args, $this->currentUserId);
+            $offset = isset($args['offset']) ? (int) $args['offset'] : 0;
+            $limit = isset($args['limit']) ? (int) $args['limit'] : null;
+
+            $users = $this->mcapMapper->fetchAll($offset, $limit);
             $fetchAll = array_map(fn(User $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {

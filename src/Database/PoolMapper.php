@@ -17,12 +17,12 @@ class PoolMapper
     {
     }
 
-    protected function respondWithError(string $message): array
+    protected function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -248,7 +248,6 @@ class PoolMapper
         }
 
         if (!empty($data)) {
-
             return [
                 'status' => 'success',
                 'counter' => count($args) -1,
@@ -256,7 +255,7 @@ class PoolMapper
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
         }
-
+        
         return $this->respondWithError(40301);
     }
 

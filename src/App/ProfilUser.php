@@ -71,7 +71,7 @@ class ProfilUser
         $this->username = $name;
     }
 
-    public function setSlug(string $slug): void
+    public function setSlug(?int $slug): void
     {
         $this->slug = $slug;
     }
