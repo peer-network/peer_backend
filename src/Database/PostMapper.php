@@ -665,8 +665,6 @@ class PostMapper
         $params['users'] = Role::USER;
         $params['admin'] = Role::ADMIN;
 
-        // here to decide whether to hide post ot not from feed
-        // send callback with post query changes to filtering object????
         if ($contentFilterService->getContentFilterAction(
             ContentType::post,
             ContentType::post
