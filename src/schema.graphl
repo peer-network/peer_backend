@@ -184,7 +184,7 @@ type TransactionResponse {
 
 type TransferTokenResponse {
   status: String!
-  responseCode: Int!
+  ResponseCode: Int!
   affectedRows: TransferToken!
 }
 
