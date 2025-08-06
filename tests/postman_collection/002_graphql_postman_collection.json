@@ -322,6 +322,7 @@
 							"        responseText.includes(\"11513\") || responseText.includes(\"11508\")",
 							"    ).to.be.true;",
 							"});",
+							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
@@ -363,6 +364,27 @@
 							"    pm.environment.unset(\"isDailyFreePost\");",
 							"    console.log(\"Not a Daily Free Post (code not 11513).\");",
 							"}",
+							"",
+							"// ✅ Validate resolutions of all three media items",
+							"pm.test(\"All uploaded image resolutions are correct\", function () {",
+							"    try {",
+							"        const expectedResolutions = [\"200x300\", \"736x413\", \"225x225\"];",
+							"        const mediaString = postResponse?.data?.createPost?.affectedRows?.media;",
+							"        const mediaArray = JSON.parse(mediaString);",
+							"",
+							"        pm.expect(mediaArray.length, \"Expected 3 media items\").to.eql(3);",
+							"",
+							"        for (let i = 0; i < expectedResolutions.length; i++) {",
+							"            const actual = mediaArray[i]?.options?.resolution;",
+							"            const expected = expectedResolutions[i];",
+							"",
+							"            pm.expect(actual, `Media[${i}] resolution should be ${expected}`).to.eql(expected);",
+							"        }",
+							"    } catch (err) {",
+							"        console.error(\"Error validating media resolutions:\", err);",
+							"        throw new Error(\"Failed to validate media resolutions.\");",
+							"    }",
+							"});",
 							""
 						],
 						"type": "text/javascript",
@@ -1313,6 +1335,7 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"11508\");",
 							"});",
+							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
@@ -1339,6 +1362,22 @@
 							"} else {",
 							"    console.log(\"Error detected in response, skipping postid set.\");",
 							"}",
+							"",
+							"// ✅ Validate video resolution",
+							"pm.test(\"Video resolution is correct\", function () {",
+							"    try {",
+							"        const affected = postResponse?.data?.createPost?.affectedRows;",
+							"",
+							"        const mediaString = affected?.media;",
+							"        const mediaArray = JSON.parse(mediaString);",
+							"        const mediaResolution = mediaArray?.[0]?.options?.resolution;",
+							"",
+							"        pm.expect(mediaResolution, \"Expected video resolution to be 1280x720\").to.eql(\"1280x720\");",
+							"    } catch (err) {",
+							"        console.error(\"Failed to validate video resolution:\", err);",
+							"        throw new Error(\"Video resolution validation failed.\");",
+							"    }",
+							"});",
 							""
 						],
 						"type": "text/javascript",
@@ -5862,7 +5901,7 @@
 			"response": []
 		},
 		{
-			"name": "Content Engagement(LIKE)",
+			"name": "Content engagement (like)",
 			"event": [
 				{
 					"listen": "test",
@@ -6214,7 +6253,7 @@
 			"response": []
 		},
 		{
-			"name": "Content Engagement(DISLIKE)",
+			"name": "Content engagement (dislike)",
 			"event": [
 				{
 					"listen": "test",
@@ -6654,7 +6693,7 @@
 			"response": []
 		},
 		{
-			"name": "Conten Engagement(View)",
+			"name": "Conten engagement (view)",
 			"event": [
 				{
 					"listen": "test",
@@ -7009,7 +7048,7 @@
 			"response": []
 		},
 		{
-			"name": "Content Engagement(LIKECOMMENT)",
+			"name": "Content engagement (comments likes)",
 			"event": [
 				{
 					"listen": "test",
