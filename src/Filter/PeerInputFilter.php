@@ -246,6 +246,26 @@ class PeerInputFilter
         return $inclusive ? $valueTimestamp <= $maxTimestamp : $valueTimestamp < $maxTimestamp;
     }
 
+    protected function TimeEndAfterTimeStart(string $timeend, array $options = []): bool
+    {
+        $timestart = $options['timestart'] ?? null;
+
+        if (!$timestart) {
+            $this->errors['timestart'][] = 30251;
+            return false;
+        }
+
+        $start = DateTime::createFromFormat('Y-m-d H:i:s.u', $timestart);
+        $end = DateTime::createFromFormat('Y-m-d H:i:s.u', $timeend);
+
+        if (!$start || !$end) {
+            $this->errors['datetime'][] = 30252;
+            return false;
+        }
+
+        return $end > $start;
+    }
+
     protected function validateIntRange(mixed $value, array $options = []): bool
     {
         if (!is_numeric($value) || (int)$value != $value) {
@@ -302,23 +322,27 @@ class PeerInputFilter
     protected function ArrayValues(mixed $value, array $options = []): bool
     {
         if (!is_array($value)) {
+            $this->errors['ArrayValues'][] = 40301;
             return false;
         }
 
         $validator = $options['validator'] ?? null;
-        if (!$validator || !isset($validator['name'])) {
+        if (!$validator || !isset($validator[0]['name'])) {
             $this->errors['ArrayValues'][] = 40301;
+            return false;
         }
 
-        $validatorName = $validator['name'];
-        $validatorOptions = $validator['options'] ?? [];
+        $validatorName = $validator[0]['name'];
+        $validatorOptions = $validator[0]['options'] ?? [];
 
-        foreach ($value as $item) {
-            if (!method_exists($this, $validatorName)) {
-                $this->errors['ArrayValues'][] = "Validator method $validatorName does not exist.";
-            }
+        if (!method_exists($this, $validatorName)) {
+            $this->errors['ArrayValues'][] = 40301;
+            return false;
+        }
 
+        foreach ($value as $index => $item) {
             if (!$this->$validatorName($item, $validatorOptions)) {
+                $this->errors['ArrayValues'][] = 40301;
                 return false;
             }
         }
