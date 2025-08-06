@@ -66,6 +66,8 @@ class DailyFreeService
             $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage()]);
             return [];
         }
+        
+        return [];
     }
 
     public function getUserDailyUsage(string $userId, int $artType): int

@@ -90,7 +90,7 @@ class UserService
         $attempts = 0;
         do {
             $slug = $this->createNumbersAsString(1, 9, 5);
-            if (!$this->userMapper->checkIfNameAndSlugExist($username, $slug)) {
+            if (!$this->userMapper->checkIfNameAndSlugExist($username, (int)$slug)) {
                 return (string) $slug;
             }
             $attempts++;
