@@ -106,13 +106,19 @@ services:
     environment:
       BACKEND_URL: "http://backend:80"
     volumes:
-      - ./tests/postman_collection:/etc/newman
-      - ./newman/reports:/etc/newman/reports
+        - ./tests/postman_collection:/etc/newman
+        - ./tests/media_files:/etc/newman/media_files
+        - ./newman/reports:/etc/newman/reports
     entrypoint: >
-      newman run /etc/newman/graphql_postman_collection.json
-      --environment /etc/newman/graphql_postman_environment.json
-      --reporters cli,htmlextra
-      --reporter-htmlextra-export /etc/newman/reports/report.html
+      sh -c '
+        mkdir -p /etc/newman/reports &&
+        node /etc/newman/merge-collections.js &&
+        newman run /etc/newman/reports/merged.json \
+          --environment /etc/newman/graphql_postman_environment.json \
+          --reporters cli,htmlextra \
+          --reporter-htmlextra-export /etc/newman/reports/report.html \
+          --reporter-htmlextra-logs true
+      '
     restart: "no"
     networks:
       - my-network

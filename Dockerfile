@@ -43,16 +43,18 @@ RUN mkdir -p /var/www/html/runtime-data/logs \
 
 RUN composer require --no-update php-ffmpeg/php-ffmpeg
  
-RUN composer install --no-dev --prefer-dist --no-interaction \
-&& composer dump-autoload -o
+RUN composer config --global process-timeout 600 \
+ && composer install --no-dev --prefer-dist --no-interaction \
+ && composer dump-autoload -o
  
 RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
 && echo "display_errors = Off" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
 && echo "display_startup_errors = Off" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
 && echo "error_reporting = E_ALL & ~E_DEPRECATED & ~E_NOTICE" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
 && echo "error_log = /var/www/html/runtime-data/logs/errorlog.txt" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
-&& echo "upload_max_filesize = 80M" >> /usr/local/etc/php/conf.d/uploads.ini \
-&& echo "post_max_size = 80M" >> /usr/local/etc/php/conf.d/uploads.ini
+&& echo "upload_max_filesize = 510M" >> /usr/local/etc/php/conf.d/uploads.ini \
+&& echo "post_max_size = 510M" >> /usr/local/etc/php/conf.d/uploads.ini \
+&& echo "max_file_uploads = 21" >> /usr/local/etc/php/conf.d/uploads.ini
  
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
 COPY docker/supervisord.conf /etc/supervisord.conf

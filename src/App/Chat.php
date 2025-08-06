@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class Chat
 {
@@ -133,7 +134,7 @@ class Chat
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -153,10 +154,12 @@ class Chat
             
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $chatConfig = ConstantsConfig::chat();
         $specification = [
             'chatid' => [
                 'required' => true,
@@ -171,8 +174,8 @@ class Chat
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 100,
+                        'min' => $chatConfig['IMAGE']['MIN_LENGTH'],
+                        'max' => $chatConfig['IMAGE']['MAX_LENGTH'],
                     ]],
                     ['name' => 'validateImage'],
                 ],
@@ -182,8 +185,8 @@ class Chat
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 53,
+                        'min' => $chatConfig['NAME']['MIN_LENGTH'],
+                        'max' => $chatConfig['NAME']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -192,7 +195,9 @@ class Chat
                 'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],
+                    ['name' => 'validateIntRange', 'options' => [
+                        'min' => $chatConfig['IS_PUBLIC']['MIN'], 
+                        'max' => $chatConfig['IS_PUBLIC']['MAX']]],
                 ],
             ],
             'createdat' => [

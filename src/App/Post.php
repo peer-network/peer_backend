@@ -93,7 +93,7 @@ class Post implements Hashable
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -112,10 +112,12 @@ class Post implements Hashable
             $errorMessageString = implode("", $errorMessages);
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $postConst = ConstantsConfig::post();
         $specification = [
             'postid' => [
                 'required' => true,
@@ -154,8 +156,8 @@ class Post implements Hashable
                 'required' => true,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 1000,
+                        'min' => $postConst['MEDIA']['MIN_LENGTH'],
+                        'max' => $postConst['MEDIA']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -164,8 +166,8 @@ class Post implements Hashable
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 0,
-                        'max' => 1000,
+                        'min' => $postConst['COVER']['MIN_LENGTH'],
+                        'max' => $postConst['COVER']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
