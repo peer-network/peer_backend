@@ -25,7 +25,7 @@ class Base64FileHandler
                 'video/x-msvideo', 'video/3gpp', 'video/x-matroska',
                 'video/webm'
             ],
-            'audio' => ['audio/mpeg', 'audio/wav',"audio/ogg"],
+            'audio' => ['audio/mpeg', 'audio/wav','audio/ogg', 'audio/x-wav', 'audio/webm'],
             'text' => ['text/plain'],
             default => []
         };
