@@ -110,11 +110,11 @@ class PeerTokenMapper
 
         if ($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient) {
             $this->logger->warning('Unauthorized to send token');
-            return self::respondWithError(31203); // Unauthorized to send token.
+            return self::respondWithError(31203);
         }
 
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
-            return self::respondWithError(30264); // Invalid token amount provided. It is should be Integer or with decimal numbers
+            return self::respondWithError(30264);
         }
 
         $numberoftokens = (string) $args['numberoftokens'];

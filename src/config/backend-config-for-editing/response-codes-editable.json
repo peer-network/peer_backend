@@ -1207,6 +1207,10 @@
         "comment": "Unexpected Error: Invalid action type",
         "userFriendlyComment": "This action isn't valid. Please try something else."
     },
+    "41222": {
+        "comment": "Unexpected Error: One of the pool accounts in the env file is missing.",
+        "userFriendlyComment": "A configuration error occurred. Please contact support."
+    },
     "41401": {
         "comment": "Unexpected Error: Failed to create transaction. Please try again later or contact support",
         "userFriendlyComment": "We couldn't complete this transaction. Please try again."
