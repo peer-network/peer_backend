@@ -743,7 +743,7 @@ class PostMapper
         }
 
         $orderByClause = match ($sortBy) {
-            'FOR_ME' => "ORDER BY isfriend, isfollowing, isfollowed, createdat DESC",
+            'FOR_ME' => "ORDER BY isfriend DESC, isfollowed DESC, friendoffriends DESC, createdat DESC",
             'NEWEST' => "ORDER BY createdat DESC",
             'OLDEST' => "ORDER BY createdat ASC",
             'TRENDING' => "ORDER BY amounttrending DESC, createdat DESC",
@@ -791,6 +791,12 @@ class PostMapper
                         WHERE f2.followerid = p.userid AND f2.followedid = :currentUserId
                     )
                 ) AS isfriend,
+                EXISTS (
+                    SELECT 1 FROM follows f1
+                    WHERE f1.followerid IN (
+                        SELECT followedid FROM follows WHERE followerid = :currentUserId
+                    ) AND f1.followedid = p.userid
+                ) AS friendoffriends,
                 a.status AS ad_type
             FROM posts p
             JOIN users u ON p.userid = u.uid
@@ -838,10 +844,7 @@ class PostMapper
             $basicStmt->execute();
 
             $normal = $normalStmt->fetchAll(\PDO::FETCH_ASSOC);
-            $this->logger->info("PostMapper.findPostser: All normal",['normal' => count($normal)]); // nur für debug
-
             $basic = $basicStmt->fetchAll(\PDO::FETCH_ASSOC);
-            $this->logger->info("PostMapper.findPostser: All basic",['basic' => count($basic)]); // nur für degub
 
             $finalPosts = [];
             $pinned = [];
@@ -854,7 +857,6 @@ class PostMapper
                 }
                 $pinnedStmt->execute();
                 $pinned = $pinnedStmt->fetchAll(\PDO::FETCH_ASSOC);
-                $this->logger->info("PostMapper.findPostser: All pinned",['pinned' => count($pinned)]); // nur für debug
 
                 if (!empty($pinned)) {
                     $finalPosts = $pinned;
