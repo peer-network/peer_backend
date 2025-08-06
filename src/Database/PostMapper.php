@@ -889,16 +889,8 @@ class PostMapper
             return array_map(function ($row) use($contentFilterService, $currentUserId) {
                 $row['tags'] = json_decode($row['tags'], true) ?? [];
 
-                // here to decide if to replace post/user content or not
-                // send callback with user object changes???? 
                 $user_reports = (int)$row['user_reports'];
                 $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
-
-                if ($row['user_status'] != 0) {
-                    $replacer = ContentReplacementPattern::suspended;
-                    $row['username'] = $replacer->username($row['username']);
-                    $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
-                }
 
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::post,
@@ -911,9 +903,6 @@ class PostMapper
                     $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
                 }
 
-                if (!isset($row['isfriend'])) {
-                    $row['isfriend'] = ($row['isfollowed'] && $row['isfollowing']);
-                }
                 return self::mapRowToPost($row);
             }, $finalPosts);
 
