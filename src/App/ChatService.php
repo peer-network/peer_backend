@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -9,7 +10,7 @@ use Fawaz\Database\ChatMapper;
 use Fawaz\Services\Base64FileHandler;
 use Psr\Log\LoggerInterface;
 use Ratchet\Client\Connector;
-use React\EventLoop\Factory as EventLoopFactory;
+use React\EventLoop\Loop;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 
@@ -795,7 +796,7 @@ class ChatService
 
     private function sendToWebSocket(array $data): void
     {
-        $loop = EventLoopFactory::create();
+        $loop = Loop::get();
         $connector = new Connector($loop);
         $connector('ws://127.0.0.1:8080')
             ->then(function ($connection) use ($data) {
