@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -85,7 +86,7 @@ class TagService
             $tag = $this->tagMapper->loadByName($tagName);
 
             if ($tag) {
-                return $this->respondWithError('Tag already exists.');
+                return $this->respondWithError(21702);//'Tag already exists.'
             }
 
             $tagId = $this->generateUUID();
