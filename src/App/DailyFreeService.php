@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -66,9 +67,10 @@ class DailyFreeService
             ];
 
         } catch (\Throwable $e) {
-            $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage(), 'userId' => $userId]);
-            return $this->respondWithError(40301);
+            $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage()]);
         }
+        
+        return [];
     }
 
     public function getUserDailyUsage(string $userId, int $artType): int
