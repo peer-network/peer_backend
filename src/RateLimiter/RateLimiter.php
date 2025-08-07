@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\RateLimiter;
 
@@ -76,5 +77,9 @@ class RateLimiter
         $this->saveRequests($requests);
 
         return true;
+    }
+    public function getLimit(): int
+    {
+        return $this->rateLimit;
     }
 }
