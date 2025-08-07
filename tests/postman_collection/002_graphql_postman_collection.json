@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "2af7416e-0845-40a2-9fed-f5459d29fc68",
-		"name": "Current Development",
+		"_postman_id": "90edbde4-9ab3-472c-8768-fe8319939dad",
+		"name": "2_ADD",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "32542010",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-2af7416e-0845-40a2-9fed-f5459d29fc68?action=share&source=collection_link&creator=32542010"
+		"_exporter_id": "43606001",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-90edbde4-9ab3-472c-8768-fe8319939dad?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -1339,7 +1339,23 @@
 							"} else {",
 							"    console.log(\"Error detected in response, skipping postid set.\");",
 							"}",
-							""
+							"",
+							"pm.test(\"Save (createdat + 1 day) as startday\", function () {",
+							"    const createdAt = pm.response.json()?.data?.createPost?.affectedRows?.createdat;",
+							"",
+							"    pm.expect(createdAt, \"createdat should exist\").to.be.a(\"string\").that.is.not.empty;",
+							"",
+							"    const date = new Date(createdAt);",
+							"    date.setDate(date.getDate() + 1);",
+							"",
+							"    const yyyy = date.getFullYear();",
+							"    const mm = String(date.getMonth() + 1).padStart(2, \"0\");",
+							"    const dd = String(date.getDate()).padStart(2, \"0\");",
+							"",
+							"    const nextDay = `${yyyy}-${mm}-${dd}`;",
+							"",
+							"    pm.environment.set(\"startday\", nextDay);",
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -1565,7 +1581,7 @@
 							"    try {",
 							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
 							"        if (postId) {",
-							"            pm.environment.set(\"postid\", postId);",
+							"            pm.environment.set(\"postidadd1\", postId);",
 							"            console.log(\"postid set to:\", postId);",
 							"        } else {",
 							"            console.log(\"No postid found in response.\");",
@@ -4414,7 +4430,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
 						"variables": ""
 					}
 				},
@@ -5862,7 +5878,7 @@
 			"response": []
 		},
 		{
-			"name": "Content Engagement(LIKE)",
+			"name": "Content engagement (like)",
 			"event": [
 				{
 					"listen": "test",
@@ -6214,7 +6230,7 @@
 			"response": []
 		},
 		{
-			"name": "Content Engagement(DISLIKE)",
+			"name": "Content engagement (dislike)",
 			"event": [
 				{
 					"listen": "test",
@@ -6654,7 +6670,7 @@
 			"response": []
 		},
 		{
-			"name": "Conten Engagement(View)",
+			"name": "Conten engagement (view)",
 			"event": [
 				{
 					"listen": "test",
@@ -7009,7 +7025,7 @@
 			"response": []
 		},
 		{
-			"name": "Content Engagement(LIKECOMMENT)",
+			"name": "Content engagement (comments likes)",
 			"event": [
 				{
 					"listen": "test",
@@ -10653,6 +10669,4381 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query GetCommentInfo {\n    getCommentInfo(commentId: \"{{commentid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            likes\n            reports\n            comments\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise post 0 liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"51301\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        startday: \"{{startday}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n    ) {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get add history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
+							"",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t1\");",
+							"let expectedPostId = pm.environment.get(\"existing_postid\");",
+							"let expectedAdId = pm.environment.get(\"existing_advertisementId\");",
+							"",
+							"pm.test(\"Advertisement exists with correct creatorId, postId, and advertisementId\", function () {",
+							"    let match = ads.some(ad =>",
+							"        ad.creatorId === expectedCreatorId &&",
+							"        ad.postId === expectedPostId &&",
+							"        ad.id === expectedAdId ",
+							"    );",
+							"",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check posts order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"",
+							"pm.test(\"First post ID matches 'postidadd' from environment\", function () {",
+							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            type\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let liquidity = response.data.balance.currentliquidity;",
+							"pm.environment.set(\"liquidity\", liquidity);",
+							"console.log(\"Saved liquidity:\", liquidity);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise invalid UUID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30209\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"hi\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{startday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise invalid id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"31510\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{uuid}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{startday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise invalid plan",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('error');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postid}}\"\n        startday: \"{{startday}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BSIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise previous date",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32008\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postid}}\"\n        startday: \"2025-06-22\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise invalid date",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32008\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postid}}\"\n        startday: \"2025-0622\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise invalid duration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('error');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postid}}\"\n        startday: \"2030-07-23\"\n        durationInDays: DAY\n        advertisePlan: BASIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pin invalid UUID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30209\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"hi\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pin invalid id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"31510\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{uuid}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pin invalid plan",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('error');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postid}}\"\n        advertisePlan: PINED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get add history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
+							"",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t1\");",
+							"let expectedPostId = pm.environment.get(\"existing_postid\");",
+							"let expectedAdId = pm.environment.get(\"existing_advertisementId\");",
+							"",
+							"pm.test(\"Advertisement exists with correct creatorId, postId, and advertisementId\", function () {",
+							"    let match = ads.some(ad =>",
+							"        ad.creatorId === expectedCreatorId &&",
+							"        ad.postId === expectedPostId &&",
+							"        ad.id === expectedAdId ",
+							"    );",
+							"",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = Number(pm.environment.get(\"liquidity\"));",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
+							"});",
+							"",
+							"pm.test(\"Liquidity should remain the same\", function () {",
+							"    pm.expect(newLiquidity).to.eql(oldLiquidity);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise other's post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12001\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let adId = response?.data?.advertisePostBasic?.affectedRows?.[0]?.id;",
+							"",
+							"if (adId) {",
+							"    pm.environment.set(\"advertisementId\", adId);",
+							"    console.log(\"Saved advertisementId:\", adId);",
+							"} else {",
+							"    console.warn(\"advertisementId not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{startday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get add history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
+							"",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedDay = pm.environment.get(\"startday\");",
+							"let expectedAdId = pm.environment.get(\"advertisementId\");",
+							"",
+							"pm.test(\"Advertisement exists with correct creatorId, postId, timeframe, and advertisementId\", function () {",
+							"    let match = ads.some(ad =>",
+							"        ad.creatorId === expectedCreatorId &&",
+							"        ad.postId === expectedPostId &&",
+							"        ad.id === expectedAdId &&",
+							"        ad.timeframeStart.startsWith(expectedDay) &&",
+							"        ad.timeframeEnd.startsWith(expectedDay)",
+							"    );",
+							"",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.not.be.undefined;",
+							"    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
+							"});",
+							"",
+							"let expectedDifference = 5000;",
+							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
+							"",
+							"pm.test(\"Liquidity should decrease exactly by 5000\", function () {",
+							"    pm.expect(actualDifference).to.equal(expectedDifference);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check posts order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let posts = res?.data?.listPosts?.affectedRows ?? [];",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"",
+							"pm.test(\"Created post exists in listPosts\", function () {",
+							"    let exists = posts.some(p => p.id === expectedPostId);",
+							"    pm.expect(exists).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            type\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise other's post diff time",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12001\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let adId = response?.data?.advertisePostBasic?.affectedRows?.[0]?.id;",
+							"",
+							"if (adId) {",
+							"    pm.environment.set(\"advertisementId\", adId);",
+							"    console.log(\"Saved advertisementId:\", adId);",
+							"} else {",
+							"    console.warn(\"advertisementId not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let startDayStr = pm.environment.get(\"startday\"); ",
+							"let startDate = new Date(startDayStr);",
+							"",
+							"startDate.setDate(startDate.getDate() + 2);",
+							"",
+							"let diffStartDay = startDate.toISOString().split(\"T\")[0];",
+							"",
+							"pm.environment.set(\"diffstartday\", diffStartDay);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get add history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
+							"",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedDay = pm.environment.get(\"diffstartday\");",
+							"let expectedAdId = pm.environment.get(\"advertisementId\");",
+							"",
+							"pm.test(\"Advertisement exists with correct creatorId, postId, timeframe, and advertisementId\", function () {",
+							"    let match = ads.some(ad =>",
+							"        ad.creatorId === expectedCreatorId &&",
+							"        ad.postId === expectedPostId &&",
+							"        ad.id === expectedAdId &&",
+							"        ad.timeframeStart.startsWith(expectedDay) &&",
+							"        ad.timeframeEnd.startsWith(expectedDay)",
+							"    );",
+							"",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.not.be.undefined;",
+							"    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
+							"});",
+							"",
+							"let expectedDifference = 5000;",
+							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
+							"",
+							"pm.test(\"Liquidity should decrease exactly by 5000\", function () {",
+							"    pm.expect(actualDifference).to.equal(expectedDifference);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check posts order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let posts = res?.data?.listPosts?.affectedRows ?? [];",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"",
+							"pm.test(\"Created post exists in listPosts\", function () {",
+							"    let exists = posts.some(p => p.id === expectedPostId);",
+							"    pm.expect(exists).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            type\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise other's post same time (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32018\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = Number(pm.environment.get(\"liquidity\"));",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
+							"});",
+							"",
+							"pm.test(\"Liquidity should remain the same\", function () {",
+							"    pm.expect(newLiquidity).to.eql(oldLiquidity);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pin other's post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12001\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let adId = response?.data?.advertisePostPinned?.affectedRows?.[0]?.id;",
+							"",
+							"if (adId) {",
+							"    pm.environment.set(\"advertisementId\", adId);",
+							"    console.log(\"Saved advertisementId:\", adId);",
+							"} else {",
+							"    console.warn(\"advertisementId not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get add history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
+							"",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedAdId = pm.environment.get(\"advertisementId\");",
+							"",
+							"pm.test(\"Advertisement exists with correct creatorId, postId, and advertisementId\", function () {",
+							"    let match = ads.some(ad =>",
+							"        ad.creatorId === expectedCreatorId &&",
+							"        ad.postId === expectedPostId &&",
+							"        ad.id === expectedAdId",
+							"    );",
+							"",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.not.be.undefined;",
+							"    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
+							"});",
+							"",
+							"let expectedDifference = 20000;",
+							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
+							"",
+							"pm.test(\"Liquidity should decrease exactly by 20000\", function () {",
+							"    pm.expect(actualDifference).to.equal(expectedDifference);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check posts order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"",
+							"pm.test(\"First post ID matches 'postidadd' from environment\", function () {",
+							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            type\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pin twice not forcing (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32018\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        forceUpdate: false\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = Number(pm.environment.get(\"liquidity\"));",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
+							"});",
+							"",
+							"pm.test(\"Liquidity should remain the same\", function () {",
+							"    pm.expect(newLiquidity).to.eql(oldLiquidity);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check posts order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"",
+							"pm.test(\"First post ID matches 'postidadd' from environment\", function () {",
+							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            type\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pin twice forcing",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12001\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let adId = response?.data?.advertisePostPinned?.affectedRows?.[0]?.id;",
+							"",
+							"if (adId) {",
+							"    pm.environment.set(\"advertisementId\", adId);",
+							"    console.log(\"Saved advertisementId:\", adId);",
+							"} else {",
+							"    console.warn(\"advertisementId not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get add history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
+							"",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedAdId = pm.environment.get(\"advertisementId\");",
+							"",
+							"pm.test(\"Advertisement exists with correct creatorId, postId, and advertisementId\", function () {",
+							"    let match = ads.some(ad =>",
+							"        ad.creatorId === expectedCreatorId &&",
+							"        ad.postId === expectedPostId &&",
+							"        ad.id === expectedAdId",
+							"    );",
+							"",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.not.be.undefined;",
+							"    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
+							"});",
+							"",
+							"let expectedDifference = 20000;",
+							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
+							"",
+							"pm.test(\"Liquidity should decrease exactly by 20000\", function () {",
+							"    pm.expect(actualDifference).to.equal(expectedDifference);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check posts order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"",
+							"pm.test(\"First post ID matches 'postidadd' from environment\", function () {",
+							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            type\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise own post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12001\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let adId = response?.data?.advertisePostBasic?.affectedRows?.[0]?.id;",
+							"",
+							"if (adId) {",
+							"    pm.environment.set(\"advertisementId\", adId);",
+							"    console.log(\"Saved advertisementId:\", adId);",
+							"} else {",
+							"    console.warn(\"advertisementId not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{startday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get add history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
+							"",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedDay = pm.environment.get(\"startday\");",
+							"let expectedAdId = pm.environment.get(\"advertisementId\");",
+							"",
+							"pm.test(\"Advertisement exists with correct creatorId, postId, timeframe, and advertisementId\", function () {",
+							"    let match = ads.some(ad =>",
+							"        ad.creatorId === expectedCreatorId &&",
+							"        ad.postId === expectedPostId &&",
+							"        ad.id === expectedAdId &&",
+							"        ad.timeframeStart.startsWith(expectedDay) &&",
+							"        ad.timeframeEnd.startsWith(expectedDay)",
+							"    );",
+							"",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.not.be.undefined;",
+							"    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
+							"});",
+							"",
+							"let expectedDifference = 5000;",
+							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
+							"",
+							"pm.test(\"Liquidity should decrease exactly by 5020\", function () {",
+							"    pm.expect(actualDifference).to.equal(expectedDifference);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check posts order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let posts = res?.data?.listPosts?.affectedRows ?? [];",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"",
+							"pm.test(\"Created post exists in listPosts\", function () {",
+							"    let exists = posts.some(p => p.id === expectedPostId);",
+							"    pm.expect(exists).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            type\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise own post diff time",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12001\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let adId = response?.data?.advertisePostBasic?.affectedRows?.[0]?.id;",
+							"",
+							"if (adId) {",
+							"    pm.environment.set(\"advertisementId\", adId);",
+							"    console.log(\"Saved advertisementId:\", adId);",
+							"} else {",
+							"    console.warn(\"advertisementId not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let startDayStr = pm.environment.get(\"startday\"); ",
+							"let startDate = new Date(startDayStr);",
+							"",
+							"startDate.setDate(startDate.getDate() + 2);",
+							"",
+							"let diffStartDay = startDate.toISOString().split(\"T\")[0];",
+							"",
+							"pm.environment.set(\"diffstartday\", diffStartDay);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: SEVEN_DAYS\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get add history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
+							"",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedDay = pm.environment.get(\"diffstartday\");",
+							"let expectedAdId = pm.environment.get(\"advertisementId\");",
+							"",
+							"pm.test(\"Advertisement exists with correct creatorId, postId, timeframe, and advertisementId\", function () {",
+							"    let match = ads.some(ad =>",
+							"        ad.creatorId === expectedCreatorId &&",
+							"        ad.postId === expectedPostId &&",
+							"        ad.id === expectedAdId &&",
+							"        ad.timeframeStart.startsWith(expectedDay) &&",
+							"        ad.timeframeEnd.startsWith(expectedDay)",
+							"    );",
+							"",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.not.be.undefined;",
+							"    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
+							"});",
+							"",
+							"let expectedDifference = 35000;",
+							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
+							"",
+							"pm.test(\"Liquidity should decrease exactly by 35000\", function () {",
+							"    pm.expect(actualDifference).to.equal(expectedDifference);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check posts order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let posts = res?.data?.listPosts?.affectedRows ?? [];",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"",
+							"pm.test(\"Created post exists in listPosts\", function () {",
+							"    let exists = posts.some(p => p.id === expectedPostId);",
+							"    pm.expect(exists).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise same time twice (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32018\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = Number(pm.environment.get(\"liquidity\"));",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
+							"});",
+							"",
+							"pm.test(\"Liquidity should remain the same\", function () {",
+							"    pm.expect(newLiquidity).to.eql(oldLiquidity);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pin own post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12001\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let adId = response?.data?.advertisePostPinned?.affectedRows?.[0]?.id;",
+							"",
+							"if (adId) {",
+							"    pm.environment.set(\"advertisementId\", adId);",
+							"    console.log(\"Saved advertisementId:\", adId);",
+							"} else {",
+							"    console.warn(\"advertisementId not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd1}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get add history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
+							"",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedAdId = pm.environment.get(\"advertisementId\");",
+							"",
+							"pm.test(\"Advertisement exists with correct creatorId, postId, and advertisementId\", function () {",
+							"    let match = ads.some(ad =>",
+							"        ad.creatorId === expectedCreatorId &&",
+							"        ad.postId === expectedPostId &&",
+							"        ad.id === expectedAdId",
+							"    );",
+							"",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.not.be.undefined;",
+							"    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
+							"});",
+							"",
+							"let expectedDifference = 20000;",
+							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
+							"",
+							"pm.test(\"Liquidity should decrease exactly by 20000\", function () {",
+							"    pm.expect(actualDifference).to.equal(expectedDifference);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check posts order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"",
+							"pm.test(\"First post ID matches 'postidadd1' from environment\", function () {",
+							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(limit:20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            type\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertise after pin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12001\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let adId = response?.data?.advertisePostBasic?.affectedRows?.[0]?.id;",
+							"",
+							"if (adId) {",
+							"    pm.environment.set(\"advertisementId\", adId);",
+							"    console.log(\"Saved advertisementId:\", adId);",
+							"} else {",
+							"    console.warn(\"advertisementId not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let startDayStr = pm.environment.get(\"startday\"); ",
+							"let startDate = new Date(startDayStr);",
+							"",
+							"startDate.setDate(startDate.getDate() + 9);",
+							"",
+							"let diffStartDay = startDate.toISOString().split(\"T\")[0];",
+							"",
+							"pm.environment.set(\"diffstartday\", diffStartDay);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get add history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
+							"",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedDay = pm.environment.get(\"diffstartday\");",
+							"let expectedAdId = pm.environment.get(\"advertisementId\");",
+							"",
+							"pm.test(\"Advertisement exists with correct creatorId, postId, timeframe, and advertisementId\", function () {",
+							"    let match = ads.some(ad =>",
+							"        ad.creatorId === expectedCreatorId &&",
+							"        ad.postId === expectedPostId &&",
+							"        ad.id === expectedAdId &&",
+							"        ad.timeframeStart.startsWith(expectedDay) &&",
+							"        ad.timeframeEnd.startsWith(expectedDay)",
+							"    );",
+							"",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.not.be.undefined;",
+							"    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
+							"});",
+							"",
+							"let expectedDifference = 5000;",
+							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
+							"",
+							"pm.test(\"Liquidity should decrease exactly by 5020\", function () {",
+							"    pm.expect(actualDifference).to.equal(expectedDifference);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check posts order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"",
+							"pm.test(\"First post ID matches 'postidadd1' from environment\", function () {",
+							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(limit:20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            type\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pin advertised post not forcing (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32018\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{existing_postid}}\"\n        advertisePlan: PINNED\n        forceUpdate: false\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = Number(pm.environment.get(\"liquidity\"));",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
+							"});",
+							"",
+							"pm.test(\"Liquidity should remain the same\", function () {",
+							"    pm.expect(newLiquidity).to.eql(oldLiquidity);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pin advertised post forcing",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12001\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let adId = response?.data?.advertisePostPinned?.affectedRows?.[0]?.id;",
+							"",
+							"if (adId) {",
+							"    pm.environment.set(\"advertisementId\", adId);",
+							"    console.log(\"Saved advertisementId:\", adId);",
+							"} else {",
+							"    console.warn(\"advertisementId not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{existing_postid}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.not.be.undefined;",
+							"    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
+							"});",
+							"",
+							"let expectedDifference = 16000;",
+							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
+							"",
+							"pm.test(\"Liquidity should decrease exactly by 16000\", function () {",
+							"    pm.expect(actualDifference).to.equal(expectedDifference);",
+							"});",
+							"",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get add history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let res = pm.response.json();",
+							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
+							"",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
+							"let expectedPostId = pm.environment.get(\"existing_postid\");",
+							"let expectedAdId = pm.environment.get(\"existing_advertisementId\");",
+							"",
+							"pm.test(\"Advertisement exists with correct creatorId, postId, timeframe, and advertisementId\", function () {",
+							"    let match = ads.some(ad =>",
+							"        ad.creatorId === expectedCreatorId &&",
+							"        ad.postId === expectedPostId &&",
+							"        ad.id === expectedAdId",
+							"    );",
+							"",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check posts order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
+							"let expectedPostId = pm.environment.get(\"existing_postid\");",
+							"",
+							"pm.test(\"First post ID matches 'postidadd1' from environment\", function () {",
+							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(limit:20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            type\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
