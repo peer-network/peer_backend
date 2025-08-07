@@ -195,7 +195,23 @@ class PeerTokenMapper
                     'tokenamount' => -$requiredAmount,
                     'message' => $message
                 ]);
-                $this->saveWalletEntry($userId, $requiredAmount, 'DEBIT');
+
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => -abs($requiredAmount),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->walletMapper->insertWinToLog($userId, $args);
+                $this->walletMapper->insertWinToPool($userId, $args);
+
             }
 
             // 2. RECIPIENT: Credit To Account
@@ -209,7 +225,22 @@ class PeerTokenMapper
                     'message' => $message,
                     'transferaction' => 'CREDIT'
                 ]);
-                $this->saveWalletEntry($row, $numberoftokens);
+
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($numberoftokens),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->walletMapper->insertWinToLog($recipient, $args);
+                $this->walletMapper->insertWinToPool($recipient, $args);
             }
 
             // 3. INVITER: Fees To Inviter (if applicable)
@@ -222,7 +253,21 @@ class PeerTokenMapper
                     'tokenamount' => $inviterWin,
                     'transferaction' => 'INVITER_FEE'
                 ]);
-                $this->saveWalletEntry($inviterId, $inviterWin);
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($inviterWin),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->walletMapper->insertWinToLog($inviterId, $args);
+                $this->walletMapper->insertWinToPool($inviterId, $args);
             }
 
             // 4. POOLWALLET: Fee To Pool Wallet
@@ -236,7 +281,21 @@ class PeerTokenMapper
                     'tokenamount' => $feeAmount,
                     'transferaction' => 'POOL_FEE'
                 ]);
-                $this->saveWalletEntry($this->poolWallet, $feeAmount);
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($feeAmount),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->walletMapper->insertWinToLog($this->poolWallet, $args);
+                $this->walletMapper->insertWinToPool($this->poolWallet, $args);
             }
 
             // 5. PEERWALLET: Fee To Peer Wallet
@@ -250,7 +309,21 @@ class PeerTokenMapper
                     'tokenamount' => $peerAmount,
                     'transferaction' => 'PEER_FEE'
                 ]);
-                $this->saveWalletEntry($this->peerWallet, $peerAmount);
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($peerAmount),
+                    'whereby' => TRANSFER_,
+                ];
+
+                $this->walletMapper->insertWinToLog($this->peerWallet, $args);
+                $this->walletMapper->insertWinToPool($this->peerWallet, $args);
             }
 
             // 6. BURNWALLET: Burn Tokens
@@ -264,7 +337,20 @@ class PeerTokenMapper
                     'tokenamount' => $burnAmount,
                     'transferaction' => 'BURN_FEE'
                 ]);
-                $this->saveWalletEntry($this->burnWallet, $burnAmount);
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($burnAmount),
+                    'whereby' => TRANSFER_,
+                ];
+                $this->walletMapper->insertWinToLog($this->burnWallet, $args);
+                $this->walletMapper->insertWinToPool($this->burnWallet, $args);
             }
 
             return [
