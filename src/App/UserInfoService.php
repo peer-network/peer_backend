@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -211,7 +212,7 @@ class UserInfoService
                 'ResponseCode' => $responseMessage, 
             ];
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to toggle profile privacy.');
+            return $this->respondWithError(00000);//'Failed to toggle profile privacy.'
         }
     }
 
