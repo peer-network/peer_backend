@@ -12,6 +12,10 @@ RUN apt-get update && \
     docker-php-ext-install \
         pgsql pdo pdo_pgsql bcmath xml curl gmp ffi && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install Rust and Cargo
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
+echo 'source $HOME/.cargo/env' >> /root/.bashrc
+ENV PATH="/root/.cargo/bin:$PATH"
 
 RUN echo "extension=/usr/local/lib/php/extensions/no-debug-non-zts-*/ffi.so" > /usr/local/etc/php/conf.d/ffi.ini && \
     echo "ffi.enable=true" >> /usr/local/etc/php/conf.d/ffi.ini
@@ -26,7 +30,9 @@ RUN curl -sS https://getcomposer.org/installer | php && \
 WORKDIR /var/www/html
  
 COPY . .
- 
+
+RUN if [ -f tokencalculation/Cargo.toml ]; then cd tokencalculation && . /root/.cargo/env && cargo build --release; fi
+
 RUN chown -R www-data:www-data /var/www/
  
 #  CI-only patch: prevent pg_last_error() warning if no connection exists
