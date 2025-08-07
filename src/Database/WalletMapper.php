@@ -721,7 +721,7 @@ class WalletMapper
         }
     }
 
-    protected function insertWinToLog(string $userId, array $args): bool
+    public function insertWinToLog(string $userId, array $args): bool
     {
         \ignore_user_abort(true);
 
@@ -776,7 +776,7 @@ class WalletMapper
         }
     }
 
-    protected function insertWinToPool(string $userId, array $args): bool
+    public function insertWinToPool(string $userId, array $args): bool
     {
         \ignore_user_abort(true);
 

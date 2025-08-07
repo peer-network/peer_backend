@@ -32,6 +32,34 @@ class PeerTokenService
     }
 
 
+    public function transferToken(array $args): array
+    {
+        $this->logger->info('WalletService.transferToken started');
+
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+        try {
+            $response = $this->peerTokenMapper->transferToken($this->currentUserId, $args);
+            if ($response['status'] === 'error') {
+                return $response;
+            } else {
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => 11211,
+                    'affectedRows' => [
+                        'tokenSend' => $response['tokenSend'],
+                        'tokensSubstractedFromWallet' => $response['tokensSubstractedFromWallet'],
+                        'createdat' => $response['createdat'] ?? ''
+                    ],
+                ];
+            }
+
+        } catch (\Exception $e) {
+            return $this->respondWithError(41229); // Failed to transfer token
+        }
+    }
+
     /**
      * Get transcation history with Filter
      * 
