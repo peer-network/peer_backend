@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -55,7 +56,7 @@ class CommentInfoService
 
         $this->logger->info('CommentInfoService.deleteCommentInfo started');
 
-        if ($this->commentInfoMapper->delete($commentId)) {
+        if ($this->commentMapper->delete($commentId)) {
             return ['status' => 'success', 'ResponseCode' => 11606];
         } else {
             return $this->respondWithError(41603);
