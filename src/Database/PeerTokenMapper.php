@@ -134,10 +134,11 @@ class PeerTokenMapper
         }
 
         try {
-             $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
+            $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':uid', $recipient);
             $stmt->bindValue(':status', Status::DELETED);
+            $stmt->execute();
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
             return self::respondWithError($e->getMessage());
