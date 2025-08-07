@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -21,7 +22,7 @@ class CommentMapper
     {
     }
 
-    protected function respondWithError(string $message): array
+    protected function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
@@ -75,21 +76,40 @@ class CommentMapper
     public function delete(string $commentid): bool
     {
         $this->logger->info("CommentMapper.delete started");
+        try {
+            $this->db->beginTransaction();
 
-        $query = "DELETE FROM comments WHERE commentid = :commentid";
+            $tables = [
+                'user_comment_likes',
+                'user_comment_reports',
+                'user_post_comments',
+                'comment_info',
+                'comments',
+            ];
+            foreach ($tables as $table) {
+                $query = "DELETE FROM $table WHERE commentid = :commentid";
+                $stmt = $this->db->prepare($query);
+                $stmt->bindValue(':commentid', $commentid, \PDO::PARAM_STR);
+                $stmt->execute();
+            }
 
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['commentid' => $commentid]);
+            $this->db->commit();
 
-        $deleted = (bool)$stmt->rowCount();
+            $this->logger->info("Deleted comment and related data successfully", [
+                'commentid' => $commentid,
+            ]);
 
-        if ($deleted) {
-            $this->logger->info("Deleted comment from database", ['commentid' => $commentid]);
-        } else {
-            $this->logger->warning("No comment found to delete in database for", ['commentid' => $commentid]);
+            return true;
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+
+            $this->logger->error("Failed to delete comment and related data", [
+            'commentid' => $commentid,
+            'exception' => $e->getMessage(),
+        ]);
+            return false;
+
         }
-
-        return $deleted;
     }
 
     public function fetchAllByPostIdetaild(string $postId, string $currentUserId, int $offset = 0, int $limit = 10,?string $contentFilterBy = null): array
@@ -546,5 +566,34 @@ class CommentMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['commentId' => $commentId]);
         return (bool) $stmt->fetchColumn();
+    }
+    
+    public function fetchAllByParentId(string $parentId, int $offset = 0, int $limit = 10): array
+    {
+        $this->logger->info("CommentMapper.fetchAllByParentId started");
+
+        $sql = "
+            SELECT 
+                commentid,
+                userid,
+                postid,
+                parentid,
+                content,
+                createdat
+            FROM comments
+            WHERE parentid = :parentId
+            ORDER BY createdat ASC
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':parentId', $parentId, \PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(fn($row) => new Comment($row), $rows);
     }
 }

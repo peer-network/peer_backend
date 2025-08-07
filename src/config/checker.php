@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 $db_driver = $_ENV['DB_DRIVER'] ?? '';
 $host = $_ENV['DB_HOST'] ?? '';
@@ -20,8 +21,7 @@ if (!in_array($db_driver, ['postgres'])) {
 
 if ($db_driver === 'postgres') {
     function is_pg_server_running($host, $port) {
-        $connection = @fsockopen($host, $port, $errno, $errstr, 5);
-
+        $connection = @fsockopen($host, (int)$port, $errno, $errstr, 5);
         if ($connection) {
             fclose($connection);
             return true;
@@ -70,11 +70,9 @@ if ($db_driver === 'postgres') {
 
             pg_close($conn);
 
-            if (isset($dsn)) {
-                $pdo = new PDO($dsn, $user, $password);
-                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            }
+            $pdo = new PDO($dsn, $user, $password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
         } else {
 			error_log("Failed to connect to PostgreSQL: " . pg_last_error(), 0);

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -118,12 +119,12 @@ class Commented
         $this->content = $content;
     }
 
-    public function getSubComments(): string
+    public function getSubComments(): array
     {
         return $this->subcomments;
     }
 
-    public function setSubComments(string $subcomments): void
+    public function setSubComments(array $subcomments): void
     {
         $this->subcomments = $subcomments;
     }

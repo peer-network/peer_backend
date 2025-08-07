@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -46,12 +47,12 @@ class UserInfoService
         return true;
     }
 
-    private function respondWithError(string $message): array
+    private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -211,7 +212,7 @@ class UserInfoService
                 'ResponseCode' => $responseMessage, 
             ];
         } catch (\Exception $e) {
-            return $this->respondWithError('Failed to toggle profile privacy.');
+            return $this->respondWithError(00000);//'Failed to toggle profile privacy.'
         }
     }
 
@@ -235,11 +236,11 @@ class UserInfoService
                 return $this->createSuccessResponse(21001);
             }
 
-            if (!empty($biography)) {
+                if (!empty($biography)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($biography, 'text', $this->currentUserId, 'userData');
                 $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
 
-                if ($mediaPath === '') {
+                if (empty($mediaPath)) {
                     return $this->respondWithError(30251);
                 }
 
@@ -248,7 +249,6 @@ class UserInfoService
                 } else {
                     return $this->respondWithError(40306);
                 }
-
             } else {
                 return $this->respondWithError(40307);
             }
@@ -257,7 +257,7 @@ class UserInfoService
             $updatedUser = $this->userInfoMapper->updateUsers($user);
             $responseMessage = 11003;
 
-            $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
+            $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
 
             return [
                 'status' => 'success', 
@@ -290,7 +290,7 @@ class UserInfoService
             if (!empty($mediaFile)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $this->currentUserId, 'profile');
 
-                if ($mediaPath === '') {
+                if (empty($mediaPath)) {
                     return $this->respondWithError(30251);
                 }
 
@@ -308,7 +308,7 @@ class UserInfoService
             $updatedUser = $this->userInfoMapper->updateUsers($user);
             $responseMessage = 11004;
 
-            $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
+            $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
 
             return [
                 'status' => 'success', 
@@ -385,7 +385,7 @@ class UserInfoService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => "11012", // added user report successfully
+                'ResponseCode' => 11012, // added user report successfully
                 'affectedRows' => $userInfo->getReports(),
             ];
         } catch (\Exception $e) {

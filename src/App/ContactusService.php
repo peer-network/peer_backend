@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -55,12 +56,12 @@ class ContactusService
             preg_match('/' . $contactConfig['NAME']['PATTERN'] . '/u', $Name);
     }
 
-    private function respondWithError(string $message): array
+    private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    private function createSuccessResponse(string $message, array $data = []): array
+    private function createSuccessResponse(int $message, array $data = []): array
     {
         return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
     }
@@ -69,7 +70,7 @@ class ContactusService
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return $this->respondWithError("$field is required");
+                return $this->respondWithError(00000);  //"$field is required"
             }
         }
         return [];
@@ -99,8 +100,11 @@ class ContactusService
             return $this->respondWithError(30102);
         }
 
-        if ($type === 'id' && !self::isValidUUID($value)) {
-            return $this->respondWithError(30105);
+        if ($type === 'id') {
+            if (!ctype_digit($value)) {
+                return $this->respondWithError(30105);
+            }
+            $value = (int)$value;
         }
 
         $this->logger->info("ContactusService.loadById started", [
@@ -115,7 +119,7 @@ class ContactusService
                 return $this->respondWithError(40401);
             }
 
-            $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $exist);
+            $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), is_array($exist) ? $exist : [$exist]);
 
             $this->logger->info("ContactusService.loadById successfully fetched contact", [
                 'type' => $type,
@@ -153,7 +157,7 @@ class ContactusService
         try {
             $exist = $this->contactUsMapper->fetchAll($args);
 
-            if ($exist === null) {
+            if (empty($exist)) {
                 return $this->respondWithError(40401);
             }
 

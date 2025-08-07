@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Services\ContentFiltering;
 
@@ -10,7 +11,6 @@ enum ContentReplacementPattern: string {
         return match ($this) {
             self::flagged   => "this post is hidden",
             self::suspended => "this post is deleted",
-            default => $title
         };
     }
 
@@ -18,7 +18,6 @@ enum ContentReplacementPattern: string {
         return match ($this) {
             self::flagged   => "",
             self::suspended => "",
-            default => $desc
         };
     }
 
@@ -26,7 +25,6 @@ enum ContentReplacementPattern: string {
         return match ($this) {
             self::flagged   => "some_pic_to_be_here_some_text_to_pass_validation",
             self::suspended => "some_pic_to_be_here_some_text_to_pass_validation",
-            default => $media
         };
     }
 
@@ -34,7 +32,6 @@ enum ContentReplacementPattern: string {
         return match ($this) {
             self::flagged   => "this comment is hidden",
             self::suspended => "this comment is flagged",
-            default => $content
         };
     }
 
@@ -42,7 +39,6 @@ enum ContentReplacementPattern: string {
         return match ($this) {
             self::flagged   => "hidden_account",
             self::suspended => "deleted_account",
-            default => $username
         };
     }
 
@@ -50,7 +46,6 @@ enum ContentReplacementPattern: string {
         return match ($this) {
             self::flagged   => "",
             self::suspended => "",
-            default => $bio
         };
     }
 
@@ -58,7 +53,6 @@ enum ContentReplacementPattern: string {
         return match ($this) {
             self::flagged   => "some_pic_to_be_here_some_text_to_pass_validation",
             self::suspended => "some_pic_to_be_here_some_text_to_pass_validation",
-            default => $path
         };
     }
 }

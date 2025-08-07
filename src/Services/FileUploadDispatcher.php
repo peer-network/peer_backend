@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Services;
 
@@ -27,7 +28,7 @@ class FileUploadDispatcher
     {
         $results = [];
 
-        if (!is_array($files) || empty($files)) {
+        if (empty($files)) {
             return ['success' => false, 'error' => 'Invalid files parameter provided'];
         }
 

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -12,12 +13,12 @@ class McapMapper
     {
     }
 
-    protected function respondWithError(string $message): array
+    protected function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -167,7 +168,7 @@ class McapMapper
 
             $resultLastData = $this->refreshMarketData();
             if ($resultLastData['status'] !== 'success') {
-                $this->logger->info(resultLastData['ResponseCode'], ['resultLastData' => $resultLastData]);
+                $this->logger->info($resultLastData['ResponseCode'], ['resultLastData' => $resultLastData]);
                 return $this->respondWithError(41217);
             }
 

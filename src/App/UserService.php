@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -84,13 +85,13 @@ class UserService
         return implode('', array_slice($numbers, 0, $count));
     }
 
-    private function generateUniqueSlug(string $username, int $maxRetries = 5): ?string
+    private function generateUniqueSlug(string $username, int $maxRetries = 5): ?int
     {
         $attempts = 0;
         do {
             $slug = $this->createNumbersAsString(1, 9, 5);
-            if (!$this->userMapper->checkIfNameAndSlugExist($username, $slug)) {
-                return (string) $slug;
+            if (!$this->userMapper->checkIfNameAndSlugExist($username, (int)$slug)) {
+                return (int) $slug;
             }
             $attempts++;
         } while ($attempts < $maxRetries);
@@ -101,9 +102,9 @@ class UserService
 
     private function createPayload(string $email, string $username, string $verificationCode): array
     {
-        $email = isset($email) ? trim($email) : '';
-        $username = isset($username) ? trim($username) : '';
-        $verificationCode = isset($verificationCode) ? trim($verificationCode) : '';
+        $email = trim($email);
+        $username = trim($username);
+        $verificationCode = trim($verificationCode);
 
 		if (empty($email) || empty($username) || empty($verificationCode)){
 			return self::respondWithError(40701);
@@ -126,7 +127,7 @@ class UserService
             return $payload;
         } catch (\Throwable $e) {
             $this->logger->error('Error create payload.', ['exception' => $e]);
-            return self::respondWithError('Error create payload.');
+            return self::respondWithError(40301);
         }
     }
 
@@ -248,8 +249,11 @@ class UserService
             $this->userMapper->createUser($user);
             unset($args);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::User.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::User.',  [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         try {
@@ -257,8 +261,11 @@ class UserService
 			$this->userMapper->insertoken($toInsert);
             unset($verificationData, $toInsert);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::Tokenize.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::Tokenize.', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         try {
@@ -266,8 +273,11 @@ class UserService
             $this->userMapper->insertinfo($userinfo);
             unset($infoData, $userinfo);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::UserInfo.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::UserInfo.', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         try {
@@ -275,8 +285,11 @@ class UserService
             $this->userPreferencesMapper->insert($userPreferences);
             unset($userPreferencesSrc, $userPreferences);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::UserPreferences.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::UserPreferences.', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         try {
@@ -292,8 +305,11 @@ class UserService
             $this->walletMapper->insertt($userwallet);
             unset($walletData, $userwallet);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::Wallett.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::Wallett.', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         try {
@@ -301,20 +317,21 @@ class UserService
             $this->dailyFreeMapper->insert($createuserDaily);
             unset($dailyData, $createuserDaily);
         } catch (\Throwable $e) {
-            $this->logger->warning('Error registering User::DailyFree.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            $this->logger->warning('Error registering User::DailyFree.', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40601);
         }
 
         $this->userMapper->logLoginDaten($id);
         $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
 
         try {
-            if(isset($id)){
-                $data = [
-                    'username' => $username
-                ];
-                (new UserWelcomeMail($data))->send($email);
-            }
+            $data = [
+                'username' => $username
+            ];
+            (new UserWelcomeMail($data))->send($email);
         } catch (\Throwable $e) {
             $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
         }
@@ -371,7 +388,7 @@ class UserService
         ];
     }
     
-    private function uploadMedia(string $mediaFile, string $userId, string $folder): ?string
+    private function uploadMedia(string $mediaFile, string $userId, string $folder): array
     {
         try {
 
@@ -379,7 +396,7 @@ class UserService
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $userId, $folder);
                 $this->logger->info('UserService.uploadMedia mediaPath', ['mediaPath' => $mediaPath]);
 
-                if ($mediaPath === '') {
+                if (empty($mediaPath)) {
                     return self::respondWithError(30251);
                 }
 
@@ -398,7 +415,7 @@ class UserService
             $this->logger->error('Error uploading media.', ['exception' => $e]);
         }
 
-        return null;
+        return self::respondWithError(40307);
     }
 
     public function verifyAccount(string $userId): array
@@ -408,14 +425,23 @@ class UserService
         }
 
         try {
-            return $this->userMapper->verifyAccount($userId);
+            $success = $this->userMapper->verifyAccount($userId);
+
+            if (!$success) {
+                return self::respondWithError(40701);
+            }
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 10701,
+            ];
         } catch (\Throwable $e) {
             $this->logger->error('Error verifying account.', ['exception' => $e]);
             return self::respondWithError(40701);
         }
     }
 
-    public function deleteUnverifiedUsers(): bool
+    public function deleteUnverifiedUsers(): bool|array
     {
         if (!$this->checkAuthentication()) {
             return self::respondWithError(60501);
@@ -612,7 +638,7 @@ class UserService
 
         $this->logger->info('UserService.setUsername started');
 
-        $username = trim($args['username'] ?? '');
+        $username = trim($args['username']);
         $password = $args['password'] ?? null;
 
         try {
@@ -637,7 +663,7 @@ class UserService
             }
 
             $user->setName($username);
-            $user->setSlug($slug);
+            $user->setSlug((int)($slug));
 
             $data = $this->userMapper->updateProfil($user);
             $affectedRows = $data->getArrayCopy();
@@ -875,7 +901,7 @@ class UserService
                 ];
             }
 
-            return $this->respondWithError(31007, []);
+            return $this->respondWithError(31007);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
@@ -1020,18 +1046,27 @@ class UserService
 
 
     /**
-     * Update password for NON logged in user
-     * 
-     * Get sent Token and New password to update it 
-     * 
-     * @param string $token
-     * @param string $newPassword
-     * 
-     * Response: 11005; Success: Password updated successfully.
-     * Response: 21001; Information Not Found: No users found. Please refine your search or try a different query.
-     * Response: 41004; Unexpected Error: Failed to update password. Please try again later or contact support.
-     * 
-     * @return array
+     * Update password for NON logged in user.
+     *
+     * Expects an array with:
+     * - 'password': new password string
+     * - 'token': password reset token sent to user's email
+     *
+     * @param array{
+     *     password?: string,
+     *     token?: string
+     * }|null $args  The input data including reset token and new password
+     *
+     * @return array{
+     *     status: string,
+     *     ResponseCode: int
+     * }
+     *
+     * Response Codes:
+     * - 11005: Password updated successfully.
+     * - 21001: No user found for token.
+     * - 31904: Invalid or expired reset token.
+     * - 41004: Unexpected error during password reset.
      */
     public function resetPassword(?array $args): array
     {

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -147,43 +148,6 @@ class PostInfoMapper
                     'exception' => $e->getMessage()
                 ]
             );
-        }
-    }
-
-    public function delete(string $postid): bool
-    {
-        $this->logger->info("PostInfoMapper.delete started");
-
-        try {
-            $this->db->beginTransaction();
-
-            $tables = [
-                'user_post_likes',
-                'user_post_dislikes',
-                'user_post_reports',
-                'user_post_saves',
-                'user_post_shares',
-                'user_post_views',
-                'post_info'
-            ];
-
-            foreach ($tables as $table) {
-                $sql = "DELETE FROM $table WHERE postid = :postid";
-                $stmt = $this->db->prepare($sql);
-                $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
-                $stmt->execute();
-            }
-
-            $this->db->commit();
-            $this->logger->info("Deleted post info and related user activities successfully", ['postid' => $postid]);
-            return true;
-        } catch (\Exception $e) {
-            $this->db->rollBack();
-            $this->logger->error("Failed to delete post info and related user activities", [
-                'postid' => $postid,
-                'exception' => $e->getMessage()
-            ]);
-            return false;
         }
     }
 

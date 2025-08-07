@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Middleware;
 
@@ -44,9 +45,9 @@ class RateLimiterMiddleware implements MiddlewareInterface
             return $response
                 ->withStatus(429)
                 ->withHeader('Content-Type', 'application/json')
-                ->withHeader('X-RateLimit-Limit', $this->rateLimiter->getLimit($ipAddress))
-                ->withHeader('X-RateLimit-Remaining', 0)
-                ->withHeader('X-RateLimit-Reset', time() + 60);
+                ->withHeader('X-RateLimit-Limit', (string) $this->rateLimiter->getLimit())
+                ->withHeader('X-RateLimit-Remaining', (string) 0)
+                ->withHeader('X-RateLimit-Reset', (string) (time() + 60));
         }
 
         return $handler->handle($request);

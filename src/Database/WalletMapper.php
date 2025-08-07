@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -114,7 +115,11 @@ class WalletMapper
             $stmt->execute();
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+             $this->logger->error('WalletMapper.transferToken exception during recipient validation query', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+             ]);
+            return self::respondWithError(40301);
         }
 
         if (empty($row)) {
@@ -132,6 +137,8 @@ class WalletMapper
         $peerAmount = round((float)$numberoftokens * PEERFEE, 2);
         $burnAmount = round((float)$numberoftokens * BURNFEE, 2);
         $countAmount = $feeAmount + $peerAmount + $burnAmount;
+        $inviterId = null;
+        $inviterWin = 0.0;
 
         try {
             $query = "SELECT ui.invited, u.status FROM users_info ui LEFT JOIN users u ON ui.invited = u.uid WHERE ui.userid = :userid AND ui.invited IS NOT NULL";
@@ -158,7 +165,11 @@ class WalletMapper
 
 
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            $this->logger->error('WalletMapper.transferToken unexpected exception during token transfer execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);
         }
 
         if ($currentBalance < $requiredAmount) {
@@ -309,7 +320,11 @@ class WalletMapper
             return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
 
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            $this->logger->error('WalletMapper.transferToken unexpected exception during token transfer execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);
         }
     }
 
@@ -447,7 +462,7 @@ class WalletMapper
         $postId = $args['postid'] ?? null;
         $fromId = $args['fromid'] ?? null;
 
-        if ($userId === null && $postId === null && $fromId === null) {
+        if (empty($postId) && empty($fromId)) {
             $this->logger->warning('WalletMapper.loadWalletById missing required identifiers in args');
             return false;
         }
@@ -459,7 +474,7 @@ class WalletMapper
             $conditions = [];
             $params = [];
 
-            if ($userId !== null) {
+            if (empty($userId)) {
                 $conditions[] = "userid = :userid";
                 $params['userid'] = $userId;
             }
@@ -717,11 +732,15 @@ class WalletMapper
 
             return $result;
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            $this->logger->error('WalletMapper.fetchWinsLog exception during logwins query execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);
         }
     }
 
-    protected function insertWinToLog(string $userId, array $args): bool
+    protected function insertWinToLog(string $userId, array $args): bool|array
     {
         \ignore_user_abort(true);
 
@@ -1084,7 +1103,7 @@ class WalletMapper
             $this->insertWinToPool($userId, end($args[$userId]['details']));
         }
 
-        if (!empty($data)) {
+        
             try {
                 $gemIds = array_column($data, 'gemid');
                 $quotedGemIds = array_map(fn($gemId) => $this->db->quote($gemId), $gemIds);
@@ -1102,7 +1121,6 @@ class WalletMapper
                 'ResponseCode' => 11208,
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
-        }
     }
 
     public function getPercentBeforeTransaction(string $userId, int $tokenAmount) : array
@@ -1134,12 +1152,11 @@ class WalletMapper
             $percent = round((float)$tokenAmount * INVTFEE, 2);
             $tosend = round((float)$tokenAmount - $percent, 2);
 
-            if ($result) {
-                $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
+            $id = self::generateUUID();
+            if (empty($id)) {
+                $this->logger->critical('Failed to generate logwins ID');
+                return self::respondWithError(41401);
+            }
 
                 $args = [
                     'token' => $id,
@@ -1149,11 +1166,8 @@ class WalletMapper
                     'whereby' => INVITATION_,
                     'createdat' => $createdat,
                 ];
-
                 $this->insertWinToLog($userId, $args);
-            }
 
-            if ($result) {
                 $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
@@ -1170,7 +1184,6 @@ class WalletMapper
                 ];
 
                 $this->insertWinToLog($inviterId, $args);
-            }
 
             return [
                 'status' => 'success', 
@@ -1186,8 +1199,6 @@ class WalletMapper
             $this->logger->error('Throwable occurred during transaction', ['exception' => $e]);
             return self::respondWithError(41401);
         }
-
-        return self::respondWithError(41401);
     }
 
     public function deductFromWallets(string $userId, ?array $args = []): array
@@ -1304,12 +1315,11 @@ class WalletMapper
     public function updateUserLiquidity(string $userId, float $liquidity): bool
     {
         try {
-            $totalNumbers = $liquidity ?? 0;
 
             $sqlUpdate = "UPDATE users_info SET liquidity = :liquidity, updatedat = CURRENT_TIMESTAMP WHERE userid = :userid";
             $stmt = $this->db->prepare($sqlUpdate);
 
-            $stmt->bindValue(':liquidity', $totalNumbers, \PDO::PARAM_STR);
+            $stmt->bindValue(':liquidity', $liquidity, \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
 
             $stmt->execute();
@@ -1337,7 +1347,7 @@ class WalletMapper
 
             if (!$userExists) {
                 $newLiquidity = abs($liquidity);
-                $liquiditq = abs($this->decimalToQ64_96($newLiquidity));
+                $liquiditq = ((float)$this->decimalToQ64_96($newLiquidity));
 
                 $query = "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
                           VALUES (:userid, :liquidity, :liquiditq, :updatedat)";
@@ -1351,7 +1361,7 @@ class WalletMapper
             } else {
                 $currentBalance = $this->getUserWalletBalance($userId);
                 $newLiquidity = abs($currentBalance + $liquidity);
-                $liquiditq = abs($this->decimalToQ64_96($newLiquidity));
+                $liquiditq = ((float)$this->decimalToQ64_96($newLiquidity));
 
                 $query = "UPDATE wallett
                           SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
@@ -1506,14 +1516,14 @@ class WalletMapper
         return $scaledValue;
     }
 
-    private function q64_96ToDecimal(string $qValue): string
+    /*private function q64_96ToDecimal(string $qValue): string
     {
         $scaleFactor = \bcpow('2', '96');
         
         $decimalValue = \bcdiv($qValue, $scaleFactor, 18);
         
-        return round($decimalValue, 2);
-    }
+        return (string) round((float) $decimalValue, 2);
+    }*/
 
     private function addQ64_96(string $qValue1, string $qValue2): string
     {

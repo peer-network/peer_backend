@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -31,7 +32,7 @@ class PostInfoService
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
-    protected function respondWithError(string $message): array
+    protected function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
@@ -61,7 +62,7 @@ class PostInfoService
         }
     }
 
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -92,7 +93,7 @@ class PostInfoService
 
         $this->logger->info('PostInfoService.deletePostInfo started');
 
-        if ($this->postInfoMapper->delete($postId)) {
+        if ($this->postMapper->delete($postId)) {
             return ['status' => 'success', 'ResponseCode' => 11510,];
         } else {
             return $this->respondWithError(41510);

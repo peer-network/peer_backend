@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -71,7 +72,7 @@ class ProfilUser
         $this->username = $name;
     }
 
-    public function setSlug(string $slug): void
+    public function setSlug(?int $slug): void
     {
         $this->slug = $slug;
     }
