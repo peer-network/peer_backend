@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -114,7 +115,11 @@ class WalletMapper
             $stmt->execute();
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+             $this->logger->error('WalletMapper.transferToken exception during recipient validation query', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+             ]);
+            return self::respondWithError(40301);
         }
 
         if (empty($row)) {
@@ -160,7 +165,11 @@ class WalletMapper
 
 
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            $this->logger->error('WalletMapper.transferToken unexpected exception during token transfer execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);
         }
 
         if ($currentBalance < $requiredAmount) {
@@ -311,8 +320,11 @@ class WalletMapper
             return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
 
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
-        }
+            $this->logger->error('WalletMapper.transferToken unexpected exception during token transfer execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);        }
     }
 
     public function fetchPool(array $args = []): array
@@ -719,8 +731,11 @@ class WalletMapper
 
             return $result;
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
-        }
+            $this->logger->error('WalletMapper.fetchWinsLog exception during logwins query execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);        }
     }
 
     protected function insertWinToLog(string $userId, array $args): bool|array
