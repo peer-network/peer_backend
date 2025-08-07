@@ -14,7 +14,7 @@ use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\TokenCalculations\SwapTokenHelper;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
-
+use Fawaz\App\Status;
 
 class PeerTokenMapper
 {
@@ -134,10 +134,10 @@ class PeerTokenMapper
         }
 
         try {
-            $sql = "SELECT uid FROM users WHERE uid = :uid";
+             $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':uid', $recipient);
-            $stmt->execute();
+            $stmt->bindValue(':status', Status::DELETED);
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
             return self::respondWithError($e->getMessage());
@@ -145,7 +145,7 @@ class PeerTokenMapper
 
         if (empty($row)) {
             $this->logger->warning('Unknown Id Exception.');
-            return self::respondWithError(31003);
+            return self::respondWithError(31007);
         }
 
         if ((string)$row === $userId) {

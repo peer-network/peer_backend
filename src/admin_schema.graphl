@@ -73,7 +73,7 @@ type Mutation {
   createPost(action: PostType!, input: PostInput!): PostResponse!
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
-  resolveTransfer(recipient: ID!, numberoftokens: Int!, message: String): TransferTokenResponse!
+  resolveTransfer(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
   reportUser(userid: ID!): DefaultResponse!
 }
 
