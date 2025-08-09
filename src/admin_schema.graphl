@@ -47,6 +47,7 @@ type Query {
   referralList(offset: Int, limit: Int): ReferralListResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
+  alphaMint: DefaultResponse
 }
 
 type Mutation {

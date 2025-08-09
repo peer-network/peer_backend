@@ -15,6 +15,7 @@ use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\PeerTokenMapper;
 
 class UserService
 {
@@ -29,6 +30,7 @@ class UserService
         protected UserPreferencesMapper $userPreferencesMapper,
         protected PostMapper $postMapper,
         protected WalletMapper $walletMapper,
+        protected PeerTokenMapper $peerTokenMapper,
 		protected Mailer $mailer
     ) {
         $this->base64filehandler = new Base64FileHandler();
@@ -1081,5 +1083,90 @@ class UserService
             return self::respondWithError(41004);
         }
     }
+
+
+    /**
+     * Run Alpha Minting Process
+     * 
+     * This function is used to mint Alpha Tokens for the Alpha Mint account and
+     * distribute them to the Alpha Users as per the Alpha_tokens_to_Peer_tokens.json file
+     */
+    public function alphaMint(?array $args = []): array
+    {
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+
+        $this->logger->info('UserService.alphaMint started');
+
+        try {
+            
+            $alphaMintAccount = [
+                'email' => 'alpha_mint@peerapp.de',
+                'password' => "alphaMintPassword@08082025",
+                'username' => 'AlphaMint',
+                'referralUuid' => "e4807c3b-6920-4e47-98e1-8b100f142d7e"
+            ];
+
+            $mintRepose = $this->createUser($alphaMintAccount);
+
+            if($mintRepose['status'] == 'success'){
+
+                $mintUserId = $mintRepose['userid'] ?? null;
+
+                // update wallett table with token amount to 21841000
+                // Mint Total Alpha Token Amount: 21841000
+                $this->walletMapper->saveWalletEntry($mintUserId, 21841000);
+                
+                // Get Alpga Users from Alpha_tokens_to_Peer_tokens.json file
+                $alphaUsers = json_decode(file_get_contents(__DIR__ . '/../../runtime-data/Alpha_tokens_to_Peer_tokens.json'), true);
+
+                if(!$alphaUsers || !is_array($alphaUsers)) {
+                    $this->logger->error('Failed to load alpha users data from JSON file');
+                    return self::respondWithError(41020);
+                }
+                $totalAlphaUserCreated = 0;
+                $totalAlphaUserMinted = 0;
+                foreach ($alphaUsers as $key => $usr) {
+                    $userData = $this->userMapper->loadByEmail($usr['user_email']);
+
+                    if(!$userData){
+                        $usrObj = [
+                            'email' => $usr['user_email'],
+                            'password' => 'AlphaUser@08082025',
+                            'username' => $usr['alpha_user_name'],
+                            'referralUuid' => "e4807c3b-6920-4e47-98e1-8b100f142d7e"
+                        ];
+
+                        $userData = $this->createUser($usrObj);
+                        $receipientUserId = $userData['userid'] ?? null;
+                    }else{
+                        $receipientUserId = $userData->getUserId();
+                    }
+
+                    $args = [
+                        'recipient' => $receipientUserId,
+                        'numberoftokens' => $usr['alpha_user_tokens'],
+                        'message' => 'Alpha Token Migration',
+                    ];
+                    
+                    $isMinted = $this->peerTokenMapper->transferToken($mintUserId, $args);
+
+                    $totalAlphaUserCreated++;
+                }
+
+                $this->userMapper->delete($mintUserId);
+
+            }
+
+            
+            return [];
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to mint alpha', ['exception' => $e]);
+            return self::respondWithError(41020);
+        }
+    }
+
 
 }

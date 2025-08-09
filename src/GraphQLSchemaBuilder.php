@@ -1800,6 +1800,7 @@ class GraphQLSchemaBuilder
             'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
+            'alphaMint' => fn(mixed $root, array $args) => $this->userService->alphaMint($args),
         ];
     }
 
