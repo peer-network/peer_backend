@@ -8033,9 +8033,14 @@
         "body": {
           "mode": "formdata",
           "formdata": [
+             {
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
             {
-              "key": "file",
-              "type": "file",
+              "key": "media",
+              "type": "media",
               "src": "/etc/newman/media_files/sample_text.txt"
             }
           ]

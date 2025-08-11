@@ -89,7 +89,7 @@ class MultipartPost
     {
 
         if(empty($this->eligibilityToken)){
-            throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty
+            throw new ValidationException("Token Should not be empty.", [930102]); // Token Should not be empty
         }
 
         if(empty($this->media) || !is_array($this->media)){
