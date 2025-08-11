@@ -322,6 +322,7 @@
 							"        responseText.includes(\"11513\") || responseText.includes(\"11508\")",
 							"    ).to.be.true;",
 							"});",
+							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
@@ -363,6 +364,27 @@
 							"    pm.environment.unset(\"isDailyFreePost\");",
 							"    console.log(\"Not a Daily Free Post (code not 11513).\");",
 							"}",
+							"",
+							"// ✅ Validate resolutions of all three media items",
+							"pm.test(\"All uploaded image resolutions are correct\", function () {",
+							"    try {",
+							"        const expectedResolutions = [\"200x300\", \"736x413\", \"225x225\"];",
+							"        const mediaString = postResponse?.data?.createPost?.affectedRows?.media;",
+							"        const mediaArray = JSON.parse(mediaString);",
+							"",
+							"        pm.expect(mediaArray.length, \"Expected 3 media items\").to.eql(3);",
+							"",
+							"        for (let i = 0; i < expectedResolutions.length; i++) {",
+							"            const actual = mediaArray[i]?.options?.resolution;",
+							"            const expected = expectedResolutions[i];",
+							"",
+							"            pm.expect(actual, `Media[${i}] resolution should be ${expected}`).to.eql(expected);",
+							"        }",
+							"    } catch (err) {",
+							"        console.error(\"Error validating media resolutions:\", err);",
+							"        throw new Error(\"Failed to validate media resolutions.\");",
+							"    }",
+							"});",
 							""
 						],
 						"type": "text/javascript",
@@ -1313,6 +1335,7 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"11508\");",
 							"});",
+							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
@@ -1339,6 +1362,33 @@
 							"} else {",
 							"    console.log(\"Error detected in response, skipping postid set.\");",
 							"}",
+							"",
+							"// ✅ Validate video resolution with hardcoded expected value",
+							"pm.test(\"Video resolution matches expected (720x1280)\", function () {",
+							"    try {",
+							"        const expectedResolution = \"720x1280\"; // 👈 set directly here",
+							"",
+							"        const affected = postResponse?.data?.createPost?.affectedRows;",
+							"        const mediaJson = affected?.media;",
+							"",
+							"        if (!mediaJson) {",
+							"            throw new Error(\"Missing media array in response.\");",
+							"        }",
+							"",
+							"        const mediaArray = JSON.parse(mediaJson);",
+							"        if (!Array.isArray(mediaArray) || !mediaArray[0]) {",
+							"            throw new Error(\"Media array is empty or invalid.\");",
+							"        }",
+							"",
+							"        const actualResolution = mediaArray[0]?.options?.resolution;",
+							"",
+							"        pm.expect(actualResolution, `Expected resolution to be ${expectedResolution} but got ${actualResolution}`)",
+							"          .to.eql(expectedResolution);",
+							"    } catch (err) {",
+							"        console.error(\"Video resolution test failed:\", err.message || err);",
+							"        throw new Error(\"Video resolution test failed. See console for details.\");",
+							"    }",
+							"});",
 							""
 						],
 						"type": "text/javascript",
@@ -5862,7 +5912,7 @@
 			"response": []
 		},
 		{
-			"name": "Content Engagement(LIKE)",
+			"name": "Content engagement (like)",
 			"event": [
 				{
 					"listen": "test",
@@ -6214,7 +6264,7 @@
 			"response": []
 		},
 		{
-			"name": "Content Engagement(DISLIKE)",
+			"name": "Content engagement (dislike)",
 			"event": [
 				{
 					"listen": "test",
@@ -6654,7 +6704,7 @@
 			"response": []
 		},
 		{
-			"name": "Conten Engagement(View)",
+			"name": "Conten engagement (view)",
 			"event": [
 				{
 					"listen": "test",
@@ -7009,7 +7059,7 @@
 			"response": []
 		},
 		{
-			"name": "Content Engagement(LIKECOMMENT)",
+			"name": "Content engagement (comments likes)",
 			"event": [
 				{
 					"listen": "test",
