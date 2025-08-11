@@ -1101,19 +1101,25 @@ class UserService
         $this->logger->info('UserService.alphaMint started');
 
         try {
+
+            $alphaUserAc = $this->userMapper->loadByEmail('alpha_mint@peerapp.de');
             
-            $alphaMintAccount = [
-                'email' => 'alpha_mint@peerapp.de',
-                'password' => "alphaMintPassword@08082025",
-                'username' => 'AlphaMint',
-                'referralUuid' => "e4807c3b-6920-4e47-98e1-8b100f142d7e"
-            ];
+            if(!$alphaUserAc){
+                $alphaMintAccount = [
+                    'email' => 'alpha_mint@peerapp.de',
+                    'password' => "alphaMintPassword@08082025",
+                    'username' => 'AlphaMint',
+                ];
 
-            $mintRepose = $this->createUser($alphaMintAccount);
+                $this->createUser($alphaMintAccount);
 
-            if($mintRepose['status'] == 'success'){
+                $alphaUserAc = $this->userMapper->loadByEmail('alpha_mint@peerapp.de');
+            }
 
-                $mintUserId = $mintRepose['userid'] ?? null;
+
+            if($alphaUserAc && $alphaUserAc->getUserId()){
+
+                $mintUserId = $alphaUserAc->getUserId();
 
                 // update wallett table with token amount to 21841000
                 // Mint Total Alpha Token Amount: 21841000
@@ -1126,47 +1132,59 @@ class UserService
                     $this->logger->error('Failed to load alpha users data from JSON file');
                     return self::respondWithError(41020);
                 }
-                $totalAlphaUserCreated = 0;
-                $totalAlphaUserMinted = 0;
+                $userCounts = 0;
+                $excluedUsers = [];
                 foreach ($alphaUsers as $key => $usr) {
-                    $userData = $this->userMapper->loadByEmail($usr['user_email']);
-
-                    if(!$userData){
-                        $usrObj = [
-                            'email' => $usr['user_email'],
-                            'password' => 'AlphaUser@08082025',
-                            'username' => $usr['alpha_user_name'],
-                            'referralUuid' => "e4807c3b-6920-4e47-98e1-8b100f142d7e"
-                        ];
-
-                        $userData = $this->createUser($usrObj);
-                        $receipientUserId = $userData['userid'] ?? null;
+                    $userData = $this->userMapper->checkIfNameAndSlugExist($usr['peer_username'], $usr['peer_app_slug']);
+                    if($userData){
+                        $userCounts++;
                     }else{
-                        $receipientUserId = $userData->getUserId();
+                        $excluedUsers[] = $usr['peer_username'] . ' - ' . $usr['peer_app_slug'];
                     }
-
-                    $args = [
-                        'recipient' => $receipientUserId,
-                        'numberoftokens' => $usr['alpha_user_tokens'],
-                        'message' => 'Alpha Token Migration',
-                    ];
-                    
-                    $isMinted = $this->peerTokenMapper->transferToken($mintUserId, $args);
-
-                    $totalAlphaUserCreated++;
                 }
 
-                $this->userMapper->delete($mintUserId);
+                if(count($alphaUsers) == $userCounts){
+                    $totalAlphaUserMinted = 0;
+                    foreach ($alphaUsers as $key => $usr) {
+                        $userData = $this->userMapper->getUserByNameAndSlug($usr['peer_username'], $usr['peer_app_slug']);
 
+                        if($userData){
+                            $receipientUserId = $userData->getUserId();
+
+                            $args = [
+                                'recipient' => $receipientUserId,
+                                'numberoftokens' => $usr['alpha_user_tokens'],
+                                'message' => 'Alpha Token Migration',
+                            ];
+                            
+                            $this->peerTokenMapper->transferToken($mintUserId, $args);
+                            $totalAlphaUserMinted++;
+                        }
+                    }
+                }else{
+                    $this->userMapper->delete($mintUserId);
+                    
+                    return [
+                        'status' => 'error',
+                        'ResponseCode' => 404,
+                    ];
+                }
+                $this->userMapper->delete($mintUserId);
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => 200,
+                ];
             }
 
             
-            return [];
+            return [
+                'status' => 'error',
+                'ResponseCode' => 500
+            ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to mint alpha', ['exception' => $e]);
             return self::respondWithError(41020);
         }
     }
-
 
 }
