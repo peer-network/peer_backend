@@ -22,10 +22,9 @@ class Base64FileHandler
             ],
             'video' => [
                 'video/mp4', 'video/quicktime', 'video/x-m4v',
-                'video/x-msvideo', 'video/3gpp', 'video/x-matroska',
-                'video/webm'
+                'video/x-msvideo', 'video/3gpp', 'video/x-matroska'
             ],
-            'audio' => ['audio/mpeg', 'audio/wav',"audio/ogg"],
+            'audio' => ['audio/mpeg', 'audio/wav','audio/ogg', 'audio/x-wav'],
             'text' => ['text/plain'],
             default => []
         };
@@ -35,8 +34,8 @@ class Base64FileHandler
     {
         return match ($contentType) {
             'image' => ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'],
-            'video' => ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'webm', 'quicktime'],
-            'audio' => ['mp3', 'wav', 'webm', 'ogg'],
+            'video' => ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'quicktime'],
+            'audio' => ['mp3', 'wav', 'ogg'],
             'text' => ['txt'],
             default => []
         };
