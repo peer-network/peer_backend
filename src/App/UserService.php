@@ -1097,7 +1097,6 @@ class UserService
             return self::respondWithError(60501);
         }
 
-
         $this->logger->info('UserService.alphaMint started');
 
         try {
@@ -1125,7 +1124,7 @@ class UserService
                 // Mint Total Alpha Token Amount: 21841000
                 $this->walletMapper->saveWalletEntry($mintUserId, 21841000);
                 
-                // Get Alpga Users from Alpha_tokens_to_Peer_tokens.json file
+                // Get Alpha Users from Alpha_tokens_to_Peer_tokens.json file
                 $alphaUsers = json_decode(file_get_contents(__DIR__ . '/../../runtime-data/Alpha_tokens_to_Peer_tokens.json'), true);
 
                 if(!$alphaUsers || !is_array($alphaUsers)) {
@@ -1150,20 +1149,18 @@ class UserService
 
                         if($userData){
                             $receipientUserId = $userData->getUserId();
-
                             $args = [
                                 'recipient' => $receipientUserId,
                                 'numberoftokens' => $usr['alpha_user_tokens'],
                                 'message' => 'Alpha Token Migration',
                             ];
-                            
                             $this->peerTokenMapper->transferToken($mintUserId, $args);
+
                             $totalAlphaUserMinted++;
                         }
                     }
                 }else{
                     $this->userMapper->delete($mintUserId);
-                    
                     return [
                         'status' => 'error',
                         'ResponseCode' => 404,
@@ -1175,7 +1172,6 @@ class UserService
                     'ResponseCode' => 200,
                 ];
             }
-
             
             return [
                 'status' => 'error',
