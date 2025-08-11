@@ -207,9 +207,6 @@ class MultipartPost
             $extension = pathinfo($media, PATHINFO_EXTENSION);
           
             $fileType = $this->getSubfolder(strtolower($extension));
-            if(strtolower($extension) == 'webm'){
-                $fileType = $this->checkForWebmFormat($media);
-            }
             if (!$fileType) {
                 return false;
             }
@@ -239,11 +236,11 @@ class MultipartPost
             return 'image';
         }
 
-        if (in_array($mimeType, ['video/mp4', 'video/avi', 'video/mov', 'video/mkv', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/x-msvideo', 'video/3gpp', 'video/x-matroska'])) {
+        if (in_array($mimeType, ['video/mp4', 'video/avi', 'video/mov', 'video/mkv', 'video/quicktime', 'video/x-m4v', 'video/x-msvideo', 'video/3gpp', 'video/x-matroska'])) {
             return 'video';
         }
 
-        if (in_array($mimeType, ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/x-wav', 'audio/webm'])) {
+        if (in_array($mimeType, ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/x-wav'])) {
             return 'audio';
         }
 
@@ -335,9 +332,6 @@ class MultipartPost
             // Calculate Subfolder
             $extension = pathinfo($tmpFolder.$media, PATHINFO_EXTENSION);
             $subFolder = $this->getSubfolder(strtolower($extension));
-            if(strtolower($extension) == 'webm'){
-                $subFolder = $this->checkForWebmFormat($media);
-            }
 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/".$subFolder;
 
@@ -470,9 +464,6 @@ class MultipartPost
             // Calculate Subfolder
             $extension = pathinfo($media, PATHINFO_EXTENSION);
             $subFolder = $this->getSubfolder(strtolower($extension));
-            if(strtolower($extension) == 'webm'){
-                $subFolder = $this->checkForWebmFormat($media);
-            }
 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/".$subFolder;
 
@@ -536,7 +527,7 @@ class MultipartPost
     {
         if(in_array($fileType, ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'])){
             return 'image';
-        }elseif(in_array($fileType, ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'webm', 'quicktime'])){
+        }elseif(in_array($fileType, ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'quicktime'])){
             return 'video';
         }elseif(in_array($fileType, ['mp3', 'wav'])){
             return 'audio';
@@ -548,8 +539,11 @@ class MultipartPost
 
     }
 
-    /**
+    /** UNUSED Method
+     * 
      * Subfolder options for Audio and Video only for webm file format
+     * 
+     * Keeping it for future use
      */
     private function checkForWebmFormat(string $media): string
     {
