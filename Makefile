@@ -115,8 +115,15 @@ test: ensure-jq
 	docker-compose $(COMPOSE_FILES) run --rm newman \
 		node /etc/newman/merge-collections.js
 
-	jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {raw: "{{BACKEND_URL}}/graphql", protocol: "http", host: ["backend"], path: ["graphql"]}' \
-	tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection_patched.json
+	jq '(select(.request.url.raw != null)) |= (.request.url = ( \
+		if .path == "upload-post" then { \
+			raw: "{{BACKEND_URL}}/upload-post",protocol: "http",host: ["backend"],path: ["upload-post"]} \
+		else { \
+			raw: "{{BACKEND_URL}}/graphql",protocol: "http",host: ["backend"],path: ["graphql"] \
+		}))' \
+  	tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection.json.tmp
+
+
 	mv tests/postman_collection/tmp_collection_patched.json tests/postman_collection/tmp_collection.json
 
 	jq 'del(.values[] | select(.key == "BACKEND_URL")) | .values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
@@ -126,11 +133,11 @@ test: ensure-jq
 	@echo "Running Newman tests inside the container..."
 	docker-compose $(COMPOSE_FILES) run --rm newman \
 	    newman run /etc/newman/tmp_collection.json \
+		--bail \
 	    --environment /etc/newman/tmp_env.json \
 	    --reporters cli,htmlextra \
 	    --reporter-htmlextra-export /etc/newman/reports/report.html || true
-
-	@sudo chown -R $(USER):$(USER) newman
+		
 	@echo "Newman tests completed! Attempting to open HTML report..."
 
 		@{ \
