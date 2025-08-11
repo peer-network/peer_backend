@@ -47,8 +47,6 @@ class WalletMapper
     private string $burnWallet;
     private string $peerWallet;
 
-    const STATUS_DELETED = 6;
-
     public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
     {
     }
@@ -60,39 +58,28 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.transferToken started');
 
-		$accountsResult = $this->pool->returnAccounts();
+        $accountsResult = $this->pool->returnAccounts();
+        if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
+            $this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
+            return self::respondWithError(40701);
+        }
 
-		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
-			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
-			return self::respondWithError(40701);
-		}
+        $liqpool = $accountsResult['response'] ?? null;
+        if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
+            $this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
+            return self::respondWithError(30102);
+        }
 
-		$liqpool = $accountsResult['response'] ?? null;
-
-		if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
-			$this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
-			return self::respondWithError(30102);
-		}
-
-		$this->poolWallet = $liqpool['pool'];
-		$this->burnWallet = $liqpool['burn'];
-		$this->peerWallet = $liqpool['peer'];
+        $this->poolWallet = $liqpool['pool'];
+        $this->burnWallet = $liqpool['burn'];
+        $this->peerWallet = $liqpool['peer'];
 
         $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
-
-        $currentBalance = $this->getUserWalletBalance($userId);
-        if (empty($currentBalance)) {
-            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(51301);
-        }
 
         $recipient = (string) $args['recipient'];
         if (!self::isValidUUID($recipient)) {
             $this->logger->warning('Incorrect recipientId Exception.', [
                 'recipient' => $recipient,
-                'Balance' => $currentBalance,
             ]);
             return self::respondWithError(30201);
         }
@@ -101,7 +88,6 @@ class WalletMapper
         if ($numberoftokens <= 0) {
             $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                 'numberoftokens' => $numberoftokens,
-                'Balance' => $currentBalance,
             ]);
             return self::respondWithError(30264);
         }
@@ -110,7 +96,7 @@ class WalletMapper
             $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':uid', $recipient);
-            $stmt->bindValue(':status', self::STATUS_DELETED);
+            $stmt->bindValue(':status', \Fawaz\App\Status::DELETED);
             $stmt->execute();
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
@@ -127,38 +113,54 @@ class WalletMapper
             return self::respondWithError(31202);
         }
 
+        // base amounts
         $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE);
-        $feeAmount = round((float)$numberoftokens * POOLFEE, 2);
-        $peerAmount = round((float)$numberoftokens * PEERFEE, 2);
-        $burnAmount = round((float)$numberoftokens * BURNFEE, 2);
-        $countAmount = $feeAmount + $peerAmount + $burnAmount;
+        $inviterWin  = 0.00;
+        $feeAmount      = round((float)$numberoftokens * POOLFEE, 2);
+        $peerAmount     = round((float)$numberoftokens * PEERFEE, 2);
+        $burnAmount     = round((float)$numberoftokens * BURNFEE, 2);
+        $countAmount    = $feeAmount + $peerAmount + $burnAmount;
 
         try {
-            $query = "SELECT ui.invited, u.status FROM users_info ui LEFT JOIN users u ON ui.invited = u.uid WHERE ui.userid = :userid AND ui.invited IS NOT NULL";
+            $query = "SELECT ui.invited, u.status
+                      FROM users_info ui
+                      LEFT JOIN users u ON ui.invited = u.uid
+                      WHERE ui.userid = :userid AND ui.invited IS NOT NULL";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['userid' => $userId]);
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != 6) {
-                $inviterId = $result['invited'];
+            $hasInviter = !empty($result['invited']);
+
+            if ($hasInviter) {
+                $isDeleted  = ((int)$result['status'] === \Fawaz\App\Status::DELETED);
                 $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
-                $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
-                $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
-                $this->logger->info('Invited By', [
-                    'invited' => $inviterId,
-                ]);
-            }
 
-            // If user's account deleted then we will send that percentage amount to PEER
-            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == 6) {
-                $peerAmount = $peerAmount + round((float)$numberoftokens * INVTFEE, 2);
-                $countAmount = $feeAmount + $peerAmount + $burnAmount;
+                if (!$isDeleted) {
+                    // inviter is active → give INVTFEE to inviter
+                    $inviterId   = $result['invited'];
+                    $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
+                    $this->logger->info('Invited By', ['invited' => $inviterId]);
+                } else {
+                    // inviter is deleted → reroute INVTFEE to peer
+                    $peerAmount += $inviterWin;
+                    $countAmount = $feeAmount + $peerAmount + $burnAmount;
+                }
+
+                // only when an inviter exists do we add INVTFEE to the required total
                 $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
             }
-
 
         } catch (\Throwable $e) {
             return self::respondWithError($e->getMessage());
+        }
+
+        $currentBalance = $this->getUserWalletBalance($userId);
+        if (empty($currentBalance)) {
+            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+                'Balance' => $currentBalance,
+            ]);
+            return self::respondWithError(51301);
         }
 
         if ($currentBalance < $requiredAmount) {
@@ -209,7 +211,7 @@ class WalletMapper
                 $this->insertWinToPool($row, $args);
             }
 
-            if (isset($result['invited']) && !empty($result['invited'])) {
+            if (isset($inviterId) && is_string($inviterId)) {
                 // 3 . INVITER: Fees To inviter Account (if exist)
                 if ($inviterWin) {
                     $id = self::generateUUID();
@@ -1498,10 +1500,10 @@ class WalletMapper
     {
         $scaleFactor = \bcpow('2', '96');
 
-		// Convert float to plain decimal string 
-		$decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
+        // Convert float to plain decimal string 
+        $decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
 
-		$scaledValue = \bcmul($decimalString, $scaleFactor, 0);
+        $scaledValue = \bcmul($decimalString, $scaleFactor, 0);
 
         return $scaledValue;
     }
