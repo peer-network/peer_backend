@@ -1138,7 +1138,7 @@ class UserService
                     if($userData){
                         $userCounts++;
                     }else{
-                        $excluedUsers[] = $usr['peer_username'] . ' - ' . $usr['peer_app_slug'];
+                        $excluedUsers[] = $usr['peer_username'];
                     }
                 }
 
@@ -1162,7 +1162,7 @@ class UserService
                 }else{
                     $this->userMapper->delete($mintUserId);
                     return [
-                        'status' => 'error',
+                        'status' => 'error: Some users not found' . ' - ' . implode(', ', $excluedUsers),
                         'ResponseCode' => 404,
                     ];
                 }
