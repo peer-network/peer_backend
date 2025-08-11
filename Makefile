@@ -115,14 +115,9 @@ test: ensure-jq
 	docker-compose $(COMPOSE_FILES) run --rm newman \
 		node /etc/newman/merge-collections.js
 
-	jq '(select(.request.url.raw != null)) |= (.request.url = ( \
-		if .path == "upload-post" then { \
-			raw: "{{BACKEND_URL}}/upload-post",protocol: "http",host: ["backend"],path: ["upload-post"]} \
-		else { \
-			raw: "{{BACKEND_URL}}/graphql",protocol: "http",host: ["backend"],path: ["graphql"] \
-		}))' \
-  	tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection.json.tmp
-
+	jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {raw: "{{BACKEND_URL}}/graphql", protocol: "http", host: ["backend"], path: ["graphql"]}' \
+	tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection_patched.json
+	mv tests/postman_collection/tmp_collection_patched.json tests/postman_collection/tmp_collection.json
 
 	mv tests/postman_collection/tmp_collection_patched.json tests/postman_collection/tmp_collection.json
 
