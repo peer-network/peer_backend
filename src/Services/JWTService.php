@@ -6,6 +6,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
 use Psr\Log\LoggerInterface;
+use DateTime;
 
 class JWTService
 {
@@ -109,6 +110,8 @@ class JWTService
             'aud' => 'peerapp.de',
             'uid' => $userId,
             'iat' => $issuedAt,
+            'date' => (new DateTime())->format('Y-m-d H:i:s.u'),
+            'jti' => bin2hex(random_bytes(20)),
             'exp' => $expirationTime
         ];
 
