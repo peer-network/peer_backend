@@ -42,14 +42,12 @@ class MultipartPostHandler implements RequestHandlerInterface
                 }
             }
 
-            $rawBody = $_POST;
+            $rawBody = $request->getParsedBody();
             $rawFiles = $_FILES;
 
             $filesArray = [];
             if (isset($rawFiles['media'])) {
                 $filesArray = $this->normalizeFilesArray($rawFiles['media']);
-                $this->logger->info("PostFileHandler filesArray.", $filesArray);
-                $this->logger->info("PostFileHandler _FILES.", $_FILES);
             }
             
             $requestObj = [
@@ -79,39 +77,46 @@ class MultipartPostHandler implements RequestHandlerInterface
      */
     function normalizeFilesArray(array $files): array
     {
-        $normalized = [];
+        try{
 
-        if (is_array($files['name']) && isset($files['name'][0]) && empty($files['name'][0])) {
+            $normalized = [];
+
+            if (is_array($files['name']) && isset($files['name'][0]) && empty($files['name'][0])) {
+                return [];
+            }
+
+            if (is_array($files['name']) && isset($files['name'][0]) && !empty($files['name'][0])) {
+                foreach ($files['name'] as $index => $name) {
+                    $normalized[] = [
+                        'name'     => $name,
+                        'type'     => $files['type'][$index],
+                        'tmp_name' => $files['tmp_name'][$index],
+                        'error'    => $files['error'][$index],
+                        'size'     => $files['size'][$index],
+                    ];
+                }
+            } else {
+                // Single file
+                $normalized[] = $files;
+            }
+
+            $uploadedFilesObj = [];
+            foreach ($normalized as $index => $fileObj) {
+                $uploadedFilesObj[] = new UploadedFile(
+                    $fileObj['tmp_name'],
+                    $fileObj['name'],
+                    $fileObj['type'],
+                    $fileObj['size'],
+                    $fileObj['error']
+                );
+            }
+
+            return $uploadedFilesObj;
+        }
+        catch (\Exception $e) {
+            $this->logger->error("Error normalizing files array: " . $e->getMessage());
             return [];
         }
-
-        if (is_array($files['name']) && isset($files['name'][0]) && !empty($files['name'][0])) {
-            foreach ($files['name'] as $index => $name) {
-                $normalized[] = [
-                    'name'     => $name,
-                    'type'     => $files['type'][$index],
-                    'tmp_name' => $files['tmp_name'][$index],
-                    'error'    => $files['error'][$index],
-                    'size'     => $files['size'][$index],
-                ];
-            }
-        } else {
-            // Single file
-            $normalized[] = $files;
-        }
-
-        $uploadedFilesObj = [];
-        foreach ($normalized as $index => $fileObj) {
-            $uploadedFilesObj[] = new UploadedFile(
-                $fileObj['tmp_name'],
-                $fileObj['name'],
-                $fileObj['type'],
-                $fileObj['size'],
-                $fileObj['error']
-            );
-        }
-
-        return $uploadedFilesObj;
     }
 
     /**

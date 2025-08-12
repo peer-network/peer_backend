@@ -2165,10 +2165,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -2546,10 +2546,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_video.mp4"
             }
@@ -2864,10 +2864,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_audio.mp3"
             }
@@ -3200,10 +3200,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_text.txt"
             }
@@ -3526,10 +3526,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -3602,10 +3602,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -3750,10 +3750,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -3898,10 +3898,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_video.mp4"
             }
@@ -4046,10 +4046,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_text.txt"
             }
@@ -4194,10 +4194,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_audio.mp3"
             }
@@ -4342,10 +4342,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -4490,10 +4490,10 @@
             {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }

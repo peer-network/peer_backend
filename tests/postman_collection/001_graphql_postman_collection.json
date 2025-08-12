@@ -8041,10 +8041,10 @@
              {
               "key": "eligibilityToken",
               "type": "text",
-              "src": "{{eligibilityToken}}"
+              "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media[]",
+              "key": "media",
               "type": "file",
               "src": "/etc/newman/media_files/sample_text.txt"
             }
