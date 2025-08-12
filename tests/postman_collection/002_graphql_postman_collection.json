@@ -3880,9 +3880,11 @@
             {
               "key": "file[]",
               "type": "file",
-              "src": ["/etc/newman/media_files/File_Example_AVI_2_3MB.avi",
-                      "/etc/newman/media_files/File_Example_AVI_2_3MB.avi",
-                      "/etc/newman/media_files/file_example_MP4_480_1_5MG.mp4" ]
+              "src": [
+                "/etc/newman/media_files/File_Example_AVI_2_3MB.avi",
+                "/etc/newman/media_files/File_Example_AVI_2_3MB.avi",
+                "/etc/newman/media_files/file_example_MP4_480_1_5MG.mp4" 
+              ]
             }
           ]
         },

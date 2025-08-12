@@ -44,21 +44,17 @@ class MultipartPostHandler implements RequestHandlerInterface
 
             $rawBody = $request->getParsedBody();
             $rawFiles = $_FILES;
-            $this->logger->info("PostFileHandler _FILES.", $_FILES);
-            $this->logger->info("PostFileHandler rawBody.", $rawBody);
+
 
             $filesArray = [];
             if (isset($rawFiles['file'])) {
                 $filesArray = $this->normalizeFilesArray($rawFiles['file']);
-                $this->logger->info("PostFileHandler filesArray.", $filesArray);
-
             }
             
             $requestObj = [
-                'eligibilityToken' => isset($rawBody['eligibilityToken']) ? $rawBody['eligibilityToken'] : '',
+                'eligibilityToken' => (!empty($rawBody['eligibilityToken']) && isset($rawBody['eligibilityToken'])) ? $rawBody['eligibilityToken'] : '',
                 'media' => !empty($filesArray) ? $filesArray : [],
             ];
-            $this->logger->info("PostFileHandler requestObj.", $requestObj);
 
             $this->multipartPostService->setCurrentUserId($bearerToken);
 
