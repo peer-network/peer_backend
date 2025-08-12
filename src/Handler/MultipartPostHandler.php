@@ -46,8 +46,8 @@ class MultipartPostHandler implements RequestHandlerInterface
             $rawFiles = $_FILES;
 
             $filesArray = [];
-            if (isset($rawFiles['media'])) {
-                $filesArray = $this->normalizeFilesArray($rawFiles['media']);
+            if (isset($rawFiles['file'])) {
+                $filesArray = $this->normalizeFilesArray($rawFiles['file']);
             }
             
             $requestObj = [

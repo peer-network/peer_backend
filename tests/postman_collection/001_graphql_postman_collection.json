@@ -8044,7 +8044,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_text.txt"
             }

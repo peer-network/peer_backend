@@ -2168,7 +2168,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -2549,7 +2549,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_video.mp4"
             }
@@ -2867,7 +2867,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_audio.mp3"
             }
@@ -3203,7 +3203,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_text.txt"
             }
@@ -3529,7 +3529,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -3605,7 +3605,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -3753,7 +3753,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -3901,7 +3901,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_video.mp4"
             }
@@ -4049,7 +4049,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_text.txt"
             }
@@ -4197,7 +4197,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_audio.mp3"
             }
@@ -4345,7 +4345,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -4493,7 +4493,7 @@
               "value": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
+              "key": "file",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
