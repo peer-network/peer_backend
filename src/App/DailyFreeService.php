@@ -53,17 +53,20 @@ class DailyFreeService
         try {
             $affectedRows = $this->dailyFreeMapper->getUserDailyAvailability($userId);
 
-            if ($affectedRows !== false) {
-                return [
-                    'status' => 'success',
-                    'ResponseCode' =>  11303,
-                    'affectedRows' => $affectedRows,
-                ];
+            if ($affectedRows === false) {
+                $this->logger->warning('DailyFree availability not found', ['userId' => $userId]);
+                return $this->respondWithError(40301);
             }
 
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11303,
+                'affectedRows' => $affectedRows,
+            ];
+
         } catch (\Throwable $e) {
-            $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage()]);
-            return [];
+            $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage(), 'userId' => $userId]);
+            return $this->respondWithError(40301);
         }
     }
 

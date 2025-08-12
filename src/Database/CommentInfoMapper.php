@@ -5,6 +5,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\CommentInfo;
 use Psr\Log\LoggerInterface;
+use Fawaz\App\Status;
 
 class CommentInfoMapper
 {
@@ -39,10 +40,10 @@ class CommentInfoMapper
     {
         $this->logger->info("CommentInfoMapper.isUserExistById started");
 
-        $status = self::STATUS_DELETED;
+        $status = Status::DELETED;                        
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE status != :status AND uid = :id");
         $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':status', $status);
+        $stmt->bindParam(':status', $status, \PDO::PARAM_INT );
         $stmt->execute();
 
         return $stmt->fetchColumn() > 0;
