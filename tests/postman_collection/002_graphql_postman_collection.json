@@ -2152,13 +2152,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -2523,13 +2533,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_video.mp4"
             }
@@ -2831,13 +2851,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_audio.mp3"
             }
@@ -3157,13 +3187,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_text.txt"
             }
@@ -3473,13 +3513,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -3539,13 +3589,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -3677,13 +3737,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -3815,13 +3885,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_video.mp4"
             }
@@ -3953,13 +4033,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_text.txt"
             }
@@ -4091,13 +4181,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_audio.mp3"
             }
@@ -4229,13 +4329,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }
@@ -4367,13 +4477,23 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "formdata",
           "formdata": [
             {
-              "key": "file",
+              "key": "eligibilityToken",
+              "type": "text",
+              "src": "{{eligibilityToken}}"
+            },
+            {
+              "key": "media[]",
               "type": "file",
               "src": "/etc/newman/media_files/sample_image.jpg"
             }

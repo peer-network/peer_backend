@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Psr7\Response;
+use Slim\Psr7\UploadedFile;
 
 class MultipartPostHandler implements RequestHandlerInterface
 {
@@ -41,12 +42,19 @@ class MultipartPostHandler implements RequestHandlerInterface
                 }
             }
 
-            $mediaFiles = $request->getUploadedFiles();
-            $rawBody = $request->getParsedBody();
+            $rawBody = $_POST;
+            $rawFiles = $_FILES;
 
+            $filesArray = [];
+            if (isset($rawFiles['media'])) {
+                $filesArray = $this->normalizeFilesArray($rawFiles['media']);
+                $this->logger->info("PostFileHandler filesArray.", $filesArray);
+                $this->logger->info("PostFileHandler _FILES.", $_FILES);
+            }
+            
             $requestObj = [
                 'eligibilityToken' => isset($rawBody['eligibilityToken']) ? $rawBody['eligibilityToken'] : '',
-                'media' => isset($mediaFiles['media']) && is_array($mediaFiles['media']) ? $mediaFiles['media'] : [],
+                'media' => is_array($filesArray) && !empty($filesArray) ? $filesArray : [],
             ];
             $this->multipartPostService->setCurrentUserId($bearerToken);
 
@@ -64,6 +72,46 @@ class MultipartPostHandler implements RequestHandlerInterface
         }
 
         return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * Normalize PHP's $_FILES array into a per-file format
+     */
+    function normalizeFilesArray(array $files): array
+    {
+        $normalized = [];
+
+        if (is_array($files['name']) && isset($files['name'][0]) && empty($files['name'][0])) {
+            return [];
+        }
+
+        if (is_array($files['name']) && isset($files['name'][0]) && !empty($files['name'][0])) {
+            foreach ($files['name'] as $index => $name) {
+                $normalized[] = [
+                    'name'     => $name,
+                    'type'     => $files['type'][$index],
+                    'tmp_name' => $files['tmp_name'][$index],
+                    'error'    => $files['error'][$index],
+                    'size'     => $files['size'][$index],
+                ];
+            }
+        } else {
+            // Single file
+            $normalized[] = $files;
+        }
+
+        $uploadedFilesObj = [];
+        foreach ($normalized as $index => $fileObj) {
+            $uploadedFilesObj[] = new UploadedFile(
+                $fileObj['tmp_name'],
+                $fileObj['name'],
+                $fileObj['type'],
+                $fileObj['size'],
+                $fileObj['error']
+            );
+        }
+
+        return $uploadedFilesObj;
     }
 
     /**

@@ -8028,6 +8028,11 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
           }
         ],
         "body": {
@@ -8039,8 +8044,8 @@
               "src": "{{eligibilityToken}}"
             },
             {
-              "key": "media",
-              "type": "media",
+              "key": "media[]",
+              "type": "file",
               "src": "/etc/newman/media_files/sample_text.txt"
             }
           ]
