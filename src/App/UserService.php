@@ -15,7 +15,6 @@ use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Database\PeerTokenMapper;
 
 class UserService
 {
@@ -30,7 +29,6 @@ class UserService
         protected UserPreferencesMapper $userPreferencesMapper,
         protected PostMapper $postMapper,
         protected WalletMapper $walletMapper,
-        protected PeerTokenMapper $peerTokenMapper,
 		protected Mailer $mailer
     ) {
         $this->base64filehandler = new Base64FileHandler();
@@ -1083,6 +1081,5 @@ class UserService
             return self::respondWithError(41004);
         }
     }
-
 
 }
