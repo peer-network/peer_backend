@@ -3506,7 +3506,7 @@
             {
               "key": "file",
               "type": "file",
-              "src": "/etc/newman/media_files/sample_image.jpg"
+              "src": "/Users/abdullamuradov/Downloads/report_12.html"
             }
           ]
         },
@@ -3720,7 +3720,29 @@
             {
               "key": "file",
               "type": "file",
-              "src": "/etc/newman/media_files/sample_image.jpg"
+              "src": [
+                "/etc/newman/media_files/image_01.jpg",
+                "/etc/newman/media_files/image_02.jpg",
+                "/etc/newman/media_files/image_03.jpg",
+                "/etc/newman/media_files/image_04.jpg",
+                "/etc/newman/media_files/image_05.jpg",
+                "/etc/newman/media_files/image_06.jpg",
+                "/etc/newman/media_files/image_07.jpg",
+                "/etc/newman/media_files/image_08.jpg",
+                "/etc/newman/media_files/image_09.jpg",
+                "/etc/newman/media_files/image_10.jpg",
+                "/etc/newman/media_files/image_11.jpg",
+                "/etc/newman/media_files/image_12.jpg",
+                "/etc/newman/media_files/image_13.jpg",
+                "/etc/newman/media_files/image_14.jpg",
+                "/etc/newman/media_files/image_15.jpg",
+                "/etc/newman/media_files/image_16.jpg",
+                "/etc/newman/media_files/image_17.jpg",
+                "/etc/newman/media_files/image_18.jpg",
+                "/etc/newman/media_files/image_19.jpg",
+                "/etc/newman/media_files/image_20.jpg",
+                "/etc/newman/media_files/sample-picture.png"
+                ]
             }
           ]
         },
@@ -3863,7 +3885,9 @@
             {
               "key": "file",
               "type": "file",
-              "src": "/etc/newman/media_files/sample_video.mp4"
+              "src": ["/etc/newman/media_files/File_Example_AVI_2_3MB.avi",
+                      "/etc/newman/media_files/File_Example_AVI_2_3MB.avi",
+                      "/etc/newman/media_files/file_example_MP4_480_1_5MG.mp4" ]
             }
           ]
         },
@@ -4006,7 +4030,8 @@
             {
               "key": "file",
               "type": "file",
-              "src": "/etc/newman/media_files/sample_text.txt"
+              "src": [ "/etc/newman/media_files/Sample_Text_File_10kb_1.txt",
+                       "/etc/newman/media_files/Sample_Text_File_10kb_1.txt"]
             }
           ]
         },
@@ -4149,7 +4174,10 @@
             {
               "key": "file",
               "type": "file",
-              "src": "/etc/newman/media_files/sample_audio.mp3"
+              "src": [
+                "/etc/newman/media_files/MP3-5MB-Example.mp3",
+                 "/etc/newman/media_files/MP3-5MB-Example.mp3"
+              ]
             }
           ]
         },
@@ -4292,7 +4320,7 @@
             {
               "key": "file",
               "type": "file",
-              "src": "/etc/newman/media_files/sample_image.jpg"
+              "src": "/etc/newman/media_files/empty.txt"
             }
           ]
         },
@@ -4435,7 +4463,9 @@
             {
               "key": "file",
               "type": "file",
-              "src": "/etc/newman/media_files/sample_image.jpg"
+              "src": [
+                "/etc/newman/media_files/bullshit.txt",
+                "/etc/newman/media_files/MP3-5MB-Example.mp3" ]
             }
           ]
         },
@@ -4658,69 +4688,6 @@
           "mode": "graphql",
           "graphql": {
             "query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: { title: \"post with tags\", contenttype: image, media: \"{{new_profile_pic}}\", tags: [\"{{long_message}}\"] }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}",
-            "variables": ""
-          }
-        },
-        "url": {
-          "raw": "https://peer-network.eu/graphql",
-          "protocol": "https",
-          "host": [
-            "peer-network",
-            "eu"
-          ],
-          "path": [
-            "graphql"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Create post more than 5 photo (fail)",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"ResponseCode is correct\", function () {",
-              "    pm.expect(pm.response.text()).to.include(\"30267\");",
-              "});",
-              "pm.test(\"Status is correct\", function () {",
-              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {}
-          }
-        },
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {}
-          }
-        }
-      ],
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{accessToken}}",
-              "type": "string"
-            }
-          ]
-        },
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "graphql",
-          "graphql": {
-            "query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
             "variables": ""
           }
         },
