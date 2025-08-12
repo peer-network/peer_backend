@@ -2152,11 +2152,6 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
-            "type": "text"
           }
         ],
         "body": {
@@ -2533,11 +2528,6 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
-            "type": "text"
           }
         ],
         "body": {
@@ -2850,11 +2840,6 @@
           {
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
             "type": "text"
           }
         ],
@@ -3187,11 +3172,6 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
-            "type": "text"
           }
         ],
         "body": {
@@ -3513,11 +3493,6 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
-            "type": "text"
           }
         ],
         "body": {
@@ -3588,11 +3563,6 @@
           {
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
             "type": "text"
           }
         ],
@@ -3737,11 +3707,6 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
-            "type": "text"
           }
         ],
         "body": {
@@ -3884,11 +3849,6 @@
           {
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
             "type": "text"
           }
         ],
@@ -4033,11 +3993,6 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
-            "type": "text"
           }
         ],
         "body": {
@@ -4180,11 +4135,6 @@
           {
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
             "type": "text"
           }
         ],
@@ -4329,11 +4279,6 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
-            "type": "text"
           }
         ],
         "body": {
@@ -4476,11 +4421,6 @@
           {
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
             "type": "text"
           }
         ],

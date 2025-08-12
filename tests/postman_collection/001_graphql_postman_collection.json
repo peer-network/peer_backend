@@ -8028,11 +8028,6 @@
             "key": "Authorization",
             "value": "Bearer {{accessToken}}",
             "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "multipart/form-data",
-            "type": "text"
           }
         ],
         "body": {
