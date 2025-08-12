@@ -52,7 +52,7 @@ class MultipartPostHandler implements RequestHandlerInterface
             
             $requestObj = [
                 'eligibilityToken' => isset($rawBody['eligibilityToken']) ? $rawBody['eligibilityToken'] : '',
-                'media' => is_array($filesArray) && !empty($filesArray) ? $filesArray : [],
+                'media' => !empty($filesArray) ? $filesArray : [],
             ];
             $this->multipartPostService->setCurrentUserId($bearerToken);
 

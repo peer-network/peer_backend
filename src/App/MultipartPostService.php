@@ -113,7 +113,7 @@ class MultipartPostService
 
             // Apply Validation
             $multipartPost = new MultipartPost($requestObj);
-            $multipartPost->validateRequiredFields($requestObj);
+            $multipartPost->validateRequiredFields();
             $multipartPost->validateMediaContentTypes();
             $multipartPost->validateMediaAllow();
 
