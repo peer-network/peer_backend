@@ -28,6 +28,7 @@ const PRICEDISLIKE=5;
 const PRICECOMMENT=0.5;
 const PRICEPOST=20;
 
+use Fawaz\App\AlphaMintService;
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
 use Fawaz\App\Comment;
@@ -72,6 +73,7 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
+        protected AlphaMintService $alphaMintService,
         protected LoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
@@ -164,6 +166,7 @@ class GraphQLSchemaBuilder
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
+        $this->alphaMintService->setCurrentUserId($userid);
     }
 
     protected function getStatusNameByID(int $status): ?string
@@ -1800,7 +1803,7 @@ class GraphQLSchemaBuilder
             'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
-            'alphaMint' => fn(mixed $root, array $args) => $this->userService->alphaMint($args),
+            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
         ];
     }
 
