@@ -3532,7 +3532,7 @@
           "script": {
             "exec": [
               "pm.test(\"ResponseCode is correct\", function () {",
-              "    pm.expect(pm.response.text()).to.include(\"40902\");",
+              "    pm.expect(pm.response.text()).to.include(\"30102\");",
               "});",
               "pm.test(\"Status is correct\", function () {",
               "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
