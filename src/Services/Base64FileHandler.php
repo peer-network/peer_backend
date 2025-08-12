@@ -114,7 +114,6 @@ class Base64FileHandler
                         $height = $fileInfo['video']['resolution_x'];
                     }
                 }
-                
               $gcd = gmp_intval(gmp_gcd($width, $height));
               $ratio = ($width / $gcd) . ':' . ($height / $gcd);
               $auflg = "{$width}x{$height}";
