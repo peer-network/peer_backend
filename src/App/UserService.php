@@ -89,7 +89,7 @@ class UserService
         $attempts = 0;
         do {
             $slug = $this->createNumbersAsString(1, 9, 5);
-            if (!$this->userMapper->checkIfNameAndSlugExist($username, $slug)) {
+            if (!$this->userMapper->checkIfNameAndSlugExist($username, (int) $slug)) {
                 return (int) $slug;
             }
             $attempts++;
@@ -126,7 +126,7 @@ class UserService
             return $payload;
         } catch (\Throwable $e) {
             $this->logger->error('Error create payload.', ['exception' => $e]);
-            return self::respondWithError('Error create payload.');
+            return self::respondWithError(00000);//'Error create payload.'
         }
     }
 
