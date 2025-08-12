@@ -22,10 +22,9 @@ class Base64FileHandler
             ],
             'video' => [
                 'video/mp4', 'video/quicktime', 'video/x-m4v',
-                'video/x-msvideo', 'video/3gpp', 'video/x-matroska',
-                'video/webm'
+                'video/x-msvideo', 'video/3gpp', 'video/x-matroska'
             ],
-            'audio' => ['audio/mpeg', 'audio/wav',"audio/ogg"],
+            'audio' => ['audio/mpeg', 'audio/wav','audio/ogg', 'audio/x-wav'],
             'text' => ['text/plain'],
             default => []
         };
@@ -35,8 +34,8 @@ class Base64FileHandler
     {
         return match ($contentType) {
             'image' => ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'],
-            'video' => ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'webm', 'quicktime'],
-            'audio' => ['mp3', 'wav', 'webm', 'ogg'],
+            'video' => ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'quicktime'],
+            'audio' => ['mp3', 'wav', 'ogg'],
             'text' => ['txt'],
             default => []
         };
@@ -99,6 +98,23 @@ class Base64FileHandler
             if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
               $width = $fileInfo['video']['resolution_x'];
               $height = $fileInfo['video']['resolution_y'];
+
+                // Check for Orientation
+                if(isset($fileInfo['jpg']['exif']['IFD0']['Orientation'])){
+                    $Orientation = $fileInfo['jpg']['exif']['IFD0']['Orientation'] ??= 1;
+                    // Handle image rotation based on EXIF Orientation
+                    if ($Orientation == 6 || $Orientation == 8) {
+                        $width = $fileInfo['video']['resolution_y'];
+                        $height = $fileInfo['video']['resolution_x'];
+                    }
+                }elseif(isset($fileInfo['video']['rotate'])){
+                    $Orientation = $fileInfo['video']['rotate'] ??= 0;
+                    // Handle video rotation
+                    if ($Orientation == 90 || $Orientation == 270) {
+                        $width = $fileInfo['video']['resolution_y'];
+                        $height = $fileInfo['video']['resolution_x'];
+                    }
+                }
 
               $gcd = gmp_intval(gmp_gcd($width, $height));
               $ratio = ($width / $gcd) . ':' . ($height / $gcd);
