@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Handler;
 
@@ -12,6 +13,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Psr7\Response;
+use GraphQL\Error\DebugFlag;
 
 class GraphQLHandler implements RequestHandlerInterface
 {
@@ -56,6 +58,7 @@ class GraphQLHandler implements RequestHandlerInterface
 
         $this->schemaBuilder->setCurrentUserId($bearerToken);
         $schema = $this->schemaBuilder->build();
+        $debugFlag = DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE;
 
         $context = [
             'request' => $request,
@@ -67,7 +70,7 @@ class GraphQLHandler implements RequestHandlerInterface
             ->setContext($context)
             ->setErrorFormatter(fn($error) => FormattedError::createFromException($error))
             ->setQueryBatching(true)
-            ->setDebugFlag(true);
+            ->setDebugFlag($debugFlag);
 
         $server = new StandardServer($config);
         $response = new Response();
