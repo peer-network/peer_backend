@@ -385,7 +385,7 @@ class UserInfoService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => "11012", // added user report successfully
+                'ResponseCode' => 11012, // added user report successfully
                 'affectedRows' => $userInfo->getReports(),
             ];
         } catch (\Exception $e) {
