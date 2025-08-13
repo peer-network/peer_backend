@@ -676,7 +676,7 @@ class PostService
      * 
      * @returns with Suggested PostId, JWT which will be valid for certain time
      */
-    public function postEligibility(): ?array
+    public function postEligibility(bool $isTokenGenerationRequired = true): ?array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
@@ -732,15 +732,23 @@ class PostService
             }
 
             // generate PostId and JWT
+            $eligibilityToken = $this->tokenService->createAccessTokenWithCustomExpriy($this->currentUserId, 300);
+
+            if($isTokenGenerationRequired){
+                // Add Eligibility Token to DB table eligibility_token
+                $this->postMapper->addOrUpdateEligibilityToken($this->currentUserId, $eligibilityToken, 'NO_FILE');
+            }
             $response = [
                         'status' => 'success',
                         'ResponseCode' => 10901, // You are eligible for post upload
                     ];
-            $response['postId'] = self::generateUUID();
-            $response['eligibilityToken'] = $this->tokenService->createAccessTokenWithCustomExpriy($this->currentUserId, 300);
+            $response['eligibilityToken'] = $eligibilityToken;
 
             return $response;
             
+        } catch (ValidationException $e) {
+            $this->logger->warning("PostService.postEligibility Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
+            return self::respondWithError($e->getErrors()[0]);
         } catch (\Throwable $e) {
             $this->logger->error('PostService.postEligibility exception', [
                 'message' => $e->getMessage(),

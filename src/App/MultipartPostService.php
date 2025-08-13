@@ -98,7 +98,7 @@ class MultipartPostService
             }
             // Check For Wallet Balance
             $this->postService->setCurrentUserId($this->currentUserId);
-            $hasPostCredits = $this->postService->postEligibility();
+            $hasPostCredits = $this->postService->postEligibility(false);
 
             if(isset($hasPostCredits['status']) && $hasPostCredits['status'] == 'error'){
                 throw new ValidationException("Post Eligibility failed ", [$hasPostCredits['ResponseCode']]); // Post Eligibility failed
@@ -120,7 +120,7 @@ class MultipartPostService
             // Move file to tmp folder
             $allMetadata = $multipartPost->moveFileToTmp();
             
-            $this->tokenExpires($tokenObj);
+            $this->updateTokenStatus($requestObj['eligibilityToken']);
 
             return [
                 'status' => 'success',
@@ -141,28 +141,24 @@ class MultipartPostService
      * Expire Token
      * 
      */
-    public function tokenExpires($data): void
+    public function updateTokenStatus($eligibilityToken): void
     {
-        $this->logger->info("MultipartPostService.tokenExpires started");
-
-        $query = "INSERT INTO eligibility_token_expires 
-                  (userid, eligibility_token, expiresat)
-                  VALUES 
-                  (:userid, :token, :expiresat)";
+        $this->logger->info("MultipartPostService.updateTokenStatus started");
 
         try {
-            $stmt = $this->db->prepare($query);
-
-            $stmt->bindValue(':token', $data['token'], \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':expiresat', (new DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_INT);
-
-            $stmt->execute();
-
-            $this->logger->info("Inserted new token into database", ['userid' => $data['userid']]);
+            $updateSql = "
+                    UPDATE eligibility_token
+                    SET status = :status
+                    WHERE token = :token
+                ";
+                $updateStmt = $this->db->prepare($updateSql);
+                $updateStmt->bindValue(':status', 'FILE_UPLOADED', \PDO::PARAM_STR);
+                $updateStmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
+                $updateStmt->execute();
+            $this->logger->info("Inserted new token into database", ['eligibilityToken' => $eligibilityToken]);
 
         } catch (\Throwable $e) {
-            $this->logger->error("MultipartPostService.tokenExpires: Exception occurred while inserting token", [
+            $this->logger->error("MultipartPostService.updateTokenStatus: Exception occurred while inserting token", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -187,7 +183,7 @@ class MultipartPostService
         }
 
         try {
-            $sql = "SELECT 1 FROM eligibility_token_expires WHERE eligibility_token = :token";
+            $sql = "SELECT 1 FROM eligibility_token WHERE token = :token AND status IN ('FILE_UPLOADED', 'POST_CREATED')";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':token', $requestObj['token']);
             $stmt->execute();

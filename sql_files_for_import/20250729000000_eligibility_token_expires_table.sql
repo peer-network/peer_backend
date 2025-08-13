@@ -1,9 +1,11 @@
 BEGIN;
--- Table: eligibility_token_expires
-CREATE TABLE IF NOT EXISTS eligibility_token_expires (
+-- Table: eligibility_token
+CREATE TABLE IF NOT EXISTS eligibility_token (
     userid UUID NOT NULL,
-    eligibility_token TEXT NOT NULL,
+    token TEXT NOT NULL,
+    status VARCHAR(33) DEFAULT 'NO_FILE' NOT NULL,
     expiresat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
 );
 
