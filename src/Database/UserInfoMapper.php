@@ -60,7 +60,8 @@ class UserInfoMapper
 
     public function update(UserInfo $user): UserInfo
     {
-        $this->logger->info('UserInfoMapper.update started', ['userid' => $user->getUserId()]);
+        $userid = $user->getUserId();
+        $this->logger->info('UserInfoMapper.update started', ['userid' => $userid]);
 
         try {
             $user->setUpdatedAt();
@@ -108,13 +109,13 @@ class UserInfoMapper
             return new UserInfo($data);
         } catch (\PDOException $e) {
             $this->logger->error("Database error in update", [
-                'userid' => $data['userid'],
+                'userid' => $userid,
                 'error' => $e->getMessage()
             ]);
             throw $e;
         } catch (\Exception $e) {
             $this->logger->error("Unexpected error in update", [
-                'userid' => $data['userid'],
+                'userid' => $userid,
                 'error' => $e->getMessage()
             ]);
             throw $e;
