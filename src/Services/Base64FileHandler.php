@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Services;
 
@@ -96,8 +97,9 @@ class Base64FileHandler
             $information = [];
 
             if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
-              $width = $fileInfo['video']['resolution_x'];
-              $height = $fileInfo['video']['resolution_y'];
+              $width = (int)$fileInfo['video']['resolution_x'];
+              $height = (int)$fileInfo['video']['resolution_y'];
+
                 // Check for Orientation
                 if(isset($fileInfo['jpg']['exif']['IFD0']['Orientation'])){
                     $Orientation = $fileInfo['jpg']['exif']['IFD0']['Orientation'] ??= 1;
