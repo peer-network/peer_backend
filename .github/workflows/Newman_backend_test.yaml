@@ -6,7 +6,6 @@ on:
       - development
       - main
       - pre-release
-      - bipin/feat/multipart-post-creation
 
 permissions:
   contents: write
