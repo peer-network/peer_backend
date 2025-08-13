@@ -18,10 +18,7 @@ echo 'source $HOME/.cargo/env' >> /root/.bashrc
 ENV PATH="/root/.cargo/bin:$PATH"
 
 RUN rm -f /usr/local/etc/php/conf.d/ffi.ini \
- && { \
-      echo 'extension=ffi'; \
-      echo 'ffi.enable=true'; \
-    } > /usr/local/etc/php/conf.d/zz-ffi.ini
+ && echo 'ffi.enable=true' > /usr/local/etc/php/conf.d/zz-ffi.ini
 
 RUN php -m | grep -qi '^ffi$' || (echo "FFI NOT FOUND after install" && exit 1)
  
