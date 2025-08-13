@@ -368,10 +368,10 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Merge Postman collections like local Makefile
+      - name: Merge Postman collections (inside newman container)
         run: |
-          cp tests/postman_collection/graphql_postman_environment.json tests/postman_collection/tmp_env.json
-          node tests/postman_collection/merge-collections.js
+          docker compose run --rm newman \
+            node /etc/newman/merge-collections.js
        
       - name: Rewrite Postman collection URLs and formdata like local Makefile
         run: |
