@@ -368,43 +368,33 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Merge Postman collections (inside newman container)
+      - name: Rewrite GraphQL and Upload-post Endpoints in Postman Collections (using jq)
         run: |
-          docker compose run --rm newman \
-            node /etc/newman/merge-collections.js
-       
-      - name: Rewrite Postman collection URLs and formdata like local Makefile
+          for file in tests/postman_collection/001_graphql_postman_collection.json \
+                     tests/postman_collection/002_graphql_postman_collection.json \
+                     tests/postman_collection/003_graphql_postman_collection.json; do
+
+            # Replace GraphQL endpoints
+            jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {
+              raw: "{{BACKEND_URL}}/graphql",
+              protocol: "http",
+              host: ["backend"],
+              path: ["graphql"]
+            }' "$file" > tmp1.json && mv tmp1.json "$file"
+
+            # Replace upload-post endpoints
+            jq '(.item[] | select(.request.body?.mode == "formdata") | .request.url) |= {
+              raw: "{{BACKEND_URL}}/upload-post",
+              protocol: "http",
+              host: ["backend"],
+              path: ["upload-post"]
+            }' "$file" > tmp2.json && mv tmp2.json "$file"
+          done
+
+      - name: Inject BACKEND_URL into Postman Environment (overwrite existing)
         run: |
-          echo "Rewriting GraphQL requests to use backend service..."
-          jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {
-            raw: "{{BACKEND_URL}}/graphql",
-            protocol: "http",
-            host: ["backend"],
-            path: ["graphql"]
-          }' tests/postman_collection/tmp_collection.json \
-          > tests/postman_collection/tmp_collection_patched.json
-          mv tests/postman_collection/tmp_collection_patched.json tests/postman_collection/tmp_collection.json
-
-          echo "Rewriting formdata upload-post URLs..."
-          jq '(.item[] | select(.request.body?.mode == "formdata") | .request.url) |= {
-            raw: "{{BACKEND_URL}}/upload-post",
-            protocol: "http",
-            host: ["backend"],
-            path: ["upload-post"]
-          }' tests/postman_collection/tmp_collection.json \
-          > tests/postman_collection/tmp_collection_patched2.json
-          mv tests/postman_collection/tmp_collection_patched2.json tests/postman_collection/tmp_collection.json
-
-          echo "Injecting BACKEND_URL into tmp_env.json..."
           jq 'del(.values[] | select(.key == "BACKEND_URL"))
               | .values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
-          tests/postman_collection/tmp_env.json \
-          > tests/postman_collection/tmp_env_patched.json
-          mv tests/postman_collection/tmp_env_patched.json tests/postman_collection/tmp_env.json
-
-      - name: Inject BACKEND_URL into Postman Environment
-        run: |
-          jq '.values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
             tests/postman_collection/graphql_postman_environment.json > temp_env.json
           mv temp_env.json tests/postman_collection/graphql_postman_environment.json
  
