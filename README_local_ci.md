@@ -82,7 +82,7 @@ This drops the backend image and container and rebuilds both of them.
 If you only want to reset the database (fresh schema & data) but keep current code & vendors:
 
 ```bash
-make restartrest-db-and-backend
+make reset-db-and-backend
 ```
 
 This drops the DB volume, recreates it, runs your migrations / seed and starts the backend.
