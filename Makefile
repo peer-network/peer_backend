@@ -20,7 +20,7 @@ init:
 
 	@echo "tmp_env.json ready. tmp_collection.json will be generated during test."
 
-rest-db-and-backend:
+reset-db-and-backend:
 	@echo "Bringing down docker-compose stack with volumes..."
 	-@docker-compose $(COMPOSE_FILES) down -v
 
@@ -52,7 +52,7 @@ reload-backend:
 	done
 	@echo "Backend reloaded and ready!"
 
-dev: env rest-db-and-backend init
+dev: env reset-db-and-backend init
 	@echo "Installing Composer dependencies on local host..."
 	composer install --no-dev --prefer-dist --no-interaction
 
