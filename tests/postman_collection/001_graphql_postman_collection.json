@@ -9193,9 +9193,9 @@
 							"    pm.expect(credit?.tokenamount).to.eql(100);",
 							"});",
 							"",
-							"pm.test(\"INVITER_FEE exists and amount is 0.02\", function () {",
+							"pm.test(\"INVITER_FEE exists and amount is 1\", function () {",
 							"    pm.expect(inviterFee).to.not.be.undefined;",
-							"    pm.expect(inviterFee.tokenamount).to.eql(0);",
+							"    pm.expect(inviterFee.tokenamount).to.eql(1);",
 							"});"
 						],
 						"type": "text/javascript",
@@ -9229,7 +9229,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 6) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
