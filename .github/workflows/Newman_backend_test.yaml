@@ -6,6 +6,7 @@ on:
       - development
       - main
       - pre-release
+      - bipin/feat/multipart-post-creation
 
 permissions:
   contents: write
@@ -366,23 +367,34 @@ jobs:
  
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
-       
-      - name: Replace Hardcoded URL in Postman Collection (using jq)
+
+      - name: Rewrite GraphQL and Upload-post Endpoints in Postman Collections (using jq)
         run: |
           for file in tests/postman_collection/001_graphql_postman_collection.json \
-                tests/postman_collection/002_graphql_postman_collection.json \
-                tests/postman_collection/003_graphql_postman_collection.json; do
+                     tests/postman_collection/002_graphql_postman_collection.json \
+                     tests/postman_collection/003_graphql_postman_collection.json; do
+
+            # Replace GraphQL endpoints
             jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {
               raw: "{{BACKEND_URL}}/graphql",
               protocol: "http",
               host: ["backend"],
               path: ["graphql"]
-            }' "$file" > temp.json && mv temp.json "$file"
+            }' "$file" > tmp1.json && mv tmp1.json "$file"
+
+            # Replace upload-post endpoints
+            jq '(.item[] | select(.request.body?.mode == "formdata") | .request.url) |= {
+              raw: "{{BACKEND_URL}}/upload-post",
+              protocol: "http",
+              host: ["backend"],
+              path: ["upload-post"]
+            }' "$file" > tmp2.json && mv tmp2.json "$file"
           done
- 
-      - name: Inject BACKEND_URL into Postman Environment
+
+      - name: Inject BACKEND_URL into Postman Environment (overwrite existing)
         run: |
-          jq '.values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
+          jq 'del(.values[] | select(.key == "BACKEND_URL"))
+              | .values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
             tests/postman_collection/graphql_postman_environment.json > temp_env.json
           mv temp_env.json tests/postman_collection/graphql_postman_environment.json
  
