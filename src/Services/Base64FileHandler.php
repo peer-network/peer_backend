@@ -99,6 +99,23 @@ class Base64FileHandler
               $width = $fileInfo['video']['resolution_x'];
               $height = $fileInfo['video']['resolution_y'];
 
+                // Check for Orientation
+                if(isset($fileInfo['jpg']['exif']['IFD0']['Orientation'])){
+                    $Orientation = $fileInfo['jpg']['exif']['IFD0']['Orientation'] ??= 1;
+                    // Handle image rotation based on EXIF Orientation
+                    if ($Orientation == 6 || $Orientation == 8) {
+                        $width = $fileInfo['video']['resolution_y'];
+                        $height = $fileInfo['video']['resolution_x'];
+                    }
+                }elseif(isset($fileInfo['video']['rotate'])){
+                    $Orientation = $fileInfo['video']['rotate'] ??= 0;
+                    // Handle video rotation
+                    if ($Orientation == 90 || $Orientation == 270) {
+                        $width = $fileInfo['video']['resolution_y'];
+                        $height = $fileInfo['video']['resolution_x'];
+                    }
+                }
+
               $gcd = gmp_intval(gmp_gcd($width, $height));
               $ratio = ($width / $gcd) . ':' . ($height / $gcd);
               $auflg = "{$width}x{$height}";
@@ -108,8 +125,7 @@ class Base64FileHandler
             $information['ratiofrm'] = isset($ratio) ? $ratio : null;
             $information['resolution'] = isset($auflg) ? $auflg : null;
 
-            return isset($information) ? (array)$information : null;
-            
+            return $information;            
         } catch (\Exception $e) {
             \error_log("getID3 Error: " . $e->getMessage());
             return null;
