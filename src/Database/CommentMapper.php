@@ -21,7 +21,7 @@ class CommentMapper
     {
     }
 
-    protected function respondWithError(string $message): array
+    protected function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
@@ -548,7 +548,6 @@ class CommentMapper
         return (bool) $stmt->fetchColumn();
     }
 
-
     /**
      * Get Comments for Geust based on Filter 
      */
@@ -644,4 +643,33 @@ class CommentMapper
         return $results;
     }
 
+    
+    public function fetchAllByParentId(string $parentId, int $offset = 0, int $limit = 10): array
+    {
+        $this->logger->info("CommentMapper.fetchAllByParentId started");
+
+        $sql = "
+            SELECT 
+                commentid,
+                userid,
+                postid,
+                parentid,
+                content,
+                createdat
+            FROM comments
+            WHERE parentid = :parentId
+            ORDER BY createdat ASC
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':parentId', $parentId, \PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(fn($row) => new Comment($row), $rows);
+    }
 }
