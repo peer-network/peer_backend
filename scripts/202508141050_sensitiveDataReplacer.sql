@@ -11,7 +11,7 @@ UPDATE users SET
         (RANDOM()*255)::INT, '.',
         (RANDOM()*255)::INT, '.',
         (RANDOM()*255)::INT
-    ),
+    )::inet,
     biography = CASE WHEN biography IS NOT NULL THEN 
         CONCAT('Sample biography for user ', (RANDOM()*1000000)::INT) 
         ELSE NULL END,
@@ -38,7 +38,7 @@ UPDATE contactus SET
         (RANDOM()*255)::INT, '.',
         (RANDOM()*255)::INT, '.',
         (RANDOM()*255)::INT
-    );
+    )::inet;
 
 -- Posts content anonymization
 UPDATE posts SET
@@ -122,7 +122,7 @@ UPDATE logdata SET
         (RANDOM()*255)::INT, '.',
         (RANDOM()*255)::INT, '.',
         (RANDOM()*255)::INT
-    ),
+    )::inet,
     browser = CASE 
         WHEN (RANDOM()*5)::INT = 0 THEN 'Chrome'
         WHEN (RANDOM()*5)::INT = 1 THEN 'Firefox'
@@ -138,7 +138,7 @@ UPDATE logdaten SET
         (RANDOM()*255)::INT, '.',
         (RANDOM()*255)::INT, '.',
         (RANDOM()*255)::INT
-    ),
+    )::inet,
     browser = CASE 
         WHEN (RANDOM()*5)::INT = 0 THEN 'Chrome'
         WHEN (RANDOM()*5)::INT = 1 THEN 'Firefox'
