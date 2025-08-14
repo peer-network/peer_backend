@@ -27,7 +27,7 @@ class FileUploadDispatcher
     {
         $results = [];
 
-        if (!is_array($files) || empty($files)) {
+        if (empty($files)) {
             return ['success' => false, 'error' => 'Invalid files parameter provided'];
         }
 

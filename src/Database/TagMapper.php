@@ -125,10 +125,6 @@ class TagMapper
             ]);
             return false;
         }
-
-        $this->logger->warning("No tags found with name", ['name' => $name]);
-
-        return false;
     }
 
     public function insert(Tag $tag): Tag|false

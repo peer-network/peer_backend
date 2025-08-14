@@ -17,10 +17,10 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 echo 'source $HOME/.cargo/env' >> /root/.bashrc
 ENV PATH="/root/.cargo/bin:$PATH"
 
-RUN echo "extension=/usr/local/lib/php/extensions/no-debug-non-zts-*/ffi.so" > /usr/local/etc/php/conf.d/ffi.ini && \
-    echo "ffi.enable=true" >> /usr/local/etc/php/conf.d/ffi.ini
+RUN rm -f /usr/local/etc/php/conf.d/ffi.ini \
+ && echo 'ffi.enable=true' > /usr/local/etc/php/conf.d/zz-ffi.ini
 
-RUN php -m | grep ffi || (echo "FFI NOT FOUND after install" && exit 1)
+RUN php -m | grep -qi '^ffi$' || (echo "FFI NOT FOUND after install" && exit 1)
  
 RUN which supervisord
  
