@@ -80,24 +80,24 @@ class PostInfoService
         return $response;
     }
 
-    public function deletePostInfo(string $postId): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
-        }
+    // public function deletePostInfo(string $postId): array
+    // {
+    //     if (!$this->checkAuthentication()) {
+    //         return $this->respondWithError(60501);
+    //     }
 
-        if (!self::isValidUUID($postId)) {
-            return $this->respondWithError(30209);
-        }
+    //     if (!self::isValidUUID($postId)) {
+    //         return $this->respondWithError(30209);
+    //     }
 
-        $this->logger->info('PostInfoService.deletePostInfo started');
+    //     $this->logger->info('PostInfoService.deletePostInfo started');
 
-        if ($this->postInfoMapper->delete($postId)) {
-            return ['status' => 'success', 'ResponseCode' => 11510,];
-        } else {
-            return $this->respondWithError(41510);
-        }
-    }
+    //     if ($this->postInfoMapper->delete($postId)) {
+    //         return ['status' => 'success', 'ResponseCode' => 11510,];
+    //     } else {
+    //         return $this->respondWithError(41510);
+    //     }
+    // }
 
     public function likePost(string $postId): array
     {
