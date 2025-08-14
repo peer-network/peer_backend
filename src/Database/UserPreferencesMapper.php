@@ -86,9 +86,11 @@ class UserPreferencesMapper
     public function update(UserPreferences $userPreferences): UserPreferences
     {
         $this->logger->info('UserPreferences.update started', ['userid' => $userPreferences->getUserId()]);
+
+        $userPreferences->setUpdatedAt();
+        $data = $userPreferences->getArrayCopy();
+        
         try {
-            $userPreferences->setUpdatedAt();
-            $data = $userPreferences->getArrayCopy();
             $query = "UPDATE user_preferences 
                       SET content_filtering_severity_level = :content_filtering_severity_level, 
                           updatedat = :updatedat 
