@@ -853,6 +853,41 @@ class PostMapper extends PeerMapper
     }
 
     /**
+     * Expire Token
+     * 
+     */
+    public function updateTokenStatus(string $userId): void
+    {
+        $this->logger->info("PostMapper.updateTokenStatus started");
+
+        try {
+            $updateSql = "
+                    UPDATE eligibility_token
+                    SET status = :status
+                    WHERE userid = :userid AND status = 'FILE_UPLOADED'
+                ";
+                $updateStmt = $this->db->prepare($updateSql);
+                $updateStmt->bindValue(':status', 'POST_CREATED', \PDO::PARAM_STR);
+                $updateStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                $updateStmt->execute();
+
+            $this->logger->info("PostMapper.updateTokenStatus updated successfully with POST_CREATED status");
+        
+        } catch (\PDOException $e) {
+            $this->logger->error("PostMapper.updateTokenStatus: Exception occurred while update token status", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+        } catch (\Throwable $e) {
+            $this->logger->error("PostMapper.updateTokenStatus: Exception occurred while update token status", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    }
+
+    /**
      * Revert Moved File to /tmp Folder
      */
     public function revertFileToTmp(string $uploadedFiles): void

@@ -235,6 +235,7 @@ class PostService
                     $postData['contenttype'] = $hasSameMediaType;
                     $args['contenttype'] = $hasSameMediaType;
                     $uploadedFileArray = $this->postMapper->handelFileMoveToMedia($args['uploadedFiles']);
+                    $this->postMapper->updateTokenStatus($this->currentUserId);
                     
                     $mediaPath['path'] = $uploadedFileArray;
 
