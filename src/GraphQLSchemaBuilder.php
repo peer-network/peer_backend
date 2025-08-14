@@ -1809,7 +1809,6 @@ class GraphQLSchemaBuilder
             'createChatFeed' => fn(mixed $root, array $args) => $this->postService->createPost($args['input']),
             'sendChatMessage' => fn(mixed $root, array $args) => $this->chatService->addMessage($args['chatid'], $args['content']),
             'deleteChatMessage' => fn(mixed $root, array $args) => $this->chatService->removeMessage($args['chatid'], $args['messid']),
-            'deletePost' => fn(mixed $root, array $args) => $this->postService->deletePost($args['id']),
             'likeComment' => fn(mixed $root, array $args) => $this->commentInfoService->likeComment($args['commentid']),
             'reportComment' => fn(mixed $root, array $args) => $this->commentInfoService->reportComment($args['commentid']),
             'reportUser' => fn(mixed $root, array $args) => $this->userInfoService->reportUser($args['userid']),
