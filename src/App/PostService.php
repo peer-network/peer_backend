@@ -577,45 +577,45 @@ class PostService
         );
     }
 
-    public function deletePost(string $id): array
-    {
-        if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
-            return $this->respondWithError('Invalid feed ID');
-        }
+    // public function deletePost(string $id): array
+    // {
+    //     if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
+    //         return $this->respondWithError('Invalid feed ID');
+    //     }
 
-        if (!self::isValidUUID($id)) {
-            return $this->respondWithError(30209);
-        }
+    //     if (!self::isValidUUID($id)) {
+    //         return $this->respondWithError(30209);
+    //     }
 
-        $this->logger->info('PostService.deletePost started');
+    //     $this->logger->info('PostService.deletePost started');
 
-        $posts = $this->postMapper->loadById($id);
-        if (!$posts) {
-            return $this->createSuccessResponse(21516);
-        }
+    //     $posts = $this->postMapper->loadById($id);
+    //     if (!$posts) {
+    //         return $this->createSuccessResponse(21516);
+    //     }
 
-        $post = $posts->getArrayCopy();
+    //     $post = $posts->getArrayCopy();
 
-        if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
-            return $this->respondWithError('Unauthorized: You can only delete your own posts.');
-        }
+    //     if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
+    //         return $this->respondWithError('Unauthorized: You can only delete your own posts.');
+    //     }
 
-        try {
-            $postid = $this->postMapper->delete($id);
+    //     try {
+    //         $postid = $this->postMapper->delete($id);
 
-            if ($postid) {
-                $this->logger->info('Post deleted successfully', ['postid' => $postid]);
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => 11510,
-                ];
-            }
-        } catch (\Throwable $e) {
-            return $this->respondWithError(41510);
-        }
+    //         if ($postid) {
+    //             $this->logger->info('Post deleted successfully', ['postid' => $postid]);
+    //             return [
+    //                 'status' => 'success',
+    //                 'ResponseCode' => 11510,
+    //             ];
+    //         }
+    //     } catch (\Throwable $e) {
+    //         return $this->respondWithError(41510);
+    //     }
 
-        return $this->respondWithError(41510);
-    }
+    //     return $this->respondWithError(41510);
+    // }
 
     /**
      * Get Interaction with post or comment
