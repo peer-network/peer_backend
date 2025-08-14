@@ -46,12 +46,12 @@ class UserInfoService
         return true;
     }
 
-    private function respondWithError(string $message): array
+    private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -235,11 +235,11 @@ class UserInfoService
                 return $this->createSuccessResponse(21001);
             }
 
-            if (!empty($biography)) {
+                if (!empty($biography)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($biography, 'text', $this->currentUserId, 'userData');
                 $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
 
-                if ($mediaPath === '') {
+                if (empty($mediaPath)) {
                     return $this->respondWithError(30251);
                 }
 
@@ -248,7 +248,6 @@ class UserInfoService
                 } else {
                     return $this->respondWithError(40306);
                 }
-
             } else {
                 return $this->respondWithError(40307);
             }
@@ -257,7 +256,7 @@ class UserInfoService
             $updatedUser = $this->userInfoMapper->updateUsers($user);
             $responseMessage = 11003;
 
-            $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
+            $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
 
             return [
                 'status' => 'success', 
@@ -290,7 +289,7 @@ class UserInfoService
             if (!empty($mediaFile)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $this->currentUserId, 'profile');
 
-                if ($mediaPath === '') {
+                if (empty($mediaPath)) {
                     return $this->respondWithError(30251);
                 }
 
@@ -308,7 +307,7 @@ class UserInfoService
             $updatedUser = $this->userInfoMapper->updateUsers($user);
             $responseMessage = 11004;
 
-            $this->logger->info($responseMessage, ['userId' => $this->currentUserId]);
+            $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
 
             return [
                 'status' => 'success', 

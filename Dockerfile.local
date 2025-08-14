@@ -1,14 +1,21 @@
-FROM php:8.3-fpm-bullseye
+FROM php:8.3-fpm-bookworm
 
 RUN apt-get update && \
     apt-get install -y nginx supervisor \
     git unzip curl libpq-dev postgresql-client \
     openssl libzip-dev zlib1g-dev libxml2-dev \
     libcurl4-openssl-dev libgmp-dev \
+    libffi-dev pkg-config \
     ffmpeg \
-    && docker-php-ext-install pgsql pdo pdo_pgsql bcmath xml curl gmp \
+    && docker-php-ext-configure ffi \
+    && docker-php-ext-install pgsql pdo pdo_pgsql bcmath xml curl gmp ffi \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+RUN rm -f /usr/local/etc/php/conf.d/ffi.ini \
+    && echo 'ffi.enable=true' > /usr/local/etc/php/conf.d/zz-ffi.ini
+   
+RUN php -m | grep -qi '^ffi$' || (echo "FFI NOT FOUND after install" && exit 1)
+   
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 WORKDIR /var/www/html

@@ -51,6 +51,30 @@ This will:
 
 This may take a few minutes on first run.
 
+If this results in some permission problems please run:
+
+```bash
+sudo make dev
+```
+
+and then
+
+```bash
+sudo make clean-all
+```
+This is a dry run which will set permissions correctly for the next run. Afterwards re-try "make dev" and proceed with step 3 if it worked.
+
+---
+
+### 3. Reload just the backend
+
+If you only want to reload the backend after some code changes without resetting your database:
+```bash
+make reload-backend
+```
+
+This drops the backend image and container and rebuilds both of them.
+
 ---
 
 ### 3. Soft restart (fresh DB with existing code & vendors)
@@ -58,7 +82,7 @@ This may take a few minutes on first run.
 If you only want to reset the database (fresh schema & data) but keep current code & vendors:
 
 ```bash
-make restart
+make reset-db-and-backend
 ```
 
 This drops the DB volume, recreates it, runs your migrations / seed and starts the backend.

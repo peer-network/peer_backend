@@ -51,12 +51,12 @@ class PostService
         return $d && $d->format($format) === $date;
     }
 
-    private function respondWithError(string $responseCode): array
+    private function respondWithError(int $responseCode): array
     {
         return ['status' => 'error', 'ResponseCode' => $responseCode];
     }
 
-    private function createSuccessResponse(string $message, array $data = []): array
+    private function createSuccessResponse(int $message, array $data = []): array
     {
         return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
     }
@@ -224,7 +224,7 @@ class PostService
                     return $this->respondWithError(40306);
                 }
             }
-            elseif ($args['contenttype'] === 'video' && !empty($mediaPath['path'])) {
+                elseif ($args['contenttype'] === 'video') {
                 $videoRelativePath = $mediaPath['path'][0]['path'];
                 $videoFilePath = __DIR__ . '/../../runtime-data/media' . $videoRelativePath;
 
@@ -261,7 +261,7 @@ class PostService
 
             if (isset($coverPath['path']) && !empty($coverPath['path'])) {
                 // Cover Posts_media
-                $coverDecoded = $coverPath['path'] ?? null;
+                $coverDecoded = $coverPath['path'];
                 $coverMed = [
                     'postid' => $postId,
                     'contenttype' => 'cover',
@@ -402,7 +402,7 @@ class PostService
         }
     }
 
-    private function createTag(string $tagName): Tag|false|array
+    private function createTag(string $tagName): Tag|false
     {
         $tagId = 0;
         $tagData = ['tagid' => $tagId, 'name' => $tagName];
@@ -558,7 +558,7 @@ class PostService
     {
         $postArray = $post->getArrayCopy();
 
-        $comments = $this->commentMapper->fetchAllByPostId($post->getPostId());
+        $comments = $this->commentMapper->fetchAllByPostId($post->getPostId(), $this->currentUserId);
         $postArray['comments'] = $this->mapCommentsWithReplies($comments);
 
         return $postArray;
@@ -577,45 +577,45 @@ class PostService
         );
     }
 
-    public function deletePost(string $id): array
-    {
-        if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
-            return $this->respondWithError('Invalid feed ID');
-        }
+    // public function deletePost(string $id): array
+    // {
+    //     if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
+    //         return $this->respondWithError('Invalid feed ID');
+    //     }
 
-        if (!self::isValidUUID($id)) {
-            return $this->respondWithError(30209);
-        }
+    //     if (!self::isValidUUID($id)) {
+    //         return $this->respondWithError(30209);
+    //     }
 
-        $this->logger->info('PostService.deletePost started');
+    //     $this->logger->info('PostService.deletePost started');
 
-        $posts = $this->postMapper->loadById($id);
-        if (!$posts) {
-            return $this->createSuccessResponse(21516);
-        }
+    //     $posts = $this->postMapper->loadById($id);
+    //     if (!$posts) {
+    //         return $this->createSuccessResponse(21516);
+    //     }
 
-        $post = $posts->getArrayCopy();
+    //     $post = $posts->getArrayCopy();
 
-        if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
-            return $this->respondWithError('Unauthorized: You can only delete your own posts.');
-        }
+    //     if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
+    //         return $this->respondWithError('Unauthorized: You can only delete your own posts.');
+    //     }
 
-        try {
-            $postid = $this->postMapper->delete($id);
+    //     try {
+    //         $postid = $this->postMapper->delete($id);
 
-            if ($postid) {
-                $this->logger->info('Post deleted successfully', ['postid' => $postid]);
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => 11510,
-                ];
-            }
-        } catch (\Throwable $e) {
-            return $this->respondWithError(41510);
-        }
+    //         if ($postid) {
+    //             $this->logger->info('Post deleted successfully', ['postid' => $postid]);
+    //             return [
+    //                 'status' => 'success',
+    //                 'ResponseCode' => 11510,
+    //             ];
+    //         }
+    //     } catch (\Throwable $e) {
+    //         return $this->respondWithError(41510);
+    //     }
 
-        return $this->respondWithError(41510);
-    }
+    //     return $this->respondWithError(41510);
+    // }
 
     /**
      * Get Interaction with post or comment
