@@ -55,7 +55,7 @@ class ConstantsConfig
      *     SOLANA_PUBKEY: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN: string},
      *     TOKEN: array{LENGTH: int},
      *     NUMBERS: array{MIN: float, MAX: float},
-     *     NUMBERSQ: array{MIN: int, MAX: int},
+     *     NUMBERSQ: array{MIN: int, MAX: float},
      *     WHEREBY: array{MIN: int, MAX: int}
      * }
      */
@@ -66,7 +66,7 @@ class ConstantsConfig
     /**
      * @return array{
      *     LIQUIDITY: array{MIN: float, MAX: float},
-     *     LIQUIDITQ: array{MIN: int, MAX: int}
+     *     LIQUIDITQ: array{MIN: int, MAX: float}
      * }
      */
     public static function wallett() {
