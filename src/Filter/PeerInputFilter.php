@@ -83,15 +83,13 @@ class PeerInputFilter
                     $options = $validator['options'] ?? [];
                     if (method_exists($this, $validatorName)) {
                         if (!$this->$validatorName($this->data[$field], $options)) {
-                            if (isset($this->errors[$field]) && is_array($this->errors[$field])){
-                                if (!empty($this->errors[$field][0])){
+                            if (isset($this->errors[$field])) {
+                                if (!empty($this->errors[$field][0])) {
                                     continue;
-                                }
-                            } else {
-                                if (!empty($this->errors[$field])){    
-                                    continue;
-                                }
                             }
+                        } elseif (!empty($this->errors[$field])) {
+                            continue;
+                        }
                             $this->errors[$field][] = $field;
                             if (!empty($validator['break_chain_on_failure'])) {
                                 break;
@@ -306,8 +304,8 @@ class PeerInputFilter
 
     protected function StringLength(string $value, array $options = []): bool
     {
-        $min =  (int)$options['min'] ?? 0;
-        $max = (int)$options['max'] ?? PHP_INT_MAX;
+        $min =  (int)($options['min'] ?? 0);
+        $max = (int)($options['max'] ?? PHP_INT_MAX);
         $errorCode = $options['errorCode'] ?? 40301;
         $length = strlen($value);   
 
