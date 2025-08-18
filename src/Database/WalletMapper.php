@@ -1327,9 +1327,12 @@ class WalletMapper
         \ignore_user_abort(true);
         $this->logger->info('WalletMapper.saveWalletEntry started');
 
+        $startedHere = false;
         try {
-            $this->db->beginTransaction();
-
+            if (!$this->db->inTransaction()) {
+                $this->db->beginTransaction();
+                $startedHere = true;
+            }
             $query = "SELECT 1 FROM wallett WHERE userid = :userid";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
@@ -1366,13 +1369,17 @@ class WalletMapper
                 $stmt->execute();
             }
 
-            $this->db->commit();
+            if ($startedHere) {
+                $this->db->commit();
+            }
             $this->logger->info('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
             $this->updateUserLiquidity($userId, $newLiquidity);
 
             return $newLiquidity;
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            if ($startedHere && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
             $this->logger->error('Database error in saveWalletEntry: ' . $e->getMessage());
             throw new \RuntimeException('Unable to save wallet entry');
         }
