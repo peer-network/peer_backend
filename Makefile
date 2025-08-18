@@ -132,6 +132,10 @@ test: ensure-jq
 	tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection_patched.json
 	mv -f tests/postman_collection/tmp_collection_patched.json tests/postman_collection/tmp_collection.json
 
+	jq '(.item[] | select(.request.body?.mode == "formdata") | .request.url ) |= {raw: "{{BACKEND_URL}}/upload-post", protocol: "http", host: ["backend"], path: ["upload-post"]}' \
+	tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection_patched2.json
+	mv tests/postman_collection/tmp_collection_patched2.json tests/postman_collection/tmp_collection.json
+
 	jq 'del(.values[] | select(.key == "BACKEND_URL")) | .values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
 	tests/postman_collection/tmp_env.json > tests/postman_collection/tmp_env_patched.json
 	mv -f tests/postman_collection/tmp_env_patched.json tests/postman_collection/tmp_env.json
@@ -142,8 +146,7 @@ test: ensure-jq
 	    --environment /etc/newman/tmp_env.json \
 	    --reporters cli,htmlextra \
 	    --reporter-htmlextra-export /etc/newman/reports/report.html || true
-
-	@sudo chown -R $(USER):$(USER) newman
+		
 	@echo "Newman tests completed! Attempting to open HTML report..."
 
 		@{ \

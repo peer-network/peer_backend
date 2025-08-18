@@ -1679,6 +1679,18 @@ class GraphQLSchemaBuilder
                     return $root['nextAttemptAt'] ?? '';
                 },
             ],
+            'PostEligibilityResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.PostEligibilityResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'eligibilityToken' => function (array $root): string {
+                    return $root['eligibilityToken'] ?? '';
+                }
+            ],
              'TransactionResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.TransactionResponse Resolvers');
@@ -1775,6 +1787,7 @@ class GraphQLSchemaBuilder
             'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
+            'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
         ];
@@ -3460,4 +3473,5 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(40901);
         }
     }
+
 }
