@@ -6,6 +6,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
 use Psr\Log\LoggerInterface;
+use DateTime;
 
 class JWTService
 {
@@ -90,4 +91,33 @@ class JWTService
             return null;
         }
     }
+
+
+    /**
+     * generate UUID
+     * 
+     * @param $expiryAfter in seconds
+     * 
+     * @returns JWR decoded token with provided expiry time
+     */
+    public function createAccessTokenWithCustomExpriy(string $userId, int $expiryAfter): string
+    {
+        $issuedAt = time();
+        $expirationTime = $issuedAt + $expiryAfter;
+        
+        $payload = [
+            'iss' => 'peerapp.de',
+            'aud' => 'peerapp.de',
+            'uid' => $userId,
+            'iat' => $issuedAt,
+            'date' => (new DateTime())->format('Y-m-d H:i:s.u'),
+            'jti' => bin2hex(random_bytes(20)),
+            'exp' => $expirationTime
+        ];
+
+        $this->logger->info('Creating access token', ['data' => $payload]);
+
+        return JWT::encode($payload, $this->privateKey, 'RS256');
+    }
+
 }

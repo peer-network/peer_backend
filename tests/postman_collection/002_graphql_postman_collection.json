@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "5f9afe7c-f396-447d-8fee-6618cdc0d831",
-		"name": "current dev 2",
+		"_postman_id": "11566e22-430b-46df-b631-7bd15bc92add",
+		"name": "bipin multipart 2",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "32542010",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-5f9afe7c-f396-447d-8fee-6618cdc0d831?action=share&source=collection_link&creator=32542010"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-11566e22-430b-46df-b631-7bd15bc92add?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -365,7 +365,6 @@
 							"    console.log(\"Not a Daily Free Post (code not 11513).\");",
 							"}",
 							"",
-							"// ✅ Validate resolutions of all three media items",
 							"pm.test(\"All uploaded image resolutions are correct\", function () {",
 							"    try {",
 							"        const expectedResolutions = [\"200x300\", \"736x413\", \"225x225\"];",
@@ -1363,10 +1362,10 @@
 							"    console.log(\"Error detected in response, skipping postid set.\");",
 							"}",
 							"",
-							"// ✅ Validate video resolution with hardcoded expected value",
+							"",
 							"pm.test(\"Video resolution matches expected (720x1280)\", function () {",
 							"    try {",
-							"        const expectedResolution = \"720x1280\"; // 👈 set directly here",
+							"        const expectedResolution = \"720x1280\"; // ",
 							"",
 							"        const affected = postResponse?.data?.createPost?.affectedRows;",
 							"        const mediaJson = affected?.media;",
@@ -2080,6 +2079,2377 @@
 			"response": []
 		},
 		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload media file photo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11515\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const response = pm.response.json();",
+							"",
+							"if (response.uploadedFiles) {",
+							"    pm.environment.set(\"uploadedFiles\", response.uploadedFiles);",
+							"    console.log(\"uploadedFiles saved as:\", response.uploadedFiles);",
+							"} else {",
+							"    pm.test(\"uploadedFiles field is missing\", function () {",
+							"        pm.expect(false).to.be.true;",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/sample_image.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create multipart photo post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11508\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postResponse = {};",
+							"try {",
+							"    postResponse = pm.response.json();",
+							"} catch (err) {",
+							"    console.log(\"Failed to parse response as JSON:\", err);",
+							"}",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    try {",
+							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
+							"        if (postId) {",
+							"            pm.environment.set(\"postid\", postId);",
+							"            console.log(\"postid set to:\", postId);",
+							"        } else {",
+							"            console.log(\"No postid found in response.\");",
+							"        }",
+							"    } catch (err) {",
+							"        console.log(\"Couldn't access post ID:\", err);",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping postid set.\");",
+							"}",
+							"",
+							"let response = pm.response.json();",
+							"let post = response?.data?.createPost?.affectedRows;",
+							"",
+							"pm.test(\"Cover field is an empty string\", function () {",
+							"    pm.expect(post.cover).to.eql(\"\", \"Expected 'cover' to be an empty string\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create same post (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"40305\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"popa\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
+							"});",
+							"pm.test(\"Liquidity should decrease after spending\", function () {",
+							"    pm.expect(newLiquidity).to.be.below(oldLiquidity);",
+							"});",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload media file video",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11515\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const response = pm.response.json();",
+							"",
+							"if (response.uploadedFiles) {",
+							"    pm.environment.set(\"uploadedFiles\", response.uploadedFiles);",
+							"    console.log(\"uploadedFiles saved as:\", response.uploadedFiles);",
+							"} else {",
+							"    pm.test(\"uploadedFiles field is missing\", function () {",
+							"        pm.expect(false).to.be.true;",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/sample_video.mp4"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create multipart video post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11508\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postResponse = {};",
+							"try {",
+							"    postResponse = pm.response.json();",
+							"} catch (err) {",
+							"    console.log(\"Failed to parse response as JSON:\", err);",
+							"}",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    try {",
+							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
+							"        if (postId) {",
+							"            pm.environment.set(\"postid\", postId);",
+							"            console.log(\"postid set to:\", postId);",
+							"        } else {",
+							"            console.log(\"No postid found in response.\");",
+							"        }",
+							"    } catch (err) {",
+							"        console.log(\"Couldn't access post ID:\", err);",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping postid set.\");",
+							"}",
+							"",
+							"let response = pm.response.json();",
+							"let post = response?.data?.createPost?.affectedRows;",
+							"",
+							"pm.test(\"Cover field is not empty\", function () {",
+							"    pm.expect(post.cover).not.to.eql(\"\", \"Expected 'cover' to be not empty\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: image\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
+							"});",
+							"pm.test(\"Liquidity should decrease after spending\", function () {",
+							"    pm.expect(newLiquidity).to.be.below(oldLiquidity);",
+							"});",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload media file audio",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11515\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const response = pm.response.json();",
+							"",
+							"if (response.uploadedFiles) {",
+							"    pm.environment.set(\"uploadedFiles\", response.uploadedFiles);",
+							"    console.log(\"uploadedFiles saved as:\", response.uploadedFiles);",
+							"} else {",
+							"    pm.test(\"uploadedFiles field is missing\", function () {",
+							"        pm.expect(false).to.be.true;",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/sample_audio.mp3"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create multipart audio post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(",
+							"        responseText.includes(\"11513\") || responseText.includes(\"11508\")",
+							"    ).to.be.true;",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postResponse = {};",
+							"try {",
+							"    postResponse = pm.response.json();",
+							"} catch (err) {",
+							"    console.log(\"Failed to parse response as JSON:\", err);",
+							"}",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    try {",
+							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
+							"        if (postId) {",
+							"            pm.environment.set(\"postid\", postId);",
+							"            console.log(\"postid set to:\", postId);",
+							"        } else {",
+							"            console.log(\"No postid found in response.\");",
+							"        }",
+							"    } catch (err) {",
+							"        console.log(\"Couldn't access post ID:\", err);",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping postid set.\");",
+							"}",
+							"",
+							"let postResponseCode = \"\";",
+							"try {",
+							"    postResponseCode = postResponse?.data?.createPost?.ResponseCode || \"\";",
+							"} catch (err) {",
+							"    console.log(\"Couldn't access ResponseCode:\", err);",
+							"}",
+							"",
+							"if (postResponseCode === \"11513\") {",
+							"    pm.environment.set(\"isDailyFreePost\", \"true\");",
+							"    console.log(\"This was a Daily Free Post (code 11513).\");",
+							"} else {",
+							"    pm.environment.unset(\"isDailyFreePost\");",
+							"    console.log(\"Not a Daily Free Post (code not 11513).\");",
+							"}",
+							"",
+							"let response = pm.response.json();",
+							"let post = response?.data?.createPost?.affectedRows;",
+							"",
+							"pm.test(\"Cover field is empty string\", function () {",
+							"    pm.expect(post.cover).to.eql(\"\", \"Expected 'cover' to be an empty string\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
+							"});",
+							"pm.test(\"Liquidity should decrease after spending\", function () {",
+							"    pm.expect(newLiquidity).to.be.below(oldLiquidity);",
+							"});",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload media file text",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11515\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const response = pm.response.json();",
+							"",
+							"if (response.uploadedFiles) {",
+							"    pm.environment.set(\"uploadedFiles\", response.uploadedFiles);",
+							"    console.log(\"uploadedFiles saved as:\", response.uploadedFiles);",
+							"} else {",
+							"    pm.test(\"uploadedFiles field is missing\", function () {",
+							"        pm.expect(false).to.be.true;",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/sample_text.txt"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create multipart text post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(",
+							"        responseText.includes(\"11513\") || responseText.includes(\"11508\")",
+							"    ).to.be.true;",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postResponse = {};",
+							"try {",
+							"    postResponse = pm.response.json();",
+							"} catch (err) {",
+							"    console.log(\"Failed to parse response as JSON:\", err);",
+							"}",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    try {",
+							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
+							"        if (postId) {",
+							"            pm.environment.set(\"postid\", postId);",
+							"            console.log(\"postid set to:\", postId);",
+							"        } else {",
+							"            console.log(\"No postid found in response.\");",
+							"        }",
+							"    } catch (err) {",
+							"        console.log(\"Couldn't access post ID:\", err);",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping postid set.\");",
+							"}",
+							"",
+							"let postResponseCode = \"\";",
+							"try {",
+							"    postResponseCode = postResponse?.data?.createPost?.ResponseCode || \"\";",
+							"} catch (err) {",
+							"    console.log(\"Couldn't access ResponseCode:\", err);",
+							"}",
+							"",
+							"if (postResponseCode === \"11513\") {",
+							"    pm.environment.set(\"isDailyFreePost\", \"true\");",
+							"    console.log(\"This was a Daily Free Post (code 11513).\");",
+							"} else {",
+							"    pm.environment.unset(\"isDailyFreePost\");",
+							"    console.log(\"Not a Daily Free Post (code not 11513).\");",
+							"}",
+							"",
+							"let response = pm.response.json();",
+							"let post = response?.data?.createPost?.affectedRows;",
+							"",
+							"pm.test(\"Cover field is empty string\", function () {",
+							"    pm.expect(post.cover).to.eql(\"\", \"Expected 'cover' to be an empty string\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let newLiquidity = response.data.balance.currentliquidity;",
+							"let oldLiquidity = pm.environment.get(\"liquidity\");",
+							"pm.test(\"Previous liquidity exists\", function () {",
+							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
+							"});",
+							"pm.test(\"Liquidity should decrease after spending\", function () {",
+							"    pm.expect(newLiquidity).to.be.below(oldLiquidity);",
+							"});",
+							"pm.environment.set(\"liquidity\", newLiquidity);",
+							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload media not existing file",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30102\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/abdullamuradov/Downloads/report_12.html"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload media without token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30102\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/sample_image.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload more than 20 photo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30267\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file[]",
+							"type": "file",
+							"src": [
+								"/etc/newman/media_files/image_01.jpg",
+								"/etc/newman/media_files/image_02.jpg",
+								"/etc/newman/media_files/image_03.jpg",
+								"/etc/newman/media_files/image_04.jpg",
+								"/etc/newman/media_files/image_05.jpg",
+								"/etc/newman/media_files/image_06.jpg",
+								"/etc/newman/media_files/image_07.jpg",
+								"/etc/newman/media_files/image_08.jpg",
+								"/etc/newman/media_files/image_09.jpg",
+								"/etc/newman/media_files/image_10.jpg",
+								"/etc/newman/media_files/image_11.jpg",
+								"/etc/newman/media_files/image_12.jpg",
+								"/etc/newman/media_files/image_13.jpg",
+								"/etc/newman/media_files/image_14.jpg",
+								"/etc/newman/media_files/image_15.jpg",
+								"/etc/newman/media_files/image_16.jpg",
+								"/etc/newman/media_files/image_17.jpg",
+								"/etc/newman/media_files/image_18.jpg",
+								"/etc/newman/media_files/image_19.jpg",
+								"/etc/newman/media_files/image_20.jpg",
+								"/etc/newman/media_files/sample-picture.png"
+							]
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload more than 2 video",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30267\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file[]",
+							"type": "file",
+							"src": [
+								"/etc/newman/media_files/file_example_MP4_480_1_5MG.mp4",
+								"/etc/newman/media_files/file_example_MP4_480_1_5MG.mp4",
+								"/etc/newman/media_files/file_example_MP4_480_1_5MG.mp4"
+							]
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload more than 1 text",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30267\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file[]",
+							"type": "file",
+							"src": [
+								"/etc/newman/media_files/Sample_Text_File_10kb_1.txt",
+								"/etc/newman/media_files/Sample_Text_File_10kb_1.txt"
+							]
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload more than 1 audio",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30267\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file[]",
+							"type": "file",
+							"src": [
+								"/etc/newman/media_files/MP3-5MB-Example.mp3",
+								"/etc/newman/media_files/MP3-5MB-Example.mp3"
+							]
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload empty file",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"40307\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/empty.txt"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload all types of media",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30266\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file[]",
+							"type": "file",
+							"src": [
+								"/etc/newman/media_files/bullshit.txt",
+								"/etc/newman/media_files/MP3-5MB-Example.mp3"
+							]
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create post fake file",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"40305\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uuid}}.txt\"\n        }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create post with more than 10 tags",
 			"event": [
 				{
@@ -2221,69 +4591,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: { title: \"post with tags\", contenttype: image, media: \"{{new_profile_pic}}\", tags: [\"{{long_message}}\"] }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create post more than 5 photo (fail)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"30267\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2912,6 +5219,106 @@
 		},
 		{
 			"name": "Comment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let commentResponse = {};",
+							"try {",
+							"    commentResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let commentResponseCode = \"\";",
+							"let status = \"\";",
+							"",
+							"try {",
+							"    status = commentResponse?.data?.createComment?.status || \"\";",
+							"    commentResponseCode = commentResponse?.data?.createComment?.ResponseCode || \"\";",
+							"} catch (e) {",
+							"    console.log(\"Error accessing response properties:\", e);",
+							"}",
+							"",
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect([\"11605\", \"11608\"]).to.include(commentResponseCode);",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(status).to.eql(\"success\");",
+							"});",
+							"",
+							"if (commentResponseCode === \"11608\") {",
+							"    pm.environment.set(\"isDailyFreeComment\", \"true\");",
+							"    console.log(\"This was a Daily Free Comment.\");",
+							"} else {",
+							"    pm.environment.unset(\"isDailyFreeComment\");",
+							"    console.log(\"Not a Daily Free Comment.\");",
+							"}",
+							"let response = {};",
+							"try {",
+							"    response = pm.response.json();",
+							"} catch (err) {",
+							"    console.log(\"Failed to parse JSON:\", err);",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    try {",
+							"        const commentId = response?.data?.createComment?.affectedRows?.[0]?.commentid;",
+							"        if (commentId) {",
+							"            pm.environment.set(\"commentid\", commentId);",
+							"            console.log(\"commentid set to:\", commentId);",
+							"        } else {",
+							"            console.log(\"No commentid found in response.\");",
+							"        }",
+							"    } catch (err) {",
+							"        console.log(\"Error extracting commentid:\", err);",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping commentid set.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{postid}}\", content: \"{{comment_content}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PostInteractions(LIKE)",
 			"event": [
 				{
 					"listen": "test",
@@ -8156,9 +10563,9 @@
 							"    pm.expect(diff).to.eql(1);",
 							"});",
 							"",
-							"pm.test(\"Comment count dropped by exactly 1\", function () {",
+							"pm.test(\"Comment count dropped by exactly 2\", function () {",
 							"    const diff = originalCommentCount - currentCommentCount;",
-							"    pm.expect(diff).to.eql(1);",
+							"    pm.expect(diff).to.eql(2);",
 							"});",
 							"",
 							"console.log(`Posts: ${originalPostCount} → ${currentPostCount}`);",
@@ -10986,68 +13393,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Globalwins {\n    globalwins {\n        status\n        ResponseCode\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "gemster",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11207\");",
-							"});",
-							"",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"pm.test(\"d0 is not 0\", function () {",
-							"    const json = pm.response.json();",
-							"    const d0 = json?.data?.gemster?.affectedRows?.d0;",
-							"    pm.expect(d0, `d0 was ${d0}`).to.not.eql(0);",
-							"    console.log(\"d0 value:\", d0);",
-							"});",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query Gemster {\n    gemster {\n        status\n        ResponseCode\n        affectedRows {\n            d0\n            d1\n            d2\n            d3\n            d4\n            d5\n            w0\n            m0\n            y0\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
