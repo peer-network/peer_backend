@@ -173,6 +173,7 @@ class WalletMapper
         }
 
         try {
+            $this->db->beginTransaction();
             // 1. SENDER: Debit From Account
             if ($numberoftokens) {
                 $id = self::generateUUID();
@@ -196,6 +197,7 @@ class WalletMapper
             if ($numberoftokens) {
                 $id = self::generateUUID();
                 if (empty($id)) {
+                    $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -216,6 +218,7 @@ class WalletMapper
                 if ($inviterWin) {
                     $id = self::generateUUID();
                     if (empty($id)) {
+                        $this->db->rollBack();
                         $this->logger->critical('Failed to generate logwins ID');
                         return self::respondWithError(41401);
                     }
@@ -236,6 +239,7 @@ class WalletMapper
             if ($countAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
+                    $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -255,6 +259,7 @@ class WalletMapper
             if ($feeAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
+                    $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -274,6 +279,7 @@ class WalletMapper
             if ($peerAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
+                    $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -293,6 +299,7 @@ class WalletMapper
             if ($burnAmount) {
                 $id = self::generateUUID();
                 if (empty($id)) {
+                    $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
                     return self::respondWithError(41401);
                 }
@@ -307,10 +314,11 @@ class WalletMapper
                 $this->insertWinToLog($this->burnWallet, $args);
                 $this->insertWinToPool($this->burnWallet, $args);
             }
-
+            $this->db->commit();
             return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
 
         } catch (\Throwable $e) {
+            $this->db->rollBack();
             return self::respondWithError($e->getMessage());
         }
     }
@@ -773,7 +781,7 @@ class WalletMapper
                 'userId' => $userId,
                 'exception' => $e->getMessage()
             ]);
-
+            
             return false;
         }
     }
@@ -1327,12 +1335,7 @@ class WalletMapper
         \ignore_user_abort(true);
         $this->logger->info('WalletMapper.saveWalletEntry started');
 
-        $startedHere = false;
         try {
-            if (!$this->db->inTransaction()) {
-                $this->db->beginTransaction();
-                $startedHere = true;
-            }
             $query = "SELECT 1 FROM wallett WHERE userid = :userid";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
@@ -1369,17 +1372,11 @@ class WalletMapper
                 $stmt->execute();
             }
 
-            if ($startedHere) {
-                $this->db->commit();
-            }
             $this->logger->info('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
             $this->updateUserLiquidity($userId, $newLiquidity);
 
             return $newLiquidity;
         } catch (\Throwable $e) {
-            if ($startedHere && $this->db->inTransaction()) {
-                $this->db->rollBack();
-            }
             $this->logger->error('Database error in saveWalletEntry: ' . $e->getMessage());
             throw new \RuntimeException('Unable to save wallet entry');
         }
