@@ -1103,7 +1103,7 @@ class PostMapper extends PeerMapper
                     $this->logger->warning("Cap reached: user has {$cnt} records in last hour with restricted statuses", [
                         'userId' => $userId,
                     ]);
-                    throw new ValidationException('Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.', [0000]); // Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED
+                    throw new ValidationException('Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.', [40301]); // Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED
                 }
             }
 
