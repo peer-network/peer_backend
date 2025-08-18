@@ -651,6 +651,9 @@ class GraphQLSchemaBuilder
                 'cover' => function (array $root): string {
                     return $root['cover'] ?? '';
                 },
+                'url' => function (array $root): string {
+                    return $root['url'] ?? '';
+                },
                 'mediadescription' => function (array $root): string {
                     return $root['mediadescription'] ?? '';
                 },

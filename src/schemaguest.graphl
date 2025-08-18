@@ -47,6 +47,7 @@ type Post {
   isdisliked: Boolean!
   issaved: Boolean!
   tags: [String]!
+  url: String!
   user: ProfileUser!
   comments: [Comment!]!
 }
