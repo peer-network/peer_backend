@@ -143,6 +143,18 @@ cd tokencalculation
 cargo build --release
 ```
 
+### **9: Install and Enable `FFI` 
+```
+sudo docker-php-ext-configure ffi
+sudo docker-php-ext-install ffi
+
+# enable the extension
+sudo rm -f /usr/local/etc/php/conf.d/ffi.ini
+echo 'ffi.enable=true' | sudo tee /usr/local/etc/php/conf.d/zz-ffi.ini
+
+# confirm that ffi is active
+php -m | grep -qi '^ffi$' || (echo "FFI NOT FOUND after install" && exit 1)
+```
 
 
 ---
