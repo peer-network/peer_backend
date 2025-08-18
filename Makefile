@@ -166,7 +166,7 @@ test: ensure-jq
 	}
 	
 
-clean-all: rest-db-and-backend
+clean-all: reset-db-and-backend
 	@rm -f composer.lock
 	@rm -rf vendor
 	@rm -rf sql_files_for_import_tmp
