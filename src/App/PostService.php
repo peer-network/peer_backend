@@ -248,6 +248,9 @@ class PostService
                         return $this->respondWithError(30101); 
                     }
                 }else{
+                    if(isset($args['uploadedFiles'])){
+                        $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                    }
                     return $this->respondWithError(30266); // Provided files should have same type 
                 }
                
@@ -717,12 +720,10 @@ class PostService
                     ];
             $hasFreeDaily = false;
 
-            if ($limit > 0) {
-                $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
-                if ($DailyUsage < $limit) {
-                    // generate PostId and JWT
-                    $hasFreeDaily = true;
-                }
+            $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
+            if ($DailyUsage < $limit) {
+                // generate PostId and JWT
+                $hasFreeDaily = true;
             }
 
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
