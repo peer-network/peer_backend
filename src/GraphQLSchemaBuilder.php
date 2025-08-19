@@ -214,8 +214,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.TodaysInteractionsData Resolvers');
                     return $root['totalInteractions'] ?? 0;
                 },
-                'totalScore' => function (array $root): int {
-                    return $root['totalScore'] ?? 0;
+                'totalScore' => function (array $root): float {
+                    return $root['totalScore'] ?? 0.0;
                 },
                 'totalDetails' => function (array $root): array {
                     return $root['totalDetails'] ?? [];
