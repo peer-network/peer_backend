@@ -284,7 +284,7 @@ jobs:
         run: |
           docker compose exec backend bash -c "echo 'upload_max_filesize = 510M' >> /usr/local/etc/php/conf.d/uploads.ini"
           docker compose exec backend bash -c "echo 'post_max_size = 510M' >> /usr/local/etc/php/conf.d/uploads.ini"
-          docker compose exec backend bash -c "echo 'max_file_uploads = 21' >> /usr/local/etc/php/conf.d/uploads.ini"
+          docker compose exec backend bash -c "echo 'max_file_uploads = 100' >> /usr/local/etc/php/conf.d/uploads.ini"
           docker compose exec backend bash -c "php -i | grep upload_max_filesize"
           docker compose exec backend bash -c "php -i | grep post_max_size"
           docker compose exec backend bash -c "php -i | grep max_file_uploads"
