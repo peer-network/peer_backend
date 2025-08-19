@@ -68,10 +68,9 @@ class DailyFreeService
             ];
 
         } catch (\Throwable $e) {
-            $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage()]);
+            $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage(), 'userId' => $userId]);
+            return $this->respondWithError(40301);
         }
-        
-        return [];
     }
 
     public function getUserDailyUsage(string $userId, int $artType): int
