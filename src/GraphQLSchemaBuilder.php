@@ -1684,8 +1684,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.PostEligibilityResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
+                'ResponseCode' => function (array $root): int {
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'eligibilityToken' => function (array $root): string {
                     return $root['eligibilityToken'] ?? '';
