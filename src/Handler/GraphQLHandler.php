@@ -58,7 +58,6 @@ class GraphQLHandler implements RequestHandlerInterface
 
         $this->schemaBuilder->setCurrentUserId($bearerToken);
         $schema = $this->schemaBuilder->build();
-        $debugFlag = DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE;
 
         $context = [
             'request' => $request,
@@ -70,7 +69,7 @@ class GraphQLHandler implements RequestHandlerInterface
             ->setContext($context)
             ->setErrorFormatter(fn($error) => FormattedError::createFromException($error))
             ->setQueryBatching(true)
-            ->setDebugFlag($debugFlag);
+            ->setDebugFlag();
 
         $server = new StandardServer($config);
         $response = new Response();
