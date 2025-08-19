@@ -365,6 +365,7 @@
 							"    console.log(\"Not a Daily Free Post (code not 11513).\");",
 							"}",
 							"",
+							"// ✅ Validate resolutions of all three media items",
 							"pm.test(\"All uploaded image resolutions are correct\", function () {",
 							"    try {",
 							"        const expectedResolutions = [\"200x300\", \"736x413\", \"225x225\"];",
@@ -1379,10 +1380,9 @@
 							"    pm.environment.set(\"startday\", nextDay);",
 							"});",
 							"// ✅ Validate video resolution with hardcoded expected value",
-							"",
 							"pm.test(\"Video resolution matches expected (720x1280)\", function () {",
 							"    try {",
-							"        const expectedResolution = \"720x1280\"; // ",
+							"        const expectedResolution = \"720x1280\"; // 👈 set directly here",
 							"",
 							"        const affected = postResponse?.data?.createPost?.affectedRows;",
 							"        const mediaJson = affected?.media;",
@@ -1631,7 +1631,7 @@
 							"    try {",
 							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
 							"        if (postId) {",
-							"            pm.environment.set(\"postidadd1\", postId);",
+							"            pm.environment.set(\"postidadd\", postId);",
 							"            console.log(\"postid set to:\", postId);",
 							"        } else {",
 							"            console.log(\"No postid found in response.\");",
@@ -2350,7 +2350,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"40305\");",
+							"    pm.expect(pm.response.text()).to.include(\"31511\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4261,6 +4261,70 @@
 			"response": []
 		},
 		{
+			"name": "Login tester 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get eligibility token",
 			"event": [
 				{
@@ -4595,6 +4659,80 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uuid}}.txt\"\n        }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "W Login tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5382,106 +5520,6 @@
 		},
 		{
 			"name": "Comment",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"let commentResponse = {};",
-							"try {",
-							"    commentResponse = pm.response.json();",
-							"} catch (e) {",
-							"    console.log(\"Failed to parse JSON:\", e);",
-							"}",
-							"",
-							"let commentResponseCode = \"\";",
-							"let status = \"\";",
-							"",
-							"try {",
-							"    status = commentResponse?.data?.createComment?.status || \"\";",
-							"    commentResponseCode = commentResponse?.data?.createComment?.ResponseCode || \"\";",
-							"} catch (e) {",
-							"    console.log(\"Error accessing response properties:\", e);",
-							"}",
-							"",
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect([\"11605\", \"11608\"]).to.include(commentResponseCode);",
-							"});",
-							"",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(status).to.eql(\"success\");",
-							"});",
-							"",
-							"if (commentResponseCode === \"11608\") {",
-							"    pm.environment.set(\"isDailyFreeComment\", \"true\");",
-							"    console.log(\"This was a Daily Free Comment.\");",
-							"} else {",
-							"    pm.environment.unset(\"isDailyFreeComment\");",
-							"    console.log(\"Not a Daily Free Comment.\");",
-							"}",
-							"let response = {};",
-							"try {",
-							"    response = pm.response.json();",
-							"} catch (err) {",
-							"    console.log(\"Failed to parse JSON:\", err);",
-							"}",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    try {",
-							"        const commentId = response?.data?.createComment?.affectedRows?.[0]?.commentid;",
-							"        if (commentId) {",
-							"            pm.environment.set(\"commentid\", commentId);",
-							"            console.log(\"commentid set to:\", commentId);",
-							"        } else {",
-							"            console.log(\"No commentid found in response.\");",
-							"        }",
-							"    } catch (err) {",
-							"        console.log(\"Error extracting commentid:\", err);",
-							"    }",
-							"} else {",
-							"    console.log(\"Error detected in response, skipping commentid set.\");",
-							"}"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{postid}}\", content: \"{{comment_content}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "PostInteractions(LIKE)",
 			"event": [
 				{
 					"listen": "test",
@@ -7241,80 +7279,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Login tester 2",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"10801\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
-							"} else {",
-							"    console.log(\"Error detected in response, environment variable not set.\");",
-							"}",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
-							"} else {",
-							"    console.log(\"Error detected in response, environment variable not set.\");",
-							"}",
-							"let token = pm.environment.get(\"accessToken\");",
-							"pm.test(\"Access token exists\", function () {",
-							"    pm.expect(token).to.be.a(\"string\");",
-							"});",
-							"",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
 						"variables": ""
 					}
 				},
@@ -10726,9 +10690,9 @@
 							"    pm.expect(diff).to.eql(1);",
 							"});",
 							"",
-							"pm.test(\"Comment count dropped by exactly 2\", function () {",
+							"pm.test(\"Comment count dropped by exactly 1\", function () {",
 							"    const diff = originalCommentCount - currentCommentCount;",
-							"    pm.expect(diff).to.eql(2);",
+							"    pm.expect(diff).to.eql(1);",
 							"});",
 							"",
 							"console.log(`Posts: ${originalPostCount} → ${currentPostCount}`);",
@@ -15945,7 +15909,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{startday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{startday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -15981,7 +15945,7 @@
 							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
 							"",
 							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
-							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
 							"let expectedDay = pm.environment.get(\"startday\");",
 							"let expectedAdId = pm.environment.get(\"advertisementId\");",
 							"",
@@ -16135,7 +16099,7 @@
 							"",
 							"let res = pm.response.json();",
 							"let posts = res?.data?.listPosts?.affectedRows ?? [];",
-							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
 							"",
 							"pm.test(\"Created post exists in listPosts\", function () {",
 							"    let exists = posts.some(p => p.id === expectedPostId);",
@@ -16253,7 +16217,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: SEVEN_DAYS\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: SEVEN_DAYS\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -16289,7 +16253,7 @@
 							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
 							"",
 							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
-							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
 							"let expectedDay = pm.environment.get(\"diffstartday\");",
 							"let expectedAdId = pm.environment.get(\"advertisementId\");",
 							"",
@@ -16443,7 +16407,7 @@
 							"",
 							"let res = pm.response.json();",
 							"let posts = res?.data?.listPosts?.affectedRows ?? [];",
-							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
 							"",
 							"pm.test(\"Created post exists in listPosts\", function () {",
 							"    let exists = posts.some(p => p.id === expectedPostId);",
@@ -16545,7 +16509,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -16686,7 +16650,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd1}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -16722,7 +16686,7 @@
 							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
 							"",
 							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
-							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
 							"let expectedAdId = pm.environment.get(\"advertisementId\");",
 							"",
 							"pm.test(\"Advertisement exists with correct creatorId, postId, and advertisementId\", function () {",
@@ -16873,9 +16837,9 @@
 							"",
 							"let response = pm.response.json();",
 							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
-							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
 							"",
-							"pm.test(\"First post ID matches 'postidadd1' from environment\", function () {",
+							"pm.test(\"First post ID matches 'postidadd' from environment\", function () {",
 							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
 							"});"
 						],
@@ -16990,7 +16954,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -17026,7 +16990,7 @@
 							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
 							"",
 							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
-							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
 							"let expectedDay = pm.environment.get(\"diffstartday\");",
 							"let expectedAdId = pm.environment.get(\"advertisementId\");",
 							"",
@@ -17180,9 +17144,9 @@
 							"",
 							"let response = pm.response.json();",
 							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
-							"let expectedPostId = pm.environment.get(\"postidadd1\");",
+							"let expectedPostId = pm.environment.get(\"postidadd\");",
 							"",
-							"pm.test(\"First post ID matches 'postidadd1' from environment\", function () {",
+							"pm.test(\"First post ID matches 'postidadd' from environment\", function () {",
 							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
 							"});"
 						],
@@ -17612,7 +17576,7 @@
 							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
 							"let expectedPostId = pm.environment.get(\"existing_postid\");",
 							"",
-							"pm.test(\"First post ID matches 'postidadd1' from environment\", function () {",
+							"pm.test(\"First post ID matches 'postidadd' from environment\", function () {",
 							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
 							"});"
 						],
