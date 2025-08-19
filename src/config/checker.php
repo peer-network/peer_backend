@@ -21,6 +21,11 @@ if (!in_array($db_driver, ['postgres'])) {
 
 if ($db_driver === 'postgres') {
     function is_pg_server_running($host, $port) {
+    if (!is_numeric($port)) { 
+        \error_log("Invalid port value for PostgreSQL connection: " . $port); 
+        return false; 
+    }
+
         $connection = @fsockopen($host, (int)$port, $errno, $errstr, 5);
 
         if ($connection) {
