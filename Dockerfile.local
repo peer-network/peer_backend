@@ -18,6 +18,14 @@ RUN php -m | grep -qi '^ffi$' || (echo "FFI NOT FOUND after install" && exit 1)
    
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+RUN { \
+  echo "upload_max_filesize = 510M"; \
+  echo "post_max_size = 510M"; \
+  echo "max_file_uploads = 100"; \
+  echo "log_errors = On"; \
+  echo "display_errors = Off"; \
+} > /usr/local/etc/php/conf.d/uploads.ini
+
 WORKDIR /var/www/html
 
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
