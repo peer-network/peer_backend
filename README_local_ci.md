@@ -77,7 +77,7 @@ This drops the backend image and container and rebuilds both of them.
 
 ---
 
-### 3. Soft restart (fresh DB with existing code & vendors)
+### 4. Soft restart (fresh DB with existing code & vendors)
 
 If you only want to reset the database (fresh schema & data) but keep current code & vendors:
 
@@ -89,7 +89,7 @@ This drops the DB volume, recreates it, runs your migrations / seed and starts t
 
 ---
 
-### 4. Run Postman (Newman) Tests Locally
+### 5. Run Postman (Newman) Tests Locally
 
 Once the backend and database are up, run:
 
@@ -106,7 +106,7 @@ This will:
 
 ---
 
-### 5. Full Cleanup
+### 6. Full Cleanup
 
 To stop and remove everything (containers, volumes, files):
 
@@ -121,7 +121,7 @@ This will:
 
 ---
 
-### 6. Run Local CI in One Command
+### 7. Run Local CI in One Command
 
 If you want to replicate the remote CI workflow locally (spin up the environment, run Newman tests, and clean everything up afterwards), run:
 
@@ -136,6 +136,64 @@ This will:
 - Generate an HTML report of the test results
 - Skip interactive steps so it can run unattended
 - Clean up containers, volumes, and temp files automatically at the end
+
+---
+
+### 8. Developer Shortcuts
+
+For faster debugging and development after starting db and backend container, the following Make targets are available:
+
+```bash
+make logs
+```
+
+```bash
+make db
+```
+
+```bash
+make bash-backend
+```
+
+  These will:
+
+- make logs will view backend logs
+- make db will open postgres psql shell
+- make bash-backend will open an interactive bash shell inside backend container.
+
+To exit interactive sessions:
+
+From psql (Postgres shell) → type \q and press Enter
+
+From backend bash shell → type exit and press Enter
+
+---
+
+### 9. List All Commands
+
+You can see all available commands at any time by running:
+
+```bash
+make help
+```
+
+Example output:
+
+Available targets:
+  bash-backend              Open interactive shell in backend container
+  ci                        Run full local CI workflow (setup, tests, cleanup)
+  clean-all                 Remove containers, volumes, vendors, reports, logs
+  db                        Open psql shell into Postgres
+  dev                       Full setup: env, DB reset, vendors install, start DB+backend
+  ensure-jq                 Ensure jq is installed (auto-install if missing)
+  env                       Copy .env.dev to .env for local development
+  help                      Show available make targets
+  init                      Prepare Postman environment files for testing
+  logs                      Tail backend logs
+  reload-backend            Rebuild and restart backend container
+  reset-db-and-backend      Reset DB, backend, and remove all related Docker images
+  restart                   Soft restart with fresh DB but keep current code & vendors
+  test                      Run Newman tests inside Docker and generate HTML report
 
 ---
 
