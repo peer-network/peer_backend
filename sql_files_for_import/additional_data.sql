@@ -123,7 +123,7 @@ INSERT INTO posts (
     '[{"path":"/image/1c9448a1-3608-423f-a038-2f267c943151.webp","options":{"size":"4.27 KB","resolution":"200x300"}}]',
     NULL,
     NULL,
-    10,
+    0,
     date_trunc('day', now()) - interval '2 days' + interval '001 milliseconds'
 );
 
