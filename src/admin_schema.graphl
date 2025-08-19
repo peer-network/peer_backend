@@ -148,56 +148,6 @@ enum ContentFilterType {
   MYGRANDMAHATES
 }
 
-enum ContentType {
-  image
-  audio
-  video
-  text
-}
-
-enum PostFilterType {
-  IMAGE
-  AUDIO
-  VIDEO
-  TEXT
-  FOLLOWED
-  FOLLOWER
-  VIEWED
-  FRIENDS
-}
-
-enum IgnoreOption {
-  YES
-  NO
-}
-
-enum PostSortType {
-  NEWEST
-  TRENDING
-  LIKES
-  DISLIKES
-  VIEWS
-  COMMENTS
-  FOR_ME
-  OLDEST
-  FOLLOWER
-  FOLLOWED
-  RELEVANT
-  FRIENDS
-}
-
-enum DayFilterType {
-  D0
-  D1
-  D2
-  D3
-  D4
-  D5
-  W0
-  M0
-  Y0
-}
-
 enum AdvertisementType {
   PINNED
   BASIC
@@ -269,6 +219,56 @@ type TransactionResponse {
 
 type UserPreferences {
   contentFilteringSeverityLevel: ContentFilterType
+}
+
+enum ContentType {
+  image
+  audio
+  video
+  text
+}
+
+enum PostFilterType {
+  IMAGE
+  AUDIO
+  VIDEO
+  TEXT
+  FOLLOWED
+  FOLLOWER
+  VIEWED
+}
+
+enum IgnoreOption {
+  YES
+  NO
+}
+
+enum PostSortType {
+  NEWEST
+  TRENDING
+  LIKES
+  DISLIKES
+  VIEWS
+  COMMENTS
+  FOR_ME
+}
+
+enum DayFilterType {
+  D0
+  D1
+  D2
+  D3
+  D4
+  D5
+  W0
+  M0
+  Y0
+}
+
+type PostEligibilityResponse {
+  status: String!
+  ResponseCode: String!
+  eligibilityToken: String!
 }
 
 type ListTodaysInteractionsResponse {
