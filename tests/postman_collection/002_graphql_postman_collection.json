@@ -1379,6 +1379,7 @@
 							"    pm.environment.set(\"startday\", nextDay);",
 							"});",
 							"// ✅ Validate video resolution with hardcoded expected value",
+							"",
 							"pm.test(\"Video resolution matches expected (720x1280)\", function () {",
 							"    try {",
 							"        const expectedResolution = \"720x1280\"; // 👈 set directly here",
