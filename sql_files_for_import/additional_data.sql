@@ -123,8 +123,8 @@ INSERT INTO posts (
     '[{"path":"/image/1c9448a1-3608-423f-a038-2f267c943151.webp","options":{"size":"4.27 KB","resolution":"200x300"}}]',
     NULL,
     NULL,
-    1,
-    date_trunc('day', NOW()) - INTERVAL '2 days'
+    10,
+    date_trunc('day', now()) - interval '2 days' + interval '000 milliseconds'
 );
 
 -- adv_post_advertisement
@@ -135,8 +135,8 @@ INSERT INTO advertisements (
     '4008c0dd-296c-46d3-811d-f90a2c077757',
     '6520ac47-f262-4f7e-b643-9dc5ee4cfa82',
     'basic',
-    date_trunc('day', NOW()) - INTERVAL '1 day',
-    date_trunc('day', NOW()) + INTERVAL '3 days'
+    date_trunc('day', NOW()) - INTERVAL '1 day'  + interval '000 milliseconds'
+    date_trunc('day', NOW()) + INTERVAL '3 days' + interval '000 milliseconds'
 );
 
 -- adv_post_log
@@ -148,9 +148,9 @@ INSERT INTO advertisements_log (
     '4008c0dd-296c-46d3-811d-f90a2c077757',
     '6520ac47-f262-4f7e-b643-9dc5ee4cfa82',
     'basic',
-    date_trunc('day', NOW()) - INTERVAL '1 day',
-    date_trunc('day', NOW()) + INTERVAL '3 days',
+    date_trunc('day', NOW()) - INTERVAL '1 day' + interval '000 milliseconds',
+    date_trunc('day', NOW()) + INTERVAL '3 days' + interval '000 milliseconds',
     2000.00000,
     200.00000,
-    date_trunc('day', NOW()) - INTERVAL '2 days'
+    date_trunc('day', NOW()) - INTERVAL '2 days' + interval '000 milliseconds'
 );
