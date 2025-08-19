@@ -1631,7 +1631,7 @@
 							"    try {",
 							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
 							"        if (postId) {",
-							"            pm.environment.set(\"postidadd\", postId);",
+							"            pm.environment.set(\"postidadd1\", postId);",
 							"            console.log(\"postid set to:\", postId);",
 							"        } else {",
 							"            console.log(\"No postid found in response.\");",
@@ -7256,88 +7256,6 @@
 							"",
 							"pm.environment.set(\"liquidity2\", newLiquidity);",
 							"console.log(\"Saved new liquidity:\", newLiquidity);"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Check current liquidity (ref%)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11204\");",
-							"});",
-							"",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"let newLiquidity = response.data.balance.currentliquidity;",
-							"let oldLiquidity = Number(pm.environment.get(\"liquidity\"));",
-							"",
-							"console.log(\"Previous liquidity:\", oldLiquidity);",
-							"console.log(\"Current liquidity:\", newLiquidity);",
-							"",
-							"pm.test(\"Previous liquidity exists\", function () {",
-							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
-							"});",
-							"",
-							"pm.test(\"Liquidity should increase\", function () {",
-							"    pm.expect(newLiquidity).to.be.above(oldLiquidity, \"Expected liquidity to increase\");",
-							"});",
-							"",
-							"pm.environment.set(\"liquidity\", newLiquidity);",
-							"console.log(\"Saved new liquidity:\", newLiquidity);"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -13335,7 +13253,7 @@
 							"let res = pm.response.json();",
 							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
 							"",
-							"let expectedCreatorId = pm.environment.get(\"w_userid_t1\");",
+							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
 							"let expectedPostId = pm.environment.get(\"existing_postid\");",
 							"let expectedAdId = pm.environment.get(\"existing_advertisementId\");",
 							"",
@@ -13414,9 +13332,9 @@
 							"",
 							"let response = pm.response.json();",
 							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
-							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedPostId = pm.environment.get(\"existing_postid\");",
 							"",
-							"pm.test(\"First post ID matches 'postidadd' from environment\", function () {",
+							"pm.test(\"First post ID matches 'existing_postid' from environment\", function () {",
 							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
 							"});"
 						],
@@ -15909,7 +15827,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{startday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{startday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -15945,7 +15863,7 @@
 							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
 							"",
 							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
-							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
 							"let expectedDay = pm.environment.get(\"startday\");",
 							"let expectedAdId = pm.environment.get(\"advertisementId\");",
 							"",
@@ -16099,7 +16017,7 @@
 							"",
 							"let res = pm.response.json();",
 							"let posts = res?.data?.listPosts?.affectedRows ?? [];",
-							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
 							"",
 							"pm.test(\"Created post exists in listPosts\", function () {",
 							"    let exists = posts.some(p => p.id === expectedPostId);",
@@ -16217,7 +16135,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: SEVEN_DAYS\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: SEVEN_DAYS\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -16253,7 +16171,7 @@
 							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
 							"",
 							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
-							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
 							"let expectedDay = pm.environment.get(\"diffstartday\");",
 							"let expectedAdId = pm.environment.get(\"advertisementId\");",
 							"",
@@ -16407,7 +16325,7 @@
 							"",
 							"let res = pm.response.json();",
 							"let posts = res?.data?.listPosts?.affectedRows ?? [];",
-							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
 							"",
 							"pm.test(\"Created post exists in listPosts\", function () {",
 							"    let exists = posts.some(p => p.id === expectedPostId);",
@@ -16509,7 +16427,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -16650,7 +16568,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd1}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -16686,7 +16604,7 @@
 							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
 							"",
 							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
-							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
 							"let expectedAdId = pm.environment.get(\"advertisementId\");",
 							"",
 							"pm.test(\"Advertisement exists with correct creatorId, postId, and advertisementId\", function () {",
@@ -16837,9 +16755,9 @@
 							"",
 							"let response = pm.response.json();",
 							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
-							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
 							"",
-							"pm.test(\"First post ID matches 'postidadd' from environment\", function () {",
+							"pm.test(\"First post ID matches 'postidadd1' from environment\", function () {",
 							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
 							"});"
 						],
@@ -16954,7 +16872,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            creatorId\n            postId\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n            gemsEarned\n            views\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -16990,7 +16908,7 @@
 							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
 							"",
 							"let expectedCreatorId = pm.environment.get(\"w_userid_t2\");",
-							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
 							"let expectedDay = pm.environment.get(\"diffstartday\");",
 							"let expectedAdId = pm.environment.get(\"advertisementId\");",
 							"",
@@ -17144,9 +17062,9 @@
 							"",
 							"let response = pm.response.json();",
 							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
-							"let expectedPostId = pm.environment.get(\"postidadd\");",
+							"let expectedPostId = pm.environment.get(\"postidadd1\");",
 							"",
-							"pm.test(\"First post ID matches 'postidadd' from environment\", function () {",
+							"pm.test(\"First post ID matches 'postidadd1' from environment\", function () {",
 							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
 							"});"
 						],
@@ -17576,7 +17494,7 @@
 							"let firstPostId = response?.data?.listPosts?.affectedRows?.[0]?.id;",
 							"let expectedPostId = pm.environment.get(\"existing_postid\");",
 							"",
-							"pm.test(\"First post ID matches 'postidadd' from environment\", function () {",
+							"pm.test(\"First post ID matches 'postidadd1' from environment\", function () {",
 							"    pm.expect(firstPostId, \"First post ID does not match\").to.eql(expectedPostId);",
 							"});"
 						],
