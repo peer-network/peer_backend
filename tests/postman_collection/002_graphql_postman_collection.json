@@ -1362,7 +1362,6 @@
 							"    console.log(\"Error detected in response, skipping postid set.\");",
 							"}",
 							"",
-<<<<<<< HEAD
 							"pm.test(\"Save (createdat + 1 day) as startday\", function () {",
 							"    const createdAt = pm.response.json()?.data?.createPost?.affectedRows?.createdat;",
 							"",
@@ -1380,9 +1379,7 @@
 							"    pm.environment.set(\"startday\", nextDay);",
 							"});",
 							"// ✅ Validate video resolution with hardcoded expected value",
-=======
 							"",
->>>>>>> development
 							"pm.test(\"Video resolution matches expected (720x1280)\", function () {",
 							"    try {",
 							"        const expectedResolution = \"720x1280\"; // ",
@@ -4264,7 +4261,6 @@
 			"response": []
 		},
 		{
-<<<<<<< HEAD
 			"name": "Get eligibility token",
 			"event": [
 				{
@@ -4338,8 +4334,6 @@
 			"response": []
 		},
 		{
-=======
->>>>>>> development
 			"name": "Upload empty file",
 			"event": [
 				{
@@ -4410,7 +4404,6 @@
 			"response": []
 		},
 		{
-<<<<<<< HEAD
 			"name": "Get eligibility token",
 			"event": [
 				{
@@ -4484,8 +4477,6 @@
 			"response": []
 		},
 		{
-=======
->>>>>>> development
 			"name": "Upload all types of media",
 			"event": [
 				{
@@ -4566,11 +4557,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-<<<<<<< HEAD
 							"    pm.expect(pm.response.text()).to.include(\"31511\");",
-=======
-							"    pm.expect(pm.response.text()).to.include(\"40305\");",
->>>>>>> development
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
