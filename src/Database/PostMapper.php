@@ -18,7 +18,6 @@ use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrateg
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-use Fawaz\App\User;
 use Fawaz\App\ValidationException;
 
 class PostMapper extends PeerMapper
@@ -1168,7 +1167,7 @@ class PostMapper extends PeerMapper
                 $updateSql = "
                     UPDATE eligibility_token
                     SET status = :status,
-                        expiresat = :expiresat,
+                        expiresat = :expiresat
                     WHERE userid = :userid
                     AND token  = :token
                 ";

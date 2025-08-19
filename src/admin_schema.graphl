@@ -148,56 +148,6 @@ enum ContentFilterType {
   MYGRANDMAHATES
 }
 
-enum ContentType {
-  image
-  audio
-  video
-  text
-}
-
-enum PostFilterType {
-  IMAGE
-  AUDIO
-  VIDEO
-  TEXT
-  FOLLOWED
-  FOLLOWER
-  VIEWED
-  FRIENDS
-}
-
-enum IgnoreOption {
-  YES
-  NO
-}
-
-enum PostSortType {
-  NEWEST
-  TRENDING
-  LIKES
-  DISLIKES
-  VIEWS
-  COMMENTS
-  FOR_ME
-  OLDEST
-  FOLLOWER
-  FOLLOWED
-  RELEVANT
-  FRIENDS
-}
-
-enum DayFilterType {
-  D0
-  D1
-  D2
-  D3
-  D4
-  D5
-  W0
-  M0
-  Y0
-}
-
 enum AdvertisementType {
   PINNED
   BASIC
@@ -269,23 +219,6 @@ type TransactionResponse {
 
 type UserPreferences {
   contentFilteringSeverityLevel: ContentFilterType
-}
-
-type ReferralInfoResponse {
-  status: String
-  ResponseCode: String
-  referralUuid: ID
-  referralLink: String
-}
-type ReferralListResponse {
-  status: String!
-  counter: Int!
-  ResponseCode: String!
-  affectedRows: ReferralUsers!
-}
-type ReferralUsers {
-  invitedBy: ProfileUser
-  iInvited: [ProfileUser!]!
 }
 
 enum ContentType {
