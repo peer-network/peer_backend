@@ -91,6 +91,14 @@ class UserService
         $attempts = 0;
         do {
             $slug = $this->createNumbersAsString(1, 9, 5);
+            if (!ctype_digit($slug)) {
+                $this->logger->error('Slug generation failed: not numeric', [
+                    'username' => $username,
+                    'slug' => $slug,
+                ]);
+                return null;
+            }
+
             if (!$this->userMapper->checkIfNameAndSlugExist($username, (int) $slug)) {
                 return (int) $slug;
             }
