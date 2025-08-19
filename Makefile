@@ -1,3 +1,9 @@
+# Load .env file
+ifneq (,$(wildcard .env))
+    include .env
+    export
+endif
+
 IMAGE_TAG=local
 export IMAGE_TAG
 
@@ -8,11 +14,11 @@ COMPOSE_FILES = -f docker-compose.yml $(if $(wildcard $(COMPOSE_OVERRIDE)),-f $(
 PROJECT_NAME ?= peer_backend_local_$(USER)
 export COMPOSE_PROJECT_NAME := $(PROJECT_NAME)
 
-env:
+env: ## Copy .env.dev to .env for local development
 	cp .env.dev .env
 	@echo ".env created from .env.dev"
 
-init:
+init: ## Prepare Postman environment files for testing
 	@echo "Using sql_files_for_import/ directly"
 
 	@echo "Copying base environment file for local testing..."
@@ -20,7 +26,7 @@ init:
 
 	@echo "tmp_env.json ready. tmp_collection.json will be generated during test."
 
-reset-db-and-backend:
+reset-db-and-backend: ## Reset DB, backend, and remove all related Docker images
 	@echo "Bringing down docker-compose stack with volumes..."
 	-@docker-compose $(COMPOSE_FILES) down -v
 
@@ -39,7 +45,7 @@ reset-db-and-backend:
 
 	@echo "Docker environment for this project reset."
 
-reload-backend:
+reload-backend: ## Rebuild and restart backend container
 	@echo "Rebuilding backend image..."
 	docker-compose $(COMPOSE_FILES) build backend
 
@@ -52,7 +58,7 @@ reload-backend:
 	done
 	@echo "Backend reloaded and ready!"
 
-dev: env reset-db-and-backend init
+dev: env reset-db-and-backend init ## Full setup: env, DB reset, vendors install, start DB+backend
 	@echo "Installing Composer dependencies on local host..."
 	composer install --no-dev --prefer-dist --no-interaction
 
@@ -89,7 +95,7 @@ dev: env reset-db-and-backend init
 
 	@echo "Backend is healthy and ready!"
 
-restart:
+restart: ## Soft restart with fresh DB but keep current code & vendors
 	@echo "Stopping and removing Docker stack (incl. volumes)..."
 	docker-compose $(COMPOSE_FILES) down -v
 
@@ -111,13 +117,13 @@ restart:
 
 	@echo "Soft restart completed. DB is clean and current code is live!"
 
-ensure-jq:
+ensure-jq: ## Ensure jq is installed (auto-install if missing)
 	@command -v jq >/dev/null 2>&1 || { \
 		echo "jq not found. Installing via apt..."; \
 		sudo apt update && sudo apt install -y jq; \
 	}
 
-test: ensure-jq
+test: ensure-jq ## Run Newman tests inside Docker and generate HTML report
 	@echo "Building Newman container..."
 	docker-compose $(COMPOSE_FILES) build newman
 
@@ -166,7 +172,7 @@ test: ensure-jq
 	}
 	
 
-clean-all: reset-db-and-backend
+clean-all: reset-db-and-backend  ## Remove containers, volumes, vendors, reports, logs
 	@rm -f composer.lock
 	@rm -rf vendor
 	@rm -rf sql_files_for_import_tmp
@@ -180,7 +186,7 @@ clean-all: reset-db-and-backend
 	@rm -f tests/postman_collection/tmp_*.json
 	@echo "Local project cleanup complete."
 
-ci:
+ci: ## Run full local CI workflow (setup, tests, cleanup)
 	$(MAKE) dev
 
 	@echo "Building Newman container..."
@@ -232,3 +238,22 @@ ci:
 	}
 
 	$(MAKE) clean-all
+
+# ---- Developer Shortcuts ----
+.PHONY: logs db bash-backend
+
+logs: ## Tail backend logs
+	@docker-compose $(COMPOSE_FILES) logs -f backend
+
+db: ## Open psql shell into Postgres
+	@docker-compose $(COMPOSE_FILES) exec -e PGPASSWORD=$(DB_PASSWORD) db \
+	    psql -h $(DB_HOST) -U $(DB_USERNAME) -d $(DB_DATABASE)
+
+bash-backend: ## Open interactive shell in backend container
+	@docker-compose $(COMPOSE_FILES) exec backend bash
+
+help: ## Show available make targets
+	@echo "Available targets:"
+	@grep -Eh '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+	| sort \
+	| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2}'
