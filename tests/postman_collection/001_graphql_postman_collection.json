@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "e87a1a7a-81db-4c0e-915b-30569b71357f",
-		"name": "1_back_graphql_postman_collection",
+		"_postman_id": "fe751c56-ad35-4b06-9df2-1d91ceaa4e6c",
+		"name": "AHMED 1",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-e87a1a7a-81db-4c0e-915b-30569b71357f?action=share&source=collection_link&creator=43606001"
+		"_exporter_id": "32542010",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-fe751c56-ad35-4b06-9df2-1d91ceaa4e6c?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -7906,6 +7906,160 @@
 			"response": []
 		},
 		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload media file text",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11515\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const response = pm.response.json();",
+							"",
+							"if (response.uploadedFiles) {",
+							"    pm.environment.set(\"uploadedFiles\", response.uploadedFiles);",
+							"    console.log(\"uploadedFiles saved as:\", response.uploadedFiles);",
+							"} else {",
+							"    pm.test(\"uploadedFiles field is missing\", function () {",
+							"        pm.expect(false).to.be.true;",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/sample_text.txt"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create daily free post",
 			"event": [
 				{
@@ -7930,7 +8084,7 @@
 							"    try {",
 							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
 							"        if (postId) {",
-							"            pm.environment.set(\"postidadd\", postId);",
+							"            pm.environment.set(\"postid\", postId);",
 							"            console.log(\"postid set to:\", postId);",
 							"        } else {",
 							"            console.log(\"No postid found in response.\");",
@@ -7989,7 +8143,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"{{invalid_email}}\"\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8057,6 +8211,70 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: 1\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token 0 liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"51301\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
 						"variables": ""
 					}
 				},
