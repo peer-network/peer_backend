@@ -187,13 +187,38 @@ Available targets:
   dev                       Full setup: env, DB reset, vendors install, start DB+backend
   ensure-jq                 Ensure jq is installed (auto-install if missing)
   env                       Copy .env.dev to .env for local development
+  error-log                 Show contents of errorlog.txt from backend container
   help                      Show available make targets
   init                      Prepare Postman environment files for testing
   logs                      Tail backend logs
   reload-backend            Rebuild and restart backend container
   reset-db-and-backend      Reset DB, backend, and remove all related Docker images
   restart                   Soft restart with fresh DB but keep current code & vendors
+  runtime-log               Show latest backend runtime log file
   test                      Run Newman tests inside Docker and generate HTML report
+
+---
+
+### 10. Inspect Application Logs
+
+To check logs written by the backend inside the container, use:
+
+```bash
+make error-log
+```
+
+This will:
+
+- Shows contents of runtime-data/logs/errorlog.txt if it exists.
+- If the file does not exist, you will see “No errorlog.txt found” (means no PHP/runtime error has been logged yet)
+
+```bash
+make runtime-log
+```
+This will:
+
+- Shows the most recent rotating runtime log (*.log) in runtime-data/logs/.
+- Useful for debugging requests and application-level events.
 
 ---
 
