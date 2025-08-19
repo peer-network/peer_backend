@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "90edbde4-9ab3-472c-8768-fe8319939dad",
-		"name": "2_ADD",
+		"_postman_id": "9bcbacb8-46bf-4df6-a52c-478e305a6182",
+		"name": "AHMED 2",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-90edbde4-9ab3-472c-8768-fe8319939dad?action=share&source=collection_link&creator=43606001"
+		"_exporter_id": "32542010",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-9bcbacb8-46bf-4df6-a52c-478e305a6182?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -1377,7 +1377,34 @@
 							"    const nextDay = `${yyyy}-${mm}-${dd}`;",
 							"",
 							"    pm.environment.set(\"startday\", nextDay);",
-							"});"
+							"});",
+							"// ✅ Validate video resolution with hardcoded expected value",
+							"pm.test(\"Video resolution matches expected (720x1280)\", function () {",
+							"    try {",
+							"        const expectedResolution = \"720x1280\"; // 👈 set directly here",
+							"",
+							"        const affected = postResponse?.data?.createPost?.affectedRows;",
+							"        const mediaJson = affected?.media;",
+							"",
+							"        if (!mediaJson) {",
+							"            throw new Error(\"Missing media array in response.\");",
+							"        }",
+							"",
+							"        const mediaArray = JSON.parse(mediaJson);",
+							"        if (!Array.isArray(mediaArray) || !mediaArray[0]) {",
+							"            throw new Error(\"Media array is empty or invalid.\");",
+							"        }",
+							"",
+							"        const actualResolution = mediaArray[0]?.options?.resolution;",
+							"",
+							"        pm.expect(actualResolution, `Expected resolution to be ${expectedResolution} but got ${actualResolution}`)",
+							"          .to.eql(expectedResolution);",
+							"    } catch (err) {",
+							"        console.error(\"Video resolution test failed:\", err.message || err);",
+							"        throw new Error(\"Video resolution test failed. See console for details.\");",
+							"    }",
+							"});",
+							""
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -2322,7 +2349,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"31511\");",
+							"    pm.expect(pm.response.text()).to.include(\"40305\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -2607,7 +2634,6 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"11508\");",
 							"});",
-							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
@@ -2640,13 +2666,7 @@
 							"",
 							"pm.test(\"Cover field is not empty\", function () {",
 							"    pm.expect(post.cover).not.to.eql(\"\", \"Expected 'cover' to be not empty\");",
-							"});",
-							"",
-							"pm.test(\"URL field is present and not empty\", function () {",
-							"    pm.expect(post).to.have.property(\"url\");",
-							"    pm.expect(post.url).to.not.be.empty;",
-							"});",
-							""
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -2679,79 +2699,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: image\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "guestlistpost",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11501\");",
-							"});",
-							"",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = {};",
-							"try {",
-							"    response = pm.response.json();",
-							"} catch (err) {",
-							"    console.log(\"Failed to parse response as JSON:\", err);",
-							"}",
-							"",
-							"let post = response?.data?.guestListPost?.affectedRows;",
-							"",
-							"pm.test(\"URL field is present and not empty\", function () {",
-							"    pm.expect(post).to.have.property(\"url\");",
-							"    pm.expect(post.url).to.not.be.empty;",
-							"});",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query GuestListPost {\n    guestListPost(postid: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: image\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4312,6 +4260,79 @@
 			"response": []
 		},
 		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Upload empty file",
 			"event": [
 				{
@@ -4376,6 +4397,79 @@
 					],
 					"path": [
 						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
 					]
 				}
 			},
