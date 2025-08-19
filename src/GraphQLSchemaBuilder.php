@@ -194,7 +194,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -293,7 +293,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'userid' => function (array $root): string {
                     return $root['userid'] ?? '';
@@ -305,7 +305,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -382,7 +382,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -397,7 +397,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -470,7 +470,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -569,7 +569,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -593,7 +593,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -608,7 +608,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -620,7 +620,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -632,7 +632,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
@@ -710,7 +710,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -752,7 +752,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -764,7 +764,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -776,7 +776,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -842,7 +842,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -871,7 +871,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -973,7 +973,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -985,7 +985,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1000,7 +1000,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1012,7 +1012,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
             ],
             'AuthPayload' => [
@@ -1021,7 +1021,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'accessToken' => function (array $root): string {
                     return $root['accessToken'] ?? '';
@@ -1039,7 +1039,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1060,7 +1060,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1084,7 +1084,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'currentliquidity' => function (array $root): float {
                     $this->logger->info('Query.currentliquidity Resolvers');
@@ -1136,7 +1136,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1148,7 +1148,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1160,7 +1160,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1184,7 +1184,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1196,7 +1196,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1208,7 +1208,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1271,7 +1271,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1286,7 +1286,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1301,7 +1301,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1318,14 +1318,13 @@ class GraphQLSchemaBuilder
             ],
             'WinStatus' => [
                 'totalGems' => function (array $root): float {
-                    $this->logger->info('Query.WinStatus Resolvers');
-                    return $root['totalGems'] ?? 0.0;
+                    return isset($root['totalGems']) ? (float)$root['totalGems'] : 0.0;
                 },
                 'gemsintoken' => function (array $root): float {
-                    return $root['gemsintoken'] ?? 0.0;
+                    return isset($root['gemsintoken']) ? (float)$root['gemsintoken'] : 0.0;
                 },
                 'bestatigung' => function (array $root): float {
-                    return $root['bestatigung'] ?? 0.0;
+                    return isset($root['bestatigung']) ? (float)$root['bestatigung'] : 0.0;
                 },
             ],
             'GemstersUserStatus' => [
@@ -1366,7 +1365,7 @@ class GraphQLSchemaBuilder
                 'numbers' => function (array $root): float {
                     return $root['numbers'] ?? 0.0;
                 },
-                'whereby' => function (array $root): float {
+                'whereby' => function (array $root): int {
                     return $root['whereby'] ?? 0.0;
                 },
                 'createdat' => function (array $root): string {
@@ -1382,7 +1381,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1424,7 +1423,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1439,7 +1438,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1544,7 +1543,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1574,7 +1573,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1586,7 +1585,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1616,7 +1615,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'referralUuid' => function (array $root): string {
                     return $root['referralUuid'] ?? '';
@@ -1634,7 +1633,7 @@ class GraphQLSchemaBuilder
                     return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1654,7 +1653,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): ?array {
                     return $root['affectedRows'] ?? null;
@@ -1680,7 +1679,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'nextAttemptAt' => function (array $root): string {
                     return $root['nextAttemptAt'] ?? '';
@@ -1704,7 +1703,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1768,7 +1767,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? '';
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];

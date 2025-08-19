@@ -9,6 +9,8 @@ use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 
+use function DI\string;
+
 const TABLESTOGEMS = true;
 const DAILY_NUMBER_TOKEN= 5000;
 const VIEW_=1;
@@ -1057,12 +1059,12 @@ class WalletMapper
             return self::createSuccessResponse(21206);
         }
 
-        $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
-        $dailyToken = DAILY_NUMBER_TOKEN;
+        $totalGems = isset($data[0]['overall_total']) ? $data[0]['overall_total'] : '0';
+        $dailyToken = (float)DAILY_NUMBER_TOKEN;
 
-        $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
+        $gemsintoken = (float)bcdiv((string)$dailyToken, (string)$totalGems, 10);
 
-        $bestatigung = bcadd(bcmul($totalGems, $gemsintoken, 10), '0.00005', 4);
+        $bestatigung = (float)bcadd(bcmul((string)$totalGems, (string)$gemsintoken, 10), '0.00005', 4);
 
         $args = [
             'winstatus' => [
@@ -1077,24 +1079,24 @@ class WalletMapper
 
             if (!isset($args[$userId])) {
                 $args[$userId] = [
-                    'userid' => $userId,
-                    'gems' => $row['total_numbers'],
-                    'tokens' => bcmul($row['total_numbers'], $gemsintoken, 10),
-                    'percentage' => $row['percentage'],
+                    'userid' => (string)$userId,
+                    'gems' => (float)$row['total_numbers'],
+                    'tokens' => (float)bcmul((string)$row['total_numbers'], (string)$gemsintoken, 10),
+                    'percentage' => (float)$row['percentage'],
                     'details' => []
                 ];
             }
 
-            $rowgems2token = bcmul($row['gems'], $gemsintoken, 10);
+            $rowgems2token = (float)bcmul((string)$row['gems'], (string)$gemsintoken, 10);
 
             $args[$userId]['details'][] = [
-                'gemid' => $row['gemid'],
-                'userid' => $row['userid'],
-                'postid' => $row['postid'],
-                'fromid' => $row['fromid'],
-                'gems' => $row['gems'],
-                'numbers' => $rowgems2token,
-                'whereby' => $row['whereby'],
+                'gemid' => (string)$row['gemid'],
+                'userid' => (string)$row['userid'],
+                'postid' => (string)$row['postid'],
+                'fromid' => (string)$row['fromid'],
+                'gems' => (float)$row['gems'],
+                'numbers' => (float)$rowgems2token,
+                'whereby' => (int)$row['whereby'],
                 'createdat' => $row['createdat']
             ];
 
