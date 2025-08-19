@@ -257,3 +257,20 @@ help: ## Show available make targets
 	@grep -Eh '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| sort \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2}'
+
+# ---- Application Logs ----
+.PHONY: app-error-log app-runtime-log
+
+error-log: ## Show contents of errorlog.txt from backend container
+	@docker-compose $(COMPOSE_FILES) exec backend \
+		sh -c 'cat /var/www/html/runtime-data/logs/errorlog.txt 2>/dev/null || echo "No errorlog.txt found"'
+
+runtime-log: ## Show latest backend runtime log file
+	@docker-compose $(COMPOSE_FILES) exec backend \
+		sh -c 'latest_log=$$(ls -t /var/www/html/runtime-data/logs/*.log 2>/dev/null | grep -v errorlog.txt | head -n 1); \
+		if [ -n "$$latest_log" ]; then \
+			echo "\n===== $$latest_log ====="; cat "$$latest_log"; \
+		else \
+			echo "No runtime log found"; \
+		fi'
+		
