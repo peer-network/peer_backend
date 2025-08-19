@@ -121,6 +121,24 @@ This will:
 
 ---
 
+### 6. Run Local CI in One Command
+
+If you want to replicate the remote CI workflow locally (spin up the environment, run Newman tests, and clean everything up afterwards), run:
+
+```bash
+make ci
+```
+
+This will:
+
+- Run the full dev setup (reset containers, build images, run migrations, install dependencies)
+- Execute the Newman test suite with the same Postman collections as remote CI
+- Generate an HTML report of the test results
+- Skip interactive steps so it can run unattended
+- Clean up containers, volumes, and temp files automatically at the end
+
+---
+
 ## Local-first workflow
 
 This setup is optimized for local development:
