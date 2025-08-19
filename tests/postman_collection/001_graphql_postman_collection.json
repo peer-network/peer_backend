@@ -8084,7 +8084,7 @@
 							"    try {",
 							"        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
 							"        if (postId) {",
-							"            pm.environment.set(\"Create daily free post\", postId);",
+							"            pm.environment.set(\"postidadd\", postId);",
 							"            console.log(\"postid set to:\", postId);",
 							"        } else {",
 							"            console.log(\"No postid found in response.\");",
