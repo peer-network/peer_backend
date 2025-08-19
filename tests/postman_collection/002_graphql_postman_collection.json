@@ -7538,7 +7538,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{w_userid_t3}}\", numberoftokens: 100000, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{w_userid_t3}}\", numberoftokens: 1000000) {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
