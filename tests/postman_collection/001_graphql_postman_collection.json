@@ -948,7 +948,7 @@
 							"",
 							"// Function to add a random emoji",
 							"function addRandomEmoji(name) {",
-							"    const emojis = [\"🔥\", \"🚀\", \"💎\", \"🎉\", \"💡\", \"🐱\", \"⚡\", \"🦄\"]; // Emoji list",
+							"    const emojis = [\"\ud83d\udd25\", \"\ud83d\ude80\", \"\ud83d\udc8e\", \"\ud83c\udf89\", \"\ud83d\udca1\", \"\ud83d\udc31\", \"\u26a1\", \"\ud83e\udd84\"]; // Emoji list",
 							"    let randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];",
 							"    return `${name} ${randomEmoji}`;",
 							"}",
@@ -1107,7 +1107,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateName {\n    updateUsername(username: \"! @ # $ © ® ™ ±\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateName {\n    updateUsername(username: \"! @ # $ \u00a9 \u00ae \u2122 \u00b1\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3745,7 +3745,7 @@
 			"response": []
 		},
 		{
-			"name": "Check if they appear in “Following” list",
+			"name": "Check if they appear in \u201cFollowing\u201d list",
 			"event": [
 				{
 					"listen": "test",
@@ -3979,7 +3979,7 @@
 			"response": []
 		},
 		{
-			"name": "Check if they disappear in “Following” list",
+			"name": "Check if they disappear in \u201cFollowing\u201d list",
 			"event": [
 				{
 					"listen": "test",
@@ -9234,8 +9234,8 @@
 							"let newLiquidity = response?.data?.balance?.currentliquidity;",
 							"let oldLiquidity = pm.environment.get(\"liquidity3\");",
 							"",
-							"console.log(`💰 Old Liquidity: ${oldLiquidity}`);",
-							"console.log(`💰 New Liquidity: ${newLiquidity}`);",
+							"console.log(`\ud83d\udcb0 Old Liquidity: ${oldLiquidity}`);",
+							"console.log(`\ud83d\udcb0 New Liquidity: ${newLiquidity}`);",
 							"",
 							"pm.test(\"Previous liquidity exists\", function () {",
 							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
@@ -9963,7 +9963,7 @@
 							"        pm.expect(profile.biography, \"Biography should be a file path like '/userData/<uuid>.txt'\")",
 							"          .to.match(/^\\/userData\\/[a-f0-9\\-]{36}\\.txt$/);",
 							"    } else {",
-							"        console.warn(`Profile ID ${profile.id} does not match userid_t2 (${expectedUserId}) — skipping checks.`);",
+							"        console.warn(`Profile ID ${profile.id} does not match userid_t2 (${expectedUserId}) \u2014 skipping checks.`);",
 							"    }",
 							"});"
 						],

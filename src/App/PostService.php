@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
+use Fawaz\App\Models\MultipartPost;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
@@ -17,6 +18,14 @@ use Psr\Log\LoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\JWTService;
+
+// USER PAY
+const PRICELIKE=3;
+const PRICEDISLIKE=5;
+const PRICECOMMENT=0.5;
+const PRICEPOST=20;
+const DISLIKE_=3;// whereby DISLIKE
 use Fawaz\config\constants\ConstantsConfig;
 
 class PostService
@@ -35,6 +44,9 @@ class PostService
         protected FileUploadDispatcher $base64filehandler,
         protected VideoCoverGenerator $videoCoverGenerator,
         protected Base64FileHandler $base64Encoder,
+        protected DailyFreeService $dailyFreeService,
+        protected WalletService $walletService,
+        protected JWTService $tokenService
     ) {}
 
     public function setCurrentUserId(string $userid): void
@@ -150,7 +162,7 @@ class PostService
             return $this->respondWithError(30101);
         }
 
-        foreach (['title', 'media', 'contenttype'] as $field) {
+        foreach (['title', 'contenttype'] as $field) {
             if (empty($args[$field])) {
                 return $this->respondWithError(30210);
             }
@@ -191,7 +203,7 @@ class PostService
         try {
             $this->postMapper->beginTransaction();
             // Media Upload
-            if ($this->isValidMedia($args['media'])) {
+            if (isset($args['media']) && $this->isValidMedia($args['media'])) {
                 $validateContentCountResult = $this->validateContentCount($args);
                 if (isset($validateContentCountResult['error'])) {
                     return $this->respondWithError($validateContentCountResult['error']);
@@ -209,6 +221,36 @@ class PostService
                 } else {
                     return $this->respondWithError(30251);
                 }
+            }else if (isset($args['uploadedFiles']) && !empty($args['uploadedFiles'])) {
+
+                $validateSameMediaType = new MultipartPost(['media' => explode(',',$args['uploadedFiles'])], [], false);
+
+                if(!$validateSameMediaType->isFilesExists()){
+                    return $this->respondWithError(40305);
+                }
+
+                $hasSameMediaType = $validateSameMediaType->validateSameContentTypes();
+
+                if($hasSameMediaType){
+                    $postData['contenttype'] = $hasSameMediaType;
+                    $args['contenttype'] = $hasSameMediaType;
+                    $uploadedFileArray = $this->postMapper->handelFileMoveToMedia($args['uploadedFiles']);
+                    $this->postMapper->updateTokenStatus($this->currentUserId);
+                    
+                    $mediaPath['path'] = $uploadedFileArray;
+
+                    if (!empty($mediaPath['path'])) {
+                        $postData['media'] = $this->argsToJsString($mediaPath['path']);
+                    } else {
+                        if(isset($args['uploadedFiles'])){
+                            $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                        }
+                        return $this->respondWithError(30101); 
+                    }
+                }else{
+                    return $this->respondWithError(30266); // Provided files should have same type 
+                }
+               
             } else {
                 return $this->respondWithError(30101);
             }
@@ -221,6 +263,9 @@ class PostService
                 if (!empty($coverPath['path'])) {
                     $postData['cover'] = $this->argsToJsString($coverPath['path']);
                 } else {
+                    if(isset($args['uploadedFiles'])){
+                        $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                    }
                     return $this->respondWithError(40306);
                 }
             }
@@ -240,6 +285,9 @@ class PostService
                 $post = new Post($postData);
             } catch (\Throwable $e) {
                 $this->postMapper->rollback();
+                if(isset($args['uploadedFiles'])){
+                    $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                }
                 return $this->respondWithError($e->getMessage());
             }
             $this->postMapper->insert($post);
@@ -280,6 +328,9 @@ class PostService
                 } 
             } catch (\Throwable $e) {
                 $this->postMapper->rollback();
+                if(isset($args['uploadedFiles'])){
+                    $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                }
                 return $this->respondWithError(30262);
             }
 
@@ -305,6 +356,9 @@ class PostService
 
         } catch (\Throwable $e) {
             $this->postMapper->rollback();
+            if(isset($args['uploadedFiles'])){
+                $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+            }
             $this->logger->error('Failed to create post', ['exception' => $e]);
             return $this->respondWithError(41508);
         }
@@ -616,6 +670,94 @@ class PostService
 
     //     return $this->respondWithError(41510);
     // }
+
+    
+    /**
+     * Check for If user eligibile to make a post or not
+     * 
+     * @returns with Suggested PostId, JWT which will be valid for certain time
+     */
+    public function postEligibility(bool $isTokenGenerationRequired = true): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->info('GraphQLSchemaBuilder.postEligibility started');
+
+        try {
+            $dailyLimits = [
+                'like' => DAILYFREELIKE,
+                'comment' => DAILYFREECOMMENT,
+                'post' => DAILYFREEPOST,
+                'dislike' => DAILYFREEDISLIKE,
+            ];
+
+            $actionPrices = [
+                'like' => PRICELIKE,
+                'comment' => PRICECOMMENT,
+                'post' => PRICEPOST,
+                'dislike' => PRICEDISLIKE,
+            ];
+
+            $actionMaps = [
+                'like' => LIKE_,
+                'comment' => COMMENT_,
+                'post' => POST_,
+                'dislike' => DISLIKE_,
+            ];
+
+            $limit = $dailyLimits['post'];
+            $price = $actionPrices['post'];
+            $actionMap = $actionMaps['post'];
+
+            $response = [
+                        'status' => 'error',
+                        'ResponseCode' => 40301, // Not eligible for upload for post
+                    ];
+            $hasFreeDaily = false;
+
+            if ($limit > 0) {
+                $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
+                if ($DailyUsage < $limit) {
+                    // generate PostId and JWT
+                    $hasFreeDaily = true;
+                }
+            }
+
+            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
+            // Return ResponseCode with Daily Free Code
+            if ($balance < $price && !$hasFreeDaily) {
+                $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                return $this->respondWithError(51301);
+            }
+
+            // generate PostId and JWT
+            $eligibilityToken = $this->tokenService->createAccessTokenWithCustomExpriy($this->currentUserId, 300);
+
+            if($isTokenGenerationRequired){
+                // Add Eligibility Token to DB table eligibility_token
+                $this->postMapper->addOrUpdateEligibilityToken($this->currentUserId, $eligibilityToken, 'NO_FILE');
+            }
+            $response = [
+                        'status' => 'success',
+                        'ResponseCode' => 10901, // You are eligible for post upload
+                    ];
+            $response['eligibilityToken'] = $eligibilityToken;
+
+            return $response;
+            
+        } catch (ValidationException $e) {
+            $this->logger->warning("PostService.postEligibility Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
+            return self::respondWithError($e->getErrors()[0]);
+        } catch (\Throwable $e) {
+            $this->logger->error('PostService.postEligibility exception', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError(40301);
+        }
+    }
 
     /**
      * Get Interaction with post or comment

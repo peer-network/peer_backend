@@ -365,7 +365,6 @@
 							"    console.log(\"Not a Daily Free Post (code not 11513).\");",
 							"}",
 							"",
-							"// ✅ Validate resolutions of all three media items",
 							"pm.test(\"All uploaded image resolutions are correct\", function () {",
 							"    try {",
 							"        const expectedResolutions = [\"200x300\", \"736x413\", \"225x225\"];",
@@ -1363,6 +1362,7 @@
 							"    console.log(\"Error detected in response, skipping postid set.\");",
 							"}",
 							"",
+<<<<<<< HEAD
 							"pm.test(\"Save (createdat + 1 day) as startday\", function () {",
 							"    const createdAt = pm.response.json()?.data?.createPost?.affectedRows?.createdat;",
 							"",
@@ -1380,9 +1380,12 @@
 							"    pm.environment.set(\"startday\", nextDay);",
 							"});",
 							"// ✅ Validate video resolution with hardcoded expected value",
+=======
+							"",
+>>>>>>> development
 							"pm.test(\"Video resolution matches expected (720x1280)\", function () {",
 							"    try {",
-							"        const expectedResolution = \"720x1280\"; // 👈 set directly here",
+							"        const expectedResolution = \"720x1280\"; // ",
 							"",
 							"        const affected = postResponse?.data?.createPost?.affectedRows;",
 							"        const mediaJson = affected?.media;",
@@ -4261,6 +4264,7 @@
 			"response": []
 		},
 		{
+<<<<<<< HEAD
 			"name": "Get eligibility token",
 			"event": [
 				{
@@ -4334,6 +4338,8 @@
 			"response": []
 		},
 		{
+=======
+>>>>>>> development
 			"name": "Upload empty file",
 			"event": [
 				{
@@ -4404,6 +4410,7 @@
 			"response": []
 		},
 		{
+<<<<<<< HEAD
 			"name": "Get eligibility token",
 			"event": [
 				{
@@ -4477,6 +4484,8 @@
 			"response": []
 		},
 		{
+=======
+>>>>>>> development
 			"name": "Upload all types of media",
 			"event": [
 				{
@@ -4557,7 +4566,11 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
+<<<<<<< HEAD
 							"    pm.expect(pm.response.text()).to.include(\"31511\");",
+=======
+							"    pm.expect(pm.response.text()).to.include(\"40305\");",
+>>>>>>> development
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -5382,6 +5395,106 @@
 		},
 		{
 			"name": "Comment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let commentResponse = {};",
+							"try {",
+							"    commentResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let commentResponseCode = \"\";",
+							"let status = \"\";",
+							"",
+							"try {",
+							"    status = commentResponse?.data?.createComment?.status || \"\";",
+							"    commentResponseCode = commentResponse?.data?.createComment?.ResponseCode || \"\";",
+							"} catch (e) {",
+							"    console.log(\"Error accessing response properties:\", e);",
+							"}",
+							"",
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect([\"11605\", \"11608\"]).to.include(commentResponseCode);",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(status).to.eql(\"success\");",
+							"});",
+							"",
+							"if (commentResponseCode === \"11608\") {",
+							"    pm.environment.set(\"isDailyFreeComment\", \"true\");",
+							"    console.log(\"This was a Daily Free Comment.\");",
+							"} else {",
+							"    pm.environment.unset(\"isDailyFreeComment\");",
+							"    console.log(\"Not a Daily Free Comment.\");",
+							"}",
+							"let response = {};",
+							"try {",
+							"    response = pm.response.json();",
+							"} catch (err) {",
+							"    console.log(\"Failed to parse JSON:\", err);",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    try {",
+							"        const commentId = response?.data?.createComment?.affectedRows?.[0]?.commentid;",
+							"        if (commentId) {",
+							"            pm.environment.set(\"commentid\", commentId);",
+							"            console.log(\"commentid set to:\", commentId);",
+							"        } else {",
+							"            console.log(\"No commentid found in response.\");",
+							"        }",
+							"    } catch (err) {",
+							"        console.log(\"Error extracting commentid:\", err);",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping commentid set.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{postid}}\", content: \"{{comment_content}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PostInteractions(LIKE)",
 			"event": [
 				{
 					"listen": "test",
@@ -10626,9 +10739,9 @@
 							"    pm.expect(diff).to.eql(1);",
 							"});",
 							"",
-							"pm.test(\"Comment count dropped by exactly 1\", function () {",
+							"pm.test(\"Comment count dropped by exactly 2\", function () {",
 							"    const diff = originalCommentCount - currentCommentCount;",
-							"    pm.expect(diff).to.eql(1);",
+							"    pm.expect(diff).to.eql(2);",
 							"});",
 							"",
 							"console.log(`Posts: ${originalPostCount} → ${currentPostCount}`);",

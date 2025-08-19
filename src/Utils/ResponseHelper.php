@@ -72,4 +72,14 @@ trait ResponseHelper
         $d = \DateTime::createFromFormat($format, $date);
         return $d && $d->format($format) === $date;
     }
+    /**
+     * Validate Authenticated User
+     */
+    private function checkAuthentication($currentUserId): bool
+    {
+        if ($currentUserId === null) {
+            return false;
+        }
+        return true;
+    }
 }
