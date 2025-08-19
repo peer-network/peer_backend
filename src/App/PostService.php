@@ -226,7 +226,7 @@ class PostService
                 $validateSameMediaType = new MultipartPost(['media' => explode(',',$args['uploadedFiles'])], [], false);
 
                 if(!$validateSameMediaType->isFilesExists()){
-                    return $this->respondWithError(40305);
+                    return $this->respondWithError(31511);
                 }
 
                 $hasSameMediaType = $validateSameMediaType->validateSameContentTypes();
