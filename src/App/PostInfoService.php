@@ -31,7 +31,7 @@ class PostInfoService
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
-    protected function respondWithError(string $message): array
+    protected function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
@@ -61,7 +61,7 @@ class PostInfoService
         }
     }
 
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -80,24 +80,24 @@ class PostInfoService
         return $response;
     }
 
-    public function deletePostInfo(string $postId): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
-        }
+    // public function deletePostInfo(string $postId): array
+    // {
+    //     if (!$this->checkAuthentication()) {
+    //         return $this->respondWithError(60501);
+    //     }
 
-        if (!self::isValidUUID($postId)) {
-            return $this->respondWithError(30209);
-        }
+    //     if (!self::isValidUUID($postId)) {
+    //         return $this->respondWithError(30209);
+    //     }
 
-        $this->logger->info('PostInfoService.deletePostInfo started');
+    //     $this->logger->info('PostInfoService.deletePostInfo started');
 
-        if ($this->postInfoMapper->delete($postId)) {
-            return ['status' => 'success', 'ResponseCode' => 11510,];
-        } else {
-            return $this->respondWithError(41510);
-        }
-    }
+    //     if ($this->postInfoMapper->delete($postId)) {
+    //         return ['status' => 'success', 'ResponseCode' => 11510,];
+    //     } else {
+    //         return $this->respondWithError(41510);
+    //     }
+    // }
 
     public function likePost(string $postId): array
     {
