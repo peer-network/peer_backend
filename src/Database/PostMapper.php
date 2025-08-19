@@ -1126,7 +1126,7 @@ class PostMapper extends PeerMapper
                 $updateSql = "
                     UPDATE eligibility_token
                     SET status = :status,
-                        expiresat = :expiresat,
+                        expiresat = :expiresat
                     WHERE userid = :userid
                     AND token  = :token
                 ";
