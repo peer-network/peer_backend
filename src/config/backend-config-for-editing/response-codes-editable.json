@@ -16,8 +16,8 @@
         "userFriendlyComment": "Login successful! Welcome back."
     },
     "10901": {
-        "comment": "Success: Token refreshed successfully. You can continue using your session",
-        "userFriendlyComment": "Session refreshed! You can continue using the app."
+        "comment": "Success: Eligibility token retrieved successfully.",
+        "userFriendlyComment": "You’ve successfully got your eligibility token."
     },
     "11001": {
         "comment": "Success: Users retrieved successfully",
@@ -226,6 +226,10 @@
     "11514": {
         "comment": "Success: Daily free like used successfully",
         "userFriendlyComment": "Daily free like used."
+    },
+    "11515": {
+        "comment": "Success: File uploaded successfully.",
+        "userFriendlyComment": "Your file was uploaded successfully."
     },
     "11601": {
         "comment": "Success: Retrieved comments successfully",
@@ -875,6 +879,10 @@
         "comment": "Information Not Found: No post found for the provided post ID. Please check the ID and try again.",
         "userFriendlyComment": "Post not found. Check the ID and try again."
     },
+    "31511": {
+        "comment": "Temporary File Error: A temporary file was used. Please try uploading the post again.",
+        "userFriendlyComment": "Please try creating the post again."
+    },
     "31601": {
         "comment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",
         "userFriendlyComment": "Comment not found. Check the ID and try again."
@@ -1022,6 +1030,10 @@
     "40901": {
         "comment": "Unexpected Error: An unexpected error occured while trying to refresh the AccessToken. Please try again later or contact support",
         "userFriendlyComment": "We're having trouble keeping you logged in. Please try again or contact support."
+    },
+    "40902": {
+        "comment": "Invalid Action: Invalid eligibility token provided.",
+        "userFriendlyComment": "The eligibility token is invalid. Please try again."
     },
     "41001": {
         "comment": "Unexpected Error: Failed to retrieve user information. Please try again later or contact support",
@@ -1258,6 +1270,10 @@
     "41513": {
         "comment": "Unexpected Error: Failed to fetch posts",
         "userFriendlyComment": "We couldn't load these posts. Please try again."
+    },
+    "41514": {
+        "comment": "Upload Failed: Could not upload the file due to an error.",
+        "userFriendlyComment": "Failed to upload the file. Please try again."
     },
     "41601": {
         "comment": "Failure: Failed to retrieve Comment Informations. Please try again later or contact support",
