@@ -260,7 +260,6 @@ class UserInfoMapper
         $this->logger->info('UserInfoMapper.toggleUserFollow started');
 
         try {
-            $this->db->beginTransaction();
 
             $query = "SELECT COUNT(*) FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
             $stmt = $this->db->prepare($query);
@@ -300,12 +299,9 @@ class UserInfoMapper
             $this->updateFriendsCount($followerid);
             $this->updateFriendsCount($followeduserid);
 
-            $this->db->commit();
-
             return ['status' => 'success', 'ResponseCode' => $response, 'isfollowing' => $action];
 
         } catch (\Exception $e) {
-            $this->db->rollBack();
             $this->logger->error('Failed to toggle user follow', ['exception' => $e]);
             return ['status' => 'error', 'ResponseCode' => 41103];
         }
@@ -441,7 +437,6 @@ class UserInfoMapper
         ]);
 
         try {
-            $this->db->beginTransaction();
             
             $query = "SELECT COUNT(*) FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
             $stmt = $this->db->prepare($query);
@@ -481,17 +476,14 @@ class UserInfoMapper
                 $response = 11105;
             }
 
-            $this->db->commit();
             return ['status' => 'success', 'ResponseCode' => $response, 'isBlocked' => $action];
 
         } catch (\PDOException $e) {
-            $this->db->rollBack();
             $this->logger->error('Database error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);
             return ['status' => 'error', 'ResponseCode' => 41106];
         } catch (\Exception $e) {
-            $this->db->rollBack();
             $this->logger->error('Unexpected error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);

@@ -15,6 +15,7 @@ use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class UserService
 {
@@ -29,7 +30,8 @@ class UserService
         protected UserPreferencesMapper $userPreferencesMapper,
         protected PostMapper $postMapper,
         protected WalletMapper $walletMapper,
-		protected Mailer $mailer
+		protected Mailer $mailer,
+        protected TransactionManager $transactionManager
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -243,11 +245,13 @@ class UserService
             'createdat' => $createdat
         ];
 
+        $this->transactionManager->beginTransaction();
         try {
             $user = new User($userData);
             $this->userMapper->createUser($user);
             unset($args);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::User.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());
         }
@@ -257,6 +261,7 @@ class UserService
 			$this->userMapper->insertoken($toInsert);
             unset($verificationData, $toInsert);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::Tokenize.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());
         }
@@ -266,6 +271,7 @@ class UserService
             $this->userMapper->insertinfo($userinfo);
             unset($infoData, $userinfo);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::UserInfo.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());
         }
@@ -275,6 +281,7 @@ class UserService
             $this->userPreferencesMapper->insert($userPreferences);
             unset($userPreferencesSrc, $userPreferences);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::UserPreferences.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());
         }
@@ -283,6 +290,7 @@ class UserService
             $referralLink = $this->userMapper->generateReferralLink($id);
             $this->userMapper->insertReferralInfo($id, $referralLink);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->warning('Error handling referral info.', ['exception' => $e]);
             return self::respondWithError(41013);
         }
@@ -292,6 +300,7 @@ class UserService
             $this->walletMapper->insertt($userwallet);
             unset($walletData, $userwallet);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::Wallett.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());
         }
@@ -301,6 +310,7 @@ class UserService
             $this->dailyFreeMapper->insert($createuserDaily);
             unset($dailyData, $createuserDaily);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::DailyFree.', ['exception' => $e]);
             return self::respondWithError($e->getMessage());
         }
@@ -316,7 +326,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
         }
-
+        $this->transactionManager->commit();
 		return [
 			'status' => 'success',
 			'ResponseCode' => 10601,
@@ -406,17 +416,21 @@ class UserService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             $success = $this->userMapper->verifyAccount($userId);
 
             if (!$success) {
+                $this->transactionManager->rollback();
                 return self::respondWithError(40701);
             }
 
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 10701,
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Error verifying account.', ['exception' => $e]);
             return self::respondWithError(40701);
         }
@@ -429,10 +443,16 @@ class UserService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
+
             $this->userMapper->deleteUnverifiedUsers();
+
+            $this->transactionManager->commit();
+
             $this->logger->info('Unverified users deleted.');
             return true;
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Error deleting unverified users.', ['exception' => $e]);
             return false;
         }
@@ -474,18 +494,22 @@ class UserService
                 $userPreferences->setUpdatedAt();
             }
 
+            $this->transactionManager->beginTransaction();
+
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
             $contentFilteringSeverityLevelString = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
 
             if ($contentFilteringSeverityLevelString === null) {
                 $this->logger->error('UserService.updateUserPreferences: failed to get contentFilteringSeverityLevelString');
-                return self::respondWithError(00000); // 402x1
+                $this->transactionManager->rollback();
+                return self::respondWithError(40301); // 402x1
             }
             $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
             $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
             
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11014,  // 102xx
@@ -493,6 +517,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update user preferences', ['exception' => $e]);
+            $this->transactionManager->rollback();
             return self::respondWithError(41016); // 402xx
         }
     }
@@ -533,15 +558,18 @@ class UserService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             $user->validatePass($args);
             $this->userMapper->updatePass($user);
 
             $this->logger->info('User password updated successfully', ['userId' => $this->currentUserId]);
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11005,
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Failed to update user password', ['exception' => $e]);
             return self::respondWithError(41004);
         }
@@ -591,17 +619,20 @@ class UserService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             $user->setMail($email);
             $data = $this->userMapper->updateProfil($user);
             $affectedRows = $data->getArrayCopy();
 
             $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId, 'email' => $email]);
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11006,
                 'affectedRows' => $affectedRows,
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Failed to update user email', ['exception' => $e]);
             return self::respondWithError(41005);
         }
@@ -642,6 +673,7 @@ class UserService
             if (!$slug) {
                 return self::respondWithError(41010);
             }
+            $this->transactionManager->beginTransaction();
 
             $user->setName($username);
             $user->setSlug($slug);
@@ -651,12 +683,14 @@ class UserService
 
             $this->logger->info('Username updated successfully', ['id' => $this->currentUserId, 'username' => $username, 'slug' => $slug]);
 
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11007,
                 'affectedRows' => $affectedRows,
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Failed to update username', ['exception' => $e]);
             return self::respondWithError(30202);
         }
@@ -686,13 +720,17 @@ class UserService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             $this->userMapper->delete($userId);
             $this->logger->info('User deleted successfully', ['userId' => $userId]);
+
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11012,
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Failed to delete user', ['exception' => $e]);
             return self::respondWithError(41011);
         }
@@ -934,6 +972,7 @@ class UserService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
 
             $user = $this->userMapper->loadByEmail($email);
             
@@ -955,21 +994,25 @@ class UserService
                 ];
                 $this->userMapper->sendPasswordResetEmail($email, $data);
                 
+                $this->transactionManager->commit();
                 return $this->genericPasswordResetSuccessResponse();
             }
 
             // Check for rate limiting: 1st attempt 
             if ($this->userMapper->isFirstAttemptTooSoon($passwordAttempt)) {
+                $this->transactionManager->rollback();
                 return $this->userMapper->rateLimitResponse(1);
             }
 
             // 2nd attempt 
             if ($this->userMapper->isSecondAttemptTooSoon($passwordAttempt)) {
+                $this->transactionManager->rollback();
                 return $this->userMapper->rateLimitResponse(10, $passwordAttempt['last_attempt']);
             }
 
             // Too many attempts made without using the token
             if ($passwordAttempt['attempt_count'] >= 3 && !$passwordAttempt['collected']) {
+                $this->transactionManager->rollback();
                 return $this->userMapper->tooManyAttemptsResponse();
             }
 
@@ -983,9 +1026,11 @@ class UserService
 
                 $this->userMapper->sendPasswordResetEmail($email, $data);
             }
+            $this->transactionManager->commit();
             return $this->genericPasswordResetSuccessResponse();
 
         } catch (\Exception $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Unexpected error during password reset request', [
                 'error' => $e->getMessage(),
                 'userId' => $userId,
@@ -1062,6 +1107,8 @@ class UserService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
+            
             $newUser = new User();
             $newUser->setPassword($newPassword);
             $newUser->validatePass($args);
@@ -1070,6 +1117,7 @@ class UserService
 
             if (!$request) {
                 $this->userMapper->deletePasswordResetToken($args['token']);
+                $this->transactionManager->rollback();
                 return [
                     'status' => 'error',
                     'ResponseCode' => 31904
@@ -1079,6 +1127,7 @@ class UserService
 
             if (!$user) {
                 $this->logger->warning('User not found', ['userId' => $request['user_id']]);
+                $this->transactionManager->commit();
                 return self::createSuccessResponse(21001);
             }
 
@@ -1088,11 +1137,13 @@ class UserService
             $this->userMapper->deletePasswordResetToken($args['token']);
 
             $this->logger->info('User password updated successfully', ['userId' => $this->currentUserId]);
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11005,
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Failed to update user password', ['exception' => $e]);
             return self::respondWithError(41004);
         }

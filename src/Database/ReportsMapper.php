@@ -49,7 +49,6 @@ class ReportsMapper
         ];
         
         try {
-            $this->db->beginTransaction();
 
             // Check if the record already exists
             $sqlCheck = "SELECT COUNT(*) 
@@ -105,16 +104,13 @@ class ReportsMapper
             $success = $stmt->execute();
 
             if ($success) {
-                $this->db->commit();
                 $this->logger->info("ReportsMapper: addReport: Report added successfully", $debugData);
                 return false;
             }
 
-            $this->db->rollBack();
             $this->logger->warning("ReportsMapper: addReport: Failed to add report", $debugData);
             return null;
         } catch (\Exception $e) {
-            $this->db->rollBack();
             $this->logger->error("ReportsMapper.addReport: Exception occurred", ['exception' => $e->getMessage()]);
             return null;
         }
