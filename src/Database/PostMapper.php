@@ -19,10 +19,14 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\App\User;
 use Fawaz\App\ValidationException;
+use Fawaz\Database\Interfaces\TransactionManager;
+use Psr\Log\LoggerInterface;
 
-class PostMapper extends PeerMapper
+class PostMapper
 {
-    const STATUS_DELETED = 6;
+    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    {
+    }
 
     public function isSameUser(string $userid, string $currentUserId): bool
     {
