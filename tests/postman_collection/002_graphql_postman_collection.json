@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "9bcbacb8-46bf-4df6-a52c-478e305a6182",
-		"name": "AHMED 2",
+		"_postman_id": "c58744ec-c352-4730-80dd-6ff9e1e24255",
+		"name": "AHMED 2 Copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "32542010",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-9bcbacb8-46bf-4df6-a52c-478e305a6182?action=share&source=collection_link&creator=32542010"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-c58744ec-c352-4730-80dd-6ff9e1e24255?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -234,6 +234,63 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Follow tester 3 Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Account is now followed\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"true\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{w_userid_t3}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -14087,86 +14144,6 @@
 			"response": []
 		},
 		{
-			"name": "Get add history",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"12002\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let res = pm.response.json();",
-							"let ads = res?.data?.advertisementHistory?.affectedRows?.advertisements ?? [];",
-							"",
-							"let expectedCreatorId = pm.environment.get(\"w_userid_t1\");",
-							"let expectedPostId = pm.environment.get(\"existing_postid\");",
-							"let expectedAdId = pm.environment.get(\"existing_advertisementId\");",
-							"",
-							"pm.test(\"Advertisement exists with correct creatorId, postId, and advertisementId\", function () {",
-							"    let match = ads.some(ad =>",
-							"        ad.creatorId === expectedCreatorId &&",
-							"        ad.postId === expectedPostId &&",
-							"        ad.id === expectedAdId ",
-							"    );",
-							"",
-							"    pm.expect(match).to.be.true;",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(\n        filter: {\n            from: null\n            to: null\n            type: null\n            advertisementId: null\n            postId: null\n            userId: null\n        }\n        sort: null\n        offset: null\n        limit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            stats {\n                totalTokenSpent\n                totalEuroSpent\n                totalAds\n                totalGemsEarned\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                creatorId\n                postId\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                views\n            }\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Check current liquidity",
 			"event": [
 				{
@@ -15483,7 +15460,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"12001\");",
+							"    pm.expect(pm.response.text()).to.include(\"12005\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
