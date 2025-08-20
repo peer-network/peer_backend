@@ -98,7 +98,6 @@ class Base64FileHandler
             if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
               $width = $fileInfo['video']['resolution_x'];
               $height = $fileInfo['video']['resolution_y'];
-
                 // Check for Orientation
                 if(isset($fileInfo['jpg']['exif']['IFD0']['Orientation'])){
                     $Orientation = $fileInfo['jpg']['exif']['IFD0']['Orientation'] ??= 1;
@@ -115,7 +114,6 @@ class Base64FileHandler
                         $height = $fileInfo['video']['resolution_x'];
                     }
                 }
-
               $gcd = gmp_intval(gmp_gcd($width, $height));
               $ratio = ($width / $gcd) . ':' . ($height / $gcd);
               $auflg = "{$width}x{$height}";
@@ -125,8 +123,7 @@ class Base64FileHandler
             $information['ratiofrm'] = isset($ratio) ? $ratio : null;
             $information['resolution'] = isset($auflg) ? $auflg : null;
 
-            return isset($information) ? (array)$information : null;
-            
+            return $information;            
         } catch (\Exception $e) {
             \error_log("getID3 Error: " . $e->getMessage());
             return null;

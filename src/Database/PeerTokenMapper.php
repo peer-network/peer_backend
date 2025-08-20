@@ -182,6 +182,7 @@ class PeerTokenMapper
 
         try {
 
+            $this->db->beginTransaction();
             $transUniqueId = self::generateUUID();
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
@@ -353,6 +354,9 @@ class PeerTokenMapper
                 $this->walletMapper->insertWinToPool($this->burnWallet, $args);
             }
 
+            $this->db->commit();
+            $this->logger->info('Token transfer completed successfully');
+
             return [
                 'status' => 'success',
                 'ResponseCode' => 11212,
@@ -361,6 +365,7 @@ class PeerTokenMapper
                 'createdat' => date('Y-m-d H:i:s.u')
             ];
         } catch (\Throwable $e) {
+            $this->db->rollBack();
             return self::respondWithError($e->getMessage());
         }
     }

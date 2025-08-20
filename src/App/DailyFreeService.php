@@ -9,6 +9,7 @@ const POST_=5;
 const DAILYFREEPOST=1;
 const DAILYFREELIKE=3;
 const DAILYFREECOMMENT=4;
+const DAILYFREEDISLIKE=0;
 
 use Fawaz\App\DailyFree;
 use Fawaz\Database\DailyFreeMapper;
@@ -32,7 +33,7 @@ class DailyFreeService
         return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
     }
 
-    private function respondWithError(string $message): array
+    private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
@@ -53,18 +54,20 @@ class DailyFreeService
         try {
             $affectedRows = $this->dailyFreeMapper->getUserDailyAvailability($userId);
 
-            if ($affectedRows !== false) {
-                return [
-                    'status' => 'success',
-                    'ResponseCode' =>  11303,
-                    'affectedRows' => $affectedRows,
-                ];
+            if ($affectedRows === false) {
+                $this->logger->warning('DailyFree availability not found', ['userId' => $userId]);
+                return $this->respondWithError(40301);
             }
 
-            return [];
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11303,
+                'affectedRows' => $affectedRows,
+            ];
+
         } catch (\Throwable $e) {
-            $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage()]);
-            return [];
+            $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage(), 'userId' => $userId]);
+            return $this->respondWithError(40301);
         }
     }
 
@@ -76,7 +79,7 @@ class DailyFreeService
             $results = $this->dailyFreeMapper->getUserDailyUsage($userId, $artType);
             $this->logger->info('DailyFreeService.getUserDailyUsage results', ['results' => $results]);
 
-            return ($results !== false) ? (int)$results : 0;
+            return $results;
         } catch (\Throwable $e) {
             $this->logger->error('Error in getUserDailyUsage', ['exception' => $e->getMessage()]);
             return 0;

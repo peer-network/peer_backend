@@ -20,7 +20,7 @@ init:
 
 	@echo "tmp_env.json ready. tmp_collection.json will be generated during test."
 
-reset:
+reset-db-and-backend:
 	@echo "Bringing down docker-compose stack with volumes..."
 	-@docker-compose $(COMPOSE_FILES) down -v
 
@@ -39,7 +39,20 @@ reset:
 
 	@echo "Docker environment for this project reset."
 
-dev: env reset init
+reload-backend:
+	@echo "Rebuilding backend image..."
+	docker-compose $(COMPOSE_FILES) build backend
+
+	@echo "Recreating backend container..."
+	docker-compose $(COMPOSE_FILES) up -d --force-recreate backend
+
+	@echo "Waiting for backend to be healthy..."
+	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
+		echo "Waiting for Backend..."; sleep 2; \
+	done
+	@echo "Backend reloaded and ready!"
+
+dev: env reset-db-and-backend init
 	@echo "Installing Composer dependencies on local host..."
 	composer install --no-dev --prefer-dist --no-interaction
 
@@ -117,11 +130,15 @@ test: ensure-jq
 
 	jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {raw: "{{BACKEND_URL}}/graphql", protocol: "http", host: ["backend"], path: ["graphql"]}' \
 	tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection_patched.json
-	mv tests/postman_collection/tmp_collection_patched.json tests/postman_collection/tmp_collection.json
+	mv -f tests/postman_collection/tmp_collection_patched.json tests/postman_collection/tmp_collection.json
+
+	jq '(.item[] | select(.request.body?.mode == "formdata") | .request.url ) |= {raw: "{{BACKEND_URL}}/upload-post", protocol: "http", host: ["backend"], path: ["upload-post"]}' \
+	tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection_patched2.json
+	mv tests/postman_collection/tmp_collection_patched2.json tests/postman_collection/tmp_collection.json
 
 	jq 'del(.values[] | select(.key == "BACKEND_URL")) | .values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
 	tests/postman_collection/tmp_env.json > tests/postman_collection/tmp_env_patched.json
-	mv tests/postman_collection/tmp_env_patched.json tests/postman_collection/tmp_env.json
+	mv -f tests/postman_collection/tmp_env_patched.json tests/postman_collection/tmp_env.json
 
 	@echo "Running Newman tests inside the container..."
 	docker-compose $(COMPOSE_FILES) run --rm newman \
@@ -129,8 +146,7 @@ test: ensure-jq
 	    --environment /etc/newman/tmp_env.json \
 	    --reporters cli,htmlextra \
 	    --reporter-htmlextra-export /etc/newman/reports/report.html || true
-
-	@sudo chown -R $(USER):$(USER) newman
+		
 	@echo "Newman tests completed! Attempting to open HTML report..."
 
 		@{ \
@@ -150,7 +166,7 @@ test: ensure-jq
 	}
 	
 
-clean-all: reset
+clean-all: reset-db-and-backend
 	@rm -f composer.lock
 	@rm -rf vendor
 	@rm -rf sql_files_for_import_tmp
@@ -163,3 +179,56 @@ clean-all: reset
 	@rm -f runtime-data/logs/errorlog.txt
 	@rm -f tests/postman_collection/tmp_*.json
 	@echo "Local project cleanup complete."
+
+ci:
+	$(MAKE) dev
+
+	@echo "Building Newman container..."
+	docker-compose $(COMPOSE_FILES) build newman
+
+	@echo "Starting Newman container..."
+	docker-compose $(COMPOSE_FILES) up -d newman
+
+	@echo "Running merge script inside the container..."
+	docker-compose $(COMPOSE_FILES) run --rm newman \
+		node /etc/newman/merge-collections.js
+
+	jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {raw: "{{BACKEND_URL}}/graphql", protocol: "http", host: ["backend"], path: ["graphql"]}' \
+		tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection_patched.json
+	mv -f tests/postman_collection/tmp_collection_patched.json tests/postman_collection/tmp_collection.json
+
+	jq '(.item[] | select(.request.body?.mode == "formdata") | .request.url ) |= {raw: "{{BACKEND_URL}}/upload-post", protocol: "http", host: ["backend"], path: ["upload-post"]}' \
+		tests/postman_collection/tmp_collection.json > tests/postman_collection/tmp_collection_patched2.json
+	mv tests/postman_collection/tmp_collection_patched2.json tests/postman_collection/tmp_collection.json
+
+	jq 'del(.values[] | select(.key == "BACKEND_URL")) | .values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
+		tests/postman_collection/tmp_env.json > tests/postman_collection/tmp_env_patched.json
+	mv -f tests/postman_collection/tmp_env_patched.json tests/postman_collection/tmp_env.json
+
+	@echo "Running Newman tests inside the container..."
+	docker-compose $(COMPOSE_FILES) run --rm newman \
+	    newman run /etc/newman/tmp_collection.json \
+	    --environment /etc/newman/tmp_env.json \
+	    --reporters cli,htmlextra \
+	    --reporter-htmlextra-export /etc/newman/reports/report.html || true
+
+	@echo "Skipping sudo chown step inside ci"
+
+	@echo "Newman tests completed! Attempting to open HTML report..."
+	@{ \
+		if command -v wslview >/dev/null 2>&1; then \
+			echo 'Opening report with wslview...'; \
+			wslview newman/reports/report.html; \
+		elif command -v xdg-open >/dev/null 2>&1; then \
+			echo 'Opening report with xdg-open...'; \
+			xdg-open newman/reports/report.html; \
+		elif command -v open >/dev/null 2>&1; then \
+			echo 'Opening report with open (macOS)...'; \
+			open newman/reports/report.html; \
+		else \
+			echo 'Could not detect browser opener. Please open newman/reports/report.html manually.'; \
+		fi; \
+		true; \
+	}
+
+	$(MAKE) clean-all

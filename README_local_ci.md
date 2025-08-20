@@ -51,6 +51,30 @@ This will:
 
 This may take a few minutes on first run.
 
+If this results in some permission problems please run:
+
+```bash
+sudo make dev
+```
+
+and then
+
+```bash
+sudo make clean-all
+```
+This is a dry run which will set permissions correctly for the next run. Afterwards re-try "make dev" and proceed with step 3 if it worked.
+
+---
+
+### 3. Reload just the backend
+
+If you only want to reload the backend after some code changes without resetting your database:
+```bash
+make reload-backend
+```
+
+This drops the backend image and container and rebuilds both of them.
+
 ---
 
 ### 3. Soft restart (fresh DB with existing code & vendors)
@@ -58,7 +82,7 @@ This may take a few minutes on first run.
 If you only want to reset the database (fresh schema & data) but keep current code & vendors:
 
 ```bash
-make restart
+make reset-db-and-backend
 ```
 
 This drops the DB volume, recreates it, runs your migrations / seed and starts the backend.
@@ -94,6 +118,24 @@ This will:
 
 - Stop Docker containers and remove volumes
 - Delete `.env`, `vendor/`, temp SQL, Postman tmp files, reports, logs
+
+---
+
+### 6. Run Local CI in One Command
+
+If you want to replicate the remote CI workflow locally (spin up the environment, run Newman tests, and clean everything up afterwards), run:
+
+```bash
+make ci
+```
+
+This will:
+
+- Run the full dev setup (reset containers, build images, run migrations, install dependencies)
+- Execute the Newman test suite with the same Postman collections as remote CI
+- Generate an HTML report of the test results
+- Skip interactive steps so it can run unattended
+- Clean up containers, volumes, and temp files automatically at the end
 
 ---
 

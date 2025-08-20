@@ -35,6 +35,7 @@ type Query {
   referralList(offset: Int, limit: Int): ReferralListResponse!
   listTodaysInteractions: ListTodaysInteractionsResponse!
   getActionPrices: GetActionPricesResponse!
+  postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
 }
@@ -263,6 +264,12 @@ type DailyFreeResponse {
   name: String!
   used: Int!
   available: Int!
+}
+
+type PostEligibilityResponse {
+  status: String!
+  ResponseCode: String!
+  eligibilityToken: String!
 }
 
 type CurrentLiquidity {
@@ -614,6 +621,7 @@ input PostInput {
   media: [String!]
   cover: [String!]
   tags: [String!]
+  uploadedFiles: String
 }
 
 input ChatInput {
