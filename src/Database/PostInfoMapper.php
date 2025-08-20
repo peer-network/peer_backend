@@ -170,7 +170,6 @@ class PostInfoMapper
         }
 
         try {
-            $this->db->beginTransaction();
 
             // Check if the record already exists
             $sqlCheck = "SELECT COUNT(*) FROM $table WHERE userid = :userid AND postid = :postid";
@@ -189,17 +188,14 @@ class PostInfoMapper
                 $success = $stmt->execute();
 
                 if ($success) {
-                    $this->db->commit();
                     $this->logger->info("User activity added successfully", ['action' => $action, 'userid' => $userid, 'postid' => $postid]);
                     return true;
                 }
             }
 
-            $this->db->rollBack();
             $this->logger->warning("User activity already exists or failed to add", ['action' => $action, 'userid' => $userid, 'postid' => $postid]);
             return false;
         } catch (\Exception $e) {
-            $this->db->rollBack();
             $this->logger->error("PostInfoMapper.addUserActivity: Exception occurred", ['exception' => $e->getMessage()]);
             return false;
         }

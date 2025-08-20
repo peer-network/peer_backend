@@ -127,21 +127,31 @@ class PostInfoService
             return $this->respondWithError(31506);
         }
 
-        $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
+        try{
+            $this->transactionManager->beginTransaction();
+        
+            $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
 
-        if (!$exists) {
-            return $this->respondWithError(31501);
+            if (!$exists) {
+                $this->transactionManager->rollback();
+                return $this->respondWithError(31501);
+            }
+
+            $postInfo->setLikes($postInfo->getLikes() + 1);
+            $this->postInfoMapper->update($postInfo);
+
+            $this->transactionManager->commit();
+            return [
+                'status' => 'success',
+                // 'ResponseCode' => 11503,
+                'ResponseCode' => 11514,
+
+            ];
+        }catch (\Exception $e) {
+            $this->transactionManager->rollback();
+            $this->logger->error('PostInfoService: likePost: Error while fetching post data', ['exception' => $e]);
+            return $this->respondWithError(41505);
         }
-
-        $postInfo->setLikes($postInfo->getLikes() + 1);
-        $this->postInfoMapper->update($postInfo);
-
-        return [
-            'status' => 'success',
-            // 'ResponseCode' => 11503,
-            'ResponseCode' => 11514,
-
-        ];
     }
 
     public function dislikePost(string $postId): array
@@ -241,11 +251,13 @@ class PostInfoService
             );
 
             if ($exists === null) {
+                $this->transactionManager->rollback();
                 $this->logger->error("PostInfoService: reportPost: Failed to add report");
                 return $this->respondWithError(41505);
             }
 
             if ($exists === true) {
+                $this->transactionManager->rollback();
                 $this->logger->warning("PostInfoService: reportPost: User tries to add duplicating report");
                 return $this->respondWithError(31503);
             }
