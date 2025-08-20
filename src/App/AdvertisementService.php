@@ -179,7 +179,7 @@ class AdvertisementService
                 if ($this->advertisementMapper->isAdvertisementIdExist($postId, \strtolower($CostPlan)) === true && empty($forcing)) 
                 {
                     $this->logger->info('Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).', ['advertisementid' => $advertisementId, 'postId' => $postId]);
-                    return self::respondWithError(22001); // Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).
+                    return self::respondWithError(32018); // Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).
                 }
 
                 $timestart = (new \DateTime())->format('Y-m-d H:i:s.u'); // Setze timestart
