@@ -67,7 +67,6 @@ class ReportsMapper
 
             $exists = $stmtCheck->fetchColumn() > 0;
             if ($exists > 0) {
-                $this->db->rollBack();
                 $this->logger->warning("User activity already exists", $debugData);
                 return true;
             }
