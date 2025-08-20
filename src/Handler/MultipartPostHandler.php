@@ -121,15 +121,4 @@ class MultipartPostHandler implements RequestHandlerInterface
         }
     }
 
-    /**
-     * Handle Requests
-     * 
-     * @return $response ResponseInterface
-     */
-    private function errorResponse(string $message, int $statusCode): ResponseInterface
-    {
-        $response = new Response($statusCode);
-        $response->getBody()->write(json_encode(['error' => $message]));
-        return $response->withHeader('Content-Type', 'application/json');
-    }
 }
