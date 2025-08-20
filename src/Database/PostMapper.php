@@ -604,7 +604,7 @@ class PostMapper
         }
         // Remove DELETED User's post
         $whereClauses[] = "u.status != :status";
-        $params['status'] = self::STATUS_DELETED;   
+        $params['status'] = Status::DELETED;
 
         if ($title !== null) {
             $whereClauses[] = "p.title ILIKE :title";

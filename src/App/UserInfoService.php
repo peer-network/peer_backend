@@ -217,12 +217,13 @@ class UserInfoService
         $this->logger->info('UserInfoService.toggleProfilePrivacy started');
 
         try {
+            $this->transactionManager->beginTransaction();
+
             $user = $this->userInfoMapper->loadInfoById($this->currentUserId);
             if (!$user) {
                 return $this->createSuccessResponse(21001);
             }
 
-            $this->transactionManager->beginTransaction();
 
             $newIsPrivate = !$user->getIsPrivate();
             $user->setIsPrivate((int) $newIsPrivate);
@@ -260,6 +261,8 @@ class UserInfoService
         $this->logger->info('UserInfoService.updateBio started');
 
         try {
+            $this->transactionManager->beginTransaction();
+
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
                 return $this->createSuccessResponse(21001);
@@ -281,7 +284,6 @@ class UserInfoService
             } else {
                 return $this->respondWithError(40307);
             }
-            $this->transactionManager->beginTransaction();
 
             $user->setBiography($mediaPathFile);
             $updatedUser = $this->userInfoMapper->updateUsers($user);

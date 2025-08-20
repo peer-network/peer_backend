@@ -477,6 +477,8 @@ class UserService
         $contentFiltering = $newUserPreferences['contentFilteringSeverityLevel'] ?? null;
         
         try {
+            $this->transactionManager->beginTransaction();
+
             $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
             if (!$userPreferences) {
                 $this->logger->error('UserService.updateUserPreferences: failed to load user preferences for updating');
@@ -494,7 +496,6 @@ class UserService
                 $userPreferences->setUpdatedAt();
             }
 
-            $this->transactionManager->beginTransaction();
 
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
@@ -654,6 +655,8 @@ class UserService
         $password = $args['password'] ?? null;
 
         try {
+            $this->transactionManager->beginTransaction();
+
             $validationResult = new User(['username' => $username], ['username']);
 
             $user = $this->userMapper->loadById($this->currentUserId);
@@ -673,7 +676,6 @@ class UserService
             if (!$slug) {
                 return self::respondWithError(41010);
             }
-            $this->transactionManager->beginTransaction();
 
             $user->setName($username);
             $user->setSlug($slug);
@@ -1108,7 +1110,7 @@ class UserService
 
         try {
             $this->transactionManager->beginTransaction();
-            
+
             $newUser = new User();
             $newUser->setPassword($newPassword);
             $newUser->validatePass($args);
