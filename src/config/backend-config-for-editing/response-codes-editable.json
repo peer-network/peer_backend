@@ -839,6 +839,10 @@
         "comment": "Not Allowed: You are not allowed to initiate transfers to your own address",
         "userFriendlyComment": "You can't transfer to yourself."
     },
+    "31203": {
+        "comment": "Unauthorized to initiate transfers to Pool accounts.",
+        "userFriendlyComment": "You are not authorized to transfer to pool accounts."
+    },
     "31501": {
         "comment": "Invalid Action: You have already liked this post",
         "userFriendlyComment": "You've already liked this post."
@@ -1214,6 +1218,10 @@
     "41221": {
         "comment": "Unexpected Error: Invalid action type",
         "userFriendlyComment": "This action isn't valid. Please try something else."
+    },
+    "41222": {
+        "comment": "Unexpected Error: One of the pool accounts in the env file is missing.",
+        "userFriendlyComment": "A configuration error occurred. Please contact support."
     },
     "41401": {
         "comment": "Unexpected Error: Failed to create transaction. Please try again later or contact support",

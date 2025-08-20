@@ -1703,6 +1703,29 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'TransferTokenResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.TransferTokenResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'TransferToken' => [
+                'tokenSend' => function (array $root): float {
+                    return $root['tokenSend'] ?? 0.0;
+                },
+                'tokensSubstractedFromWallet' => function (array $root): float {
+                    return $root['tokensSubstractedFromWallet'] ?? 0.0;
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ],
             'Transaction' => [
                 'transactionid' => function (array $root): string {
                     return $root['transactionid'] ?? '';
@@ -1829,7 +1852,7 @@ class GraphQLSchemaBuilder
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
-            'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
+            'resolveTransfer' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
         ];
     }
 
