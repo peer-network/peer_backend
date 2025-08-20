@@ -879,6 +879,10 @@
         "comment": "Information Not Found: No post found for the provided post ID. Please check the ID and try again.",
         "userFriendlyComment": "Post not found. Check the ID and try again."
     },
+    "31511": {
+        "comment": "Temporary File Error: A temporary file was used. Please try uploading the post again.",
+        "userFriendlyComment": "Please try creating the post again."
+    },
     "31601": {
         "comment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",
         "userFriendlyComment": "Comment not found. Check the ID and try again."
