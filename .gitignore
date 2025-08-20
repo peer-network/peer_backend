@@ -19,6 +19,7 @@ runtime-data/media/profile/*
 runtime-data/media/text/*
 runtime-data/media/userData/*
 runtime-data/media/video/*
+runtime-data/media/tmp/*
 runtime-data/logs/*
 runtime-data/ratelimiter/*
 runtime-data/media/tmp/*

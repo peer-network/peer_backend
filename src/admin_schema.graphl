@@ -45,6 +45,7 @@ type Query {
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
   getReferralInfo: ReferralInfoResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
+  postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
 }
@@ -228,6 +229,12 @@ enum DayFilterType {
   W0
   M0
   Y0
+}
+
+type PostEligibilityResponse {
+  status: String!
+  ResponseCode: String!
+  eligibilityToken: String!
 }
 
 type ListTodaysInteractionsResponse {
@@ -819,9 +826,10 @@ input PostInput {
   title: String!
   mediadescription: String
   contenttype: ContentType!
-  media: [String!]
-  cover: [String!]
+  media: [String]
+  cover: [String]
   tags: [String!]
+  uploadedFiles: String
 }
 
 input ChatInput {
