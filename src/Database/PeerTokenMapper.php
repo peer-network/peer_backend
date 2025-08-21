@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -110,7 +111,7 @@ class PeerTokenMapper
             return self::respondWithError(30264);
         }
 
-        $numberoftokens = (string) $args['numberoftokens'];
+        $numberoftokens = (float) $args['numberoftokens'];
         if ($numberoftokens <= 0) {
             $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
                 'numberoftokens' => $numberoftokens,
@@ -189,6 +190,7 @@ class PeerTokenMapper
 
             // 1. SENDER: Debit From Account
             if ($requiredAmount) {
+                // Remove this records we don't need it anymore.
                 // $this->createAndSaveTransaction($transRepo, [
                 //     'transuniqueid' => $transUniqueId,
                 //     'transactiontype' => 'transferDeductSenderToRecipient',
@@ -364,7 +366,6 @@ class PeerTokenMapper
                 'createdat' => date('Y-m-d H:i:s.u')
             ];
         } catch (\Throwable $e) {
-            $this->db->rollBack();
             $this->logger->error('Error during token transfer', [
                 'error' => $e->getMessage(),
                 'userId' => $userId,

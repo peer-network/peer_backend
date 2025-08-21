@@ -8,33 +8,6 @@ define('Q64_96_SCALE', bcpow('2', '96'));
 
 class TokenHelper
 {
-    /**
-     * Calculates the Peer Token price in EUR based on BTC-EUR and PeerToken-BTC prices.
-     *
-     * @param string $btcEURPrice Current BTC to EUR price.
-     * @param string $peerTokenBTCPrice Current PeerToken to BTC price.
-     * @return float|null Calculated PeerToken price in EUR.
-     */
-    public static function calculatePeerTokenEURPrice(string $btcEURPrice, string $peerTokenBTCPrice): ?string
-    {
-        $peerValue = self::mulRc($btcEURPrice, $peerTokenBTCPrice);
-
-        return ($peerValue);
-    }
-
-    /**
-     * Calculates the price of one Peer Token in BTC based on liquidity pool data.
-     *
-     * @param float $btcPoolBTCAmount Total BTC in the liquidity pool.
-     * @param float $liqPoolTokenAmount Total Peer Tokens in the liquidity pool.
-     * @return float|null Peer Token price in BTC with 10-digit precision.
-     */
-    public static function calculatePeerTokenPriceValue(string $btcPoolBTCAmount, string $liqPoolTokenAmount): ?string
-    {
-        $beforeToken = self::divRc($btcPoolBTCAmount, $liqPoolTokenAmount);
-        
-        return ($beforeToken);
-    }
 
     /**
      * Calculates the total number of Peer Tokens required including all applicable fees.
@@ -47,17 +20,17 @@ class TokenHelper
      * @return float|null Total required tokens including all fees.
      */
     public static function calculateTokenRequiredAmount(
-        string $numberOfTokens,
+        float $numberOfTokens,
         float $peerFee,
         float $poolFee,
         float $burnFee,
         float $inviterFee = 0
-    ): ?string {
+    ): ?float {
         $allFees = (1 + $peerFee + $poolFee + $burnFee + $inviterFee);
 
         $requiredAmount = self::mulRc($numberOfTokens, $allFees);
 
-        return $requiredAmount;
+        return (float) $requiredAmount;
     }
 
     /**
@@ -67,39 +40,17 @@ class TokenHelper
      * @param float $peerAmount Actual token amount.
      * @param float $burnAmount Burned token amount.
      * @param float $inviterAmount Optional amount for inviter reward.
-     * @return float|null Total required from sender including all parts.
+     * @return float Total required from sender including all parts.
      */
     public static function calculateSwapTokenSenderRequiredAmountIncludingFees(
         float $feeAmount,
         float $peerAmount,
         float $burnAmount,
         float $inviterAmount = 0
-    ): ?string {
-        return ($feeAmount + $peerAmount + $burnAmount + $inviterAmount);
+    ): ?float {
+        return  (float) ($feeAmount + $peerAmount + $burnAmount + $inviterAmount);
     }
 
-    /**
-     * Converts a decimal string to its Q96 fixed-point representation.
-     *
-     * @param string $decimal The number as a string (not float).
-     * @return string Q96 fixed-point representation.
-     */
-    public static function convertToQ96(string $decimal): string
-    {
-        return bcmul($decimal, Q64_96_SCALE, 0);
-    }
-
-    /**
-     * Converts a Q96 fixed-point string back to a decimal string.
-     *
-     * @param string $q96Value The Q96 fixed-point value.
-     * @param int $precision Number of decimal places in output.
-     * @return string
-     */
-    // public static function decodeFromQ96(string $q96Value, int $precision = 30): string
-    // {
-    //     return bcdiv($q96Value, Q64_96_SCALE, $precision);
-    // }
 
 
     /**
@@ -107,17 +58,17 @@ class TokenHelper
      *
      * This method assumes both values are already scaled by 2^96.
      *
-     * @param string $q96Value1 First Q96-encoded value.
-     * @param string $q96Value2 Second Q96-encoded value.
-     * @return string Sum of the two Q96 values, as a Q96-encoded string.
+     * @param float $q96Value1 First Q96-encoded value.
+     * @param float $q96Value2 Second Q96-encoded value.
+     * @return float Sum of the two Q96 values, as a Q96-encoded string.
      */
-    public static function addRc(string $q96Value1, string $q96Value2): string
+    public static function addRc(float $q96Value1, float $q96Value2): float
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->add_decimal($q96Value1, $q96Value2);
+        $result = $runtIns->add_decimal((string) $q96Value1, (string) $q96Value2);
 
-        return $result;
+        return (float) $result;
     }
 
 
@@ -126,17 +77,17 @@ class TokenHelper
      *
      * This method assumes both values are already scaled by 2^96.
      *
-     * @param string $q96Value1 First Q96-encoded value.
-     * @param string $q96Value2 Second Q96-encoded value.
-     * @return string Sum of the two Q96 values, as a Q96-encoded string.
+     * @param float $q96Value1 First Q96-encoded value.
+     * @param float $q96Value2 Second Q96-encoded value.
+     * @return float Sum of the two Q96 values, as a Q96-encoded float.
      */
-    public static function mulRc(string $q96Value1, string $q96Value2): string
+    public static function mulRc(float $q96Value1, float $q96Value2): float
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->multiply_decimal($q96Value1, $q96Value2);
+        $result = $runtIns->multiply_decimal((string) $q96Value1, (string) $q96Value2);
 
-        return $result;
+        return (float) $result;
 
     }
     
@@ -145,54 +96,41 @@ class TokenHelper
      *
      * This method assumes both values are already scaled by 2^96.
      *
-     * @param string $q96Value1 First Q96-encoded value.
-     * @param string $q96Value2 Second Q96-encoded value.
-     * @return string Sum of the two Q96 values, as a Q96-encoded string.
+     * @param float $q96Value1 First Q96-encoded value.
+     * @param float $q96Value2 Second Q96-encoded value.
+     * @return float Sum of the two Q96 values, as a Q96-encoded float.
      */
-    public static function divRc(string $q96Value1, string $q96Value2): string
+    public static function divRc(float $q96Value1, float $q96Value2): float
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->divide_decimal($q96Value1, $q96Value2);
+        $result = $runtIns->divide_decimal((string) $q96Value1, (string) $q96Value2);
 
-        return $result;
+        return (float) $result;
     }
 
-    /**
-     * compare two Q96-encoded values.
-     *
-     * This method assumes both values are already scaled by 2^96.
-     *
-     * @param string $q96Value1 First Q96-encoded value.
-     * @param string $q96Value2 Second Q96-encoded value.
-     * @return string Sum of the two Q96 values, as a Q96-encoded string.
-     */
     /**
      * Substract two Q96-encoded fixed-point values.
      *
      * This method assumes both values are already scaled by 2^96.
      *
-     * @param string $q96Value1 First Q96-encoded value.
-     * @param string $q96Value2 Second Q96-encoded value.
-     * @return string Sum of the two Q96 values, as a Q96-encoded string.
+     * @param float $q96Value1 First Q96-encoded value.
+     * @param float $q96Value2 Second Q96-encoded value.
+     * @return float Sum of the two Q96 values, as a Q96-encoded float.
      */
-    public static function subRc(string $q96Value1, string $q96Value2): string
+    public static function subRc(float $q96Value1, float $q96Value2): float
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->subtract_decimal($q96Value1, $q96Value2);
+        $result = $runtIns->subtract_decimal((string) $q96Value1, (string) $q96Value2);
 
-        return $result;
+        return (float) $result;
     }
 
     /**
      * initialise Rust.
      *
      * This method assumes both values are already scaled by 2^96.
-     *
-     * @param string $q96Value1 First Q96-encoded value.
-     * @param string $q96Value2 Second Q96-encoded value.
-     * @return string Sum of the two Q96 values, as a Q96-encoded string.
      */
     public static function initRc(){
 
