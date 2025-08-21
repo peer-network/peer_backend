@@ -736,37 +736,37 @@ class ChatService
 
     public function getChatMessages(string $chatId): array
     {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
-        }
+//        if (!$this->checkAuthentication()) {
+//            return $this->respondWithError(60501);
+//        }
+//
+//        $results = $this->chatMapper->getChatMessages(['chatId' => $chatId]);
+//        $requestData = [
+//            'type' => 'getMessages',
+//            'chatId' => $chatId,
+//            'requesterId' => $this->currentUserId,
+//        ];
 
-        $results = $this->chatMapper->getChatMessages(['chatId' => $chatId]);
-        $requestData = [
-            'type' => 'getMessages',
-            'chatId' => $chatId,
-            'requesterId' => $this->currentUserId,
-        ];
-
-        $this->sendToWebSocket($requestData);
+//        $this->sendToWebSocket($requestData);
 
         return [
-            'status' => 'success',
-            'ResponseCode' => 11807,
-            'affectedRows' => $results,
+            'status' => 'error',
+            'ResponseCode' => 00000,
+            'affectedRows' => [],
         ];
     }
 
-    private function sendToWebSocket(array $data): void
-    {
-        $loop = Loop::get();
-        $connector = new Connector($loop);
-        $connector('ws://127.0.0.1:8080')
-            ->then(function ($connection) use ($data) {
-                $connection->send(json_encode($data));
-                $connection->close();
-            }, function (\Throwable $e) {
-                $this->logger->error("WebSocket connection error", ['exception' => $e->getMessage()]);
-            });
-        $loop->run();
-    }
+//    private function sendToWebSocket(array $data): void
+//    {
+//        $loop = Loop::get();
+//        $connector = new Connector($loop);
+//        $connector('ws://127.0.0.1:8080')
+//            ->then(function ($connection) use ($data) {
+//                $connection->send(json_encode($data));
+//                $connection->close();
+//            }, function (\Throwable $e) {
+//                $this->logger->error("WebSocket connection error", ['exception' => $e->getMessage()]);
+//            });
+//        $loop->run();
+//    }
 }

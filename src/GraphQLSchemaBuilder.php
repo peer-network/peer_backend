@@ -1360,7 +1360,7 @@ class GraphQLSchemaBuilder
                     return $root['numbers'] ?? 0.0;
                 },
                 'whereby' => function (array $root): int {
-                    return $root['whereby'] ?? 0.0;
+                    return $root['whereby'] ?? 0;
                 },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
