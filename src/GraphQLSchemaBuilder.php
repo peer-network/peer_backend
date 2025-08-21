@@ -699,9 +699,6 @@ class GraphQLSchemaBuilder
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 },
-                'type' => function (array $root): string {
-                    return $root['type'] ?? '';
-                },
                 'tags' => function (array $root): array {
                     return $root['tags'] ?? [];
                 },
@@ -883,6 +880,54 @@ class GraphQLSchemaBuilder
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
+                },
+            ],
+            'AdvCreator' => [
+                'advertisementid' => function (array $root): string {
+                    $this->logger->info('Query.AdvCreator Resolvers');
+                    return $root['advertisementid'] ?? '';
+                },
+                'postid' => function (array $root): string {
+                    return $root['postid'] ?? '';
+                },
+                'advertisementtype' => function (array $root): string {
+                    return strtoupper($root['status']) ?? '';
+                },
+                'startdate' => function (array $root): string {
+                    return $root['timestart'] ?? '';
+                },
+                'enddate' => function (array $root): string {
+                    return $root['timeend'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'user' => function (array $root): array {
+                    return $root['user'] ?? [];
+                },
+            ],
+            'ListAdvertisementPostsResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ListAdvertisementPostsResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'counter' => function (array $root): int {
+                    return $root['counter'] ?? 0;
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'AdvertisementPost' => [
+                'post' => function (array $root): array {
+                    $this->logger->info('Query.AdvertisementPost Resolvers');
+                    return $root['post'] ?? [];
+                },
+                'advertisement' => function (array $root): array {
+                    return $root['advertisement'] ?? [];
                 },
             ],
             'Chat' => [
@@ -1871,7 +1916,7 @@ class GraphQLSchemaBuilder
             'listFollowRelations' => fn(mixed $root, array $args) => $this->resolveFollows($args),
             'listFriends' => fn(mixed $root, array $args) => $this->resolveFriends($args),
             'listPosts' => fn(mixed $root, array $args) => $this->resolvePosts($args),
-            'guestListPost' => fn(mixed $root, array $args) => $this->guestListPost($args),
+            'listAdvertisementPosts' => fn(mixed $root, array $args) => $this->resolveAdvertisementsPosts($args),
             'getPostInfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
             'getCommentInfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentId']),
             'listChildComments' => fn(mixed $root, array $args) => $this->resolveComments($args),
@@ -3414,6 +3459,62 @@ class GraphQLSchemaBuilder
         ];
     }
 
+    protected function resolveAdvertisementsPosts(array $args): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        $this->logger->info('Query.resolveAdvertisementsPosts started');
+
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+
+        $posts = $this->advertisementService->findAdvertiser($args);
+        if (isset($posts['status']) && $posts['status'] === 'error') {
+            return $posts;
+        }
+
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
+
+        $data = array_map(
+            function (array $row) use ($commentOffset, $commentLimit, $contentFilterBy) {
+                $postWithComments = $this->mapPostWithComments(
+                    $row['post'],
+                    $commentOffset,
+                    $commentLimit,
+                    $contentFilterBy
+                );
+
+                return [
+                    // PostAdvanced Objekt
+                    'post' => $postWithComments,
+                    // Advertisements Objekt
+                    'advertisement' => $this->mapPostWithAdvertisement($row['advertisement']),
+                ];
+            },
+            $posts
+        );
+
+        $this->logger->info('findAdvertiser', ['data' => $data]);
+        return [
+            'status' => 'success',
+            'counter' => count($data),
+            'ResponseCode' => empty($data) ? 21501 : 11501,
+            'affectedRows' => $data,
+        ];
+    }
+
+    protected function mapPostWithAdvertisement(Advertisements $advertise): ?array
+    {
+        return $advertise->getArrayCopy();
+    }
+
     protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit, ?string $contentFilterBy = null): array
     {
         $postArray = $post->getArrayCopy();
@@ -3426,7 +3527,7 @@ class GraphQLSchemaBuilder
         return $postArray;
     }
 
-    protected function fetchCommentWithoutReplies(CommentAdvanced $comment): array
+    protected function fetchCommentWithoutReplies(CommentAdvanced $comment): ?array
     {
         return $comment->getArrayCopy();
     }

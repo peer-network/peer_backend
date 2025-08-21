@@ -16,6 +16,7 @@ class Advertisements
     protected float $tokencost;
     protected float $eurocost;
     protected string $createdat;
+    protected ?array $user = [];
     protected string $timeBetween;
 
     // Constructor
@@ -35,6 +36,7 @@ class Advertisements
         $this->tokencost = $data['tokencost'] ?? 0.0;
         $this->eurocost = $data['eurocost'] ?? 0.0;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
     }
 
     // Array Copy methods
@@ -50,6 +52,7 @@ class Advertisements
             'tokencost' => $this->tokencost,
             'eurocost' => $this->eurocost,
             'createdat' => $this->createdat,
+            'user' => $this->user,
         ];
         return $att;
     }
@@ -212,6 +215,12 @@ class Advertisements
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                     ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                     ['name' => 'isString'],
+                ],
+            ],
+            'user' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'IsArray'],
                 ],
             ],
         ];

@@ -4,6 +4,15 @@ namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\Advertisements;
+use Fawaz\App\PostAdvanced;
+use Fawaz\App\Role;
+use Fawaz\App\Status;
+use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Psr\Log\LoggerInterface;
 
 class AdvertisementMapper
@@ -446,5 +455,222 @@ class AdvertisementMapper
 
         $this->logger->info('convertEuroToTokens response', ['response' => $response]);
         return $response;
+    }
+
+    public function findAdvertiser(string $currentUserId, ?array $args = []): array
+    {
+        $this->logger->info("AdvertisementMapper.findAdvertiser started");
+
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit  = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $trenddays = 7;
+
+        $from   = $args['from']   ?? null;
+        $to     = $args['to']     ?? null;
+        $filterBy = $args['filterBy'] ?? [];
+        $tag    = $args['tag']    ?? null;
+        $postId = $args['postid'] ?? null;
+        $userId = $args['userid'] ?? null;
+
+        $whereClauses = ["p.feedid IS NULL"];
+        $params = ['currentUserId' => $currentUserId];
+
+        if ($postId !== null) {
+            $whereClauses[] = "p.postid = :postId";
+            $params['postId'] = $postId;
+        }
+        if ($userId !== null) {
+            $whereClauses[] = "p.userid = :userId";
+            $params['userId'] = $userId;
+        }
+        if ($from !== null) {
+            $whereClauses[] = "p.createdat >= :from";
+            $params['from'] = $from;
+        }
+        if ($to !== null) {
+            $whereClauses[] = "p.createdat <= :to";
+            $params['to'] = $to;
+        }
+        if ($tag !== null) {
+            $whereClauses[] = "t.name = :tag";
+            $params['tag'] = $tag;
+        }
+
+        // Allow Only (Normal Status) Plus (User's & Admin's Mode) Posts
+        $whereClauses[] = 'u.status = :stNormal AND u.roles_mask IN (:roleUser, :roleAdmin)';
+        $params['stNormal']  = Status::NORMAL;
+        $params['roleUser']  = Role::USER;
+        $params['roleAdmin'] = Role::ADMIN;
+
+        // FilterBy Content Types
+        if (!empty($filterBy) && is_array($filterBy)) {
+            $mapping = [
+                'IMAGE' => 'image',
+                'AUDIO' => 'audio',
+                'VIDEO' => 'video',
+                'TEXT'  => 'text',
+            ];
+
+            $validTypes = array_values(array_intersect_key($mapping, array_flip($filterBy)));
+
+            if ($validTypes) {
+                $placeholders = [];
+                foreach ($validTypes as $i => $value) {
+                    $key = "filter$i";
+                    $placeholders[] = ":$key";
+                    $params[$key] = $value;
+                }
+                $whereClauses[] = "p.contenttype IN (" . implode(", ", $placeholders) . ")";
+            }
+        }
+
+        $baseSelect = "
+            SELECT 
+                p.postid, p.userid, p.contenttype, p.title, p.media, p.cover, p.mediadescription, p.createdat,
+                a.advertisementid, a.userid AS tuserid, a.status AS ad_type,
+                a.timestart AS ad_order, a.timeend AS end_order, a.createdat AS tcreatedat,
+                ut.username AS tusername, ut.slug AS tslug, ut.img AS timg,
+                u.username, u.slug, u.img,
+                COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]'::json) AS tags,
+                (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) AS amountlikes,
+                (SELECT COUNT(*) FROM user_post_dislikes WHERE postid = p.postid) AS amountdislikes,
+                (SELECT COUNT(*) FROM user_post_views WHERE postid = p.postid) AS amountviews,
+                (SELECT COUNT(*) FROM comments WHERE postid = p.postid) AS amountcomments,
+                COALESCE((SELECT SUM(numbers) FROM logwins WHERE postid = p.postid AND createdat >= NOW() - INTERVAL '$trenddays days'), 0) AS amounttrending,
+                EXISTS (SELECT 1 FROM user_post_likes     WHERE postid = p.postid AND userid = :currentUserId) AS isliked,
+                EXISTS (SELECT 1 FROM user_post_views     WHERE postid = p.postid AND userid = :currentUserId) AS isviewed,
+                EXISTS (SELECT 1 FROM user_post_reports   WHERE postid = p.postid AND userid = :currentUserId) AS isreported,
+                EXISTS (SELECT 1 FROM user_post_dislikes  WHERE postid = p.postid AND userid = :currentUserId) AS isdisliked,
+                EXISTS (SELECT 1 FROM user_post_saves     WHERE postid = p.postid AND userid = :currentUserId) AS issaved,
+                EXISTS (SELECT 1 FROM follows WHERE followedid = a.userid AND followerid = :currentUserId) AS tisfollowed,
+                EXISTS (SELECT 1 FROM follows WHERE followerid = a.userid AND followedid = :currentUserId) AS tisfollowing,
+                EXISTS (SELECT 1 FROM follows WHERE followedid = p.userid AND followerid = :currentUserId) AS isfollowed,
+                EXISTS (SELECT 1 FROM follows WHERE followerid = p.userid AND followedid = :currentUserId) AS isfollowing
+            FROM posts p
+            JOIN users u ON p.userid = u.uid
+            LEFT JOIN post_tags pt ON p.postid = pt.postid
+            LEFT JOIN tags t ON pt.tagid = t.tagid
+            LEFT JOIN advertisements a ON p.postid = a.postid
+            LEFT JOIN users ut ON a.userid = ut.uid
+            WHERE " . implode(" AND ", $whereClauses) . "
+            GROUP BY p.postid, a.advertisementid,
+                     tuserid, ad_type, ad_order, end_order,
+                     tcreatedat, tusername, tslug, timg,
+                     u.username, u.slug, u.img
+        ";
+
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
+
+        $sqlPinnedPosts = "WITH base_posts AS ($baseSelect)
+        SELECT * FROM base_posts
+        WHERE ad_type = 'pinned'
+          AND ad_order <= NOW()
+          AND end_order > NOW()
+        ORDER BY ad_order DESC
+        LIMIT :limit OFFSET :offset";
+
+        $sqlBasicAds = "WITH base_posts AS ($baseSelect)
+        SELECT * FROM base_posts
+        WHERE ad_type = 'basic'
+          AND ad_order <= NOW()
+          AND end_order > NOW()
+        ORDER BY ad_order ASC
+        LIMIT :limit OFFSET :offset";
+
+        try {
+            $pinnedStmt = $this->db->prepare($sqlPinnedPosts);
+            foreach ($params as $key => $val) {
+                $pinnedStmt->bindValue(":" . $key, $val);
+            }
+            $pinnedStmt->execute();
+            $pinned = $pinnedStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $basicStmt = $this->db->prepare($sqlBasicAds);
+            foreach ($params as $key => $val) {
+                $basicStmt->bindValue(":" . $key, $val);
+            }
+            $basicStmt->execute();
+            $basic = $basicStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $finalPosts = [];
+            if (!empty($pinned)) {
+                $finalPosts = array_merge($finalPosts, $pinned);
+            }
+            if (!empty($basic)) {
+                $finalPosts = array_merge($finalPosts, $basic);
+            }
+
+            return array_map(function ($row) {
+                $row['tags'] = json_decode($row['tags'], true) ?? [];
+
+                return [
+                    'post' => self::mapRowToPost($row),
+                    'advertisement' => self::mapRowToAdvertisement($row),
+                ];
+            }, $finalPosts);
+
+        } catch (\Throwable $e) {
+            $this->logger->error('General error in findAdvertiser', [
+                'error' => $e,
+            ]);
+            return [];
+        }
+    }
+
+    private static function mapRowToPost(array $row): PostAdvanced
+    {
+        return new PostAdvanced([
+            'postid' => (string)$row['postid'],
+            'userid' => (string)$row['userid'],
+            'contenttype' => (string)$row['contenttype'],
+            'title' => (string)$row['title'],
+            'media' => (string)$row['media'],
+            'cover' => (string)$row['cover'],
+            'mediadescription' => (string)$row['mediadescription'],
+            'createdat' => (string)$row['createdat'],
+            'amountlikes' => (int)$row['amountlikes'],
+            'amountviews' => (int)$row['amountviews'],
+            'amountcomments' => (int)$row['amountcomments'],
+            'amountdislikes' => (int)$row['amountdislikes'],
+            'amounttrending' => (int)$row['amounttrending'],
+            'isliked' => (bool)$row['isliked'],
+            'isviewed' => (bool)$row['isviewed'],
+            'isreported' => (bool)$row['isreported'],
+            'isdisliked' => (bool)$row['isdisliked'],
+            'issaved' => (bool)$row['issaved'],
+            'tags' => $row['tags'],
+            'user' => [
+                'uid' => (string)$row['userid'],
+                'username' => (string)$row['username'],
+                'slug' => (int)$row['slug'],
+                'img' => (string)$row['img'],
+                'isfollowed' => (bool)$row['isfollowed'],
+                'isfollowing' => (bool)$row['isfollowing'],
+                'isfriend' => (bool)((int)$row['isfollowed'] && (int)$row['isfollowing']),
+            ],
+        ]);
+    }
+
+    private static function mapRowToAdvertisement(array $row): Advertisements
+    {
+        return new Advertisements([
+            'advertisementid' => (string)$row['advertisementid'],
+            'postid' => (string)$row['postid'],
+            'userid' => (string)$row['tuserid'],
+            'status' => (string)$row['ad_type'],
+            'timestart' => (string)$row['ad_order'],
+            'timeend' => (string)$row['end_order'],
+            'createdat' => (string)$row['tcreatedat'],
+            'user' => [
+                'uid' => (string)$row['tuserid'],
+                'username' => (string)$row['tusername'],
+                'slug' => (string)$row['tslug'],
+                'img' => (string)$row['timg'],
+                'isfollowed' => (bool)$row['tisfollowed'],
+                'isfollowing' => (bool)$row['tisfollowing'],
+                'isfriend' => (bool)((int)$row['tisfollowed'] && (int)$row['tisfollowing']),
+            ],
+        ]);
     }
 }

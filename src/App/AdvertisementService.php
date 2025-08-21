@@ -335,4 +335,52 @@ class AdvertisementService
             return self::respondWithError(42005);
         }
     }
+
+    public function findAdvertiser(?array $args = []): array|false
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $filterBy = $args['filterBy'] ?? [];
+        $tag = $args['tag'] ?? null; 
+        $postId = $args['postid'] ?? null;
+        $userId = $args['userid'] ?? null;
+
+        if ($postId !== null && !self::isValidUUID($postId)) {
+            return $this->respondWithError(30209);
+        }
+
+        if ($userId !== null && !self::isValidUUID($userId)) {
+            return $this->respondWithError(30201);
+        }
+
+        if ($tag !== null) {
+            if (!preg_match('/' . $titleConfig['PATTERN'] . '/u', $tag)) {
+                $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
+                return $this->respondWithError(30211);
+            }
+        }
+
+        if (!empty($filterBy) && is_array($filterBy)) {
+            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT'];
+
+            $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
+
+            if (!empty($invalidTypes)) {
+                return $this->respondWithError(30103);
+            }
+        }
+
+        $this->logger->info("AdvertisementService.findAdvertiser started");
+
+        $results = $this->advertisementMapper->findAdvertiser($this->currentUserId, $args);
+        //$this->logger->info('findAdvertiser', ['results' => $results]);
+        $this->logger->info("AdvertisementService.findAdvertiser Done");
+        if (empty($results) && $postId != null) {
+            return $this->respondWithError(31510); 
+        }
+
+        return $results;
+    }
 }

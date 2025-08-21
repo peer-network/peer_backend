@@ -8,6 +8,7 @@ CREATE TABLE advertisements (
     status VARCHAR(12) NOT NULL DEFAULT 'basic' CHECK (status IN ('basic', 'pinned')),
     timestart TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     timeend TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_advertisement_postid FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE,
     CONSTRAINT fk_advertisement_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
     UNIQUE (advertisementid, status, timestart)

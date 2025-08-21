@@ -32,7 +32,6 @@ class PostAdvanced
     protected ?bool $isfollowing;
     protected ?bool $isfriend;
     protected string $createdat;
-    protected ?string $type;
     protected ?array $tags = [];
     protected ?array $user = [];
     protected ?array $comments = [];
@@ -67,7 +66,6 @@ class PostAdvanced
         $this->isfollowing = $data['isfollowing'] ?? false;
         $this->isfriend = $data['isfriend'] ?? false;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->type = $data['type'] ?? null;
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->comments = isset($data['comments']) && is_array($data['comments']) ? $data['comments'] : [];
@@ -101,7 +99,6 @@ class PostAdvanced
             'isfollowing' => $this->isfollowing,
             'isfriend' => $this->isfriend,
             'createdat' => $this->createdat,
-            'type' => $this->type,
             'tags' => $this->tags, // Include tags
             'user' => $this->user,
             'comments' => $this->comments,
@@ -340,12 +337,6 @@ class PostAdvanced
                 'validators' => [
                    ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
-                ],
-            ],
-            'type' => [
-                'required' => false,
-                'validators' => [
-                    ['name' => 'isString'],
                 ],
             ],
             'user' => [
