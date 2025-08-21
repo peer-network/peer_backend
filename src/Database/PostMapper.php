@@ -19,10 +19,14 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\App\User;
 use Fawaz\App\ValidationException;
+use Fawaz\Database\Interfaces\TransactionManager;
+use Psr\Log\LoggerInterface;
 
-class PostMapper extends PeerMapper
+class PostMapper
 {
-    const STATUS_DELETED = 6;
+    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    {
+    }
 
     public function isSameUser(string $userid, string $currentUserId): bool
     {
@@ -600,7 +604,7 @@ class PostMapper extends PeerMapper
         }
         // Remove DELETED User's post
         $whereClauses[] = "u.status != :status";
-        $params['status'] = self::STATUS_DELETED;   
+        $params['status'] = Status::DELETED;
 
         if ($title !== null) {
             $whereClauses[] = "p.title ILIKE :title";
