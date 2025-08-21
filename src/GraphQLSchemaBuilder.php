@@ -654,6 +654,9 @@ class GraphQLSchemaBuilder
                 'cover' => function (array $root): string {
                     return $root['cover'] ?? '';
                 },
+                'url' => function (array $root): string {
+                    return $root['url'] ?? '';
+                },
                 'mediadescription' => function (array $root): string {
                     return $root['mediadescription'] ?? '';
                 },
@@ -1784,6 +1787,7 @@ class GraphQLSchemaBuilder
             'listFollowRelations' => fn(mixed $root, array $args) => $this->resolveFollows($args),
             'listFriends' => fn(mixed $root, array $args) => $this->resolveFriends($args),
             'listPosts' => fn(mixed $root, array $args) => $this->resolvePosts($args),
+            'guestListPost' => fn(mixed $root, array $args) => $this->guestListPost($args),
             'getPostInfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
             'getCommentInfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentId']),
             'listChildComments' => fn(mixed $root, array $args) => $this->resolveComments($args),
@@ -3499,6 +3503,52 @@ class GraphQLSchemaBuilder
             
             return $this->respondWithError(40901);
         }
+    }
+
+    /**
+     * Guest List Post
+     * 
+     */
+    protected function guestListPost(array $args): ?array
+    {
+        $this->logger->info('Query.guestListPost started');
+
+        $posts = $this->postService->getGuestListPost($args);
+
+        if (isset($posts['status']) && $posts['status'] === 'error') {
+            return $posts;
+        }
+
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
+
+        $data = array_map(
+            fn(PostAdvanced $post) => $this->guestPostMapPostWithComments($post, $commentOffset, $commentLimit),
+            $posts
+        );
+
+        return [
+            'status' => 'success',
+            'counter' => count($data),
+            'ResponseCode' => empty($data) ? 21501 : 11501,
+            'affectedRows' => $data[0] ?? [],
+        ];
+    }
+
+    /**
+     * Map Guest Post with Comments
+     * 
+     */
+    protected function guestPostMapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit): array
+    {
+        $postArray = $post->getArrayCopy();
+        $comments = $this->commentService->fetchAllByGuestPostIdetaild($post->getPostId(), $commentOffset, $commentLimit);
+        
+        $postArray['comments'] = array_map(
+            fn(CommentAdvanced $comment) => $comment->getArrayCopy(),
+            $comments
+        );
+        return $postArray;
     }
 
 }
