@@ -27,6 +27,7 @@ const PRICECOMMENT=0.5;
 const PRICEPOST=20;
 const DISLIKE_=3;// whereby DISLIKE
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class PostService
 {
@@ -45,7 +46,8 @@ class PostService
         protected Base64FileHandler $base64Encoder,
         protected DailyFreeService $dailyFreeService,
         protected WalletService $walletService,
-        protected JWTService $tokenService
+        protected JWTService $tokenService,
+        protected TransactionManager $transactionManager
     ) {}
 
     public function setCurrentUserId(string $userid): void
@@ -201,7 +203,7 @@ class PostService
         }
 
         try {
-            $this->postMapper->beginTransaction();
+            $this->transactionManager->beginTransaction();
             // Media Upload
             if (isset($args['media']) && $this->isValidMedia($args['media'])) {
                 $validateContentCountResult = $this->validateContentCount($args);
@@ -287,7 +289,7 @@ class PostService
                 // Post speichern
                 $post = new Post($postData);
             } catch (\Throwable $e) {
-                $this->postMapper->rollback();
+                $this->transactionManager->rollback();
                 if(isset($args['uploadedFiles'])){
                     $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                 }
@@ -330,7 +332,7 @@ class PostService
                     $this->handleTags($args['tags'], $postId, $createdAt);
                 } 
             } catch (\Throwable $e) {
-                $this->postMapper->rollback();
+                $this->transactionManager->rollback();
                 if(isset($args['uploadedFiles'])){
                     $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                 }
@@ -354,11 +356,11 @@ class PostService
 
             $data = $post->getArrayCopy();
             $data['tags'] = $tagNames;
-            $this->postMapper->commit();
+            $this->transactionManager->commit();
             return $this->createSuccessResponse(11513, $data);
 
         } catch (\Throwable $e) {
-            $this->postMapper->rollback();
+            $this->transactionManager->rollback();
             if(isset($args['uploadedFiles'])){
                 $this->postMapper->revertFileToTmp($args['uploadedFiles']);
             }
