@@ -413,11 +413,13 @@ class UserInfoService
 
             if ($exists === null) {
                 $this->logger->error("UserInfoService.reportUser: Failed to add report");
+                $this->transactionManager->rollback();
                 return $this->respondWithError(41015); // 410xx - failed to report user
             }
 
             if ($exists === true) {
                 $this->logger->error('UserInfoService.reportUser: User report already exists');
+                $this->transactionManager->rollback();
                 return $this->respondWithError(31008); // report already exists
             }
             
