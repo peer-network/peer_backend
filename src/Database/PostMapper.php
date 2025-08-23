@@ -1010,12 +1010,12 @@ class PostMapper
                     LIMIT :limit OFFSET :offset";
 
             $stmt = $this->db->prepare($sql);
-			$stmt->bindParam(':postid', $postOrCommentId, \PDO::PARAM_STR);
-			$stmt->bindParam(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-			$stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
-			$stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindParam(':postid', $postOrCommentId, \PDO::PARAM_STR);
+            $stmt->bindParam(':currentUserId', $currentUserId, \PDO::PARAM_STR);
+            $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
 
-			$stmt->execute();
+            $stmt->execute();
 
             $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -1084,7 +1084,7 @@ class PostMapper
                 p.mediadescription, 
                 p.createdat, 
                 u.username, 
-				u.slug,
+                u.slug,
                 u.img AS userimg,
                 MAX(u.status) AS user_status,
                 MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
