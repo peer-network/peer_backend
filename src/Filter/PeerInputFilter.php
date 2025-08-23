@@ -325,13 +325,13 @@ class PeerInputFilter
         }
 
         $validator = $options['validator'] ?? null;
-        if (!$validator || !isset($validator[0]['name'])) {
+        if (!$validator || !isset($validator['name'])) {
             $this->errors['ArrayValues'][] = 40301;
             return false;
         }
 
-        $validatorName = $validator[0]['name'];
-        $validatorOptions = $validator[0]['options'] ?? [];
+        $validatorName = $validator['name'];
+        $validatorOptions = $validator['options'] ?? [];
 
         if (!method_exists($this, $validatorName)) {
             $this->errors['ArrayValues'][] = 40301;
