@@ -65,6 +65,7 @@ class PostAdvanced
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
         $this->isfriend = $data['isfriend'] ?? false;
+        $this->url = $this->getPostUrl();
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
@@ -161,6 +162,14 @@ class PostAdvanced
     public function getContentType(): string
     {
         return $this->contenttype;
+    }
+    
+    public function getPostUrl(): string
+    {
+        if(empty($this->postid)) {
+            return '';
+        }
+        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
     }
 
     // Renew Validation and Array Filtering methods
@@ -326,7 +335,7 @@ class PostAdvanced
                         'name' => 'ArrayValues',
                         'options' => [
                             'validator' => [
-                                ['name' => 'validateTagName'],
+                                ['name' => 'IsString'],
                             ],
                         ],
                     ],
@@ -358,13 +367,5 @@ class PostAdvanced
         }
 
         return (new PeerInputFilter($specification));
-    }
-    
-    public function getPostUrl(): string
-    {
-        if(empty($this->postid)) {
-            return '';
-        }
-        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
     }
 }
