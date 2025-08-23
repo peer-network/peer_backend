@@ -2,8 +2,8 @@
 namespace Fawaz\Database;
 
 use DateTime;
-use Fawaz\App\Models\MultipartPost;
 use PDO;
+use Fawaz\App\Models\MultipartPost;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostMedia;
@@ -19,9 +19,15 @@ use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\App\ValidationException;
+use Fawaz\Database\Interfaces\TransactionManager;
+use Psr\Log\LoggerInterface;
 
 class PostMapper
 {
+    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    {
+    }
+
     public function isSameUser(string $userid, string $currentUserId): bool
     {
         return $userid === $currentUserId;
@@ -518,80 +524,43 @@ class PostMapper
         }
     }
 
-    /**
-     * Get Interactions based on Filter 
-     */
-    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit): array
-    {
-        $this->logger->info("PostMapper.getInteractions started");
+    // public function delete(string $postid): bool
+    // {
+    //     $this->logger->info("PostMapper.delete started");
 
-        try {
-            $this->logger->info("PostMapper.fetchViews started");
+    //     try {
+    //         $this->db->beginTransaction();
 
-            $needleTable = 'user_post_likes';
-            $needleColumn = 'postid';
+    //         $tables = [
+    //             'user_post_likes',
+    //             'user_post_dislikes',
+    //             'user_post_reports',
+    //             'user_post_saves',
+    //             'user_post_shares',
+    //             'user_post_views',
+    //             'post_info',
+    //             'posts'
+    //         ];
 
-            if($getOnly == 'VIEW'){
-                $needleTable = 'user_post_views';
-            }elseif($getOnly == 'LIKE'){
-                $needleTable = 'user_post_likes';
-            }elseif($getOnly == 'DISLIKE'){
-                $needleTable = 'user_post_dislikes';
-            }elseif($getOnly == 'COMMENTLIKE'){
-                $needleTable = 'user_comment_likes';
-                $needleColumn = 'commentid';
-            }
+    //         foreach ($tables as $table) {
+    //             $sql = "DELETE FROM $table WHERE postid = :postid";
+    //             $stmt = $this->db->prepare($sql);
+    //             $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
+    //             $stmt->execute();
+    //         }
 
-            $sql = "SELECT 
-                        u.uid, 
-                        u.username, 
-                        u.slug, 
-                        u.img, 
-                        u.status, 
-                        (f1.followerid IS NOT NULL) AS isfollowing,
-                        (f2.followerid IS NOT NULL) AS isfollowed
-                    FROM $needleTable uv 
-                    LEFT JOIN users u ON u.uid = uv.userid  
-                    LEFT JOIN 
-                        follows f1 
-                        ON u.uid = f1.followerid AND f1.followedid = :currentUserId 
-                    LEFT JOIN 
-                        follows f2 
-                        ON u.uid = f2.followedid AND f2.followerid = :currentUserId
-                    WHERE $needleColumn = :postid
-                    LIMIT :limit OFFSET :offset";
-
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':postid', $postOrCommentId, \PDO::PARAM_STR);
-            $stmt->bindParam(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
-
-            $stmt->execute();
-
-            $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-            $userResultObj = [];
-            foreach($userResults as $key => $prt){
-                $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
-                $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
-                $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
-            }  
-            
-            return $userResultObj;
-        } catch (\PDOException $e) {
-            $this->logger->error("Error fetching posts from database", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return [];
-        } catch (\Exception $e) {
-            $this->logger->error("Error fetching posts from database", [
-                'error' => $e->getMessage(),
-            ]);
-            return [];
-        }
-    }
+    //         $this->db->commit();
+    //         $this->logger->info("Deleted post and related user activities successfully", ['postid' => $postid]);
+    //         return true;
+    //     } catch (\Exception $e) {
+    //         $this->db->rollBack();
+    //         $this->logger->error("Failed to delete post and related user activities", [
+    //             'postid' => $postid,
+    //             'exception' => $e->getMessage()
+    //         ]);
+    //         return false;
+    //     }
+    // }
     
     public function findPostser(string $currentUserId, ?array $args = []): array
     {
@@ -998,8 +967,210 @@ class PostMapper
     }
     
     /**
-     * Add or Update Eligibility Token for post
+     * Get Interactions based on Filter 
      */
+    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit): array
+    {
+        $this->logger->info("PostMapper.getInteractions started");
+
+        try {
+            $this->logger->info("PostMapper.fetchViews started");
+
+            $needleTable = 'user_post_likes';
+            $needleColumn = 'postid';
+
+            if($getOnly == 'VIEW'){
+                $needleTable = 'user_post_views';
+            }elseif($getOnly == 'LIKE'){
+                $needleTable = 'user_post_likes';
+            }elseif($getOnly == 'DISLIKE'){
+                $needleTable = 'user_post_dislikes';
+            }elseif($getOnly == 'COMMENTLIKE'){
+                $needleTable = 'user_comment_likes';
+                $needleColumn = 'commentid';
+            }
+
+            $sql = "SELECT 
+                        u.uid, 
+                        u.username, 
+                        u.slug, 
+                        u.img, 
+                        u.status, 
+                        (f1.followerid IS NOT NULL) AS isfollowing,
+                        (f2.followerid IS NOT NULL) AS isfollowed
+                    FROM $needleTable uv 
+                    LEFT JOIN users u ON u.uid = uv.userid  
+                    LEFT JOIN 
+                        follows f1 
+                        ON u.uid = f1.followerid AND f1.followedid = :currentUserId 
+                    LEFT JOIN 
+                        follows f2 
+                        ON u.uid = f2.followedid AND f2.followerid = :currentUserId
+                    WHERE $needleColumn = :postid
+                    LIMIT :limit OFFSET :offset";
+
+            $stmt = $this->db->prepare($sql);
+			$stmt->bindParam(':postid', $postOrCommentId, \PDO::PARAM_STR);
+			$stmt->bindParam(':currentUserId', $currentUserId, \PDO::PARAM_STR);
+			$stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+			$stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
+
+			$stmt->execute();
+
+            $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $userResultObj = [];
+            foreach($userResults as $key => $prt){
+                $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
+                $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
+                $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
+            }  
+            
+            return $userResultObj;
+        } catch (\PDOException $e) {
+            $this->logger->error("Error fetching posts from database", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            $this->logger->error("Error fetching posts from database", [
+                'error' => $e->getMessage(),
+            ]);
+            return [];
+        }
+    }
+
+    /**
+     * Get GuestListPost based on Filter 
+     */
+    public function getGuestListPost(array $args = []): array
+    {
+        $this->logger->info("PostMapper.getGuestListPost started");
+
+        $offset = 0;
+        $limit = 1;
+
+        $postId = $args['postid'] ?? null;
+
+        $whereClauses = ["p.feedid IS NULL"];
+        $joinClausesString = "
+            users u ON p.userid = u.uid
+            LEFT JOIN post_tags pt ON p.postid = pt.postid
+            LEFT JOIN tags t ON pt.tagid = t.tagid
+            LEFT JOIN post_info pi ON p.postid = pi.postid AND pi.userid = p.userid
+            LEFT JOIN users_info ui ON p.userid = ui.userid
+        ";
+
+        if ($postId !== null) {
+            $whereClauses[] = "p.postid = :postId"; 
+            $params['postId'] = $postId;
+        }
+
+        $whereClauses[] = 'u.status = 0 AND (u.roles_mask = 0 OR u.roles_mask = 16)';
+
+        $orderBy = "p.createdat DESC";
+
+        $whereClausesString = implode(" AND ", $whereClauses);
+
+        $sql = sprintf(
+            "SELECT 
+                p.postid, 
+                p.userid, 
+                p.contenttype, 
+                p.title, 
+                p.media, 
+                p.cover, 
+                p.mediadescription, 
+                p.createdat, 
+                u.username, 
+				u.slug,
+                u.img AS userimg,
+                MAX(u.status) AS user_status,
+                MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
+                MAX(pi.count_content_moderation_dismissed) AS post_count_content_moderation_dismissed,
+                MAX(ui.reports) AS user_reports,
+                MAX(pi.reports) AS post_reports,
+                COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
+                (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) as amountlikes,
+                (SELECT COUNT(*) FROM user_post_dislikes WHERE postid = p.postid) as amountdislikes,
+                (SELECT COUNT(*) FROM user_post_views WHERE postid = p.postid) as amountviews,
+                (SELECT COUNT(*) FROM comments WHERE postid = p.postid) as amountcomments
+            FROM posts p
+            JOIN %s
+            WHERE %s
+            GROUP BY p.postid, u.username, u.slug, u.img
+            ORDER BY %s
+            LIMIT :limit OFFSET :offset",
+            $joinClausesString,
+            $whereClausesString,
+            $orderBy
+        );
+
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
+
+        try {
+            $stmt = $this->db->prepare($sql);
+
+            $results = [];
+            $stmt->execute($params);
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$row) {
+                $this->logger->warning("PostMapper.getGuestListPost No posts found for the given criteria");
+                return [];
+            }
+            $row['tags'] = json_decode($row['tags'], true) ?? [];
+
+            $results[] = new PostAdvanced([
+                'postid' => $row['postid'],
+                'userid' => $row['userid'],
+                'contenttype' => $row['contenttype'],
+                'title' => $row['title'],
+                'media' => $row['media'],
+                'cover' => $row['cover'],
+                'mediadescription' => $row['mediadescription'],
+                'createdat' => $row['createdat'],
+                'amountlikes' => (int)$row['amountlikes'],
+                'amountviews' => (int)$row['amountviews'],
+                'amountcomments' => (int)$row['amountcomments'],
+                'amountdislikes' => (int)$row['amountdislikes'],
+                'amounttrending' => 0,
+                'isliked' => false,
+                'isviewed' => false,
+                'isreported' => false,
+                'isdisliked' => false,
+                'issaved' => false,
+                'tags' => $row['tags'],
+                'user' => [
+                    'uid' => $row['userid'],
+                    'username' => $row['username'],
+                    'slug' => $row['slug'],
+                    'img' => $row['userimg'],
+                    'isfollowed' => false,
+                    'isfollowing' => false,
+                ],
+            ],[],false);
+
+            return ((is_array($results) && count($results) > 0) ? $results : []);
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error in PostMapper.getGuestListPost", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            $this->logger->error('Database error in PostMapper.getGuestListPost', [
+                'error' => $e->getMessage(),
+            ]);
+            return [];
+        }
+    }
+
+    /*
+    * Add or Update Eligibility Token for post
+    */
     public function addOrUpdateEligibilityToken01(string $userId, string $eligibilityToken, string $status): void
     {
 

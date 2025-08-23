@@ -440,7 +440,7 @@ class AdvertisementMapper
     {
         $this->logger->info('AdvertisementMapper.convertEuroToTokens started', ['euroAmount' => $euroAmount]);
 
-        $tokenPrice = 0.01; // Fixed price: 1 cent
+        $tokenPrice = 0.10; // Fixed price: 10 cent
         $tokens = $euroAmount / $tokenPrice;
 
         $response = [
