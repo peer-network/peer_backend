@@ -49,6 +49,7 @@ type Query {
   postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
+  alphaMint: DefaultResponse
   advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
 }
 
@@ -216,6 +217,18 @@ type TransactionResponse {
   status: String!
   responseCode: Int!
   affectedRows: [Transaction!]
+}
+
+type TransferTokenResponse {
+  status: String!
+  ResponseCode: Int!
+  affectedRows: TransferToken!
+}
+
+type TransferToken {
+  tokenSend: Decimal
+  tokensSubstractedFromWallet: Decimal
+  createdat: String
 }
 
 type UserPreferences {

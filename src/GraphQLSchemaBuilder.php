@@ -31,6 +31,7 @@ const PRICEPOST=20;
 const BASIC = 50;
 const PINNED = 200;
 
+use Fawaz\App\AlphaMintService;
 use Fawaz\App\Advertisements;
 use Fawaz\App\AdvertisementService;
 use Fawaz\App\Chat;
@@ -170,6 +171,7 @@ class GraphQLSchemaBuilder
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
+        $this->alphaMintService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
     }
 
@@ -214,8 +216,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.TodaysInteractionsData Resolvers');
                     return $root['totalInteractions'] ?? 0;
                 },
-                'totalScore' => function (array $root): float {
-                    return $root['totalScore'] ?? 0.0;
+                'totalScore' => function (array $root): int {
+                    return $root['totalScore'] ?? 0;
                 },
                 'totalDetails' => function (array $root): array {
                     return $root['totalDetails'] ?? [];
@@ -1739,6 +1741,18 @@ class GraphQLSchemaBuilder
                     return $root['nextAttemptAt'] ?? '';
                 },
             ],
+            'PostEligibilityResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.PostEligibilityResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'eligibilityToken' => function (array $root): string {
+                    return $root['eligibilityToken'] ?? '';
+                }
+            ],
             'TransactionResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.TransactionResponse Resolvers');
@@ -1916,6 +1930,7 @@ class GraphQLSchemaBuilder
             'listFollowRelations' => fn(mixed $root, array $args) => $this->resolveFollows($args),
             'listFriends' => fn(mixed $root, array $args) => $this->resolveFriends($args),
             'listPosts' => fn(mixed $root, array $args) => $this->resolvePosts($args),
+            'guestListPost' => fn(mixed $root, array $args) => $this->guestListPost($args),
             'listAdvertisementPosts' => fn(mixed $root, array $args) => $this->resolveAdvertisementsPosts($args),
             'getPostInfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
             'getCommentInfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentId']),
@@ -1949,6 +1964,7 @@ class GraphQLSchemaBuilder
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
+            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'advertisementHistory' => fn(mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
         ];
     }
@@ -1989,7 +2005,7 @@ class GraphQLSchemaBuilder
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
-            'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
+            'resolveTransfer' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'advertisePostBasic' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
             'advertisePostPinned' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
         ];
