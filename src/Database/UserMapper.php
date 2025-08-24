@@ -8,6 +8,8 @@ use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
 use Fawaz\App\Role;
+use Fawaz\App\Specs\Specification;
+use Fawaz\App\Specs\SpecificationSQLData;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
 use Fawaz\config\constants\ConstantsConfig;
@@ -2016,5 +2018,57 @@ class UserMapper
 
 
         return $result ?: null;
+    }
+
+    public function fetchProfileDataRaw(string $userid, string $currentUserId, array $specifications): Profile|false {
+        $allSpecs = SpecificationSQLData::merge($specifications);
+        $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
+        $whereClauses[] = "u.uid = :userid";
+        $whereClausesString = implode(" AND ", $whereClauses);
+
+        $sql = sprintf("
+            SELECT 
+                u.uid,
+                u.username,
+                u.slug,
+                u.status,
+                u.img,
+                u.biography,
+                ui.amountposts,
+                ui.amountfollower,
+                ui.amountfollowed,
+                ui.amountfriends,
+                ui.amountblocked,
+                ui.reports AS user_reports,
+                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
+                COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
+                EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
+                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
+            FROM users u
+            LEFT JOIN users_info ui ON ui.userid = u.uid
+            WHERE %s",
+            $whereClausesString
+         );
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $params['userid'] = $userid;
+            $params['currentUserId'] = $currentUserId;
+
+            $stmt->execute($params);
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+
+            if ($data !== false) {
+                return new Profile($data);
+            }
+
+            $this->logger->warning("No user found with ID", ['userid' => $userid]);
+            return false;
+        } catch (\Throwable $e) {
+            $this->logger->error("Database error in fetchProfileData", ['error' => $e->getMessage()]);
+            return false;
+        }
     }
 }
