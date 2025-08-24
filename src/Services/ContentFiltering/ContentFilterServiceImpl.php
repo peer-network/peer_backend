@@ -104,4 +104,11 @@ class ContentFilterServiceImpl {
         }
         return null;
     }
+
+    public function getReportsAmountToHideContent(ContentType $contentType): array {
+        return $this->reports_amount_to_hide_content[$contentType->constantsArrayKey()];
+    }
+    public function moderationsDismissAmountToRestoreContent(ContentType $contentType): array {
+        return $this->moderationsDismissAmountToRestoreContent[$contentType->constantsArrayKey()];
+    }
 }

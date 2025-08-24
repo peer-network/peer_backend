@@ -7,8 +7,8 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 class ListPostsContentFilteringStrategy implements ContentFilteringStrategy {
     public const STRATEGY = [
         ContentType::user->value => [
-            ContentType::post->value => ContentFilteringAction::replaceWithPlaceholder,
-            ContentType::comment->value => ContentFilteringAction::replaceWithPlaceholder,
+            ContentType::post->value => null,
+            ContentType::comment->value => null,
             ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
         ],
         ContentType::post->value => [
