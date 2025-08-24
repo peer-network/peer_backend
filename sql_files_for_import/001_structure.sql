@@ -608,8 +608,4 @@ ALTER TABLE post_info
 ADD COLUMN IF NOT EXISTS count_content_moderation_dismissed INTEGER NOT NULL DEFAULT 0;
 
 
--- Update Posts Set the default value of column status
-ALTER TABLE posts 
-ALTER COLUMN status SET DEFAULT 0;
-
 COMMIT;
