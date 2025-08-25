@@ -148,7 +148,7 @@ type Transaction {
 
 type TransactionResponse {
   status: String!
-  responseCode: Int!
+  ResponseCode: Int!
   affectedRows: [Transaction!]
 }
 
@@ -372,7 +372,7 @@ type PostSubCommentsData {
 
 type PercentBeforeTransactionResponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: Int!
   affectedRows: PercentBeforeTransactionData
 }
 

@@ -179,7 +179,7 @@ type Transaction {
 
 type TransactionResponse {
   status: String!
-  responseCode: Int!
+  ResponseCode: Int!
   affectedRows: [Transaction!]
 }
 
