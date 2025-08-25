@@ -1714,8 +1714,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.TransferTokenResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
+                'ResponseCode' => function (array $root): int {
+                    return $root['ResponseCode'] ?? 0;
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
