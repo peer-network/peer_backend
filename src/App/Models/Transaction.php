@@ -19,7 +19,7 @@ class Transaction
     protected string $senderid;
     protected string $recipientid;
     protected string $transactiontype;
-    protected string $tokenamount;
+    protected int $tokenamount;
     protected $transferaction;
     protected ?string $message;
     protected ?string $createdat;
