@@ -5,10 +5,8 @@ namespace Fawaz\Utils\TokenCalculations;
 
 use FFI;
 
-
 class TokenHelper
 {
-
     /**
      * Calculates the total number of Peer Tokens required including all applicable fees.
      *
@@ -51,8 +49,6 @@ class TokenHelper
         return  (float) ($feeAmount + $peerAmount + $burnAmount + $inviterAmount);
     }
 
-
-
     /**
      * Adds two values.
      *
@@ -71,7 +67,6 @@ class TokenHelper
         }
         return (float) $result;
     }
-
 
     /**
      * Multiply two values.
@@ -153,6 +148,5 @@ class TokenHelper
         ", $relativePath);
 
         return $ffi;
-
     }
 }
