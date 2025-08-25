@@ -11,6 +11,7 @@ use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Utils\ReportTargetType;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class UserInfoService
 {
@@ -23,6 +24,7 @@ class UserInfoService
         protected UserMapper $userMapper,
         protected UserPreferencesMapper $userPreferencesMapper,
         protected ReportsMapper $reportsMapper,
+        protected TransactionManager $transactionManager
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -129,7 +131,19 @@ class UserInfoService
             return $this->respondWithError(31003);
         }
 
-        return $this->userInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
+        $this->transactionManager->beginTransaction();
+        
+        $response = $this->userInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
+
+        if (isset($response['status']) && $response['status'] === 'error') {
+            $this->logger->error('Error toggling user follow', ['error' => $response]);
+            $this->transactionManager->rollback();
+            return $response;
+        }
+
+        $this->transactionManager->commit();
+
+        return $response;
     }
 
     public function toggleUserBlock(string $blockedUserId): array
@@ -156,7 +170,18 @@ class UserInfoService
             return $this->respondWithError(31106);
         }
 
-        return $this->userInfoMapper->toggleUserBlock($this->currentUserId, $blockedUserId);
+        $this->transactionManager->beginTransaction();
+
+        $response = $this->userInfoMapper->toggleUserBlock($this->currentUserId, $blockedUserId);
+
+        if (isset($response['status']) && $response['status'] === 'error') {
+            $this->logger->error('Error toggling user block', ['error' => $response]);
+            $this->transactionManager->rollback();
+            return $response;
+        }
+        $this->transactionManager->commit();
+
+        return $response;
     }
 
     public function loadBlocklist(?array $args = []): array
@@ -192,10 +217,13 @@ class UserInfoService
         $this->logger->info('UserInfoService.toggleProfilePrivacy started');
 
         try {
+            $this->transactionManager->beginTransaction();
+
             $user = $this->userInfoMapper->loadInfoById($this->currentUserId);
             if (!$user) {
                 return $this->createSuccessResponse(21001);
             }
+
 
             $newIsPrivate = !$user->getIsPrivate();
             $user->setIsPrivate((int) $newIsPrivate);
@@ -206,11 +234,14 @@ class UserInfoService
 
             $this->logger->info('Profile privacy toggled', ['userId' => $this->currentUserId, 'newPrivacy' => $newIsPrivate]);
 
+            $this->transactionManager->commit();
+
             return [
                 'status' => 'success', 
                 'ResponseCode' => $responseMessage, 
             ];
         } catch (\Exception $e) {
+            $this->transactionManager->rollback();
             return $this->respondWithError('Failed to toggle profile privacy.');
         }
     }
@@ -230,12 +261,14 @@ class UserInfoService
         $this->logger->info('UserInfoService.updateBio started');
 
         try {
+            $this->transactionManager->beginTransaction();
+
             $user = $this->userInfoMapper->loadById($this->currentUserId);
             if (!$user) {
                 return $this->createSuccessResponse(21001);
             }
 
-                if (!empty($biography)) {
+            if (!empty($biography)) {
                 $mediaPath = $this->base64filehandler->handleFileUpload($biography, 'text', $this->currentUserId, 'userData');
                 $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
 
@@ -258,11 +291,14 @@ class UserInfoService
 
             $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
 
+            $this->transactionManager->commit();
+
             return [
                 'status' => 'success', 
                 'ResponseCode' => $responseMessage, 
             ];
         } catch (\Exception $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Error updating biography', ['exception' => $e]);
             return $this->respondWithError(41002);
         }
@@ -302,6 +338,7 @@ class UserInfoService
             } else {
                 return $this->respondWithError(40307);
             }
+            $this->transactionManager->beginTransaction();
 
             $user->setProfilePicture($mediaPathFile);
             $updatedUser = $this->userInfoMapper->updateUsers($user);
@@ -309,11 +346,13 @@ class UserInfoService
 
             $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
 
+            $this->transactionManager->commit();
             return [
                 'status' => 'success', 
                 'ResponseCode' => $responseMessage, 
             ];
         } catch (\Exception $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Error setting profile picture', ['exception' => $e]);
             return $this->respondWithError(41003);
         }
@@ -362,6 +401,9 @@ class UserInfoService
         }
 
         try {
+
+            $this->transactionManager->beginTransaction();
+
             $exists = $this->reportsMapper->addReport(
                 $this->currentUserId,
                 ReportTargetType::USER, 
@@ -371,16 +413,20 @@ class UserInfoService
 
             if ($exists === null) {
                 $this->logger->error("UserInfoService.reportUser: Failed to add report");
+                $this->transactionManager->rollback();
                 return $this->respondWithError(41015); // 410xx - failed to report user
             }
 
             if ($exists === true) {
                 $this->logger->error('UserInfoService.reportUser: User report already exists');
+                $this->transactionManager->rollback();
                 return $this->respondWithError(31008); // report already exists
             }
             
             $userInfo->setReports($userInfo->getReports() + 1);
             $this->userInfoMapper->update($userInfo);
+
+            $this->transactionManager->commit();
 
             return [
                 'status' => 'success',
@@ -388,6 +434,7 @@ class UserInfoService
                 'affectedRows' => $userInfo->getReports(),
             ];
         } catch (\Exception $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
             return $this->respondWithError(41015); // 410xx - failed to report user
         }

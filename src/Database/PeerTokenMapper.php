@@ -69,9 +69,6 @@ class PeerTokenMapper
     /**
      * Make peer token transfer to recipient.
      * 
-     * @param userId string
-     * @param args array
-     * 
      */
     public function transferToken(string $userId, array $args = []): ?array
     {
@@ -182,7 +179,6 @@ class PeerTokenMapper
 
         try {
 
-            $this->db->beginTransaction();
             $transUniqueId = self::generateUUID();
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
@@ -354,7 +350,6 @@ class PeerTokenMapper
                 $this->walletMapper->insertWinToPool($this->burnWallet, $args);
             }
 
-            $this->db->commit();
             $this->logger->info('Token transfer completed successfully');
 
             return [
@@ -365,7 +360,6 @@ class PeerTokenMapper
                 'createdat' => date('Y-m-d H:i:s.u')
             ];
         } catch (\Throwable $e) {
-            $this->db->rollBack();
             return self::respondWithError($e->getMessage());
         }
     }
@@ -428,69 +422,6 @@ class PeerTokenMapper
         $transaction = new Transaction($transObj, ['transuniqueid', 'senderid', 'tokenamount'], false);
         $transRepo->saveTransaction($transaction);
     }
-
-
-    /**
-     * Save wallet entry.
-     *
-     * @param $inputPassword string
-     * @param $hashedPassword string
-     * 
-     * @return bool value
-     */
-    public function saveWalletEntry(string $userId, string $liquidity, $direction = 'CREDIT'): float
-    {
-        \ignore_user_abort(true);
-        $this->logger->info('PeerTokenMapper.saveWalletEntry started');
-
-        try {
-            $this->db->beginTransaction();
-
-            $query = "SELECT 1 FROM wallett WHERE userid = :userid";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->execute();
-            $userExists = $stmt->fetchColumn();
-
-            if ($userExists) {
-                // Q96
-                $currentBalance = $this->getUserWalletBalance($userId);
-
-                if ($direction == 'CREDIT') {
-                    $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
-                } elseif ('DEBIT') {
-                    $newLiquidity = TokenHelper::subRc($currentBalance, $liquidity);
-                } else {
-                    throw new \RuntimeException('Unknown Action while save Wallet entry');
-                }
-
-                $liquiditq = TokenHelper::convertToQ96($newLiquidity);
-
-                $query = "UPDATE wallett
-                          SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
-                          WHERE userid = :userid";
-                $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
-                $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
-
-                $stmt->execute();
-            }
-
-            $this->db->commit();
-            $this->logger->info('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
-            $this->walletMapper->updateUserLiquidity($userId, $newLiquidity);
-
-            return $newLiquidity;
-        } catch (\Throwable $e) {
-            $this->db->rollBack();
-            $this->logger->error('Database error in saveWalletEntry: ' . $e->getMessage());
-            throw new \RuntimeException('Unable to save wallet entry');
-        }
-    }
-
-
 
     /**
      * 
