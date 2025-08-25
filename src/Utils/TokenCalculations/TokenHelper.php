@@ -5,7 +5,6 @@ namespace Fawaz\Utils\TokenCalculations;
 
 use FFI;
 
-define('Q64_96_SCALE', bcpow('2', '96'));
 
 class TokenHelper
 {
@@ -55,13 +54,13 @@ class TokenHelper
 
 
     /**
-     * Adds two Q96-encoded fixed-point values.
+     * Adds two  fixed-point values.
      *
      * This method assumes both values are already scaled by 2^96.
      *
-     * @param float $q96Value1 First Q96-encoded value.
-     * @param float $q96Value2 Second Q96-encoded value.
-     * @return float Sum of the two Q96 values, as a Q96-encoded string.
+     * @param float $q96Value1 First  value.
+     * @param float $q96Value2 Second  value.
+     * @return float Sum of the two  values, as a  string.
      */
     public static function addRc(float $q96Value1, float $q96Value2): float
     {
@@ -69,18 +68,21 @@ class TokenHelper
 
         $result = $runtIns->add_decimal((string) $q96Value1, (string) $q96Value2);
 
+        if(is_numeric($result) === false){
+            throw new \RuntimeException("Error in addition operation, result is not numeric.");
+        }
         return (float) $result;
     }
 
 
     /**
-     * Multiply two Q96-encoded fixed-point values.
+     * Multiply two  fixed-point values.
      *
      * This method assumes both values are already scaled by 2^96.
      *
-     * @param float $q96Value1 First Q96-encoded value.
-     * @param float $q96Value2 Second Q96-encoded value.
-     * @return float Sum of the two Q96 values, as a Q96-encoded float.
+     * @param float $q96Value1 First value.
+     * @param float $q96Value2 Second value.
+     * @return float Sum of the two values, as a float.
      */
     public static function mulRc(float $q96Value1, float $q96Value2): float
     {
@@ -88,18 +90,21 @@ class TokenHelper
 
         $result = $runtIns->multiply_decimal((string) $q96Value1, (string) $q96Value2);
 
+        if(is_numeric($result) === false){
+            throw new \RuntimeException("Error in addition operation, result is not numeric.");
+        }
         return (float) $result;
 
     }
     
     /**
-     * divide two Q96-encoded fixed-point values.
+     * divide two  fixed-point values.
      *
      * This method assumes both values are already scaled by 2^96.
      *
-     * @param float $q96Value1 First Q96-encoded value.
-     * @param float $q96Value2 Second Q96-encoded value.
-     * @return float Sum of the two Q96 values, as a Q96-encoded float.
+     * @param float $q96Value1 First  value.
+     * @param float $q96Value2 Second  value.
+     * @return float Sum of the two  values, as a  float.
      */
     public static function divRc(float $q96Value1, float $q96Value2): float
     {
@@ -107,17 +112,20 @@ class TokenHelper
 
         $result = $runtIns->divide_decimal((string) $q96Value1, (string) $q96Value2);
 
+        if(is_numeric($result) === false){
+            throw new \RuntimeException("Error in addition operation, result is not numeric.");
+        }
         return (float) $result;
     }
 
     /**
-     * Substract two Q96-encoded fixed-point values.
+     * Substract two  fixed-point values.
      *
      * This method assumes both values are already scaled by 2^96.
      *
-     * @param float $q96Value1 First Q96-encoded value.
-     * @param float $q96Value2 Second Q96-encoded value.
-     * @return float Sum of the two Q96 values, as a Q96-encoded float.
+     * @param float $q96Value1 First  value.
+     * @param float $q96Value2 Second  value.
+     * @return float Sum of the two  values, as a  float.
      */
     public static function subRc(float $q96Value1, float $q96Value2): float
     {
@@ -125,6 +133,9 @@ class TokenHelper
 
         $result = $runtIns->subtract_decimal((string) $q96Value1, (string) $q96Value2);
 
+        if(is_numeric($result) === false){
+            throw new \RuntimeException("Error in addition operation, result is not numeric.");
+        }
         return (float) $result;
     }
 
