@@ -805,4 +805,27 @@ class PostService
             return $this->respondWithError(41513);
         }
     }
+
+    /**
+     * Get Guest List Post
+     */
+    public function getGuestListPost(?array $args = []): array|false
+    {
+        $postId = $args['postid'] ?? null;
+
+        if ($postId == null && !self::isValidUUID($postId)) {
+            return $this->respondWithError(30209);
+        }
+
+        $this->logger->info("PostService.getGuestListPost started");
+
+        $results = $this->postMapper->getGuestListPost($args);
+
+        if (empty($results)) {
+            return $this->respondWithError(31510); 
+        }
+
+        return $results;
+    }
+    
 }

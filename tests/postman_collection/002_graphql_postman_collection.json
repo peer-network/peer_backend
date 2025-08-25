@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "ec28326f-cf00-4288-a29c-813511b51119",
-		"name": "Current Development",
+		"_postman_id": "f4662015-8610-4870-a13b-4aeb3cbdc50e",
+		"name": "current dev 2",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-ec28326f-cf00-4288-a29c-813511b51119?action=share&source=collection_link&creator=43606001"
+		"_exporter_id": "32542010",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-f4662015-8610-4870-a13b-4aeb3cbdc50e?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -2618,6 +2618,7 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"11508\");",
 							"});",
+							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
@@ -2650,7 +2651,13 @@
 							"",
 							"pm.test(\"Cover field is not empty\", function () {",
 							"    pm.expect(post.cover).not.to.eql(\"\", \"Expected 'cover' to be not empty\");",
-							"});"
+							"});",
+							"",
+							"pm.test(\"URL field is present and not empty\", function () {",
+							"    pm.expect(post).to.have.property(\"url\");",
+							"    pm.expect(post.url).to.not.be.empty;",
+							"});",
+							""
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -2683,7 +2690,79 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: image\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: image\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "guestlistpost",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = {};",
+							"try {",
+							"    response = pm.response.json();",
+							"} catch (err) {",
+							"    console.log(\"Failed to parse response as JSON:\", err);",
+							"}",
+							"",
+							"let post = response?.data?.guestListPost?.affectedRows;",
+							"",
+							"pm.test(\"URL field is present and not empty\", function () {",
+							"    pm.expect(post).to.have.property(\"url\");",
+							"    pm.expect(post.url).to.not.be.empty;",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GuestListPost {\n    guestListPost(postid: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},

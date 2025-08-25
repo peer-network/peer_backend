@@ -16,6 +16,7 @@ class PostAdvanced
     protected ?string $cover;
     protected string $mediadescription;
     protected string $contenttype;
+    protected string $url;
     protected ?int $amountlikes;
     protected ?int $amountdislikes;
     protected ?int $amountviews;
@@ -62,6 +63,7 @@ class PostAdvanced
         $this->issaved = $data['issaved'] ?? false;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
+        $this->url = $this->getPostUrl();
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
@@ -78,6 +80,7 @@ class PostAdvanced
             'title' => $this->title,
             'media' => $this->media,
             'cover' => $this->cover,
+            'url' => $this->url,
             'mediadescription' => $this->mediadescription,
             'contenttype' => $this->contenttype,
             'amountlikes' => $this->amountlikes,
@@ -349,5 +352,13 @@ class PostAdvanced
         }
 
         return (new PeerInputFilter($specification));
+    }
+    
+    public function getPostUrl(): string
+    {
+        if(empty($this->postid)) {
+            return '';
+        }
+        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
     }
 }
