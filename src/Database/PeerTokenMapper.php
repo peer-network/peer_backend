@@ -46,7 +46,6 @@ class PeerTokenMapper
         $this->btcpool = $data['btcpool'];
     }
 
-
     /**
      * Validate fees wallet UUID.
      *
@@ -376,7 +375,6 @@ class PeerTokenMapper
         }
     }
 
-
     private function getInviterID(string $userId): ?string
     {
         try {
@@ -543,5 +541,4 @@ class PeerTokenMapper
             throw new \RuntimeException("Database error while fetching transactions: " . $th->getMessage());
         }
     }
-
 }
