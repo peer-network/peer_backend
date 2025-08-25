@@ -51,7 +51,7 @@ class PeerInputFilter
     /**
      * Apply a filter method dynamically by its name.
      *
-     * @param string $filterName Name of the filter method to call.
+     * @param string $filterName Name of the filter method to call
      * @param mixed $value The value to be filtered.
      * @param array $options Optional arguments passed to the filter method.
      *
