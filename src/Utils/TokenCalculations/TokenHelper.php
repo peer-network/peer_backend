@@ -17,7 +17,7 @@ class TokenHelper
      * @param float $poolFee Percentage fee for liquidity pool.
      * @param float $burnFee Percentage of tokens to be burned.
      * @param float $inviterFee Optional percentage for inviter reward.
-     * @return float|null Total required tokens including all fees.
+     * @return float Total required tokens including all fees.
      */
     public static function calculateTokenRequiredAmount(
         float $numberOfTokens,
@@ -25,7 +25,7 @@ class TokenHelper
         float $poolFee,
         float $burnFee,
         float $inviterFee = 0
-    ): ?float {
+    ): float {
         $allFees = (1 + $peerFee + $poolFee + $burnFee + $inviterFee);
 
         $requiredAmount = self::mulRc($numberOfTokens, $allFees);
@@ -47,16 +47,14 @@ class TokenHelper
         float $peerAmount,
         float $burnAmount,
         float $inviterAmount = 0
-    ): ?float {
+    ): float {
         return  (float) ($feeAmount + $peerAmount + $burnAmount + $inviterAmount);
     }
 
 
 
     /**
-     * Adds two  fixed-point values.
-     *
-     * This method assumes both values are already scaled by 2^96.
+     * Adds two values.
      *
      * @param float $q96Value1 First  value.
      * @param float $q96Value2 Second  value.
@@ -76,9 +74,7 @@ class TokenHelper
 
 
     /**
-     * Multiply two  fixed-point values.
-     *
-     * This method assumes both values are already scaled by 2^96.
+     * Multiply two values.
      *
      * @param float $q96Value1 First value.
      * @param float $q96Value2 Second value.
@@ -98,9 +94,7 @@ class TokenHelper
     }
     
     /**
-     * divide two  fixed-point values.
-     *
-     * This method assumes both values are already scaled by 2^96.
+     * divide two values.
      *
      * @param float $q96Value1 First  value.
      * @param float $q96Value2 Second  value.
@@ -119,9 +113,7 @@ class TokenHelper
     }
 
     /**
-     * Substract two  fixed-point values.
-     *
-     * This method assumes both values are already scaled by 2^96.
+     * Substract two  values.
      *
      * @param float $q96Value1 First  value.
      * @param float $q96Value2 Second  value.
@@ -140,9 +132,7 @@ class TokenHelper
     }
 
     /**
-     * initialise Rust.
-     *
-     * This method assumes both values are already scaled by 2^96.
+     * initialise Rust Module Helper.
      */
     public static function initRc(){
 
@@ -154,7 +144,6 @@ class TokenHelper
             $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.so';
         }
         
-
         // Load FFI bindings
         $ffi = FFI::cdef("
             const char* add_decimal(const char* a, const char* b);
