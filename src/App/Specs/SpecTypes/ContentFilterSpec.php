@@ -3,7 +3,7 @@
 namespace Fawaz\App\Specs\SpecTypes;
 
 use Fawaz\App\Specs\Specification;
-use Fawaz\App\Specs\SpecificationFactory;
+use Fawaz\App\Specs\ContentFilteringSpecificationFactory;
 use Fawaz\App\Specs\SpecificationSQLData;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
@@ -32,7 +32,7 @@ final class ContentFilterSpec implements Specification
             ContentType::post,
             ContentType::post
         ) === ContentFilteringAction::hideContent) {
-            return new SpecificationFactory(
+            return new ContentFilteringSpecificationFactory(
                 $this->contentFilterService
             )->build(
                 ContentType::post,
@@ -43,7 +43,7 @@ final class ContentFilterSpec implements Specification
             ContentType::user,
             ContentType::user
         ) === ContentFilteringAction::hideContent) {
-            return new SpecificationFactory(
+            return new ContentFilteringSpecificationFactory(
                 $this->contentFilterService
             )->build(
                 ContentType::user,
