@@ -48,6 +48,52 @@ class PeerInputFilter
         $this->data = $data;
     }
 
+    /**
+     * Apply a filter method dynamically by its name.
+     *
+     * @param string $filterName Name of the filter method to call.
+     * @param mixed $value The value to be filtered.
+     * @param array $options Optional arguments passed to the filter method.
+     *
+     * @return mixed The filtered result.
+     *
+     * @throws ValidationException If the requested filter does not exist.
+     */
+    public function applyFilter(string $filterName, mixed $value, array $options = []): mixed
+    {
+        if (!method_exists($this, $filterName)) {
+            $this->errors[$filterName][] = "Filter '$filterName' does not exist.";
+            throw new ValidationException("Filter '$filterName' does not exist.");
+        }
+
+        $result = $this->$filterName($value, $options);
+        
+        return $result;
+    }
+
+    /**
+     * Apply a validator method dynamically by its name.
+     *
+     * @param string $validatorName Name of the validator method to call.
+     * @param mixed $value The value to be validated.
+     * @param array $options Optional arguments passed to the validator method.
+     *
+     * @return bool True if validation passes, false otherwise.
+     *
+     * @throws ValidationException If the requested validator does not exist.
+     */
+    public function applyValidator(string $validatorName, mixed $value, array $options = []): bool
+    {
+        if (!method_exists($this, $validatorName)) {
+            $this->errors[$validatorName][] = "Validator '$validatorName' does not exist.";
+            throw new ValidationException("Validator '$validatorName' does not exist.");
+        }
+
+        $result = $this->$validatorName($value, $options);
+        
+        return $result;
+    }
+
     public function isValid(): bool
     {
         $this->errors = [];
