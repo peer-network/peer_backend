@@ -1,6 +1,7 @@
-FROM node:alpine
- 
-RUN npm install -g newman newman-reporter-htmlextra
+FROM postman/newman:alpine
+
+# Install HTMLExtra reporter
+RUN npm install -g newman-reporter-htmlextra
  
 WORKDIR /etc/newman
 
