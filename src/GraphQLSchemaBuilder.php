@@ -1816,7 +1816,7 @@ class GraphQLSchemaBuilder
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 },
-            ], 
+            ],
             'PostInteractionResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.PostInteractionResponse Resolvers');
@@ -2009,7 +2009,6 @@ class GraphQLSchemaBuilder
             'resolveTransferV2' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'advertisePostBasic' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
             'advertisePostPinned' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
-            'resolveTransferV2' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
         ];
     }
 
@@ -2243,7 +2242,7 @@ class GraphQLSchemaBuilder
     }
 
     // Werbeanzeige historie abrufen
-    protected function resolveAdvertisementHistory(?array $args = []): ?array
+/*     protected function resolveAdvertisementHistory(?array $args = []): ?array
     {
         // Authentifizierung prüfen
         if (!$this->checkAuthentication()) {
@@ -2272,7 +2271,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(40301);
         }
     }
-
+ */
     protected function createUser(array $args): ?array
     {
         $this->logger->info('Query.createUser started');
