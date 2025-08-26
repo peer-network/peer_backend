@@ -1965,7 +1965,7 @@ class GraphQLSchemaBuilder
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
-            'advertisementHistory' => fn(mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
+            //'advertisementHistory' => fn(mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
         ];
     }
 
@@ -2006,6 +2006,7 @@ class GraphQLSchemaBuilder
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveTransfer' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
+            'resolveTransferV2' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'advertisePostBasic' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
             'advertisePostPinned' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
         ];
@@ -2241,7 +2242,7 @@ class GraphQLSchemaBuilder
     }
 
     // Werbeanzeige historie abrufen
-/*     protected function resolveAdvertisementHistory(?array $args = []): ?array
+    protected function resolveAdvertisementHistory(?array $args = []): ?array
     {
         // Authentifizierung prüfen
         if (!$this->checkAuthentication()) {
@@ -2270,7 +2271,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(40301);
         }
     }
- */
+
     protected function createUser(array $args): ?array
     {
         $this->logger->info('Query.createUser started');
