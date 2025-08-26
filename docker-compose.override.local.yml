@@ -23,8 +23,6 @@ services:
         condition: service_healthy
     ports:
       - "8888:80"
-    volumes:
-      - ./:/var/www/html
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/graphql"]
       interval: 5s
