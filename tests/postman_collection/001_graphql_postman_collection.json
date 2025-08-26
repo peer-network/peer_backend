@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "e87a1a7a-81db-4c0e-915b-30569b71357f",
-		"name": "1_back_graphql_postman_collection",
+		"_postman_id": "7a0b1f2c-b719-48ff-9a4e-55bc65e1eceb",
+		"name": "11111",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "32542010",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-e87a1a7a-81db-4c0e-915b-30569b71357f?action=share&source=collection_link&creator=32542010"
+		"_exporter_id": "43606001",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-7a0b1f2c-b719-48ff-9a4e-55bc65e1eceb?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -8904,14 +8904,7 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"let accessToken = pm.environment.get(\"accessToken\") || pm.globals.get(\"accessToken\");",
-							"",
-							"if (!accessToken) {",
-							"    console.log(\"accessToken is missing\");",
-							"    throw new Error(\"accessToken is missing in environment or globals.\");",
-							"} else {",
-							"    console.log(\"accessToken found:\", accessToken);",
-							"}"
+							""
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -8934,7 +8927,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid_t3}}\", numberoftokens: 105) {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid_t3}}\", numberoftokens: 105, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8975,14 +8968,7 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"let accessToken = pm.environment.get(\"accessToken\") || pm.globals.get(\"accessToken\");",
-							"",
-							"if (!accessToken) {",
-							"    console.log(\"accessToken is missing\");",
-							"    throw new Error(\"accessToken is missing in environment or globals.\");",
-							"} else {",
-							"    console.log(\"accessToken found:\", accessToken);",
-							"}"
+							""
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -9005,7 +8991,87 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid_t2}}\", numberoftokens: 105) {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid_t2}}\", numberoftokens: 105, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11215\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = {};",
+							"try {",
+							"    response = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let transactions = response?.data?.getTransactionHistory?.affectedRows || [];",
+							"",
+							"let credit = transactions.find(tx => tx.transferaction === \"CREDIT\");",
+							"",
+							"pm.test(\"CREDIT transaction has correct message\", function () {",
+							"    pm.expect(credit).to.not.be.undefined;",
+							"    pm.expect(credit.message).to.eql(\"hi\");",
+							"    pm.expect(credit?.tokenamount).to.eql(105);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -9168,14 +9234,7 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"let accessToken = pm.environment.get(\"accessToken\") || pm.globals.get(\"accessToken\");",
-							"",
-							"if (!accessToken) {",
-							"    console.log(\"accessToken is missing\");",
-							"    throw new Error(\"accessToken is missing in environment or globals.\");",
-							"} else {",
-							"    console.log(\"accessToken found:\", accessToken);",
-							"}"
+							""
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -9198,7 +9257,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid}}\", numberoftokens: 100) {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid}}\", numberoftokens: 100, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9217,7 +9276,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm no ref fee?",
+			"name": "Check current liquidity",
 			"event": [
 				{
 					"listen": "test",
@@ -9289,6 +9348,92 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11215\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = {};",
+							"try {",
+							"    response = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let transactions = response?.data?.getTransactionHistory?.affectedRows || [];",
+							"",
+							"let credit = transactions.find(tx => tx.transferaction === \"CREDIT\");",
+							"let inviterFee = transactions.find(tx => tx.transferaction === \"INVITER_FEE\");",
+							"",
+							"pm.test(\"CREDIT transaction has correct message\", function () {",
+							"    pm.expect(credit).to.not.be.undefined;",
+							"    pm.expect(credit.message).to.eql(\"hi\");",
+							"    pm.expect(credit?.tokenamount).to.eql(100);",
+							"});",
+							"",
+							"pm.test(\"INVITER_FEE exists and amount is 1\", function () {",
+							"    pm.expect(inviterFee).to.not.be.undefined;",
+							"    pm.expect(inviterFee.tokenamount).to.eql(1);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 6) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},

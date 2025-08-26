@@ -547,6 +547,102 @@ class CommentMapper
         $stmt->execute(['commentId' => $commentId]);
         return (bool) $stmt->fetchColumn();
     }
+
+    /**
+     * Get Comments for Geust based on Filter 
+     */
+    public function fetchAllByGuestPostIdetaild(string $postId, int $offset = 0, int $limit = 10): array
+    {
+        $this->logger->info("CommentMapper.fetchAllByGuestPostIdetaild started");
+
+        $whereClauses = ["c.postid = :postId AND c.parentid IS NULL"];
+
+        $joinClausesString = "
+                users u ON c.userid = u.uid
+            LEFT JOIN 
+                (SELECT commentid, COUNT(*) AS like_count FROM user_comment_likes GROUP BY commentid) like_counts 
+                ON c.commentid = like_counts.commentid
+			LEFT JOIN 
+				(SELECT commentid, SUM(comments) AS comment_count FROM comment_info GROUP BY commentid) comment_counts 
+				ON c.commentid = comment_counts.commentid
+            LEFT JOIN comment_info ci
+                ON c.commentid = ci.commentid AND ci.userid = c.userid
+            LEFT JOIN users_info ui 
+                ON c.userid = ui.userid
+        ";
+
+        $whereClausesString = implode(" AND ", $whereClauses);
+
+        $sql = sprintf("
+            SELECT 
+                c.*,
+                COALESCE(like_counts.like_count, 0) AS amountlikes,
+				COALESCE(comment_counts.comment_count, 0) AS amountreplies,
+                u.uid,
+                u.username,
+				u.slug,
+                u.status,
+                u.img,
+                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
+                ci.count_content_moderation_dismissed AS comment_count_content_moderation_dismissed,
+                ui.reports AS user_reports,
+                u.status AS user_status,
+                ci.reports AS comment_reports
+                FROM comments c
+            LEFT JOIN %s
+            WHERE %s
+            ORDER BY 
+                c.createdat ASC
+            LIMIT :limit OFFSET :offset;",
+            $joinClausesString,
+            $whereClausesString
+        );
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':postId', $postId, PDO::PARAM_STR);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $results = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $userObj = [
+                        'uid' => $row['uid'],
+                        'status' => $row['status'],
+                        'username' => $row['username'],
+                        'slug' => $row['slug'],
+                        'img' => $row['img'],
+                    ];
+            $userObj = (new User($userObj, [], false))->getArrayCopy();
+
+            $results[] = new CommentAdvanced([
+                'commentid' => $row['commentid'],
+                'userid' => $row['userid'],
+                'postid' => $row['postid'],
+                'parentid' => $row['parentid'],
+                'content' => $row['content'],
+                'amountlikes' => (int) $row['amountlikes'],
+                'amountreplies' => (int) $row['amountreplies'],
+                'isliked' => false,
+                'createdat' => $row['createdat'],
+                'userstatus' => $userObj['status'],
+                'user' => [
+                    'uid' => $userObj['uid'],
+                    'username' => $userObj['username'],
+                    'status' => $userObj['status'],
+                    'slug' => $userObj['slug'],
+                    'img' => $userObj['img'],
+                    'isfollowed' => false,
+                    'isfollowing' => false,
+                ],
+            ]);
+        }
+
+        $this->logger->info("Fetched comments for post", ['count' => count($results)]);
+
+        return $results;
+    }
+
     
     public function fetchAllByParentId(string $parentId, int $offset = 0, int $limit = 10): array
     {
