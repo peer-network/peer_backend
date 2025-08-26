@@ -19,7 +19,7 @@ class Transaction
     protected string $senderid;
     protected string $recipientid;
     protected string $transactiontype;
-    protected int $tokenamount;
+    protected float $tokenamount;
     protected $transferaction;
     protected ?string $message;
     protected ?string $createdat;
@@ -197,7 +197,7 @@ class Transaction
     /**
      * Getter method for tokenamount
      */
-    public function getTokenAmount(): string
+    public function getTokenAmount(): float
     {
         return $this->tokenamount;
     }
