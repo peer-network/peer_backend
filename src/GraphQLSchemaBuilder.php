@@ -2008,6 +2008,7 @@ class GraphQLSchemaBuilder
             'resolveTransfer' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'advertisePostBasic' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
             'advertisePostPinned' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
+            'resolveTransferV2' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
         ];
     }
 
