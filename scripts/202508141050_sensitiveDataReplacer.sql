@@ -153,24 +153,24 @@ UPDATE logdaten SET
     request_payload = NULL;
 
 -- Financial data randomization (preserving structure but changing values)
-UPDATE wallet SET
-    numbers = (RANDOM()*1000)::NUMERIC(30,10),
-    numbersq = (RANDOM()*1000)::NUMERIC(64);
+-- UPDATE wallet SET
+--     numbers = (RANDOM()*1000)::NUMERIC(30,10),
+--     numbersq = (RANDOM()*1000)::NUMERIC(64);
 
-UPDATE wallett SET
-    liquidity = (RANDOM()*10000)::NUMERIC(30,10),
-    liquiditq = (RANDOM()*10000)::NUMERIC(64);
+-- UPDATE wallett SET
+--     liquidity = (RANDOM()*10000)::NUMERIC(30,10),
+--     liquiditq = (RANDOM()*10000)::NUMERIC(64);
 
-UPDATE gems SET
-    gems = (RANDOM()*100)::NUMERIC(30,10);
+-- UPDATE gems SET
+--     gems = (RANDOM()*100)::NUMERIC(30,10);
 
-UPDATE mcap SET
-    coverage = (RANDOM()*1000000)::NUMERIC(30,10),
-    tokenprice = (RANDOM()*100)::NUMERIC(30,10),
-    gemprice = (RANDOM()*10)::NUMERIC(30,10),
-    daygems = (RANDOM()*1000)::NUMERIC(30,10),
-    daytokens = (RANDOM()*1000)::NUMERIC(30,10),
-    totaltokens = (RANDOM()*1000000)::NUMERIC(30,10);
+-- UPDATE mcap SET
+--     coverage = (RANDOM()*1000000)::NUMERIC(30,10),
+--     tokenprice = (RANDOM()*100)::NUMERIC(30,10),
+--     gemprice = (RANDOM()*10)::NUMERIC(30,10),
+--     daygems = (RANDOM()*1000)::NUMERIC(30,10),
+--     daytokens = (RANDOM()*1000)::NUMERIC(30,10),
+--     totaltokens = (RANDOM()*1000000)::NUMERIC(30,10);
 
 -- Commit transaction
 COMMIT;
