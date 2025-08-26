@@ -24,7 +24,7 @@ type Mutation {
 
 type PostResponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: Int
   affectedRows: Post
 }
 
@@ -77,7 +77,7 @@ type ProfileUser {
 
 type ReferralResponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: Int
   affectedRows: ReferralInfo
 }
 
@@ -99,7 +99,7 @@ type ContactusResponsePayload {
 
 type ContactusResponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: Int
   affectedRows: ContactusResponsePayload
 }
 
@@ -113,24 +113,24 @@ type HelloResponse {
 
 type RegisterResponse {
   status: String
-  ResponseCode: String
+  ResponseCode: Int
   userid: ID
 }
 
 type DefaultResponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: Int
 }
 
 type ResetPasswordRequestResponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: Int
   nextAttemptAt: String
 }
 
 type AuthPayload {
   status: String!
-  ResponseCode: String
+  ResponseCode: Int
   accessToken: String
   refreshToken: String
 }
