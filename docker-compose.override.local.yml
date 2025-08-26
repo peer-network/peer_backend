@@ -29,6 +29,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
+      - ./src:/var/www/html/src
       - ./runtime-data/logs:/var/www/html/runtime-data/logs
     networks:
       - my-network
