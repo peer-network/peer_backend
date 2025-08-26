@@ -2241,7 +2241,7 @@ class GraphQLSchemaBuilder
     }
 
     // Werbeanzeige historie abrufen
-    protected function resolveAdvertisementHistory(?array $args = []): ?array
+/*     protected function resolveAdvertisementHistory(?array $args = []): ?array
     {
         // Authentifizierung prüfen
         if (!$this->checkAuthentication()) {
@@ -2270,7 +2270,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(40301);
         }
     }
-
+ */
     protected function createUser(array $args): ?array
     {
         $this->logger->info('Query.createUser started');
