@@ -28,9 +28,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    volumes:
+      - ./runtime-data/logs:/var/www/html/runtime-data/logs
     networks:
       - my-network
-
   newman:
     build:
       context: .
