@@ -3667,7 +3667,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(offset: -2, limit: null) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(offset: -2, limit: null) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -3731,7 +3731,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(offset: null, limit: 22) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(offset: null, limit: 22) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
