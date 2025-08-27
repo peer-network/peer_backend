@@ -1702,7 +1702,7 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.TransactionResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
+                'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
                 'affectedRows' => function (array $root): array {
