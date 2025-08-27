@@ -5,6 +5,7 @@ namespace Fawaz\App;
 
 use Fawaz\Database\CommentInfoMapper;
 use Fawaz\Database\CommentMapper;
+use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\ReportsMapper;
 use Fawaz\Utils\ReportTargetType;
 use Psr\Log\LoggerInterface;
@@ -17,7 +18,8 @@ class CommentInfoService
         protected LoggerInterface $logger, 
         protected CommentInfoMapper $commentInfoMapper, 
         protected ReportsMapper $reportsMapper,
-        protected CommentMapper $commentMapper, 
+        protected CommentMapper $commentMapper,
+        protected TransactionManager $transactionManager 
     ){}
 
     public function setCurrentUserId(string $userId): void
@@ -106,20 +108,30 @@ class CommentInfoService
             return $this->respondWithError(31606);
         }
 
-        $exists = $this->commentInfoMapper->addUserActivity('likeComment', $this->currentUserId, $commentId);
+        try{
+            $this->transactionManager->beginTransaction();
 
-        if (!$exists) {
-            return $this->respondWithError(31604);
+            $exists = $this->commentInfoMapper->addUserActivity('likeComment', $this->currentUserId, $commentId);
+
+            if (!$exists) {
+                return $this->respondWithError(31604);
+            }
+
+            $commentInfo->setLikes($commentInfo->getLikes() + 1);
+            $this->commentInfoMapper->update($commentInfo);
+
+            $this->transactionManager->commit();
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11603,
+                'affectedRows' => $commentInfo->getLikes(),
+            ];
+        }catch (\Exception $e) {
+            $this->transactionManager->rollback();
+            $this->logger->error('Error while fetching comment data', ['exception' => $e]);
+            return $this->respondWithError(41601);
         }
-
-        $commentInfo->setLikes($commentInfo->getLikes() + 1);
-        $this->commentInfoMapper->update($commentInfo);
-
-        return [
-            'status' => 'success',
-            'ResponseCode' => 11603,
-            'affectedRows' => $commentInfo->getLikes(),
-        ];
     }
 
     public function reportComment(string $commentId): array
@@ -164,6 +176,8 @@ class CommentInfoService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
+
             $exists = $this->reportsMapper->addReport(
                 $this->currentUserId,
                 ReportTargetType::COMMENT, 
@@ -184,12 +198,14 @@ class CommentInfoService
             $commentInfo->setReports($commentInfo->getReports() + 1);
             $this->commentInfoMapper->update($commentInfo);
 
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11604,
                 'affectedRows' => $commentInfo->getReports(),
             ];
         } catch (\Exception $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Error while adding report to db or updating info data', ['exception' => $e]);
             return $this->respondWithError(41601);
         }

@@ -28,6 +28,7 @@ const PRICECOMMENT=0.5;
 const PRICEPOST=20;
 const DISLIKE_=3;// whereby DISLIKE
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class PostService
 {
@@ -46,7 +47,8 @@ class PostService
         protected Base64FileHandler $base64Encoder,
         protected DailyFreeService $dailyFreeService,
         protected WalletService $walletService,
-        protected JWTService $tokenService
+        protected JWTService $tokenService,
+        protected TransactionManager $transactionManager
     ) {}
 
     public function setCurrentUserId(string $userid): void
@@ -202,7 +204,7 @@ class PostService
         }
 
         try {
-            $this->postMapper->beginTransaction();
+            $this->transactionManager->beginTransaction();
             // Media Upload
             if (isset($args['media']) && $this->isValidMedia($args['media'])) {
                 $validateContentCountResult = $this->validateContentCount($args);
@@ -224,36 +226,49 @@ class PostService
                 }
             }else if (isset($args['uploadedFiles']) && !empty($args['uploadedFiles'])) {
 
-                $validateSameMediaType = new MultipartPost(['media' => explode(',',$args['uploadedFiles'])], [], false);
+                try{
 
-                if(!$validateSameMediaType->isFilesExists()){
-                    return $this->respondWithError(31511);
-                }
+                    $validateSameMediaType = new MultipartPost(['media' => explode(',',$args['uploadedFiles'])], [], false);
 
-                $hasSameMediaType = $validateSameMediaType->validateSameContentTypes();
+                    if(!$validateSameMediaType->isFilesExists()){
+                        return $this->respondWithError(31511);
+                    }
 
-                if($hasSameMediaType){
-                    $postData['contenttype'] = $hasSameMediaType;
-                    $args['contenttype'] = $hasSameMediaType;
-                    $uploadedFileArray = $this->postMapper->handelFileMoveToMedia($args['uploadedFiles']);
-                    $this->postMapper->updateTokenStatus($this->currentUserId);
-                    
-                    $mediaPath['path'] = $uploadedFileArray;
+                    $hasSameMediaType = $validateSameMediaType->validateSameContentTypes();
 
-                    if (!empty($mediaPath['path'])) {
-                        $postData['media'] = $this->argsToJsString($mediaPath['path']);
-                    } else {
+                    if($hasSameMediaType){
+                        $postData['contenttype'] = $hasSameMediaType;
+                        $args['contenttype'] = $hasSameMediaType;
+                        $uploadedFileArray = $this->postMapper->handelFileMoveToMedia($args['uploadedFiles']);
+                        $this->postMapper->updateTokenStatus($this->currentUserId);
+                        
+                        $mediaPath['path'] = $uploadedFileArray;
+
+                        if (!empty($mediaPath['path'])) {
+                            $postData['media'] = $this->argsToJsString($mediaPath['path']);
+                        } else {
+                            if(isset($args['uploadedFiles'])){
+                                $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                            }
+                            return $this->respondWithError(30101); 
+                        }
+                    }else{
                         if(isset($args['uploadedFiles'])){
                             $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                         }
-                        return $this->respondWithError(30101); 
+                        return $this->respondWithError(30266); // Provided files should have same type 
                     }
-                }else{
+                }catch(\Exception $e){
                     if(isset($args['uploadedFiles'])){
                         $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                     }
-                    return $this->respondWithError(30266); // Provided files should have same type 
+                    $this->logger->error('PostService.createPost Unexpected error occurred', [
+                        'message' => $e->getMessage(),
+                        'trace'   => $e->getTraceAsString(),
+                    ]);
+                    return $this->respondWithError(40301); // Unexpected error occurred 
                 }
+                
                
             } else {
                 return $this->respondWithError(30101);
@@ -294,6 +309,10 @@ class PostService
                     'trace' => $e->getTraceAsString(),
                 ]);
                 return $this->respondWithError(30263);
+                if(isset($args['uploadedFiles'])){
+                    $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                }
+                return $this->respondWithError($e->getMessage());
             }
             $this->postMapper->insert($post);
 
@@ -332,7 +351,7 @@ class PostService
                     $this->handleTags($args['tags'], $postId, $createdAt);
                 } 
             } catch (\Throwable $e) {
-                $this->postMapper->rollback();
+                $this->transactionManager->rollback();
                 if(isset($args['uploadedFiles'])){
                     $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                 }
@@ -356,11 +375,11 @@ class PostService
 
             $data = $post->getArrayCopy();
             $data['tags'] = $tagNames;
-            $this->postMapper->commit();
+            $this->transactionManager->commit();
             return $this->createSuccessResponse(11513, $data);
 
         } catch (\Throwable $e) {
-            $this->postMapper->rollback();
+            $this->transactionManager->rollback();
             if(isset($args['uploadedFiles'])){
                 $this->postMapper->revertFileToTmp($args['uploadedFiles']);
             }
@@ -805,4 +824,27 @@ class PostService
             return $this->respondWithError(41513);
         }
     }
+
+    /**
+     * Get Guest List Post
+     */
+    public function getGuestListPost(?array $args = []): array|false
+    {
+        $postId = $args['postid'] ?? null;
+
+        if ($postId == null && !self::isValidUUID($postId)) {
+            return $this->respondWithError(30209);
+        }
+
+        $this->logger->info("PostService.getGuestListPost started");
+
+        $results = $this->postMapper->getGuestListPost($args);
+
+        if (empty($results)) {
+            return $this->respondWithError(31510); 
+        }
+
+        return $results;
+    }
+    
 }

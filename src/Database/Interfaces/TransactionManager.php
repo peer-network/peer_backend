@@ -5,12 +5,14 @@ namespace Fawaz\Database\Interfaces;
 
 use PDO;
 use Fawaz\Database\Interfaces\RollbackableDatabase;
-use Psr\Log\LoggerInterface;
 
-class PeerMapper implements RollbackableDatabase
+class TransactionManager implements RollbackableDatabase
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
-    {
+    private PDO $db;
+
+
+    public function __construct(PDO $pdo) {
+        $this->db = $pdo;
     }
 
     public function beginTransaction(): bool {

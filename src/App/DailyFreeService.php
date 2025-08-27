@@ -14,13 +14,14 @@ const DAILYFREEDISLIKE=0;
 
 use Fawaz\App\DailyFree;
 use Fawaz\Database\DailyFreeMapper;
+use Fawaz\Database\Interfaces\TransactionManager;
 use Psr\Log\LoggerInterface;
 
 class DailyFreeService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected DailyFreeMapper $dailyFreeMapper)
+    public function __construct(protected LoggerInterface $logger, protected DailyFreeMapper $dailyFreeMapper, protected TransactionManager $transactionManager)
     {
     }
 
@@ -92,8 +93,20 @@ class DailyFreeService
         $this->logger->info('DailyFreeService.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
 
         try {
-            return $this->dailyFreeMapper->incrementUserDailyUsage($userId, $artType);
+            $this->transactionManager->beginTransaction();
+            $response =  $this->dailyFreeMapper->incrementUserDailyUsage($userId, $artType);
+
+            if (!$response) {
+                $this->logger->error('Failed to increment daily usage', ['userId' => $userId, 'artType' => $artType]);
+                $this->transactionManager->rollback();
+                return false;
+            }
+            $this->transactionManager->commit();
+            $this->logger->info('Daily usage incremented successfully');
+
+            return true;
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Error in incrementUserDailyUsage', ['exception' => $e->getMessage()]);
             return false;
         }

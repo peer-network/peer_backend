@@ -12,13 +12,14 @@ use Psr\Log\LoggerInterface;
 use Ratchet\Client\Connector;
 use React\EventLoop\Loop;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class ChatService
 {
     protected ?string $currentUserId = null;
     private Base64FileHandler $base64filehandler;
 
-    public function __construct(protected LoggerInterface $logger, protected ChatMapper $chatMapper)
+    public function __construct(protected LoggerInterface $logger, protected ChatMapper $chatMapper, protected TransactionManager $transactionManager)
     {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -168,6 +169,7 @@ class ChatService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             // Create the chat
             $chatData = [
                 'chatid' => $chatId,
@@ -225,12 +227,14 @@ class ChatService
             $this->chatMapper->insertPart($creatorParticipant);
 
             $this->logger->info('Chat and participants created successfully', ['chatId' => $chatId]);
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11804,
                 'affectedRows' => ['chatid' => $chatId],
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to create chat and participants', ['exception' => $e]);
             return $this->respondWithError(41802);
         }
@@ -297,6 +301,8 @@ class ChatService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
+
             $chat = $this->chatMapper->loadById($chatId);
             if (!$chat) {
                 return $this->respondWithError(30218);
@@ -308,12 +314,14 @@ class ChatService
             $this->chatMapper->update($chat);
 
             $this->logger->info('Chat updated successfully', ['chatid' => $chatId]);
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11805,
                 'affectedRows' => $chat->getArrayCopy()
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to update chat', ['args' => $args, 'exception' => $e]);
             return $this->respondWithError(41803);
         }
@@ -347,19 +355,23 @@ class ChatService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             $chatId = $this->chatMapper->delete($id);
 
             if ($chatId) {
                 $this->logger->info('Chat deleted successfully', ['chatId' => $chatId]);
+                $this->transactionManager->commit();
                 return [
                     'status' => 'success',
                     'ResponseCode' => 11809
                 ];
             }
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to delete chat', ['id' => $id, 'error' => $e->getMessage()]);
             return $this->respondWithError(41809);
         }
+        $this->transactionManager->rollBack();
 
         return $this->respondWithError(41809);
     }
@@ -417,6 +429,7 @@ class ChatService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             foreach ($participants as $participantId) {
 
                 if (!self::isValidUUID($participantId)) {
@@ -432,18 +445,22 @@ class ChatService
                 $participant = new ChatParticipants($participantData);
                 $response = $this->chatMapper->insertPart($participant);
 
-                if ($response['status'] === 'error') {
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->logger->error('Failed to add participant', ['chatId' => $chatId, 'participantId' => $participantId, 'error' => $response]);
+                    $this->transactionManager->rollBack();
                     return $response;
                 }
             }
 
             $this->logger->info('Participants added successfully', ['chatId' => $chatId]);
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11802,
                 'affectedRows' => $participants,
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to add participants', ['chatId' => $chatId, 'exception' => $e]);
             return $this->respondWithError(41804);
         }
@@ -487,13 +504,17 @@ class ChatService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             foreach ($participants as $participantId) {
 
                 if (!self::isValidUUID($participantId)) {
+                    $this->transactionManager->rollback();
                     return $this->respondWithError(30201);
                 }
 
                 if (!$this->chatMapper->isParticipantExist($chatId, $participantId)) {
+                    $this->logger->warning('Participant not found', ['chatId' => $chatId, 'participantId' => $participantId]);
+                    $this->transactionManager->rollback();
                     return $this->respondWithError(31811);
                 }
 
@@ -501,12 +522,14 @@ class ChatService
             }
 
             $this->logger->info('Participants removed successfully', ['chatId' => $chatId]);
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11806,
                 'affectedRows' => $participants,
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to remove participants', ['chatId' => $chatId, 'exception' => $e]);
             return $this->respondWithError(41805);
         }
@@ -557,6 +580,8 @@ class ChatService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
+
             $messageData = [
                 'messid' => 0,
                 'chatid'    => $chatId,
@@ -569,13 +594,16 @@ class ChatService
             $result = $this->chatMapper->insertMess($message);
 
             if ($result['status'] === 'error') {
+                $this->transactionManager->rollBack();
                 $this->logger->error('Failed to insert message', ['chatId' => $chatId, 'error' => $result]);
                 return $result;
             }
 
+            $this->transactionManager->commit();
             $this->logger->info('Message added successfully', ['chatId' => $chatId, 'content' => $content]);
             return $result;
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to add message', ['chatId' => $chatId, 'exception' => $e->getMessage()]);
             return $this->respondWithError(41806);
         }
@@ -614,15 +642,18 @@ class ChatService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             $this->chatMapper->deleteMessage($chatId, $messageId);
 
             $this->logger->info('Message removed successfully', ['chatId' => $chatId, 'messageId' => $messageId]);
+            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => 11809,
                 'affectedRows' => $message,
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to remove message', ['chatId' => $chatId, 'exception' => $e]);
             return $this->respondWithError(41810);
         }
@@ -718,6 +749,7 @@ class ChatService
             return $this->respondWithError(60501);
         }
 
+        $this->transactionManager->beginTransaction();
         $messageData = [
             'type' => 'message',
             'chatId' => $chatId,
@@ -730,6 +762,12 @@ class ChatService
         if ($result['status'] === 'success') {
             $this->sendToWebSocket($messageData);
         }
+        if (isset($result['status']) && $result['status'] === 'error') {
+            $this->transactionManager->rollBack();
+            $this->logger->error('Failed to insert message', ['chatId' => $chatId, 'error' => $result]);
+            return $result;
+        }
+        $this->transactionManager->commit();
 
         return $result;
     }

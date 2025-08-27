@@ -19,6 +19,7 @@ class Post implements Hashable
     protected string $title;
     protected string $contenttype;
     protected string $media;
+    protected string $url;
     protected ?string $cover;
     protected string $mediadescription;
     protected string $createdat;
@@ -41,6 +42,7 @@ class Post implements Hashable
         $this->contenttype = $data['contenttype'] ?? 'text';
         $this->media = $data['media'] ?? '';
         $this->cover = $data['cover'] ?? null;
+        $this->url = $this->getPostUrl();
         $this->mediadescription = $data['mediadescription'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
@@ -56,6 +58,7 @@ class Post implements Hashable
             'contenttype' => $this->contenttype,
             'media' => $this->media,
             'cover' => $this->cover,
+            'url' => $this->url,
             'mediadescription' => $this->mediadescription,
             'createdat' => $this->createdat,
         ];
@@ -213,5 +216,13 @@ class Post implements Hashable
 
     public function hashValue(): string {
         return $this->hashObject($this);
+    }
+
+    public function getPostUrl(): string
+    {
+        if(empty($this->postid)) {
+            return '';
+        }
+        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
     }
 }

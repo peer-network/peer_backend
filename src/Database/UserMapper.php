@@ -696,6 +696,30 @@ class UserMapper
         }
     }
 
+    
+    public function getUserByNameAndSlug(string $username, int $slug): User|bool
+    {
+        $this->logger->info("UserMapper.checkIfNameAndSlugExist started", ['username' => $username, 'slug' => $slug]);
+
+        try {
+            $sql = "SELECT * FROM users WHERE username = :username AND slug = :slug";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['username' => $username, 'slug' => $slug]);
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($data !== false) {
+                return new User($data);
+            }
+
+            $this->logger->warning("No user found with email", ['email' => $username]);
+            return false;
+
+        } catch (\Throwable $e) {
+            $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
     public function verifyAccount(string $uid): bool
     {
         $this->logger->info("UserMapper.verifyAccount started", ['uid' => $uid]);

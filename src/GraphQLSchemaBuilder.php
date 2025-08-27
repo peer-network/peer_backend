@@ -29,6 +29,7 @@ const PRICEDISLIKE=5;
 const PRICECOMMENT=0.5;
 const PRICEPOST=20;
 
+use Fawaz\App\AlphaMintService;
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
 use Fawaz\App\Comment;
@@ -73,6 +74,7 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
+        protected AlphaMintService $alphaMintService,
         protected LoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
@@ -165,6 +167,7 @@ class GraphQLSchemaBuilder
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
+        $this->alphaMintService->setCurrentUserId($userid);
     }
 
     protected function getStatusNameByID(int $status): ?string
@@ -651,6 +654,9 @@ class GraphQLSchemaBuilder
                 },
                 'cover' => function (array $root): string {
                     return $root['cover'] ?? '';
+                },
+                'url' => function (array $root): string {
+                    return $root['url'] ?? '';
                 },
                 'mediadescription' => function (array $root): string {
                     return $root['mediadescription'] ?? '';
@@ -1703,6 +1709,29 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'TransferTokenResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.TransferTokenResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'TransferToken' => [
+                'tokenSend' => function (array $root): float {
+                    return $root['tokenSend'] ?? 0.0;
+                },
+                'tokensSubstractedFromWallet' => function (array $root): float {
+                    return $root['tokensSubstractedFromWallet'] ?? 0.0;
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ],
             'Transaction' => [
                 'transactionid' => function (array $root): string {
                     return $root['transactionid'] ?? '';
@@ -1758,6 +1787,7 @@ class GraphQLSchemaBuilder
             'listFollowRelations' => fn(mixed $root, array $args) => $this->resolveFollows($args),
             'listFriends' => fn(mixed $root, array $args) => $this->resolveFriends($args),
             'listPosts' => fn(mixed $root, array $args) => $this->resolvePosts($args),
+            'guestListPost' => fn(mixed $root, array $args) => $this->guestListPost($args),
             'getPostInfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
             'getCommentInfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentId']),
             'listChildComments' => fn(mixed $root, array $args) => $this->resolveComments($args),
@@ -1790,6 +1820,7 @@ class GraphQLSchemaBuilder
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
+            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
         ];
     }
 
@@ -1829,7 +1860,8 @@ class GraphQLSchemaBuilder
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
-            'resolveTransfer' => fn(mixed $root, array $args) => $this->walletService->transferToken($args),
+            'resolveTransfer' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
+            'resolveTransferV2' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
         ];
     }
 
@@ -3472,6 +3504,52 @@ class GraphQLSchemaBuilder
             
             return $this->respondWithError(40901);
         }
+    }
+
+    /**
+     * Guest List Post
+     * 
+     */
+    protected function guestListPost(array $args): ?array
+    {
+        $this->logger->info('Query.guestListPost started');
+
+        $posts = $this->postService->getGuestListPost($args);
+
+        if (isset($posts['status']) && $posts['status'] === 'error') {
+            return $posts;
+        }
+
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
+
+        $data = array_map(
+            fn(PostAdvanced $post) => $this->guestPostMapPostWithComments($post, $commentOffset, $commentLimit),
+            $posts
+        );
+
+        return [
+            'status' => 'success',
+            'counter' => count($data),
+            'ResponseCode' => empty($data) ? 21501 : 11501,
+            'affectedRows' => $data[0] ?? [],
+        ];
+    }
+
+    /**
+     * Map Guest Post with Comments
+     * 
+     */
+    protected function guestPostMapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit): array
+    {
+        $postArray = $post->getArrayCopy();
+        $comments = $this->commentService->fetchAllByGuestPostIdetaild($post->getPostId(), $commentOffset, $commentLimit);
+        
+        $postArray['comments'] = array_map(
+            fn(CommentAdvanced $comment) => $comment->getArrayCopy(),
+            $comments
+        );
+        return $postArray;
     }
 
 }
