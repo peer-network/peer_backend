@@ -2,6 +2,7 @@ name: Dependabot Alerts to Discord
 
 on:
   repository_vulnerability_alert:
+    types: [created, reopened]
 
 permissions:
   contents: read
