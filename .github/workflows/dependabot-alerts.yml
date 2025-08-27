@@ -3,6 +3,8 @@ name: Dependabot Alerts to Discord (Scheduled)
 on:
   schedule:
     - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch:
+
 
 jobs:
   notify:
@@ -20,9 +22,19 @@ jobs:
 
       - name: Send Discord Notification
         run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Mock/test mode when manually triggered
+            MESSAGE=":test_tube: **Test Dependabot Alert**\nRepo: ${{ github.repository }}\nPackage: symfony/http-foundation\nSeverity: HIGH\nAdvisory: https://github.com/advisories/GHSA-xxxx-xxxx\nFixed in: 6.4.3"
+            curl -H "Content-Type: application/json" \
+                 -X POST \
+                 -d "{\"content\": \"$MESSAGE\"}" \
+                 "$DISCORD_WEBHOOK_URL"
+            exit 0
+          fi
+
           count=$(jq length alerts.json)
           if [ "$count" -gt 0 ]; then
-            MESSAGE=":rotating_light: **$count Dependabot Security Alerts Found!**\n"
+            MESSAGE=":rotating_light: **$count Dependabot Security Alerts Found!**"
             curl -H "Content-Type: application/json" \
                  -X POST \
                  -d "{\"content\": \"$MESSAGE\"}" \
