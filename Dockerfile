@@ -12,11 +12,15 @@ RUN apt-get update && \
     docker-php-ext-install \
         pgsql pdo pdo_pgsql bcmath xml curl gmp ffi && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install Rust and Cargo
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
+echo 'source $HOME/.cargo/env' >> /root/.bashrc
+ENV PATH="/root/.cargo/bin:$PATH"
 
-RUN echo "extension=/usr/local/lib/php/extensions/no-debug-non-zts-*/ffi.so" > /usr/local/etc/php/conf.d/ffi.ini && \
-    echo "ffi.enable=true" >> /usr/local/etc/php/conf.d/ffi.ini
+RUN rm -f /usr/local/etc/php/conf.d/ffi.ini \
+ && echo 'ffi.enable=true' > /usr/local/etc/php/conf.d/zz-ffi.ini
 
-RUN php -m | grep ffi || (echo "FFI NOT FOUND after install" && exit 1)
+RUN php -m | grep -qi '^ffi$' || (echo "FFI NOT FOUND after install" && exit 1)
  
 RUN which supervisord
  
@@ -26,7 +30,9 @@ RUN curl -sS https://getcomposer.org/installer | php && \
 WORKDIR /var/www/html
  
 COPY . .
- 
+
+RUN if [ -f tokencalculation/Cargo.toml ]; then cd tokencalculation && . /root/.cargo/env && cargo build --release; fi
+
 RUN chown -R www-data:www-data /var/www/
  
 #  CI-only patch: prevent pg_last_error() warning if no connection exists
@@ -54,7 +60,7 @@ RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
 && echo "error_log = /var/www/html/runtime-data/logs/errorlog.txt" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
 && echo "upload_max_filesize = 510M" >> /usr/local/etc/php/conf.d/uploads.ini \
 && echo "post_max_size = 510M" >> /usr/local/etc/php/conf.d/uploads.ini \
-&& echo "max_file_uploads = 21" >> /usr/local/etc/php/conf.d/uploads.ini
+&& echo "max_file_uploads = 100" >> /usr/local/etc/php/conf.d/uploads.ini
  
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
 COPY docker/supervisord.conf /etc/supervisord.conf

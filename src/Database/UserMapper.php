@@ -248,9 +248,7 @@ class UserMapper
         $conditions[] = "status != :status";
         $queryParams[':status'] = Status::DELETED;
 
-        if ($conditions) {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        }
+        $sql .= " AND " . implode(" AND ", $conditions);
 
         $sql .= " ORDER BY uid LIMIT :limit OFFSET :offset";
         $queryParams[':limit'] = $limit;
@@ -418,9 +416,7 @@ class UserMapper
         $conditions[] = "u.status != :status";
         $queryParams[':status'] = Status::DELETED;
 
-        if ($conditions) {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        }
+        $sql .= " AND " . implode(" AND ", $conditions);
 
         $sql .= " ORDER BY u.createdat DESC LIMIT :limit OFFSET :offset";
         $queryParams[':limit'] = $limit;
@@ -695,6 +691,30 @@ class UserMapper
             return $exists;
         } catch (\Throwable $e) {
             $this->logger->error("General error while checking name and slug", ['username' => $username, 'slug' => $slug, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    
+    public function getUserByNameAndSlug(string $username, int $slug): User|bool
+    {
+        $this->logger->info("UserMapper.checkIfNameAndSlugExist started", ['username' => $username, 'slug' => $slug]);
+
+        try {
+            $sql = "SELECT * FROM users WHERE username = :username AND slug = :slug";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['username' => $username, 'slug' => $slug]);
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($data !== false) {
+                return new User($data);
+            }
+
+            $this->logger->warning("No user found with email", ['email' => $username]);
+            return false;
+
+        } catch (\Throwable $e) {
+            $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
             return false;
         }
     }
@@ -1204,7 +1224,7 @@ class UserMapper
             $userid = $userData->getUserId();
             $password = $userData->getPassword();
 
-            $hashedPassword = method_exists($this, 'setPassword') ? $this->setPassword($password) : \password_hash($password, \PASSWORD_BCRYPT, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
+            $hashedPassword = $this->setPassword($password);
             $userData->setPassword($hashedPassword);
 
             if (!$userData->getReferralUuid()) {
@@ -1973,7 +1993,6 @@ class UserMapper
             ]);
             return null;
         }
-        return null;
     }
 
     public function getValidReferralInfoByLink(string $referralLink): array|null
