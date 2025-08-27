@@ -8,6 +8,7 @@ use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
+use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Psr\Log\LoggerInterface;
 
 use function DI\string;
@@ -1077,16 +1078,17 @@ class WalletMapper
 
         $totalGems = isset($data[0]['overall_total']) ? $data[0]['overall_total'] : '0';
         $dailyToken = (float)DAILY_NUMBER_TOKEN;
+        // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
+        $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
 
-        $gemsintoken = (float)bcdiv((string)$dailyToken, (string)$totalGems, 10);
-
-        $bestatigung = (float)bcadd(bcmul((string)$totalGems, (string)$gemsintoken, 10), '0.00005', 4);
+        $bestatigungInitial = TokenHelper::mulRc((float) $totalGems, (float) $gemsintoken);
+        // $bestatigung = bcadd(bcmul($totalGems, $gemsintoken, 10), '0.00005', 4);
 
         $args = [
             'winstatus' => [
                 'totalGems' => $totalGems,
                 'gemsintoken' => $gemsintoken,
-                'bestatigung' => $bestatigung
+                'bestatigung' => $bestatigungInitial
             ]
         ];
 
@@ -1094,16 +1096,18 @@ class WalletMapper
             $userId = (string)$row['userid'];
 
             if (!isset($args[$userId])) {
+
+                $totalTokenNumber = TokenHelper::mulRc((float) $row['total_numbers'], (float) $gemsintoken);
                 $args[$userId] = [
-                    'userid' => (string)$userId,
-                    'gems' => (float)$row['total_numbers'],
-                    'tokens' => (float)bcmul((string)$row['total_numbers'], (string)$gemsintoken, 10),
-                    'percentage' => (float)$row['percentage'],
+                    'userid' => $userId,
+                    'gems' => $row['total_numbers'],
+                    'tokens' => $totalTokenNumber,
+                    'percentage' => $row['percentage'],
                     'details' => []
                 ];
             }
 
-            $rowgems2token = (float)bcmul((string)$row['gems'], (string)$gemsintoken, 10);
+            $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
 
             $args[$userId]['details'][] = [
                 'gemid' => (string)$row['gemid'],
@@ -1375,7 +1379,7 @@ class WalletMapper
                 $stmt->execute();
             } else {
                 $currentBalance = $this->getUserWalletBalance($userId);
-                $newLiquidity = abs($currentBalance + $liquidity);
+                $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
                 $liquiditq = ((float)$this->decimalToQ64_96($newLiquidity));
 
                 $query = "UPDATE wallett
