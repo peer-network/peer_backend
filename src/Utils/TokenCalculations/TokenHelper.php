@@ -65,7 +65,9 @@ class TokenHelper
         if(is_numeric($result) === false){
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
         }
+        // return or make values till 10 decimal places without rounding
         return (float) $result;
+
     }
 
     /**

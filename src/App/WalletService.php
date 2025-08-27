@@ -316,24 +316,4 @@ class WalletService
         }
     }
 
-    public function transferToken(array $args): array
-    {
-        $this->logger->info('WalletService.transferToken started');
-
-        try {
-            $response = $this->walletMapper->transferToken($this->currentUserId, $args);
-            if ($response['status'] === 'error') {
-                return $response;
-            } else {
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => 11211,
-                    'affectedRows' => [],
-                ];
-            }
-
-        } catch (\Exception $e) {
-            return $this->respondWithError('Unknown Error.');
-        }
-    }
 }

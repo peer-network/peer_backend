@@ -68,6 +68,11 @@ class PeerTokenMapper
      */
     public function transferToken(string $userId, array $args = []): ?array
     {
+
+        $twoVae = TokenHelper::mulRc(159.146498944, 654.465449);
+
+        var_dump($twoVae); exit; // For debugging purpose only, remove or comment out in production. Rust: 104155.88488816298
+
         \ignore_user_abort(true);
 
         $this->logger->info('PeerTokenMapper.transferToken started');
@@ -199,20 +204,17 @@ class PeerTokenMapper
                 // ]);
 
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => -abs($requiredAmount),
-                    'whereby' => TRANSFER_,
-                ];
+                // $args = [
+                //     'token' => $id,
+                //     'fromid' => $userId,
+                //     'numbers' => -abs($requiredAmount),
+                //     'whereby' => TRANSFER_,
+                // ];
 
-                $this->walletMapper->insertWinToLog($userId, $args);
-                $this->walletMapper->insertWinToPool($userId, $args);
+                // $this->walletMapper->insertWinToLog($userId, $args);
+                // $this->walletMapper->insertWinToPool($userId, $args);
+                $this->walletMapper->saveWalletEntry($userId, -abs($requiredAmount));
 
             }
 
@@ -229,10 +231,6 @@ class PeerTokenMapper
                 ]);
 
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -241,8 +239,10 @@ class PeerTokenMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->walletMapper->insertWinToLog($recipient, $args);
-                $this->walletMapper->insertWinToPool($recipient, $args);
+                // $this->walletMapper->insertWinToLog($recipient, $args);
+                // $this->walletMapper->insertWinToPool($recipient, $args);
+                $this->walletMapper->saveWalletEntry($recipient, abs($numberoftokens));
+
             }
 
             // 3. INVITER: Fees To Inviter (if applicable)
@@ -261,15 +261,17 @@ class PeerTokenMapper
                     return self::respondWithError(41401);
                 }
 
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($inviterWin),
-                    'whereby' => TRANSFER_,
-                ];
+                // $args = [
+                //     'token' => $id,
+                //     'fromid' => $userId,
+                //     'numbers' => abs($inviterWin),
+                //     'whereby' => TRANSFER_,
+                // ];
 
-                $this->walletMapper->insertWinToLog($inviterId, $args);
-                $this->walletMapper->insertWinToPool($inviterId, $args);
+                // $this->walletMapper->insertWinToLog($inviterId, $args);
+                // $this->walletMapper->insertWinToPool($inviterId, $args);
+                $this->walletMapper->saveWalletEntry($inviterId, abs($inviterWin));
+
             }
 
             // 4. POOLWALLET: Fee To Pool Wallet
@@ -296,8 +298,10 @@ class PeerTokenMapper
                     'whereby' => TRANSFER_,
                 ];
 
-                $this->walletMapper->insertWinToLog($this->poolWallet, $args);
-                $this->walletMapper->insertWinToPool($this->poolWallet, $args);
+                // $this->walletMapper->insertWinToLog($this->poolWallet, $args);
+                // $this->walletMapper->insertWinToPool($this->poolWallet, $args);
+                $this->walletMapper->saveWalletEntry($this->poolWallet, abs($feeAmount));
+
             }
 
             // 5. PEERWALLET: Fee To Peer Wallet
@@ -317,15 +321,17 @@ class PeerTokenMapper
                     return self::respondWithError(41401);
                 }
 
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($peerAmount),
-                    'whereby' => TRANSFER_,
-                ];
+                // $args = [
+                //     'token' => $id,
+                //     'fromid' => $userId,
+                //     'numbers' => abs($peerAmount),
+                //     'whereby' => TRANSFER_,
+                // ];
 
-                $this->walletMapper->insertWinToLog($this->peerWallet, $args);
-                $this->walletMapper->insertWinToPool($this->peerWallet, $args);
+                // $this->walletMapper->insertWinToLog($this->peerWallet, $args);
+                // $this->walletMapper->insertWinToPool($this->peerWallet, $args);
+                $this->walletMapper->saveWalletEntry($this->peerWallet, abs($peerAmount));
+
             }
 
             // 6. BURNWALLET: Burn Tokens
@@ -345,14 +351,16 @@ class PeerTokenMapper
                     return self::respondWithError(41401);
                 }
 
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($burnAmount),
-                    'whereby' => TRANSFER_,
-                ];
-                $this->walletMapper->insertWinToLog($this->burnWallet, $args);
-                $this->walletMapper->insertWinToPool($this->burnWallet, $args);
+                // $args = [
+                //     'token' => $id,
+                //     'fromid' => $userId,
+                //     'numbers' => abs($burnAmount),
+                //     'whereby' => TRANSFER_,
+                // ];
+                // $this->walletMapper->insertWinToLog($this->burnWallet, $args);
+                // $this->walletMapper->insertWinToPool($this->burnWallet, $args);
+                $this->walletMapper->saveWalletEntry($this->burnWallet, abs($burnAmount));
+
             }
 
             $this->logger->info('Token transfer completed successfully');
