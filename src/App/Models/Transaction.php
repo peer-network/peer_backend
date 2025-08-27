@@ -19,7 +19,7 @@ class Transaction
     protected string $senderid;
     protected string $recipientid;
     protected string $transactiontype;
-    protected string $tokenamount;
+    protected float $tokenamount;
     protected $transferaction;
     protected ?string $message;
     protected ?string $createdat;
@@ -44,6 +44,24 @@ class Transaction
         }
     }
     
+    /**
+     * Get Values of current state
+     */
+    public function getArrayCopy(): array
+    {
+        $att = [
+            'transactionid' => $this->transactionid,
+            'transuniqueid' => $this->transuniqueid,
+            'transactiontype' => $this->transactiontype,
+            'senderid' => $this->senderid,
+            'recipientid' => $this->recipientid,
+            'tokenamount' => $this->tokenamount,
+            'transferaction' => $this->transferaction,
+            'message' => $this->message,
+            'createdat' => $this->createdat,
+        ];
+        return $att;
+    }
 
     /**
      * Define Input filter
@@ -197,7 +215,7 @@ class Transaction
     /**
      * Getter method for tokenamount
      */
-    public function getTokenAmount(): string
+    public function getTokenAmount(): float
     {
         return $this->tokenamount;
     }

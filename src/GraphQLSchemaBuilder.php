@@ -1690,8 +1690,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.PostEligibilityResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? 0;
+                'ResponseCode' => function (array $root): string {
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'eligibilityToken' => function (array $root): string {
                     return $root['eligibilityToken'] ?? '';
@@ -1703,7 +1703,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1715,7 +1715,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1749,7 +1749,7 @@ class GraphQLSchemaBuilder
                     return $root['recipientid'] ?? '';
                 },
                 'tokenamount' => function (array $root): float {
-                    return $root['tokenamount'] ?? 0;
+                    return $root['tokenamount'] ?? 0.0;
                 },
                 'transferaction' => function (array $root): string {
                     return $root['transferaction'] ?? '';
