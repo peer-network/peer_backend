@@ -18,7 +18,7 @@ jobs:
       is_behind: ${{ steps.check.outputs.is_behind }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
  
@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
  
@@ -151,7 +151,7 @@ jobs:
       outcome: ${{ steps.outcome.outputs.outcome }}
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install FFmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
@@ -531,7 +531,7 @@ jobs:
         php-version: ['8.2', '8.3']
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
  
       - uses: actions/download-artifact@v4
         with:
