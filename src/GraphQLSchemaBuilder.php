@@ -1861,6 +1861,7 @@ class GraphQLSchemaBuilder
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveTransfer' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
+            'resolveTransferV2' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
         ];
     }
 
