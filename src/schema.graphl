@@ -35,6 +35,7 @@ type Query {
   referralList(offset: Int, limit: Int): ReferralListResponse!
   listTodaysInteractions: ListTodaysInteractionsResponse!
   getActionPrices: GetActionPricesResponse!
+  postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
 }
@@ -64,7 +65,8 @@ type Mutation {
   createPost(action: PostType!, input: PostInput!): PostResponse!
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
-  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse!
+  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: "Use `resolveTransferV2`.")
+  resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
 }
 
 scalar Decimal
@@ -182,6 +184,18 @@ type TransactionResponse {
   affectedRows: [Transaction!]
 }
 
+type TransferTokenResponse {
+  status: String!
+  ResponseCode: Int!
+  affectedRows: TransferToken!
+}
+
+type TransferToken {
+  tokenSend: Decimal
+  tokensSubstractedFromWallet: Decimal
+  createdat: String
+}
+
 
 type UserPreferences {
   contentFilteringSeverityLevel: ContentFilterType
@@ -251,6 +265,12 @@ type DailyFreeResponse {
   name: String!
   used: Int!
   available: Int!
+}
+
+type PostEligibilityResponse {
+  status: String!
+  ResponseCode: String!
+  eligibilityToken: String!
 }
 
 type CurrentLiquidity {
@@ -554,6 +574,7 @@ type Post {
   isdisliked: Boolean!
   issaved: Boolean!
   tags: [String]!
+  url: String!
   user: ProfileUser!
   comments: [Comment!]!
 }
@@ -602,6 +623,7 @@ input PostInput {
   media: [String!]
   cover: [String!]
   tags: [String!]
+  uploadedFiles: String
 }
 
 input ChatInput {

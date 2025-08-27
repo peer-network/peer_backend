@@ -47,6 +47,7 @@ return static function(string $appEnv) {
             'peer' => $_ENV['PEER_BANK'] ?? '',
             'pool' => $_ENV['LIQUIDITY_POOL'] ?? '',
             'burn' => $_ENV['BURN_ACCOUNT'] ?? '',
+            'btcpool' => $_ENV['BTC_POOL'] ?? '',
         ],
         'privateKeyPath' => __DIR__ . '/../../' . $_ENV['PRIVATE_KEY_PATH'],
         'publicKeyPath' => __DIR__ . '/../../' . $_ENV['PUBLIC_KEY_PATH'],

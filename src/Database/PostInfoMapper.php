@@ -150,43 +150,6 @@ class PostInfoMapper
         }
     }
 
-    public function delete(string $postid): bool
-    {
-        $this->logger->info("PostInfoMapper.delete started");
-
-        try {
-            $this->db->beginTransaction();
-
-            $tables = [
-                'user_post_likes',
-                'user_post_dislikes',
-                'user_post_reports',
-                'user_post_saves',
-                'user_post_shares',
-                'user_post_views',
-                'post_info'
-            ];
-
-            foreach ($tables as $table) {
-                $sql = "DELETE FROM $table WHERE postid = :postid";
-                $stmt = $this->db->prepare($sql);
-                $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
-                $stmt->execute();
-            }
-
-            $this->db->commit();
-            $this->logger->info("Deleted post info and related user activities successfully", ['postid' => $postid]);
-            return true;
-        } catch (\Exception $e) {
-            $this->db->rollBack();
-            $this->logger->error("Failed to delete post info and related user activities", [
-                'postid' => $postid,
-                'exception' => $e->getMessage()
-            ]);
-            return false;
-        }
-    }
-
     public function addUserActivity(string $action, string $userid, string $postid): bool
     {
         $this->logger->info("PostInfoMapper.addUserActivity started");
@@ -207,7 +170,6 @@ class PostInfoMapper
         }
 
         try {
-            $this->db->beginTransaction();
 
             // Check if the record already exists
             $sqlCheck = "SELECT COUNT(*) FROM $table WHERE userid = :userid AND postid = :postid";
@@ -226,17 +188,14 @@ class PostInfoMapper
                 $success = $stmt->execute();
 
                 if ($success) {
-                    $this->db->commit();
                     $this->logger->info("User activity added successfully", ['action' => $action, 'userid' => $userid, 'postid' => $postid]);
                     return true;
                 }
             }
 
-            $this->db->rollBack();
             $this->logger->warning("User activity already exists or failed to add", ['action' => $action, 'userid' => $userid, 'postid' => $postid]);
             return false;
         } catch (\Exception $e) {
-            $this->db->rollBack();
             $this->logger->error("PostInfoMapper.addUserActivity: Exception occurred", ['exception' => $e->getMessage()]);
             return false;
         }
@@ -247,7 +206,6 @@ class PostInfoMapper
         $this->logger->info("PostInfoMapper.togglePostSaved started");
 
         try {
-            $this->db->beginTransaction();
 
             // Check if the post is already saved by the user
             $query = "SELECT COUNT(*) FROM user_post_saves WHERE userid = :userid AND postid = :postid";
@@ -288,11 +246,9 @@ class PostInfoMapper
             $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
             $stmt->execute();
 
-            $this->db->commit();
 
             return ['status' => 'success', 'isSaved' => $issaved, 'ResponseCode' => $action];
         } catch (\Exception $e) {
-            $this->db->rollBack();
             $this->logger->error('Failed to toggle post save', [
                 'userid' => $userid,
                 'postid' => $postid,
@@ -307,7 +263,6 @@ class PostInfoMapper
         $this->logger->info("PostInfoMapper.toggleUserFollow started");
 
         try {
-            $this->db->beginTransaction();
 
             // Check if the follow relationship already exists
             $query = "SELECT COUNT(*) FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
@@ -336,11 +291,9 @@ class PostInfoMapper
             $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
             $stmt->execute();
 
-            $this->db->commit();
 
             return ['status' => 'success', 'isfollowing' => $isfollowing, 'ResponseCode' => $action];
         } catch (\Exception $e) {
-            $this->db->rollBack();
             $this->logger->error('Failed to toggle user follow', [
                 'followerid' => $followerid,
                 'followeduserid' => $followeduserid,

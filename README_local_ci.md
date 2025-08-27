@@ -51,21 +51,62 @@ This will:
 
 This may take a few minutes on first run.
 
+If this results in some permission problems please run:
+
+```bash
+sudo make dev
+```
+
+and then
+
+```bash
+sudo make clean-all
+```
+This is a dry run which will set permissions correctly for the next run. Afterwards re-try "make dev" and proceed with step 3 if it worked.
+
 ---
 
-### 3. Soft restart (fresh DB with existing code & vendors)
+### 3. Reload just the backend
+
+If you only want to reload the backend after some code changes without resetting your database:
+
+```bash
+make reload-backend
+```
+
+This drops the backend image and container and rebuilds both of them.
+
+---
+
+### 4. Restart Database Only
+
+If you want to reset only the **Postgres database** (fresh schema and seed data) while leaving your backend container and code untouched:
+
+```bash
+make restart-db
+```
+
+This will:
+
+- Stop and remove the database container and volume
+- Recreate a fresh Postgres database
+- Keep your backend container/images unchanged
+
+---
+
+### 5. Soft restart (fresh DB with existing code & vendors)
 
 If you only want to reset the database (fresh schema & data) but keep current code & vendors:
 
 ```bash
-make restart
+make reset-db-and-backend
 ```
 
 This drops the DB volume, recreates it, runs your migrations / seed and starts the backend.
 
 ---
 
-### 4. Run Postman (Newman) Tests Locally
+### 6. Run Postman (Newman) Tests Locally
 
 Once the backend and database are up, run:
 
@@ -82,7 +123,7 @@ This will:
 
 ---
 
-### 5. Full Cleanup
+### 7. Full Cleanup
 
 To stop and remove everything (containers, volumes, files):
 
@@ -94,6 +135,105 @@ This will:
 
 - Stop Docker containers and remove volumes
 - Delete `.env`, `vendor/`, temp SQL, Postman tmp files, reports, logs
+
+---
+
+### 8. Run Local CI in One Command
+
+If you want to replicate the remote CI workflow locally (spin up the environment, run Newman tests, and clean everything up afterwards), run:
+
+```bash
+make ci
+```
+
+This will:
+
+- Run the full dev setup (reset containers, build images, run migrations, install dependencies)
+- Execute the Newman test suite with the same Postman collections as remote CI
+- Generate an HTML report of the test results
+- Skip interactive steps so it can run unattended
+- Clean up containers, volumes, and temp files automatically at the end
+
+---
+
+### 9. Developer Shortcuts
+
+For faster debugging and development after starting db and backend container, the following Make targets are available:
+
+```bash
+make logs
+```
+
+```bash
+make db
+```
+
+```bash
+make bash-backend
+```
+
+  These will:
+
+- make logs will view backend container logs
+- make db will open postgres psql shell
+- make bash-backend will open an interactive bash shell inside backend container.
+
+To exit interactive sessions:
+
+From psql (Postgres shell) → type \q and press Enter
+
+From backend bash shell → type exit and press Enter
+
+---
+
+### 10. List All Commands
+
+You can see all available commands at any time by running:
+
+```bash
+make help
+```
+
+Example output:
+
+Available targets:
+bash-backend : Open interactive shell in backend container
+ci : Run full local CI workflow (setup, tests, cleanup)
+clean-all : Remove containers, volumes, vendors, reports, logs
+clean-prune : Remove ALL unused images, build cache, and volumes
+db : Open psql shell into Postgres
+dev : Full setup: env, DB reset, vendors install, start DB+backend
+ensure-jq : Ensure jq is installed (auto-install if missing)
+env : Copy .env.dev to .env for local development
+help : Show available make targets
+init : Prepare Postman environment files for testing
+logs : Tail backend container logs
+reload-backend : Rebuild and restart backend container
+reset-db-and-backend : Reset DB, backend, and remove all related Docker images
+restart-db : Restart only the database (fresh schema & data, keep backend as-is)
+restart : Soft restart with fresh DB but keep current code & vendors
+test : Run Newman tests inside Docker and generate HTML report
+
+---
+
+### 11. Deep Cleanup (Prune Everything)
+
+If you want to **wipe absolutely everything** Docker considers unused  
+(including images, build cache, and volumes across *all projects*, not just this one), run:
+
+```bash
+make clean-prune
+```
+
+This will:
+
+- Stop and remove project containers/volumes (same as make clean-all)
+- Remove all dangling images
+- Remove all unused build cache
+- Remove all unused Docker volumes across your system
+
+⚠️ Warning: This is destructive. It will nuke caches and volumes you might want for other projects.
+✅ Use this if you need a completely fresh Docker environment.
 
 ---
 

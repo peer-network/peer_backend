@@ -2,6 +2,8 @@
 
 namespace Fawaz\Database;
 
+use DateTime;
+use Fawaz\App\Models\MultipartPost;
 use PDO;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
@@ -16,10 +18,15 @@ use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\App\User;
+use Fawaz\App\ValidationException;
+use Fawaz\Database\Interfaces\TransactionManager;
+use Psr\Log\LoggerInterface;
 
-class PostMapper extends PeerMapper
+class PostMapper
 {
-    const STATUS_DELETED = 6;
+    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    {
+    }
 
     public function isSameUser(string $userid, string $currentUserId): bool
     {
@@ -507,6 +514,44 @@ class PostMapper extends PeerMapper
         }
     }
 
+    // public function delete(string $postid): bool
+    // {
+    //     $this->logger->info("PostMapper.delete started");
+
+    //     try {
+    //         $this->db->beginTransaction();
+
+    //         $tables = [
+    //             'user_post_likes',
+    //             'user_post_dislikes',
+    //             'user_post_reports',
+    //             'user_post_saves',
+    //             'user_post_shares',
+    //             'user_post_views',
+    //             'post_info',
+    //             'posts'
+    //         ];
+
+    //         foreach ($tables as $table) {
+    //             $sql = "DELETE FROM $table WHERE postid = :postid";
+    //             $stmt = $this->db->prepare($sql);
+    //             $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
+    //             $stmt->execute();
+    //         }
+
+    //         $this->db->commit();
+    //         $this->logger->info("Deleted post and related user activities successfully", ['postid' => $postid]);
+    //         return true;
+    //     } catch (\Exception $e) {
+    //         $this->db->rollBack();
+    //         $this->logger->error("Failed to delete post and related user activities", [
+    //             'postid' => $postid,
+    //             'exception' => $e->getMessage()
+    //         ]);
+    //         return false;
+    //     }
+    // }
+    
     public function findPostser(string $currentUserId, ?array $args = []): array
     {
         $this->logger->info("PostMapper.findPostser started");
@@ -559,7 +604,7 @@ class PostMapper extends PeerMapper
         }
         // Remove DELETED User's post
         $whereClauses[] = "u.status != :status";
-        $params['status'] = self::STATUS_DELETED;   
+        $params['status'] = Status::DELETED;
 
         if ($title !== null) {
             $whereClauses[] = "p.title ILIKE :title";
@@ -829,6 +874,76 @@ class PostMapper extends PeerMapper
         }
     }
 
+    /**
+     * Move Uploaded File to Media Folder
+     */
+    public function handelFileMoveToMedia(string $uploadedFiles): array 
+    {
+        $fileObjs = explode(',', $uploadedFiles);
+
+        $uploadedFilesObj = [];
+        try{
+            if(is_array($fileObjs) && !empty($fileObjs)){
+                $multipartPost = new MultipartPost(['media' => $fileObjs], [], false);
+                $uploadedFilesObj = $multipartPost->moveFileTmpToMedia();
+            }
+        }catch(\Exception $e){
+            $this->logger->info("PostMapper.handelFileMoveToMedia Error". $e->getMessage());
+        }
+
+        return $uploadedFilesObj;
+    }
+
+    /**
+     * Expire Token
+     * 
+     */
+    public function updateTokenStatus(string $userId): void
+    {
+        $this->logger->info("PostMapper.updateTokenStatus started");
+
+        try {
+            $updateSql = "
+                    UPDATE eligibility_token
+                    SET status = :status
+                    WHERE userid = :userid AND status = 'FILE_UPLOADED'
+                ";
+                $updateStmt = $this->db->prepare($updateSql);
+                $updateStmt->bindValue(':status', 'POST_CREATED', \PDO::PARAM_STR);
+                $updateStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                $updateStmt->execute();
+
+            $this->logger->info("PostMapper.updateTokenStatus updated successfully with POST_CREATED status");
+        
+        } catch (\PDOException $e) {
+            $this->logger->error("PostMapper.updateTokenStatus: Exception occurred while update token status", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+        } catch (\Throwable $e) {
+            $this->logger->error("PostMapper.updateTokenStatus: Exception occurred while update token status", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    }
+
+    /**
+     * Revert Moved File to /tmp Folder
+     */
+    public function revertFileToTmp(string $uploadedFiles): void
+    {
+        $fileObjs = explode(',', $uploadedFiles);
+        try{
+            if(is_array($fileObjs) && !empty($fileObjs)){
+                $multipartPost = new MultipartPost(['media' => $fileObjs], [], false);
+                $multipartPost->revertFileToTmp();
+            }
+        }catch(\Exception $e){
+            $this->logger->info("PostMapper.revertFileToTmp Error". $e->getMessage());
+        }
+    }
     
     /**
      * Get Interactions based on Filter 
@@ -904,4 +1019,286 @@ class PostMapper extends PeerMapper
             return [];
         }
     }
+
+    /**
+     * Get GuestListPost based on Filter 
+     */
+    public function getGuestListPost(array $args = []): array
+    {
+        $this->logger->info("PostMapper.getGuestListPost started");
+
+        $offset = 0;
+        $limit = 1;
+
+        $postId = $args['postid'] ?? null;
+
+        $whereClauses = ["p.feedid IS NULL"];
+        $joinClausesString = "
+            users u ON p.userid = u.uid
+            LEFT JOIN post_tags pt ON p.postid = pt.postid
+            LEFT JOIN tags t ON pt.tagid = t.tagid
+            LEFT JOIN post_info pi ON p.postid = pi.postid AND pi.userid = p.userid
+            LEFT JOIN users_info ui ON p.userid = ui.userid
+        ";
+
+        if ($postId !== null) {
+            $whereClauses[] = "p.postid = :postId"; 
+            $params['postId'] = $postId;
+        }
+
+        $whereClauses[] = 'u.status = 0 AND (u.roles_mask = 0 OR u.roles_mask = 16)';
+
+        $orderBy = "p.createdat DESC";
+
+        $whereClausesString = implode(" AND ", $whereClauses);
+
+        $sql = sprintf(
+            "SELECT 
+                p.postid, 
+                p.userid, 
+                p.contenttype, 
+                p.title, 
+                p.media, 
+                p.cover, 
+                p.mediadescription, 
+                p.createdat, 
+                u.username, 
+				u.slug,
+                u.img AS userimg,
+                MAX(u.status) AS user_status,
+                MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
+                MAX(pi.count_content_moderation_dismissed) AS post_count_content_moderation_dismissed,
+                MAX(ui.reports) AS user_reports,
+                MAX(pi.reports) AS post_reports,
+                COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
+                (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) as amountlikes,
+                (SELECT COUNT(*) FROM user_post_dislikes WHERE postid = p.postid) as amountdislikes,
+                (SELECT COUNT(*) FROM user_post_views WHERE postid = p.postid) as amountviews,
+                (SELECT COUNT(*) FROM comments WHERE postid = p.postid) as amountcomments
+            FROM posts p
+            JOIN %s
+            WHERE %s
+            GROUP BY p.postid, u.username, u.slug, u.img
+            ORDER BY %s
+            LIMIT :limit OFFSET :offset",
+            $joinClausesString,
+            $whereClausesString,
+            $orderBy
+        );
+
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
+
+        try {
+            $stmt = $this->db->prepare($sql);
+
+            $results = [];
+            $stmt->execute($params);
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$row) {
+                $this->logger->warning("PostMapper.getGuestListPost No posts found for the given criteria");
+                return [];
+            }
+            $row['tags'] = json_decode($row['tags'], true) ?? [];
+
+            $results[] = new PostAdvanced([
+                'postid' => $row['postid'],
+                'userid' => $row['userid'],
+                'contenttype' => $row['contenttype'],
+                'title' => $row['title'],
+                'media' => $row['media'],
+                'cover' => $row['cover'],
+                'mediadescription' => $row['mediadescription'],
+                'createdat' => $row['createdat'],
+                'amountlikes' => (int)$row['amountlikes'],
+                'amountviews' => (int)$row['amountviews'],
+                'amountcomments' => (int)$row['amountcomments'],
+                'amountdislikes' => (int)$row['amountdislikes'],
+                'amounttrending' => 0,
+                'isliked' => false,
+                'isviewed' => false,
+                'isreported' => false,
+                'isdisliked' => false,
+                'issaved' => false,
+                'tags' => $row['tags'],
+                'user' => [
+                    'uid' => $row['userid'],
+                    'username' => $row['username'],
+                    'slug' => $row['slug'],
+                    'img' => $row['userimg'],
+                    'isfollowed' => false,
+                    'isfollowing' => false,
+                ],
+            ],[],false);
+
+            return ((is_array($results) && count($results) > 0) ? $results : []);
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error in PostMapper.getGuestListPost", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            $this->logger->error('Database error in PostMapper.getGuestListPost', [
+                'error' => $e->getMessage(),
+            ]);
+            return [];
+        }
+    }
+
+    /*
+    * Add or Update Eligibility Token for post
+    */
+    public function addOrUpdateEligibilityToken01(string $userId, string $eligibilityToken, string $status): void
+    {
+
+        try {
+            $this->logger->info("PostMapper.addOrUpdateEligibilityToken started");
+            $query = "SELECT COUNT(*) FROM eligibility_token WHERE userid = :userid AND token = :token";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
+            $stmt->execute();
+            
+            $existingToken = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($existingToken) {
+                // Token exists, update it
+                $this->logger->info("Updating existing eligibility token for user: " . $userId);
+                $query = "UPDATE eligibility_token 
+                        SET token = :token, status = :status
+                        WHERE userid = :userid";
+            } else {
+                // Token does not exist, insert a new one
+                $this->logger->info("Inserting new eligibility token for user: " . $userId);
+                $query = "INSERT INTO eligibility_token 
+                        (userid, token, expiresat) 
+                        VALUES (:userid, :token, :expiresat)";
+                
+                $stmt = $this->db->prepare($query);
+                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                $stmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
+                $stmt->bindValue(':expiresat', date('Y-m-d H:i:s', strtotime('+5 minutes')), \PDO::PARAM_STR);
+
+                $stmt->execute();
+            }
+            var_dump($existingToken); exit;
+
+            $this->logger->info("PostMapper.addOrUpdateEligibilityToken: Inserted new token into database", ['userid' => $userId]);
+
+        } catch (\Throwable $e) {
+            $this->logger->error("PostMapper.addOrUpdateEligibilityToken: Exception occurred while inserting token", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+
+    }
+
+    /**
+     * Add or Update Eligibility Token for post
+     * Enforces: A user must NOT have more than 5 records in the past hour
+     *           with status IN ('NO_FILE', 'FILE_UPLOADED').
+     */
+    public function addOrUpdateEligibilityToken(string $userId, string $eligibilityToken, string $status): void
+    {
+        try {
+            $this->logger->info("PostMapper.addOrUpdateEligibilityToken started", [
+                'userId' => $userId,
+                'token'  => $eligibilityToken,
+                'status' => $status,
+            ]);
+
+            $now       = (new \DateTime())->format('Y-m-d H:i:s.u');
+            $expiresAt = (new \DateTime('+5 minutes'))->format('Y-m-d H:i:s.u');
+            $oneHourAgo = (new \DateTime('-1 hour'))->format('Y-m-d H:i:s.u');
+
+            // Only enforce cap if status is one of the restricted ones
+            $restrictedStatuses = ['NO_FILE', 'FILE_UPLOADED'];
+            if (in_array($status, $restrictedStatuses, true)) {
+                $capSql = "
+                    SELECT COUNT(*) 
+                    FROM eligibility_token
+                    WHERE userid = :userid
+                    AND status IN ('NO_FILE', 'FILE_UPLOADED')
+                    AND createdat >= :oneHourAgo
+                ";
+                $capStmt = $this->db->prepare($capSql);
+                $capStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                $capStmt->bindValue(':oneHourAgo', $oneHourAgo, \PDO::PARAM_STR);
+                $capStmt->execute();
+                $cnt = (int) $capStmt->fetchColumn();
+
+                if ($cnt >= 5) {
+                    $this->logger->warning("Cap reached: user has {$cnt} records in last hour with restricted statuses", [
+                        'userId' => $userId,
+                    ]);
+                    throw new ValidationException('Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.', [40301]); // Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED
+                }
+            }
+
+            $this->db->beginTransaction();
+
+            // Check if (userId, token) exists
+            $existsSql = "
+                SELECT 1
+                FROM eligibility_token
+                WHERE userid = :userid AND token = :token
+                LIMIT 1
+            ";
+            $existsStmt = $this->db->prepare($existsSql);
+            $existsStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+            $existsStmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
+            $existsStmt->execute();
+            $exists = (bool) $existsStmt->fetchColumn();
+
+            if ($exists) {
+                $updateSql = "
+                    UPDATE eligibility_token
+                    SET status = :status,
+                        expiresat = :expiresat
+                    WHERE userid = :userid
+                    AND token  = :token
+                ";
+                $updateStmt = $this->db->prepare($updateSql);
+                $updateStmt->bindValue(':status', $status, \PDO::PARAM_STR);
+                $updateStmt->bindValue(':expiresat', $expiresAt, \PDO::PARAM_STR);
+                $updateStmt->bindValue(':now', $now, \PDO::PARAM_STR);
+                $updateStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                $updateStmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
+                $updateStmt->execute();
+            } else {
+                $insertSql = "
+                    INSERT INTO eligibility_token
+                        (userid, token, status, expiresat, createdat)
+                    VALUES
+                        (:userid, :token, :status, :expiresat, :now)
+                ";
+                $insertStmt = $this->db->prepare($insertSql);
+                $insertStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                $insertStmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
+                $insertStmt->bindValue(':status', $status, \PDO::PARAM_STR);
+                $insertStmt->bindValue(':expiresat', $expiresAt, \PDO::PARAM_STR);
+                $insertStmt->bindValue(':now', $now, \PDO::PARAM_STR);
+                $insertStmt->execute();
+            }
+
+            $this->db->commit();
+            $this->logger->info("PostMapper.addOrUpdateEligibilityToken completed", ['userid' => $userId]);
+
+        } catch (\Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            $this->logger->error("PostMapper.addOrUpdateEligibilityToken failed", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'userid' => $userId,
+            ]);
+            throw $e;
+        }
+    }
+
+
 }

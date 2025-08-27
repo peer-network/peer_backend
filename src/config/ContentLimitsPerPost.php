@@ -13,7 +13,7 @@ enum ContentLimitsPerPost: string {
         return match($this) 
         {
             ContentLimitsPerPost::AUDIO => 1,
-            ContentLimitsPerPost::IMAGE => 5,
+            ContentLimitsPerPost::IMAGE => 20,
             ContentLimitsPerPost::TEXT => 1,
             ContentLimitsPerPost::VIDEO => 2,
         };

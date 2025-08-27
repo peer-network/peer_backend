@@ -48,6 +48,52 @@ class PeerInputFilter
         $this->data = $data;
     }
 
+    /**
+     * Apply a filter method dynamically by its name.
+     *
+     * @param string $filterName Name of the filter method to call
+     * @param mixed $value The value to be filtered.
+     * @param array $options Optional arguments passed to the filter method.
+     *
+     * @return mixed The filtered result.
+     *
+     * @throws ValidationException If the requested filter does not exist.
+     */
+    public function applyFilter(string $filterName, mixed $value, array $options = []): mixed
+    {
+        if (!method_exists($this, $filterName)) {
+            $this->errors[$filterName][] = "Filter '$filterName' does not exist.";
+            throw new ValidationException("Filter '$filterName' does not exist.");
+        }
+
+        $result = $this->$filterName($value, $options);
+        
+        return $result;
+    }
+
+    /**
+     * Apply a validator method dynamically by its name.
+     *
+     * @param string $validatorName Name of the validator method to call.
+     * @param mixed $value The value to be validated.
+     * @param array $options Optional arguments passed to the validator method.
+     *
+     * @return bool True if validation passes, false otherwise.
+     *
+     * @throws ValidationException If the requested validator does not exist.
+     */
+    public function applyValidator(string $validatorName, mixed $value, array $options = []): bool
+    {
+        if (!method_exists($this, $validatorName)) {
+            $this->errors[$validatorName][] = "Validator '$validatorName' does not exist.";
+            throw new ValidationException("Validator '$validatorName' does not exist.");
+        }
+
+        $result = $this->$validatorName($value, $options);
+        
+        return $result;
+    }
+
     public function isValid(): bool
     {
         $this->errors = [];
@@ -83,15 +129,13 @@ class PeerInputFilter
                     $options = $validator['options'] ?? [];
                     if (method_exists($this, $validatorName)) {
                         if (!$this->$validatorName($this->data[$field], $options)) {
-                            if (isset($this->errors[$field]) && is_array($this->errors[$field])){
-                                if (!empty($this->errors[$field][0])){
+                            if (isset($this->errors[$field])) {
+                                if (!empty($this->errors[$field][0])) {
                                     continue;
-                                }
-                            } else {
-                                if (!empty($this->errors[$field])){    
-                                    continue;
-                                }
                             }
+                        } elseif (!empty($this->errors[$field])) {
+                            continue;
+                        }
                             $this->errors[$field][] = $field;
                             if (!empty($validator['break_chain_on_failure'])) {
                                 break;
@@ -286,8 +330,8 @@ class PeerInputFilter
 
     protected function StringLength(string $value, array $options = []): bool
     {
-        $min =  (int)$options['min'] ?? 0;
-        $max = (int)$options['max'] ?? PHP_INT_MAX;
+        $min =  (int)($options['min'] ?? 0);
+        $max = (int)($options['max'] ?? PHP_INT_MAX);
         $errorCode = $options['errorCode'] ?? 40301;
         $length = strlen($value);   
 
@@ -723,51 +767,51 @@ class PeerInputFilter
         return true;
     }
 
-	protected function validateResetToken(string $value, array $options = []): bool
-	{
-		if ($value === '') {
-			$this->errors['reset_token'][] = 'Reset token is required.';
-			return false;
-		}
+    protected function validateResetToken(string $value, array $options = []): bool
+    {
+        if ($value === '') {
+            $this->errors['reset_token'][] = 'Reset token is required.';
+            return false;
+        }
 
-		$value = trim($value);
-		$value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $value = trim($value);
+        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
-		if (strlen($value) !== 64) {
-			$this->errors['reset_token'][] = 'Reset token must be exactly 64 characters.';
-			return false;
-		}
+        if (strlen($value) !== 64) {
+            $this->errors['reset_token'][] = 'Reset token must be exactly 64 characters.';
+            return false;
+        }
 
-		if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
-			$this->errors['reset_token'][] = 'Invalid reset token format.';
-			return false;
-		}
+        if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
+            $this->errors['reset_token'][] = 'Invalid reset token format.';
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	protected function validateActivationToken(string $value, array $options = []): bool
-	{
-		if ($value === '') {
-			$this->errors['activation_token'][] = 'Activation token is required.';
-			return false;
-		}
+    protected function validateActivationToken(string $value, array $options = []): bool
+    {
+        if ($value === '') {
+            $this->errors['activation_token'][] = 'Activation token is required.';
+            return false;
+        }
 
-		$value = trim($value);
-		$value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $value = trim($value);
+        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
-		if (strlen($value) !== 64) {
-			$this->errors['activation_token'][] = 'Activation token must be exactly 64 characters.';
-			return false;
-		}
+        if (strlen($value) !== 64) {
+            $this->errors['activation_token'][] = 'Activation token must be exactly 64 characters.';
+            return false;
+        }
 
-		if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
-			$this->errors['activation_token'][] = 'Invalid activation token format.';
-			return false;
-		}
+        if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
+            $this->errors['activation_token'][] = 'Invalid activation token format.';
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     protected function validateImage(string $imagePath, array $options = []): bool
     {

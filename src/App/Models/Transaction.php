@@ -16,7 +16,7 @@ class Transaction
     protected string $transactionid;
     protected string $transuniqueid;
     protected string $senderid;
-    protected string|null $recipientid;
+    protected string $recipientid;
     protected string $transactiontype;
     protected string $tokenamount;
     protected $transferaction;
@@ -65,11 +65,11 @@ class Transaction
                 'validators' => [['name' => 'Uuid']],
             ],
             'recipientid' => [
-                'required' => false,
+                'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'transactiontype' => [
-                'required' => true,
+                'required' => false,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [

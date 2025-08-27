@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
+use Fawaz\App\Models\MultipartPost;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
@@ -17,7 +18,16 @@ use Psr\Log\LoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\JWTService;
+
+// USER PAY
+const PRICELIKE=3;
+const PRICEDISLIKE=5;
+const PRICECOMMENT=0.5;
+const PRICEPOST=20;
+const DISLIKE_=3;// whereby DISLIKE
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class PostService
 {
@@ -34,6 +44,10 @@ class PostService
         protected FileUploadDispatcher $base64filehandler,
         protected VideoCoverGenerator $videoCoverGenerator,
         protected Base64FileHandler $base64Encoder,
+        protected DailyFreeService $dailyFreeService,
+        protected WalletService $walletService,
+        protected JWTService $tokenService,
+        protected TransactionManager $transactionManager
     ) {}
 
     public function setCurrentUserId(string $userid): void
@@ -51,12 +65,12 @@ class PostService
         return $d && $d->format($format) === $date;
     }
 
-    private function respondWithError(string $responseCode): array
+    private function respondWithError(int $responseCode): array
     {
         return ['status' => 'error', 'ResponseCode' => $responseCode];
     }
 
-    private function createSuccessResponse(string $message, array $data = []): array
+    private function createSuccessResponse(int $message, array $data = []): array
     {
         return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
     }
@@ -150,7 +164,7 @@ class PostService
             return $this->respondWithError(30101);
         }
 
-        foreach (['title', 'media', 'contenttype'] as $field) {
+        foreach (['title', 'contenttype'] as $field) {
             if (empty($args[$field])) {
                 return $this->respondWithError(30210);
             }
@@ -189,9 +203,9 @@ class PostService
         }
 
         try {
-            $this->postMapper->beginTransaction();
+            $this->transactionManager->beginTransaction();
             // Media Upload
-            if ($this->isValidMedia($args['media'])) {
+            if (isset($args['media']) && $this->isValidMedia($args['media'])) {
                 $validateContentCountResult = $this->validateContentCount($args);
                 if (isset($validateContentCountResult['error'])) {
                     return $this->respondWithError($validateContentCountResult['error']);
@@ -209,6 +223,39 @@ class PostService
                 } else {
                     return $this->respondWithError(30251);
                 }
+            }else if (isset($args['uploadedFiles']) && !empty($args['uploadedFiles'])) {
+
+                $validateSameMediaType = new MultipartPost(['media' => explode(',',$args['uploadedFiles'])], [], false);
+
+                if(!$validateSameMediaType->isFilesExists()){
+                    return $this->respondWithError(31511);
+                }
+
+                $hasSameMediaType = $validateSameMediaType->validateSameContentTypes();
+
+                if($hasSameMediaType){
+                    $postData['contenttype'] = $hasSameMediaType;
+                    $args['contenttype'] = $hasSameMediaType;
+                    $uploadedFileArray = $this->postMapper->handelFileMoveToMedia($args['uploadedFiles']);
+                    $this->postMapper->updateTokenStatus($this->currentUserId);
+                    
+                    $mediaPath['path'] = $uploadedFileArray;
+
+                    if (!empty($mediaPath['path'])) {
+                        $postData['media'] = $this->argsToJsString($mediaPath['path']);
+                    } else {
+                        if(isset($args['uploadedFiles'])){
+                            $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                        }
+                        return $this->respondWithError(30101); 
+                    }
+                }else{
+                    if(isset($args['uploadedFiles'])){
+                        $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                    }
+                    return $this->respondWithError(30266); // Provided files should have same type 
+                }
+               
             } else {
                 return $this->respondWithError(30101);
             }
@@ -221,10 +268,13 @@ class PostService
                 if (!empty($coverPath['path'])) {
                     $postData['cover'] = $this->argsToJsString($coverPath['path']);
                 } else {
+                    if(isset($args['uploadedFiles'])){
+                        $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                    }
                     return $this->respondWithError(40306);
                 }
             }
-            elseif ($args['contenttype'] === 'video' && !empty($mediaPath['path'])) {
+                elseif ($args['contenttype'] === 'video') {
                 $videoRelativePath = $mediaPath['path'][0]['path'];
                 $videoFilePath = __DIR__ . '/../../runtime-data/media' . $videoRelativePath;
 
@@ -239,7 +289,10 @@ class PostService
                 // Post speichern
                 $post = new Post($postData);
             } catch (\Throwable $e) {
-                $this->postMapper->rollback();
+                $this->transactionManager->rollback();
+                if(isset($args['uploadedFiles'])){
+                    $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                }
                 return $this->respondWithError($e->getMessage());
             }
             $this->postMapper->insert($post);
@@ -261,7 +314,7 @@ class PostService
 
             if (isset($coverPath['path']) && !empty($coverPath['path'])) {
                 // Cover Posts_media
-                $coverDecoded = $coverPath['path'] ?? null;
+                $coverDecoded = $coverPath['path'];
                 $coverMed = [
                     'postid' => $postId,
                     'contenttype' => 'cover',
@@ -279,7 +332,10 @@ class PostService
                     $this->handleTags($args['tags'], $postId, $createdAt);
                 } 
             } catch (\Throwable $e) {
-                $this->postMapper->rollback();
+                $this->transactionManager->rollback();
+                if(isset($args['uploadedFiles'])){
+                    $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+                }
                 return $this->respondWithError(30262);
             }
 
@@ -300,11 +356,14 @@ class PostService
 
             $data = $post->getArrayCopy();
             $data['tags'] = $tagNames;
-            $this->postMapper->commit();
+            $this->transactionManager->commit();
             return $this->createSuccessResponse(11513, $data);
 
         } catch (\Throwable $e) {
-            $this->postMapper->rollback();
+            $this->transactionManager->rollback();
+            if(isset($args['uploadedFiles'])){
+                $this->postMapper->revertFileToTmp($args['uploadedFiles']);
+            }
             $this->logger->error('Failed to create post', ['exception' => $e]);
             return $this->respondWithError(41508);
         }
@@ -402,7 +461,7 @@ class PostService
         }
     }
 
-    private function createTag(string $tagName): Tag|false|array
+    private function createTag(string $tagName): Tag|false
     {
         $tagId = 0;
         $tagData = ['tagid' => $tagId, 'name' => $tagName];
@@ -558,7 +617,7 @@ class PostService
     {
         $postArray = $post->getArrayCopy();
 
-        $comments = $this->commentMapper->fetchAllByPostId($post->getPostId());
+        $comments = $this->commentMapper->fetchAllByPostId($post->getPostId(), $this->currentUserId);
         $postArray['comments'] = $this->mapCommentsWithReplies($comments);
 
         return $postArray;
@@ -577,44 +636,130 @@ class PostService
         );
     }
 
-    public function deletePost(string $id): array
+    // public function deletePost(string $id): array
+    // {
+    //     if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
+    //         return $this->respondWithError('Invalid feed ID');
+    //     }
+
+    //     if (!self::isValidUUID($id)) {
+    //         return $this->respondWithError(30209);
+    //     }
+
+    //     $this->logger->info('PostService.deletePost started');
+
+    //     $posts = $this->postMapper->loadById($id);
+    //     if (!$posts) {
+    //         return $this->createSuccessResponse(21516);
+    //     }
+
+    //     $post = $posts->getArrayCopy();
+
+    //     if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
+    //         return $this->respondWithError('Unauthorized: You can only delete your own posts.');
+    //     }
+
+    //     try {
+    //         $postid = $this->postMapper->delete($id);
+
+    //         if ($postid) {
+    //             $this->logger->info('Post deleted successfully', ['postid' => $postid]);
+    //             return [
+    //                 'status' => 'success',
+    //                 'ResponseCode' => 11510,
+    //             ];
+    //         }
+    //     } catch (\Throwable $e) {
+    //         return $this->respondWithError(41510);
+    //     }
+
+    //     return $this->respondWithError(41510);
+    // }
+
+    
+    /**
+     * Check for If user eligibile to make a post or not
+     * 
+     * @returns with Suggested PostId, JWT which will be valid for certain time
+     */
+    public function postEligibility(bool $isTokenGenerationRequired = true): ?array
     {
-        if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
-            return $this->respondWithError('Invalid feed ID');
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
         }
 
-        if (!self::isValidUUID($id)) {
-            return $this->respondWithError(30209);
-        }
-
-        $this->logger->info('PostService.deletePost started');
-
-        $posts = $this->postMapper->loadById($id);
-        if (!$posts) {
-            return $this->createSuccessResponse(21516);
-        }
-
-        $post = $posts->getArrayCopy();
-
-        if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
-            return $this->respondWithError('Unauthorized: You can only delete your own posts.');
-        }
+        $this->logger->info('GraphQLSchemaBuilder.postEligibility started');
 
         try {
-            $postid = $this->postMapper->delete($id);
+            $dailyLimits = [
+                'like' => DAILYFREELIKE,
+                'comment' => DAILYFREECOMMENT,
+                'post' => DAILYFREEPOST,
+                'dislike' => DAILYFREEDISLIKE,
+            ];
 
-            if ($postid) {
-                $this->logger->info('Post deleted successfully', ['postid' => $postid]);
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => 11510,
-                ];
+            $actionPrices = [
+                'like' => PRICELIKE,
+                'comment' => PRICECOMMENT,
+                'post' => PRICEPOST,
+                'dislike' => PRICEDISLIKE,
+            ];
+
+            $actionMaps = [
+                'like' => LIKE_,
+                'comment' => COMMENT_,
+                'post' => POST_,
+                'dislike' => DISLIKE_,
+            ];
+
+            $limit = $dailyLimits['post'];
+            $price = $actionPrices['post'];
+            $actionMap = $actionMaps['post'];
+
+            $response = [
+                        'status' => 'error',
+                        'ResponseCode' => 40301, // Not eligible for upload for post
+                    ];
+            $hasFreeDaily = false;
+
+            $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
+            if ($DailyUsage < $limit) {
+                // generate PostId and JWT
+                $hasFreeDaily = true;
             }
-        } catch (\Throwable $e) {
-            return $this->respondWithError(41510);
-        }
 
-        return $this->respondWithError(41510);
+            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
+            // Return ResponseCode with Daily Free Code
+            if ($balance < $price && !$hasFreeDaily) {
+                $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                return $this->respondWithError(51301);
+            }
+
+            // generate PostId and JWT
+            $eligibilityToken = $this->tokenService->createAccessTokenWithCustomExpriy($this->currentUserId, 300);
+
+            if($isTokenGenerationRequired){
+                // Add Eligibility Token to DB table eligibility_token
+                $this->postMapper->addOrUpdateEligibilityToken($this->currentUserId, $eligibilityToken, 'NO_FILE');
+            }
+            $response = [
+                        'status' => 'success',
+                        'ResponseCode' => 10901, // You are eligible for post upload
+                    ];
+            $response['eligibilityToken'] = $eligibilityToken;
+
+            return $response;
+            
+        } catch (ValidationException $e) {
+            $this->logger->warning("PostService.postEligibility Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
+            return self::respondWithError($e->getErrors()[0]);
+        } catch (\Throwable $e) {
+            $this->logger->error('PostService.postEligibility exception', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithError(40301);
+        }
     }
 
     /**
@@ -660,4 +805,27 @@ class PostService
             return $this->respondWithError(41513);
         }
     }
+
+    /**
+     * Get Guest List Post
+     */
+    public function getGuestListPost(?array $args = []): array|false
+    {
+        $postId = $args['postid'] ?? null;
+
+        if ($postId == null && !self::isValidUUID($postId)) {
+            return $this->respondWithError(30209);
+        }
+
+        $this->logger->info("PostService.getGuestListPost started");
+
+        $results = $this->postMapper->getGuestListPost($args);
+
+        if (empty($results)) {
+            return $this->respondWithError(31510); 
+        }
+
+        return $results;
+    }
+    
 }

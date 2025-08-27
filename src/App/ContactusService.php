@@ -6,12 +6,13 @@ use Fawaz\App\Contactus;
 use Fawaz\Database\ContactusMapper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class ContactusService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected ContactusMapper $contactUsMapper)
+    public function __construct(protected LoggerInterface $logger, protected ContactusMapper $contactUsMapper, protected TransactionManager $transactionManager)
     {
     }
 
@@ -55,12 +56,12 @@ class ContactusService
             preg_match('/' . $contactConfig['NAME']['PATTERN'] . '/u', $Name);
     }
 
-    private function respondWithError(string $message): array
+    private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    private function createSuccessResponse(string $message, array $data = []): array
+    private function createSuccessResponse(int $message, array $data = []): array
     {
         return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
     }
@@ -77,12 +78,49 @@ class ContactusService
 
     public function insert(Contactus $contact): ?Contactus
     {
-        return $this->contactUsMapper->insert($contact);
+
+        try {
+            $this->transactionManager->beginTransaction();
+            $response = $this->contactUsMapper->insert($contact);
+
+            $this->transactionManager->commit();
+
+            return $response;
+        }catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
+            $this->logger->error("Error occurred in ContactusService.insert", [
+                'error' => $e->getMessage(),
+                'contact' => $contact->getArrayCopy(),
+            ]);
+            return null;
+        }
     }
 
     public function checkRateLimit(string $ip): bool
     {
-        return $this->contactUsMapper->checkRateLimit($ip);
+        try{
+            $this->transactionManager->beginTransaction();
+
+            $response = $this->contactUsMapper->checkRateLimit($ip);
+
+            if(!$response) {
+                $this->logger->info("Rate limit check failed for IP: $ip");
+                $this->transactionManager->rollBack();
+                return false;
+            }
+            $this->transactionManager->commit();
+
+            return $response;
+        }catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
+
+            $this->logger->error("Error occurred in ContactusService.checkRateLimit", [
+                'error' => $e->getMessage(),
+                'ip' => $ip,
+            ]);
+            return false;
+        }
+
     }
 
     public function loadById(string $type, string $value): array
@@ -99,8 +137,11 @@ class ContactusService
             return $this->respondWithError(30102);
         }
 
-        if ($type === 'id' && !self::isValidUUID($value)) {
-            return $this->respondWithError(30105);
+        if ($type === 'id') {
+            if (!ctype_digit($value)) {
+                return $this->respondWithError(30105);
+            }
+            $value = (int)$value;
         }
 
         $this->logger->info("ContactusService.loadById started", [
@@ -153,7 +194,7 @@ class ContactusService
         try {
             $exist = $this->contactUsMapper->fetchAll($args);
 
-            if ($exist === null) {
+            if (empty($exist)) {
                 return $this->respondWithError(40401);
             }
 

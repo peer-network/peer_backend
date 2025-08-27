@@ -22,12 +22,12 @@ trait ResponseHelper
         return [];
     }
 
-    private function respondWithError(string $responseCode): array
+    private function respondWithError(int $responseCode): array
     {
         return ['status' => 'error', 'ResponseCode' => $responseCode];
     }
 
-    private function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    private function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -62,4 +62,16 @@ trait ResponseHelper
     {
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
+
+    /**
+     * Validate Authenticated User
+     */
+    private function checkAuthentication($currentUserId): bool
+    {
+        if ($currentUserId === null) {
+            return false;
+        }
+        return true;
+    }
+
 }

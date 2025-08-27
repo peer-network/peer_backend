@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "dcb25b2e-c091-49f8-9088-8020a87a90ac",
-		"name": "type_injection_tests",
+		"_postman_id": "3759c4a7-c14c-4b3a-b1d8-9f1c49c8b417",
+		"name": "current dev 3",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-dcb25b2e-c091-49f8-9088-8020a87a90ac?action=share&source=collection_link&creator=43606001"
+		"_exporter_id": "32542010",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-3759c4a7-c14c-4b3a-b1d8-9f1c49c8b417?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -126,7 +126,850 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"query": "mutation {\n  login(email: \"{{w_email_t3}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Flooding Server 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11515\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const response = pm.response.json();",
+							"",
+							"if (response.uploadedFiles) {",
+							"    pm.environment.set(\"uploadedFiles\", response.uploadedFiles);",
+							"    console.log(\"uploadedFiles saved as:\", response.uploadedFiles);",
+							"} else {",
+							"    pm.test(\"uploadedFiles field is missing\", function () {",
+							"        pm.expect(false).to.be.true;",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/sample_image.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Flooding Server 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11515\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const response = pm.response.json();",
+							"",
+							"if (response.uploadedFiles) {",
+							"    pm.environment.set(\"uploadedFiles\", response.uploadedFiles);",
+							"    console.log(\"uploadedFiles saved as:\", response.uploadedFiles);",
+							"} else {",
+							"    pm.test(\"uploadedFiles field is missing\", function () {",
+							"        pm.expect(false).to.be.true;",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/sample_image.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Flooding Server 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11515\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const response = pm.response.json();",
+							"",
+							"if (response.uploadedFiles) {",
+							"    pm.environment.set(\"uploadedFiles\", response.uploadedFiles);",
+							"    console.log(\"uploadedFiles saved as:\", response.uploadedFiles);",
+							"} else {",
+							"    pm.test(\"uploadedFiles field is missing\", function () {",
+							"        pm.expect(false).to.be.true;",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/sample_image.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Flooding Server 4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11515\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const response = pm.response.json();",
+							"",
+							"if (response.uploadedFiles) {",
+							"    pm.environment.set(\"uploadedFiles\", response.uploadedFiles);",
+							"    console.log(\"uploadedFiles saved as:\", response.uploadedFiles);",
+							"} else {",
+							"    pm.test(\"uploadedFiles field is missing\", function () {",
+							"        pm.expect(false).to.be.true;",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/sample_image.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10901\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Flooding Server 5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11515\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const response = pm.response.json();",
+							"",
+							"if (response.uploadedFiles) {",
+							"    pm.environment.set(\"uploadedFiles\", response.uploadedFiles);",
+							"    console.log(\"uploadedFiles saved as:\", response.uploadedFiles);",
+							"} else {",
+							"    pm.test(\"uploadedFiles field is missing\", function () {",
+							"        pm.expect(false).to.be.true;",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "eligibilityToken",
+							"value": "{{eligibilityToken}}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/etc/newman/media_files/sample_image.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://peer-network.eu/upload-post",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"upload-post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get eligibility token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"40301\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let token = response?.data?.postEligibility?.eligibilityToken;",
+							"",
+							"if (token) {",
+							"    pm.environment.set(\"eligibilityToken\", token);",
+							"    console.log(\"Eligibility token saved to environment.\");",
+							"} else {",
+							"    console.warn(\"Eligibility token not found in response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -1116,7 +1959,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"21501\");",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -3604,6 +4447,134 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{invalid_username}}\",\n    username: \"{{username}}\",\n    referralUuid: \"\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transaction 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30203\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(offset: -2, limit: null) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transaction 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(offset: null, limit: 22) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
