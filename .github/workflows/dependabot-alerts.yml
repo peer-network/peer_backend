@@ -1,13 +1,8 @@
-# test
 name: Dependabot Alerts to Discord (Scheduled)
 
 on:
   schedule:
     - cron: "0 */6 * * *" # every 6 hours
-  push:
-    branches:
-      - wisdom/Add/dependabot
-  workflow_dispatch:
 
 jobs:
   notify:
@@ -25,19 +20,26 @@ jobs:
 
       - name: Send Discord Notification
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            # Mock/test mode when manually triggered
-            MESSAGE=":test_tube: **Test Dependabot Alert**\nRepo: ${{ github.repository }}\nPackage: symfony/http-foundation\nSeverity: HIGH\nAdvisory: https://github.com/advisories/GHSA-xxxx-xxxx\nFixed in: 6.4.3"
-            curl -H "Content-Type: application/json" \
-                 -X POST \
-                 -d "{\"content\": \"$MESSAGE\"}" \
-                 "$DISCORD_WEBHOOK_URL"
-            exit 0
-          fi
-
           count=$(jq length alerts.json)
           if [ "$count" -gt 0 ]; then
-            MESSAGE=":rotating_light: **$count Dependabot Security Alerts Found!**"
+            MESSAGE=":rotating_light: **$count Dependabot Security Alerts Found!**\n\n"
+            index=1
+            for row in $(jq -c '.[]' alerts.json); do
+              pkg=$(echo $row | jq -r '.dependency.package.name')
+              severity=$(echo $row | jq -r '.security_advisory.severity')
+              fixed_in=$(echo $row | jq -r '.security_vulnerability.first_patched_version.identifier')
+              advisory=$(echo $row | jq -r '.security_advisory.references[0].url')
+
+              MESSAGE+="$index. $pkg — $severity"
+              if [ "$fixed_in" != "null" ]; then
+                MESSAGE+=" — fixed in $fixed_in"
+              fi
+              MESSAGE+="\n$advisory\n\n"
+
+              index=$((index+1))
+            done
+
+            # Send to Discord
             curl -H "Content-Type: application/json" \
                  -X POST \
                  -d "{\"content\": \"$MESSAGE\"}" \
