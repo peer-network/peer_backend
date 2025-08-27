@@ -529,10 +529,15 @@ class PeerTokenMapper
             $stmt->execute();
             $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            $data = array_map(
+                fn($trans) => (new Transaction($trans, [], false))->getArrayCopy(),
+                $transactions
+            );
+
             return [
                 'status' => 'success',
                 'ResponseCode' => 11215,
-                'affectedRows' => $transactions
+                'affectedRows' => $data
             ];
         } catch (\Throwable $th) {
             $this->logger->error("Database error while fetching transactions - PeerTokenMapper.getTransactions", [
