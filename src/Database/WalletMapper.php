@@ -154,7 +154,7 @@ class WalletMapper
 
             // If user's account deleted then we will send that percentage amount to PEER
             if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == 6) {
-                $peerAmount = $peerAmount + round((float)$numberoftokens * INVTFEE, 2);
+                $peerAmount += round((float)$numberoftokens * INVTFEE, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount;
                 $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
             }
@@ -636,7 +636,7 @@ class WalletMapper
         $filter = (int)(1 << $bits) - 1;
         do {
             $rnd = \hexdec(\bin2hex(\openssl_random_pseudo_bytes($bytes)));
-            $rnd = $rnd & $filter;
+            $rnd &= $filter;
         } while ($rnd >= $range);
         return $min + $rnd;
     }
