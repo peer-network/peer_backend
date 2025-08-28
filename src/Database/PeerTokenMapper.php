@@ -196,7 +196,7 @@ class PeerTokenMapper
             if ($requiredAmount) {
                 // Remove this records we don't need it anymore.
                 // $this->createAndSaveTransaction($transRepo, [
-                //     'transuniqueid' => $transUniqueId,
+                //     'operationid' => $transUniqueId,
                 //     'transactiontype' => 'transferDeductSenderToRecipient',
                 //     'senderid' => $userId,
                 //     'tokenamount' => -$requiredAmount,
@@ -221,7 +221,7 @@ class PeerTokenMapper
             // 2. RECIPIENT: Credit To Account
             if ($numberoftokens) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'transuniqueid' => $transUniqueId,
+                    'operationid' => $transUniqueId,
                     'transactiontype' => 'transferSenderToRecipient',
                     'senderid' => $userId,
                     'recipientid' => $recipient,
@@ -248,7 +248,7 @@ class PeerTokenMapper
             // 3. INVITER: Fees To Inviter (if applicable)
             if (!empty($inviterId) && $inviterWin) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'transuniqueid' => $transUniqueId,
+                    'operationid' => $transUniqueId,
                     'transactiontype' => 'transferSenderToInviter',
                     'senderid' => $userId,
                     'recipientid' => $inviterId,
@@ -278,7 +278,7 @@ class PeerTokenMapper
             $feeAmount = TokenHelper::mulRc($numberoftokens, POOLFEE);
             if ($feeAmount) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'transuniqueid' => $transUniqueId,
+                    'operationid' => $transUniqueId,
                     'transactiontype' => 'transferSenderToPoolWallet',
                     'senderid' => $userId,
                     'recipientid' => $this->poolWallet,
@@ -308,7 +308,7 @@ class PeerTokenMapper
             $peerAmount = TokenHelper::mulRc($numberoftokens, PEERFEE);
             if ($peerAmount) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'transuniqueid' => $transUniqueId,
+                    'operationid' => $transUniqueId,
                     'transactiontype' => 'transferSenderToPeerWallet',
                     'senderid' => $userId,
                     'recipientid' => $this->peerWallet,
@@ -338,7 +338,7 @@ class PeerTokenMapper
             $burnAmount = TokenHelper::mulRc($numberoftokens, BURNFEE);
             if ($burnAmount) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'transuniqueid' => $transUniqueId,
+                    'operationid' => $transUniqueId,
                     'transactiontype' => 'transferSenderToBurnWallet',
                     'senderid' => $userId,
                     'recipientid' => $this->burnWallet,
@@ -437,7 +437,7 @@ class PeerTokenMapper
      */
     private function createAndSaveTransaction($transRepo, array $transObj): void
     {
-        $transaction = new Transaction($transObj, ['transuniqueid', 'senderid', 'tokenamount'], false);
+        $transaction = new Transaction($transObj, ['operationid', 'senderid', 'tokenamount'], false);
         $transRepo->saveTransaction($transaction);
     }
 
@@ -537,10 +537,15 @@ class PeerTokenMapper
             $stmt->execute();
             $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            $data = array_map(
+                fn($trans) => (new Transaction($trans, [], false))->getArrayCopy(),
+                $transactions
+            );
+
             return [
                 'status' => 'success',
                 'ResponseCode' => 11215,
-                'affectedRows' => $transactions
+                'affectedRows' => $data
             ];
         } catch (\Throwable $th) {
             $this->logger->error("Database error while fetching transactions - PeerTokenMapper.getTransactions", [
