@@ -15,12 +15,12 @@ class Transaction
     use ResponseHelper;
 
     protected string $transactionid;
-    protected string $transuniqueid;
+    protected string $operationid;
     protected string $senderid;
     protected string $recipientid;
     protected string $transactiontype;
     protected float $tokenamount;
-    protected $transferaction;
+    protected string $transferaction;
     protected ?string $message;
     protected ?string $createdat;
 
@@ -30,7 +30,7 @@ class Transaction
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
         $this->transactionid = $data['transactionid'] ?? self::generateUUID();
-        $this->transuniqueid = $data['transuniqueid'] ?? null;
+        $this->operationid = $data['operationid'] ?? null;
         $this->senderid = $data['senderid'] ?? null;
         $this->recipientid = $data['recipientid'] ?? null;
         $this->transactiontype = $data['transactiontype'] ?? null;
@@ -51,7 +51,7 @@ class Transaction
     {
         $att = [
             'transactionid' => $this->transactionid,
-            'transuniqueid' => $this->transuniqueid,
+            'operationid' => $this->operationid,
             'transactiontype' => $this->transactiontype,
             'senderid' => $this->senderid,
             'recipientid' => $this->recipientid,
@@ -75,7 +75,7 @@ class Transaction
                 'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'transuniqueid' => [
+            'operationid' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
@@ -175,11 +175,11 @@ class Transaction
 
     
     /**
-     * Getter method for transuniqueid
+     * Getter method for operationid
      */
-    public function getTransUniqueId(): string
+    public function getOperationId(): string
     {
-        return $this->transuniqueid;
+        return $this->operationid;
     }
 
 

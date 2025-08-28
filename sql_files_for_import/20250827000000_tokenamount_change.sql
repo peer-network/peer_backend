@@ -13,4 +13,6 @@ ALTER TABLE transactions
 ALTER TABLE transactions 
     ALTER COLUMN tokenamount SET NOT NULL;
 
+ALTER TABLE transactions RENAME transuniqueid TO operationid;
+
 COMMIT;
