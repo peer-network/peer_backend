@@ -25,15 +25,15 @@ class TransactionRepository
         $this->logger->info("TransactionRepository.saveTransaction started");
 
         $query = "INSERT INTO transactions 
-                  (transactionid, transuniqueid, transactiontype, senderid, recipientid, tokenamount, transferaction, message, createdat)
+                  (transactionid, operationid, transactiontype, senderid, recipientid, tokenamount, transferaction, message, createdat)
                   VALUES 
-                  (:transactionId, :transUniqueId, :transactionType, :senderId, :recipientId, :tokenAmount, :transferAction, :message, :createdat)";
+                  (:transactionId, :operationId, :transactionType, :senderId, :recipientId, :tokenAmount, :transferAction, :message, :createdat)";
 
         try {
             $stmt = $this->db->prepare($query);
 
             $stmt->bindValue(':transactionId', $transaction->getTransactionId(), \PDO::PARAM_STR);
-            $stmt->bindValue(':transUniqueId', $transaction->getTransUniqueId(), \PDO::PARAM_STR);
+            $stmt->bindValue(':operationId', $transaction->getOperationId(), \PDO::PARAM_STR);
             $stmt->bindValue(':transactionType', $transaction->getTransactionType(), \PDO::PARAM_STR);
             $stmt->bindValue(':senderId', $transaction->getSenderId(), \PDO::PARAM_STR);
             $stmt->bindValue(':recipientId', $transaction->getRecipientId(), \PDO::PARAM_STR);
