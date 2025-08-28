@@ -25,14 +25,14 @@ trait ResponseHelper
 
     private function respondWithError(int $responseCode): array
     {
-        return ['status' => 'error', 'ResponseCode' => $responseCode];
+        return ['status' => 'error', 'ResponseCode' => (string)$responseCode];
     }
 
     private function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
-            'ResponseCode' => $message,
+            'ResponseCode' => (float)$message,
             'affectedRows' => $data,
         ];
 

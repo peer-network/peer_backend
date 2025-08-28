@@ -6,40 +6,18 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
+use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 
 class PoolMapper
 {
+    use ResponseHelper;
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
 
     public function __construct(protected LoggerInterface $logger, protected PDO $db)
     {
-    }
-
-    protected function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
-            }
-        }
-
-        return $response;
     }
 
     public function fetchPool(array $args = []): array
@@ -138,7 +116,7 @@ class PoolMapper
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
 
         $success = [
@@ -170,7 +148,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            return $this->respondWithError(30223);
+            return $this::respondWithError(30223);
         }
 
         $whereCondition = $dayOptions[$day];
@@ -209,11 +187,11 @@ class PoolMapper
             $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
 
         if (empty($data)) {
-            return $this->createSuccessResponse(21202); //'No records found for ' . $day
+            return $this::createSuccessResponse(21202); //'No records found for ' . $day
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
@@ -242,7 +220,7 @@ class PoolMapper
             ];
 
             if (!isset($mapping[$whereby])) {
-                return $this->respondWithError(41221);
+                return $this::respondWithError(41221);
             }
 
             $whereby = $mapping[$whereby]['text'];
@@ -257,7 +235,7 @@ class PoolMapper
             ];
         }
         
-        return $this->respondWithError(40301);
+        return $this::respondWithError(40301);
     }
 
     private function decimalToQ64_96(float $value): string
