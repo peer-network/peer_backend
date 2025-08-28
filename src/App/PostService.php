@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -114,7 +115,7 @@ class PostService
         }
 
         if ($coversCount > $coverLimit) {
-            return ['success' => false, 'error' => '30268'];
+            return ['success' => false, 'error' => 30268 ];
         } else {
             return ['success' => true, 'error' => null];
         }
@@ -123,11 +124,11 @@ class PostService
 
     private function validateContentCount(array $args): array {
         if (!isset($args['contenttype']) && empty($args['contenttype']) && !is_string($args['contenttype'])) {
-            return ['success' => false, 'error' => '30206'];
+            return ['success' => false, 'error' => 30206];
         }
         $contenttype = strval($args['contenttype']);
         if (!isset($args['media']) && empty($args['media']) && !is_array($args['media'])) {
-            return ['success' => false, 'error' => '30102'];
+            return ['success' => false, 'error' => 30102 ];
         }
         if (isset($args['cover']) && !empty($args['cover'])) {
              return $this->validateCoverCount($args,$contenttype);
@@ -139,16 +140,16 @@ class PostService
         try {
             $mediaLimitObj = ContentLimitsPerPost::from($contenttype);
             if (!$mediaLimitObj) {
-                return ['success' => false, 'error' => '40301'];    
+                return ['success' => false, 'error' => 40301 ];    
             }
             $mediaLimit = $mediaLimitObj->mediaLimit();
         } catch (\Throwable $e) {
             echo($e->getMessage());
-            return ['success' => false, 'error' => '40301'];
+            return ['success' => false, 'error' => 40301];
         }
 
         if ($mediaCount > $mediaLimit) {
-            return ['success' => false, 'error' => '30267'];
+            return ['success' => false, 'error' => 30267 ];
         } else {
             return ['success' => true, 'error' => null];
         }
@@ -302,7 +303,12 @@ class PostService
                 // Post speichern
                 $post = new Post($postData);
             } catch (\Throwable $e) {
-                $this->transactionManager->rollback();
+                $this->postMapper->rollback();
+                $this->logger->error('Failed to create post', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                return $this->respondWithError(30263);
                 if(isset($args['uploadedFiles'])){
                     $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                 }

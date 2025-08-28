@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -9,6 +10,8 @@ use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Psr\Log\LoggerInterface;
+
+use function DI\string;
 
 const TABLESTOGEMS = true;
 const DAILY_NUMBER_TOKEN= 5000;
@@ -115,7 +118,11 @@ class WalletMapper
             $stmt->execute();
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+             $this->logger->error('WalletMapper.transferToken exception during recipient validation query', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+             ]);
+            return self::respondWithError(40301);
         }
 
         if (empty($row)) {
@@ -161,7 +168,11 @@ class WalletMapper
 
 
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            $this->logger->error('WalletMapper.transferToken unexpected exception during token transfer execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);
         }
 
         if ($currentBalance < $requiredAmount) {
@@ -320,7 +331,11 @@ class WalletMapper
 
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            return self::respondWithError($e->getMessage());
+            $this->logger->error('WalletMapper.transferToken unexpected exception during token transfer execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);        
         }
     }
 
@@ -728,8 +743,11 @@ class WalletMapper
 
             return $result;
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
-        }
+            $this->logger->error('WalletMapper.fetchWinsLog exception during logwins query execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);        }
     }
 
     public function insertWinToLog(string $userId, array $args): bool
@@ -1058,9 +1076,8 @@ class WalletMapper
             return self::createSuccessResponse(21206);
         }
 
-        $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
-        $dailyToken = DAILY_NUMBER_TOKEN;
-
+        $totalGems = isset($data[0]['overall_total']) ? $data[0]['overall_total'] : '0';
+        $dailyToken = (float)DAILY_NUMBER_TOKEN;
         // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
         $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
 
@@ -1093,13 +1110,13 @@ class WalletMapper
             $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
 
             $args[$userId]['details'][] = [
-                'gemid' => $row['gemid'],
-                'userid' => $row['userid'],
-                'postid' => $row['postid'],
-                'fromid' => $row['fromid'],
-                'gems' => $row['gems'],
-                'numbers' => $rowgems2token,
-                'whereby' => $row['whereby'],
+                'gemid' => (string)$row['gemid'],
+                'userid' => (string)$row['userid'],
+                'postid' => (string)$row['postid'],
+                'fromid' => (string)$row['fromid'],
+                'gems' => (float)$row['gems'],
+                'numbers' => (float)$rowgems2token,
+                'whereby' => (int)$row['whereby'],
                 'createdat' => $row['createdat']
             ];
 

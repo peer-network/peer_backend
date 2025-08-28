@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -242,7 +243,7 @@ class UserInfoService
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
-            return $this->respondWithError('Failed to toggle profile privacy.');
+            return $this->respondWithError(00000);//'Failed to toggle profile privacy.'
         }
     }
 
@@ -430,7 +431,7 @@ class UserInfoService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => "11012", // added user report successfully
+                'ResponseCode' => 11012, // added user report successfully
                 'affectedRows' => $userInfo->getReports(),
             ];
         } catch (\Exception $e) {
