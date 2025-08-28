@@ -1736,8 +1736,8 @@ class GraphQLSchemaBuilder
                 'transactionid' => function (array $root): string {
                     return $root['transactionid'] ?? '';
                 },
-                'transuniqueid' => function (array $root): string {
-                    return $root['transuniqueid'] ?? '';
+                'operationid' => function (array $root): string {
+                    return $root['operationid'] ?? '';
                 },
                 'transactiontype' => function (array $root): string {
                     return $root['transactiontype'] ?? '';
