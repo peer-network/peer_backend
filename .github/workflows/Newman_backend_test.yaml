@@ -806,7 +806,7 @@ jobs:
           git config user.name "GitHub Actions"
           git add reports
           git commit -m "Deploy reports for run $GITHUB_RUN_ID (keep last 10)" || echo "No changes to commit"
-          git push origin gh-pages
+          git push origin gh-pages --force
           
   send_success_discord_notification:
     name: Send Discord Notification for Successful CI
