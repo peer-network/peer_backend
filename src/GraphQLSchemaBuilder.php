@@ -2022,7 +2022,6 @@ class GraphQLSchemaBuilder
             if (empty($info)) {
                 return $this::createSuccessResponse(21002);
             }
-
             $response = [
                 'referralUuid' => $info['referral_uuid'] ?? '', 
                 'referralLink' => $info['referral_link'] ?? '',
@@ -2082,12 +2081,12 @@ class GraphQLSchemaBuilder
 
             $this->logger->info('Returning final referralList response', ['referralUsers' => $referralUsers]);
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11011,
-                'counter' => count($referralUsers['iInvited']),
-                'affectedRows' => $referralUsers
-            ];
+            return $this::createSuccessResponse(
+                11011,
+                $referralUsers,
+                true,
+                (string)count($referralUsers['iInvited'])
+            );
         } catch (\Throwable $e) {
             $this->logger->error('Query.resolveReferralList exception', [
                 'error' => $e->getMessage(),
@@ -2200,12 +2199,12 @@ class GraphQLSchemaBuilder
         }
 
         if ($response !== false) {
-            return [
-                'status' => 'success',
-                'counter' => count($response['posts']),
-                'ResponseCode' => 11204,
-                'affectedRows' => $response,
-            ];
+            return $this::createSuccessResponse(
+                11204,
+                $response,
+                true,
+                (string)count($response['posts'])
+            );
         }
 
         $this->logger->warning('Query.resolvePool No transactions found');
@@ -2876,12 +2875,13 @@ class GraphQLSchemaBuilder
         if ($response['status'] === 'success') {
             $chat = $response['data'];
             $data = [$this->mapChatToArray($chat)];
-            return [
-                'status' => 'success',
-                'counter' => count($data),
-                'ResponseCode' => $response['ResponseCode'],
-                'affectedRows' => $data,
-            ];
+
+            return $this::createSuccessResponse(
+                $response['ResponseCode'],
+                $data,
+                true,
+                (string)count($data)
+            );
         }
 
         return $this::respondWithError($response['ResponseCode']);
@@ -2905,12 +2905,12 @@ class GraphQLSchemaBuilder
                 fn(Chat $chat) => $this->mapChatToArray($chat),
                 $chats
             );
-            return [
-                'status' => 'success',
-                'counter' => count($data),
-                'ResponseCode' => 11801,
-                'affectedRows' => $data,
-            ];
+            return $this::createSuccessResponse(
+                11801,
+                $data,
+                true,
+                (string)count($data)
+            );
         }
 
         return $this::createSuccessResponse(21801);
@@ -2979,11 +2979,10 @@ class GraphQLSchemaBuilder
         } else {
             return $this::createSuccessResponse(21506);
         }
-        return [
-            'status' => 'success',
-            'ResponseCode' => 11602,
-            'affectedRows' => $comments,
-        ];
+        return $this::createSuccessResponse(
+            11602,
+            $comments
+        );
     }
 
     /**
