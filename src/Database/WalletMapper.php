@@ -1082,7 +1082,6 @@ class WalletMapper
         $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
 
         $bestatigungInitial = TokenHelper::mulRc((float) $totalGems, (float) $gemsintoken);
-        // $bestatigung = bcadd(bcmul($totalGems, $gemsintoken, 10), '0.00005', 4);
 
         $args = [
             'winstatus' => [

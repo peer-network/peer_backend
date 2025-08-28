@@ -319,8 +319,8 @@ class GraphQLSchemaBuilder
                 'username' => function (array $root): string {
                     return $root['username'] ?? '';
                 },
-                'slug' => function (array $root): string {
-                    return $root['slug'] ?? '';
+                'slug' => function (array $root): int {
+                    return $root['slug'] ?? 0;
                 },
                 'img' => function (array $root): string {
                     return $root['img'] ?? '';

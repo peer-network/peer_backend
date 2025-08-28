@@ -33,7 +33,7 @@ type HelloResponse {
 
 type DailyGemStatusResponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: Int
   affectedRows: DailyGemStatusData
 }
 
@@ -51,7 +51,7 @@ type DailyGemStatusData {
 
 type DailyGemsResultsResponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: Int
   affectedRows: DailyGemsResultsData
 }
 
