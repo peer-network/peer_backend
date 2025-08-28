@@ -303,7 +303,7 @@ class PostService
                 // Post speichern
                 $post = new Post($postData);
             } catch (\Throwable $e) {
-                $this->postMapper->rollback();
+                $this->transactionManager->rollback();
                 $this->logger->error('Failed to create post', [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
