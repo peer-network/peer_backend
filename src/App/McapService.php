@@ -4,10 +4,12 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use Fawaz\Database\McapMapper;
+use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 
 class McapService
 {
+    use ResponseHelper;
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -30,30 +32,6 @@ class McapService
         return true;
     }
 
-    private function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
-            }
-        }
-
-        return $response;
-    }
-    
     public function loadLastId(): array
     {
 
@@ -78,9 +56,9 @@ class McapService
                 return $success;
             }
 
-            return $this->respondWithError(31201);
+            return $this::respondWithError(31201);
         } catch (\Exception $e) {
-            return $this->respondWithError(41206);
+            return $this::respondWithError(41206);
         }
     }
 
@@ -106,9 +84,9 @@ class McapService
                 return $success;
             }
 
-            return $this->createSuccessResponse(21001);
+            return $this::createSuccessResponse(21001);
         } catch (\Exception $e) {
-            return $this->respondWithError(41207);
+            return $this::respondWithError(41207);
         }
     }
 }

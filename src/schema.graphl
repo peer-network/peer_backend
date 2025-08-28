@@ -257,7 +257,7 @@ type UserLogWins {
 
 type GetDailyResponse {
   status: String!
-  ResponseCode: Int!
+  ResponseCode: String!
   affectedRows: [DailyFreeResponse]
 }
 
@@ -269,19 +269,19 @@ type DailyFreeResponse {
 
 type PostEligibilityResponse {
   status: String!
-  ResponseCode: Int!
+  ResponseCode: String!
   eligibilityToken: String!
 }
 
 type CurrentLiquidity {
   status: String!
-  ResponseCode: Int!
+  ResponseCode: String!
   currentliquidity: Decimal
 }
 
 type UserInfoResponse {
   status: String!
-  ResponseCode: Int!
+  ResponseCode: String!
   affectedRows: UserInfo
 }
 
@@ -300,7 +300,7 @@ type UserInfo {
 
 type PostInfoResponse {
   status: String!
-  ResponseCode: Int!
+  ResponseCode: String!
   affectedRows: PostInfo
 }
 
@@ -316,7 +316,7 @@ type PostInfo {
 
 type CommentInfoResponse {
   status: String!
-  ResponseCode: Int!
+  ResponseCode: String!
   affectedRows: CommentInfo
 }
 
@@ -608,7 +608,7 @@ type ReferralInfoResponse {
 type ReferralListResponse {
   status: String!
   counter: Int!
-  ResponseCode: Int!
+  ResponseCode: String!
   affectedRows: ReferralUsers!
 }
 type ReferralUsers {
@@ -660,6 +660,6 @@ type ActionPriceResult {
 
 type GetActionPricesResponse {
     status: String!
-    ResponseCode: Int!
+    ResponseCode: String!
     affectedRows: ActionPriceResult!
 }

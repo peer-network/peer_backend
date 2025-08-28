@@ -5,36 +5,15 @@ namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\Mcap;
+use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 
 class McapMapper
 {
+    use ResponseHelper;
+    
     public function __construct(protected LoggerInterface $logger, protected PDO $db)
     {
-    }
-
-    protected function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
-            }
-        }
-
-        return $response;
     }
 
     public function fetchAll(int $offset, int $limit): array
@@ -163,13 +142,13 @@ class McapMapper
 
             if ($numberoftokens === 0 || $numberofgems === 0) {
                 $this->logger->info("numberoftokens or numberofgems is empty.", ['numberoftokens' => $numberoftokens, 'numberofgems' => $numberofgems]);
-                return $this->createSuccessResponse(21207);
+                return $this::createSuccessResponse(21207);
             }
 
             $resultLastData = $this->refreshMarketData();
             if ($resultLastData['status'] !== 'success') {
                 $this->logger->info($resultLastData['ResponseCode'], ['resultLastData' => $resultLastData]);
-                return $this->respondWithError(41217);
+                return $this::respondWithError(41217);
             }
 
             $insertedId = $resultLastData['affectedRows']['insertedId'] ?? null;
@@ -178,7 +157,7 @@ class McapMapper
 
             if ($insertedId === null) {
                 $this->logger->info("Inserted ID is missing from refreshMarketData response.", ['insertedId' => $insertedId]);
-                return $this->respondWithError(41218);
+                return $this::respondWithError(41218);
             }
 
             $numberoftokens += $daytokens;
@@ -198,7 +177,7 @@ class McapMapper
                     ':capid' => $insertedId
                 ]);
             } catch (\PDOException $e) {
-                return $this->respondWithError(40301);
+                return $this::respondWithError(40301);
             }
 
             $result = [
@@ -215,7 +194,7 @@ class McapMapper
                 'affectedRows' => $result
             ];
         } catch (\PDOException $e) {
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 
@@ -228,16 +207,16 @@ class McapMapper
             $priceInfo = @file_get_contents($url);
 
             if ($priceInfo === false) {
-                return $this->respondWithError(41219);
+                return $this::respondWithError(41219);
             }
 
             $array = json_decode($priceInfo, true);
             if (json_last_error() !== JSON_ERROR_NONE || $array === null) {
-                return $this->respondWithError(41220);
+                return $this::respondWithError(41220);
             }
 
             if (empty($array['data']['ETH/EUR']['bestAsk'])) {
-                return $this->createSuccessResponse(21208);
+                return $this::createSuccessResponse(21208);
             }
 
             $coverage = (float) $array['data']['ETH/EUR']['bestAsk'];
@@ -254,7 +233,7 @@ class McapMapper
             } catch (\PDOException $e) {
                 $this->db->rollBack();
                 $this->logger->error('Database Exception.', ['exception' => $e]);
-                return $this->respondWithError(40302);
+                return $this::respondWithError(40302);
             }
 
             return [
@@ -264,7 +243,7 @@ class McapMapper
             ];
         } catch (\Exception $e) {
             $this->logger->error('Connection Exception.', ['exception' => $e]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 }

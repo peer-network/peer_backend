@@ -39,7 +39,7 @@ class PeerTokenService
         $this->logger->info('WalletService.transferToken started');
 
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
         try {
             $this->transactionManager->beginTransaction();
@@ -64,7 +64,7 @@ class PeerTokenService
 
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
-            return $this->respondWithError(41229); // Failed to transfer token
+            return $this::respondWithError(41229); // Failed to transfer token
         }
     }
 

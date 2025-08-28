@@ -153,7 +153,7 @@ class UserService
         $id = self::generateUUID();
         if (empty($id)) {
             $this->logger->critical('Failed to generate user ID');
-            return $this->respondWithError(40602);
+            return $this::respondWithError(40602);
         }
 
         $pkey = $args['pkey'] ?? null;
@@ -490,7 +490,7 @@ class UserService
             $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
             if (!$userPreferences) {
                 $this->logger->error('UserService.updateUserPreferences: failed to load user preferences for updating');
-                return $this->respondWithError(40301); // 402xx
+                return $this::respondWithError(40301); // 402xx
             }
 
             if ($contentFiltering && !empty($contentFiltering)) {
@@ -498,7 +498,7 @@ class UserService
                 
                 if($contentFilteringSeverityLevel === null){
                     $this->logger->error('UserService.updateUserPreferences: failed to get ContentFilteringSeverityLevel');
-                    return $this->respondWithError(30103);
+                    return $this::respondWithError(30103);
                 }
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
                 $userPreferences->setUpdatedAt();
@@ -789,7 +789,7 @@ class UserService
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return $this->createSuccessResponse(21001, []);
+            return $this::createSuccessResponse(21001, []);
         }
     }
 
@@ -803,7 +803,7 @@ class UserService
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
         if($contentFilterService->validateContentFilter($contentFilterBy) == false){
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
         if (!self::isValidUUID($userId)) {
@@ -914,7 +914,7 @@ class UserService
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
         if($contentFilterService->validateContentFilter($contentFilterBy) == false){
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
         try {
@@ -930,7 +930,7 @@ class UserService
                 ];
             }
 
-            return $this->respondWithError(31007);
+            return $this::respondWithError(31007);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
