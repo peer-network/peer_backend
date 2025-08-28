@@ -1366,7 +1366,7 @@ class GraphQLSchemaBuilder
                     return $root['numbers'] ?? 0.0;
                 },
                 'whereby' => function (array $root): int {
-                    return $root['whereby'] ?? 0.0;
+                    return $root['whereby'] ?? 0;
                 },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
@@ -1690,8 +1690,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.PostEligibilityResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? 0;
+                'ResponseCode' => function (array $root): string {
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'eligibilityToken' => function (array $root): string {
                     return $root['eligibilityToken'] ?? '';
@@ -1702,8 +1702,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.TransactionResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? 0;
+                'ResponseCode' => function (array $root): string {
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1714,8 +1714,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.TransferTokenResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'ResponseCode' => function (array $root): int {
-                    return $root['ResponseCode'] ?? 0;
+                'ResponseCode' => function (array $root): string {
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1736,8 +1736,8 @@ class GraphQLSchemaBuilder
                 'transactionid' => function (array $root): string {
                     return $root['transactionid'] ?? '';
                 },
-                'transuniqueid' => function (array $root): string {
-                    return $root['transuniqueid'] ?? '';
+                'operationid' => function (array $root): string {
+                    return $root['operationid'] ?? '';
                 },
                 'transactiontype' => function (array $root): string {
                     return $root['transactiontype'] ?? '';
@@ -1749,7 +1749,7 @@ class GraphQLSchemaBuilder
                     return $root['recipientid'] ?? '';
                 },
                 'tokenamount' => function (array $root): float {
-                    return $root['tokenamount'] ?? 0;
+                    return $root['tokenamount'] ?? 0.0;
                 },
                 'transferaction' => function (array $root): string {
                     return $root['transferaction'] ?? '';
@@ -1861,6 +1861,7 @@ class GraphQLSchemaBuilder
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveTransfer' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
+            'resolveTransferV2' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
         ];
     }
 

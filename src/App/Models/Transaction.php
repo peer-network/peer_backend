@@ -15,12 +15,12 @@ class Transaction
     use ResponseHelper;
 
     protected string $transactionid;
-    protected string $transuniqueid;
+    protected string $operationid;
     protected string $senderid;
     protected string $recipientid;
     protected string $transactiontype;
     protected float $tokenamount;
-    protected $transferaction;
+    protected string $transferaction;
     protected ?string $message;
     protected ?string $createdat;
 
@@ -30,11 +30,11 @@ class Transaction
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
         $this->transactionid = $data['transactionid'] ?? self::generateUUID();
-        $this->transuniqueid = $data['transuniqueid'] ?? null;
+        $this->operationid = $data['operationid'] ?? null;
         $this->senderid = $data['senderid'] ?? null;
         $this->recipientid = $data['recipientid'] ?? null;
         $this->transactiontype = $data['transactiontype'] ?? null;
-        $this->tokenamount = $data['tokenamount'] ?? null;
+        $this->tokenamount = (float)$data['tokenamount'] ?? null;
         $this->transferaction = $data['transferaction'] ?? 'DEDUCT';
         $this->message = $data['message'] ?? null;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -44,6 +44,24 @@ class Transaction
         }
     }
     
+    /**
+     * Get Values of current state
+     */
+    public function getArrayCopy(): array
+    {
+        $att = [
+            'transactionid' => $this->transactionid,
+            'operationid' => $this->operationid,
+            'transactiontype' => $this->transactiontype,
+            'senderid' => $this->senderid,
+            'recipientid' => $this->recipientid,
+            'tokenamount' => $this->tokenamount,
+            'transferaction' => $this->transferaction,
+            'message' => $this->message,
+            'createdat' => $this->createdat,
+        ];
+        return $att;
+    }
 
     /**
      * Define Input filter
@@ -57,7 +75,7 @@ class Transaction
                 'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'transuniqueid' => [
+            'operationid' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
@@ -136,7 +154,7 @@ class Transaction
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
@@ -157,11 +175,11 @@ class Transaction
 
     
     /**
-     * Getter method for transuniqueid
+     * Getter method for operationid
      */
-    public function getTransUniqueId(): string
+    public function getOperationId(): string
     {
-        return $this->transuniqueid;
+        return $this->operationid;
     }
 
 

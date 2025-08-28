@@ -6435,7 +6435,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid}}\", numberoftokens: 160, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{userid}}\", numberoftokens: 160, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6583,7 +6583,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -6647,7 +6647,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid}}\", numberoftokens: 0.5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{userid}}\", numberoftokens: 0.5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6796,7 +6796,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -6860,7 +6860,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(offset: -2, limit: null) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(offset: -2, limit: null) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -6924,7 +6924,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(offset: null, limit: 22) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(offset: null, limit: 22) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -6977,7 +6977,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{w_userid_t2}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t2}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7030,7 +7030,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{uuid}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{uuid}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7083,7 +7083,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{peer}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{peer}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7136,7 +7136,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{burn}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{burn}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7189,7 +7189,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{lp}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{lp}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7242,7 +7242,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{btc}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{btc}}\", numberoftokens: 5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7295,7 +7295,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{w_userid_t3}}\", numberoftokens: 0, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 0, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7348,7 +7348,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{w_userid_t3}}\", numberoftokens: -5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: -5, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7402,7 +7402,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{w_userid_t3}}\", numberoftokens: 100000, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 100000, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7555,7 +7555,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -7928,7 +7928,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 2) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 2) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -7992,7 +7992,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{w_userid_t3}}\", numberoftokens: 2, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 2, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8146,7 +8146,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 6) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 6) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -8382,7 +8382,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 1) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 1) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},

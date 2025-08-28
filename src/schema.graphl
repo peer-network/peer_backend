@@ -65,7 +65,8 @@ type Mutation {
   createPost(action: PostType!, input: PostInput!): PostResponse!
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
-  resolveTransfer(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
+  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: "Use `resolveTransferV2`.")
+  resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
 }
 
 scalar Decimal
@@ -167,7 +168,7 @@ input UserPreferencesInput {
 
 type Transaction {
   transactionid: String!
-  transuniqueid: String!
+  operationid: String!
   transactiontype: String!
   senderid: String!
   recipientid: String!
@@ -179,13 +180,13 @@ type Transaction {
 
 type TransactionResponse {
   status: String!
-  ResponseCode: Int!
+  ResponseCode: String
   affectedRows: [Transaction!]
 }
 
 type TransferTokenResponse {
   status: String!
-  ResponseCode: Int!
+  ResponseCode: String!
   affectedRows: TransferToken!
 }
 
