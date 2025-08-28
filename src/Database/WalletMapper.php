@@ -2,6 +2,8 @@
 
 namespace Fawaz\Database;
 
+use Fawaz\App\Models\Transaction;
+use Fawaz\App\Repositories\TransactionRepository;
 use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
@@ -44,14 +46,32 @@ class WalletMapper
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
-    private string $poolWallet;
     private string $burnWallet;
-    private string $peerWallet;
 
     const STATUS_DELETED = 6;
 
     public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
     {
+    }
+
+    /**
+     * Initialize and validates the liquidity pool wallets.
+     *
+     * @throws \RuntimeException if accounts are missing or invalid
+     */
+    private function initializeLiquidityPool(): void
+    {
+        $accounts = $this->pool->returnAccounts();
+        if (($accounts['status'] ?? '') === 'error') {
+            throw new \RuntimeException("Failed to load pool accounts");
+        }
+
+        $data = $accounts['response'] ?? [];
+        if (!isset($data['pool'], $data['burn'], $data['peer'])) {
+            throw new \RuntimeException("Liquidity pool wallets incomplete");
+        }
+
+        $this->burnWallet = $data['burn'];
     }
 
     public function fetchPool(array $args = []): array
@@ -462,6 +482,24 @@ class WalletMapper
         }
     }
 
+    /**
+     * Records Paid Actions such Post Creation, Like, Dislike, Views, Comment
+     * 
+     * Used for Peer Token transfer to Receipient (Peer-to-Peer transfer).  @deprecated
+     * 
+     * Now Peer-to-Peer transfer will be stored on `transactions` table, Refers to PeerTokenMapper->transferToken
+     * 
+     * Used for Actions records:
+     * whereby = 1  -> Post Views
+     * whereby = 2  -> Post Like
+     * whereby = 3  -> Post Dislike
+     * whereby = 4  -> Post Comment
+     * whereby = 5  -> Post Creation
+     * whereby = 18 -> Token transfer @deprecated
+     * 
+     * Records `Transactions` as well, for each above mentioned Actions.
+     * Table `Transactions` has Foreign key on `operationsid`, which refers to `logWins`'s `token` PK. 
+     */
     public function insertWinToLog(string $userId, array $args): array|bool
     {
         \ignore_user_abort(true);
@@ -488,7 +526,8 @@ class WalletMapper
         try {
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':token', $args['gemid'] ?? $id, \PDO::PARAM_STR);
+            $tokenId = $args['gemid'] ?? $id;
+            $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
             $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
@@ -500,6 +539,33 @@ class WalletMapper
 
             $stmt->execute();
 
+            
+            $this->initializeLiquidityPool();
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+
+            $transactionType = '';
+            $transferType = 'MINT';
+            if($args['whereby'] == 1){
+                $transactionType = 'postViewed';
+            }elseif ($args['whereby'] == 2) {
+                $transactionType = 'postLiked';
+            }elseif ($args['whereby'] == 3) {
+                $transactionType = 'postDisLiked';
+            }elseif ($args['whereby'] == 4) {
+                $transactionType = 'postComment';
+            }elseif ($args['whereby'] == 5) {
+                $transactionType = 'postCreated';
+                $transferType = 'BURN';
+            }
+            $this->createAndSaveTransaction($transRepo, [
+                'operationid' => $tokenId,
+                'transactiontype' => $transactionType,
+                'senderid' => $userId,
+                'recipientid' => $this->burnWallet,   
+                'tokenamount' => $numBers,
+                'transferaction' => $transferType
+            ]);
+            
             
             $this->logger->info('Inserted into logwins successfully', [
                 'userId' => $userId,
@@ -515,6 +581,15 @@ class WalletMapper
             
             return false;
         }
+    }
+
+    /**
+     * Helper to create and save a transaction
+     */
+    private function createAndSaveTransaction($transRepo, array $transObj): void
+    {
+        $transaction = new Transaction($transObj, ['operationid', 'senderid', 'tokenamount'], false);
+        $transRepo->saveTransaction($transaction);
     }
 
     public function insertWinToPool(string $userId, array $args): bool
