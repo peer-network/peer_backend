@@ -152,10 +152,6 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v5
-
-      - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
- 
       - name: Fix log directory permissions
         run: sudo chown -R 33:33 runtime-data/logs
  
@@ -533,7 +529,7 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v5
  
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: docker-image-${{ matrix.php-version }}
           path: .
@@ -607,7 +603,7 @@ jobs:
     outputs:
       final_outcome: ${{ steps.aggregate.outputs.final_outcome }}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           pattern: outcome-*
           path: outcomes
@@ -637,7 +633,7 @@ jobs:
       newman_failed_any: ${{ steps.setflag.outputs.newman_failed_any }}
     steps:
       - name: Download All Newman Failure Markers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: newman_flags
  
@@ -774,13 +770,13 @@ jobs:
     if: always()
     steps:
       - name: Download PHP 8.2 HTMLExtra report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: docker_newman_report-8.2
           path: reports/php-8.2
  
       - name: Download PHP 8.3 HTMLExtra report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: docker_newman_report-8.3
           path: reports/php-8.3
