@@ -39,7 +39,7 @@ class PoolService
     public function fetchPool(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
+            return $this::createResponse(60501);
         }
 
         $this->logger->info("WalletService.fetchPool started");
@@ -51,7 +51,7 @@ class PoolService
     public function callGemster(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
+            return $this::createResponse(60501);
         }
 
         return $this->poolMapper->getTimeSorted();
@@ -60,13 +60,13 @@ class PoolService
     public function callGemsters(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
+            return $this::createResponse(60501);
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
 
         if (!in_array($day, $dayActions, true)) {
-            return $this::respondWithError(30223);
+            return $this::createResponse(30223);
         }
 
         return $this->poolMapper->getTimeSortedMatch($day);

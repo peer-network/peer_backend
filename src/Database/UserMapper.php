@@ -1899,7 +1899,7 @@ class UserMapper
         
         return [
             'status' => 'error',
-            'ResponseCode' => 31901,
+            'ResponseCode' => "31901",
             'nextAttemptAt' => $nextAttemptAt
         ];
     }
@@ -1911,7 +1911,7 @@ class UserMapper
     {
         return [
             'status' => 'error',
-            'ResponseCode' => 31903
+            'ResponseCode' => "31903"
         ];
     }
 

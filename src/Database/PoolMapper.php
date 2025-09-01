@@ -116,16 +116,10 @@ class PoolMapper
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
-            return $this::respondWithError(40301);
+            return $this::createResponse(40301);
         }
 
-        $success = [
-            'status' => 'success',
-            'ResponseCode' => 11207,
-            'affectedRows' => $entries
-        ];
-
-        return $success;
+        return $this::createResponse(11207, $entries, false);
 
     }
 
@@ -148,7 +142,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            return $this::respondWithError(30223);
+            return $this::createResponse(30223);
         }
 
         $whereCondition = $dayOptions[$day];
@@ -187,11 +181,11 @@ class PoolMapper
             $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
-            return $this::respondWithError(40301);
+            return $this::createResponse(40301);
         }
 
         if (empty($data)) {
-            return $this::createSuccessResponse(21202); //'No records found for ' . $day
+            return $this::createResponse(21202); //'No records found for ' . $day
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
@@ -220,7 +214,7 @@ class PoolMapper
             ];
 
             if (!isset($mapping[$whereby])) {
-                return $this::respondWithError(41221);
+                return $this::createResponse(41221);
             }
 
             $whereby = $mapping[$whereby]['text'];
@@ -230,12 +224,12 @@ class PoolMapper
             return [
                 'status' => 'success',
                 'counter' => count($args) -1,
-                'ResponseCode' => 11208,
+                'ResponseCode' => "11208",
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
         }
         
-        return $this::respondWithError(40301);
+        return $this::createResponse(40301);
     }
 
     private function decimalToQ64_96(float $value): string

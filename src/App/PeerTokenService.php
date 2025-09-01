@@ -39,7 +39,7 @@ class PeerTokenService
         $this->logger->info('WalletService.transferToken started');
 
         if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
+            return $this::createResponse(60501);
         }
         try {
             $this->transactionManager->beginTransaction();
@@ -51,20 +51,21 @@ class PeerTokenService
             } else {
                 $this->logger->info('PeerTokenService.transferToken completed successfully', ['response' => $response]);
                 $this->transactionManager->commit();
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => 11211,
-                    'affectedRows' => [
-                        'tokenSend' => $response['tokenSend'],
-                        'tokensSubstractedFromWallet' => $response['tokensSubstractedFromWallet'],
-                        'createdat' => $response['createdat'] ?? ''
+                return $this::createResponse(
+                    11211,
+                    [
+                        'tokenSend'                  => $response['tokenSend'],
+                        'tokensSubstractedFromWallet'=> $response['tokensSubstractedFromWallet'],
+                        'createdat'                  => $response['createdat'] ?? '',
                     ],
-                ];
+                    false // no counter needed for associative array
+                );
+
             }
 
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
-            return $this::respondWithError(41229); // Failed to transfer token
+            return $this::createResponse(41229); // Failed to transfer token
         }
     }
 
@@ -80,11 +81,12 @@ class PeerTokenService
         try {
             $results = $this->peerTokenMapper->getTransactions($this->currentUserId, $args);
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => $results['ResponseCode'],
-                'affectedRows' => $results['affectedRows']
-            ];
+            return $this::createResponse(
+                (int)$results['ResponseCode'],
+                $results['affectedRows'],
+                false // no counter needed for existing data
+            );
+
         }catch (\Exception $e) {
             $this->logger->error("Error in PeerTokenService.transactionsHistory", ['exception' => $e->getMessage()]);
             throw new \RuntimeException("Database error while fetching transactions: " . $e->getMessage());

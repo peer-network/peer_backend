@@ -220,7 +220,7 @@ class PostInfoMapper
             if ($isSaved) {
                 // Delete the save record
                 $query = "DELETE FROM user_post_saves WHERE userid = :userid AND postid = :postid";
-                $action = 11511;
+                $action = "11511";
                 $issaved = false;
 
                 // Decrement the save count in `post_info`
@@ -231,7 +231,7 @@ class PostInfoMapper
             } else {
                 // Insert a new save record
                 $query = "INSERT INTO user_post_saves (userid, postid) VALUES (:userid, :postid)";
-                $action = 11512;
+                $action = "11512";
                 $issaved = true;
 
                 // Increment the save count in `post_info`
@@ -255,7 +255,7 @@ class PostInfoMapper
                 'postid' => $postid,
                 'exception' => $e->getMessage(),
             ]);
-            return ['status' => 'error', 'ResponseCode' => 41502];
+            return ['status' => 'error', 'ResponseCode' => "41502"];
         }
     }
 
@@ -277,12 +277,12 @@ class PostInfoMapper
             if ($isFollowing) {
                 // Unfollow: delete the relationship
                 $query = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-                $action = 11103;
+                $action = "11103";
                 $isfollowing = false;
             } else {
                 // Follow: insert the relationship
                 $query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
-                $action = 11104;
+                $action = "11104";
                 $isfollowing = true;
             }
 
@@ -300,7 +300,7 @@ class PostInfoMapper
                 'followeduserid' => $followeduserid,
                 'exception' => $e->getMessage(),
             ]);
-            return ['status' => 'error', 'ResponseCode' => 41103];
+            return ['status' => 'error', 'ResponseCode' => "41103"];
         }
     }
 
