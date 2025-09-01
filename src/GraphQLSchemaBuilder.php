@@ -2539,6 +2539,16 @@ class GraphQLSchemaBuilder
         return $this->createSuccessResponse(21701);
     }
 
+    /**
+     * This Method uses logWins.
+     * 
+     * Need to check first, is this API in co-operation or not, and if it is than, what is it for?
+     * 
+     * And Accordingly, logWins for Transactions should be changed
+     * 
+     * NOTE: If it used than it is not working correctly i think.
+     * Giving SQL Error like: "SQLSTATE[23505]: Unique violation: 7 ERROR:  duplicate key value violates unique constraint \"logwins_pkey\"\nDETAIL:  Key (token)=(4aa1f21b-759c-49cd-9432-03844c03ba75) already exists."} {"uid":"1241e34"}
+     */
     protected function resolveBeforeTransaction(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {

@@ -544,7 +544,6 @@ class WalletMapper
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
             $transactionType = '';
-            $transferType = 'MINT';
             if($args['whereby'] == 1){
                 $transactionType = 'postViewed';
             }elseif ($args['whereby'] == 2) {
@@ -555,7 +554,22 @@ class WalletMapper
                 $transactionType = 'postComment';
             }elseif ($args['whereby'] == 5) {
                 $transactionType = 'postCreated';
+            }elseif ($args['whereby'] == 11) {
+                $transactionType = 'getPercentBeforeTransaction'; // PENDING: Should be changed according to the API Logic
+            }
+
+            /**
+             * PENDING FOR API: `getpercentbeforetransaction`, 
+             * Need to check first, is this API in co-operation or not, and if it is than, what is it for?
+             * 
+             * Determine the transfer type based on the number of gems.
+             * If the number of gems is negative, it's a burn operation.
+             * If the number of gems is positive, it's a mint operation.
+             */
+            if($numBers < 0){
                 $transferType = 'BURN';
+            }else{
+                $transferType = 'MINT';
             }
             $this->createAndSaveTransaction($transRepo, [
                 'operationid' => $tokenId,
@@ -565,6 +579,14 @@ class WalletMapper
                 'tokenamount' => $numBers,
                 'transferaction' => $transferType
             ]);
+            if($transferType == 'BURN'){
+                /**
+                 * Add Amount to Burn account
+                 *
+                 * Reason behind keeping -$numBers is to, Add to Burn Account Positively
+                 */
+                $this->saveWalletEntry($this->burnWallet, -$numBers);
+            }
             
             
             $this->logger->info('Inserted into logwins successfully', [
@@ -867,6 +889,10 @@ class WalletMapper
         $dailyToken = DAILY_NUMBER_TOKEN;
 
         // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
+        /**
+         * Still We are facing with digital precision issues
+         * If we use till 9 Digit here, it coming right.
+         */
         $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
 
         $bestatigungInitial = TokenHelper::mulRc((float) $totalGems, (float) $gemsintoken);
