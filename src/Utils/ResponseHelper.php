@@ -31,7 +31,7 @@ trait ResponseHelper
 
         $response = [
             'status' => $isSuccess ? 'success' : 'error',
-            'ResponseCode' => (string)$responseCode,
+            'ResponseCode' => (string)$responseCode
         ];
 
         if ($isSuccess) {

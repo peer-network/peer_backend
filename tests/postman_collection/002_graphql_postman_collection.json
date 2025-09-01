@@ -78,7 +78,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10601);",
+							"    pm.expect(pm.response.text()).to.include('10601');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -139,7 +139,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10701);",
+							"    pm.expect(pm.response.text()).to.include('10701');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -185,7 +185,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10801);",
+							"    pm.expect(pm.response.text()).to.include('10801');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -259,7 +259,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -319,7 +319,7 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    const responseText = pm.response.text();",
 							"    pm.expect(",
-							"        responseText.includes(11513) || responseText.includes(11508)",
+							"        responseText.includes('11513') || responseText.includes('11508')",
 							"    ).to.be.true;",
 							"});",
 							"",
@@ -357,7 +357,7 @@
 							"    console.log(\"Couldn't access ResponseCode:\", err);",
 							"}",
 							"",
-							"if (postResponseCode === 11513) {",
+							"if (postResponseCode === '11513') {",
 							"    pm.environment.set(\"isDailyFreePost\", \"true\");",
 							"    console.log(\"This was a Daily Free Post (code 11513).\");",
 							"} else {",
@@ -443,7 +443,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -563,7 +563,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -657,7 +657,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11508);",
+							"    pm.expect(pm.response.text()).to.include('11508');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -744,7 +744,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -814,7 +814,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -880,7 +880,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11508);",
+							"    pm.expect(pm.response.text()).to.include('11508');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -967,7 +967,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1043,7 +1043,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1109,7 +1109,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11508);",
+							"    pm.expect(pm.response.text()).to.include('11508');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1196,7 +1196,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1266,7 +1266,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1332,7 +1332,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11508);",
+							"    pm.expect(pm.response.text()).to.include('11508');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -1447,7 +1447,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1531,7 +1531,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1597,7 +1597,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11508);",
+							"    pm.expect(pm.response.text()).to.include('11508');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1696,7 +1696,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11701);",
+							"    pm.expect(pm.response.text()).to.include('11701');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1749,7 +1749,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11701);",
+							"    pm.expect(pm.response.text()).to.include('11701');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1802,7 +1802,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(21701);",
+							"    pm.expect(pm.response.text()).to.include('21701');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1877,7 +1877,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -1943,7 +1943,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11508);",
+							"    pm.expect(pm.response.text()).to.include('11508');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -2020,7 +2020,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -2086,7 +2086,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10901);",
+							"    pm.expect(pm.response.text()).to.include('10901');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -2159,7 +2159,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11515);",
+							"    pm.expect(pm.response.text()).to.include('11515');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -2240,7 +2240,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11508);",
+							"    pm.expect(pm.response.text()).to.include('11508');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -2333,7 +2333,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31511);",
+							"    pm.expect(pm.response.text()).to.include('31511');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -2396,7 +2396,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -2462,7 +2462,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10901);",
+							"    pm.expect(pm.response.text()).to.include('10901');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -2535,7 +2535,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11515);",
+							"    pm.expect(pm.response.text()).to.include('11515');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -2616,7 +2616,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11508);",
+							"    pm.expect(pm.response.text()).to.include('11508');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -2716,7 +2716,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -2788,7 +2788,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -2854,7 +2854,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10901);",
+							"    pm.expect(pm.response.text()).to.include('10901');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -2927,7 +2927,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11515);",
+							"    pm.expect(pm.response.text()).to.include('11515');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -3010,7 +3010,7 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    const responseText = pm.response.text();",
 							"    pm.expect(",
-							"        responseText.includes(11513) || responseText.includes(11508)",
+							"        responseText.includes('11513') || responseText.includes('11508')",
 							"    ).to.be.true;",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
@@ -3047,7 +3047,7 @@
 							"    console.log(\"Couldn't access ResponseCode:\", err);",
 							"}",
 							"",
-							"if (postResponseCode === 11513) {",
+							"if (postResponseCode === '11513') {",
 							"    pm.environment.set(\"isDailyFreePost\", \"true\");",
 							"    console.log(\"This was a Daily Free Post (code 11513).\");",
 							"} else {",
@@ -3119,7 +3119,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -3185,7 +3185,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10901);",
+							"    pm.expect(pm.response.text()).to.include('10901');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -3258,7 +3258,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11515);",
+							"    pm.expect(pm.response.text()).to.include('11515');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -3341,7 +3341,7 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    const responseText = pm.response.text();",
 							"    pm.expect(",
-							"        responseText.includes(11513) || responseText.includes(11508)",
+							"        responseText.includes('11513') || responseText.includes('11508')",
 							"    ).to.be.true;",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
@@ -3378,7 +3378,7 @@
 							"    console.log(\"Couldn't access ResponseCode:\", err);",
 							"}",
 							"",
-							"if (postResponseCode === 11513) {",
+							"if (postResponseCode === '11513') {",
 							"    pm.environment.set(\"isDailyFreePost\", \"true\");",
 							"    console.log(\"This was a Daily Free Post (code 11513).\");",
 							"} else {",
@@ -3450,7 +3450,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -3516,7 +3516,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10901);",
+							"    pm.expect(pm.response.text()).to.include('10901');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -3589,7 +3589,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30102);",
+							"    pm.expect(pm.response.text()).to.include('30102');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -3660,7 +3660,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30102);",
+							"    pm.expect(pm.response.text()).to.include('30102');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -3726,7 +3726,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10901);",
+							"    pm.expect(pm.response.text()).to.include('10901');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -3799,7 +3799,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30267);",
+							"    pm.expect(pm.response.text()).to.include('30267');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -3891,7 +3891,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10901);",
+							"    pm.expect(pm.response.text()).to.include('10901');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -3964,7 +3964,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30267);",
+							"    pm.expect(pm.response.text()).to.include('30267');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4038,7 +4038,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10901);",
+							"    pm.expect(pm.response.text()).to.include('10901');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -4111,7 +4111,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30267);",
+							"    pm.expect(pm.response.text()).to.include('30267');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4184,7 +4184,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10901);",
+							"    pm.expect(pm.response.text()).to.include('10901');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -4257,7 +4257,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30267);",
+							"    pm.expect(pm.response.text()).to.include('30267');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4330,7 +4330,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(40307);",
+							"    pm.expect(pm.response.text()).to.include('40307');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4400,7 +4400,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30266);",
+							"    pm.expect(pm.response.text()).to.include('30266');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4473,7 +4473,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31511);",
+							"    pm.expect(pm.response.text()).to.include('31511');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4536,7 +4536,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30262);",
+							"    pm.expect(pm.response.text()).to.include('30262');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4589,7 +4589,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30262);",
+							"    pm.expect(pm.response.text()).to.include('30262');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4642,7 +4642,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30262);",
+							"    pm.expect(pm.response.text()).to.include('30262');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4695,7 +4695,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30267);",
+							"    pm.expect(pm.response.text()).to.include('30267');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4758,7 +4758,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30267);",
+							"    pm.expect(pm.response.text()).to.include('30267');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4821,7 +4821,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30267);",
+							"    pm.expect(pm.response.text()).to.include('30267');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4885,7 +4885,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30268);",
+							"    pm.expect(pm.response.text()).to.include('30268');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -4949,7 +4949,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30251);",
+							"    pm.expect(pm.response.text()).to.include('30251');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -5012,7 +5012,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30210);",
+							"    pm.expect(pm.response.text()).to.include('30210');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -5065,7 +5065,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30251);",
+							"    pm.expect(pm.response.text()).to.include('30251');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -5118,7 +5118,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30263);",
+							"    pm.expect(pm.response.text()).to.include('30263');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -5182,7 +5182,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30251);",
+							"    pm.expect(pm.response.text()).to.include('30251');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -5236,7 +5236,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -5328,7 +5328,7 @@
 							"    pm.expect(status).to.eql(\"success\");",
 							"});",
 							"",
-							"if (commentResponseCode === 11608) {",
+							"if (commentResponseCode === '11608') {",
 							"    pm.environment.set(\"isDailyFreeComment\", \"true\");",
 							"    console.log(\"This was a Daily Free Comment.\");",
 							"} else {",
@@ -5428,7 +5428,7 @@
 							"    pm.expect(status).to.eql(\"success\");",
 							"});",
 							"",
-							"if (commentResponseCode === 11608) {",
+							"if (commentResponseCode === '11608') {",
 							"    pm.environment.set(\"isDailyFreeComment\", \"true\");",
 							"    console.log(\"This was a Daily Free Comment.\");",
 							"} else {",
@@ -5504,7 +5504,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -5587,7 +5587,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -5658,7 +5658,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30265);",
+							"    pm.expect(pm.response.text()).to.include('30265');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -5711,7 +5711,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30265);",
+							"    pm.expect(pm.response.text()).to.include('30265');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -5775,7 +5775,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31506);",
+							"    pm.expect(pm.response.text()).to.include('31506');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -5838,7 +5838,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31507);",
+							"    pm.expect(pm.response.text()).to.include('31507');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -5891,7 +5891,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31508);",
+							"    pm.expect(pm.response.text()).to.include('31508');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -5954,7 +5954,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11507);",
+							"    pm.expect(pm.response.text()).to.include('11507');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -6007,7 +6007,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31504);",
+							"    pm.expect(pm.response.text()).to.include('31504');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -6060,7 +6060,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31509);",
+							"    pm.expect(pm.response.text()).to.include('31509');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -6113,7 +6113,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11512);",
+							"    pm.expect(pm.response.text()).to.include('11512');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -6166,7 +6166,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11511);",
+							"    pm.expect(pm.response.text()).to.include('11511');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -6219,7 +6219,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31606);",
+							"    pm.expect(pm.response.text()).to.include('31606');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -6272,7 +6272,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31607);",
+							"    pm.expect(pm.response.text()).to.include('31607');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -6325,7 +6325,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -6397,7 +6397,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11211);",
+							"    pm.expect(pm.response.text()).to.include('11211');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -6461,7 +6461,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -6529,7 +6529,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11215);",
+							"    pm.expect(pm.response.text()).to.include('11215');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -6609,7 +6609,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11211);",
+							"    pm.expect(pm.response.text()).to.include('11211');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -6673,7 +6673,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -6741,7 +6741,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11215);",
+							"    pm.expect(pm.response.text()).to.include('11215');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -6822,7 +6822,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30203);",
+							"    pm.expect(pm.response.text()).to.include('30203');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -6886,7 +6886,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30204);",
+							"    pm.expect(pm.response.text()).to.include('30204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -6950,7 +6950,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31202);",
+							"    pm.expect(pm.response.text()).to.include('31202');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -7003,7 +7003,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31007);",
+							"    pm.expect(pm.response.text()).to.include('31007');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -7056,7 +7056,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31203);",
+							"    pm.expect(pm.response.text()).to.include('31203');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -7109,7 +7109,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31203);",
+							"    pm.expect(pm.response.text()).to.include('31203');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -7162,7 +7162,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31203);",
+							"    pm.expect(pm.response.text()).to.include('31203');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -7215,7 +7215,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31203);",
+							"    pm.expect(pm.response.text()).to.include('31203');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -7268,7 +7268,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30264);",
+							"    pm.expect(pm.response.text()).to.include('30264');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -7321,7 +7321,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(30264);",
+							"    pm.expect(pm.response.text()).to.include('30264');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -7374,7 +7374,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(51301);",
+							"    pm.expect(pm.response.text()).to.include('51301');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -7428,7 +7428,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -7500,7 +7500,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11215);",
+							"    pm.expect(pm.response.text()).to.include('11215');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -7581,7 +7581,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11205);",
+							"    pm.expect(pm.response.text()).to.include('11205');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -7634,7 +7634,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11011);",
+							"    pm.expect(pm.response.text()).to.include('11011');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -7687,7 +7687,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11011);",
+							"    pm.expect(pm.response.text()).to.include('11011');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -7744,7 +7744,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10801);",
+							"    pm.expect(pm.response.text()).to.include('10801');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -7808,7 +7808,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -7866,7 +7866,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11215);",
+							"    pm.expect(pm.response.text()).to.include('11215');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -7954,7 +7954,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11211);",
+							"    pm.expect(pm.response.text()).to.include('11211');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8018,7 +8018,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8086,7 +8086,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11215);",
+							"    pm.expect(pm.response.text()).to.include('11215');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8172,7 +8172,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10801);",
+							"    pm.expect(pm.response.text()).to.include('10801');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8246,7 +8246,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -8325,7 +8325,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11215);",
+							"    pm.expect(pm.response.text()).to.include('11215');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8408,7 +8408,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11104);",
+							"    pm.expect(pm.response.text()).to.include('11104');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8465,7 +8465,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10801);",
+							"    pm.expect(pm.response.text()).to.include('10801');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8529,7 +8529,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11009);",
+							"    pm.expect(pm.response.text()).to.include('11009');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8582,7 +8582,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11008);",
+							"    pm.expect(pm.response.text()).to.include('11008');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8636,7 +8636,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11502);",
+							"    pm.expect(pm.response.text()).to.include('11502');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8690,7 +8690,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8753,7 +8753,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11105);",
+							"    pm.expect(pm.response.text()).to.include('11105');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8807,7 +8807,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11107);",
+							"    pm.expect(pm.response.text()).to.include('11107');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8865,7 +8865,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8923,7 +8923,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11106);",
+							"    pm.expect(pm.response.text()).to.include('11106');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -8977,7 +8977,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11107);",
+							"    pm.expect(pm.response.text()).to.include('11107');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -9034,7 +9034,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -9093,7 +9093,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -9194,7 +9194,7 @@
 							"    pm.expect(status).to.eql(\"success\");",
 							"});",
 							"",
-							"if (commentResponseCode === 11608) {",
+							"if (commentResponseCode === '11608') {",
 							"    pm.environment.set(\"isDailyFreeComment\", \"true\");",
 							"    console.log(\"This was a Daily Free Comment.\");",
 							"} else {",
@@ -9249,7 +9249,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11607);",
+							"    pm.expect(pm.response.text()).to.include('11607');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -9303,7 +9303,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -9410,7 +9410,7 @@
 							"    pm.expect(status).to.eql(\"success\");",
 							"});",
 							"",
-							"if (likeResponseCode === 11514) {",
+							"if (likeResponseCode === '11514') {",
 							"    pm.environment.set(\"isDailyFreeLike\", \"true\");",
 							"    console.log(\"This was a Daily Free Like.\");",
 							"} else {",
@@ -9476,7 +9476,7 @@
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    const responseText = pm.response.text();",
-							"    pm.expect(responseText.includes(11205)).to.be.true;",
+							"    pm.expect(responseText.includes('11205')).to.be.true;",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -9574,7 +9574,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -9657,7 +9657,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31501);",
+							"    pm.expect(pm.response.text()).to.include('31501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -9710,7 +9710,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -9774,7 +9774,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11504);",
+							"    pm.expect(pm.response.text()).to.include('11504');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -9828,7 +9828,7 @@
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    const responseText = pm.response.text();",
-							"    pm.expect(responseText.includes(11205)).to.be.true;",
+							"    pm.expect(responseText.includes('11205')).to.be.true;",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -9926,7 +9926,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -9991,7 +9991,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31502);",
+							"    pm.expect(pm.response.text()).to.include('31502');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -10044,7 +10044,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -10108,7 +10108,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11507);",
+							"    pm.expect(pm.response.text()).to.include('11507');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -10161,7 +10161,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31504);",
+							"    pm.expect(pm.response.text()).to.include('31504');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -10214,7 +10214,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11506);",
+							"    pm.expect(pm.response.text()).to.include('11506');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -10268,7 +10268,7 @@
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    const responseText = pm.response.text();",
-							"    pm.expect(responseText.includes(11205)).to.be.true;",
+							"    pm.expect(responseText.includes('11205')).to.be.true;",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -10356,7 +10356,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31505);",
+							"    pm.expect(pm.response.text()).to.include('31505');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -10409,7 +10409,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11512);",
+							"    pm.expect(pm.response.text()).to.include('11512');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -10462,7 +10462,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11511);",
+							"    pm.expect(pm.response.text()).to.include('11511');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -10515,7 +10515,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31601);",
+							"    pm.expect(pm.response.text()).to.include('31601');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -10569,7 +10569,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11603);",
+							"    pm.expect(pm.response.text()).to.include('11603');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -10623,7 +10623,7 @@
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    const responseText = pm.response.text();",
-							"    pm.expect(responseText.includes(11205)).to.be.true;",
+							"    pm.expect(responseText.includes('11205')).to.be.true;",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -10721,7 +10721,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31604);",
+							"    pm.expect(pm.response.text()).to.include('31604');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -10774,7 +10774,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11204);",
+							"    pm.expect(pm.response.text()).to.include('11204');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -10838,7 +10838,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -10910,7 +10910,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11604);",
+							"    pm.expect(pm.response.text()).to.include('11604');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -10963,7 +10963,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -11052,7 +11052,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -11130,7 +11130,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31605);",
+							"    pm.expect(pm.response.text()).to.include('31605');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -11183,7 +11183,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -11261,7 +11261,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -11339,7 +11339,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10801);",
+							"    pm.expect(pm.response.text()).to.include('10801');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -11403,7 +11403,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -11481,7 +11481,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -11559,7 +11559,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10801);",
+							"    pm.expect(pm.response.text()).to.include('10801');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -11623,7 +11623,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11505);",
+							"    pm.expect(pm.response.text()).to.include('11505');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -11686,7 +11686,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -11768,7 +11768,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31503);",
+							"    pm.expect(pm.response.text()).to.include('31503');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -11821,7 +11821,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -11880,7 +11880,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -11939,7 +11939,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10801);",
+							"    pm.expect(pm.response.text()).to.include('10801');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -12003,7 +12003,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -12062,7 +12062,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -12121,7 +12121,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10801);",
+							"    pm.expect(pm.response.text()).to.include('10801');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -12185,7 +12185,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11012);",
+							"    pm.expect(pm.response.text()).to.include('11012');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -12239,7 +12239,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31008);",
+							"    pm.expect(pm.response.text()).to.include('31008');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -12293,7 +12293,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(31009);",
+							"    pm.expect(pm.response.text()).to.include('31009');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -12347,7 +12347,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -12418,7 +12418,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11009);",
+							"    pm.expect(pm.response.text()).to.include('11009');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -12490,7 +12490,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11009);",
+							"    pm.expect(pm.response.text()).to.include('11009');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -12562,7 +12562,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11008);",
+							"    pm.expect(pm.response.text()).to.include('11008');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -12632,7 +12632,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -12703,7 +12703,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11009);",
+							"    pm.expect(pm.response.text()).to.include('11009');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -12775,7 +12775,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11009);",
+							"    pm.expect(pm.response.text()).to.include('11009');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -12847,7 +12847,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11008);",
+							"    pm.expect(pm.response.text()).to.include('11008');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -12917,7 +12917,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11104);",
+							"    pm.expect(pm.response.text()).to.include('11104');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -12974,7 +12974,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11101);",
+							"    pm.expect(pm.response.text()).to.include('11101');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13053,7 +13053,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11102);",
+							"    pm.expect(pm.response.text()).to.include('11102');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13126,7 +13126,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11101);",
+							"    pm.expect(pm.response.text()).to.include('11101');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13205,7 +13205,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11102);",
+							"    pm.expect(pm.response.text()).to.include('11102');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13278,7 +13278,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10801);",
+							"    pm.expect(pm.response.text()).to.include('10801');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -13342,7 +13342,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13413,7 +13413,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11009);",
+							"    pm.expect(pm.response.text()).to.include('11009');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13485,7 +13485,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11009);",
+							"    pm.expect(pm.response.text()).to.include('11009');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13557,7 +13557,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11008);",
+							"    pm.expect(pm.response.text()).to.include('11008');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13627,7 +13627,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11501);",
+							"    pm.expect(pm.response.text()).to.include('11501');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13698,7 +13698,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11009);",
+							"    pm.expect(pm.response.text()).to.include('11009');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13770,7 +13770,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11009);",
+							"    pm.expect(pm.response.text()).to.include('11009');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13842,7 +13842,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11008);",
+							"    pm.expect(pm.response.text()).to.include('11008');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -13912,7 +13912,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11002);",
+							"    pm.expect(pm.response.text()).to.include('11002');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -13973,7 +13973,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11014);",
+							"    pm.expect(pm.response.text()).to.include('11014');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -14028,7 +14028,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11002);",
+							"    pm.expect(pm.response.text()).to.include('11002');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -14089,7 +14089,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11014);",
+							"    pm.expect(pm.response.text()).to.include('11014');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -14144,7 +14144,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11002);",
+							"    pm.expect(pm.response.text()).to.include('11002');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -14205,7 +14205,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11602);",
+							"    pm.expect(pm.response.text()).to.include('11602');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -14284,7 +14284,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(21202);",
+							"    pm.expect(pm.response.text()).to.include('21202');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -14337,7 +14337,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11203);",
+							"    pm.expect(pm.response.text()).to.include('11203');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -14390,7 +14390,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(10801);",
+							"    pm.expect(pm.response.text()).to.include('10801');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -14454,7 +14454,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11207);",
+							"    pm.expect(pm.response.text()).to.include('11207');",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -14512,7 +14512,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(11206);",
+							"    pm.expect(pm.response.text()).to.include('11206');",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
