@@ -2999,7 +2999,7 @@ class GraphQLSchemaBuilder
             $results = $this->peerTokenService->transactionsHistory($args);
 
             return $this::createResponse(
-                $results['ResponseCode'],
+                (int)$results['ResponseCode'],
                 $results['affectedRows'],
                 false // no counter needed for existing data
             );
@@ -3034,7 +3034,7 @@ class GraphQLSchemaBuilder
             $results = $this->postService->postInteractions($args);
 
             return $this::createResponse(
-                $results['ResponseCode'],
+                (int)$results['ResponseCode'],
                 isset($results['affectedRows']) ? $results['affectedRows'] : [],
                 false // no counter needed for existing data
             );

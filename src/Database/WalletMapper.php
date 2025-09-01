@@ -1444,8 +1444,8 @@ class WalletMapper
             return [
                 'status' => 'success',
                 'ResponseCode' => $totalInteractions > 0
-                    ? "11205"
-                    : "21204",
+                    ? 11205
+                    : 21204,
                 'affectedRows' => array_merge(['totalInteractions' => $totalInteractions, 'totalScore' => $totalScore, 'totalDetails' => $interactionDetails])
             ];
         } catch (\Throwable $e) {
