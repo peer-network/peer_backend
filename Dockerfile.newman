@@ -5,6 +5,6 @@ RUN npm install -g newman-reporter-htmlextra
  
 WORKDIR /etc/newman
 
-# Copy Postman collections and merge script into container
+# Copy Postman collections and merge script into container.
 COPY tests/postman_collection/*.json /etc/newman/
 COPY tests/postman_collection/merge-collections.js /etc/newman/

@@ -1747,7 +1747,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'eligibilityToken' => function (array $root): string {
                     return $root['eligibilityToken'] ?? '';
@@ -1758,8 +1758,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.TransactionResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
+                'ResponseCode' => function (array $root): string {
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1771,7 +1771,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1792,8 +1792,8 @@ class GraphQLSchemaBuilder
                 'transactionid' => function (array $root): string {
                     return $root['transactionid'] ?? '';
                 },
-                'transuniqueid' => function (array $root): string {
-                    return $root['transuniqueid'] ?? '';
+                'operationid' => function (array $root): string {
+                    return $root['operationid'] ?? '';
                 },
                 'transactiontype' => function (array $root): string {
                     return $root['transactiontype'] ?? '';
@@ -1805,7 +1805,7 @@ class GraphQLSchemaBuilder
                     return $root['recipientid'] ?? '';
                 },
                 'tokenamount' => function (array $root): float {
-                    return $root['tokenamount'] ?? 0;
+                    return $root['tokenamount'] ?? 0.0;
                 },
                 'transferaction' => function (array $root): string {
                     return $root['transferaction'] ?? '';
