@@ -2749,7 +2749,7 @@ class GraphQLSchemaBuilder
         }
 
         if (isset($results['status']) && $results['status'] === 'error') {
-            return $this::createResponse($results['ResponseCode']);
+            return $this::createResponse((int)$results['ResponseCode']);
         }
 
         $this->logger->warning('Query.resolveProfile User not found');
