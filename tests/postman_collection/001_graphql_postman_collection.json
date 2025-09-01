@@ -7496,7 +7496,7 @@
 							"}",
 							"",
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect([11605, 11608]).to.include(commentResponseCode);",
+							"    pm.expect(['11605', '11608']).to.include(commentResponseCode);",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
