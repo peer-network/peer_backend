@@ -203,7 +203,7 @@ type UserPreferences {
 
 type ListTodaysInteractionsResponse {
   status: String!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: TodaysInteractionsData
 }
 
@@ -215,7 +215,7 @@ type TodaysInteractionsData {
 
 type PostInteractionResponse {
   status: String!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: [ProfileUser!]
 }
 
@@ -251,7 +251,7 @@ type LogWins {
 type UserLogWins {
   status: String
   counter: Int!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: [LogWins]
 }
 
@@ -329,7 +329,7 @@ type CommentInfo {
 type ChatResponse {
   status: String!
   counter: Int!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: [Chat!]
 }
 
@@ -361,7 +361,7 @@ type ChatParticipant {
 
 type FollowStatusResponse {
   status: String!
-  ResponseCode: Int
+  ResponseCode: String
   isfollowing: Boolean
 }
 
@@ -375,18 +375,18 @@ type ProfilePostMedia {
 
 type DefaultResponse {
   status: String!
-  ResponseCode: Int
+  ResponseCode: String
 }
 
 type UserPreferencesResponse {
   status: String!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: UserPreferences
 }
 
 type AddPostResponse {
   status: String!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: Postinfo
 }
 
@@ -401,7 +401,7 @@ type Postinfo {
 
 type AddChatResponse {
   status: String!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: Chatinfo
 }
 
@@ -412,7 +412,7 @@ type Chatinfo {
 type AddChatmessageResponse {
   status: String!
   counter: Int!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: [ChatMessageInfo]
 }
 
@@ -426,7 +426,7 @@ type ChatMessageInfo {
 
 type BasicUserInfoResponse {
   status: String!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: BasicUserInfo
 }
 
@@ -442,7 +442,7 @@ type BasicUserInfo {
 type UserFriendsResponse {
   status: String!
   counter: Int!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: [BasicUserInfo]
 }
 
@@ -480,7 +480,7 @@ type Profile {
 
 type ProfileInfo {
   status: String
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: Profile
 }
 
@@ -501,7 +501,7 @@ type FollowRelations {
 type FollowRelationsResponse {
   status: String
   counter: Int!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: FollowRelations
 }
 
@@ -520,14 +520,14 @@ type BlockedUsers {
 type BlockedUsersResponse {
   status: String
   counter: Int!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: BlockedUsers
 }
 
 type UserListResponse {
   status: String!
   counter: Int!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: [User]
 }
 
@@ -538,20 +538,20 @@ type Tag {
 type TagSearchResponse {
   status: String!
   counter: Int!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: [Tag]
 }
 
 type PostResponse {
   status: String!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: Post
 }
 
 type PostListResponse {
   status: String!
   counter: Int!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: [Post!]
 }
 
@@ -595,13 +595,13 @@ type Comment {
 type CommentResponse {
   status: String!
   counter: Int!
-  ResponseCode: Int
+  ResponseCode: String
   affectedRows: [Comment]
 }
 
 type ReferralInfoResponse {
   status: String
-  ResponseCode: Int
+  ResponseCode: String
   referralUuid: ID
   referralLink: String
 }
