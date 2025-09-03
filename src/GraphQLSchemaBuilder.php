@@ -18,7 +18,6 @@ const FREELIKE_=30;// whereby FREELIKE
 const FREECOMMENT_=31;// whereby FREECOMMENT
 const FREEPOST_=32;// whereby FREEPOST
 
-use Fawaz\App\AlphaMintService;
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
 use Fawaz\App\Comment;
@@ -63,7 +62,6 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
-        protected AlphaMintService $alphaMintService,
         protected LoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
@@ -156,7 +154,6 @@ class GraphQLSchemaBuilder
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
-        $this->alphaMintService->setCurrentUserId($userid);
     }
 
     protected function getStatusNameByID(int $status): ?string
