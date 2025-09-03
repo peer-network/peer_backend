@@ -31,3 +31,4 @@ newman/reports/
 sql_files_for_import_tmp/
 supervisord.pid
 changelog
+.idea
