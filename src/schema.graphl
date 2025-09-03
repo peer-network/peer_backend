@@ -39,7 +39,7 @@ type Query {
   postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
-  #advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
+  advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
 }
 
 type Mutation {
@@ -203,30 +203,46 @@ enum AdvertisementSort {
   SMALLEST_COST
 }
 
+# merged alt + neu
 type Advertisement {
   id: ID!
   createdAt: Date!
-  type: String!
-  creatorId: ID!
-  postId: ID!
+  type: AdvertisementType!
   timeframeStart: Date!
   timeframeEnd: Date!
   totalTokenCost: Float!
   totalEuroCost: Float!
   gemsEarned: Float!
-  views: Int!
+  amountLikes: Int!
+  amountViews: Int!
+  amountComments: Int!
+  amountDislikes: Int!
+  amountReports: Int!
+  user : ProfileUser!
+  post : Post!
 }
 
-type AdvertisementHistoryStats {
-  totalTokenSpent: Float!
-  totalEuroSpent: Float!
-  totalAds: Int!
-  totalGemsEarned: Int!
+type TotalAdvertisementHistoryStats { 
+  tokenSpent: Float!
+  euroSpent: Float!
+  amountAds: Int!
+  gemsEarned: Int!
+  amountLikes: Int!
+  amountViews: Int! 
+  amountComments: Int!
+  amountDislikes: Int!
+  amountReports: Int!
 }
 
 type AdvertisementHistoryResult {
-  stats: AdvertisementHistoryStats
+  stats: TotalAdvertisementHistoryStats
   advertisements: [Advertisement]
+}
+
+type ListedAdvertisementData {
+  status: String!
+  ResponseCode: String
+  affectedRows: AdvertisementHistoryResult
 }
 
 type ListAdvertisementData {
@@ -235,16 +251,9 @@ type ListAdvertisementData {
   affectedRows: [Advertisement]
 }
 
-type ListedAdvertisementData {
-  status: String!
-  counter: Int!
-  ResponseCode: String
-  affectedRows: AdvertisementHistoryResult
-}
-
 type Transaction {
   transactionid: String!
-  operationid: String!
+  transuniqueid: String!
   transactiontype: String!
   senderid: String!
   recipientid: String!
@@ -256,13 +265,13 @@ type Transaction {
 
 type TransactionResponse {
   status: String!
-  ResponseCode: String!
+  responseCode: Int!
   affectedRows: [Transaction!]
 }
 
 type TransferTokenResponse {
   status: String!
-  ResponseCode: String!
+  ResponseCode: Int!
   affectedRows: TransferToken!
 }
 
@@ -649,8 +658,8 @@ type Post {
   isreported: Boolean!
   isdisliked: Boolean!
   issaved: Boolean!
-  tags: [String]!
   url: String!
+  tags: [String]!
   user: ProfileUser!
   comments: [Comment!]!
 }
@@ -767,8 +776,8 @@ input UserPreferencesInput {
 }
 
 input AdvertisementHistoryFilter {
-  from: Date
-  to: Date
+  from: DateTime
+  to: DateTime
   type: AdvertisementType
   advertisementId: ID
   postId: ID
