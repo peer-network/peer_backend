@@ -509,7 +509,7 @@ class UserService
                             'available' => $available,
                         ]);
                         $this->transactionManager->rollback();
-                        return $this->respondWithError(00000); // TESTING Team: INVALID_ONBOARDING_VALUE — input contains onboarding not listed in AVAILABLE_ONBOARDINGS;
+                        return $this->respondWithError(31011); // TESTING Team: INVALID_ONBOARDING_VALUE — input contains onboarding not listed in AVAILABLE_ONBOARDINGS;
                     }
                 }
 
