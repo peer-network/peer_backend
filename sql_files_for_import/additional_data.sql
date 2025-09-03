@@ -123,19 +123,20 @@ INSERT INTO posts (
     NULL,
     NULL,
     1,
-    date_trunc('day', NOW()) - INTERVAL '2 days'
+    date_trunc('day', NOW()) - INTERVAL '3 days'
 );
 
 -- adv_post_advertisement
 INSERT INTO advertisements (
-    advertisementid, postid, userid, status, timestart, timeend
+    advertisementid, postid, userid, status, timestart, timeend, createdat
 ) VALUES (
     'a1111111-aaaa-1111-aaaa-111111111111',
     '4008c0dd-296c-46d3-811d-f90a2c077757',
     '6520ac47-f262-4f7e-b643-9dc5ee4cfa82',
     'basic',
-    date_trunc('day', NOW()) - INTERVAL '1 day',
-    date_trunc('day', NOW()) + INTERVAL '3 days'
+    date_trunc('day', NOW()) - INTERVAL '2 days',
+    date_trunc('day', NOW()) + INTERVAL '2 days',
+    date_trunc('day', NOW()) - INTERVAL '3 days'
 );
 
 -- adv_post_log
@@ -146,6 +147,53 @@ INSERT INTO advertisements_log (
     'a1111111-aaaa-1111-aaaa-111111111111',
     '4008c0dd-296c-46d3-811d-f90a2c077757',
     '6520ac47-f262-4f7e-b643-9dc5ee4cfa82',
+    'basic',
+    date_trunc('day', NOW()) - INTERVAL '2 days',
+    date_trunc('day', NOW()) + INTERVAL '2 days',
+    2000.00000,
+    200.00000,
+    date_trunc('day', NOW()) - INTERVAL '3 days'
+);
+
+-- adv_post_2
+INSERT INTO posts (
+    postid, userid, feedid, contenttype, title, mediadescription,
+    media, cover, options, status, createdat
+) VALUES (
+    '1008c0dd-296c-46d3-811d-f90a2c077757',
+    'dbe72768-0d47-4d29-99e7-b6ec4eadfaa3',
+    NULL,
+    'image',
+    'Test Advertisement Post',
+    'This is a test post used for advertisement CI tests.',
+    '[{"path":"/image/1c9448a1-3608-423f-a038-2f267c943151.webp","options":{"size":"4.27 KB","resolution":"200x300"}}]',
+    NULL,
+    NULL,
+    1,
+    date_trunc('day', NOW()) - INTERVAL '2 days'
+);
+
+-- adv_post_advertisement_2
+INSERT INTO advertisements (
+    advertisementid, postid, userid, status, timestart, timeend, createdat
+) VALUES (
+    'b2222222-bbbb-2222-bbbb-222222222222',
+    '1008c0dd-296c-46d3-811d-f90a2c077757',
+    'dbe72768-0d47-4d29-99e7-b6ec4eadfaa3',
+    'basic',
+    date_trunc('day', NOW()) - INTERVAL '1 day',
+    date_trunc('day', NOW()) + INTERVAL '3 days',
+    date_trunc('day', NOW()) - INTERVAL '2 days'
+);
+
+-- adv_post_log_2
+INSERT INTO advertisements_log (
+    advertisementid, postid, userid, status,
+    timestart, timeend, tokencost, eurocost, createdat
+) VALUES (
+    'b2222222-bbbb-2222-bbbb-222222222222',
+    '1008c0dd-296c-46d3-811d-f90a2c077757',
+    'dbe72768-0d47-4d29-99e7-b6ec4eadfaa3',
     'basic',
     date_trunc('day', NOW()) - INTERVAL '1 day',
     date_trunc('day', NOW()) + INTERVAL '3 days',
