@@ -14,7 +14,7 @@ type Query {
   searchUser(userid: ID,contentFilterBy: ContentFilterType, email: String, username: String, status: Int, verified: Int, ip: String, offset: Int, limit: Int): UserListResponse!
   listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse!
   getProfile(userid: ID,contentFilterBy: ContentFilterType, postLimit: Int): ProfileInfo!
-  listFollowRelations(contentFilterBy: ContentFilterType,userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
+  listFollowRelations(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
   listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!
   getUserInfo: UserInfoResponse!
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
@@ -49,7 +49,7 @@ type Query {
   postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
-  #advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
+  advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
 }
 
 type Mutation {
@@ -162,43 +162,51 @@ enum AdvertisementSort {
   SMALLEST_COST
 }
 
+# merged alt + neu
 type Advertisement {
   id: ID!
   createdAt: Date!
-  type: String!
-  creatorId: ID!
-  postId: ID!
+  type: AdvertisementType!
   timeframeStart: Date!
   timeframeEnd: Date!
   totalTokenCost: Float!
   totalEuroCost: Float!
   gemsEarned: Float!
-  views: Int!
+  amountLikes: Int!
+  amountViews: Int!
+  amountComments: Int!
+  amountDislikes: Int!
+  user : ProfileUser!
+  post : Post!
 }
 
-type AdvertisementHistoryStats {
-  totalTokenSpent: Float!
-  totalEuroSpent: Float!
-  totalAds: Int!
-  totalGemsEarned: Int!
+type TotalAdvertisementHistoryStats { 
+  tokenSpent: Float!
+  euroSpent: Float!
+  amountAds: Int!
+  gemsEarned: Int!
+  amountLikes: Int!
+  amountViews: Int! 
+  amountComments: Int!
+  amountDislikes: Int!
+  amountReports: Int!
 }
 
 type AdvertisementHistoryResult {
-  stats: AdvertisementHistoryStats
+  stats: TotalAdvertisementHistoryStats
   advertisements: [Advertisement]
+}
+
+type ListedAdvertisementData {
+  status: String!
+  ResponseCode: String
+  affectedRows: AdvertisementHistoryResult
 }
 
 type ListAdvertisementData {
   status: String!
   ResponseCode: String
   affectedRows: [Advertisement]
-}
-
-type ListedAdvertisementData {
-  status: String!
-  counter: Int!
-  ResponseCode: String
-  affectedRows: AdvertisementHistoryResult
 }
 
 type Transaction {
@@ -839,8 +847,8 @@ type Post {
   isreported: Boolean!
   isdisliked: Boolean!
   issaved: Boolean!
-  tags: [String]!
   url: String!
+  tags: [String]!
   user: ProfileUser!
   comments: [Comment!]!
 }
