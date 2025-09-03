@@ -667,6 +667,10 @@ class PostMapper
                     $userFilters[] = $userMapping[$type]; 
                 }
             }
+            if (in_array('FOLLOWED', $filterBy, true) || in_array('FOLLOWER', $filterBy, true)) {
+                $userFilters[] = "p.userid = :currentUserId";
+            }
+            
             if (in_array('VIEWED', $filterBy, true)) {
                 $whereClauses[] = "EXISTS (
                     SELECT 1 FROM user_post_views upv

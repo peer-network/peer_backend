@@ -400,9 +400,9 @@ class PeerTokenMapper
         $transactionTypes = isset($args['type']) ? ($typeMap[$args['type']] ?? []) : [];
         $transferActions = isset($args['direction']) ? ($directionMap[$args['direction']] ?? []) : [];
 
-        $query = "SELECT * FROM transactions WHERE (senderid = :userid OR recipientid = :userid)";
+        $query = "SELECT * FROM transactions WHERE (senderid = :senderid OR recipientid = :recipientid)";
 
-        $params = [':userid' => $userId];
+        $params = [':senderid' => $userId, ':recipientid' => $userId];
 
         // Handle TRANSACTION TYPE filter.
         if (!empty($transactionTypes)) {
