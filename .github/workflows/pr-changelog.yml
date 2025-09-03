@@ -25,7 +25,7 @@ jobs:
             });
 
             // Build changelog
-            let changelog = "## 📜 Changelog\n\n";
+            let changelog = "## Changelog";
             for (const f of files) {
               let type = "🔧 Changed";
               if (f.filename.startsWith("src/")) type = "✨ Code";
@@ -36,9 +36,9 @@ jobs:
 
             // Preserve the original body, but replace/append the changelog section
             let body = pr.body || "";
-            const changelogMarker = "## 📜 Changelog";
+            const changelogMarker = "## Changelog";
             if (body.includes(changelogMarker)) {
-              body = body.replace(/## 📜 Changelog[\\s\\S]*/m, changelog);
+              body = body.replace(/## Changelog[\\s\\S]*/m, changelog);
             } else {
               body += "\\n\\n" + changelog;
             }
