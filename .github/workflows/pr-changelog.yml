@@ -1,0 +1,49 @@
+name: Update PR Description with Changelog
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update PR body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+
+            // Get changed files
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+
+            // Build changelog
+            let changelog = "## 📜 Changelog\n\n";
+            for (const f of files) {
+              let type = "🔧 Changed";
+              if (f.filename.startsWith("src/")) type = "✨ Code";
+              if (f.filename.startsWith("docs/")) type = "📝 Docs";
+              if (f.filename.startsWith("tests/")) type = "✅ Tests";
+              changelog += `- ${type}: \`${f.filename}\`\n`;
+            }
+
+            // Preserve the original body, but replace/append the changelog section
+            let body = pr.body || "";
+            const changelogMarker = "## 📜 Changelog";
+            if (body.includes(changelogMarker)) {
+              body = body.replace(/## 📜 Changelog[\\s\\S]*/m, changelog);
+            } else {
+              body += "\\n\\n" + changelog;
+            }
+
+            // Update PR description
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              body: body
+            });
