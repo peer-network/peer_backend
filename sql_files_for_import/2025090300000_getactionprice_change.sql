@@ -1,3 +1,6 @@
+ALTER TABLE user_preferences
+    ADD COLUMN IF NOT EXISTS onboardingsWereShown JSONB NOT NULL DEFAULT '[]';
+
 -- updated action prices 
 UPDATE action_prices
 SET post_price    = 2.0,

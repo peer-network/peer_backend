@@ -12,8 +12,6 @@ CREATE TABLE IF NOT EXISTS user_preferences (
     CONSTRAINT fk_user_preferences_users FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
 );
 
-ALTER TABLE user_preferences
-    ADD COLUMN IF NOT EXISTS onboardingsWereShown JSONB NOT NULL DEFAULT '[]';
 -- CREATE INDEX idx_userid_user_preferences ON user_preferences(userid);
 
 
