@@ -6830,7 +6830,8 @@
 			},
 			"response": []
 		},
-		{
+
+    {
 			"name": "Transfer token to yourself",
 			"event": [
 				{

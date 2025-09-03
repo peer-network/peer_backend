@@ -31,7 +31,6 @@ const PRICEPOST=20;
 const BASIC = 50;
 const PINNED = 200;
 
-use Fawaz\App\AlphaMintService;
 use Fawaz\App\Advertisements;
 use Fawaz\App\AdvertisementService;
 use Fawaz\App\Chat;
@@ -77,7 +76,6 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
-        protected AlphaMintService $alphaMintService,
         protected LoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
@@ -171,7 +169,6 @@ class GraphQLSchemaBuilder
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
-        $this->alphaMintService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
     }
 
@@ -1964,7 +1961,6 @@ class GraphQLSchemaBuilder
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
-            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             //'advertisementHistory' => fn(mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
         ];
     }
