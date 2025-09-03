@@ -475,6 +475,7 @@ class UserService
         $newUserPreferences = $args['userPreferences'];
 
         $contentFiltering = $newUserPreferences['contentFilteringSeverityLevel'] ?? null;
+        $shownOnboardingsIn  = $newUserPreferences['shownOnboardings'] ?? null; 
         
         try {
             $this->transactionManager->beginTransaction();
@@ -482,6 +483,7 @@ class UserService
             $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
             if (!$userPreferences) {
                 $this->logger->error('UserService.updateUserPreferences: failed to load user preferences for updating');
+                $this->transactionManager->rollback();
                 return $this->respondWithError(40301); // 402xx
             }
 
@@ -490,12 +492,46 @@ class UserService
                 
                 if($contentFilteringSeverityLevel === null){
                     $this->logger->error('UserService.updateUserPreferences: failed to get ContentFilteringSeverityLevel');
+                    $this->transactionManager->rollback();
                     return $this->respondWithError(30103);
                 }
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
                 $userPreferences->setUpdatedAt();
             }
 
+            if (is_array($shownOnboardingsIn) && !empty($shownOnboardingsIn)) {
+                $available = ConstantsConfig::onboarding()['AVAILABLE_ONBOARDINGS'] ?? [];
+
+                foreach ($shownOnboardingsIn as $o) {
+                    if (!in_array($o, $available, true)) {
+                        $this->logger->warning('UserService.updateUserPreferences: invalid onboarding value', [
+                            'value'     => $o,
+                            'available' => $available,
+                        ]);
+                        $this->transactionManager->rollback();
+                        return $this->respondWithError(00000); // TESTING Team: INVALID_ONBOARDING_VALUE — input contains onboarding not listed in AVAILABLE_ONBOARDINGS;
+                    }
+                }
+
+                $currentShown = $userPreferences->getOnboardingsWereShown();
+                if (!is_array($currentShown)) {
+                    $currentShown = empty($currentShown) ? [] : (array)$currentShown;
+                }
+
+                $currentShown = array_values(array_filter(array_map('strval', $currentShown)));
+                $incoming     = array_values(array_filter(array_map('strval', $shownOnboardingsIn)));
+
+                $set = array_fill_keys($currentShown, true);
+                foreach ($incoming as $o) {
+                    $set[$o] = true;
+                }
+                $merged = array_keys($set);
+
+                if ($merged !== $currentShown) {
+                    $userPreferences->setOnboardingsWereShown($merged);
+                    $userPreferences->setUpdatedAt();
+                }
+            }
 
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
@@ -508,6 +544,10 @@ class UserService
             }
             $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
+            if (!isset($resultPreferences['onboardingsWereShown']) || !is_array($resultPreferences['onboardingsWereShown'])) {
+                $resultPreferences['onboardingsWereShown'] = (array)($userPreferences->getOnboardingsWereShown() ?? []);
+            }
+            
             $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
             
             $this->transactionManager->commit();
