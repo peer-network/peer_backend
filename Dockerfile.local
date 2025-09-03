@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-bookworm
+FROM php:8.4-fpm-bookworm
 
 RUN apt-get update && \
     apt-get install -y nginx supervisor \
@@ -10,6 +10,11 @@ RUN apt-get update && \
     && docker-php-ext-configure ffi \
     && docker-php-ext-install pgsql pdo pdo_pgsql bcmath xml curl gmp ffi \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Rust and Cargo
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
+    echo 'source $HOME/.cargo/env' >> /root/.bashrc
+ENV PATH="/root/.cargo/bin:$PATH"
 
 RUN rm -f /usr/local/etc/php/conf.d/ffi.ini \
     && echo 'ffi.enable=true' > /usr/local/etc/php/conf.d/zz-ffi.ini
@@ -27,6 +32,41 @@ RUN { \
 } > /usr/local/etc/php/conf.d/uploads.ini
 
 WORKDIR /var/www/html
+
+COPY . .
+
+# Build TokenCalculations if Cargo.toml exists
+RUN if [ -f tokencalculation/Cargo.toml ]; then \
+      cd tokencalculation && cargo build --release; \
+    fi
+
+RUN chown -R www-data:www-data /var/www/
+
+# Patch pg_last_error
+RUN sed -i '/pg_last_error()/i if (\$conn) {' src/config/checker.php && \
+    sed -i '/pg_last_error()/a } else { error_log("Connection not established before pg_last_error().", 0); }' src/config/checker.php
+
+# Prepare logs
+RUN mkdir -p /var/www/html/runtime-data/logs \
+ && touch /var/www/html/runtime-data/logs/errorlog.txt \
+ && touch /var/www/html/runtime-data/logs/graphql_debug.log \
+ && chmod 666 /var/www/html/runtime-data/logs/*.log \
+ && chown -R www-data:www-data /var/www/html/runtime-data
+
+# Composer deps (mirror CI)
+RUN composer require --no-update php-ffmpeg/php-ffmpeg
+RUN composer config --global process-timeout 600 \
+ && composer install --no-dev --prefer-dist --no-interaction \
+ && composer dump-autoload -o
+
+# Error logging config
+RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
+ && echo "display_errors = Off" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
+ && echo "display_startup_errors = Off" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
+ && echo "error_reporting = E_ALL & ~E_DEPRECATED & ~E_NOTICE" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
+ && echo "error_log = /var/www/html/runtime-data/logs/errorlog.txt" >> /usr/local/etc/php/conf.d/docker-php-error.ini
+
+ RUN chmod 777 /tmp
 
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
 COPY docker/supervisord.conf /etc/supervisord.conf

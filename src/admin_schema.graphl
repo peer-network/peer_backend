@@ -48,7 +48,6 @@ type Query {
   postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
-  alphaMint: DefaultResponse
 }
 
 type Mutation {
@@ -74,7 +73,8 @@ type Mutation {
   createPost(action: PostType!, input: PostInput!): PostResponse!
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
-  resolveTransfer(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
+  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: "Use `resolveTransferV2`.")
+  resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
   reportUser(userid: ID!): DefaultResponse!
 }
 
@@ -136,7 +136,7 @@ input UserPreferencesInput {
 
 type Transaction {
   transactionid: String!
-  transuniqueid: String!
+  operationid: String!
   transactiontype: String!
   senderid: String!
   recipientid: String!
@@ -148,14 +148,14 @@ type Transaction {
 
 type TransactionResponse {
   status: String!
-  responseCode: Int!
+  ResponseCode: String!
   affectedRows: [Transaction!]
 }
 
 
 type TransferTokenResponse {
   status: String!
-  ResponseCode: Int!
+  ResponseCode: String!
   affectedRows: TransferToken!
 }
 

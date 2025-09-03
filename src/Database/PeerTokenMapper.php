@@ -1,17 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use Fawaz\App\Models\BtcSwapTransaction;
 use Fawaz\App\Models\Transaction;
-use Fawaz\App\Repositories\BtcSwapTransactionRepository;
 use Fawaz\App\Repositories\TransactionRepository;
 use PDO;
-use Fawaz\Services\BtcService;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
-use Fawaz\Utils\TokenCalculations\SwapTokenHelper;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Fawaz\App\Status;
@@ -48,7 +45,6 @@ class PeerTokenMapper
         $this->peerWallet = $data['peer'];
         $this->btcpool = $data['btcpool'];
     }
-
 
     /**
      * Validate fees wallet UUID.
@@ -114,7 +110,7 @@ class PeerTokenMapper
             return self::respondWithError(30264);
         }
 
-        $numberoftokens = (string) $args['numberoftokens'];
+        $numberoftokens = (float) $args['numberoftokens'];
         if ($numberoftokens <= 0) {
             $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
                 'numberoftokens' => $numberoftokens,
@@ -138,7 +134,11 @@ class PeerTokenMapper
             $stmt->execute();
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            $this->logger->error('Database error while fetching recipient user', [
+                'error' => $e->getMessage(),
+                'recipient' => $recipient
+            ]);
+            return self::respondWithError(31007);
         }
 
         if (empty($row)) {
@@ -165,7 +165,11 @@ class PeerTokenMapper
                 ]);
             }
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            $this->logger->error('Error while fetching inviter ID', [
+                'error' => $e->getMessage(),
+                'userId' => $userId
+            ]);
+            return self::respondWithError(31007);
         }
 
         if ($currentBalance < $requiredAmount) {
@@ -185,13 +189,14 @@ class PeerTokenMapper
 
             // 1. SENDER: Debit From Account
             if ($requiredAmount) {
-                $this->createAndSaveTransaction($transRepo, [
-                    'transuniqueid' => $transUniqueId,
-                    'transactiontype' => 'transferDeductSenderToRecipient',
-                    'senderid' => $userId,
-                    'tokenamount' => -$requiredAmount,
-                    'message' => $message
-                ]);
+                // Remove this records we don't need it anymore.
+                // $this->createAndSaveTransaction($transRepo, [
+                //     'operationid' => $transUniqueId,
+                //     'transactiontype' => 'transferDeductSenderToRecipient',
+                //     'senderid' => $userId,
+                //     'tokenamount' => -$requiredAmount,
+                //     'message' => $message
+                // ]);
 
                 $id = self::generateUUID();
                 if (empty($id)) {
@@ -214,7 +219,7 @@ class PeerTokenMapper
             // 2. RECIPIENT: Credit To Account
             if ($numberoftokens) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'transuniqueid' => $transUniqueId,
+                    'operationid' => $transUniqueId,
                     'transactiontype' => 'transferSenderToRecipient',
                     'senderid' => $userId,
                     'recipientid' => $recipient,
@@ -243,7 +248,7 @@ class PeerTokenMapper
             // 3. INVITER: Fees To Inviter (if applicable)
             if (!empty($inviterId) && $inviterWin) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'transuniqueid' => $transUniqueId,
+                    'operationid' => $transUniqueId,
                     'transactiontype' => 'transferSenderToInviter',
                     'senderid' => $userId,
                     'recipientid' => $inviterId,
@@ -271,7 +276,7 @@ class PeerTokenMapper
             $feeAmount = TokenHelper::mulRc($numberoftokens, POOLFEE);
             if ($feeAmount) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'transuniqueid' => $transUniqueId,
+                    'operationid' => $transUniqueId,
                     'transactiontype' => 'transferSenderToPoolWallet',
                     'senderid' => $userId,
                     'recipientid' => $this->poolWallet,
@@ -299,7 +304,7 @@ class PeerTokenMapper
             $peerAmount = TokenHelper::mulRc($numberoftokens, PEERFEE);
             if ($peerAmount) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'transuniqueid' => $transUniqueId,
+                    'operationid' => $transUniqueId,
                     'transactiontype' => 'transferSenderToPeerWallet',
                     'senderid' => $userId,
                     'recipientid' => $this->peerWallet,
@@ -327,7 +332,7 @@ class PeerTokenMapper
             $burnAmount = TokenHelper::mulRc($numberoftokens, BURNFEE);
             if ($burnAmount) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'transuniqueid' => $transUniqueId,
+                    'operationid' => $transUniqueId,
                     'transactiontype' => 'transferSenderToBurnWallet',
                     'senderid' => $userId,
                     'recipientid' => $this->burnWallet,
@@ -360,10 +365,15 @@ class PeerTokenMapper
                 'createdat' => date('Y-m-d H:i:s.u')
             ];
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            $this->logger->error('Error during token transfer', [
+                'error' => $e->getMessage(),
+                'userId' => $userId,
+                'recipient' => $recipient,
+                'numberoftokens' => $numberoftokens
+            ]);
+            return self::respondWithError(40301);
         }
     }
-
 
     private function getInviterID(string $userId): ?string
     {
@@ -389,7 +399,7 @@ class PeerTokenMapper
      * @param $userId string
      * @param $hashedPassword string
      * 
-     * @return bool value
+     * @return string value
      */
     public function getUserWalletBalance(string $userId): string
     {
@@ -419,7 +429,7 @@ class PeerTokenMapper
      */
     private function createAndSaveTransaction($transRepo, array $transObj): void
     {
-        $transaction = new Transaction($transObj, ['transuniqueid', 'senderid', 'tokenamount'], false);
+        $transaction = new Transaction($transObj, ['operationid', 'senderid', 'tokenamount'], false);
         $transRepo->saveTransaction($transaction);
     }
 
@@ -450,9 +460,9 @@ class PeerTokenMapper
         $transactionTypes = isset($args['type']) ? ($typeMap[$args['type']] ?? []) : [];
         $transferActions = isset($args['direction']) ? ($directionMap[$args['direction']] ?? []) : [];
 
-        $query = "SELECT * FROM transactions WHERE (senderid = :userid OR recipientid = :userid)";
+        $query = "SELECT * FROM transactions WHERE (senderid = :senderid OR recipientid = :recipientid)";
 
-        $params = [':userid' => $userId];
+        $params = [':senderid' => $userId, ':recipientid' => $userId];
 
         // Handle TRANSACTION TYPE filter.
         if (!empty($transactionTypes)) {
@@ -519,10 +529,15 @@ class PeerTokenMapper
             $stmt->execute();
             $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            $data = array_map(
+                fn($trans) => (new Transaction($trans, [], false))->getArrayCopy(),
+                $transactions
+            );
+
             return [
                 'status' => 'success',
                 'ResponseCode' => 11215,
-                'affectedRows' => $transactions
+                'affectedRows' => $data
             ];
         } catch (\Throwable $th) {
             $this->logger->error("Database error while fetching transactions - PeerTokenMapper.getTransactions", [
@@ -531,5 +546,4 @@ class PeerTokenMapper
             throw new \RuntimeException("Database error while fetching transactions: " . $th->getMessage());
         }
     }
-
 }

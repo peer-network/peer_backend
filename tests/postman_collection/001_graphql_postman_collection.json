@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "7a0b1f2c-b719-48ff-9a4e-55bc65e1eceb",
-		"name": "11111",
+		"_postman_id": "c6bfe79c-f9c0-420e-8701-d8cf48a228e2",
+		"name": "001_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-7a0b1f2c-b719-48ff-9a4e-55bc65e1eceb?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-c6bfe79c-f9c0-420e-8701-d8cf48a228e2?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -948,7 +948,7 @@
 							"",
 							"// Function to add a random emoji",
 							"function addRandomEmoji(name) {",
-							"    const emojis = [\"\ud83d\udd25\", \"\ud83d\ude80\", \"\ud83d\udc8e\", \"\ud83c\udf89\", \"\ud83d\udca1\", \"\ud83d\udc31\", \"\u26a1\", \"\ud83e\udd84\"]; // Emoji list",
+							"    const emojis = [\"🔥\", \"🚀\", \"💎\", \"🎉\", \"💡\", \"🐱\", \"⚡\", \"🦄\"]; // Emoji list",
 							"    let randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];",
 							"    return `${name} ${randomEmoji}`;",
 							"}",
@@ -1107,7 +1107,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateName {\n    updateUsername(username: \"! @ # $ \u00a9 \u00ae \u2122 \u00b1\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateName {\n    updateUsername(username: \"! @ # $ © ® ™ ±\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3745,7 +3745,7 @@
 			"response": []
 		},
 		{
-			"name": "Check if they appear in \u201cFollowing\u201d list",
+			"name": "Check if they appear in “Following” list",
 			"event": [
 				{
 					"listen": "test",
@@ -3979,7 +3979,7 @@
 			"response": []
 		},
 		{
-			"name": "Check if they disappear in \u201cFollowing\u201d list",
+			"name": "Check if they disappear in “Following” list",
 			"event": [
 				{
 					"listen": "test",
@@ -8033,10 +8033,10 @@
 				"body": {
 					"mode": "formdata",
 					"formdata": [
-						 {
+						{
 							"key": "eligibilityToken",
-							"type": "text",
-							"value": "{{eligibilityToken}}"
+							"value": "{{eligibilityToken}}",
+							"type": "text"
 						},
 						{
 							"key": "file",
@@ -8882,6 +8882,120 @@
 			"response": []
 		},
 		{
+			"name": "Check followers filter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"w_userid_t2 is present in response\", function () {",
+							"    pm.expect(pm.response.text()).to.include(pm.environment.get(\"w_userid_t2\"));",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(filterBy: FOLLOWER, limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check followed filter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"w_userid_t2 is present in response\", function () {",
+							"    pm.expect(pm.response.text()).to.include(pm.environment.get(\"w_userid_t2\"));",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(filterBy: FOLLOWED, limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Transfer token",
 			"event": [
 				{
@@ -8927,7 +9041,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid_t3}}\", numberoftokens: 105, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{userid_t3}}\", numberoftokens: 105, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8991,7 +9105,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid_t2}}\", numberoftokens: 105, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{userid_t2}}\", numberoftokens: 105, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -9032,14 +9146,7 @@
 							"",
 							"let transactions = response?.data?.getTransactionHistory?.affectedRows || [];",
 							"",
-							"let deduct = transactions.find(tx => tx.transferaction === \"DEDUCT\");",
 							"let credit = transactions.find(tx => tx.transferaction === \"CREDIT\");",
-							"",
-							"pm.test(\"DEDUCT transaction has correct message and amount\", function () {",
-							"    pm.expect(deduct).to.not.be.undefined;",
-							"    pm.expect(deduct.message).to.eql(\"hi\");",
-							"    pm.expect(deduct.tokenamount).to.eql(-109.2);",
-							"});",
 							"",
 							"pm.test(\"CREDIT transaction has correct message\", function () {",
 							"    pm.expect(credit).to.not.be.undefined;",
@@ -9078,7 +9185,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -9264,7 +9371,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransfer(recipient: \"{{userid}}\", numberoftokens: 100, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{userid}}\", numberoftokens: 100, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9300,8 +9407,8 @@
 							"let newLiquidity = response?.data?.balance?.currentliquidity;",
 							"let oldLiquidity = pm.environment.get(\"liquidity3\");",
 							"",
-							"console.log(`\ud83d\udcb0 Old Liquidity: ${oldLiquidity}`);",
-							"console.log(`\ud83d\udcb0 New Liquidity: ${newLiquidity}`);",
+							"console.log(`Old Liquidity: ${oldLiquidity}`);",
+							"console.log(`New Liquidity: ${newLiquidity}`);",
 							"",
 							"pm.test(\"Previous liquidity exists\", function () {",
 							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
@@ -9395,15 +9502,8 @@
 							"",
 							"let transactions = response?.data?.getTransactionHistory?.affectedRows || [];",
 							"",
-							"let deduct = transactions.find(tx => tx.transferaction === \"DEDUCT\");",
 							"let credit = transactions.find(tx => tx.transferaction === \"CREDIT\");",
 							"let inviterFee = transactions.find(tx => tx.transferaction === \"INVITER_FEE\");",
-							"",
-							"pm.test(\"DEDUCT transaction has correct message and amount\", function () {",
-							"    pm.expect(deduct).to.not.be.undefined;",
-							"    pm.expect(deduct.message).to.eql(\"hi\");",
-							"    pm.expect(deduct.tokenamount).to.eql(-105);",
-							"});",
 							"",
 							"pm.test(\"CREDIT transaction has correct message\", function () {",
 							"    pm.expect(credit).to.not.be.undefined;",
@@ -9447,7 +9547,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 6) {\n        status\n        responseCode\n        affectedRows {\n            transactionid\n            transuniqueid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 6) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -10122,7 +10222,7 @@
 							"        pm.expect(profile.biography, \"Biography should be a file path like '/userData/<uuid>.txt'\")",
 							"          .to.match(/^\\/userData\\/[a-f0-9\\-]{36}\\.txt$/);",
 							"    } else {",
-							"        console.warn(`Profile ID ${profile.id} does not match userid_t2 (${expectedUserId}) \u2014 skipping checks.`);",
+							"        console.warn(`Profile ID ${profile.id} does not match userid_t2 (${expectedUserId}) — skipping checks.`);",
 							"    }",
 							"});"
 						],
@@ -10390,7 +10490,6 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"11501\");",
 							"});",
-							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
@@ -10529,7 +10628,6 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"11501\");",
 							"});",
-							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",

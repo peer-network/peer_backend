@@ -28,7 +28,6 @@ const PRICEDISLIKE=5;
 const PRICECOMMENT=0.5;
 const PRICEPOST=20;
 
-use Fawaz\App\AlphaMintService;
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
 use Fawaz\App\Comment;
@@ -73,7 +72,6 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
-        protected AlphaMintService $alphaMintService,
         protected LoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
@@ -166,7 +164,6 @@ class GraphQLSchemaBuilder
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
-        $this->alphaMintService->setCurrentUserId($userid);
     }
 
     protected function getStatusNameByID(int $status): ?string
@@ -1691,7 +1688,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'eligibilityToken' => function (array $root): string {
                     return $root['eligibilityToken'] ?? '';
@@ -1702,8 +1699,8 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.TransactionResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
+                'ResponseCode' => function (array $root): string {
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1715,7 +1712,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
@@ -1736,8 +1733,8 @@ class GraphQLSchemaBuilder
                 'transactionid' => function (array $root): string {
                     return $root['transactionid'] ?? '';
                 },
-                'transuniqueid' => function (array $root): string {
-                    return $root['transuniqueid'] ?? '';
+                'operationid' => function (array $root): string {
+                    return $root['operationid'] ?? '';
                 },
                 'transactiontype' => function (array $root): string {
                     return $root['transactiontype'] ?? '';
@@ -1749,7 +1746,7 @@ class GraphQLSchemaBuilder
                     return $root['recipientid'] ?? '';
                 },
                 'tokenamount' => function (array $root): float {
-                    return $root['tokenamount'] ?? 0;
+                    return $root['tokenamount'] ?? 0.0;
                 },
                 'transferaction' => function (array $root): string {
                     return $root['transferaction'] ?? '';
@@ -1820,7 +1817,6 @@ class GraphQLSchemaBuilder
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
-            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
         ];
     }
 
@@ -1861,6 +1857,7 @@ class GraphQLSchemaBuilder
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveTransfer' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
+            'resolveTransferV2' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
         ];
     }
 
