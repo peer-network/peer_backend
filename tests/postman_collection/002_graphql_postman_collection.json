@@ -14202,59 +14202,6 @@
 			"response": []
 		},
 		{
-			"name": "Fetchwinslog",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11203\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query Fetchwinslog {\n    listWinLogs(day: D0) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            from\n            token\n            userid\n            postid\n            action\n            numbers\n            createdat\n        }\n    }\n}",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Login tester 2",
 			"event": [
 				{
@@ -14520,6 +14467,59 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Gemsters {\n    gemsters(day: D0) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            winStatus {\n                totalGems\n                gemsintoken\n                bestatigung\n            }\n            userStatus {\n                userid\n                gems\n                tokens\n                percentage\n                details {\n                    gemid\n                    userid\n                    postid\n                    fromid\n                    gems\n                    numbers\n                    whereby\n                    createdat\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetchwinslog",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11203\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Fetchwinslog {\n    listWinLogs(day: D0) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            from\n            token\n            userid\n            postid\n            action\n            numbers\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
