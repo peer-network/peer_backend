@@ -1838,13 +1838,34 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? null;
                 },
             ],
+            'AdvertisementRow' => [
+                'id' => function (array $root): string {
+                    $this->logger->info('Query.Advertisement Resolvers');
+                    return $root['advertisementid'] ?? '';
+                },
+                'createdAt' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'type' => function (array $root): string {
+                    return strtoupper($root['status']) ?? 'BASIC';
+                },
+                'timeframeStart' => function (array $root): string {
+                    return $root['timestart'] ?? '';
+                },
+                'timeframeEnd' => function (array $root): string {
+                    return $root['timeend'] ?? '';
+                },
+                'totalTokenCost' => function (array $root): float {
+                    return $root['tokencost'] ?? 0.0;
+                },
+                'totalEuroCost' => function (array $root): float {
+                    return $root['eurocost'] ?? 0.0;
+                },
+            ],
             'ListedAdvertisementData' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.ListedAdvertisementData Resolvers');
                     return $root['status'] ?? '';
-                },
-                'counter' => function (array $root): int {
-                    return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
@@ -1858,17 +1879,14 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.Advertisement Resolvers');
                     return $root['advertisementid'] ?? '';
                 },
-                'createdAt' => function (array $root): string {
-                    return $root['createdat'] ?? '';
-                },
-                'type' => function (array $root): string {
-                    return $root['status'] ?? '';
-                },
                 'creatorId' => function (array $root): string {
                     return $root['userid'] ?? '';
                 },
                 'postId' => function (array $root): string {
                     return $root['postid'] ?? '';
+                },
+                'type' => function (array $root): string {
+                    return strtoupper($root['status']) ?? 'BASIC';
                 },
                 'timeframeStart' => function (array $root): string {
                     return $root['timestart'] ?? '';
@@ -1883,25 +1901,61 @@ class GraphQLSchemaBuilder
                     return $root['eurocost'] ?? 0.0;
                 },
                 'gemsEarned' => function (array $root): float {
-                    return $root['gemsEarned'] ?? 0.0;
+                    return $root['gemsearned'] ?? 0.0;
                 },
-                'views' => function (array $root): int {
-                    return $root['view'] ?? 0;
+                'amountLikes' => function (array $root): int {
+                    return $root['amountlikes'] ?? 0;
+                },
+                'amountViews' => function (array $root): int {
+                    return $root['amountviews'] ?? 0;
+                },
+                'amountComments' => function (array $root): int {
+                    return $root['amountcomments'] ?? 0;
+                },
+                'amountDislikes' => function (array $root): int {
+                    return $root['amountdislikes'] ?? 0;
+                },
+                'amountReports' => function (array $root): int {
+                    return $root['amountreports'] ?? 0;
+                },
+                'createdAt' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'user' => function (array $root): array { // neu
+                    return $root['user'] ?? [];
+                },
+                'post' => function (array $root): array { // neu
+                    return $root['post'] ?? [];
                 },
             ],
-            'AdvertisementHistoryStats' => [
-                'totalTokenSpent' => function (array $root): float {
-                    $this->logger->info('Query.AdvertisementHistoryStats Resolvers');
-                    return $root['totaltokenspent'] ?? 0.0;
+            'TotalAdvertisementHistoryStats' => [
+                'tokenSpent' => function (array $root): float {
+                    $this->logger->info('Query.TotalAdvertisementHistoryStats Resolvers');
+                    return $root['tokenSpent'] ?? 0.0;
                 },
-                'totalEuroSpent' => function (array $root): float {
-                    return $root['totaleurospent'] ?? 0.0;
+                'euroSpent' => function (array $root): float {
+                    return $root['euroSpent'] ?? 0.0;
                 },
-                'totalAds' => function (array $root): int {
-                    return $root['totalads'] ?? 0;
+                'amountAds' => function (array $root): int {
+                    return $root['amountAds'] ?? 0;
                 },
-                'totalGemsEarned' => function (array $root): int {
-                    return $root['totalgemsearned'] ?? 0;
+                'gemsEarned' => function (array $root): int {
+                    return $root['gemsEarned'] ?? 0;
+                },
+                'amountLikes' => function (array $root): int {
+                    return $root['amountLikes'] ?? 0;
+                },
+                'amountViews' => function (array $root): int {
+                    return $root['amountViews'] ?? 0;
+                },
+                'amountComments' => function (array $root): int {
+                    return $root['amountComments'] ?? 0;
+                },
+                'amountDislikes' => function (array $root): int {
+                    return $root['amountDislikes'] ?? 0;
+                },
+                'amountReports' => function (array $root): int {
+                    return $root['amountReports'] ?? 0;
                 },
             ],
             'AdvertisementHistoryResult' => [
@@ -1961,7 +2015,7 @@ class GraphQLSchemaBuilder
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
-            //'advertisementHistory' => fn(mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
+            'advertisementHistory' => fn(mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
         ];
     }
 
@@ -2238,7 +2292,7 @@ class GraphQLSchemaBuilder
     }
 
     // Werbeanzeige historie abrufen
-/*     protected function resolveAdvertisementHistory(?array $args = []): ?array
+    protected function resolveAdvertisementHistory(?array $args = []): ?array
     {
         // Authentifizierung prüfen
         if (!$this->checkAuthentication()) {
@@ -2267,7 +2321,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(40301);
         }
     }
- */
+
     protected function createUser(array $args): ?array
     {
         $this->logger->info('Query.createUser started');
