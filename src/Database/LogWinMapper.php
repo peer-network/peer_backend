@@ -85,6 +85,7 @@ class LogWinMapper
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
             foreach ($logwins as $key => $value) {
+                $this->transactionManager->beginTransaction();
 
                 try{
                     $userId = $value['userid'];
@@ -152,7 +153,9 @@ class LogWinMapper
 
                     $this->updateLogwinStatus($value['token'], 1);
 
+                    $this->transactionManager->commit();
                 }catch(\Throwable $e){
+                    $this->transactionManager->rollback();
                     $this->updateLogwinStatus($value['token'], 2); // Unmigrated due to some errors
                     continue; 
                 }
@@ -211,7 +214,6 @@ class LogWinMapper
 
             if (empty($logwins)) {
                 $this->logger->info('No logwins to migrate');
-                $this->transactionManager->commit();
                 return true;
             }
 
@@ -336,12 +338,6 @@ class LogWinMapper
                             $recipientId = ($tnxs[5]['userid']); // Requested tokens
                             $amount = $tnxs[5]['numbers'];
 
-                            /**
-                             * Assign Default Burn account if record not found.
-                             */
-                            if($recipientId =='7e0b2d21-d2b0-4af5-8b73-5f8efc04b11f'){
-                                $recipientId = $this->burnWallet; // burn accounts for 217+ records not found.
-                            }
                         }
                     }
                     $this->createAndSaveTransaction($transRepo, [
