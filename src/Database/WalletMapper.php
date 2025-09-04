@@ -750,7 +750,7 @@ class WalletMapper
         $id = self::generateUUID();
         if (empty($id)) {
             $this->logger->critical('Failed to generate logwins ID');
-            return self::respondWithError(41401);
+            return false;
         }
 
         $sql = "INSERT INTO logwins 
@@ -1259,11 +1259,21 @@ class WalletMapper
         try {
             $results = $this->insertWinToLog($userId, $args);
             if ($results === false) {
+                $this->logger->warning("Error occurred in deductFromWallets.insertWinToLog", [
+                    'userId' => $userId,
+                    'args' => $args,
+                ]);
+
                 return self::respondWithError(41206);
             }
 
             $results = $this->insertWinToPool($userId, $args);
             if ($results === false) {
+                $this->logger->warning("Error occurred in deductFromWallets.insertWinToPool", [
+                    'userId' => $userId,
+                    'args' => $args,
+                ]);
+
                 return self::respondWithError(41206);
             }
 
@@ -1295,6 +1305,11 @@ class WalletMapper
                     'whereby' => $whereby,
                 ],
             ]);
+            $this->logger->warning("Error occurred in deductFromWallets.Throwable", [
+                'userId' => $userId,
+                'args' => $args,
+            ]);
+
             return self::respondWithError(41206);
         }
     }
@@ -1388,7 +1403,7 @@ class WalletMapper
 
             return $newLiquidity;
         } catch (\Throwable $e) {
-            $this->logger->error('Database error in saveWalletEntry: ' . $e->getMessage());
+            $this->logger->error('Database error in saveWalletEntry: ' . $e);
             throw new \RuntimeException('Unable to save wallet entry');
         }
     }
