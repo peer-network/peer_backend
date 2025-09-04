@@ -818,13 +818,6 @@ class PostMapper
                 LEFT JOIN post_tags pt  ON pt.postid = p.postid
                 LEFT JOIN tags t        ON t.tagid = pt.tagid
                 WHERE " . implode(" AND ", $whereClauses) . "
-                AND NOT EXISTS (
-                  SELECT 1
-                  FROM advertisements a
-                  WHERE a.postid = p.postid
-                    AND a.timestart <= NOW()
-                    AND a.timeend > NOW()
-                )
                 GROUP BY
                     p.postid, p.userid, p.contenttype, p.title, p.media, p.cover,
                     p.mediadescription, p.createdat,
