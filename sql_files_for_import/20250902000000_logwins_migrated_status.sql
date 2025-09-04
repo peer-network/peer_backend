@@ -1,6 +1,0 @@
-BEGIN;
-
-ALTER TABLE logwins 
-    ADD COLUMN migrated INT DEFAULT 0;
-
-COMMIT;

@@ -53,26 +53,39 @@ class LogWinService
      * It will keep migrating data until all logwin records are processed
      * 
      */
-    public function migrateLogwinData(): ?array
+    public function logWinMigration(): ?array
     {
-        $this->logger->info('LogWinService.migrateLogwinData started');
+        $this->logger->info('LogWinService.logWinMigration started');
 
         try {
-            $response = $this->logWinMapper->migrateLogwinData();
+            $response = $this->logWinMapper->migratePaidActionsLogwinData();
 
             if(!$response){
-                $this->migrateLogwinData();
+                $this->logWinMigration();
             }
+
+            $response = $this->logWinMapper->migrateTokenTransferLogwinData();
+
+            if(!$response){
+                $this->logWinMigration();
+            }
+
             return [
                 'status' => 'success',
                 'ResponseCode' => 200
             ];
 
         }catch (\RuntimeException $e) {
-            $this->logger->error('RuntimeException in LogWinService.migrateLogwinData: ' . $e->getMessage());
-            return $this->respondWithError($e->getCode());
+            $this->logger->error('RuntimeException in LogWinService.logWinMigration: ' . $e->getMessage());
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => $e->getCode()
+            ];
         }catch (\Exception $e) {
-            return $this->respondWithError(41205);
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => 41205
+            ];
         }
     }
 
