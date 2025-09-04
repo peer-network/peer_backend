@@ -561,7 +561,7 @@ class PostMapper
     //         return false;
     //     }
     // }
-    
+
     public function findPostser(string $currentUserId, ?array $args = []): array
     {
         $this->logger->info("PostMapper.findPostser started");
@@ -575,16 +575,16 @@ class PostMapper
         $trenddays = 7;
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $from    = $args['from']    ?? null;
-        $to      = $args['to']      ?? null;
-        $filterBy= $args['filterBy']?? [];
-        $Ignorlist = $args['IgnorList'] ?? 'NO';
-        $sortBy  = $args['sortBy']  ?? null;
-        $title   = $args['title']   ?? null;
-        $tag     = $args['tag']     ?? null;
-        $tags    = $args['tags']    ?? [];
-        $postId  = $args['postid']  ?? null;
-        $userId  = $args['userid']  ?? null;
+        $from     = $args['from']     ?? null;
+        $to       = $args['to']       ?? null;
+        $filterBy = $args['filterBy'] ?? [];
+        $Ignorlist= $args['IgnorList']?? 'NO';
+        $sortBy   = $args['sortBy']   ?? null;
+        $title    = $args['title']    ?? null;
+        $tag      = $args['tag']      ?? null;
+        $tags     = $args['tags']     ?? [];
+        $postId   = $args['postid']   ?? null;
+        $userId   = $args['userid']   ?? null;
 
         $contentFilterService = new ContentFilterServiceImpl(
             new ListPostsContentFilteringStrategy(),
@@ -592,8 +592,8 @@ class PostMapper
             $contentFilterBy
         );
 
-        $whereClauses = ["p.feedid IS NULL"];
         $params = ['currentUserId' => $currentUserId];
+        $whereClauses = ["p.feedid IS NULL"];
 
         if ($postId !== null) {
             $whereClauses[] = "p.postid = :postId";
@@ -622,32 +622,38 @@ class PostMapper
         if (!empty($tags)) {
             $tagPlaceholders = [];
             foreach ($tags as $i => $tg) {
-                $ph = ":tag$i";
-                $tagPlaceholders[] = $ph;
+                $ph = "tag$i";
+                $tagPlaceholders[] = ':' . $ph;
                 $params[$ph] = $tg;
             }
             $whereClauses[] = "t.name IN (" . implode(", ", $tagPlaceholders) . ")";
         }
 
-        // Allow Only (Normal Status) Plus (User's & Admin's Mode) Posts
+        // Nur normale User & Admin-Accounts
         $whereClauses[] = 'u.status = :stNormal AND u.roles_mask IN (:roleUser, :roleAdmin)';
         $params['stNormal']  = Status::NORMAL;
         $params['roleUser']  = Role::USER;
         $params['roleAdmin'] = Role::ADMIN;
 
-        // Content Filtering (Posts ausblenden mit vielen Reports – außer eigene)
+        // Content Filtering: eigene Posts immer sichtbar
         if ($contentFilterService->getContentFilterAction(
             ContentType::post,
             ContentType::post
         ) === ContentFilteringAction::hideContent) {
-            $whereClauses[] = '((pi.reports < :post_report_amount_to_hide OR pi.count_content_moderation_dismissed > :post_dismiss_moderation_amount) OR p.userid = :currentUserId)';
             $params['post_report_amount_to_hide']     = $post_report_amount_to_hide;
             $params['post_dismiss_moderation_amount'] = $post_dismiss_moderation_amount;
+            $whereClauses[] = '(
+                p.userid = :currentUserId
+                OR (
+                    pi.reports < :post_report_amount_to_hide
+                    OR pi.count_content_moderation_dismissed > :post_dismiss_moderation_amount
+                )
+            )';
         }
 
         // Filter: Content-Typ / Beziehungen / Viewed
         if (!empty($filterBy) && is_array($filterBy)) {
-            $validTypes = [];
+            $validTypes  = [];
             $userFilters = [];
 
             $mapping = [
@@ -659,7 +665,14 @@ class PostMapper
             $userMapping = [
                 'FOLLOWED' => "p.userid IN (SELECT followedid FROM follows WHERE followerid = :currentUserId)",
                 'FOLLOWER' => "p.userid IN (SELECT followerid FROM follows WHERE followedid = :currentUserId)",
-                'FRIENDS'  => "EXISTS (SELECT 1 FROM follows f1 WHERE f1.followerid = :currentUserId AND f1.followedid = p.userid AND EXISTS (SELECT 1 FROM follows f2 WHERE f2.followerid = p.userid AND f2.followedid = :currentUserId))",
+                'FRIENDS'  => "EXISTS (
+                    SELECT 1 FROM follows f1
+                    WHERE f1.followerid = :currentUserId AND f1.followedid = p.userid
+                    AND EXISTS (
+                        SELECT 1 FROM follows f2
+                        WHERE f2.followerid = p.userid AND f2.followedid = :currentUserId
+                    )
+                )",
             ];
 
             foreach ($filterBy as $type) {
@@ -668,6 +681,11 @@ class PostMapper
                 } elseif (isset($userMapping[$type])) {
                     $userFilters[] = $userMapping[$type];
                 }
+            }
+
+            // eigene Posts auch bei FOLLOWED/FOLLOWER einschließen
+            if (in_array('FOLLOWED', $filterBy, true) || in_array('FOLLOWER', $filterBy, true)) {
+                $userFilters[] = "p.userid = :currentUserId";
             }
 
             if (in_array('VIEWED', $filterBy, true)) {
@@ -691,7 +709,7 @@ class PostMapper
             }
         }
 
-        // Blockliste berücksichtigen
+        // Blockliste
         if ($Ignorlist === 'YES') {
             $whereClauses[] = "p.userid NOT IN (
                 SELECT blockedid FROM user_block_user WHERE blockerid = :currentUserId
@@ -729,7 +747,7 @@ class PostMapper
             default    => "ORDER BY createdat DESC",
         };
 
-        // --- WICHTIG: KEINE aktiven Ads (NOT EXISTS) ---
+        // --- WICHTIG: KEINE aktiven Ads (NOT EXISTS) 
         $sql = "
             WITH base_posts AS (
                 SELECT 
@@ -794,21 +812,21 @@ class PostMapper
                     ) AS friendoffriends
 
                 FROM posts p
-                JOIN users u          ON p.userid = u.uid
+                JOIN users u           ON p.userid = u.uid
                 LEFT JOIN post_info pi ON pi.postid = p.postid AND pi.userid = p.userid
                 LEFT JOIN users_info ui ON ui.userid = p.userid
                 LEFT JOIN post_tags pt  ON pt.postid = p.postid
                 LEFT JOIN tags t        ON t.tagid = pt.tagid
                 WHERE " . implode(" AND ", $whereClauses) . "
-                  AND NOT EXISTS (
-                      SELECT 1
-                      FROM advertisements a
-                      WHERE a.postid = p.postid
-                        AND a.timestart <= NOW()
-                        AND a.timeend > NOW()
-                  )
+                AND NOT EXISTS (
+                  SELECT 1
+                  FROM advertisements a
+                  WHERE a.postid = p.postid
+                    AND a.timestart <= NOW()
+                    AND a.timeend > NOW()
+                )
                 GROUP BY
-                    p.postid, p.userid, p.contenttype, p.title, p.media, p.cover, 
+                    p.postid, p.userid, p.contenttype, p.title, p.media, p.cover,
                     p.mediadescription, p.createdat,
                     u.username, u.slug, userimg, userstatus
             )
@@ -819,7 +837,6 @@ class PostMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            // bind all dynamic params
             foreach ($params as $k => $v) {
                 $stmt->bindValue(':' . ltrim($k, ':'), $v);
             }
@@ -829,13 +846,12 @@ class PostMapper
 
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            return array_map(function (array $row) use ($contentFilterService, $currentUserId) {
-                // JSON tags -> array
+            $results = array_map(function (array $row) use ($contentFilterService, $currentUserId) {
                 $row['tags'] = json_decode($row['tags'], true) ?? [];
 
                 // User-Placeholder anwenden, falls nötig
-                $user_reports  = (int)$row['user_reports'];
-                $user_dismiss  = (int)$row['user_count_content_moderation_dismissed'];
+                $user_reports = (int)$row['user_reports'];
+                $user_dismiss = (int)$row['user_count_content_moderation_dismissed'];
 
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::post,
@@ -845,13 +861,19 @@ class PostMapper
                     $currentUserId,
                     $row['userid']
                 ) === ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer         = ContentReplacementPattern::flagged;
-                    $row['username']  = $replacer->username($row['username']);
-                    $row['userimg']   = $replacer->profilePicturePath($row['userimg']);
+                    $replacer       = ContentReplacementPattern::flagged;
+                    $row['username']= $replacer->username($row['username']);
+                    $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
                 }
 
                 return self::mapRowToPost($row);
             }, $rows);
+
+            $this->logger->info('findPostser.results', [
+                'postArray' => array_map(fn(PostAdvanced $p) => $p->getArrayCopy(), $results),
+            ]);
+
+            return $results;
 
         } catch (\Throwable $e) {
             $this->logger->error('General error in findPostser', [
