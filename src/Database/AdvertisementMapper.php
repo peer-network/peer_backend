@@ -25,126 +25,374 @@ class AdvertisementMapper
     {
         $this->logger->info("AdvertisementMapper.fetchAllWithStats started");
 
-        $offset = $args['offset'] ?? 0;
-        $limit = $args['limit'] ?? 10;
-        $filterBy = $args['filter'] ?? [];
-        $sortBy = strtoupper($args['sort'] ?? 'NEWEST');
+        $offset    = isset($args['offset']) ? (int)$args['offset'] : 0;
+        $limit     = isset($args['limit'])  ? (int)$args['limit']  : 10;
+        $filterBy  = $args['filter'] ?? [];
+        $sortBy    = strtoupper($args['sort'] ?? 'NEWEST');
+        $trendDays = isset($args['trenddays']) ? (int)$args['trenddays'] : 7;
 
-        $conditions = [];
-        $params = [];
+        $trendSince = (new \DateTimeImmutable('now'))
+            ->modify("-{$trendDays} days")
+            ->format('Y-m-d H:i:s');
 
-        if (!empty($filterBy)) {
-            if (!empty($filterBy['from'])) {
-                $conditions[] = "al.createdat >= :from";
-                $params[':from'] = $filterBy['from'];
+        // ---- Filterbedingungen + gemeinsame Parameter
+        $conditions    = [];
+        $paramsCommon  = [];
+
+        if (!empty($filterBy['from'])) {
+            $conditions[] = "al.createdat >= :from";
+            $paramsCommon[':from'] = $filterBy['from'];
+        }
+        if (!empty($filterBy['to'])) {
+            $conditions[] = "al.createdat <= :to";
+            $paramsCommon[':to'] = $filterBy['to'];
+        }
+        if (!empty($filterBy['type'])) {
+            $typeMap = ['PINNED' => 'pinned', 'BASIC' => 'basic'];
+            if (isset($typeMap[$filterBy['type']])) {
+                $conditions[] = "al.status = :type";
+                $paramsCommon[':type'] = $typeMap[$filterBy['type']];
             }
-
-            if (!empty($filterBy['to'])) {
-                $conditions[] = "al.createdat <= :to";
-                $params[':to'] = $filterBy['to'];
-            }
-
-            if (!empty($filterBy['type'])) {
-                $typeMap = [
-                    'PINNED' => 'pinned',
-                    'BASIC' => 'basic',
-                ];
-                if (isset($typeMap[$filterBy['type']])) {
-                    $conditions[] = "al.status = :type";
-                    $params[':type'] = $typeMap[$filterBy['type']];
-                }
-            }
-
-            if (!empty($filterBy['advertisementId'])) {
-                $conditions[] = "al.advertisementid = :advertisementId";
-                $params[':advertisementId'] = $filterBy['advertisementId'];
-            }
-
-            if (!empty($filterBy['postId'])) {
-                $conditions[] = "al.postid = :postId";
-                $params[':postId'] = $filterBy['postId'];
-            }
-
-            if (!empty($filterBy['userId'])) {
-                $conditions[] = "al.userid = :userId";
-                $params[':userId'] = $filterBy['userId'];
-            }
+        }
+        if (!empty($filterBy['advertisementId'])) {
+            $conditions[] = "al.advertisementid = :advertisementId";
+            $paramsCommon[':advertisementId'] = $filterBy['advertisementId'];
+        }
+        if (!empty($filterBy['postId'])) {
+            $conditions[] = "al.postid = :postId";
+            $paramsCommon[':postId'] = $filterBy['postId'];
+        }
+        if (!empty($filterBy['userId'])) { // Creator-Filter
+            $conditions[] = "al.userid = :userId";
+            $paramsCommon[':userId'] = $filterBy['userId'];
         }
 
         $whereClause = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
 
+        // ---- Sort
         $orderByMap = [
-            'NEWEST' => 'al.createdat DESC',
-            'OLDEST' => 'al.createdat ASC',
-            'BIGGEST_COST' => 'al.tokencost DESC',
+            'NEWEST'        => 'al.createdat DESC',
+            'OLDEST'        => 'al.createdat ASC',
+            'BIGGEST_COST'  => 'al.tokencost DESC',
             'SMALLEST_COST' => 'al.tokencost ASC',
         ];
-
         $orderByClause = $orderByMap[$sortBy] ?? $orderByMap['NEWEST'];
 
-        $sSql = "
-            SELECT 
-                COALESCE(SUM(al.tokencost), 0) AS total_token_spent,
-                COALESCE(SUM(al.eurocost), 0) AS total_euro_spent,
-                COUNT(al.postid) AS total_ads,
-                COALESCE(SUM(g.gems), 0) AS total_gems_earned
-            FROM advertisements_log al
-            LEFT JOIN gems g ON g.postid = al.postid AND g.collected = 1
-            $whereClause
+        // ---- Voraggregation Gems pro Post (keine Duplikate)
+        $gemsAgg = "
+            SELECT postid, COALESCE(SUM(gems),0) AS gems_earned
+            FROM gems
+            WHERE collected = 1
+            GROUP BY postid
         ";
 
+        // ---- Stats (ohne :trend_since)
+        $sSql = "
+            WITH al_filtered AS (
+                SELECT *
+                FROM advertisements_log al
+                $whereClause
+            ),
+            -- nur die betroffenen Posts einmalig
+            post_set AS (
+                SELECT DISTINCT postid FROM al_filtered
+            ),
+            gems_by_post AS ($gemsAgg),
+
+            -- Voraggregationen pro Post
+            likes_by_post AS (
+                SELECT postid, COUNT(*) AS cnt
+                FROM user_post_likes
+                GROUP BY postid
+            ),
+            dislikes_by_post AS (
+                SELECT postid, COUNT(*) AS cnt
+                FROM user_post_dislikes
+                GROUP BY postid
+            ),
+            views_by_post AS (
+                SELECT postid, COUNT(*) AS cnt
+                FROM user_post_views
+                GROUP BY postid
+            ),
+            comments_by_post AS (
+                SELECT postid, COUNT(*) AS cnt
+                FROM comments
+                GROUP BY postid
+            ),
+            reports_by_post AS (
+                SELECT postid, COUNT(*) AS cnt
+                FROM user_post_reports
+                GROUP BY postid
+            )
+            SELECT
+                COALESCE(SUM(al_filtered.tokencost), 0) AS total_token_spent,
+                COALESCE(SUM(al_filtered.eurocost), 0)  AS total_euro_spent,
+                COUNT(*)                                 AS total_ads,
+
+                -- Summen über die distinct Posts
+                COALESCE((
+                    SELECT SUM(gbp.gems_earned)
+                    FROM post_set ps
+                    LEFT JOIN gems_by_post gbp USING (postid)
+                ), 0) AS total_gems_earned,
+
+                COALESCE((
+                    SELECT SUM(lb.cnt)
+                    FROM post_set ps
+                    LEFT JOIN likes_by_post lb USING (postid)
+                ), 0) AS total_amount_likes,
+
+                COALESCE((
+                    SELECT SUM(vb.cnt)
+                    FROM post_set ps
+                    LEFT JOIN views_by_post vb USING (postid)
+                ), 0) AS total_amount_views,
+
+                COALESCE((
+                    SELECT SUM(cb.cnt)
+                    FROM post_set ps
+                    LEFT JOIN comments_by_post cb USING (postid)
+                ), 0) AS total_amount_comments,
+
+                COALESCE((
+                    SELECT SUM(db.cnt)
+                    FROM post_set ps
+                    LEFT JOIN dislikes_by_post db USING (postid)
+                ), 0) AS total_amount_dislikes,
+
+                COALESCE((
+                    SELECT SUM(rp.cnt)
+                    FROM post_set ps
+                    LEFT JOIN reports_by_post rp USING (postid)
+                ), 0) AS total_amount_reports
+            FROM al_filtered
+        ";
+
+        // ---- Datenliste (Creator u*, Post-Owner pu*) + Kommentare
         $dSql = "
-            SELECT 
-                al.advertisementid,
-                al.createdat,
-                al.status,
-                al.userid,
-                al.postid,
-                al.timestart,
-                al.timeend,
-                al.tokencost,
-                al.eurocost,
-                (
-                    SELECT COALESCE(SUM(g2.gems), 0)
-                    FROM gems g2
-                    WHERE g2.postid = al.postid AND g2.collected = 1
-                ) AS gemsEarned,
-                (
-                    SELECT COUNT(pv.postid)
-                    FROM user_post_views pv
-                    WHERE pv.postid = al.postid
-                ) AS view
+            WITH gems_by_post AS ($gemsAgg)
+            SELECT
+                -- top-level (Ad)
+                al.advertisementid               AS advertisementid,
+                al.postid                        AS postid,
+                al.userid                        AS creatorid,
+                al.createdat                     AS createdat,
+                al.status                        AS status,
+                al.timestart                     AS timeframestart,
+                al.timeend                       AS timeframeend,
+                al.tokencost                     AS totaltokencost,
+                al.eurocost                      AS totaleurocost,
+                COALESCE(gbp.gems_earned, 0)     AS gemsearned,
+
+                -- top-level views (vom Metrics-Block)
+                m.amountviews                    AS views,
+
+                -- post-objekt (Owner & Felder aus posts)
+                p.userid                         AS post_owner_id,
+                p.createdat                      AS post_createdat,
+                p.contenttype                    AS contenttype,
+                p.title                          AS title,
+                p.media                          AS media,
+                p.cover                          AS cover,
+                p.mediadescription               AS mediadescription,
+                m.amountlikes                    AS amountlikes,
+                m.amountviews                    AS amountviews,
+                m.amountcomments                 AS amountcomments,
+                m.amountdislikes                 AS amountdislikes,
+                m.amountreports                  AS amountreports,
+                m.amounttrending                 AS amounttrending,
+                (m.isliked      )::int           AS isliked,
+                (m.isviewed     )::int           AS isviewed,
+                (m.isreported   )::int           AS isreported,
+                (m.isdisliked   )::int           AS isdisliked,
+                (m.issaved      )::int           AS issaved,
+                tg.tags                          AS tags,
+
+                -- Kommentare als JSON-Array
+                cm.comments                      AS comments,
+
+                -- Creator (Ad-User)
+                u.username                       AS creator_username,
+                u.slug                           AS creator_slug,
+                u.img                            AS creator_img,
+
+                -- Post Owner (User des Posts)
+                pu.username                      AS post_username,
+                pu.slug                          AS post_slug,
+                pu.img                           AS post_userimg,
+
+                -- Relationship-Flags (Creator ↔ Post Owner)
+                (m.isfollowed   )::int           AS isfollowed,
+                (m.isfollowing  )::int           AS isfollowing,
+                (m.isfriend     )::int           AS isfriend
+
             FROM advertisements_log al
+            LEFT JOIN gems_by_post gbp ON gbp.postid = al.postid
+            LEFT JOIN posts p          ON p.postid   = al.postid
+            LEFT JOIN users u          ON u.uid      = al.userid      -- Creator
+            LEFT JOIN users pu         ON pu.uid     = p.userid       -- Post Owner
+
+            -- Metriken & Flags (al.userid = Creator, p.userid = Post Owner)
+            LEFT JOIN LATERAL (
+                SELECT
+                    (SELECT COUNT(*) FROM user_post_likes    upl WHERE upl.postid = p.postid) AS amountlikes,
+                    (SELECT COUNT(*) FROM user_post_dislikes upd WHERE upd.postid = p.postid) AS amountdislikes,
+                    (SELECT COUNT(*) FROM user_post_views    upv WHERE upv.postid = p.postid) AS amountviews,
+                    (SELECT COUNT(*) FROM user_post_reports  upr WHERE upr.postid = p.postid) AS amountreports,
+                    (SELECT COUNT(*) FROM comments           cmt WHERE cmt.postid = p.postid)  AS amountcomments,
+
+                    COALESCE((
+                        SELECT SUM(numbers) FROM logwins lw
+                        WHERE lw.postid = p.postid
+                          AND lw.createdat >= :trend_since
+                    ), 0) AS amounttrending,
+
+                    EXISTS (SELECT 1 FROM user_post_likes    upl2 WHERE upl2.postid = p.postid AND upl2.userid = al.userid) AS isliked,
+                    EXISTS (SELECT 1 FROM user_post_views    upv2 WHERE upv2.postid = p.postid AND upv2.userid = al.userid) AS isviewed,
+                    EXISTS (SELECT 1 FROM user_post_reports  upr2 WHERE upr2.postid = p.postid AND upr2.userid = al.userid) AS isreported,
+                    EXISTS (SELECT 1 FROM user_post_dislikes upd2 WHERE upd2.postid = p.postid AND upd2.userid = al.userid) AS isdisliked,
+                    EXISTS (SELECT 1 FROM user_post_saves    ups2 WHERE ups2.postid = p.postid AND ups2.userid = al.userid) AS issaved,
+
+                    -- Follow-Beziehung: Creator ↔ Post Owner
+                    EXISTS (SELECT 1 FROM follows f WHERE f.followedid = p.userid AND f.followerid = al.userid) AS isfollowed,
+                    EXISTS (SELECT 1 FROM follows f WHERE f.followerid = p.userid AND f.followedid = al.userid) AS isfollowing,
+                    EXISTS (
+                        SELECT 1 FROM follows f1
+                        WHERE f1.followerid = al.userid
+                          AND f1.followedid = p.userid
+                          AND EXISTS (
+                              SELECT 1 FROM follows f2
+                              WHERE f2.followerid = p.userid
+                                AND f2.followedid = al.userid
+                          )
+                    ) AS isfriend
+            ) m ON TRUE
+
+            -- Tags als JSON-Array
+            LEFT JOIN LATERAL (
+                SELECT COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]'::json) AS tags
+                FROM post_tags pt
+                JOIN tags t ON t.tagid = pt.tagid
+                WHERE pt.postid = p.postid
+            ) tg ON TRUE
+
+            -- Kommentare als JSON-Array (inkl. Kommentator-User + Follow-Flags + Like-Infos)
+            LEFT JOIN LATERAL (
+                SELECT COALESCE(
+                    JSON_AGG(
+                        JSON_BUILD_OBJECT(
+                            'commentid',  c.commentid::text,
+                            'postid',     c.postid::text,
+                            'parentid',   c.parentid::text,
+                            'content',    c.content,
+                            'createdat',  c.createdat,
+                            -- neue Felder aus comment_info
+                            'amountlikes',   COALESCE(ci.likes, 0),
+                            'amountreplies', COALESCE(ci.comments, 0),
+                            -- neue Felder aus user_comment_likes
+                            'isliked', EXISTS (
+                                SELECT 1 FROM user_comment_likes ucl
+                                WHERE ucl.commentid = c.commentid
+                                  AND ucl.userid    = al.userid
+                            ),
+                            'user',       JSON_BUILD_OBJECT(
+                                'uid',       cu.uid::text,
+                                'username',  cu.username,
+                                'slug',      cu.slug,
+                                'img',       cu.img,
+                                -- Follow-Flags relativ zum Ad-Creator (al.userid)
+                                'isfollowed',  EXISTS (
+                                    SELECT 1 FROM follows f
+                                    WHERE f.followedid = cu.uid
+                                      AND f.followerid = al.userid
+                                ),
+                                'isfollowing', EXISTS (
+                                    SELECT 1 FROM follows f
+                                    WHERE f.followerid = cu.uid
+                                      AND f.followedid = al.userid
+                                ),
+                                'isfriend',    EXISTS (
+                                    SELECT 1 FROM follows f1
+                                    WHERE f1.followerid = al.userid
+                                      AND f1.followedid = cu.uid
+                                      AND EXISTS (
+                                          SELECT 1 FROM follows f2
+                                          WHERE  f2.followerid = cu.uid
+                                            AND  f2.followedid = al.userid
+                                      )
+                                )
+                            )
+                        )
+                        ORDER BY c.createdat ASC
+                    ),
+                    '[]'::json
+                ) AS comments
+                FROM comments c
+                JOIN users cu ON cu.uid = c.userid
+                LEFT JOIN comment_info ci ON ci.commentid = c.commentid
+                WHERE c.postid = p.postid
+                  -- ggf. nur freigegebene Kommentare:
+                  -- AND c.status = 10
+            ) cm ON TRUE
+
             $whereClause
             ORDER BY $orderByClause
             LIMIT :limit OFFSET :offset
         ";
 
+        // getrennte Parameter: Stats ohne :trend_since, Data mit :trend_since
+        $paramsStats = $paramsCommon;
+        $paramsData  = $paramsCommon + [':trend_since' => $trendSince];
+
         try {
+            // Stats
             $statsStmt = $this->db->prepare($sSql);
-            foreach ($params as $key => $val) {
-                $statsStmt->bindValue($key, $val);
+            foreach ($paramsStats as $k => $v) {
+                if ($v !== null) $statsStmt->bindValue($k, $v);
             }
             $statsStmt->execute();
-            $stats = $statsStmt->fetch(\PDO::FETCH_ASSOC);
+            $stats = $statsStmt->fetch(\PDO::FETCH_ASSOC) ?: [];
 
+            // Data
             $dataStmt = $this->db->prepare($dSql);
-            foreach ($params as $key => $val) {
-                $dataStmt->bindValue($key, $val);
+            foreach ($paramsData as $k => $v) {
+                if ($v !== null) $dataStmt->bindValue($k, $v);
             }
-            $dataStmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $dataStmt->bindValue(':limit',  $limit,  \PDO::PARAM_INT);
             $dataStmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $dataStmt->execute();
-            $ads = $dataStmt->fetchAll(\PDO::FETCH_ASSOC);
-
+            $rows = $dataStmt->fetchAll(\PDO::FETCH_ASSOC);
+            //$this->logger->info('findPostser_1', ['rows' => $rows]);
+            $ads = array_values(array_filter(array_map(function ($row) {
+                return self::mapRowToAdvertisementt($row);
+            }, $rows)));
+            $this->logger->info('fetchAllWithStats', [
+                'stats' => [
+                    'tokenSpent'     => (float)($stats['total_token_spent'] ?? 0),
+                    'euroSpent'      => (float)($stats['total_euro_spent'] ?? 0),
+                    'amountAds'      => (int)($stats['total_ads'] ?? 0),
+                    'gemsEarned'     => (float)($stats['total_gems_earned'] ?? 0),
+                    'amountLikes'    => (int)($stats['total_amount_likes'] ?? 0),
+                    'amountViews'    => (int)($stats['total_amount_views'] ?? 0),
+                    'amountComments' => (int)($stats['total_amount_comments'] ?? 0),
+                    'amountDislikes' => (int)($stats['total_amount_dislikes'] ?? 0),
+                    'amountReports'  => (int)($stats['total_amount_reports'] ?? 0),
+                ],
+                'advertisements' => $ads,
+            ]);
             return [
-                'counter' => count($ads),
                 'affectedRows' => [
                     'stats' => [
-                        'totaltokenspent' => (float)($stats['total_token_spent'] ?? 0),
-                        'totaleurospent' => (float)($stats['total_euro_spent'] ?? 0),
-                        'totalads' => (int)($stats['total_ads'] ?? 0),
-                        'totalgemsearned' => (float)($stats['total_gems_earned'] ?? 0),
+                        'tokenSpent'     => (float)($stats['total_token_spent'] ?? 0),
+                        'euroSpent'      => (float)($stats['total_euro_spent'] ?? 0),
+                        'amountAds'      => (int)($stats['total_ads'] ?? 0),
+                        'gemsEarned'     => (float)($stats['total_gems_earned'] ?? 0),
+                        'amountLikes'    => (int)($stats['total_amount_likes'] ?? 0),
+                        'amountViews'    => (int)($stats['total_amount_views'] ?? 0),
+                        'amountComments' => (int)($stats['total_amount_comments'] ?? 0),
+                        'amountDislikes' => (int)($stats['total_amount_dislikes'] ?? 0),
+                        'amountReports'  => (int)($stats['total_amount_reports'] ?? 0),
                     ],
                     'advertisements' => $ads,
                 ],
@@ -154,13 +402,81 @@ class AdvertisementMapper
                 'error' => $e->getMessage(),
             ]);
             return [
-                'counter' => 0,
                 'affectedRows' => [
                     'stats' => null,
                     'advertisements' => [],
                 ],
             ];
         }
+    }
+
+    private static function mapRowToAdvertisementt(array $row): ?array
+    {
+        $tags = is_string($row['tags'] ?? null) ? json_decode($row['tags'], true) : ($row['tags'] ?? []);
+        if (!is_array($tags)) $tags = [];
+
+        $comments = is_string($row['comments'] ?? null) ? json_decode($row['comments'], true) : ($row['comments'] ?? []);
+        if (!is_array($comments)) $comments = [];
+
+        return [
+            'advertisementid' => (string)$row['advertisementid'],
+            'createdat'       => (string)$row['createdat'],
+            'userid'          => (string)$row['creatorid'],
+            'postid'          => (string)$row['postid'],
+            'status'          => (string)$row['status'],
+            'timestart'       => (string)$row['timeframestart'],
+            'timeend'         => (string)$row['timeframeend'],
+            'tokencost'       => (float)$row['totaltokencost'],
+            'eurocost'        => (float)$row['totaleurocost'],
+            'gemsearned'      => (float)$row['gemsearned'],
+            'amountlikes'     => (int)$row['amountlikes'],
+            'amountviews'     => (int)$row['amountviews'],
+            'amountcomments'  => (int)$row['amountcomments'],
+            'amountdislikes'  => (int)$row['amountdislikes'],
+            'amountreports'   => (int)$row['amountreports'],
+
+            'user' => [
+                'uid'         => (string)$row['creatorid'],
+                'username'    => (string)$row['creator_username'],
+                'slug'        => (int)$row['creator_slug'],
+                'img'         => (string)$row['creator_img'],
+                'isfollowed'  => (bool)$row['isfollowed'],
+                'isfollowing' => (bool)$row['isfollowing'],
+                'isfriend'    => (bool)$row['isfriend'],
+            ],
+
+            'post' => [
+                'postid'          => (string)$row['postid'],
+                'contenttype'     => (string)$row['contenttype'],
+                'title'           => (string)$row['title'],
+                'media'           => (string)$row['media'],
+                'cover'           => (string)$row['cover'],
+                'mediadescription'=> (string)$row['mediadescription'],
+                'createdat'       => (string)$row['post_createdat'],
+                'amountlikes'     => (int)$row['amountlikes'],
+                'amountviews'     => (int)$row['amountviews'],
+                'amountcomments'  => (int)$row['amountcomments'],
+                'amountdislikes'  => (int)$row['amountdislikes'],
+                'amounttrending'  => (int)$row['amounttrending'],
+                'isliked'         => (bool)$row['isliked'],
+                'isviewed'        => (bool)$row['isviewed'],
+                'isreported'      => (bool)$row['isreported'],
+                'isdisliked'      => (bool)$row['isdisliked'],
+                'issaved'         => (bool)$row['issaved'],
+                'url'             => (string)$_ENV['WEB_APP_URL'] . '/post/' . $row['postid'],
+                'tags'            => $tags,
+                'user' => [
+                    'uid'         => (string)$row['post_owner_id'],
+                    'username'    => (string)$row['post_username'],
+                    'slug'        => (int)$row['post_slug'],
+                    'img'         => (string)$row['post_userimg'],
+                    'isfollowed'  => (bool)$row['isfollowed'],
+                    'isfollowing' => (bool)$row['isfollowing'],
+                    'isfriend'    => (bool)$row['isfriend'],
+                ],
+                'comments'        => $comments,
+            ],
+        ];
     }
 
     public function isAdvertisementDurationValid(string $postId, string $userId): bool
@@ -256,7 +572,7 @@ class AdvertisementMapper
             'status' => $status
         ]);
 
-        $sql = "SELECT advertisementid, postid, userid, status, timestart, timeend 
+        $sql = "SELECT advertisementid, postid, userid, status, timestart, timeend, createdat 
                 FROM advertisements 
                 WHERE postid = :postId AND status = :status";
 
@@ -295,42 +611,79 @@ class AdvertisementMapper
         return (bool) $stmt->fetchColumn();
     }
 
+    public function hasActiveAdvertisement(string $postId, string $status): bool
+    {
+        $this->logger->info("AdvertisementMapper.hasActiveAdvertisement started", [
+            'postId' => $postId,
+            'status' => $status
+        ]);
+
+        $sql = "
+            SELECT 1
+            FROM advertisements
+            WHERE postid   = :postId
+              AND status   = :status
+              AND timestart <= NOW()
+              AND timeend   >= NOW()
+            LIMIT 1
+        ";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':postId', $postId);
+            $stmt->bindValue(':status', $status);
+            $stmt->execute();
+
+            $exists = (bool) $stmt->fetchColumn();
+
+            $this->logger->info("Active advertisement check result", ['exists' => $exists]);
+
+            return $exists;
+        } catch (\Throwable $e) {
+            $this->logger->error("Error checking active advertisement", [
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
     public function hasTimeConflict(string $postId, string $status, string $newStart, string $newEnd): bool
     {
-        $this->logger->info("AdvertisementMapper.hasTimeConflict started");
-
-        $this->logger->info("Checking for conflicting reservations", [
+        $this->logger->info("AdvertisementMapper.hasTimeConflict started", [
             'postId' => $postId,
             'status' => $status,
             'newStart' => $newStart,
             'newEnd' => $newEnd
         ]);
 
-        $sql = "SELECT COUNT(*) 
-                FROM advertisements 
-                WHERE postid = :postId
-                  AND status = :status
-                  AND timeend > :newStart
-                  AND timestart < :newEnd";
+        $sql = "
+            SELECT 1
+            FROM advertisements
+            WHERE postid   = :postId
+              AND status   = :status
+              AND timeend  > :newStart
+              AND timestart < :newEnd
+            LIMIT 1
+        ";
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':postId', $postId, \PDO::PARAM_STR);
-            $stmt->bindValue(':status', $status, \PDO::PARAM_STR);
-            $stmt->bindValue(':newStart', $newStart, \PDO::PARAM_STR);
-            $stmt->bindValue(':newEnd', $newEnd, \PDO::PARAM_STR);
+            $stmt->bindValue(':postId', $postId);
+            $stmt->bindValue(':status', $status);
+            $stmt->bindValue(':newStart', $newStart);
+            $stmt->bindValue(':newEnd',   $newEnd);
             $stmt->execute();
 
-            $count = (int) $stmt->fetchColumn();
+            $hasConflict = (bool) $stmt->fetchColumn();
 
-            $this->logger->info("Conflict check result", ['conflicts' => $count]);
+            $this->logger->info("Conflict check result", ['conflict' => $hasConflict]);
 
-            return $count > 0;
+            return $hasConflict; // true = Konflikt, false = frei
         } catch (\Throwable $e) {
             $this->logger->error("Error checking reservation conflicts", [
                 'error' => $e->getMessage()
             ]);
-            return true;
+            throw $e;
         }
     }
 
@@ -351,6 +704,11 @@ class AdvertisementMapper
                    (advertisementid, postid, userid, status, timestart, timeend, tokencost, eurocost)
                    VALUES 
                    (:advertisementid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost)";
+
+        $query3 = "INSERT INTO advertisements_info 
+                   (advertisementid, postid, userid)
+                   VALUES 
+                   (:advertisementid, :postid, :userid)";
 
         try {
             $this->db->beginTransaction();
@@ -378,6 +736,18 @@ class AdvertisementMapper
             }
 
             $stmt2->execute();
+
+            // Statement 3
+            $stmt3 = $this->db->prepare($query3);
+            if (!$stmt3) {
+                throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
+            }
+
+            foreach (['advertisementid', 'postid', 'userid'] as $key) {
+                $stmt3->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
+            }
+
+            $stmt3->execute();
 
             $this->db->commit();
 

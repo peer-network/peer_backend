@@ -15,8 +15,15 @@ class Advertisements
     protected string $timeend;
     protected float $tokencost;
     protected float $eurocost;
+    protected float $gemsearned;
+    protected int $amountlikes;
+    protected int $amountviews;
+    protected int $amountcomments;
+    protected int $amountdislikes;
+    protected int $amountreports;
     protected string $createdat;
-    protected ?array $user = [];
+    protected array $user = [];
+    protected array $post = [];
     protected string $timeBetween;
 
     // Constructor
@@ -35,8 +42,15 @@ class Advertisements
         $this->timeend = $data['timeend'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->tokencost = $data['tokencost'] ?? 0.0;
         $this->eurocost = $data['eurocost'] ?? 0.0;
+        $this->gemsearned = $data['gemsearned'] ?? 0.0;
+        $this->amountlikes = $data['amountlikes'] ?? 0;
+        $this->amountviews = $data['amountviews'] ?? 0;
+        $this->amountcomments = $data['amountcomments'] ?? 0;
+        $this->amountdislikes = $data['amountdislikes'] ?? 0;
+        $this->amountreports = $data['amountreports'] ?? 0;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
+        $this->post = isset($data['post']) && is_array($data['post']) ? $data['post'] : [];
     }
 
     // Array Copy methods
@@ -51,8 +65,15 @@ class Advertisements
             'timeend' => $this->timeend,
             'tokencost' => $this->tokencost,
             'eurocost' => $this->eurocost,
+            'gemsearned' => $this->gemsearned,
+            'amountlikes' => $this->amountlikes,
+            'amountviews' => $this->amountviews,
+            'amountcomments' => $this->amountcomments,
+            'amountdislikes' => $this->amountdislikes,
+            'amountreports' => $this->amountreports,
             'createdat' => $this->createdat,
             'user' => $this->user,
+            'post' => $this->post,
         ];
         return $att;
     }
@@ -209,6 +230,38 @@ class Advertisements
                     ['name' => 'ValidateFloat', 'options' => ['min' => -5000.0, 'max' => 5000.0]],
                 ],
             ],
+            'gemsearned' => [
+                'required' => false,
+                'filters' => [['name' => 'FloatSanitize']],
+                'validators' => [
+                    ['name' => 'ValidateFloat', 'options' => ['min' => 0.0, 'max' => 5000000.0]],
+                ],
+            ],
+            'amountlikes' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountviews' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountcomments' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountdislikes' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'amountreports' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
             'createdat' => [
                 'required' => false,
                 'validators' => [
@@ -218,6 +271,12 @@ class Advertisements
                 ],
             ],
             'user' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'IsArray'],
+                ],
+            ],
+            'post' => [
                 'required' => false,
                 'validators' => [
                     ['name' => 'IsArray'],
