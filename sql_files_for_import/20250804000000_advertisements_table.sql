@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS advertisements (
     timestart TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     timeend TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT chk_ads_time_order CHECK (timeend >= timestart);
+    CONSTRAINT chk_ads_time_order CHECK (timeend >= timestart),
     CONSTRAINT fk_ads_postid FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE,
     CONSTRAINT fk_ads_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
 );
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS advertisements_log (
     tokencost NUMERIC(20,5) DEFAULT 0.0 NOT NULL,
     eurocost NUMERIC(20,5) DEFAULT 0.0 NOT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT chk_adslog_time_order CHECK (timeend >= timestart);
+    CONSTRAINT chk_adslog_time_order CHECK (timeend >= timestart),
     CONSTRAINT fk_adslog_advsid FOREIGN KEY (advertisementid) REFERENCES advertisements(advertisementid) ON DELETE CASCADE,
     CONSTRAINT fk_adslog_postid FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE,
     CONSTRAINT fk_adslog_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
