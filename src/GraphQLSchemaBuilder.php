@@ -1840,7 +1840,7 @@ class GraphQLSchemaBuilder
             ],
             'AdvertisementRow' => [
                 'id' => function (array $root): string {
-                    $this->logger->info('Query.Advertisement Resolvers');
+                    $this->logger->info('Query.AdvertisementRow Resolvers');
                     return $root['advertisementid'] ?? '';
                 },
                 'createdAt' => function (array $root): string {
