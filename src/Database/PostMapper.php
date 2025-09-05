@@ -869,9 +869,7 @@ class PostMapper
                 return self::mapRowToPost($row);
             }, $rows);
 
-            $this->logger->info('findPostser.results', [
-                'postArray' => array_map(fn(PostAdvanced $p) => $p->getArrayCopy(), $results),
-            ]);
+            //$this->logger->info('findPostser.results', ['postArray' => array_map(fn(PostAdvanced $p) => $p->getArrayCopy(), $results)]);
 
             return $results;
 

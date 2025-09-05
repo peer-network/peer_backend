@@ -363,24 +363,10 @@ class AdvertisementMapper
             $dataStmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $dataStmt->execute();
             $rows = $dataStmt->fetchAll(\PDO::FETCH_ASSOC);
-            //$this->logger->info('findPostser_1', ['rows' => $rows]);
+
             $ads = array_values(array_filter(array_map(function ($row) {
                 return self::mapRowToAdvertisementt($row);
             }, $rows)));
-            $this->logger->info('fetchAllWithStats', [
-                'stats' => [
-                    'tokenSpent'     => (float)($stats['total_token_spent'] ?? 0),
-                    'euroSpent'      => (float)($stats['total_euro_spent'] ?? 0),
-                    'amountAds'      => (int)($stats['total_ads'] ?? 0),
-                    'gemsEarned'     => (float)($stats['total_gems_earned'] ?? 0),
-                    'amountLikes'    => (int)($stats['total_amount_likes'] ?? 0),
-                    'amountViews'    => (int)($stats['total_amount_views'] ?? 0),
-                    'amountComments' => (int)($stats['total_amount_comments'] ?? 0),
-                    'amountDislikes' => (int)($stats['total_amount_dislikes'] ?? 0),
-                    'amountReports'  => (int)($stats['total_amount_reports'] ?? 0),
-                ],
-                'advertisements' => $ads,
-            ]);
             return [
                 'affectedRows' => [
                     'stats' => [
