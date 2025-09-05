@@ -2,6 +2,7 @@
 
 namespace Fawaz\App;
 
+use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\AdvertisementMapper;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
@@ -352,6 +353,7 @@ class AdvertisementService
         $tag = $args['tag'] ?? null; 
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
+        $titleConfig = ConstantsConfig::post()['TITLE'];
 
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this->respondWithError(30209);

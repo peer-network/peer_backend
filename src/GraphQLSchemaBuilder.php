@@ -2150,7 +2150,7 @@ class GraphQLSchemaBuilder
 
         // Werbeplan validieren
         if (!in_array($advertisePlan, $advertiseActions, true)) {
-            $this->logger->error('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
+            $this->logger->warning('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
             return $this->respondWithError(32006);
         }
 
@@ -2161,14 +2161,14 @@ class GraphQLSchemaBuilder
 
         // Preisvalidierung
         if (!isset($actionPrices[$advertisePlan])) {
-            $this->logger->error('Ungültiger Preisplan', ['advertisePlan' => $advertisePlan]);
+            $this->logger->warning('Ungültiger Preisplan', ['advertisePlan' => $advertisePlan]);
             return $this->respondWithError(32005);
         }
 
         if ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
             // Startdatum validieren
             if (isset($startdayInput) && empty($startdayInput)) {
-                $this->logger->error('Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
+                $this->logger->warning('Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
                 return $this->respondWithError(32007);
             }
 
@@ -2177,19 +2177,19 @@ class GraphQLSchemaBuilder
             $errors = DateTimeImmutable::getLastErrors();
 
             if (!$startday) {
-                $this->logger->error("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
+                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
                 return $this->respondWithError(32008);
             }
 
             if (isset($errors['warning_count']) && $errors['warning_count'] > 0 || isset($errors['error_count']) && $errors['error_count'] > 0) {
-                $this->logger->error("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
+                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
                 return $this->respondWithError(42004);
             }
 
             // Prüfen, ob das Startdatum in der Vergangenheit liegt
             $tomorrow = new DateTimeImmutable('tomorrow');
             if ($startday < $tomorrow) {
-                $this->logger->error('Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
+                $this->logger->warning('Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
                 return $this->respondWithError(32008);
             }
 
@@ -2197,7 +2197,7 @@ class GraphQLSchemaBuilder
 
             // Laufzeit validieren
             if ($durationInDays !== null && !in_array($durationInDays, $durationActions, true)) {
-                $this->logger->error('Ungültige Laufzeit', ['durationInDays' => $durationInDays]);
+                $this->logger->warning('Ungültige Laufzeit', ['durationInDays' => $durationInDays]);
                 return $this->respondWithError(32009);
             }
         }
@@ -2234,7 +2234,7 @@ class GraphQLSchemaBuilder
             $this->logger->info('Werbeanzeige BASIC', ["Kosten für $durationInDays Tage: " => $CostPlan]);
             $rescode = 12004;
         } else {
-            $this->logger->error('Ungültige Ads Plan', ['CostPlan' => $CostPlan]);
+            $this->logger->warning('Ungültige Ads Plan', ['CostPlan' => $CostPlan]);
             return $this->respondWithError(32005);
         }
 
@@ -2277,7 +2277,7 @@ class GraphQLSchemaBuilder
                 }
 
                 if (!$deducted) {
-                    $this->logger->error('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
+                    $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
                     return $this->respondWithError($deducted['ResponseCode']);
                 }
 
