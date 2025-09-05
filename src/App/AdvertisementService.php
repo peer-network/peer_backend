@@ -171,7 +171,7 @@ class AdvertisementService
                 }
 
                 if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend) === true) {
-                    $this->logger->warning('1 Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
+                    $this->logger->warning('Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
             } 
@@ -179,7 +179,7 @@ class AdvertisementService
             {
                 if ($this->advertisementMapper->hasActiveAdvertisement($postId, \strtolower($CostPlan)) === true && empty($forcing)) 
                 {
-                    $this->logger->info('Pinned Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).', ['advertisementid' => $advertisementId, 'postId' => $postId]);
+                    $this->logger->warning('Pinned Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).
                 }
 
@@ -187,7 +187,7 @@ class AdvertisementService
                 $timeend = (new \DateTime('+1 days'))->format('Y-m-d H:i:s.u'); // Setze Timeend
 
                 if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower('BASIC'), $timestart, $timeend) === true && empty($forcing)) {
-                    $this->logger->warning('2 Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
+                    $this->logger->warning('Pinned.Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
 
