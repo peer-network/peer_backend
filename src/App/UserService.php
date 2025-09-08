@@ -2,6 +2,7 @@
 
 namespace Fawaz\App;
 
+use Fawaz\App\Specs\SpecTypes\VerifiedAndActiveUserSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -759,8 +760,18 @@ class UserService
         return self::respondWithError(31007);
         }
 
+        $specs = [
+            new VerifiedAndActiveUserSpec($userId)->toSql()
+        ];
+
         try {
-            $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId,$contentFilterBy)->getArrayCopy();
+            $profileData = $this->userMapper->fetchProfileDataRaw(
+                $userId,
+                $this->currentUserId,
+                $specs
+            )->getArrayCopy();
+
+            // $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId,$contentFilterBy)->getArrayCopy();
             $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
 
             $posts = $this->postMapper->fetchPostsByType($this->currentUserId,$userId, $postLimit,$contentFilterBy);
