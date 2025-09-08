@@ -270,7 +270,14 @@ jobs:
  
       - name: Force DB init by removing the volume
         run: docker volume rm peer_backend_ci-cd_db-data || true
- 
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
       - name: Build And Start Docker Containers
         run: |
           docker compose -f ./docker-compose.yml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}
