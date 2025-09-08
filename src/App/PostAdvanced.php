@@ -335,7 +335,7 @@ class PostAdvanced
                         'name' => 'ArrayValues',
                         'options' => [
                             'validator' => [
-                                'name' => 'validateTagName',
+                                'name' => 'IsString',
                             ],
                         ],
                     ],
