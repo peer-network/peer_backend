@@ -22,7 +22,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.REPORTS_DEPLOY_TOKEN }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build and Push Base Image
         uses: docker/build-push-action@v6
