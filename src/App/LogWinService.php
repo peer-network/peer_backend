@@ -58,6 +58,14 @@ class LogWinService
         $this->logger->info('LogWinService.logWinMigration started');
 
         try {
+
+            // PENDING: Migrate Gems to LogWins
+            $response = $this->logWinMapper->migrateGemsToLogWins();
+
+            if(!$response){
+                $this->logWinMigration();
+            }
+
             $response = $this->logWinMapper->migratePaidActions();
 
             if(!$response){
@@ -69,6 +77,18 @@ class LogWinService
             if(!$response){
                 $this->logWinMigration();
             }
+            
+            // DONE:  Generate logwin entries for like paid actions
+            $response = $this->logWinMapper->generateLikePaidActionToLogWins();
+
+            // DONE: Generate logwin entries for dislike paid actions
+            $response = $this->logWinMapper->generateDislikePaidActionToLogWins();
+
+            // DONE:  Generate logwin entries for post paid actions
+            $response = $this->logWinMapper->generatePostPaidActionToLogWins();
+
+            // DONE: Generate logwin entries for comment paid actions
+            $response = $this->logWinMapper->generateCommentPaidActionToLogWins();
 
             return [
                 'status' => 'success',

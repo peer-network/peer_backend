@@ -366,6 +366,677 @@ class LogWinMapper
         }
     }
 
+
+    /**
+     * Generate logwins entries for Like actions between 05th March 2025 to 02nd April 2025
+     *
+     * Used for Actions records:
+     *  whereby = 2  -> Post Like
+     */
+    public function generateLikePaidActionToLogWins(): bool
+    {
+        \ignore_user_abort(true);
+
+        ini_set('max_execution_time', '0');
+
+        try {
+
+            $sql = "WITH ranked AS (
+                        SELECT 
+                            upl.*,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY userid, DATE(createdat) 
+                                ORDER BY createdat
+                            ) AS rn
+                        FROM user_post_likes upl
+                        WHERE  createdat < '2025-04-02 08:31'
+                    )
+                    SELECT *
+                    FROM ranked
+                    WHERE rn > 3
+                    ORDER BY createdat;
+                ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+
+            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $this->initializeLiquidityPool();
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+
+            foreach ($logwins as $key => $value) {
+                $this->transactionManager->beginTransaction();
+
+                $sql = "INSERT INTO logwins 
+                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
+                VALUES 
+                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :createdat)";
+
+                try {
+                    $stmt = $this->db->prepare($sql);
+
+                    $tokenId = self::generateUUID();
+
+                    $numBers = -3; // Each extra like will cost 3 Gems
+
+                    $userId = $value['userid'];
+                    $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':postid', $value['postid'], \PDO::PARAM_STR);
+                    $stmt->bindValue(':fromid', $userId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':gems', 0, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+                    $stmt->bindValue(':whereby', 2, \PDO::PARAM_INT);
+                    $stmt->bindValue(':createdat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+
+                    $stmt->execute();
+
+                    
+                    $this->initializeLiquidityPool();
+                    $transRepo = new TransactionRepository($this->logger, $this->db);
+
+                    
+                    $transactionType = 'postLiked';
+
+                    $transferType = 'BURN';
+
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $tokenId,
+                        'transactiontype' => $transactionType,
+                        'senderid' => $userId,
+                        'recipientid' => $this->burnWallet,   
+                        'tokenamount' => $numBers,
+                        'transferaction' => $transferType
+                    ]);
+
+                    $this->saveWalletEntry($this->burnWallet, -$numBers);
+
+                    $this->updateLogwinStatus($value['token'], 1);
+
+                    $this->transactionManager->commit();
+
+                }catch(\Throwable $e){
+                    $this->transactionManager->rollback();
+                    $this->updateLogwinStatus($value['token'], 2); // Unmigrated due to some errors
+                    continue; 
+                }
+
+            }
+            
+
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID', 41401);
+        }
+    }
+
+
+    /**
+     * Generate logwins entries for Dislike actions between 05th March 2025 to 02nd April 2025
+     *
+     * Used for Actions records:
+     *  whereby = 3  -> Post Dislike
+     */
+    public function generateDislikePaidActionToLogWins(): bool
+    {
+        \ignore_user_abort(true);
+
+        ini_set('max_execution_time', '0');
+
+        try {
+
+            $sql = "WITH ranked AS (
+                        SELECT 
+                            upl.*,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY userid, DATE(createdat) 
+                                ORDER BY createdat
+                            ) AS rn
+                        FROM user_post_dislikes upl
+                        WHERE  createdat < '2025-04-02 08:31'
+                    )
+                    SELECT *
+                    FROM ranked
+                    WHERE rn > 0
+                    ORDER BY createdat;
+                ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+
+            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $this->initializeLiquidityPool();
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+
+            foreach ($logwins as $key => $value) {
+                $this->transactionManager->beginTransaction();
+
+                $sql = "INSERT INTO logwins 
+                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
+                VALUES 
+                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :createdat)";
+
+                try {
+                    $stmt = $this->db->prepare($sql);
+
+                    $tokenId = self::generateUUID();
+
+                    $numBers = -5; // Each extra dislike will cost 5 Gems
+
+                    $userId = $value['userid'];
+                    $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':postid', $value['postid'], \PDO::PARAM_STR);
+                    $stmt->bindValue(':fromid', $userId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':gems', 0, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+                    $stmt->bindValue(':whereby', 3, \PDO::PARAM_INT);
+                    $stmt->bindValue(':createdat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+
+                    $stmt->execute();
+
+                    
+                    $this->initializeLiquidityPool();
+                    $transRepo = new TransactionRepository($this->logger, $this->db);
+
+
+                    $transactionType = 'postDisliked';
+
+                    $transferType = 'BURN';
+
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $tokenId,
+                        'transactiontype' => $transactionType,
+                        'senderid' => $userId,
+                        'recipientid' => $this->burnWallet,   
+                        'tokenamount' => $numBers,
+                        'transferaction' => $transferType
+                    ]);
+
+                    $this->saveWalletEntry($this->burnWallet, -$numBers);
+
+                    $this->updateLogwinStatus($value['token'], 1);
+
+                    $this->transactionManager->commit();
+
+                }catch(\Throwable $e){
+                    $this->transactionManager->rollback();
+                    $this->updateLogwinStatus($value['token'], 2); // Unmigrated due to some errors
+                    continue; 
+                }
+
+            }
+            
+
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID', 41401);
+        }
+    }
+
+
+    /**
+     * Generate logwins entries for Post creation actions between 05th March 2025 to 02nd April 2025
+     *
+     * Used for Actions records:
+     *  whereby = 5  -> Post Creation
+     */
+    public function generatePostPaidActionToLogWins(): bool
+    {
+        \ignore_user_abort(true);
+
+        ini_set('max_execution_time', '0');
+
+        try {
+
+            $sql = "WITH ranked AS (
+                        SELECT 
+                            upl.*,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY userid, DATE(createdat) 
+                                ORDER BY createdat
+                            ) AS rn
+                        FROM posts upl
+                        WHERE  createdat < '2025-04-02 08:31'
+                    )
+                    SELECT *
+                    FROM ranked
+                    WHERE rn > 1
+                    ORDER BY createdat;
+                ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+
+            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $this->initializeLiquidityPool();
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+
+            foreach ($logwins as $key => $value) {
+                $this->transactionManager->beginTransaction();
+
+                $sql = "INSERT INTO logwins 
+                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
+                VALUES 
+                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :createdat)";
+
+                try {
+                    $stmt = $this->db->prepare($sql);
+
+                    $tokenId = self::generateUUID();
+
+                    $numBers = -20; // Each extra like will cost 3 Gems
+
+                    $userId = $value['userid'];
+                    $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':postid', $value['postid'], \PDO::PARAM_STR);
+                    $stmt->bindValue(':fromid', $userId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':gems', 0, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+                    $stmt->bindValue(':whereby', 5, \PDO::PARAM_INT);
+                    $stmt->bindValue(':createdat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+
+                    $stmt->execute();
+
+                    
+                    $this->initializeLiquidityPool();
+                    $transRepo = new TransactionRepository($this->logger, $this->db);
+
+                    $transactionType = 'postCreated';
+
+                    $transferType = 'BURN';
+
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $tokenId,
+                        'transactiontype' => $transactionType,
+                        'senderid' => $userId,
+                        'recipientid' => $this->burnWallet,   
+                        'tokenamount' => $numBers,
+                        'transferaction' => $transferType
+                    ]);
+
+                    $this->saveWalletEntry($this->burnWallet, -$numBers);
+
+                    $this->updateLogwinStatus($value['token'], 1);
+
+                    $this->transactionManager->commit();
+
+                }catch(\Throwable $e){
+                    $this->transactionManager->rollback();
+                    $this->updateLogwinStatus($value['token'], 2); // Unmigrated due to some errors
+                    continue; 
+                }
+
+            }
+            
+
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID', 41401);
+        }
+    }
+
+    
+    /**
+     * Generate logwins entries for Post creation actions between 05th March 2025 to 02nd April 2025
+     *
+     * Used for Actions records:
+     *  whereby = 4  -> Post Comment
+     */
+    public function generateCommentPaidActionToLogWins(): bool
+    {
+        \ignore_user_abort(true);
+
+        ini_set('max_execution_time', '0');
+
+        try {
+
+            $sql = "WITH ranked AS (
+                        SELECT 
+                            upl.*,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY userid, DATE(createdat) 
+                                ORDER BY createdat
+                            ) AS rn
+                        FROM user_post_comments upl
+                        WHERE  createdat < '2025-04-02 08:31'
+                    )
+                    SELECT *
+                    FROM ranked
+                    WHERE rn > 4
+                    ORDER BY createdat;
+                ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+
+            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $this->initializeLiquidityPool();
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+
+            foreach ($logwins as $key => $value) {
+                $this->transactionManager->beginTransaction();
+
+                $sql = "INSERT INTO logwins 
+                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
+                VALUES 
+                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :createdat)";
+
+                try {
+                    $stmt = $this->db->prepare($sql);
+
+                    $tokenId = self::generateUUID();
+
+                    $numBers = -0.5; // Each extra like will cost 0.5 Gems
+
+                    $userId = $value['userid'];
+                    $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':postid', $value['commentid'], \PDO::PARAM_STR);
+                    $stmt->bindValue(':fromid', $userId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':gems', 0, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+                    $stmt->bindValue(':whereby', 4, \PDO::PARAM_INT);
+                    $stmt->bindValue(':createdat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+
+                    $stmt->execute();
+
+                    
+                    $this->initializeLiquidityPool();
+                    $transRepo = new TransactionRepository($this->logger, $this->db);
+                    
+                    $transactionType = 'postComment';
+
+                    $transferType = 'BURN';
+
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $tokenId,
+                        'transactiontype' => $transactionType,
+                        'senderid' => $userId,
+                        'recipientid' => $this->burnWallet,   
+                        'tokenamount' => $numBers,
+                        'transferaction' => $transferType
+                    ]);
+
+                    $this->saveWalletEntry($this->burnWallet, -$numBers);
+
+                    $this->updateLogwinStatus($value['token'], 1);
+
+                    $this->transactionManager->commit();
+
+                }catch(\Throwable $e){
+                    $this->transactionManager->rollback();
+                    $this->updateLogwinStatus($value['token'], 2); // Unmigrated due to some errors
+                    continue; 
+                }
+
+            }
+            
+
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID', 41401);
+        }
+    }
+    
+    /**
+     * Generate gems to logwins entries
+     * 
+     * Gems table: Records are pending to be added on logwins: Total: 1672
+     * 
+     * Date From: 
+     * "2025-03-05 15:48:24.08886"										
+     * Date To:
+     * "2025-04-02 02:13:11.124195"	
+     */
+    public function migrateGemsToLogWins(): bool
+    {
+        \ignore_user_abort(true);
+
+        ini_set('max_execution_time', '0');
+
+        $this->logger->info('LogWinMapper.migrateTokenTransfer started');
+
+        try {
+
+            $sql = "
+                WITH user_sums AS (
+                    SELECT 
+                        userid,
+                        GREATEST(SUM(gems), 0) AS total_numbers
+                    FROM gems
+                    WHERE collected = 0 and createdat < '2025-04-02 08:31'
+                    GROUP BY userid
+                ),
+                total_sum AS (
+                    SELECT SUM(total_numbers) AS overall_total FROM user_sums
+                )
+                SELECT 
+                    g.userid,
+                    g.gemid,
+                    g.postid,
+                    g.fromid,
+                    g.gems,
+                    g.whereby,
+                    g.createdat,
+                    us.total_numbers,
+                    (SELECT SUM(total_numbers) FROM user_sums) AS overall_total,
+                    (us.total_numbers * 100.0 / ts.overall_total) AS percentage
+                FROM gems g
+                JOIN user_sums us ON g.userid = us.userid
+                CROSS JOIN total_sum ts
+                WHERE us.total_numbers > 0 AND g.collected = 0 and g.createdat < '2025-04-02 08:31';
+            ";
+            $this->logger->info('LogWinMapper.migrateGemsToLogWins SQL', ['sql' => $sql]);
+
+            $stmt = $this->db->query($sql);
+
+            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            var_dump($data); exit;
+            var_dump('Total Gems to migrate: '.count($data)); exit;
+            if (empty($data)) {
+                $this->logger->info('No gems to migrate');
+                return true;
+            }
+            
+            $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
+            $dailyToken = DAILY_NUMBER_TOKEN;
+
+            // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
+            /**
+             * Still We are facing with digital precision issues
+             * If we use till 9 Digit here, it coming right.
+             */
+            $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
+
+            $bestatigungInitial = TokenHelper::mulRc((float) $totalGems, (float) $gemsintoken);
+            // $bestatigung = bcadd(bcmul($totalGems, $gemsintoken, 10), '0.00005', 4);
+
+            $args = [
+                'winstatus' => [
+                    'totalGems' => $totalGems,
+                    'gemsintoken' => $gemsintoken,
+                    'bestatigung' => $bestatigungInitial
+                ]
+            ];
+
+            foreach ($data as $row) {
+                $userId = (string)$row['userid'];
+
+                if (!isset($args[$userId])) {
+
+                    $totalTokenNumber = TokenHelper::mulRc((float) $row['total_numbers'], (float) $gemsintoken);
+                    $args[$userId] = [
+                        'userid' => $userId,
+                        'gems' => $row['total_numbers'],
+                        'tokens' => $totalTokenNumber,
+                        'percentage' => $row['percentage'],
+                        'details' => []
+                    ];
+                }
+
+                $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
+
+                $args[$userId]['details'][] = [
+                    'gemid' => $row['gemid'],
+                    'userid' => $row['userid'],
+                    'postid' => $row['postid'],
+                    'fromid' => $row['fromid'],
+                    'gems' => $row['gems'],
+                    'numbers' => $rowgems2token,
+                    'whereby' => $row['whereby'],
+                    'createdat' => $row['createdat']
+                ];
+
+                // $this->insertWinToLog($userId, end($args[$userId]['details']));
+                // Star
+                $postId = $args['postid'] ?? null;
+                $fromId = $args['fromid'] ?? null;
+                $gems = $args['gems'] ?? 0.0;
+                $numBers = $args['numbers'] ?? 0;
+                $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
+
+                $id = self::generateUUID();
+                if (empty($id)) {
+                    $this->logger->critical('Failed to generate logwins ID');
+                    return self::respondWithError(41401);
+                }
+
+                $sql = "INSERT INTO logwins 
+                        (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
+                        VALUES 
+                        (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :createdat)";
+
+                try {
+                    $stmt = $this->db->prepare($sql);
+
+                    $tokenId = $args['gemid'] ?? $id;
+                    $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':gems', $gems, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+                    $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
+                    $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
+
+                    $stmt->execute();
+
+                    
+                    $this->initializeLiquidityPool();
+                    $transRepo = new TransactionRepository($this->logger, $this->db);
+
+                    $transactionType = '';
+                    if($args['whereby'] == 1){
+                        $transactionType = 'postViewed';
+                    }elseif ($args['whereby'] == 2) {
+                        $transactionType = 'postLiked';
+                    }elseif ($args['whereby'] == 3) {
+                        $transactionType = 'postDisLiked';
+                    }elseif ($args['whereby'] == 4) {
+                        $transactionType = 'postComment';
+                    }elseif ($args['whereby'] == 5) {
+                        $transactionType = 'postCreated';
+                    }elseif ($args['whereby'] == 11) {
+                        $transactionType = 'getPercentBeforeTransaction'; // PENDING: Should be changed according to the API Logic
+                    }
+
+                    /**
+                     * PENDING FOR API: `getpercentbeforetransaction`, 
+                     * Need to check first, is this API in co-operation or not, and if it is than, what is it for?
+                     * 
+                     * Determine the transfer type based on the number of gems.
+                     * If the number of gems is negative, it's a burn operation.
+                     * If the number of gems is positive, it's a mint operation.
+                     */
+                    if($numBers < 0){
+                        $transferType = 'BURN';
+                    }else{
+                        $transferType = 'MINT';
+                    }
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $tokenId,
+                        'transactiontype' => $transactionType,
+                        'senderid' => $userId,
+                        'recipientid' => $this->burnWallet,   
+                        'tokenamount' => $numBers,
+                        'transferaction' => $transferType
+                    ]);
+                    if($transferType == 'BURN'){
+                        /**
+                         * Add Amount to Burn account
+                         *
+                         * Reason behind keeping -$numBers is to, Add to Burn Account Positively
+                         */
+                        $this->saveWalletEntry($this->burnWallet, -$numBers);
+                    }
+                    
+                    
+                    $this->logger->info('Inserted into logwins successfully', [
+                        'userId' => $userId,
+                        'postid' => $postId
+                    ]);
+
+
+
+                // $this->insertWinToPool($userId, end($args[$userId]['details']));
+                $postId = $args['postid'] ?? null;
+                $fromId = $args['fromid'] ?? null;
+                $numBers = $args['numbers'] ?? 0;
+                $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
+
+                $sql = "INSERT INTO wallet 
+                        (token, userid, postid, fromid, numbers, numbersq, whereby, createdat) 
+                        VALUES 
+                        (:token, :userid, :postid, :fromid, :numbers, :numbersq, :whereby, :createdat)";
+
+                $stmt = $this->db->prepare($sql);
+
+                $stmt->bindValue(':token', $this->getPeerToken(), \PDO::PARAM_STR);
+                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
+                $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
+                $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+                $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+                $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
+                $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
+
+                $stmt->execute();
+
+
+                $this->logger->info('Inserted into wallet successfully', [
+                    'userId' => $userId,
+                    'postid' => $postId
+                ]);
+
+                
+            }
+
+            try {
+                $gemIds = array_column($data, 'gemid');
+                $quotedGemIds = array_map(fn($gemId) => $this->db->quote($gemId), $gemIds);
+
+                $this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
+
+            } catch (\Throwable $e) {
+                $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
+                return true;
+            }
+
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID ' . $e->getMessage() , 41401);
+        }
+    }
+    
+
     /**
      * Marked as Status migrated
      */
