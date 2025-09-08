@@ -176,6 +176,7 @@ type Advertisement {
   amountViews: Int!
   amountComments: Int!
   amountDislikes: Int!
+  amountReports: Int!
   user : ProfileUser!
   post : Post!
 }
@@ -203,10 +204,20 @@ type ListedAdvertisementData {
   affectedRows: AdvertisementHistoryResult
 }
 
+type AdvertisementRow {
+  id: ID!
+  createdAt: Date!
+  type: AdvertisementType!
+  timeframeStart: Date!
+  timeframeEnd: Date!
+  totalTokenCost: Float!
+  totalEuroCost: Float!
+}
+
 type ListAdvertisementData {
   status: String!
   ResponseCode: String
-  affectedRows: [Advertisement]
+  affectedRows: [AdvertisementRow]
 }
 
 type Transaction {
@@ -273,6 +284,11 @@ enum PostSortType {
   VIEWS
   COMMENTS
   FOR_ME
+  OLDEST
+  FOLLOWER
+  FOLLOWED
+  RELEVANT
+  FRIENDS
 }
 
 enum DayFilterType {

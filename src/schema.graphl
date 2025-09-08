@@ -245,10 +245,20 @@ type ListedAdvertisementData {
   affectedRows: AdvertisementHistoryResult
 }
 
+type AdvertisementRow {
+  id: ID!
+  createdAt: Date!
+  type: AdvertisementType!
+  timeframeStart: Date!
+  timeframeEnd: Date!
+  totalTokenCost: Float!
+  totalEuroCost: Float!
+}
+
 type ListAdvertisementData {
   status: String!
   ResponseCode: String
-  affectedRows: [Advertisement]
+  affectedRows: [AdvertisementRow]
 }
 
 type Transaction {
@@ -265,13 +275,13 @@ type Transaction {
 
 type TransactionResponse {
   status: String!
-  responseCode: Int!
+  ResponseCode: String!
   affectedRows: [Transaction!]
 }
 
 type TransferTokenResponse {
   status: String!
-  ResponseCode: Int!
+  ResponseCode: String!
   affectedRows: TransferToken!
 }
 

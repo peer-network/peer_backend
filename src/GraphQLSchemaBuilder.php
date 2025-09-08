@@ -1838,13 +1838,34 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? null;
                 },
             ],
+            'AdvertisementRow' => [
+                'id' => function (array $root): string {
+                    $this->logger->info('Query.AdvertisementRow Resolvers');
+                    return $root['advertisementid'] ?? '';
+                },
+                'createdAt' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'type' => function (array $root): string {
+                    return strtoupper($root['status']) ?? 'BASIC';
+                },
+                'timeframeStart' => function (array $root): string {
+                    return $root['timestart'] ?? '';
+                },
+                'timeframeEnd' => function (array $root): string {
+                    return $root['timeend'] ?? '';
+                },
+                'totalTokenCost' => function (array $root): float {
+                    return $root['tokencost'] ?? 0.0;
+                },
+                'totalEuroCost' => function (array $root): float {
+                    return $root['eurocost'] ?? 0.0;
+                },
+            ],
             'ListedAdvertisementData' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.ListedAdvertisementData Resolvers');
                     return $root['status'] ?? '';
-                },
-                'counter' => function (array $root): int {
-                    return $root['counter'] ?? 0;
                 },
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
@@ -1858,17 +1879,14 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.Advertisement Resolvers');
                     return $root['advertisementid'] ?? '';
                 },
-                'createdAt' => function (array $root): string {
-                    return $root['createdat'] ?? '';
-                },
-                'type' => function (array $root): string {
-                    return $root['status'] ?? '';
-                },
                 'creatorId' => function (array $root): string {
                     return $root['userid'] ?? '';
                 },
                 'postId' => function (array $root): string {
                     return $root['postid'] ?? '';
+                },
+                'type' => function (array $root): string {
+                    return strtoupper($root['status']) ?? 'BASIC';
                 },
                 'timeframeStart' => function (array $root): string {
                     return $root['timestart'] ?? '';
@@ -1883,25 +1901,61 @@ class GraphQLSchemaBuilder
                     return $root['eurocost'] ?? 0.0;
                 },
                 'gemsEarned' => function (array $root): float {
-                    return $root['gemsEarned'] ?? 0.0;
+                    return $root['gemsearned'] ?? 0.0;
                 },
-                'views' => function (array $root): int {
-                    return $root['view'] ?? 0;
+                'amountLikes' => function (array $root): int {
+                    return $root['amountlikes'] ?? 0;
+                },
+                'amountViews' => function (array $root): int {
+                    return $root['amountviews'] ?? 0;
+                },
+                'amountComments' => function (array $root): int {
+                    return $root['amountcomments'] ?? 0;
+                },
+                'amountDislikes' => function (array $root): int {
+                    return $root['amountdislikes'] ?? 0;
+                },
+                'amountReports' => function (array $root): int {
+                    return $root['amountreports'] ?? 0;
+                },
+                'createdAt' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'user' => function (array $root): array { // neu
+                    return $root['user'] ?? [];
+                },
+                'post' => function (array $root): array { // neu
+                    return $root['post'] ?? [];
                 },
             ],
-            'AdvertisementHistoryStats' => [
-                'totalTokenSpent' => function (array $root): float {
-                    $this->logger->info('Query.AdvertisementHistoryStats Resolvers');
-                    return $root['totaltokenspent'] ?? 0.0;
+            'TotalAdvertisementHistoryStats' => [
+                'tokenSpent' => function (array $root): float {
+                    $this->logger->info('Query.TotalAdvertisementHistoryStats Resolvers');
+                    return $root['tokenSpent'] ?? 0.0;
                 },
-                'totalEuroSpent' => function (array $root): float {
-                    return $root['totaleurospent'] ?? 0.0;
+                'euroSpent' => function (array $root): float {
+                    return $root['euroSpent'] ?? 0.0;
                 },
-                'totalAds' => function (array $root): int {
-                    return $root['totalads'] ?? 0;
+                'amountAds' => function (array $root): int {
+                    return $root['amountAds'] ?? 0;
                 },
-                'totalGemsEarned' => function (array $root): int {
-                    return $root['totalgemsearned'] ?? 0;
+                'gemsEarned' => function (array $root): int {
+                    return $root['gemsEarned'] ?? 0;
+                },
+                'amountLikes' => function (array $root): int {
+                    return $root['amountLikes'] ?? 0;
+                },
+                'amountViews' => function (array $root): int {
+                    return $root['amountViews'] ?? 0;
+                },
+                'amountComments' => function (array $root): int {
+                    return $root['amountComments'] ?? 0;
+                },
+                'amountDislikes' => function (array $root): int {
+                    return $root['amountDislikes'] ?? 0;
+                },
+                'amountReports' => function (array $root): int {
+                    return $root['amountReports'] ?? 0;
                 },
             ],
             'AdvertisementHistoryResult' => [
@@ -1961,7 +2015,7 @@ class GraphQLSchemaBuilder
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
-            //'advertisementHistory' => fn(mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
+            'advertisementHistory' => fn(mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
         ];
     }
 
@@ -2096,7 +2150,7 @@ class GraphQLSchemaBuilder
 
         // Werbeplan validieren
         if (!in_array($advertisePlan, $advertiseActions, true)) {
-            $this->logger->error('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
+            $this->logger->warning('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
             return $this->respondWithError(32006);
         }
 
@@ -2107,14 +2161,14 @@ class GraphQLSchemaBuilder
 
         // Preisvalidierung
         if (!isset($actionPrices[$advertisePlan])) {
-            $this->logger->error('Ungültiger Preisplan', ['advertisePlan' => $advertisePlan]);
+            $this->logger->warning('Ungültiger Preisplan', ['advertisePlan' => $advertisePlan]);
             return $this->respondWithError(32005);
         }
 
         if ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
             // Startdatum validieren
             if (isset($startdayInput) && empty($startdayInput)) {
-                $this->logger->error('Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
+                $this->logger->warning('Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
                 return $this->respondWithError(32007);
             }
 
@@ -2123,19 +2177,19 @@ class GraphQLSchemaBuilder
             $errors = DateTimeImmutable::getLastErrors();
 
             if (!$startday) {
-                $this->logger->error("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
+                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
                 return $this->respondWithError(32008);
             }
 
             if (isset($errors['warning_count']) && $errors['warning_count'] > 0 || isset($errors['error_count']) && $errors['error_count'] > 0) {
-                $this->logger->error("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
+                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
                 return $this->respondWithError(42004);
             }
 
             // Prüfen, ob das Startdatum in der Vergangenheit liegt
             $tomorrow = new DateTimeImmutable('tomorrow');
             if ($startday < $tomorrow) {
-                $this->logger->error('Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
+                $this->logger->warning('Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
                 return $this->respondWithError(32008);
             }
 
@@ -2143,7 +2197,7 @@ class GraphQLSchemaBuilder
 
             // Laufzeit validieren
             if ($durationInDays !== null && !in_array($durationInDays, $durationActions, true)) {
-                $this->logger->error('Ungültige Laufzeit', ['durationInDays' => $durationInDays]);
+                $this->logger->warning('Ungültige Laufzeit', ['durationInDays' => $durationInDays]);
                 return $this->respondWithError(32009);
             }
         }
@@ -2180,7 +2234,7 @@ class GraphQLSchemaBuilder
             $this->logger->info('Werbeanzeige BASIC', ["Kosten für $durationInDays Tage: " => $CostPlan]);
             $rescode = 12004;
         } else {
-            $this->logger->error('Ungültige Ads Plan', ['CostPlan' => $CostPlan]);
+            $this->logger->warning('Ungültige Ads Plan', ['CostPlan' => $CostPlan]);
             return $this->respondWithError(32005);
         }
 
@@ -2223,7 +2277,7 @@ class GraphQLSchemaBuilder
                 }
 
                 if (!$deducted) {
-                    $this->logger->error('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
+                    $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
                     return $this->respondWithError($deducted['ResponseCode']);
                 }
 
@@ -2238,7 +2292,7 @@ class GraphQLSchemaBuilder
     }
 
     // Werbeanzeige historie abrufen
-/*     protected function resolveAdvertisementHistory(?array $args = []): ?array
+    protected function resolveAdvertisementHistory(?array $args = []): ?array
     {
         // Authentifizierung prüfen
         if (!$this->checkAuthentication()) {
@@ -2267,7 +2321,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(40301);
         }
     }
- */
+
     protected function createUser(array $args): ?array
     {
         $this->logger->info('Query.createUser started');

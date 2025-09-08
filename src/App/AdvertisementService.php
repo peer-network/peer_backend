@@ -170,16 +170,16 @@ class AdvertisementService
                     return self::respondWithError(32017); // BASIC: es fehlt eine teil von (postid, date, costplan)
                 }
 
-                if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend)) {
+                if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend) === true) {
                     $this->logger->warning('Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
             } 
             elseif ($CostPlan !== null && $CostPlan === self::PLAN_PINNED) 
             {
-                if ($this->advertisementMapper->isAdvertisementIdExist($postId, \strtolower($CostPlan)) === true && empty($forcing)) 
+                if ($this->advertisementMapper->hasActiveAdvertisement($postId, \strtolower($CostPlan)) === true && empty($forcing)) 
                 {
-                    $this->logger->info('Pinned Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).', ['advertisementid' => $advertisementId, 'postId' => $postId]);
+                    $this->logger->warning('Pinned Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).
                 }
 
@@ -187,7 +187,7 @@ class AdvertisementService
                 $timeend = (new \DateTime('+1 days'))->format('Y-m-d H:i:s.u'); // Setze Timeend
 
                 if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower('BASIC'), $timestart, $timeend) === true && empty($forcing)) {
-                    $this->logger->warning('Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
+                    $this->logger->warning('Pinned.Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
 
@@ -277,21 +277,21 @@ class AdvertisementService
 
         $this->logger->info('AdvertisementService.fetchAll Befor check');
 		if ($from !== null && !self::validateDate($from)) {
-			        $this->logger->info('AdvertisementService.fetchAll im check');
+            $this->logger->info('AdvertisementService.fetchAll im check');
             return self::respondWithError(30212);
         }
 
         $this->logger->info('AdvertisementService.fetchAll Befor 2 check');
         if ($to !== null && !self::validateDate($to)) {
-			        $this->logger->info('AdvertisementService.fetchAll im 2 check');
+            $this->logger->info('AdvertisementService.fetchAll im 2 check');
             return self::respondWithError(30213);
         }
 
         try {
             $result = $this->advertisementMapper->fetchAllWithStats($args);
 
-            return self::createSuccessResponse(12002, $result['affectedRows'], true, 'advertisements');
-
+            //return $result;
+            return self::createSuccessResponse(12002, $result['affectedRows'], false);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching Advertisements', ['error' => $e->getMessage()]);
             return self::respondWithError(42001);
@@ -353,6 +353,7 @@ class AdvertisementService
         $tag = $args['tag'] ?? null; 
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
+        $titleConfig = ConstantsConfig::post()['TITLE'];
 
         $titleConfig = ConstantsConfig::post()['TITLE'];
 

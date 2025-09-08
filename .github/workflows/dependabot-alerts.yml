@@ -3,6 +3,11 @@ name: Dependabot Alerts to Discord (Scheduled)
 on:
   schedule:
     - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch:
+  
+permissions:
+  contents: read
+  security-events: read
 
 jobs:
   notify:
@@ -14,6 +19,12 @@ jobs:
           -H "Accept: application/vnd.github+json" \
           https://api.github.com/repos/${{ github.repository }}/dependabot/alerts \
           > alerts.json
+
+          if [ ! -s alerts.json ]; then
+            echo "alerts.json is empty (no permissions or no alerts)"
+            cat alerts.json
+            exit 0
+          fi
 
           echo "Alerts:"
           cat alerts.json
@@ -48,4 +59,4 @@ jobs:
             echo "No alerts found."
           fi
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_DEPENDABOT }}
