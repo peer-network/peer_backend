@@ -2022,10 +2022,11 @@ class UserMapper
 
     public function fetchProfileDataRaw(string $userid, string $currentUserId, array $specifications): Profile|false {
         $allSpecs = SpecificationSQLData::merge($specifications);
+        
         $whereClauses = $allSpecs->whereClauses;
-        $params = $allSpecs->paramsToPrepare;
         $whereClauses[] = "u.uid = :userid";
         $whereClausesString = implode(" AND ", $whereClauses);
+        $params = $allSpecs->paramsToPrepare;
 
         $sql = sprintf("
             SELECT 

@@ -21,12 +21,12 @@ final class VerifiedAndActiveUserSpec implements Specification
                 "EXISTS (
                 SELECT 1
                 FROM users verified_and_active_user_spec_users
-                WHERE verified_and_active_user_spec_users.userid = $this->userid
-                AND verified_and_active_user_spec_users.verified == 1
-                AND verified_and_active_user_spec_users.status == 0
+                WHERE verified_and_active_user_spec_users.uid = :verified_and_active_user_spec_users_userid
+                AND verified_and_active_user_spec_users.verified = 1
                 AND verified_and_active_user_spec_users.status IN (0,2,16))"
-            ],
-            []
+            ],[
+                "verified_and_active_user_spec_users_userid" => $this->userid
+            ]
         );
     }
 

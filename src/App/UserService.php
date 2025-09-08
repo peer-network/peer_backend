@@ -761,7 +761,7 @@ class UserService
         }
 
         $specs = [
-            new VerifiedAndActiveUserSpec($userId)->toSql()
+            (new VerifiedAndActiveUserSpec($userId))->toSql()
         ];
 
         try {
