@@ -164,6 +164,7 @@ enum DayFilterType {
 
 enum OnboardingType {
   INTROONBOARDING
+  PONOCHKA_ONBOARDING
 }
 
 input UserPreferencesInput {
