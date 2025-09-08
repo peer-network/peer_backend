@@ -3,6 +3,10 @@ name: Build and Push Base Image
 on:
   workflow_dispatch: # allow manual trigger
   push:
+    branches:
+      - development
+      - main
+      - pre-release
     paths:
       - "Dockerfile.base"
       - ".github/workflows/build_base_image.yml"
