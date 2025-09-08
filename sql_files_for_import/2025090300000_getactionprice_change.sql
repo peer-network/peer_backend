@@ -1,3 +1,4 @@
+BEGIN;
 ALTER TABLE user_preferences
     ADD COLUMN IF NOT EXISTS onboardingsWereShown JSONB NOT NULL DEFAULT '[]';
 
@@ -9,3 +10,4 @@ SET post_price    = 2.0,
     comment_price = 0.10,
     updatedat     = NOW()
 WHERE currency = 'EUR';
+COMMIT;
