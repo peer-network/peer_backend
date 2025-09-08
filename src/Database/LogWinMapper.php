@@ -58,7 +58,7 @@ class LogWinMapper
      * 
      * Table `Transactions` has Foreign key on `operationsid`, which refers to `logWins`'s `token` PK. 
      */
-    public function migratePaidActionsLogwinData(): bool
+    public function migratePaidActions(): bool
     {
         \ignore_user_abort(true);
 
@@ -183,13 +183,13 @@ class LogWinMapper
      * whereby = 18 -> Token transfer @deprecated
      * 
      */
-    public function migrateTokenTransferLogwinData(): bool
+    public function migrateTokenTransfer(): bool
     {
         \ignore_user_abort(true);
 
         ini_set('max_execution_time', '0');
 
-        $this->logger->info('LogWinMapper.migrateTokenTransferLogwinData started');
+        $this->logger->info('LogWinMapper.migrateTokenTransfer started');
 
         try {
 

@@ -58,13 +58,13 @@ class LogWinService
         $this->logger->info('LogWinService.logWinMigration started');
 
         try {
-            $response = $this->logWinMapper->migratePaidActionsLogwinData();
+            $response = $this->logWinMapper->migratePaidActions();
 
             if(!$response){
                 $this->logWinMigration();
             }
 
-            $response = $this->logWinMapper->migrateTokenTransferLogwinData();
+            $response = $this->logWinMapper->migrateTokenTransfer();
 
             if(!$response){
                 $this->logWinMigration();
