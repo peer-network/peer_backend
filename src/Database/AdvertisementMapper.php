@@ -86,7 +86,7 @@ class AdvertisementMapper
             GROUP BY postid
         ";
 
-        // ---- Stats (ohne :trend_since)
+        // ---- Stats
         $sSql = "
             WITH al_filtered AS (
                 SELECT *
@@ -101,28 +101,28 @@ class AdvertisementMapper
 
             -- Voraggregationen pro Post
             likes_by_post AS (
-                SELECT postid, COUNT(*) AS cnt
-                FROM user_post_likes
+                SELECT postid, SUM(likes) AS cnt
+                FROM advertisements_info
                 GROUP BY postid
             ),
             dislikes_by_post AS (
-                SELECT postid, COUNT(*) AS cnt
-                FROM user_post_dislikes
+                SELECT postid, SUM(dislikes) AS cnt
+                FROM advertisements_info
                 GROUP BY postid
             ),
             views_by_post AS (
-                SELECT postid, COUNT(*) AS cnt
-                FROM user_post_views
+                SELECT postid, SUM(views) AS cnt
+                FROM advertisements_info
                 GROUP BY postid
             ),
             comments_by_post AS (
-                SELECT postid, COUNT(*) AS cnt
-                FROM comments
+                SELECT postid, SUM(comments) AS cnt
+                FROM advertisements_info
                 GROUP BY postid
             ),
             reports_by_post AS (
-                SELECT postid, COUNT(*) AS cnt
-                FROM user_post_reports
+                SELECT postid, SUM(reports) AS cnt
+                FROM advertisements_info
                 GROUP BY postid
             )
             SELECT
@@ -184,9 +184,11 @@ class AdvertisementMapper
                 al.tokencost                     AS totaltokencost,
                 al.eurocost                      AS totaleurocost,
                 COALESCE(gbp.gems_earned, 0)     AS gemsearned,
-
-                -- top-level views (vom Metrics-Block)
-                m.amountviews                    AS views,
+                ai.amountlikes                   AS adsamountlikes,
+                ai.amountviews                   AS adsamountviews,
+                ai.amountcomments                AS adsamountcomments,
+                ai.amountdislikes                AS adsamountdislikes,
+                ai.amountreports                 AS adsamountreports,
 
                 -- post-objekt (Owner & Felder aus posts)
                 p.userid                         AS post_owner_id,
@@ -230,8 +232,20 @@ class AdvertisementMapper
             FROM advertisements_log al
             LEFT JOIN gems_by_post gbp ON gbp.postid = al.postid
             LEFT JOIN posts p          ON p.postid   = al.postid
-            LEFT JOIN users u          ON u.uid      = al.userid      -- Creator
-            LEFT JOIN users pu         ON pu.uid     = p.userid       -- Post Owner
+            LEFT JOIN users u          ON u.uid      = al.userid
+            LEFT JOIN users pu         ON pu.uid     = p.userid
+
+            -- Metriken & Flags (al.userid = Creator, p.userid = Ads Owner)
+            LEFT JOIN LATERAL (
+                SELECT
+                    likes    AS amountlikes,
+                    dislikes AS amountdislikes,
+                    views    AS amountviews,
+                    reports  AS amountreports,
+                    comments AS amountcomments
+                FROM advertisements_info
+                WHERE postid = p.postid
+            ) ai ON TRUE
 
             -- Metriken & Flags (al.userid = Creator, p.userid = Post Owner)
             LEFT JOIN LATERAL (
@@ -415,11 +429,11 @@ class AdvertisementMapper
             'tokencost'       => (float)$row['totaltokencost'],
             'eurocost'        => (float)$row['totaleurocost'],
             'gemsearned'      => (float)$row['gemsearned'],
-            'amountlikes'     => (int)$row['amountlikes'],
-            'amountviews'     => (int)$row['amountviews'],
-            'amountcomments'  => (int)$row['amountcomments'],
-            'amountdislikes'  => (int)$row['amountdislikes'],
-            'amountreports'   => (int)$row['amountreports'],
+            'amountlikes'     => (int)$row['adsamountlikes'],
+            'amountviews'     => (int)$row['adsamountviews'],
+            'amountcomments'  => (int)$row['adsamountcomments'],
+            'amountdislikes'  => (int)$row['adsamountdislikes'],
+            'amountreports'   => (int)$row['adsamountreports'],
 
             'user' => [
                 'uid'         => (string)$row['creatorid'],
@@ -682,19 +696,19 @@ class AdvertisementMapper
 
         // SQL-Statements für beide Tabellen
         $query1 = "INSERT INTO advertisements 
-                   (advertisementid, postid, userid, status, timestart, timeend)
+                   (advertisementid, postid, userid, status, timestart, timeend, createdat)
                    VALUES 
-                   (:advertisementid, :postid, :userid, :status, :timestart, :timeend)";
+                   (:advertisementid, :postid, :userid, :status, :timestart, :timeend, :createdat)";
 
         $query2 = "INSERT INTO advertisements_log 
-                   (advertisementid, postid, userid, status, timestart, timeend, tokencost, eurocost)
+                   (advertisementid, postid, userid, status, timestart, timeend, tokencost, eurocost, createdat)
                    VALUES 
-                   (:advertisementid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost)";
+                   (:advertisementid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost, :createdat)";
 
         $query3 = "INSERT INTO advertisements_info 
-                   (advertisementid, postid, userid)
+                   (advertisementid, postid, userid, updatedat, createdat)
                    VALUES 
-                   (:advertisementid, :postid, :userid)";
+                   (:advertisementid, :postid, :userid, :updatedat, :createdat) ON CONFLICT (advertisementid) DO NOTHING";
 
         try {
             $this->db->beginTransaction();
@@ -705,7 +719,7 @@ class AdvertisementMapper
                 throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
             }
 
-            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend'] as $key) {
+            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'createdat'] as $key) {
                 $stmt1->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
             }
 
@@ -717,7 +731,7 @@ class AdvertisementMapper
                 throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
             }
 
-            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost'] as $key) {
+            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost', 'createdat'] as $key) {
                 $stmt2->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
             }
 
@@ -729,7 +743,7 @@ class AdvertisementMapper
                 throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
             }
 
-            foreach (['advertisementid', 'postid', 'userid'] as $key) {
+            foreach (['advertisementid', 'postid', 'userid', 'updatedat', 'createdat'] as $key) {
                 $stmt3->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
             }
 
