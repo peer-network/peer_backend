@@ -152,7 +152,6 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v5
- 
       - name: Fix log directory permissions
         run: sudo chown -R 33:33 runtime-data/logs
  
