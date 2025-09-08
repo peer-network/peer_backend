@@ -176,6 +176,7 @@ type Advertisement {
   amountViews: Int!
   amountComments: Int!
   amountDislikes: Int!
+  amountReports: Int!
   user : ProfileUser!
   post : Post!
 }
@@ -283,6 +284,11 @@ enum PostSortType {
   VIEWS
   COMMENTS
   FOR_ME
+  OLDEST
+  FOLLOWER
+  FOLLOWED
+  RELEVANT
+  FRIENDS
 }
 
 enum DayFilterType {

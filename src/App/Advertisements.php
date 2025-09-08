@@ -21,6 +21,7 @@ class Advertisements
     protected int $amountcomments;
     protected int $amountdislikes;
     protected int $amountreports;
+    protected string $updatedat;
     protected string $createdat;
     protected array $user = [];
     protected array $post = [];
@@ -48,6 +49,7 @@ class Advertisements
         $this->amountcomments = $data['amountcomments'] ?? 0;
         $this->amountdislikes = $data['amountdislikes'] ?? 0;
         $this->amountreports = $data['amountreports'] ?? 0;
+        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->post = isset($data['post']) && is_array($data['post']) ? $data['post'] : [];
@@ -71,6 +73,7 @@ class Advertisements
             'amountcomments' => $this->amountcomments,
             'amountdislikes' => $this->amountdislikes,
             'amountreports' => $this->amountreports,
+            'updatedat' => $this->updatedat,
             'createdat' => $this->createdat,
             'user' => $this->user,
             'post' => $this->post,
@@ -261,6 +264,14 @@ class Advertisements
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
+            ],
+            'updatedat' => [
+                'required' => false,
+                'validators' => [
+                    ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
+                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'isString'],
+                ],
             ],
             'createdat' => [
                 'required' => false,
