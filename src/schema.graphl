@@ -776,8 +776,8 @@ input UserPreferencesInput {
 }
 
 input AdvertisementHistoryFilter {
-  from: DateTime
-  to: DateTime
+  from: Date
+  to: Date
   type: AdvertisementType
   advertisementId: ID
   postId: ID
