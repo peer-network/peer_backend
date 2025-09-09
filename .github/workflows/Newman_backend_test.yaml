@@ -579,7 +579,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: outcome-${{ matrix.php-version }}
+          name: outcome-${{ matrix.php-version }}-${{ github.run_attempt }}
           path: outcome.txt
  
       - name: Upload Scan Reports
@@ -593,7 +593,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: trivy-security-reports-${{ matrix.php-version }}
+          name: trivy-security-reports-${{ matrix.php-version }}-${{ github.run_attempt }}
           path: trivy_reports
  
   aggregate_outcome:
