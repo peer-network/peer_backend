@@ -428,7 +428,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 2, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+                    $stmt->bindValue(':createdat', $value['createdat']);
 
                     $stmt->execute();
 
@@ -533,7 +533,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 3, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+                    $stmt->bindValue(':createdat', $value['createdat']);
 
                     $stmt->execute();
 
@@ -638,7 +638,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 5, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+                    $stmt->bindValue(':createdat', $value['createdat']);
 
                     $stmt->execute();
 
@@ -742,7 +742,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 4, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+                    $stmt->bindValue(':createdat', $value['createdat']);
 
                     $stmt->execute();
 
@@ -802,7 +802,6 @@ class LogWinMapper
 
         $this->logger->info('LogWinMapper.migrateTokenTransfer started');
 
-        try {
 
             $sql = "
                 WITH user_sums AS (
@@ -903,10 +902,7 @@ class LogWinMapper
                 $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
 
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
+                
 
                 $sql = "INSERT INTO logwins 
                         (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
@@ -986,54 +982,48 @@ class LogWinMapper
 
 
 
-                // $this->insertWinToPool($userId, end($args[$userId]['details']));
-                $postId = $args['postid'] ?? null;
-                $fromId = $args['fromid'] ?? null;
-                $numBers = $args['numbers'] ?? 0;
-                $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
+                    // $this->insertWinToPool($userId, end($args[$userId]['details']));
+                    $postId = $args['postid'] ?? null;
+                    $fromId = $args['fromid'] ?? null;
+                    $numBers = $args['numbers'] ?? 0;
+                    $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
 
-                $sql = "INSERT INTO wallet 
-                        (token, userid, postid, fromid, numbers, numbersq, whereby, createdat) 
-                        VALUES 
-                        (:token, :userid, :postid, :fromid, :numbers, :numbersq, :whereby, :createdat)";
+                    $sql = "INSERT INTO wallet 
+                            (token, userid, postid, fromid, numbers, numbersq, whereby, createdat) 
+                            VALUES 
+                            (:token, :userid, :postid, :fromid, :numbers, :numbersq, :whereby, :createdat)";
 
-                $stmt = $this->db->prepare($sql);
+                    $stmt = $this->db->prepare($sql);
 
-                $stmt->bindValue(':token', $this->getPeerToken(), \PDO::PARAM_STR);
-                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
-                $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
-                $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-                $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
-                $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
-                $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
+                    $stmt->bindValue(':token', $this->getPeerToken(), \PDO::PARAM_STR);
+                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+                    $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
+                    $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
-                $stmt->execute();
+                    $stmt->execute();
 
 
-                $this->logger->info('Inserted into wallet successfully', [
-                    'userId' => $userId,
-                    'postid' => $postId
-                ]);
+                    $this->logger->info('Inserted into wallet successfully', [
+                        'userId' => $userId,
+                        'postid' => $postId
+                    ]);
 
-                
+                    
+                    $gemIds = array_column($data, 'gemid');
+                    $quotedGemIds = array_map(fn($gemId) => $this->db->quote($gemId), $gemIds);
+
+                    $this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
+
+                } catch (\Throwable $e) {
+                    $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
+                    return true;
+                }
             }
 
-            try {
-                $gemIds = array_column($data, 'gemid');
-                $quotedGemIds = array_map(fn($gemId) => $this->db->quote($gemId), $gemIds);
-
-                $this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
-
-            } catch (\Throwable $e) {
-                $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
-                return true;
-            }
-
-            return false;
-        } catch (\Throwable $e) {
-            throw new \RuntimeException('Failed to generate logwins ID ' . $e->getMessage() , 41401);
-        }
     }
     
 
