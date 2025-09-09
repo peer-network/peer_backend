@@ -1,21 +1,10 @@
-FROM php:8.4-fpm-bullseye
- 
-RUN apt-get update && \
-    apt-get install -y \
-        nginx supervisor \
-        git unzip curl libpq-dev postgresql-client \
-        openssl libzip-dev zlib1g-dev libxml2-dev \
-        libcurl4-openssl-dev libgmp-dev \
-        libffi-dev pkg-config \
-        ffmpeg && \
-    docker-php-ext-configure ffi && \
-    docker-php-ext-install \
-        pgsql pdo pdo_pgsql bcmath xml curl gmp ffi && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-# Install Rust and Cargo
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
-echo 'source $HOME/.cargo/env' >> /root/.bashrc
-ENV PATH="/root/.cargo/bin:$PATH"
+# Use prebuilt base image (already has ffmpeg, php-exts, rust, etc.)
+FROM ghcr.io/peer-network/php-backend-base:latest
+
+WORKDIR /var/www/html
+
+# Copy app code
+COPY . .
 
 RUN rm -f /usr/local/etc/php/conf.d/ffi.ini \
  && echo 'ffi.enable=true' > /usr/local/etc/php/conf.d/zz-ffi.ini
@@ -26,10 +15,6 @@ RUN which supervisord
  
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer
- 
-WORKDIR /var/www/html
- 
-COPY . .
 
 RUN if [ -f tokencalculation/Cargo.toml ]; then cd tokencalculation && . /root/.cargo/env && cargo build --release; fi
 
