@@ -19,9 +19,7 @@ class LogWinMapper
     private string $burnWallet;
     private string $companyWallet;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected TransactionManager $transactionManager)
-    {
-    }
+    public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected TransactionManager $transactionManager) {}
 
     /**
      * Initialize and validates the liquidity pool wallets.
@@ -87,7 +85,7 @@ class LogWinMapper
             foreach ($logwins as $key => $value) {
                 $this->transactionManager->beginTransaction();
 
-                try{
+                try {
                     $userId = $value['userid'];
                     $postId = $value['postid'];
                     $gems = $value['gems'];
@@ -98,33 +96,32 @@ class LogWinMapper
                         'userId' => $userId,
                         'postId' => $postId
                     ]);
-                    
+
                     $transactionType = '';
-                    if($value['whereby'] == 1){
+                    if ($value['whereby'] == 1) {
                         $transactionType = 'postViewed';
-                    }elseif ($value['whereby'] == 2) {
+                    } elseif ($value['whereby'] == 2) {
                         $transactionType = 'postLiked';
-                    }elseif ($value['whereby'] == 3) {
+                    } elseif ($value['whereby'] == 3) {
                         $transactionType = 'postDisLiked';
-                    }elseif ($value['whereby'] == 4) {
+                    } elseif ($value['whereby'] == 4) {
                         $transactionType = 'postComment';
-                    }elseif ($value['whereby'] == 5) {
+                    } elseif ($value['whereby'] == 5) {
                         $transactionType = 'postCreated';
                     }
 
                     /**
-                    * Determine the transfer type based on the number of gems.
-                    * If the number of gems is negative, it's a burn operation.
-                    * If the number of gems is positive, it's a mint operation.
-                    */
+                     * Determine the transfer type based on the number of gems.
+                     * If the number of gems is negative, it's a burn operation.
+                     * If the number of gems is positive, it's a mint operation.
+                     */
                     $senderid = $userId;
-                    if($numBers < 0){
+                    if ($numBers < 0) {
                         $transferType = 'BURN';
-                        $recipientid = $this->burnWallet; 
-
-                    }else{
+                        $recipientid = $this->burnWallet;
+                    } else {
                         $transferType = 'MINT';
-                        $recipientid = $userId; 
+                        $recipientid = $userId;
                         $senderid = $this->companyWallet; // PENDING, needs to confirms
                     }
 
@@ -140,7 +137,7 @@ class LogWinMapper
                         'transferaction' => $transferType
                     ]);
 
-                    if($transferType == 'BURN'){
+                    if ($transferType == 'BURN') {
                         /**
                          * Credit to Burn Account, as till now, we didn't credit burn account
                          * 
@@ -154,15 +151,14 @@ class LogWinMapper
                     $this->updateLogwinStatus($value['token'], 1);
 
                     $this->transactionManager->commit();
-                }catch(\Throwable $e){
+                } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
                     $this->updateLogwinStatus($value['token'], 2); // Unmigrated due to some errors
-                    continue; 
+                    continue;
                 }
-
             }
-            
-            
+
+
             $this->logger->info('Inserted into logwins successfully', [
                 'userId' => $userId,
                 'postid' => $postId
@@ -229,15 +225,15 @@ class LogWinMapper
                 $txnIds = array_column($tnxs, 'token');
 
                 if (empty($tnxs)) {
-                    continue; 
+                    continue;
                 }
 
                 $hasInviter = false;
-                if(count($tnxs) == 7){
+                if (count($tnxs) == 7) {
                     $hasInviter = true;
                 }
 
-                try{
+                try {
                     /*
                     * This action considere as Credit to Receipient
                     */
@@ -257,7 +253,6 @@ class LogWinMapper
                             // 'message' => $message,
                             'transferaction' => 'CREDIT'
                         ]);
-
                     }
 
                     /**
@@ -284,11 +279,11 @@ class LogWinMapper
                      * 
                      * Credits 1% fees to Pool's Account
                      */
-                    if($hasInviter && isset($tnxs[4]['fromid'])){
+                    if ($hasInviter && isset($tnxs[4]['fromid'])) {
                         $senderId = $tnxs[4]['fromid'];
                         $recipientId = $tnxs[4]['userid'];
                         $amount = $tnxs[4]['numbers'];
-                    }else{
+                    } else {
                         $senderId = $tnxs[3]['fromid'];
                         $recipientId = $tnxs[3]['userid'];
                         $amount = $tnxs[3]['numbers'];
@@ -307,11 +302,11 @@ class LogWinMapper
                      * 
                      * Credits 2% fees to Peer's Account
                      */
-                    if($hasInviter && isset($tnxs[5]['fromid'])){
+                    if ($hasInviter && isset($tnxs[5]['fromid'])) {
                         $senderId = $tnxs[5]['fromid'];
                         $recipientId = ($tnxs[5]['userid']); // Requested tokens
                         $amount = $tnxs[5]['numbers'];
-                    }else{
+                    } else {
                         $senderId = $tnxs[4]['fromid'];
                         $recipientId = ($tnxs[4]['userid']); // Requested tokens
                         $amount = $tnxs[4]['numbers'];
@@ -328,16 +323,15 @@ class LogWinMapper
                     /**
                      * 1% of requested tokens will be transferred to Burn' account
                      */
-                    if($hasInviter && isset($tnxs[6]['fromid'])){
+                    if ($hasInviter && isset($tnxs[6]['fromid'])) {
                         $senderId = $tnxs[6]['fromid'];
                         $recipientId = ($tnxs[6]['userid']); // Requested tokens
                         $amount = $tnxs[6]['numbers'];
-                    }else{
-                        if(isset($tnxs[5]['fromid'])){
+                    } else {
+                        if (isset($tnxs[5]['fromid'])) {
                             $senderId = $tnxs[5]['fromid'];
                             $recipientId = ($tnxs[5]['userid']); // Requested tokens
                             $amount = $tnxs[5]['numbers'];
-
                         }
                     }
                     $this->createAndSaveTransaction($transRepo, [
@@ -352,7 +346,7 @@ class LogWinMapper
                     $this->updateLogwinStatusInBunch($txnIds, 1);
 
                     $this->transactionManager->commit();
-                }catch(\Throwable $e){
+                } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
                     $this->updateLogwinStatusInBunch($txnIds, 2);
 
@@ -362,7 +356,7 @@ class LogWinMapper
             }
             return false;
         } catch (\Throwable $e) {
-            throw new \RuntimeException('Failed to generate logwins ID ' . $e->getMessage() , 41401);
+            throw new \RuntimeException('Failed to generate logwins ID ' . $e->getMessage(), 41401);
         }
     }
 
@@ -432,11 +426,11 @@ class LogWinMapper
 
                     $stmt->execute();
 
-                    
+
                     $this->initializeLiquidityPool();
                     $transRepo = new TransactionRepository($this->logger, $this->db);
 
-                    
+
                     $transactionType = 'postLiked';
 
                     $transferType = 'BURN';
@@ -445,7 +439,7 @@ class LogWinMapper
                         'operationid' => $tokenId,
                         'transactiontype' => $transactionType,
                         'senderid' => $userId,
-                        'recipientid' => $this->burnWallet,   
+                        'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
                         'transferaction' => $transferType
                     ]);
@@ -455,15 +449,13 @@ class LogWinMapper
                     $this->updateLogwinStatus($value['token'], 1);
 
                     $this->transactionManager->commit();
-
-                }catch(\Throwable $e){
+                } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
                     $this->updateLogwinStatus($value['token'], 2); // Unmigrated due to some errors
-                    continue; 
+                    continue;
                 }
-
             }
-            
+
 
             return false;
         } catch (\Throwable $e) {
@@ -537,7 +529,7 @@ class LogWinMapper
 
                     $stmt->execute();
 
-                    
+
                     $this->initializeLiquidityPool();
                     $transRepo = new TransactionRepository($this->logger, $this->db);
 
@@ -550,7 +542,7 @@ class LogWinMapper
                         'operationid' => $tokenId,
                         'transactiontype' => $transactionType,
                         'senderid' => $userId,
-                        'recipientid' => $this->burnWallet,   
+                        'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
                         'transferaction' => $transferType
                     ]);
@@ -560,15 +552,13 @@ class LogWinMapper
                     $this->updateLogwinStatus($value['token'], 1);
 
                     $this->transactionManager->commit();
-
-                }catch(\Throwable $e){
+                } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
                     $this->updateLogwinStatus($value['token'], 2); // Unmigrated due to some errors
-                    continue; 
+                    continue;
                 }
-
             }
-            
+
 
             return false;
         } catch (\Throwable $e) {
@@ -642,7 +632,7 @@ class LogWinMapper
 
                     $stmt->execute();
 
-                    
+
                     $this->initializeLiquidityPool();
                     $transRepo = new TransactionRepository($this->logger, $this->db);
 
@@ -654,7 +644,7 @@ class LogWinMapper
                         'operationid' => $tokenId,
                         'transactiontype' => $transactionType,
                         'senderid' => $userId,
-                        'recipientid' => $this->burnWallet,   
+                        'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
                         'transferaction' => $transferType
                     ]);
@@ -664,15 +654,13 @@ class LogWinMapper
                     $this->updateLogwinStatus($value['token'], 1);
 
                     $this->transactionManager->commit();
-
-                }catch(\Throwable $e){
+                } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
                     $this->updateLogwinStatus($value['token'], 2); // Unmigrated due to some errors
-                    continue; 
+                    continue;
                 }
-
             }
-            
+
 
             return false;
         } catch (\Throwable $e) {
@@ -680,7 +668,7 @@ class LogWinMapper
         }
     }
 
-    
+
     /**
      * Generate logwins entries for Post creation actions between 05th March 2025 to 02nd April 2025
      *
@@ -746,10 +734,10 @@ class LogWinMapper
 
                     $stmt->execute();
 
-                    
+
                     $this->initializeLiquidityPool();
                     $transRepo = new TransactionRepository($this->logger, $this->db);
-                    
+
                     $transactionType = 'postComment';
 
                     $transferType = 'BURN';
@@ -758,7 +746,7 @@ class LogWinMapper
                         'operationid' => $tokenId,
                         'transactiontype' => $transactionType,
                         'senderid' => $userId,
-                        'recipientid' => $this->burnWallet,   
+                        'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
                         'transferaction' => $transferType
                     ]);
@@ -768,22 +756,20 @@ class LogWinMapper
                     $this->updateLogwinStatus($value['token'], 1);
 
                     $this->transactionManager->commit();
-
-                }catch(\Throwable $e){
+                } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
                     $this->updateLogwinStatus($value['token'], 2); // Unmigrated due to some errors
-                    continue; 
+                    continue;
                 }
-
             }
-            
+
 
             return false;
         } catch (\Throwable $e) {
             throw new \RuntimeException('Failed to generate logwins ID', 41401);
         }
     }
-    
+
     /**
      * Generate gems to logwins entries
      * 
@@ -803,7 +789,7 @@ class LogWinMapper
         $this->logger->info('LogWinMapper.migrateTokenTransfer started');
 
 
-            $sql = "
+        $sql = "
                 WITH user_sums AS (
                     SELECT 
                         userid,
@@ -831,201 +817,219 @@ class LogWinMapper
                 CROSS JOIN total_sum ts
                 WHERE us.total_numbers > 0 AND g.collected = 0 and g.createdat < '2025-04-02 08:31';
             ";
-            $this->logger->info('LogWinMapper.migrateGemsToLogWins SQL', ['sql' => $sql]);
+        $this->logger->info('LogWinMapper.migrateGemsToLogWins SQL', ['sql' => $sql]);
 
-            $stmt = $this->db->query($sql);
+        $stmt = $this->db->query($sql);
 
-            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            var_dump($data); exit;
-            var_dump('Total Gems to migrate: '.count($data)); exit;
-            if (empty($data)) {
-                $this->logger->info('No gems to migrate');
-                return true;
+
+        $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
+        $dailyToken = DAILY_NUMBER_TOKEN;
+
+        // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
+        /**
+         * Still We are facing with digital precision issues
+         * If we use till 9 Digit here, it coming right.
+         */
+        $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
+
+        $bestatigungInitial = TokenHelper::mulRc((float) $totalGems, (float) $gemsintoken);
+        // $bestatigung = bcadd(bcmul($totalGems, $gemsintoken, 10), '0.00005', 4);
+
+        $args = [
+            'winstatus' => [
+                'totalGems' => $totalGems,
+                'gemsintoken' => $gemsintoken,
+                'bestatigung' => $bestatigungInitial
+            ]
+        ];
+
+        foreach ($data as $row) {
+            $userId = (string)$row['userid'];
+
+            if (!isset($args[$userId])) {
+
+                $totalTokenNumber = TokenHelper::mulRc((float) $row['total_numbers'], (float) $gemsintoken);
+                $args[$userId] = [
+                    'userid' => $userId,
+                    'gems' => $row['total_numbers'],
+                    'tokens' => $totalTokenNumber,
+                    'percentage' => $row['percentage'],
+                    'details' => []
+                ];
             }
-            
-            $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
-            $dailyToken = DAILY_NUMBER_TOKEN;
 
-            // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
-            /**
-             * Still We are facing with digital precision issues
-             * If we use till 9 Digit here, it coming right.
-             */
-            $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
-
-            $bestatigungInitial = TokenHelper::mulRc((float) $totalGems, (float) $gemsintoken);
-            // $bestatigung = bcadd(bcmul($totalGems, $gemsintoken, 10), '0.00005', 4);
+            $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
 
             $args = [
-                'winstatus' => [
-                    'totalGems' => $totalGems,
-                    'gemsintoken' => $gemsintoken,
-                    'bestatigung' => $bestatigungInitial
-                ]
+                'gemid' => $row['gemid'],
+                'userid' => $row['userid'],
+                'postid' => $row['postid'],
+                'fromid' => $row['fromid'],
+                'gems' => $row['gems'],
+                'numbers' => $rowgems2token,
+                'whereby' => $row['whereby'],
+                'createdat' => $row['createdat']
             ];
 
-            foreach ($data as $row) {
-                $userId = (string)$row['userid'];
+            // $this->insertWinToLog($userId, end($args[$userId]['details']));
+            // Star
+            $postId = $args['postid'] ?? null;
+            $fromId = $args['fromid'] ?? null;
+            $gems = $args['gems'] ?? 0.0;
+            $numBers = $args['numbers'] ?? 0;
+            $createdat = (new \DateTime())->format('Y-m-d H:i:s.u');
 
-                if (!isset($args[$userId])) {
 
-                    $totalTokenNumber = TokenHelper::mulRc((float) $row['total_numbers'], (float) $gemsintoken);
-                    $args[$userId] = [
-                        'userid' => $userId,
-                        'gems' => $row['total_numbers'],
-                        'tokens' => $totalTokenNumber,
-                        'percentage' => $row['percentage'],
-                        'details' => []
-                    ];
-                }
-
-                $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
-
-                $args[$userId]['details'][] = [
-                    'gemid' => $row['gemid'],
-                    'userid' => $row['userid'],
-                    'postid' => $row['postid'],
-                    'fromid' => $row['fromid'],
-                    'gems' => $row['gems'],
-                    'numbers' => $rowgems2token,
-                    'whereby' => $row['whereby'],
-                    'createdat' => $row['createdat']
-                ];
-
-                // $this->insertWinToLog($userId, end($args[$userId]['details']));
-                // Star
-                $postId = $args['postid'] ?? null;
-                $fromId = $args['fromid'] ?? null;
-                $gems = $args['gems'] ?? 0.0;
-                $numBers = $args['numbers'] ?? 0;
-                $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
-
-                $id = self::generateUUID();
-                
-
-                $sql = "INSERT INTO logwins 
+            $sql = "INSERT INTO logwins 
                         (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
                         VALUES 
                         (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :createdat)";
 
-                try {
-                    $stmt = $this->db->prepare($sql);
+            try {
+                $stmt = $this->db->prepare($sql);
 
-                    $tokenId = $args['gemid'] ?? $id;
-                    $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':gems', $gems, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
-                    $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
+                $tokenId = self::generateUUID();
+                $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
+                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
+                $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
+                $stmt->bindValue(':gems', $gems, \PDO::PARAM_STR);
+                $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+                $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+                $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
+                $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
-                    $stmt->execute();
+                $stmt->execute();
 
-                    
-                    $this->initializeLiquidityPool();
-                    $transRepo = new TransactionRepository($this->logger, $this->db);
 
-                    $transactionType = '';
-                    if($args['whereby'] == 1){
-                        $transactionType = 'postViewed';
-                    }elseif ($args['whereby'] == 2) {
-                        $transactionType = 'postLiked';
-                    }elseif ($args['whereby'] == 3) {
-                        $transactionType = 'postDisLiked';
-                    }elseif ($args['whereby'] == 4) {
-                        $transactionType = 'postComment';
-                    }elseif ($args['whereby'] == 5) {
-                        $transactionType = 'postCreated';
-                    }elseif ($args['whereby'] == 11) {
-                        $transactionType = 'getPercentBeforeTransaction'; // PENDING: Should be changed according to the API Logic
-                    }
+                $this->initializeLiquidityPool();
+                $transRepo = new TransactionRepository($this->logger, $this->db);
 
+                $transactionType = '';
+                if ($args['whereby'] == 1) {
+                    $transactionType = 'postViewed';
+                } elseif ($args['whereby'] == 2) {
+                    $transactionType = 'postLiked';
+                } elseif ($args['whereby'] == 3) {
+                    $transactionType = 'postDisLiked';
+                } elseif ($args['whereby'] == 4) {
+                    $transactionType = 'postComment';
+                } elseif ($args['whereby'] == 5) {
+                    $transactionType = 'postCreated';
+                }
+
+                if ($numBers < 0) {
+                    $transferType = 'BURN';
+                } else {
+                    $transferType = 'MINT';
+                }
+                $this->createAndSaveTransaction($transRepo, [
+                    'operationid' => $tokenId,
+                    'transactiontype' => $transactionType,
+                    'senderid' => $userId,
+                    'recipientid' => $this->burnWallet,
+                    'tokenamount' => $numBers,
+                    'transferaction' => $transferType
+                ]);
+                if ($transferType == 'BURN') {
                     /**
-                     * PENDING FOR API: `getpercentbeforetransaction`, 
-                     * Need to check first, is this API in co-operation or not, and if it is than, what is it for?
-                     * 
-                     * Determine the transfer type based on the number of gems.
-                     * If the number of gems is negative, it's a burn operation.
-                     * If the number of gems is positive, it's a mint operation.
+                     * Add Amount to Burn account
+                     *
+                     * Reason behind keeping -$numBers is to, Add to Burn Account Positively
                      */
-                    if($numBers < 0){
-                        $transferType = 'BURN';
-                    }else{
-                        $transferType = 'MINT';
-                    }
-                    $this->createAndSaveTransaction($transRepo, [
-                        'operationid' => $tokenId,
-                        'transactiontype' => $transactionType,
-                        'senderid' => $userId,
-                        'recipientid' => $this->burnWallet,   
-                        'tokenamount' => $numBers,
-                        'transferaction' => $transferType
-                    ]);
-                    if($transferType == 'BURN'){
-                        /**
-                         * Add Amount to Burn account
-                         *
-                         * Reason behind keeping -$numBers is to, Add to Burn Account Positively
-                         */
-                        $this->saveWalletEntry($this->burnWallet, -$numBers);
-                    }
-                    
-                    
-                    $this->logger->info('Inserted into logwins successfully', [
-                        'userId' => $userId,
-                        'postid' => $postId
-                    ]);
+                    $this->saveWalletEntry($this->burnWallet, -$numBers);
+                }
 
 
+                $this->logger->info('Inserted into logwins successfully', [
+                    'userId' => $userId,
+                    'postid' => $postId
+                ]);
 
-                    // $this->insertWinToPool($userId, end($args[$userId]['details']));
-                    $postId = $args['postid'] ?? null;
-                    $fromId = $args['fromid'] ?? null;
-                    $numBers = $args['numbers'] ?? 0;
-                    $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
 
-                    $sql = "INSERT INTO wallet 
+                // $this->insertWinToPool($userId, end($args[$userId]['details']));
+                $postId = $args['postid'] ?? null;
+                $fromId = $args['fromid'] ?? null;
+                $numBers = $args['numbers'] ?? 0;
+                $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
+
+                $sql = "INSERT INTO wallet 
                             (token, userid, postid, fromid, numbers, numbersq, whereby, createdat) 
                             VALUES 
                             (:token, :userid, :postid, :fromid, :numbers, :numbersq, :whereby, :createdat)";
 
-                    $stmt = $this->db->prepare($sql);
+                $stmt = $this->db->prepare($sql);
 
-                    $stmt->bindValue(':token', $this->getPeerToken(), \PDO::PARAM_STR);
-                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
-                    $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
+                $stmt->bindValue(':token', $this->getPeerToken(), \PDO::PARAM_STR);
+                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
+                $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
+                $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+                $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+                $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
+                $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
-                    $stmt->execute();
+                $stmt->execute();
 
 
-                    $this->logger->info('Inserted into wallet successfully', [
-                        'userId' => $userId,
-                        'postid' => $postId
-                    ]);
+                $this->logger->info('Inserted into wallet successfully', [
+                    'userId' => $userId,
+                    'postid' => $postId
+                ]);
 
-                    
-                    $gemIds = array_column($data, 'gemid');
-                    $quotedGemIds = array_map(fn($gemId) => $this->db->quote($gemId), $gemIds);
-
-                    $this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
-
-                } catch (\Throwable $e) {
-                    $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
-                    return true;
-                }
+                $updateGemsSql = "UPDATE gems SET collected = 1 WHERE gemid = :gemid";
+                $updateGemsStmt = $this->db->prepare($updateGemsSql);
+                $updateGemsStmt->bindValue(':gemid', $row['gemid'], \PDO::PARAM_STR);
+                $updateGemsStmt->execute();
+            } catch (\Throwable $e) {
+                $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
+                // return true;
             }
+        }
 
+        return true;
     }
-    
+
+    public function getPeerToken(): string
+    {
+        $x = 0;
+        $token = $this->getToken(12);
+        do {
+            $stmt = $this->db->prepare('SELECT token FROM wallet WHERE token = ?');
+            $stmt->execute([$token]);
+            $res = $stmt->fetch(\PDO::FETCH_ASSOC);
+        } while ($res && $x++ < 100);
+        return $token;
+    }
+
+    public function getToken(int $length = 32): string
+    {
+        $token = '';
+        $codeAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for ($i = 0; $i < $length; $i++) {
+            $token .= $codeAlphabet[$this->crypto_rand_secure(0, \strlen($codeAlphabet))];
+        }
+        return $token;
+    }
+
+
+    // CRYPTO GENERATOR
+    public function crypto_rand_secure(int $min, int $max): int
+    {
+        $range = $max - $min;
+        if ($range < 0) return $min;
+        $log = \log($range, 2);
+        $bytes = (int)($log / 8) + 1;
+        $bits = (int)$log + 1;
+        $filter = (int)(1 << $bits) - 1;
+        do {
+            $rnd = \hexdec(\bin2hex(\openssl_random_pseudo_bytes($bytes)));
+            $rnd = $rnd & $filter;
+        } while ($rnd >= $range);
+        return $min + $rnd;
+    }
 
     /**
      * Marked as Status migrated
@@ -1050,7 +1054,6 @@ class LogWinMapper
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':migrated', $status, \PDO::PARAM_INT);
         $stmt->execute();
-
     }
 
 
@@ -1074,7 +1077,7 @@ class LogWinMapper
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
             $stmt->execute();
-            $userExists = $stmt->fetchColumn(); 
+            $userExists = $stmt->fetchColumn();
 
             if (!$userExists) {
                 $newLiquidity = abs($liquidity);
@@ -1116,7 +1119,7 @@ class LogWinMapper
         }
     }
 
-    
+
     public function updateUserLiquidity(string $userId, float $liquidity): bool
     {
         try {
@@ -1136,15 +1139,15 @@ class LogWinMapper
         }
     }
 
-    
+
     private function decimalToQ64_96(float $value): string
     {
         $scaleFactor = \bcpow('2', '96');
 
-		// Convert float to plain decimal string 
-		$decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
+        // Convert float to plain decimal string 
+        $decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
 
-		$scaledValue = \bcmul($decimalString, $scaleFactor, 0);
+        $scaledValue = \bcmul($decimalString, $scaleFactor, 0);
 
         return $scaledValue;
     }
@@ -1172,6 +1175,4 @@ class LogWinMapper
             throw new \RuntimeException('Unable to fetch wallet balance');
         }
     }
-
-
 }
