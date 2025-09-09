@@ -62,7 +62,7 @@ class UserAdvanced
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
 
         if($this->status == 6){
-            $this->username = 'Deleted Account';
+            $this->username = 'Deleted_Account';
             $this->img = '/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg';
             $this->biography = '/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt';
         }
