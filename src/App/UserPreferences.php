@@ -5,7 +5,7 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Tests\utils\ConfigGeneration;
-use Tests\utils\ConfigGeneration\JSONHandler;
+use Fawaz\Utils\JsonHelper;
 
 class UserPreferences
 {
@@ -28,7 +28,7 @@ class UserPreferences
         if (is_array($raw)){
             $this->onboardingsWereShown = $raw;
         } else {
-            $this->onboardingsWereShown = JSONHandler::decode($raw) ?? [];
+            $this->onboardingsWereShown = JsonHelper::decode($raw) ?? [];
         }
     }
 

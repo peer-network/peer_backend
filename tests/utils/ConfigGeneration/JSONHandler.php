@@ -79,16 +79,4 @@ class JSONHandler {
             return false;
         }
     }
-    public static function decode(mixed $raw): mixed
-    {
-        if (!is_string($raw)) {
-            return $raw;
-        }
-        $decoded = json_decode($raw, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return null;
-        }
-        return $decoded;
-    }
 }

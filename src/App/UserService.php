@@ -17,7 +17,6 @@ use Psr\Log\LoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\UserPreferences;
-use Fawaz\Utils\JsonHelper;
 
 class UserService
 {

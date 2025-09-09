@@ -5,7 +5,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\UserPreferences;
 use Psr\Log\LoggerInterface;
-use Tests\utils\ConfigGeneration\JSONHandler;
+use Fawaz\Utils\JsonHelper;
 
 class UserPreferencesMapper
 {
@@ -32,7 +32,7 @@ class UserPreferencesMapper
             if ($data) {
                 $this->logger->info('User preferences loaded successfully', ['id' => $id, 'data' => $data]);
                 $data['contentFilteringSeverityLevel'] = $data['content_filtering_severity_level'];
-                $data['onboardingsWereShown'] = JSONHandler::decode($data['onboardingswereshown'] ?? '[]') ?? [];
+                $data['onboardingsWereShown'] = JsonHelper::decode($data['onboardingswereshown'] ?? '[]') ?? [];
                 return new UserPreferences($data);
             } else {
                 $this->logger->warning("No user found with given ID", ['id' => $id]);
