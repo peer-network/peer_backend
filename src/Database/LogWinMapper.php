@@ -395,6 +395,11 @@ class LogWinMapper
 
             $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            if(empty($logwins)) {
+                $this->logger->info('No logwins to migrate');
+                return true;
+            }
+
             $this->initializeLiquidityPool();
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
@@ -498,6 +503,10 @@ class LogWinMapper
 
             $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            if(empty($logwins)) {
+                $this->logger->info('No logwins to migrate');
+                return true;
+            }
             $this->initializeLiquidityPool();
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
@@ -601,6 +610,11 @@ class LogWinMapper
 
             $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            if(empty($logwins)) {
+                $this->logger->info('No logwins to migrate');
+                return true;
+            }
+
             $this->initializeLiquidityPool();
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
@@ -702,6 +716,11 @@ class LogWinMapper
             $stmt->execute();
 
             $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if(empty($logwins)) {
+                $this->logger->info('No logwins to migrate');
+                return true;
+            }
 
             $this->initializeLiquidityPool();
             $transRepo = new TransactionRepository($this->logger, $this->db);
@@ -823,6 +842,10 @@ class LogWinMapper
 
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+        if(empty($data)) {
+            $this->logger->info('No gems to migrate to logwins');
+            return true;
+        }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
         $dailyToken = DAILY_NUMBER_TOKEN;
