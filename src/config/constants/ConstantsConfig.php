@@ -16,7 +16,7 @@ class ConstantsConfig
             "WALLET" => $this::wallet(),
             "WALLETT" => $this::wallett(),    
             "ONBOARDING" => $this::onboarding(),
-            "DAILY" => $this::dailyFree(),
+            "DAILY_FREE" => $this::dailyFree(),
             "TOKENOMICS" => $this::tokenomics(),
             "MINTING" => $this::minting(),
         ];
@@ -179,7 +179,7 @@ class ConstantsConfig
         ],
     ];
     private const DAILY_FREE = [
-        'DAILY_FREE' => [
+        'DAILY_FREE_ACTIONS' => [
             'post'    => 1,  
             'like'    => 3,  
             'comment' => 4,  

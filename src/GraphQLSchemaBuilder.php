@@ -2349,10 +2349,10 @@ class GraphQLSchemaBuilder
         }
 
         $dailyLimits = [
-            'like' => $dailyfreeConfig['DAILY_FREE']['like'],
-            'comment' => $dailyfreeConfig['DAILY_FREE']['comment'],
-            'post' => $dailyfreeConfig['DAILY_FREE']['post'],
-            'dislike' => $dailyfreeConfig['DAILY_FREE']['dislike'],
+            'like' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['like'],
+            'comment' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['comment'],
+            'post' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['post'],
+            'dislike' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['dislike'],
         ];
 
         $actionPrices = [

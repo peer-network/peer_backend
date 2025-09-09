@@ -4,6 +4,8 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Tests\utils\ConfigGeneration;
+use Tests\utils\ConfigGeneration\JSONHandler;
 
 class UserPreferences
 {
@@ -23,7 +25,11 @@ class UserPreferences
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
 
         $raw = $data['onboardingsWereShown'] ?? [];
-        $this->onboardingsWereShown = is_array($raw) ? $raw : (array)json_decode((string)$raw, true);
+        if (is_array($raw)){
+            $this->onboardingsWereShown = $raw;
+        } else {
+            $this->onboardingsWereShown = JSONHandler::decode($raw) ?? [];
+        }
     }
 
     // Array Copy methods

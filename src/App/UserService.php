@@ -16,6 +16,8 @@ use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\App\UserPreferences;
+use Fawaz\Utils\JsonHelper;
 
 class UserService
 {
@@ -473,9 +475,8 @@ class UserService
         $this->logger->info('UserService.updateUserPreferences started');
 
         $newUserPreferences = $args['userPreferences'];
-
         $contentFiltering = $newUserPreferences['contentFilteringSeverityLevel'] ?? null;
-        $shownOnboardingsIn  = $newUserPreferences['shownOnboardings'] ?? null; 
+        $shownOnboardingsIn = $newUserPreferences['shownOnboardings'] ?? null;
         
         try {
             $this->transactionManager->beginTransaction();
@@ -483,7 +484,6 @@ class UserService
             $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
             if (!$userPreferences) {
                 $this->logger->error('UserService.updateUserPreferences: failed to load user preferences for updating');
-                $this->transactionManager->rollback();
                 return $this->respondWithError(40301); // 402xx
             }
 
@@ -492,7 +492,6 @@ class UserService
                 
                 if($contentFilteringSeverityLevel === null){
                     $this->logger->error('UserService.updateUserPreferences: failed to get ContentFilteringSeverityLevel');
-                    $this->transactionManager->rollback();
                     return $this->respondWithError(30103);
                 }
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
@@ -500,38 +499,9 @@ class UserService
             }
 
             if (is_array($shownOnboardingsIn) && !empty($shownOnboardingsIn)) {
-                $available = ConstantsConfig::onboarding()['AVAILABLE_ONBOARDINGS'] ?? [];
-
-                foreach ($shownOnboardingsIn as $o) {
-                    if (!in_array($o, $available, true)) {
-                        $this->logger->warning('UserService.updateUserPreferences: invalid onboarding value', [
-                            'value'     => $o,
-                            'available' => $available,
-                        ]);
-                        $this->transactionManager->rollback();
-                        return $this->respondWithError(31011); // TESTING Team: INVALID_ONBOARDING_VALUE — input contains onboarding not listed in AVAILABLE_ONBOARDINGS;
-                    }
-                }
-
-                $currentShown = $userPreferences->getOnboardingsWereShown();
-                if (!is_array($currentShown)) {
-                    $currentShown = empty($currentShown) ? [] : (array)$currentShown;
-                }
-
-                $currentShown = array_values(array_filter(array_map('strval', $currentShown)));
-                $incoming     = array_values(array_filter(array_map('strval', $shownOnboardingsIn)));
-
-                $set = array_fill_keys($currentShown, true);
-                foreach ($incoming as $o) {
-                    $set[$o] = true;
-                }
-                $merged = array_keys($set);
-
-                if ($merged !== $currentShown) {
-                    $userPreferences->setOnboardingsWereShown($merged);
-                    $userPreferences->setUpdatedAt();
-                }
+                $this->updateOnboardings($userPreferences, $shownOnboardingsIn);
             }
+
 
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
@@ -544,10 +514,6 @@ class UserService
             }
             $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
-            if (!isset($resultPreferences['onboardingsWereShown']) || !is_array($resultPreferences['onboardingsWereShown'])) {
-                $resultPreferences['onboardingsWereShown'] = (array)($userPreferences->getOnboardingsWereShown() ?? []);
-            }
-            
             $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
             
             $this->transactionManager->commit();
@@ -560,6 +526,45 @@ class UserService
             $this->logger->error('Failed to update user preferences', ['exception' => $e]);
             $this->transactionManager->rollback();
             return self::respondWithError(41016); // 402xx
+        }
+    }
+
+    private function updateOnboardings($userPreferences, array $shownOnboardingsIn): void
+    {
+        $available = ConstantsConfig::onboarding()['AVAILABLE_ONBOARDINGS'] ?? [];
+        if (empty($available)) {
+            $this->logger->error('updateUserPreferences: AVAILABLE_ONBOARDINGS list is empty');
+            throw new \RuntimeException('No available onboardings configured', 00000);// List is empty, response code = 4XXXX
+        }
+
+        foreach ($shownOnboardingsIn as $onboarding) {
+            $val = (string) $onboarding;
+            if (!in_array($val, $available, true)) {
+                $this->logger->warning('updateUserPreferences: invalid onboarding value', [
+                    'value'     => $val,
+                    'available' => $available,
+                ]);
+                throw new \InvalidArgumentException('INVALID_ONBOARDING_VALUE', 31011);
+            }
+        }
+
+        $currentShown = $userPreferences->getOnboardingsWereShown();
+        if (!is_array($currentShown)) {
+            $currentShown = empty($currentShown) ? [] : (array) $currentShown;
+        }
+
+        $currentShown = array_values(array_filter(array_map('strval', $currentShown)));
+        $incoming     = array_values(array_filter(array_map('strval', $shownOnboardingsIn)));
+
+        $set = array_fill_keys($currentShown, true);
+        foreach ($incoming as $onboarding) {
+            $set[$onboarding] = true;
+        }
+        $merged = array_keys($set);
+
+        if ($merged !== $currentShown) {
+            $userPreferences->setOnboardingsWereShown($merged);
+            $userPreferences->setUpdatedAt();
         }
     }
 
