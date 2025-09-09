@@ -18829,7 +18829,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"12005\");",
+							"    pm.expect(pm.response.text()).to.include(\"12001\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -19329,7 +19329,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"12005\");",
+							"    pm.expect(pm.response.text()).to.include(\"12001\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",

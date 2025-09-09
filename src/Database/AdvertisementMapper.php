@@ -719,7 +719,7 @@ class AdvertisementMapper
                 throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
             }
 
-            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'createdat'] as $key) {
+            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend','createdat'] as $key) {
                 $stmt1->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
             }
 
@@ -731,7 +731,7 @@ class AdvertisementMapper
                 throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
             }
 
-            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost', 'createdat'] as $key) {
+            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost','createdat'] as $key) {
                 $stmt2->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
             }
 
@@ -773,8 +773,8 @@ class AdvertisementMapper
                     WHERE postid = :postid AND status = :status";
 
         $query2 = "INSERT INTO advertisements_log 
-                    (advertisementid, postid, userid, status, timestart, timeend, tokencost, eurocost) 
-                    VALUES (:advertisementid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost)";
+                    (advertisementid, postid, userid, status, timestart, timeend, tokencost, eurocost,createdat) 
+                    VALUES (:advertisementid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost,:createdat)";
 
         try {
             $this->db->beginTransaction();
@@ -789,7 +789,7 @@ class AdvertisementMapper
             $stmt1->execute();
 
             $stmt2 = $this->db->prepare($query2);
-            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost'] as $key) {
+            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost', 'createdat'] as $key) {
                 $stmt2->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
             }
             $stmt2->execute();

@@ -263,7 +263,7 @@ type ListAdvertisementData {
 
 type Transaction {
   transactionid: String!
-  transuniqueid: String!
+  operationid: String!
   transactiontype: String!
   senderid: String!
   recipientid: String!
