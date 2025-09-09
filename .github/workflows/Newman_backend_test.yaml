@@ -575,13 +575,9 @@ jobs:
             echo "other_failure" > outcome.txt
           fi
  
-      - name: Save Trivy outcome to file
-        if: always()
-        run: echo "${{ steps.trivy_outcome.outputs.outcome }}" > outcome.txt
- 
       - name: Upload Trivy build outcome marker
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: outcome-${{ matrix.php-version }}
           path: outcome.txt
@@ -595,7 +591,7 @@ jobs:
           trivy fs . --format table --scanners vuln --output trivy_reports/filesystem_vuln.txt
           trivy fs . --format table --scanners secret --output trivy_reports/secrets.txt
  
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: trivy-security-reports-${{ matrix.php-version }}
