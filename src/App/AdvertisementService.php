@@ -355,8 +355,6 @@ class AdvertisementService
         $userId = $args['userid'] ?? null;
         $titleConfig = ConstantsConfig::post()['TITLE'];
 
-        $titleConfig = ConstantsConfig::post()['TITLE'];
-
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
         }
