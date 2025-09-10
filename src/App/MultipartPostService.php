@@ -71,14 +71,14 @@ class MultipartPostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11515,
+                'ResponseCode' => "11515",
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
-            return self::respondWithError($e->getErrors()[0]);
+            return self::createResponse($e->getErrors()[0]);
         } catch(\Exception $e){
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
-            return self::respondWithError(41514);
+            return self::createResponse(41514);
         }
 
     }
@@ -94,7 +94,7 @@ class MultipartPostService
     {
         try{
             if (!self::checkAuthentication($this->currentUserId)) {
-                return self::respondWithError(60501);
+                return self::createResponse(60501);
             }
             // Check For Wallet Balance
             $this->postService->setCurrentUserId($this->currentUserId);
@@ -124,15 +124,15 @@ class MultipartPostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11515,
+                'ResponseCode' => "11515",
                 'uploadedFiles' => implode(',', $allMetadata),
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
-            return self::respondWithError($e->getErrors()[0]);
+            return self::createResponse($e->getErrors()[0]);
         } catch(\Exception $e){
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
-            return self::respondWithError(41514);
+            return self::createResponse(41514);
         }
 
     }

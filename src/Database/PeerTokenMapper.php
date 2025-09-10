@@ -76,20 +76,20 @@ class PeerTokenMapper
 
         if ((string) $recipient === $userId) {
             $this->logger->warning('Send and Receive Same Wallet Error.');
-            return self::respondWithError(31202);
+            return self::createResponse(31202);
         }
 
         if (!self::isValidUUID($recipient)) {
             $this->logger->warning('Incorrect recipientid Exception.', [
                 'recipient' => $recipient,
             ]);
-            return self::respondWithError(30201);
+            return self::createResponse(30201);
         }
 
         $this->initializeLiquidityPool();
 
         if (!$this->validateFeesWalletUUIDs()) {
-            return self::respondWithError(41222);
+            return self::createResponse(41222);
         }
 
         $currentBalance = $this->getUserWalletBalance($userId);
@@ -98,16 +98,16 @@ class PeerTokenMapper
             $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(51301);
+            return self::createResponse(51301);
         }
 
         if ($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient) {
             $this->logger->warning('Unauthorized to send token');
-            return self::respondWithError(31203);
+            return self::createResponse(31203);
         }
 
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
-            return self::respondWithError(30264);
+            return self::createResponse(30264);
         }
 
         $numberoftokens = (float) $args['numberoftokens'];
@@ -116,14 +116,14 @@ class PeerTokenMapper
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
-            return self::respondWithError(30264);
+            return self::createResponse(30264);
         }
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
 
         if ($message !== null && strlen($message) > 200) {
             $this->logger->warning('message length is too high');
-            return self::respondWithError(30210); // message length is too high.
+            return self::createResponse(30210); // message length is too high.
         }
 
         try {
@@ -138,17 +138,17 @@ class PeerTokenMapper
                 'error' => $e->getMessage(),
                 'recipient' => $recipient
             ]);
-            return self::respondWithError(31007);
+            return self::createResponse(31007);
         }
 
         if (empty($row)) {
             $this->logger->warning('Unknown Id Exception.');
-            return self::respondWithError(31007);
+            return self::createResponse(31007);
         }
 
         if ((string)$row === $userId) {
             $this->logger->warning('Send and Receive Same Wallet Error.');
-            return self::respondWithError(31202);
+            return self::createResponse(31202);
         }
 
         $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, PEERFEE, POOLFEE, BURNFEE);
@@ -169,7 +169,7 @@ class PeerTokenMapper
                 'error' => $e->getMessage(),
                 'userId' => $userId
             ]);
-            return self::respondWithError(31007);
+            return self::createResponse(31007);
         }
 
         if ($currentBalance < $requiredAmount) {
@@ -178,7 +178,7 @@ class PeerTokenMapper
                 'Balance' => $currentBalance,
                 'requiredAmount' => $requiredAmount,
             ]);
-            return self::respondWithError(51301);
+            return self::createResponse(51301);
         }
 
         try {
@@ -201,7 +201,7 @@ class PeerTokenMapper
                 $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
+                    return self::createResponse(41401);
                 }
 
                 $args = [
@@ -231,7 +231,7 @@ class PeerTokenMapper
                 $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
+                    return self::createResponse(41401);
                 }
 
                 $args = [
@@ -258,7 +258,7 @@ class PeerTokenMapper
                 $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
+                    return self::createResponse(41401);
                 }
 
                 $args = [
@@ -286,7 +286,7 @@ class PeerTokenMapper
                 $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
+                    return self::createResponse(41401);
                 }
 
                 $args = [
@@ -314,7 +314,7 @@ class PeerTokenMapper
                 $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
+                    return self::createResponse(41401);
                 }
 
                 $args = [
@@ -342,7 +342,7 @@ class PeerTokenMapper
                 $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
+                    return self::createResponse(41401);
                 }
 
                 $args = [
@@ -359,7 +359,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11212,
+                'ResponseCode' => "11212",
                 'tokenSend' => $numberoftokens,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'createdat' => date('Y-m-d H:i:s.u')
@@ -371,7 +371,7 @@ class PeerTokenMapper
                 'recipient' => $recipient,
                 'numberoftokens' => $numberoftokens
             ]);
-            return self::respondWithError(40301);
+            return self::createResponse(40301);
         }
     }
 
@@ -536,7 +536,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11215,
+                'ResponseCode' => "11215",
                 'affectedRows' => $data
             ];
         } catch (\Throwable $th) {

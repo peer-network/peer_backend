@@ -207,6 +207,10 @@ ci: ## Run full local CI workflow (setup, tests, cleanup)
 	$(MAKE) test
 	$(MAKE) clean-all
 
+hot-ci: ## Run full local CI workflow (setup, tests, cleanup)
+	$(MAKE) restart-db
+	$(MAKE) test
+
 # ---- Developer Shortcuts ----
 .PHONY: logs db bash-backend
 
