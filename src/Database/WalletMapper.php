@@ -1264,7 +1264,7 @@ class WalletMapper
                     'args' => $args,
                 ]);
 
-                return self::respondWithError(41206);
+                return self::respondWithError(41205);
             }
 
             $results = $this->insertWinToPool($userId, $args);
@@ -1274,7 +1274,7 @@ class WalletMapper
                     'args' => $args,
                 ]);
 
-                return self::respondWithError(41206);
+                return self::respondWithError(41205);
             }
 
             $this->logger->info('Wallet deduction successful.', [
@@ -1310,7 +1310,7 @@ class WalletMapper
                 'args' => $args,
             ]);
 
-            return self::respondWithError(41206);
+            return self::respondWithError(41205);
         }
     }
 
