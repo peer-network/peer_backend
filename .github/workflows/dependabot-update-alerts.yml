@@ -1,0 +1,48 @@
+name: Dependabot Update Alerts
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - development
+      - main
+      - pre-release
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  notify_dependabot_update:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        run: |
+          MESSAGE=":package: **Dependabot opened an Update PR**\n"
+          MESSAGE+="**Title:** ${{ github.event.pull_request.title }}\n"
+          MESSAGE+="**Link:** ${{ github.event.pull_request.html_url }}\n"
+          MESSAGE+="**Branch:** ${{ github.event.pull_request.head.ref }}\n"
+          MESSAGE+="Opened by: Dependabot"
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"$MESSAGE\"}" \
+               "${{ secrets.DISCORD_WEBHOOK_DEPENDABOT }}"
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Add label to PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pr_number=${{ github.event.pull_request.number }}
+          # Only add label if it's not already there
+          if gh pr view "$pr_number" --json labels -q '.labels[].name' | grep -q '^dependabot-update-alert$'; then
+            echo "Label already exists, skipping."
+          else
+            gh pr edit "$pr_number" --add-label "dependabot-update-alert"
+          fi
