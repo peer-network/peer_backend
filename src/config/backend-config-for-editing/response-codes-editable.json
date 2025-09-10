@@ -755,6 +755,10 @@
         "comment": "The cover field must contain at most only {POST.COVER.MAX_COUNT} image",
         "userFriendlyComment": "Only {POST.COVER.MAX_COUNT} cover image allowed."
     },
+    "30269": {
+        "comment": "The 'advertisementId' field must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
+        "userFriendlyComment": "Advertisement ID format. Please check and try again."
+    },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
         "userFriendlyComment": "Input required. Please provide the needed information."
