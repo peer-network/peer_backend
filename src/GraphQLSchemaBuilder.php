@@ -1820,7 +1820,9 @@ class GraphQLSchemaBuilder
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
-            'logWinMigration' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration()
+            'logWinMigration' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration(),
+            'logwinsPaidActionForMarchApril' => fn(mixed $root, array $args) => $this->logWinService->logwinsPaidActionForMarchApril()
+            
         ];
     }
 

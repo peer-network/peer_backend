@@ -60,35 +60,34 @@ class LogWinService
         try {
 
             // PENDING: Migrate Gems to LogWins
-            $response = $this->logWinMapper->migrateGemsToLogWins();
+            $this->logWinMapper->migrateGemsToLogWins();
 
-            if(!$response){
-                $this->logWinMigration();
-            }
 
             $response = $this->logWinMapper->migratePaidActions();
 
             if(!$response){
+
+                // Free memory between batches
+                gc_collect_cycles();
+
+                // Small delay helps avoid TLS exhaustion on some PHP builds
+                sleep(1); // 200 ms instead of full 1 second
+
                 $this->logWinMigration();
             }
 
             $response = $this->logWinMapper->migrateTokenTransfer();
 
             if(!$response){
+                // Free memory between batches
+                gc_collect_cycles();
+
+                // Small delay helps avoid TLS exhaustion on some PHP builds
+                sleep(1); // 200 ms instead of full 1 second
+
                 $this->logWinMigration();
             }
             
-            // DONE:  Generate logwin entries for like paid actions
-            $response = $this->logWinMapper->generateLikePaidActionToLogWins();
-
-            // DONE: Generate logwin entries for dislike paid actions
-            $response = $this->logWinMapper->generateDislikePaidActionToLogWins();
-
-            // DONE:  Generate logwin entries for post paid actions
-            $response = $this->logWinMapper->generatePostPaidActionToLogWins();
-
-            // DONE: Generate logwin entries for comment paid actions
-            $response = $this->logWinMapper->generateCommentPaidActionToLogWins();
 
             return [
                 'status' => 'success',
@@ -108,5 +107,48 @@ class LogWinService
             ];
         }
     }
+
+    /**
+     * Generate logwin entries for paid actions that were not generated previously between March and 02 April 2025
+     * 
+     */
+    public function logwinsPaidActionForMarchApril(): ?array
+    {
+        $this->logger->info('LogWinService.logWinMigration started');
+
+        try {
+
+            // Generate logwin entries for like paid actions
+            $this->logWinMapper->generateLikePaidActionToLogWins();
+
+            // Generate logwin entries for dislike paid actions
+            $this->logWinMapper->generateDislikePaidActionToLogWins();
+
+            // Generate logwin entries for post paid actions
+            $this->logWinMapper->generatePostPaidActionToLogWins();
+
+            //Generate logwin entries for comment paid actions
+            $this->logWinMapper->generateCommentPaidActionToLogWins();
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 200
+            ];
+
+        }catch (\RuntimeException $e) {
+            $this->logger->error('RuntimeException in LogWinService.logWinMigration: ' . $e->getMessage());
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => $e->getCode()
+            ];
+        }catch (\Exception $e) {
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => 41205
+            ];
+        }
+    }
+
+    
 
 }
