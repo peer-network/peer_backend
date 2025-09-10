@@ -43,7 +43,7 @@ class LogWinMapper
     }
 
     /**
-     * Migrate logwin data to transactions table.
+     * Migrate logwins records to transactions table.
      *
      * This Function only for Paid Actions such Post Creation, Like, Dislike, Views, Comment
      * 
@@ -65,9 +65,7 @@ class LogWinMapper
         $this->logger->info('LogWinMapper.migrateLogwinData started');
 
         try {
-
-            // Get 1000 Records and migrate to Transaction table
-            $sql = "SELECT * FROM logwins WHERE migrated = :migrated and whereby IN(1, 2, 3, 4, 5) LIMIT 100";
+            $sql = "SELECT * FROM logwins WHERE migrated = :migrated and whereby IN(1, 2, 3, 4, 5) LIMIT 2000";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':migrated', 0, \PDO::PARAM_INT);
             $stmt->execute();
@@ -199,7 +197,7 @@ class LogWinMapper
                     AND lw.whereby = 18
                     GROUP BY created_at_minute, lw.fromid
                     ORDER BY created_at_minute ASC, lw.fromid
-                    LIMIT 100;
+                    LIMIT 1000;
                 ";
 
 
@@ -792,7 +790,7 @@ class LogWinMapper
     /**
      * Generate gems to logwins entries
      * 
-     * Gems table: Records are pending to be added on logwins: Total: 1672
+     * Gems table: Records are pending to be added on logwins: Total: 1666
      * 
      * Date From: 
      * "2025-03-05 15:48:24.08886"										
@@ -850,7 +848,6 @@ class LogWinMapper
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
         $dailyToken = DAILY_NUMBER_TOKEN;
 
-        // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
         /**
          * Still We are facing with digital precision issues
          * If we use till 9 Digit here, it coming right.
@@ -896,8 +893,6 @@ class LogWinMapper
                 'createdat' => $row['createdat']
             ];
 
-            // $this->insertWinToLog($userId, end($args[$userId]['details']));
-            // Star
             $postId = $args['postid'] ?? null;
             $fromId = $args['fromid'] ?? null;
             $gems = $args['gems'] ?? 0.0;
