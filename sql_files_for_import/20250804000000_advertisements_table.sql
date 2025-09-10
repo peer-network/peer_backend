@@ -13,10 +13,7 @@ CREATE TABLE IF NOT EXISTS advertisements (
     CONSTRAINT fk_ads_postid FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE,
     CONSTRAINT fk_ads_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
 );
-CREATE INDEX IF NOT EXISTS idx_ads_status ON advertisements(postid, status);
-CREATE INDEX IF NOT EXISTS idx_ads_tmstrt ON advertisements (postid, timestart);
-CREATE INDEX IF NOT EXISTS idx_ads_tmeend ON advertisements (postid, timeend);
-CREATE INDEX IF NOT EXISTS idx_ads_postid_time ON advertisements (postid, timestart, timeend);
+CREATE INDEX IF NOT EXISTS idx_ads_post_status_time ON advertisements (postid, status, timestart, timeend);
 
 -- Tabelle: advertisements_log
 CREATE TABLE IF NOT EXISTS advertisements_log (
@@ -37,10 +34,7 @@ CREATE TABLE IF NOT EXISTS advertisements_log (
     CONSTRAINT fk_adslog_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_adslog_advsid ON advertisements_log(advertisementid);
-CREATE INDEX IF NOT EXISTS idx_adslog_status ON advertisements_log(postid, status);
-CREATE INDEX IF NOT EXISTS idx_adslog_tmstrt ON advertisements_log(postid, timestart);
-CREATE INDEX IF NOT EXISTS idx_adslog_timend ON advertisements_log(postid, timeend);
-CREATE INDEX IF NOT EXISTS idx_ads_postid_time ON advertisements (postid, timestart, timeend);
+CREATE INDEX IF NOT EXISTS idx_idx_adslog_post_status_time ON advertisements_log (postid, status, timestart, timeend);
 
 -- Table: advertisements_info
 CREATE TABLE IF NOT EXISTS advertisements_info (
