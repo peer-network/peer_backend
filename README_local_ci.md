@@ -225,11 +225,12 @@ Available targets:
 bash-backend : Open interactive shell in backend container
 ci : Run full local CI workflow (setup, tests, cleanup)
 clean-all : Remove containers, volumes, vendors, reports, logs
+clean-ci : Cleanup for CI but keep reports
 clean-prune : Remove ALL unused images, build cache, and volumes
 db : Open psql shell into Postgres
 dev : Full setup: env, DB reset, vendors install, start DB+backend
 ensure-jq : Ensure jq is installed (auto-install if missing)
-env : Copy .env.dev to .env for local development
+env-ci : Copy .env.dev to .env.ci for local development
 help : Show available make targets
 init : Prepare Postman environment files for testing
 logs : Tail backend container logs
