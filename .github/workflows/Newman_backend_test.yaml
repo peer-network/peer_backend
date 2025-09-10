@@ -271,12 +271,19 @@ jobs:
       - name: Force DB init by removing the volume
         run: docker volume rm peer_backend_ci-cd_db-data || true
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+      - name: Log in to GHCR (with retry)
+        run: |
+          for i in 1 2 3 4 5; do
+            echo "Attempt $i to login to GHCR..."
+            if echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin; then
+              echo "Login successful!"
+              exit 0
+            fi
+            echo "Login failed, retrying in 20s..."
+            sleep 20
+          done
+          echo "All login attempts failed."
+          exit 1
 
       - name: Build And Start Docker Containers
         run: |
@@ -609,14 +616,12 @@ jobs:
           else
             echo "other_failure" > outcome.txt
           fi
-
       - name: Upload Trivy build outcome marker
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: outcome-${{ matrix.php-version }}
+          name: outcome-${{ matrix.php-version }}-${{ github.run_attempt }}
           path: outcome.txt
-          overwrite: true
  
       - name: Collect Trivy reports
         if: always()
@@ -628,7 +633,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: trivy-security-reports-${{ matrix.php-version }}
+          name: trivy-security-reports-${{ matrix.php-version }}-${{ github.run_attempt }}
           path: trivy_reports
  
   aggregate_outcome:
