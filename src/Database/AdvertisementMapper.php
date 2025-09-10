@@ -941,11 +941,20 @@ class AdvertisementMapper
         LIMIT :limit OFFSET :offset";
 
         $sqlBasicAds = "WITH base_posts AS ($baseSelect)
-        SELECT * FROM base_posts
-        WHERE ad_type = 'basic'
-          AND ad_order <= NOW()
-          AND end_order > NOW()
-        ORDER BY ad_order ASC
+        SELECT *
+        FROM base_posts bp
+        WHERE bp.ad_type = 'basic'
+          AND bp.ad_order <= NOW()
+          AND bp.end_order > NOW()
+          AND NOT EXISTS (
+            SELECT 1
+            FROM advertisements a2
+            WHERE a2.postid = bp.postid
+              AND a2.status = 'pinned'
+              AND a2.timestart <= NOW()
+              AND a2.timeend  > NOW()
+          )
+        ORDER BY bp.ad_order ASC
         LIMIT :limit OFFSET :offset";
 
         try {
