@@ -31,7 +31,8 @@ use Fawaz\Database\Interfaces\TransactionManager;
 
 class PostService
 {
-	use ResponseHelper;
+    use ResponseHelper;
+
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -91,7 +92,6 @@ class PostService
     private function argsToString($args) {
         return serialize($args);
     }
-
 
     private function validateCoverCount(array $args, string $contenttype): array {
         if (!is_array($args['cover'])) {
@@ -573,7 +573,7 @@ class PostService
         }
 
         if (!empty($filterBy) && is_array($filterBy)) {
-            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED'];
+            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED', 'FRIENDS'];
 
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
@@ -840,5 +840,21 @@ class PostService
 
         return $results;
     }
-    
+
+    public function postExistsById(string $postId): bool
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->info('PostService.postExistsById started');
+
+        try {
+            return $this->postMapper->postExistsById($postId);
+
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed fetch Post', ['postId' => $postId, 'exception' => $e]);
+            return false;
+        }
+    }
 }
