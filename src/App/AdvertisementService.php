@@ -271,11 +271,9 @@ class AdvertisementService
         }
 
         $this->logger->info('AdvertisementService.fetchAll started');
-        $this->logger->info('args', ['args' => $args]);
 
         $advertiseActions = ['BASIC', 'PINNED'];
         $filter = $args['filter'] ?? [];
-        $this->logger->info('filter', ['filter' => $filter]);
         $from = $filter['from'] ?? null;
         $to = $filter['to'] ?? null;
         $advertisementtype = $filter['type'] ?? null;
