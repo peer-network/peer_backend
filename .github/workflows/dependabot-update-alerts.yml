@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   notify_dependabot_update:
-    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    if: startsWith(github.head_ref, 'dependabot/')
     runs-on: ubuntu-latest
     steps:
       - name: Send Discord Notification
