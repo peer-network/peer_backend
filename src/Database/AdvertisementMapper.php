@@ -647,7 +647,7 @@ class AdvertisementMapper
         }
     }
 
-    public function hasTimeConflict(string $postId, string $status, string $newStart, string $newEnd): bool
+    public function hasTimeConflict(string $postId, string $status, string $newStart, string $newEnd, $currentUserId): bool
     {
         $this->logger->info("AdvertisementMapper.hasTimeConflict started", [
             'postId' => $postId,
@@ -660,6 +660,7 @@ class AdvertisementMapper
             SELECT 1
             FROM advertisements
             WHERE postid   = :postId
+              AND userid   = :userid
               AND status   = :status
               AND timeend  > :newStart
               AND timestart < :newEnd
@@ -669,6 +670,7 @@ class AdvertisementMapper
         try {
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':postId', $postId);
+            $stmt->bindValue(':userid', $currentUserId);
             $stmt->bindValue(':status', $status);
             $stmt->bindValue(':newStart', $newStart);
             $stmt->bindValue(':newEnd',   $newEnd);
@@ -950,6 +952,7 @@ class AdvertisementMapper
             SELECT 1
             FROM advertisements a2
             WHERE a2.postid = bp.postid
+              AND a2.userid = bp.userid
               AND a2.status = 'pinned'
               AND a2.timestart <= NOW()
               AND a2.timeend  > NOW()
