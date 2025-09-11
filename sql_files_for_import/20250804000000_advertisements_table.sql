@@ -56,4 +56,7 @@ CREATE TABLE IF NOT EXISTS advertisements_info (
 );
 CREATE INDEX IF NOT EXISTS idx_advsinf_postid ON advertisements_info(postid);
 
+-- Performance-Hinweis: Wir Legen einen Index an: Hilft (advertisementid.gemsearned)
+CREATE INDEX IF NOT EXISTS idx_logwins_post_createdat ON logwins(postid, createdat);
+
 COMMIT;
