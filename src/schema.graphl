@@ -226,7 +226,7 @@ type TotalAdvertisementHistoryStats {
   tokenSpent: Float!
   euroSpent: Float!
   amountAds: Int!
-  gemsEarned: Int!
+  gemsEarned: Float!
   amountLikes: Int!
   amountViews: Int! 
   amountComments: Int!
