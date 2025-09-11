@@ -170,7 +170,7 @@ class AdvertisementService
                     return self::respondWithError(32017); // BASIC: es fehlt eine teil von (postid, date, costplan)
                 }
 
-                if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend) === true) {
+                if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend, $this->currentUserId) === true) {
                     $this->logger->warning('Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
@@ -186,7 +186,7 @@ class AdvertisementService
                 $timestart = (new \DateTime())->format('Y-m-d H:i:s.u'); // Setze timestart
                 $timeend = (new \DateTime('+1 days'))->format('Y-m-d H:i:s.u'); // Setze Timeend
 
-                if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower('BASIC'), $timestart, $timeend) === true && empty($forcing)) {
+                if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower('BASIC'), $timestart, $timeend, $this->currentUserId) === true && empty($forcing)) {
                     $this->logger->warning('Pinned.Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
@@ -271,26 +271,57 @@ class AdvertisementService
         }
 
         $this->logger->info('AdvertisementService.fetchAll started');
+        $this->logger->info('args', ['args' => $args]);
 
-        $from = $args['filter']['from'] ?? null;
-        $to = $args['filter']['to'] ?? null;
+        $advertiseActions = ['BASIC', 'PINNED'];
+        $filter = $args['filter'] ?? [];
+        $this->logger->info('filter', ['filter' => $filter]);
+        $from = $filter['from'] ?? null;
+        $to = $filter['to'] ?? null;
+        $advertisementtype = $filter['type'] ?? null;
+        $advertisementId = $filter['advertisementId'] ?? null;
+        $postId = $filter['postId'] ?? null;
+        $userId = $filter['userId'] ?? null;
 
-        $this->logger->info('AdvertisementService.fetchAll Befor check');
+
 		if ($from !== null && !self::validateDate($from)) {
-            $this->logger->info('AdvertisementService.fetchAll im check');
             return self::respondWithError(30212);
         }
 
-        $this->logger->info('AdvertisementService.fetchAll Befor 2 check');
         if ($to !== null && !self::validateDate($to)) {
-            $this->logger->info('AdvertisementService.fetchAll im 2 check');
             return self::respondWithError(30213);
+        }
+
+        if ($advertisementtype !== null && !in_array($advertisementtype, $advertiseActions, true)) {
+            return $this->respondWithError(32006);
+        }
+
+        if ($advertisementId !== null && !self::isValidUUID($advertisementId)) {
+            return $this->respondWithError(30209);
+        }
+
+        if ($postId !== null && !self::isValidUUID($postId)) {
+            return $this->respondWithError(30209);
+        }
+
+        if ($userId !== null && !self::isValidUUID($userId)) {
+            return $this->respondWithError(30201);
+        }
+
+        $sortBy = $args['sort'] ?? [];
+        if (!empty($sortBy) && is_array($sortBy)) {
+            $allowedTypes = ['NEWEST', 'OLDEST', 'BIGGEST_COST', 'SMALLEST_COST'];
+
+            $invalidTypes = array_diff(array_map('strtoupper', $sortBy), $allowedTypes);
+
+            if (!empty($invalidTypes)) {
+                return $this->respondWithError(30103);
+            }
         }
 
         try {
             $result = $this->advertisementMapper->fetchAllWithStats($args);
 
-            //return $result;
             return self::createSuccessResponse(12002, $result['affectedRows'], false);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching Advertisements', ['error' => $e->getMessage()]);
