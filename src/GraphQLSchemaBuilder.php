@@ -187,9 +187,9 @@ class GraphQLSchemaBuilder
                 },
             ],
             'UserPreferences' => [
-                'contentFilteringSeverityLevel' => function (array $root): string {
+                'contentFilteringSeverityLevel' => function (array $root): ?string {
                     $this->logger->info('Query.UserPreferences Resolvers');
-                    return $root['contentFilteringSeverityLevel'] ?? '';
+                    return $root['contentFilteringSeverityLevel'];
                 },
                 'onboardingsWereShown' => function (array $root): array {
                     $this->logger->info('Query.UserPreferences.onboardingsWereShown Resolver');
