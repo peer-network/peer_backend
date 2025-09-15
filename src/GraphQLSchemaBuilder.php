@@ -18,6 +18,7 @@ const FREELIKE_=30;// whereby FREELIKE
 const FREECOMMENT_=31;// whereby FREECOMMENT
 const FREEPOST_=32;// whereby FREEPOST
 
+use Fawaz\App\AlphaMintService;
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
 use Fawaz\App\Comment;
@@ -79,7 +80,8 @@ class GraphQLSchemaBuilder
         protected ChatService $chatService,
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
-        protected JWTService $tokenService
+        protected JWTService $tokenService,
+        protected AlphaMintService $alphaMintService
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -141,6 +143,7 @@ class GraphQLSchemaBuilder
 
     protected function setCurrentUserIdForServices(string $userid): void
     {
+        $this->alphaMintService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
