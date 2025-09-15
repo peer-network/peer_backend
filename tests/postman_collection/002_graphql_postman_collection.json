@@ -20271,6 +20271,7 @@
 							"        { adId: pm.environment.get(\"advertisementId_8\"),          postId: pm.environment.get(\"postidadd1\"),        type: \"BASIC\" },",
 							"        { adId: pm.environment.get(\"advertisementId_9\"),          postId: pm.environment.get(\"existing_postid\"),   type: \"PINNED\" },",
 							"        { adId: pm.environment.get(\"advertisementId_10\"),         postId: pm.environment.get(\"existing_postid_2\"), type: \"PINNED\" }",
+
 							"    ];",
 							"",
 							"    pm.expect(ads.length, \"Advertisements length mismatch\").to.eql(amountAds);",
@@ -20765,6 +20766,7 @@
 							"        { adId: pm.environment.get(\"advertisementId_8\"),          postId: pm.environment.get(\"postidadd1\"),        type: \"BASIC\" },",
 							"        { adId: pm.environment.get(\"advertisementId_9\"),          postId: pm.environment.get(\"existing_postid\"),   type: \"PINNED\" },",
 							"        { adId: pm.environment.get(\"advertisementId_10\"),         postId: pm.environment.get(\"existing_postid_2\"), type: \"PINNED\" }",
+
 							"    ];",
 							"",
 							"    pm.expect(ads.length, \"Advertisements length mismatch\").to.eql(amountAds);",

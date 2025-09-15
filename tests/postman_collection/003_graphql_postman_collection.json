@@ -1572,8 +1572,7 @@
 						"exec": [
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"error\");",
-							"});",
-							""
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -1623,8 +1622,7 @@
 						"exec": [
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"error\");",
-							"});",
-							""
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -1680,6 +1678,16 @@
 						"type": "text/javascript",
 						"packages": {}
 					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
 				}
 			],
 			"request": {
@@ -1727,8 +1735,9 @@
 							"    pm.expect(pm.response.text()).to.include(\"31815\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
-							"});"
+							"    pm.expect(pm.response.text()).to.include(\"error\");",
+							"});",
+							""
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -1813,6 +1822,7 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\"]\n            contenttype: image\n        }\n        action: Zhopa  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+
 						"variables": ""
 					}
 				},
@@ -2577,7 +2587,9 @@
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"error\");",
 							"});",
-							""
+							"pm.test(\"Status is success\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -2601,6 +2613,7 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Getallposts {\n    listPosts(\n        offset: *@!\n        limit: *@!\n        commentOffset: *@!\n        commentLimit: *@!\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                amountlikes\n                isliked\n                createdat\n                user {\n                    id\n                    username\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+
 						"variables": ""
 					}
 				},

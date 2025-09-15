@@ -2138,12 +2138,12 @@ class GraphQLSchemaBuilder
 
         // postId validieren
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(21517);
+            return $this->respondWithError(30209);
         }
 
         if ($this->postService->postExistsById($postId) === false) 
         {
-            return $this->respondWithError(21516);
+            return $this->respondWithError(31510);
         }
 
         $advertiseActions = ['BASIC', 'PINNED'];
