@@ -14086,6 +14086,132 @@
 			"response": []
 		},
 		{
+			"name": "showOnboardings",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11014\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Check onboardingsWereShown contains INTROONBOARDING\", function () {",
+							"    const response = pm.response.json();",
+							"    const onboardings = response?.data?.updateUserPreferences?.affectedRows?.onboardingsWereShown;",
+							"",
+							"    pm.expect(onboardings, \"onboardingsWereShown should be an array\").to.be.an(\"array\");",
+							"    pm.expect(onboardings, \"onboardingsWereShown should include INTROONBOARDING\")",
+							"        .to.include(\"INTROONBOARDING\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UpdateUserPreferences {\n    updateUserPreferences(\n        userPreferences: { contentFilteringSeverityLevel: MYGRANDMALIKES, shownOnboardings: INTROONBOARDING }\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            contentFilteringSeverityLevel\n            onboardingsWereShown\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "verify getUserinfo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11002\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Check onboardingsWereShown contains INTROONBOARDING\", function () {",
+							"    const response = pm.response.json();",
+							"    const onboardings = pm.response.json()?.data?.getUserInfo?.affectedRows?.userPreferences?.onboardingsWereShown;",
+							"",
+							"    pm.expect(onboardings, \"onboardingsWereShown should be an array\").to.be.an(\"array\");",
+							"    pm.expect(onboardings, \"onboardingsWereShown should include INTROONBOARDING\")",
+							"        .to.include(\"INTROONBOARDING\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetUserInfo {\n    getUserInfo {\n        status\n        ResponseCode\n        affectedRows {\n            userid\n            liquidity\n            amountposts\n            amountblocked\n            amountfollower\n            amountfollowed\n            amountfriends\n            invited\n            updatedat\n            userPreferences {\n                contentFilteringSeverityLevel\n                onboardingsWereShown\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get comment info",
 			"event": [
 				{
