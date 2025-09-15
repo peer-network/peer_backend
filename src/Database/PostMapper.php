@@ -626,7 +626,7 @@ class PostMapper
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
                 return [];
             }
-            $whereClauses[] = "t.name = :tag";
+            $whereClauses[] = "t.name ILIKE :tag";
             $params['tag'] = $tag;
         }
 
