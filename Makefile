@@ -1,11 +1,13 @@
-# Load .env file
+# Warn if .env file exists (Docker Compose auto-loads .env by default)
 ifneq (,$(wildcard .env))
-    include .env
-    export
+    $(warning Local .env detected. Docker Compose auto-loads this and it may override .env.ci. To avoid issues, either delete it or set COMPOSE_ENV_FILE=.env.ci)
 endif
 
 IMAGE_TAG=local
 export IMAGE_TAG
+
+# Force Docker Compose to use .env.ci instead of auto-loading .env
+export COMPOSE_ENV_FILE=.env.ci
 
 VOLUME_NAME = $(COMPOSE_PROJECT_NAME)_db_data
 COMPOSE_OVERRIDE = docker-compose.override.local.yml
