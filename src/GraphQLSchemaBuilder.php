@@ -143,6 +143,7 @@ class GraphQLSchemaBuilder
 
     protected function setCurrentUserIdForServices(string $userid): void
     {
+        $this->alphaMintService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
