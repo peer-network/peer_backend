@@ -73,10 +73,6 @@ class AlphaMintService
             if($alphaUserAc && $alphaUserAc->getUserId()){
 
                 $mintUserId = $alphaUserAc->getUserId();
-
-                // update wallett table with token amount to 21841000
-                // Mint Total Alpha Token Amount: 21841000
-                $this->walletMapper->saveWalletEntry($mintUserId, 2184100);
                 
                 // Get Alpha Users from Alpha_tokens_to_Peer_tokens.json file
                 $alphaUsers = json_decode(file_get_contents(__DIR__ . '/../../runtime-data/Alpha_tokens_to_Peer_tokens.json'), true);
