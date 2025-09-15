@@ -839,7 +839,11 @@
         "comment": "Invalid Referral String: The referral code provided is invalid or does not match any existing records.",
         "userFriendlyComment": "The referral code you entered is invalid. Please check and try again."
     },
-    "31101": {
+    "31011": {
+        "comment": "INVALID_ONBOARDING_VALUE — input contains onboarding not listed in AVAILABLE_ONBOARDINGS",
+        "userFriendlyComment": "The onboarding value you entered is not valid. Please select a valid option and try again."
+    },
+     "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",
         "userFriendlyComment": "This action is only available for friends."
     },

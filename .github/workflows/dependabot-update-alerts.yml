@@ -1,28 +1,34 @@
 name: Dependabot Update Alerts
 
 on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-    branches:
-      - development
-      - main
-      - pre-release
-
-permissions:
-  pull-requests: write
-  contents: read
+  workflow_run:
+    workflows: ["Newman Test For Postman on the php Backend Directory"]
+    types:
+      - completed
 
 jobs:
   notify_dependabot_update:
-    if: startsWith(github.head_ref, 'dependabot/')
+    if: >
+      ${{
+        github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.actor == 'dependabot[bot]'
+      }}
     runs-on: ubuntu-latest
     steps:
+      - name: Extract PR Info
+        id: pr
+        run: |
+          echo "pr_number=$(jq -r '.pull_requests[0].number' <<< '${{ toJson(github.event.workflow_run) }}')" >> $GITHUB_OUTPUT
+          echo "pr_title=$(jq -r '.display_title' <<< '${{ toJson(github.event.workflow_run) }}')" >> $GITHUB_OUTPUT
+          echo "pr_url=$(jq -r '.pull_requests[0].html_url' <<< '${{ toJson(github.event.workflow_run) }}')" >> $GITHUB_OUTPUT
+          echo "pr_branch=$(jq -r '.head_branch' <<< '${{ toJson(github.event.workflow_run) }}')" >> $GITHUB_OUTPUT
+
       - name: Send Discord Notification
         run: |
           MESSAGE=":package: **Dependabot opened an Update PR**\n"
-          MESSAGE+="**Title:** ${{ github.event.pull_request.title }}\n"
-          MESSAGE+="**Link:** ${{ github.event.pull_request.html_url }}\n"
-          MESSAGE+="**Branch:** ${{ github.event.pull_request.head.ref }}\n"
+          MESSAGE+="**Title:** ${{ steps.pr.outputs.pr_title }}\n"
+          MESSAGE+="**Link:** ${{ steps.pr.outputs.pr_url }}\n"
+          MESSAGE+="**Branch:** ${{ steps.pr.outputs.pr_branch }}\n"
           MESSAGE+="Opened by: Dependabot"
           curl -H "Content-Type: application/json" \
                -X POST \
@@ -39,7 +45,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          pr_number=${{ github.event.pull_request.number }}
+          pr_number=${{ steps.pr.outputs.pr_number }}
           # Only add label if it's not already there
           if gh pr view "$pr_number" --json labels -q '.labels[].name' | grep -q '^dependabot-update-alert$'; then
             echo "Label already exists, skipping."

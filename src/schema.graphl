@@ -40,6 +40,7 @@ type Query {
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
   advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
+  getTokenomics: TokenomicsResponse!
 }
 
 type Mutation {
@@ -190,7 +191,6 @@ enum DayFilterType {
   M0
   Y0
 }
-
 enum AdvertisementType {
   PINNED
   BASIC
@@ -260,6 +260,14 @@ type ListAdvertisementData {
   ResponseCode: String
   affectedRows: [AdvertisementRow]
 }
+enum OnboardingType {
+  INTROONBOARDING
+}
+
+input UserPreferencesInput {
+  contentFilteringSeverityLevel: ContentFilterType
+  shownOnboardings: [OnboardingType!]     
+}
 
 type Transaction {
   transactionid: String!
@@ -293,6 +301,7 @@ type TransferToken {
 
 type UserPreferences {
   contentFilteringSeverityLevel: ContentFilterType
+  onboardingsWereShown: [OnboardingType!]!
 }
 
 type ListTodaysInteractionsResponse {
@@ -792,4 +801,22 @@ input AdvertisementHistoryFilter {
   advertisementId: ID
   postId: ID
   userId: ID
+}
+type TokenomicsResponse {
+  status: String!
+  ResponseCode: Int!                         
+  actionTokenPrices: ActionPriceResult!
+  actionGemsReturns: ActionGemsReturns!
+  mintingData: MintingData!
+}
+
+type ActionGemsReturns {
+  viewGemsReturn: Float!
+  likeGemsReturn: Float!
+  dislikeGemsReturn: Float!
+  commentGemsReturn: Float!
+}
+
+type MintingData {
+  tokensMintedYesterday: Float!
 }
