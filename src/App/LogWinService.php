@@ -63,8 +63,39 @@ class LogWinService
             // PENDING: Migrate Gems to LogWins
             $this->logWinMapper->migrateGemsToLogWins();
 
+            return [
+                'status' => 'success',
+                'ResponseCode' => 200
+            ];
 
-            $response = $this->logWinMapper->migratePaidActions();
+        }catch (\RuntimeException $e) {
+            $this->logger->error('RuntimeException in LogWinService.logWinMigration: ' . $e->getMessage());
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => $e->getCode()
+            ];
+        }catch (\Exception $e) {
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => 41205
+            ];
+        }
+    }
+
+    /**
+     * This will be Recurring function to migrate logwin data
+     * It will keep migrating data until all logwin records are processed
+     * 
+     */
+    public function logWinMigration02(): ?array
+    {
+        $this->logger->info('LogWinService.logWinMigration02 started');
+
+        set_time_limit(0);
+        try {
+
+
+            $response = $this->logWinMapper->migrateViewPaidActions();
 
             if(!$response){
 
@@ -74,8 +105,90 @@ class LogWinService
                 // Small delay helps avoid TLS exhaustion on some PHP builds
                 usleep(200); // 200 ms
 
-                $this->logWinMigration();
+                $this->logWinMigration02();
             }
+            
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 200
+            ];
+
+        }catch (\RuntimeException $e) {
+            $this->logger->error('RuntimeException in LogWinService.logWinMigration02: ' . $e->getMessage());
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => $e->getCode()
+            ];
+        }catch (\Exception $e) {
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => 41205
+            ];
+        }
+    }
+
+    
+    /**
+     * This will be Recurring function to migrate logwin data
+     * It will keep migrating data until all logwin records are processed
+     * 
+     */
+    public function logWinMigration03(): ?array
+    {
+        $this->logger->info('LogWinService.logWinMigration03 started');
+
+        set_time_limit(0);
+        try {
+
+
+            $response = $this->logWinMapper->migrateOtherPaidActions();
+
+            if(!$response){
+
+                // Free memory between batches
+                gc_collect_cycles();
+
+                // Small delay helps avoid TLS exhaustion on some PHP builds
+                usleep(200); // 200 ms
+
+                $this->logWinMigration03();
+            }
+            
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 200
+            ];
+
+        }catch (\RuntimeException $e) {
+            $this->logger->error('RuntimeException in LogWinService.logWinMigration03: ' . $e->getMessage());
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => $e->getCode()
+            ];
+        }catch (\Exception $e) {
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => 41205
+            ];
+        }
+    }
+
+
+
+        /**
+     * This will be Recurring function to migrate logwin data
+     * It will keep migrating data until all logwin records are processed
+     * 
+     */
+    public function logWinMigration04(): ?array
+    {
+        $this->logger->info('LogWinService.logWinMigration04 started');
+
+        set_time_limit(0);
+        try {
+
 
             $response = $this->logWinMapper->migrateTokenTransfer();
 
@@ -86,7 +199,7 @@ class LogWinService
                 // Small delay helps avoid TLS exhaustion on some PHP builds
                 usleep(200); // 200 ms
 
-                $this->logWinMigration();
+                $this->logWinMigration04();
             }
             
 
@@ -96,7 +209,7 @@ class LogWinService
             ];
 
         }catch (\RuntimeException $e) {
-            $this->logger->error('RuntimeException in LogWinService.logWinMigration: ' . $e->getMessage());
+            $this->logger->error('RuntimeException in LogWinService.logWinMigration04: ' . $e->getMessage());
             return [
                 'status' => 'error - ' . $e->getMessage(),
                 'ResponseCode' => $e->getCode()

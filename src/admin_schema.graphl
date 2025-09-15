@@ -48,8 +48,11 @@ type Query {
   postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
+  logWinsPaidActionForMarchApril: DefaultResponse
   logWinMigration: DefaultResponse
-  logwinsPaidActionForMarchApril: DefaultResponse
+  logWinMigration02: DefaultResponse
+  logWinMigration03: DefaultResponse
+  logWinMigration04: DefaultResponse
 }
 
 type Mutation {

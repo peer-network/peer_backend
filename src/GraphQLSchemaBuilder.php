@@ -1852,7 +1852,9 @@ class GraphQLSchemaBuilder
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
             'logWinMigration' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration(),
-            'logwinsPaidActionForMarchApril' => fn(mixed $root, array $args) => $this->logWinService->logwinsPaidActionForMarchApril(),
+            'logWinMigration02' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration02(),
+            'logWinMigration03' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration03(),
+            'logWinsPaidActionForMarchApril' => fn(mixed $root, array $args) => $this->logWinService->logwinsPaidActionForMarchApril(),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'getTokenomics' => fn(mixed $root, array $args) => $this->resolveTokenomics(),
         ];
