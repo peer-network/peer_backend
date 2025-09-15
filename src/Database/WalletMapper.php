@@ -1263,7 +1263,6 @@ class WalletMapper
                     'userId' => $userId,
                     'args' => $args,
                 ]);
-
                 return self::respondWithError(41205);
             }
 
@@ -1273,7 +1272,6 @@ class WalletMapper
                     'userId' => $userId,
                     'args' => $args,
                 ]);
-
                 return self::respondWithError(41205);
             }
 
@@ -1309,7 +1307,6 @@ class WalletMapper
                 'userId' => $userId,
                 'args' => $args,
             ]);
-
             return self::respondWithError(41205);
         }
     }
