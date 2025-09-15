@@ -1939,8 +1939,8 @@ class GraphQLSchemaBuilder
                 'amountAds' => function (array $root): int {
                     return $root['amountAds'] ?? 0;
                 },
-                'gemsEarned' => function (array $root): int {
-                    return $root['gemsEarned'] ?? 0;
+                'gemsEarned' => function (array $root): float {
+                    return $root['gemsEarned'] ?? 0.0;
                 },
                 'amountLikes' => function (array $root): int {
                     return $root['amountLikes'] ?? 0;
