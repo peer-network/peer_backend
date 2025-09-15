@@ -57,6 +57,7 @@ class LogWinService
     {
         $this->logger->info('LogWinService.logWinMigration started');
 
+        set_time_limit(0);
         try {
 
             // PENDING: Migrate Gems to LogWins
@@ -71,7 +72,7 @@ class LogWinService
                 gc_collect_cycles();
 
                 // Small delay helps avoid TLS exhaustion on some PHP builds
-                sleep(1); // 200 ms instead of full 1 second
+                usleep(200); // 200 ms
 
                 $this->logWinMigration();
             }
@@ -83,7 +84,7 @@ class LogWinService
                 gc_collect_cycles();
 
                 // Small delay helps avoid TLS exhaustion on some PHP builds
-                sleep(1); // 200 ms instead of full 1 second
+                usleep(200); // 200 ms
 
                 $this->logWinMigration();
             }

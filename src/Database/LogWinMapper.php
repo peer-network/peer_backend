@@ -2,6 +2,7 @@
 
 namespace Fawaz\Database;
 
+use DateTime;
 use Fawaz\App\Models\Transaction;
 use Fawaz\App\Repositories\TransactionRepository;
 use Fawaz\Database\Interfaces\TransactionManager;
@@ -60,6 +61,7 @@ class LogWinMapper
     {
         \ignore_user_abort(true);
         ini_set('max_execution_time', '0');
+        set_time_limit(0);
 
         $this->logger->info('LogWinMapper.migrateLogwinData started');
 
@@ -127,7 +129,8 @@ class LogWinMapper
                         'senderid' => $senderid,
                         'recipientid' => $recipientid,
                         'tokenamount' => $numBers,
-                        'transferaction' => $transferType
+                        'transferaction' => $transferType,
+                        'createdat' => $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u')
                     ]);
 
                     if ($transferType === 'BURN') {
@@ -193,7 +196,7 @@ class LogWinMapper
     /**
      * Records migration for Token Transfers
      * 
-     * Used for Peer Token transfer to Receipient (Peer-to-Peer transfer).  @deprecated
+     * Used for Peer Token transfer to Receipient (Peer-to-Peer transfer).
      * 
      * Used for Actions records:
      * whereby = 18 -> Token transfer @deprecated
@@ -271,7 +274,8 @@ class LogWinMapper
                             'recipientid' => $recipientId,
                             'tokenamount' => $amount,
                             // 'message' => $message,
-                            'transferaction' => 'CREDIT'
+                            'transferaction' => 'CREDIT',
+                            'createdat' => $tnxs[1]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u')
                         ]);
                     }
 
@@ -284,13 +288,15 @@ class LogWinMapper
                         $senderId = $tnxs[2]['fromid'];
                         $recipientId = $tnxs[2]['userid'];
                         $amount = $tnxs[2]['numbers'];
+                        $createdat = $tnxs[2]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                         $this->createAndSaveTransaction($transRepo, [
                             'operationid' => $transUniqueId,
                             'transactiontype' => 'transferSenderToInviter',
                             'senderid' => $senderId,
                             'recipientid' => $recipientId,
                             'tokenamount' => $amount,
-                            'transferaction' => 'INVITER_FEE'
+                            'transferaction' => 'INVITER_FEE',
+                            'createdat' => $createdat
                         ]);
                     }
 
@@ -303,10 +309,12 @@ class LogWinMapper
                         $senderId = $tnxs[4]['fromid'];
                         $recipientId = $tnxs[4]['userid'];
                         $amount = $tnxs[4]['numbers'];
+                        $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     } else {
                         $senderId = $tnxs[3]['fromid'];
                         $recipientId = $tnxs[3]['userid'];
                         $amount = $tnxs[3]['numbers'];
+                        $createdat = $tnxs[3]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     }
                     $this->createAndSaveTransaction($transRepo, [
                         'operationid' => $transUniqueId,
@@ -314,7 +322,8 @@ class LogWinMapper
                         'senderid' => $senderId,
                         'recipientid' => $recipientId,
                         'tokenamount' => $amount,
-                        'transferaction' => 'POOL_FEE'
+                        'transferaction' => 'POOL_FEE',
+                        'createdat' => $createdat
                     ]);
 
                     /**
@@ -326,10 +335,12 @@ class LogWinMapper
                         $senderId = $tnxs[5]['fromid'];
                         $recipientId = ($tnxs[5]['userid']); // Requested tokens
                         $amount = $tnxs[5]['numbers'];
+                        $createdat = $tnxs[5]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     } else {
                         $senderId = $tnxs[4]['fromid'];
                         $recipientId = ($tnxs[4]['userid']); // Requested tokens
                         $amount = $tnxs[4]['numbers'];
+                        $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     }
                     $this->createAndSaveTransaction($transRepo, [
                         'operationid' => $transUniqueId,
@@ -337,7 +348,8 @@ class LogWinMapper
                         'senderid' => $senderId,
                         'recipientid' => $recipientId,
                         'tokenamount' => $amount,
-                        'transferaction' => 'PEER_FEE'
+                        'transferaction' => 'PEER_FEE',
+                        'createdat' => $createdat
                     ]);
 
                     /**
@@ -347,11 +359,13 @@ class LogWinMapper
                         $senderId = $tnxs[6]['fromid'];
                         $recipientId = ($tnxs[6]['userid']); // Requested tokens
                         $amount = $tnxs[6]['numbers'];
+                        $createdat = $tnxs[6]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     } else {
                         if (isset($tnxs[5]['fromid'])) {
                             $senderId = $tnxs[5]['fromid'];
                             $recipientId = ($tnxs[5]['userid']); // Requested tokens
                             $amount = $tnxs[5]['numbers'];
+                            $createdat = $tnxs[5]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                         }
                     }
                     $this->createAndSaveTransaction($transRepo, [
@@ -360,7 +374,8 @@ class LogWinMapper
                         'senderid' => $senderId,
                         'recipientid' => $recipientId, // burn accounts for 217+ records not found.
                         'tokenamount' => $amount,
-                        'transferaction' => 'BURN_FEE'
+                        'transferaction' => 'BURN_FEE',
+                        'createdat' => $createdat
                     ]);
 
                     $this->updateLogwinStatusInBunch($txnIds, 1);
@@ -443,6 +458,7 @@ class LogWinMapper
                     $numBers = -3; // Each extra like will cost 3 Gems
 
                     $userId = $value['userid'];
+                    $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
                     $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
                     $stmt->bindValue(':postid', $value['postid'], \PDO::PARAM_STR);
@@ -451,7 +467,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 2, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', $value['createdat']);
+                    $stmt->bindValue(':createdat', $createdat);
 
                     $stmt->execute();
 
@@ -470,7 +486,8 @@ class LogWinMapper
                         'senderid' => $userId,
                         'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
-                        'transferaction' => $transferType
+                        'transferaction' => $transferType,
+                        'createdat' => $createdat
                     ]);
 
                     $this->saveWalletEntry($this->burnWallet, -$numBers);
@@ -553,6 +570,7 @@ class LogWinMapper
                     $numBers = -5; // Each extra dislike will cost 5 Gems
 
                     $userId = $value['userid'];
+                    $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
                     $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
                     $stmt->bindValue(':postid', $value['postid'], \PDO::PARAM_STR);
@@ -561,7 +579,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 3, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', $value['createdat']);
+                    $stmt->bindValue(':createdat', $createdat);
 
                     $stmt->execute();
 
@@ -580,7 +598,8 @@ class LogWinMapper
                         'senderid' => $userId,
                         'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
-                        'transferaction' => $transferType
+                        'transferaction' => $transferType,
+                        'createdat' => $createdat
                     ]);
 
                     $this->saveWalletEntry($this->burnWallet, -$numBers);
@@ -663,6 +682,7 @@ class LogWinMapper
                     $numBers = -20; // Each extra like will cost 3 Gems
 
                     $userId = $value['userid'];
+                    $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
                     $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
                     $stmt->bindValue(':postid', $value['postid'], \PDO::PARAM_STR);
@@ -671,7 +691,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 5, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', $value['createdat']);
+                    $stmt->bindValue(':createdat', $createdat);
 
                     $stmt->execute();
 
@@ -689,7 +709,8 @@ class LogWinMapper
                         'senderid' => $userId,
                         'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
-                        'transferaction' => $transferType
+                        'transferaction' => $transferType,
+                        'createdat' => $createdat
                     ]);
 
                     $this->saveWalletEntry($this->burnWallet, -$numBers);
@@ -772,6 +793,7 @@ class LogWinMapper
                     $numBers = -0.5; // Each extra like will cost 0.5 Gems
 
                     $userId = $value['userid'];
+                    $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
                     $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
                     $stmt->bindValue(':postid', $value['commentid'], \PDO::PARAM_STR);
@@ -780,7 +802,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 4, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', $value['createdat']);
+                    $stmt->bindValue(':createdat', $createdat);
 
                     $stmt->execute();
 
@@ -798,7 +820,8 @@ class LogWinMapper
                         'senderid' => $userId,
                         'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
-                        'transferaction' => $transferType
+                        'transferaction' => $transferType,
+                        'createdat' => $createdat
                     ]);
 
                     $this->saveWalletEntry($this->burnWallet, -$numBers);
@@ -822,9 +845,9 @@ class LogWinMapper
     }
 
     /**
-     * Generate gems to logwins entries
+     * Generate logwins entries from gems table between 05th March 2025 to 02nd April 2025
      * 
-     * Gems table: Records are pending to be added on logwins: Total: 1666
+     * Gems table: Records are pending to be added on logwins: Around Total: 1666
      * 
      * Date From: 
      * "2025-03-05 15:48:24.08886"										
@@ -949,7 +972,7 @@ class LogWinMapper
                 $fromId = $args['fromid'] ?? null;
                 $gems = $args['gems'] ?? 0.0;
                 $numBers = $args['numbers'] ?? 0;
-                $createdat = (new \DateTime())->format('Y-m-d H:i:s.u');
+                $createdat =  $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
 
                 try {
                     // Insert into logwins
@@ -984,7 +1007,8 @@ class LogWinMapper
                         'senderid' => $userId,
                         'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
-                        'transferaction' => $transferType
+                        'transferaction' => $transferType,
+                        'createdat' => $createdat
                     ]);
 
                     if ($transferType === 'BURN') {
