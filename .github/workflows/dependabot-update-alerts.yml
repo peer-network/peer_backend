@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   notify_dependabot_update:
-    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    if: startsWith(github.head_ref, 'dependabot/')
     runs-on: ubuntu-latest
     steps:
       - name: Send Discord Notification
@@ -32,9 +32,17 @@ jobs:
       - name: Install GitHub CLI
         run: sudo apt-get install -y gh
 
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
       - name: Add label to PR
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           pr_number=${{ github.event.pull_request.number }}
-          gh pr edit "$pr_number" --add-label "dependabot-update-alert"
+          # Only add label if it's not already there
+          if gh pr view "$pr_number" --json labels -q '.labels[].name' | grep -q '^dependabot-update-alert$'; then
+            echo "Label already exists, skipping."
+          else
+            gh pr edit "$pr_number" --add-label "dependabot-update-alert"
+          fi
