@@ -62,7 +62,7 @@ class AdvertisementMapper
             $conditions[] = "al.postid = :postId";
             $paramsCommon[':postId'] = $filterBy['postId'];
         }
-        if (!empty($filterBy['userId'])) { // Creator-Filter
+        if (!empty($filterBy['userId'])) {
             $conditions[] = "al.userid = :userId";
             $paramsCommon[':userId'] = $filterBy['userId'];
         }
@@ -86,7 +86,7 @@ class AdvertisementMapper
             GROUP BY postid
         ";
 
-        // ---- Stats
+        // ---- Stats (distinct Ads, plus Summen über betroffene Posts)
         $sSql = "
             WITH al_filtered AS (
                 SELECT *
@@ -99,7 +99,7 @@ class AdvertisementMapper
             ),
             gems_by_post AS ($gemsAgg),
 
-            -- Voraggregationen pro Post
+            -- Voraggregationen pro Post (aus advertisements_info)
             likes_by_post AS (
                 SELECT postid, SUM(likes) AS cnt
                 FROM advertisements_info
@@ -126,9 +126,10 @@ class AdvertisementMapper
                 GROUP BY postid
             )
             SELECT
+                -- Ausgaben/Anzahl auf Basis der gefilterten Logs
                 COALESCE(SUM(al_filtered.tokencost), 0) AS total_token_spent,
                 COALESCE(SUM(al_filtered.eurocost), 0)  AS total_euro_spent,
-                COUNT(*)                                 AS total_ads,
+                COUNT(DISTINCT al_filtered.advertisementid) AS total_ads,
 
                 -- Summen über die distinct Posts
                 COALESCE((
@@ -169,9 +170,26 @@ class AdvertisementMapper
             FROM al_filtered
         ";
 
-        // ---- Datenliste (Creator u*, Post-Owner pu*) + Kommentare
+        // ---- Datenliste (dedupliziert: eine Zeile je advertisementid)
         $dSql = "
-            WITH gems_by_post AS ($gemsAgg)
+            WITH gems_by_post AS ($gemsAgg),
+            al_filtered AS (
+                SELECT *
+                FROM advertisements_log al
+                $whereClause
+            ),
+            latest_al AS (
+                SELECT *
+                FROM (
+                    SELECT al.*,
+                           ROW_NUMBER() OVER (
+                             PARTITION BY al.advertisementid
+                             ORDER BY al.createdat DESC, al.id DESC
+                           ) AS rn
+                    FROM al_filtered al
+                ) s
+                WHERE s.rn = 1
+            )
             SELECT
                 -- top-level (Ad)
                 al.advertisementid               AS advertisementid,
@@ -184,11 +202,13 @@ class AdvertisementMapper
                 al.tokencost                     AS totaltokencost,
                 al.eurocost                      AS totaleurocost,
                 COALESCE(gbp.gems_earned, 0)     AS gemsearned,
-                ai.amountlikes                   AS adsamountlikes,
-                ai.amountviews                   AS adsamountviews,
-                ai.amountcomments                AS adsamountcomments,
-                ai.amountdislikes                AS adsamountdislikes,
-                ai.amountreports                 AS adsamountreports,
+
+                -- Metriken aus advertisements_info (für genau DIESE Anzeige)
+                COALESCE(ai.amountlikes,    0)   AS adsamountlikes,
+                COALESCE(ai.amountviews,    0)   AS adsamountviews,
+                COALESCE(ai.amountcomments, 0)   AS adsamountcomments,
+                COALESCE(ai.amountdislikes, 0)   AS adsamountdislikes,
+                COALESCE(ai.amountreports,  0)   AS adsamountreports,
 
                 -- post-objekt (Owner & Felder aus posts)
                 p.userid                         AS post_owner_id,
@@ -198,6 +218,8 @@ class AdvertisementMapper
                 p.media                          AS media,
                 p.cover                          AS cover,
                 p.mediadescription               AS mediadescription,
+
+                -- Postweite Metriken & Flags (gesamt pro Post, relativ zum Ad-Creator)
                 m.amountlikes                    AS amountlikes,
                 m.amountviews                    AS amountviews,
                 m.amountcomments                 AS amountcomments,
@@ -229,25 +251,27 @@ class AdvertisementMapper
                 (m.isfollowing  )::int           AS isfollowing,
                 (m.isfriend     )::int           AS isfriend
 
-            FROM advertisements_log al
+            FROM latest_al al
             LEFT JOIN gems_by_post gbp ON gbp.postid = al.postid
             LEFT JOIN posts p          ON p.postid   = al.postid
             LEFT JOIN users u          ON u.uid      = al.userid
             LEFT JOIN users pu         ON pu.uid     = p.userid
 
-            -- Metriken & Flags (al.userid = Creator, p.userid = Ads Owner)
+            -- Ad-spezifische Metriken (join auf advertisementid UND postid)
             LEFT JOIN LATERAL (
                 SELECT
-                    likes    AS amountlikes,
-                    dislikes AS amountdislikes,
-                    views    AS amountviews,
-                    reports  AS amountreports,
-                    comments AS amountcomments
-                FROM advertisements_info
-                WHERE postid = p.postid
+                    ai.likes    AS amountlikes,
+                    ai.dislikes AS amountdislikes,
+                    ai.views    AS amountviews,
+                    ai.reports  AS amountreports,
+                    ai.comments AS amountcomments
+                FROM advertisements_info ai
+                WHERE ai.advertisementid = al.advertisementid
+                  AND ai.postid = p.postid
+                LIMIT 1
             ) ai ON TRUE
 
-            -- Metriken & Flags (al.userid = Creator, p.userid = Post Owner)
+            -- Postweite Metriken & Flags relativ zum Ad-Creator
             LEFT JOIN LATERAL (
                 SELECT
                     (SELECT COUNT(*) FROM user_post_likes    upl WHERE upl.postid = p.postid) AS amountlikes,
@@ -266,9 +290,8 @@ class AdvertisementMapper
                     EXISTS (SELECT 1 FROM user_post_views    upv2 WHERE upv2.postid = p.postid AND upv2.userid = al.userid) AS isviewed,
                     EXISTS (SELECT 1 FROM user_post_reports  upr2 WHERE upr2.postid = p.postid AND upr2.userid = al.userid) AS isreported,
                     EXISTS (SELECT 1 FROM user_post_dislikes upd2 WHERE upd2.postid = p.postid AND upd2.userid = al.userid) AS isdisliked,
-                    EXISTS (SELECT 1 FROM user_post_saves    ups2 WHERE ups2.postid = p.postid AND ups2.userid = al.userid) AS issaved,
+                    EXISTS (SELECT 1 FROM user_post_saves    ups2 WHERE  ups2.postid = p.postid AND ups2.userid = al.userid) AS issaved,
 
-                    -- Follow-Beziehung: Creator ↔ Post Owner
                     EXISTS (SELECT 1 FROM follows f WHERE f.followedid = p.userid AND f.followerid = al.userid) AS isfollowed,
                     EXISTS (SELECT 1 FROM follows f WHERE f.followerid = p.userid AND f.followedid = al.userid) AS isfollowing,
                     EXISTS (
@@ -291,7 +314,7 @@ class AdvertisementMapper
                 WHERE pt.postid = p.postid
             ) tg ON TRUE
 
-            -- Kommentare als JSON-Array (inkl. Kommentator-User + Follow-Flags + Like-Infos)
+            -- Kommentare als JSON-Array (inkl. User + Flags)
             LEFT JOIN LATERAL (
                 SELECT COALESCE(
                     JSON_AGG(
@@ -301,31 +324,20 @@ class AdvertisementMapper
                             'parentid',   c.parentid::text,
                             'content',    c.content,
                             'createdat',  c.createdat,
-                            -- neue Felder aus comment_info
                             'amountlikes',   COALESCE(ci.likes, 0),
                             'amountreplies', COALESCE(ci.comments, 0),
-                            -- neue Felder aus user_comment_likes
                             'isliked', EXISTS (
                                 SELECT 1 FROM user_comment_likes ucl
                                 WHERE ucl.commentid = c.commentid
                                   AND ucl.userid    = al.userid
                             ),
-                            'user',       JSON_BUILD_OBJECT(
+                            'user', JSON_BUILD_OBJECT(
                                 'uid',       cu.uid::text,
                                 'username',  cu.username,
                                 'slug',      cu.slug,
                                 'img',       cu.img,
-                                -- Follow-Flags relativ zum Ad-Creator (al.userid)
-                                'isfollowed',  EXISTS (
-                                    SELECT 1 FROM follows f
-                                    WHERE f.followedid = cu.uid
-                                      AND f.followerid = al.userid
-                                ),
-                                'isfollowing', EXISTS (
-                                    SELECT 1 FROM follows f
-                                    WHERE f.followerid = cu.uid
-                                      AND f.followedid = al.userid
-                                ),
+                                'isfollowed',  EXISTS (SELECT 1 FROM follows f WHERE f.followedid = cu.uid AND f.followerid = al.userid),
+                                'isfollowing', EXISTS (SELECT 1 FROM follows f WHERE f.followerid = cu.uid AND f.followedid = al.userid),
                                 'isfriend',    EXISTS (
                                     SELECT 1 FROM follows f1
                                     WHERE f1.followerid = al.userid
@@ -346,12 +358,9 @@ class AdvertisementMapper
                 JOIN users cu ON cu.uid = c.userid
                 LEFT JOIN comment_info ci ON ci.commentid = c.commentid
                 WHERE c.postid = p.postid
-                  -- ggf. nur freigegebene Kommentare:
-                  -- AND c.status = 10
             ) cm ON TRUE
 
-            $whereClause
-            ORDER BY $orderByClause
+            ORDER BY $orderByClause, al.id DESC
             LIMIT :limit OFFSET :offset
         ";
 
@@ -367,6 +376,7 @@ class AdvertisementMapper
             }
             $statsStmt->execute();
             $stats = $statsStmt->fetch(\PDO::FETCH_ASSOC) ?: [];
+            $this->logger->info('fetchAllWithStats.statsStmt', ['statsStmt' => $stats]);
 
             // Data
             $dataStmt = $this->db->prepare($dSql);
@@ -377,16 +387,18 @@ class AdvertisementMapper
             $dataStmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $dataStmt->execute();
             $rows = $dataStmt->fetchAll(\PDO::FETCH_ASSOC);
+            $this->logger->info('fetchAllWithStats.dataStmt', ['dataStmt' => $rows]);
 
             $ads = array_values(array_filter(array_map(function ($row) {
                 return self::mapRowToAdvertisementt($row);
             }, $rows)));
+
             return [
                 'affectedRows' => [
                     'stats' => [
                         'tokenSpent'     => (float)($stats['total_token_spent'] ?? 0),
                         'euroSpent'      => (float)($stats['total_euro_spent'] ?? 0),
-                        'amountAds'      => (int)($stats['total_ads'] ?? 0),
+                        'amountAds'      => (int)($stats['total_ads'] ?? 0),  // DISTINCT Ads
                         'gemsEarned'     => (float)($stats['total_gems_earned'] ?? 0),
                         'amountLikes'    => (int)($stats['total_amount_likes'] ?? 0),
                         'amountViews'    => (int)($stats['total_amount_views'] ?? 0),
@@ -647,7 +659,7 @@ class AdvertisementMapper
         }
     }
 
-    public function hasTimeConflict(string $postId, string $status, string $newStart, string $newEnd): bool
+    public function hasTimeConflict(string $postId, string $status, string $newStart, string $newEnd, $currentUserId): bool
     {
         $this->logger->info("AdvertisementMapper.hasTimeConflict started", [
             'postId' => $postId,
@@ -660,6 +672,7 @@ class AdvertisementMapper
             SELECT 1
             FROM advertisements
             WHERE postid   = :postId
+              AND userid   = :userid
               AND status   = :status
               AND timeend  > :newStart
               AND timestart < :newEnd
@@ -669,6 +682,7 @@ class AdvertisementMapper
         try {
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':postId', $postId);
+            $stmt->bindValue(':userid', $currentUserId);
             $stmt->bindValue(':status', $status);
             $stmt->bindValue(':newStart', $newStart);
             $stmt->bindValue(':newEnd',   $newEnd);
@@ -950,6 +964,7 @@ class AdvertisementMapper
             SELECT 1
             FROM advertisements a2
             WHERE a2.postid = bp.postid
+              AND a2.userid = bp.userid
               AND a2.status = 'pinned'
               AND a2.timestart <= NOW()
               AND a2.timeend  > NOW()
