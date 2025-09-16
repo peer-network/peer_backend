@@ -89,17 +89,17 @@ class GraphQLSchemaBuilder
     public function build(): Schema|array
     {
         if ($this->currentUserId === null) {
-            $schema = 'schemaguest.graphl';
+            $schema = 'schemaguest.graphql';
         } else {
-            $schema = 'schema.graphl';
+            $schema = 'schema.graphql';
         }
 
         if ($this->userRoles <= 0) {
             $schema = $schema;
         } elseif ($this->userRoles === 8) {
-            $schema = 'bridge_schema.graphl';
+            $schema = 'bridge_schema.graphql';
         } elseif ($this->userRoles === 16) {
-            $schema = 'admin_schema.graphl';
+            $schema = 'admin_schema.graphql';
         }
 
         if (empty($schema)){
