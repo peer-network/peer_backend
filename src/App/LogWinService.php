@@ -64,7 +64,7 @@ class LogWinService
             $this->logWinMapper->migrateGemsToLogWins();
 
             return [
-                'status' => 'success',
+                'status' => 'Success - Gems logwin entries generated successfully. Please wait about 1 minute.',
                 'ResponseCode' => 200
             ];
 
@@ -106,11 +106,13 @@ class LogWinService
                 usleep(200); // 200 ms
 
                 $this->logWinMigration02();
+                // $message = 'View paid actions migration batch has more records to process. Wait for 10 seconds and call again.';
             }
             
+            $message = 'View paid actions migration batch processed. Please wait about 3 minutes to complete process.';
 
             return [
-                'status' => 'success',
+                'status' => $message,
                 'ResponseCode' => 200
             ];
 
@@ -153,11 +155,13 @@ class LogWinService
                 usleep(200); // 200 ms
 
                 $this->logWinMigration03();
+                $message = 'Paid actions migration batch has more records to process. Wait for 10 seconds and call again.';
             }
-            
+
+            $message = 'Paid actions migration batch processed. Please wait about 3 minutes to complete process.';
 
             return [
-                'status' => 'success',
+                'status' => $message,
                 'ResponseCode' => 200
             ];
 
@@ -177,7 +181,7 @@ class LogWinService
 
 
 
-        /**
+    /**
      * This will be Recurring function to migrate logwin data
      * It will keep migrating data until all logwin records are processed
      * 
@@ -200,11 +204,15 @@ class LogWinService
                 usleep(200); // 200 ms
 
                 $this->logWinMigration04();
+
+                // $message = 'Token transfer migration batch has more records to process. Wait for 20 seconds and call again.';
+
             }
             
+            $message = 'Token transfer migration batch processed. Please wait about 2-3 minutes to complete process.';
 
             return [
-                'status' => 'success',
+                'status' => $message,
                 'ResponseCode' => 200
             ];
 
@@ -221,6 +229,56 @@ class LogWinService
             ];
         }
     }
+
+    /**
+     * This will be Recurring function to migrate logwin data
+     * It will keep migrating data until all logwin records are processed
+     * 
+     */
+    public function logWinMigration05(): ?array
+    {
+        $this->logger->info('LogWinService.logWinMigration04 started');
+
+        set_time_limit(0);
+        try {
+
+
+            $response = $this->logWinMapper->migrateTokenTransfer01();
+
+            if(!$response){
+                // Free memory between batches
+                gc_collect_cycles();
+
+                // Small delay helps avoid TLS exhaustion on some PHP builds
+                usleep(200); // 200 ms
+
+                $this->logWinMigration05();
+
+                // $message = 'Token transfer migration batch has more records to process. Wait for 20 seconds and call again.';
+
+            }
+            
+            $message = 'Token transfer migration batch processed. Please wait about 2-3 minutes to complete process.';
+
+            return [
+                'status' => $message,
+                'ResponseCode' => 200
+            ];
+
+        }catch (\RuntimeException $e) {
+            $this->logger->error('RuntimeException in LogWinService.logWinMigration04: ' . $e->getMessage());
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => $e->getCode()
+            ];
+        }catch (\Exception $e) {
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => 41205
+            ];
+        }
+    }
+
 
     /**
      * Generate logwin entries for paid actions that were not generated previously between March and 02 April 2025
@@ -245,7 +303,7 @@ class LogWinService
             $this->logWinMapper->generateCommentPaidActionToLogWins();
 
             return [
-                'status' => 'success',
+                'status' => 'Success - Paid actions logwin entries generated successfully. Please wait about 30 seconds.',
                 'ResponseCode' => 200
             ];
 

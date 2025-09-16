@@ -363,15 +363,241 @@ class LogWinMapper
 
             // Group by fromid to avoid duplicates
             $sql = "SELECT 
-                        date_trunc('minute', lw.createdat) AS created_at_minute,
+                        date_trunc('second', lw.createdat) AS created_at_second,
                         lw.fromid,
-                        json_agg(lw ORDER BY lw.createdat) AS logwin_entries
+                        json_agg(lw ORDER BY lw.createdat) AS logwin_entries,
+                        COUNT(*) AS logwin_count
                     FROM logwins lw
                     WHERE lw.migrated = 0
                     AND lw.whereby = 18
-                    GROUP BY created_at_minute, lw.fromid
-                    ORDER BY created_at_minute ASC, lw.fromid
-                    LIMIT 1000;
+                    GROUP BY created_at_second, lw.fromid
+                    HAVING COUNT(*) IN (6, 7)
+                    ORDER BY created_at_second ASC, lw.fromid
+                    LIMIT 100;
+                ";
+
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+
+            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($logwins)) {
+                $this->logger->info('No logwins to migrate');
+                return true;
+            }
+
+            $this->initializeLiquidityPool();
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+
+
+            foreach ($logwins as $key => $value) {
+                $this->transactionManager->beginTransaction();
+
+                $tnxs = json_decode($value['logwin_entries'], true);
+
+                $txnIds = array_column($tnxs, 'token');
+
+                if (empty($tnxs)) {
+                    continue;
+                }
+
+                $hasInviter = false;
+                if (count($tnxs) == 7) {
+                    $hasInviter = true;
+                }
+
+                try {
+                    /*
+                    * This action considere as Credit to Receipient
+                    */
+                    // 2. RECIPIENT: Credit To Account ----- Index 1
+                    $transUniqueId = self::generateUUID();
+                    if (isset($tnxs[1]['fromid'])) {
+                        $senderId = $tnxs[1]['fromid'];
+                        $recipientId = $tnxs[1]['userid'];
+                        $amount = $tnxs[1]['numbers'];
+
+                        $this->createAndSaveTransaction($transRepo, [
+                            'operationid' => $transUniqueId,
+                            'transactiontype' => 'transferSenderToRecipient',
+                            'senderid' => $senderId,
+                            'recipientid' => $recipientId,
+                            'tokenamount' => $amount,
+                            // 'message' => $message,
+                            'transferaction' => 'CREDIT',
+                            'createdat' => $tnxs[1]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u')
+                        ]);
+                    }
+
+                    /**
+                     * If current user was Invited by any Inviter than Current User has to pay 1% fee to Inviter
+                     * 
+                     * Consider this actions as a Transactions and Credit fees to Inviter'account
+                     */
+                    if ($hasInviter && isset($tnxs[2]['fromid'])) {
+                        $senderId = $tnxs[2]['fromid'];
+                        $recipientId = $tnxs[2]['userid'];
+                        $amount = $tnxs[2]['numbers'];
+                        $createdat = $tnxs[2]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                        $this->createAndSaveTransaction($transRepo, [
+                            'operationid' => $transUniqueId,
+                            'transactiontype' => 'transferSenderToInviter',
+                            'senderid' => $senderId,
+                            'recipientid' => $recipientId,
+                            'tokenamount' => $amount,
+                            'transferaction' => 'INVITER_FEE',
+                            'createdat' => $createdat
+                        ]);
+                    }
+
+                    /**
+                     * 1% Pool Fees will be charged when a Token Transfer happen
+                     * 
+                     * Credits 1% fees to Pool's Account
+                     */
+                    if ($hasInviter && isset($tnxs[4]['fromid'])) {
+                        $senderId = $tnxs[4]['fromid'];
+                        $recipientId = $tnxs[4]['userid'];
+                        $amount = $tnxs[4]['numbers'];
+                        $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    } else {
+                        $senderId = $tnxs[3]['fromid'];
+                        $recipientId = $tnxs[3]['userid'];
+                        $amount = $tnxs[3]['numbers'];
+                        $createdat = $tnxs[3]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $transUniqueId,
+                        'transactiontype' => 'transferSenderToPoolWallet',
+                        'senderid' => $senderId,
+                        'recipientid' => $recipientId,
+                        'tokenamount' => $amount,
+                        'transferaction' => 'POOL_FEE',
+                        'createdat' => $createdat
+                    ]);
+
+                    /**
+                     * 2% of requested tokens Peer Fees will be charged 
+                     * 
+                     * Credits 2% fees to Peer's Account
+                     */
+                    if ($hasInviter && isset($tnxs[5]['fromid'])) {
+                        $senderId = $tnxs[5]['fromid'];
+                        $recipientId = ($tnxs[5]['userid']); // Requested tokens
+                        $amount = $tnxs[5]['numbers'];
+                        $createdat = $tnxs[5]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    } else {
+                        $senderId = $tnxs[4]['fromid'];
+                        $recipientId = ($tnxs[4]['userid']); // Requested tokens
+                        $amount = $tnxs[4]['numbers'];
+                        $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $transUniqueId,
+                        'transactiontype' => 'transferSenderToPeerWallet',
+                        'senderid' => $senderId,
+                        'recipientid' => $recipientId,
+                        'tokenamount' => $amount,
+                        'transferaction' => 'PEER_FEE',
+                        'createdat' => $createdat
+                    ]);
+
+                    /**
+                     * 1% of requested tokens will be transferred to Burn' account
+                     */
+                    if ($hasInviter && isset($tnxs[6]['fromid'])) {
+                        $senderId = $tnxs[6]['fromid'];
+                        $recipientId = ($tnxs[6]['userid']); // Requested tokens
+                        $amount = $tnxs[6]['numbers'];
+                        $createdat = $tnxs[6]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    } else {
+                        if (isset($tnxs[5]['fromid'])) {
+                            $senderId = $tnxs[5]['fromid'];
+                            $recipientId = ($tnxs[5]['userid']); // Requested tokens
+                            $amount = $tnxs[5]['numbers'];
+                            $createdat = $tnxs[5]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                        }
+                    }
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $transUniqueId,
+                        'transactiontype' => 'transferSenderToBurnWallet',
+                        'senderid' => $senderId,
+                        'recipientid' => $recipientId, // burn accounts for 217+ records not found.
+                        'tokenamount' => $amount,
+                        'transferaction' => 'BURN_FEE',
+                        'createdat' => $createdat
+                    ]);
+
+                    $this->updateLogwinStatusInBunch($txnIds, 1);
+
+                    $this->transactionManager->commit();
+                } catch (\Throwable $e) {
+                    $this->transactionManager->rollback();
+                    $this->updateLogwinStatusInBunch($txnIds, 2);
+
+                    continue; // Skip to the next record
+                }
+                // Update migrated status to 1
+            }
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID ' . $e->getMessage(), 41401);
+        }
+    }
+
+
+    /**
+     * Records migration for Token Transfers
+     * 
+     * It will process remaining records which were not processed in first run of migrateTokenTransfer()
+     * Used for Peer Token transfer to Receipient (Peer-to-Peer transfer).
+     * 
+     * 
+     * Used for Actions records:
+     * whereby = 18 -> Token transfer @deprecated
+     * 
+     */
+    public function migrateTokenTransfer01(): bool
+    {
+        \ignore_user_abort(true);
+
+        ini_set('max_execution_time', '0');
+
+        $this->logger->info('LogWinMapper.migrateTokenTransfer started');
+
+        try {
+
+            // Group by fromid to avoid duplicates
+            $sql = "WITH ordered AS (
+                        SELECT
+                            lw.*,
+                            CASE
+                            WHEN lag(lw.createdat) OVER (PARTITION BY lw.fromid ORDER BY lw.createdat) IS NULL THEN 1
+                            WHEN lw.createdat - lag(lw.createdat) OVER (PARTITION BY lw.fromid ORDER BY lw.createdat) > INTERVAL '1 second' THEN 1
+                            ELSE 0
+                            END AS is_new_group
+                        FROM logwins lw
+                        WHERE lw.migrated = 0
+                            AND lw.whereby = 18
+                        ),
+                        grp AS (
+                        SELECT
+                            *,
+                            sum(is_new_group) OVER (PARTITION BY fromid ORDER BY createdat
+                                                    ROWS UNBOUNDED PRECEDING) AS grp_no
+                        FROM ordered
+                        )
+                        SELECT
+                        fromid,
+                        date_trunc('second', min(createdat)) AS created_at_group,  -- representative timestamp
+                        json_agg(row_to_json(grp) ORDER BY createdat)     AS logwin_entries,
+                        count(*)                                         AS logwin_count
+                        FROM grp
+                        GROUP BY fromid, grp_no
+                        HAVING count(*) IN (6, 7)
+                        ORDER BY created_at_group ASC, fromid
+                        LIMIT 50;
                 ";
 
 

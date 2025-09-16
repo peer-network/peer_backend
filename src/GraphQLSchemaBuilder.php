@@ -1854,6 +1854,8 @@ class GraphQLSchemaBuilder
             'logWinMigration' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration(),
             'logWinMigration02' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration02(),
             'logWinMigration03' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration03(),
+            'logWinMigration04' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration04(),
+            'logWinMigration05' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration05(),
             'logWinsPaidActionForMarchApril' => fn(mixed $root, array $args) => $this->logWinService->logwinsPaidActionForMarchApril(),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'getTokenomics' => fn(mixed $root, array $args) => $this->resolveTokenomics(),
