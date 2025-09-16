@@ -1,0 +1,6 @@
+name = "dependabot-alerts"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/XXXX/YYY" # replace with your secret webhook
