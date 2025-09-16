@@ -38,6 +38,7 @@ type Query {
   postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
+  getTokenomics: TokenomicsResponse!
 }
 
 type Mutation {
@@ -113,7 +114,7 @@ enum CommentType {
 }
 
 enum ContentFilterType {
-  MYGRANDMALIKES,
+  MYGRANDMALIKES
   MYGRANDMAHATES
 }
 
@@ -161,10 +162,14 @@ enum DayFilterType {
   Y0
 }
 
-input UserPreferencesInput {
-  contentFilteringSeverityLevel: ContentFilterType
+enum OnboardingType {
+  INTROONBOARDING
 }
 
+input UserPreferencesInput {
+  contentFilteringSeverityLevel: ContentFilterType
+  shownOnboardings: [OnboardingType!]     
+}
 
 type Transaction {
   transactionid: String!
@@ -199,6 +204,7 @@ type TransferToken {
 
 type UserPreferences {
   contentFilteringSeverityLevel: ContentFilterType
+  onboardingsWereShown: [OnboardingType!]!
 }
 
 type ListTodaysInteractionsResponse {
@@ -662,4 +668,23 @@ type GetActionPricesResponse {
     status: String!
     ResponseCode: String!
     affectedRows: ActionPriceResult!
+}
+
+type TokenomicsResponse {
+  status: String!
+  ResponseCode: Int!                         
+  actionTokenPrices: ActionPriceResult!
+  actionGemsReturns: ActionGemsReturns!
+  mintingData: MintingData!
+}
+
+type ActionGemsReturns {
+  viewGemsReturn: Float!
+  likeGemsReturn: Float!
+  dislikeGemsReturn: Float!
+  commentGemsReturn: Float!
+}
+
+type MintingData {
+  tokensMintedYesterday: Float!
 }
