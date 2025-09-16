@@ -9,9 +9,9 @@ use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Psr\Log\LoggerInterface;
+use Fawaz\config\constants\ConstantsConfig;
 
 const TABLESTOGEMS = true;
-const DAILY_NUMBER_TOKEN= 5000;
 const VIEW_=1;
 const LIKE_=2;
 const DISLIKE_=3;
@@ -19,24 +19,9 @@ const COMMENT_=4;
 const POST_=5;
 const INVITATION_=11;
 
-const RECEIVELIKE=5;
-const RECEIVEDISLIKE=4;
-const RECEIVECOMMENT=2;
-const RECEIVEPOSTVIEW=0.25;
-
-const PRICELIKE=3;
-const PRICEDISLIKE=5;
-const PRICECOMMENT=0.5;
-const PRICEPOST=20;
-
 const DIRECTDEBIT_=14;
 const CREDIT_=15;
 const TRANSFER_=18;
-
-const INVTFEE=0.01;
-const POOLFEE=0.01;
-const PEERFEE=0.02;
-const BURNFEE=0.01;
 
 class WalletMapper
 {
@@ -127,11 +112,12 @@ class WalletMapper
             $this->logger->warning('Send and Receive Same Wallet Error.');
             return self::respondWithError(31202);
         }
+        $fees = ConstantsConfig::tokenomics()['FEES'];
 
-        $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE);
-        $feeAmount = round((float)$numberoftokens * POOLFEE, 2);
-        $peerAmount = round((float)$numberoftokens * PEERFEE, 2);
-        $burnAmount = round((float)$numberoftokens * BURNFEE, 2);
+        $requiredAmount = $numberoftokens * (1 + $fees['PEER'] + $fees['POOL'] + $fees['BURN']);
+        $feeAmount = round((float)$numberoftokens * $fees['POOL'], 2);
+        $peerAmount = round((float)$numberoftokens * $fees['PEER'], 2);
+        $burnAmount = round((float)$numberoftokens * $fees['BURN'], 2);
         $countAmount = $feeAmount + $peerAmount + $burnAmount;
         $inviterId = null;
         $inviterWin = 0.0;
@@ -144,9 +130,9 @@ class WalletMapper
 
             if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != 6) {
                 $inviterId = $result['invited'];
-                $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
+                $inviterWin = round((float)$numberoftokens * $fees['INVITATION'], 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
-                $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
+                $requiredAmount = $numberoftokens * (1 + $fees['PEER'] + $fees['POOL'] + $fees['BURN'] + $fees['INVITATION']);
                 $this->logger->info('Invited By', [
                     'invited' => $inviterId,
                 ]);
@@ -154,9 +140,9 @@ class WalletMapper
 
             // If user's account deleted then we will send that percentage amount to PEER
             if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == 6) {
-                $peerAmount = $peerAmount + round((float)$numberoftokens * INVTFEE, 2);
+                $peerAmount = $peerAmount + round((float)$numberoftokens * $fees['INVITATION'], 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount;
-                $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
+                $requiredAmount = $numberoftokens * (1 + $fees['PEER'] + $fees['POOL'] + $fees['BURN'] + $fees['INVITATION']);
             }
 
 
@@ -841,11 +827,13 @@ class WalletMapper
             return self::respondWithError(41215);
         }
 
+        $tokenomics = ConstantsConfig::tokenomics();
+
         $wins = [
-            ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)RECEIVEPOSTVIEW],
-            ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)RECEIVELIKE],
-            ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => -(float)RECEIVEDISLIKE],
-            ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)RECEIVECOMMENT]
+            ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['view']],
+            ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['like']],
+            ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => -(float)$tokenomics['ACTION_GEMS_RETURNS']['dislike']],
+            ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['comment']]
         ];
 
         $totalInserts = 0;
@@ -1153,7 +1141,8 @@ class WalletMapper
             $inviterId = $result['invited'];
             $this->logger->info('Inviter found', ['inviterId' => $inviterId]);
 
-            $percent = round((float)$tokenAmount * INVTFEE, 2);
+            $fees = ConstantsConfig::tokenomics()['FEES'];
+            $percent = round((float)$tokenAmount * $fees['INVITATION'], 2);
             $tosend = round((float)$tokenAmount - $percent, 2);
 
             $id = self::generateUUID();
@@ -1213,12 +1202,13 @@ class WalletMapper
         $postId = $args['postid'] ?? null;
         $art = $args['art'] ?? null;
         $fromId = $args['fromid'] ?? null;
+        $prices = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
 
         $mapping = [
-            2 => ['price' => PRICELIKE, 'whereby' => LIKE_, 'text' => 'Buy like'],
-            3 => ['price' => PRICEDISLIKE, 'whereby' => DISLIKE_, 'text' => 'Buy dislike'],
-            4 => ['price' => PRICECOMMENT, 'whereby' => COMMENT_, 'text' => 'Buy comment'],
-            5 => ['price' => PRICEPOST, 'whereby' => POST_, 'text' => 'Buy post'],
+            2 => ['price' => $prices['like'], 'whereby' => LIKE_, 'text' => 'Buy like'],
+            3 => ['price' => $prices['dislike'], 'whereby' => DISLIKE_, 'text' => 'Buy dislike'],
+            4 => ['price' => $prices['comment'], 'whereby' => COMMENT_, 'text' => 'Buy comment'],
+            5 => ['price' => $prices['post'], 'whereby' => POST_, 'text' => 'Buy post'],
         ];
 
         if (!isset($mapping[$art])) {
@@ -1389,12 +1379,14 @@ class WalletMapper
 
     public function callUserMove(string $userId): array
     {
+        $tokenomics = ConstantsConfig::tokenomics();
+
         try {
             $wins = [
-                ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)RECEIVEPOSTVIEW, 'key' => 'views'],
-                ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)RECEIVELIKE, 'key' => 'likes'],
-                ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => -(float)RECEIVEDISLIKE, 'key' => 'dislikes'],
-                ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)RECEIVECOMMENT, 'key' => 'comments']
+                ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['view'], 'key' => 'views'],
+                ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['like'], 'key' => 'likes'],
+                ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => -(float)$tokenomics['ACTION_GEMS_RETURNS']['dislike'], 'key' => 'dislikes'],
+                ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['comment'], 'key' => 'comments']
             ];
 
             $totalInteractions = 0;
