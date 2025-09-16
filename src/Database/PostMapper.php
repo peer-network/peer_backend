@@ -616,7 +616,11 @@ class PostMapper
             $params['to'] = $to;
         }
         if ($tag !== null) {
-            $whereClauses[] = "t.name = :tag";
+            if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
+                $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
+                return [];
+            }
+            $whereClauses[] = "t.name ILIKE :tag";
             $params['tag'] = $tag;
         }
         if (!empty($tags)) {
