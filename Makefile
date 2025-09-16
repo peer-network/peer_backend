@@ -241,3 +241,7 @@ help: ## Show available make targets
 clean-prune: clean-all ## Remove ALL unused images, build cache, and volumes
 	@echo "WARNING: This will remove ALL unused images, build cache, and volumes on your system!"
 	docker system prune -af --volumes
+
+hot-ci:
+	$(MAKE) restart-db
+	$(MAKE) test
