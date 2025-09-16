@@ -4,12 +4,15 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Tests\utils\ConfigGeneration;
+use Fawaz\Utils\JsonHelper;
 
 class UserPreferences
 {
     protected string $userid;
     protected ?int $contentFilteringSeverityLevel;
     protected string $updatedat;
+    protected array $onboardingsWereShown = [];
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -20,6 +23,13 @@ class UserPreferences
         $this->userid = $data['userid'] ?? '';
         $this->contentFilteringSeverityLevel = $data['contentFilteringSeverityLevel'];
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+
+        $raw = $data['onboardingsWereShown'] ?? [];
+        if (is_array($raw)){
+            $this->onboardingsWereShown = $raw;
+        } else {
+            $this->onboardingsWereShown = JsonHelper::decode($raw) ?? [];
+        }
     }
 
     // Array Copy methods
@@ -29,6 +39,7 @@ class UserPreferences
             'userid' => $this->userid,
             'contentFilteringSeverityLevel' => $this->contentFilteringSeverityLevel,
             'updatedat' => $this->updatedat,
+            'onboardingsWereShown' => $this->onboardingsWereShown,
         ];
         return $att;
     }
@@ -57,6 +68,16 @@ class UserPreferences
     public function setContentFilteringSeverityLevel(int $contentFilteringSeverityLevel): void
     {
         $this->contentFilteringSeverityLevel = $contentFilteringSeverityLevel;
+    }
+
+    public function getOnboardingsWereShown(): array
+    {
+        return $this->onboardingsWereShown;
+    }
+
+    public function setOnboardingsWereShown(array $onboardings): void
+    {
+        $this->onboardingsWereShown = $onboardings;
     }
     
     // Validation and Array Filtering methods
@@ -102,6 +123,10 @@ class UserPreferences
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],
+            ],
+            'onboardingsWereShown' => [
+                'required' => false,
+                'validators' => [['name' => 'IsArray']],
             ],
         ];
 

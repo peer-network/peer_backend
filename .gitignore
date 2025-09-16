@@ -4,6 +4,7 @@ test
 error
 srcc
 .env
+.env.ci
 .htaccess
 index.php
 psalm.xml
