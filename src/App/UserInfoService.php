@@ -86,12 +86,21 @@ class UserInfoService
             if ($results !== false && $userPreferences !== false) {
                 $affectedRows = $results->getArrayCopy();
                 $resultPreferences = $userPreferences->getArrayCopy();
+
+                $onboardings = $resultPreferences['onboardingsWereShown'] ?? [];
+                if (!is_array($onboardings)) {
+                    $onboardings = $onboardings ? (array) $onboardings : [];
+                }
+
+                $resultPreferences['onboardingsWereShown'] = $onboardings;
+
                 $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
                 
                 $contentFilterService = new ContentFilterServiceImpl();
                 $resultPreferences['contentFilteringSeverityLevel'] = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
 
                 $affectedRows['userPreferences'] = $resultPreferences;
+                $affectedRows['onboardingsWereShown']   = $onboardings;
 
                 $success = [
                     'status' => 'success',

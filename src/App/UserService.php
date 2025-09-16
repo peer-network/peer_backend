@@ -17,6 +17,7 @@ use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\App\UserPreferences;
 
 class UserService
 {
@@ -137,7 +138,7 @@ class UserService
     {
         $this->logger->info('UserService.createUser started');
 
-        $requiredFields = ['username', 'email', 'password', 'referralUuid'];
+        $requiredFields = ['username', 'email', 'password'];
         $validationErrors = self::validateRequiredFields($args, $requiredFields);
         if (!empty($validationErrors)) {
             return $validationErrors;
@@ -474,8 +475,8 @@ class UserService
         $this->logger->info('UserService.updateUserPreferences started');
 
         $newUserPreferences = $args['userPreferences'];
-
         $contentFiltering = $newUserPreferences['contentFilteringSeverityLevel'] ?? null;
+        $shownOnboardingsIn = $newUserPreferences['shownOnboardings'] ?? null;
         
         try {
             $this->transactionManager->beginTransaction();
@@ -495,6 +496,10 @@ class UserService
                 }
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
                 $userPreferences->setUpdatedAt();
+            }
+
+            if (is_array($shownOnboardingsIn) && !empty($shownOnboardingsIn)) {
+                $this->updateOnboardings($userPreferences, $shownOnboardingsIn);
             }
 
 
@@ -521,6 +526,45 @@ class UserService
             $this->logger->error('Failed to update user preferences', ['exception' => $e]);
             $this->transactionManager->rollback();
             return self::respondWithError(41016); // 402xx
+        }
+    }
+
+    private function updateOnboardings($userPreferences, array $shownOnboardingsIn): void
+    {
+        $available = ConstantsConfig::onboarding()['AVAILABLE_ONBOARDINGS'] ?? [];
+        if (empty($available)) {
+            $this->logger->error('updateUserPreferences: AVAILABLE_ONBOARDINGS list is empty');
+            throw new \RuntimeException('No available onboardings configured', 00000);// List is empty, response code = 4XXXX
+        }
+
+        foreach ($shownOnboardingsIn as $onboarding) {
+            $val = (string) $onboarding;
+            if (!in_array($val, $available, true)) {
+                $this->logger->warning('updateUserPreferences: invalid onboarding value', [
+                    'value'     => $val,
+                    'available' => $available,
+                ]);
+                throw new \InvalidArgumentException('INVALID_ONBOARDING_VALUE', 31011);
+            }
+        }
+
+        $currentShown = $userPreferences->getOnboardingsWereShown();
+        if (!is_array($currentShown)) {
+            $currentShown = empty($currentShown) ? [] : (array) $currentShown;
+        }
+
+        $currentShown = array_values(array_filter(array_map('strval', $currentShown)));
+        $incoming     = array_values(array_filter(array_map('strval', $shownOnboardingsIn)));
+
+        $set = array_fill_keys($currentShown, true);
+        foreach ($incoming as $onboarding) {
+            $set[$onboarding] = true;
+        }
+        $merged = array_keys($set);
+
+        if ($merged !== $currentShown) {
+            $userPreferences->setOnboardingsWereShown($merged);
+            $userPreferences->setUpdatedAt();
         }
     }
 
