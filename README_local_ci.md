@@ -15,6 +15,7 @@ Make sure you have the following installed:
 - jq
 - composer
 - curl
+- php (required only for Composer on host; e.g. sudo apt install php-cli on Ubuntu/WSL, or brew install php on macOS. Backend itself runs in Docker.)
 
 (If `jq` is missing, `make` will auto-install it on Ubuntu/WSL via `sudo apt install jq`.)
 
@@ -42,7 +43,7 @@ make dev
 
 This will:
 
-- Create `.env` from `.env.dev`  
+- Create `.env.ci` from `.env.dev`  
 - Reset Docker containers, images and volumes (full clean)  
 - Copy SQL files and Postman test files  
 - Install PHP dependencies via composer on your host  
@@ -123,7 +124,23 @@ This will:
 
 ---
 
-### 7. Full Cleanup
+### 7a. CI Cleanup (keep reports)
+
+If you want to clean up your local CI run but keep generated reports (so you can still view the HTMLExtra results), run:
+
+```bash
+make clean-ci
+```
+This will:
+
+- Stop Docker containers and remove volumes
+- Delete .env.ci, vendor/, temp SQL, and temp Postman JSON files
+- Preserve HTML test reports
+- This is the cleanup step that make ci calls at the end of its run.
+
+---
+
+### 7b. Full Cleanup
 
 To stop and remove everything (containers, volumes, files):
 
@@ -134,7 +151,7 @@ make clean-all
 This will:
 
 - Stop Docker containers and remove volumes
-- Delete `.env`, `vendor/`, temp SQL, Postman tmp files, reports, logs
+- Delete `.env.ci`, `vendor/`, temp SQL, Postman tmp files, reports, logs
 
 ---
 
@@ -152,7 +169,15 @@ This will:
 - Execute the Newman test suite with the same Postman collections as remote CI
 - Generate an HTML report of the test results
 - Skip interactive steps so it can run unattended
-- Clean up containers, volumes, and temp files automatically at the end
+- Run make clean-ci at the end (removes containers, volumes, vendors, tmp files, etc. but preserves reports so you can view them)
+
+⚠️ Important: After reviewing your report, run:
+
+```bash
+make clean-all
+```
+
+This ensures your environment is fully cleaned (reports, vendors, and temp files) before the next run.
 
 ---
 
@@ -200,11 +225,12 @@ Available targets:
 bash-backend : Open interactive shell in backend container
 ci : Run full local CI workflow (setup, tests, cleanup)
 clean-all : Remove containers, volumes, vendors, reports, logs
+clean-ci : Cleanup for CI but keep reports
 clean-prune : Remove ALL unused images, build cache, and volumes
 db : Open psql shell into Postgres
 dev : Full setup: env, DB reset, vendors install, start DB+backend
 ensure-jq : Ensure jq is installed (auto-install if missing)
-env : Copy .env.dev to .env for local development
+env-ci : Copy .env.dev to .env.ci for local development
 help : Show available make targets
 init : Prepare Postman environment files for testing
 logs : Tail backend container logs

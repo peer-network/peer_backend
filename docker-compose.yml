@@ -22,6 +22,7 @@ services:
     image: peer-backend:${IMAGE_TAG}
     build:
       context: .
+      dockerfile: Dockerfile
     depends_on:
       db:
         condition: service_healthy
