@@ -610,6 +610,17 @@ class AdvertisementMapper
         }
     }
 
+    public function advertisementExistsById(string $advertisementId): bool
+    {
+        $this->logger->info("AdvertisementMapper.advertisementExistsById started");
+
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM advertisements WHERE advertisementId = :advertisementId");
+        $stmt->bindValue(':advertisementId', $advertisementId, \PDO::PARAM_STR);
+        $stmt->execute();
+
+        return (bool) $stmt->fetchColumn();
+    }
+
     public function isAdvertisementIdExist(string $postId, string $status): bool
     {
         $this->logger->info("AdvertisementMapper.isAdvertisementIdExist started");

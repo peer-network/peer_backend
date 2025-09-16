@@ -18,6 +18,9 @@ const FREELIKE_=30;// whereby FREELIKE
 const FREECOMMENT_=31;// whereby FREECOMMENT
 const FREEPOST_=32;// whereby FREEPOST
 
+const BASIC=50;
+const PINNED=200;
+
 use Fawaz\App\Advertisements;
 use Fawaz\App\AdvertisementService;
 use Fawaz\App\AlphaMintService;

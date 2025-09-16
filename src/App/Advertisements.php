@@ -177,7 +177,7 @@ class Advertisements
             'advertisementid' => [
                 'required' => true,
                 'validators' => [
-                    ['name' => 'Uuid', 'options' => ['responsecode' => 30209]],
+                    ['name' => 'Uuid', 'options' => ['responsecode' => 30269]],
                     ['name' => 'isString'],
                 ],
             ],
