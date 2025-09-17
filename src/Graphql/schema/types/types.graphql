@@ -25,7 +25,7 @@ type Post {
 type Comment {
   commentid: ID!
   userid: ID!
-  postid: ID!
+  postid: ID! 
   parentid: ID
   content: String!
   createdat: Date!
