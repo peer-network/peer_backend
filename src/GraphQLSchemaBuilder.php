@@ -2204,7 +2204,7 @@ class GraphQLSchemaBuilder
 
         $payload = [
             'status'            => 'success',
-            'ResponseCode'      => 00000, // successfully returns static tokenomics information
+            'ResponseCode'      => 11212, 
             'actionTokenPrices' => $actionTokenPrices,
             'actionGemsReturns' => $actionGemsReturns,
             'mintingData'       => [

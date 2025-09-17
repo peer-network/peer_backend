@@ -147,6 +147,10 @@
         "comment": "Success: Successfully added to wallet",
         "userFriendlyComment": "Funds added to your wallet."
     },
+    "11212": {
+        "comment": "Success: Successfully returned static tokenomics information",
+        "userFriendlyComment": "Tokenomics information loaded successfully"
+    },
     "11301": {
         "comment": "Success: Payment completed successfully",
         "userFriendlyComment": "Payment processed successfully!"
@@ -326,6 +330,10 @@
     "21003": {
         "comment": "No referral data available",
         "userFriendlyComment": "No referral information available."
+    },
+    "21004": {
+        "comment": "No onboarding available",
+        "userFriendlyComment": "No onboarding available."
     },
     "21101": {
         "comment": "Information Not Found: No friends found. You haven't added any friends yet",
