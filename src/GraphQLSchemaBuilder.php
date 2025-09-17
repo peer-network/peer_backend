@@ -17,17 +17,8 @@ const OTHERSHARED_=13;// whereby SHAREN POSTER
 const FREELIKE_=30;// whereby FREELIKE
 const FREECOMMENT_=31;// whereby FREECOMMENT
 const FREEPOST_=32;// whereby FREEPOST
-// DAILY FREE
-const DAILYFREEPOST=1;
-const DAILYFREELIKE=3;
-const DAILYFREECOMMENT=4;
-const DAILYFREEDISLIKE=0;
-// USER PAY
-const PRICELIKE=3;
-const PRICEDISLIKE=5;
-const PRICECOMMENT=0.5;
-const PRICEPOST=20;
 
+use Fawaz\App\AlphaMintService;
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
 use Fawaz\App\Comment;
@@ -89,7 +80,8 @@ class GraphQLSchemaBuilder
         protected ChatService $chatService,
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
-        protected JWTService $tokenService
+        protected JWTService $tokenService,
+        protected AlphaMintService $alphaMintService
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -97,17 +89,17 @@ class GraphQLSchemaBuilder
     public function build(): Schema|array
     {
         if ($this->currentUserId === null) {
-            $schema = 'schemaguest.graphl';
+            $schema = 'schemaguest.graphql';
         } else {
-            $schema = 'schema.graphl';
+            $schema = 'schema.graphql';
         }
 
         if ($this->userRoles <= 0) {
             $schema = $schema;
         } elseif ($this->userRoles === 8) {
-            $schema = 'bridge_schema.graphl';
+            $schema = 'bridge_schema.graphql';
         } elseif ($this->userRoles === 16) {
-            $schema = 'admin_schema.graphl';
+            $schema = 'admin_schema.graphql';
         }
 
         if (empty($schema)){
@@ -151,6 +143,7 @@ class GraphQLSchemaBuilder
 
     protected function setCurrentUserIdForServices(string $userid): void
     {
+        $this->alphaMintService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
@@ -197,10 +190,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'UserPreferences' => [
-                'contentFilteringSeverityLevel' => function (array $root): string {
+                'contentFilteringSeverityLevel' => function (array $root): ?string {
                     $this->logger->info('Query.UserPreferences Resolvers');
-                    return $root['contentFilteringSeverityLevel'] ?? '';
-                }
+                    return $root['contentFilteringSeverityLevel'];
+                },
+                'onboardingsWereShown' => function (array $root): array {
+                    $this->logger->info('Query.UserPreferences.onboardingsWereShown Resolver');
+                    return $root['onboardingsWereShown'] ?? [];
+                },
             ],
             'TodaysInteractionsData' => [
                 'totalInteractions' => function (array $root): int {
@@ -1669,6 +1666,43 @@ class GraphQLSchemaBuilder
                 'commentPrice' => function (array $root): float {
                     return (float) ($root['commentPrice'] ?? 0);
                 },
+            ],
+            'ActionGemsReturns' => [
+                'viewGemsReturn' => function (array $root): float {
+                    return (float)($root['viewGemsReturn'] ?? 0.0);
+                },
+                'likeGemsReturn' => function (array $root): float {
+                    return (float)($root['likeGemsReturn'] ?? 0.0);
+                },
+                'dislikeGemsReturn' => function (array $root): float {
+                    return (float)($root['dislikeGemsReturn'] ?? 0.0);
+                },
+                'commentGemsReturn' => function (array $root): float {
+                    return (float)($root['commentGemsReturn'] ?? 0.0);
+                },
+            ],
+            'MintingData' => [
+                'tokensMintedYesterday' => function (array $root): float {
+                    return (float)($root['tokensMintedYesterday'] ?? 0.0);
+                },
+            ],
+            'TokenomicsResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.TokenomicsResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): int {
+                    return $root['ResponseCode'] ?? 0;
+                },
+                'actionTokenPrices' => function (array $root): array {
+                    return $root['actionTokenPrices'] ?? [];
+                },
+                'actionGemsReturns' => function (array $root): array {
+                    return $root['actionGemsReturns'] ?? [];
+                },
+                'mintingData' => function (array $root): array {
+                    return $root['mintingData'] ?? [];
+                },
             ],    
             'ResetPasswordRequestResponse' => [
                 'status' => function (array $root): string {
@@ -1817,6 +1851,8 @@ class GraphQLSchemaBuilder
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
+            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
+            'getTokenomics' => fn(mixed $root, array $args) => $this->resolveTokenomics(),
         ];
     }
 
@@ -2103,22 +2139,37 @@ class GraphQLSchemaBuilder
         try {
             $result = $this->poolService->getActionPrices();
 
+            if (
+                empty($result) ||
+                !isset($result['post_price'], $result['like_price'], $result['dislike_price'], $result['comment_price'])
+            ) {
+                $this->logger->warning('resolveActionPrices: DB result missing/invalid, falling back to constants');
 
-         $affectedRows = [
-                'postPrice'     => isset($result['post_price']) ? (float) $result['post_price'] : 0.0,
-                'likePrice'     => isset($result['like_price']) ? (float) $result['like_price'] : 0.0,
-                'dislikePrice'  => isset($result['dislike_price']) ? (float) $result['dislike_price'] : 0.0,
-                'commentPrice'  => isset($result['comment_price']) ? (float) $result['comment_price'] : 0.0,
-        ];
+                $tokenomics = ConstantsConfig::tokenomics();
+                $prices     = $tokenomics['ACTION_TOKEN_PRICES'] ?? [];
 
-        $this->logger->info('resolveActionPrices: Successfully fetched prices', $affectedRows);
+                $affectedRows = [
+                    'postPrice'    => (float)($prices['post']    ?? 0.0),
+                    'likePrice'    => (float)($prices['like']    ?? 0.0),
+                    'dislikePrice' => (float)($prices['dislike'] ?? 0.0),
+                    'commentPrice' => (float)($prices['comment'] ?? 0.0),
+                ];
+            } else {
+                $affectedRows = [
+                    'postPrice'    => isset($result['post_price'])    ? (float)$result['post_price']    : 0.0,
+                    'likePrice'    => isset($result['like_price'])    ? (float)$result['like_price']    : 0.0,
+                    'dislikePrice' => isset($result['dislike_price']) ? (float)$result['dislike_price'] : 0.0,
+                    'commentPrice' => isset($result['comment_price']) ? (float)$result['comment_price'] : 0.0,
+                ];
+            }
 
-        return [
-            'status'        => 'success',
-            'ResponseCode'  => 11304,
-            'affectedRows'  => $affectedRows
-        ];
+            $this->logger->info('resolveActionPrices: Successfully fetched prices', $affectedRows);
 
+            return [
+                'status'       => 'success',
+                'ResponseCode' => 11304,
+                'affectedRows' => $affectedRows,
+            ];
         } catch (\Throwable $e) {
             $this->logger->error('Query.resolveActionPrices exception', [
                 'message' => $e->getMessage(),
@@ -2126,6 +2177,46 @@ class GraphQLSchemaBuilder
             ]);
             return $this->respondWithError(41301);
         }
+    }
+
+    private function resolveTokenomics(): array
+    {
+        $this->logger->info('Query.getTokenomics started');
+
+        $tokenomics = ConstantsConfig::tokenomics();
+        $minting    = ConstantsConfig::minting();
+
+        $prices = $tokenomics['ACTION_TOKEN_PRICES'] ?? [];
+        $gems   = $tokenomics['ACTION_GEMS_RETURNS'] ?? [];
+
+        $actionTokenPrices = [
+            'postPrice'    => (float)($prices['post']    ?? 0.0),
+            'likePrice'    => (float)($prices['like']    ?? 0.0),
+            'dislikePrice' => (float)($prices['dislike'] ?? 0.0),
+            'commentPrice' => (float)($prices['comment'] ?? 0.0),
+        ];
+
+        $actionGemsReturns = [
+            'viewGemsReturn'    => (float)($gems['view']    ?? 0.0),
+            'likeGemsReturn'    => (float)($gems['like']    ?? 0.0),
+            'dislikeGemsReturn' => (float)($gems['dislike'] ?? 0.0),
+            'commentGemsReturn' => (float)($gems['comment'] ?? 0.0),
+        ];
+
+        $mintedYesterday = (float)($minting['DAILY_NUMBER_TOKEN'] ?? 0.0);
+
+        $payload = [
+            'status'            => 'success',
+            'ResponseCode'      => 11212, 
+            'actionTokenPrices' => $actionTokenPrices,
+            'actionGemsReturns' => $actionGemsReturns,
+            'mintingData'       => [
+                'tokensMintedYesterday' => $mintedYesterday,
+            ],
+        ];
+
+        $this->logger->info('Query.getTokenomics finished', ['payload' => $payload]);
+        return $payload;
     }
 
     protected function resolveChatMessages(array $args): ?array
@@ -2235,6 +2326,8 @@ class GraphQLSchemaBuilder
 
     protected function resolveActionPost(?array $args = []): ?array
     {
+        $tokenomicsConfig = ConstantsConfig::tokenomics();
+        $dailyfreeConfig = ConstantsConfig :: dailyFree();
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
         }
@@ -2259,17 +2352,17 @@ class GraphQLSchemaBuilder
         }
 
         $dailyLimits = [
-            'like' => DAILYFREELIKE,
-            'comment' => DAILYFREECOMMENT,
-            'post' => DAILYFREEPOST,
-            'dislike' => DAILYFREEDISLIKE,
+            'like' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['like'],
+            'comment' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['comment'],
+            'post' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['post'],
+            'dislike' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['dislike'],
         ];
 
         $actionPrices = [
-            'like' => PRICELIKE,
-            'comment' => PRICECOMMENT,
-            'post' => PRICEPOST,
-            'dislike' => PRICEDISLIKE,
+            'like' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['like'],
+            'comment' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['comment'],
+            'post' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['post'],
+            'dislike' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['dislike'],
         ];
 
         $actionMaps = [
