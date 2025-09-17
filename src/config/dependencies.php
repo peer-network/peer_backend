@@ -6,6 +6,8 @@ use Fawaz\Services\JWTService;
 use Fawaz\Services\Mailer;
 use Fawaz\Services\LiquidityPool;
 use DI\ContainerBuilder;
+use Fawaz\App\Interfaces\UserServiceImpl;
+use Fawaz\App\Interfaces\UserServiceInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
@@ -73,5 +75,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 
             return $pdo;
         },
+
+        UserServiceInterface::class => \DI\autowire(UserServiceImpl::class),
     ]);
 };

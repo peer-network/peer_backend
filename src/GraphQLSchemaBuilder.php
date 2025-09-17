@@ -28,6 +28,7 @@ use Fawaz\App\CommentService;
 use Fawaz\App\ContactusService;
 use Fawaz\App\DailyFreeService;
 use Fawaz\App\Helpers\FeesAccountHelper;
+use Fawaz\App\Interfaces\UserServiceInterface;
 use Fawaz\App\McapService;
 use Fawaz\App\PoolService;
 use Fawaz\App\Post;
@@ -70,7 +71,7 @@ class GraphQLSchemaBuilder
         protected ContactusService $contactusService,
         protected DailyFreeService $dailyFreeService,
         protected McapService $mcapService,
-        protected UserService $userService,
+        protected UserServiceInterface $userService,
         protected UserInfoService $userInfoService,
         protected PoolService $poolService,
         protected PostInfoService $postInfoService,

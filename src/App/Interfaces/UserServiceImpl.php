@@ -67,19 +67,27 @@ final class UserServiceImpl implements UserServiceInterface
             return self::respondWithError(31007);
         }
 
+        // $specs = [
+        //     new SpecTypesContentFilterSpec(
+        //         new GetProfileContentFilteringStrategy(),
+        //         $contentFilterBy
+        //     ),
+        //     new VerifiedAndActiveUserSpec($userId),
+        // ];
+
         $specs = [
-            new SpecTypesContentFilterSpec(
-                new GetProfileContentFilteringStrategy(),
-                $contentFilterBy
-            ),
-            new VerifiedAndActiveUserSpec($userId),
+            new VerifiedAndActiveUserSpec($userId)
         ];
 
         try {
-            $profileData = $this->userMapper->fetchProfileDataRaw($userId, $this->currentUserId, $specs);
+            $data = $this->userMapper->fetchProfileDataRaw(
+                $userId,
+                $this->currentUserId,
+                $specs
+            )->getArrayCopy();
 
-            // $user_reports = (int)$data['user_reports'];
-            // $user_dismiss_moderation_amount = (int)$data['user_count_content_moderation_dismissed'];
+            $user_reports = (int)$data['user_reports'];
+            $user_dismiss_moderation_amount = (int)$data['user_count_content_moderation_dismissed'];
 
             // if ($contentFilterService->getContentFilterAction(
             //         ContentType::user,

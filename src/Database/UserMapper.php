@@ -2021,7 +2021,10 @@ class UserMapper
     }
 
     public function fetchProfileDataRaw(string $userid, string $currentUserId, array $specifications): Profile|false {
-        $allSpecs = SpecificationSQLData::merge($specifications);
+        
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
         
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = "u.uid = :userid";
