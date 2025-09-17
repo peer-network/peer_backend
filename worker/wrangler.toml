@@ -4,4 +4,4 @@ compatibility_date = "2025-01-01"
 
 account_id = "b40a951a416d23bce9414c08cf3ca239" 
 [vars]
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/XXXX/YYY" # replace with your secret webhook
+DISCORD_WEBHOOK_URL = "${DISCORD_WEBHOOK_DEPENDABOT}"
