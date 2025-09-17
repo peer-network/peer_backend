@@ -1330,7 +1330,7 @@ class LogWinMapper
 
                 // Right now, i am not using mulRc function as it is creating issues with Fatal Error on my system.
                 // $rowgems2token = TokenHelper::mulRc((float)$row['gems'], (float)$gemsintoken);
-                $rowgems2token = (float)$row['gems'] * (float)$gemsintoken;
+                $rowgems2token = (float) $row['gems'] * (float)$gemsintoken;
 
                 $args = [
                     'gemid' => $row['gemid'],
@@ -1376,11 +1376,21 @@ class LogWinMapper
 
                     $transferType = ($numBers < 0) ? 'BURN' : 'MINT';
 
+                    $senderid = $userId;
+                    if ($numBers < 0) {
+                        $transferType = 'BURN';
+                        $recipientid = $this->burnWallet;
+                    } else {
+                        $transferType = 'MINT';
+                        $recipientid = $userId;
+                        $senderid = $this->companyWallet;
+                    }
+
                     $this->createAndSaveTransaction($transRepo, [
                         'operationid' => $tokenId,
                         'transactiontype' => $transactionType,
-                        'senderid' => $userId,
-                        'recipientid' => $this->burnWallet,
+                        'senderid' => $senderid,
+                        'recipientid' => $recipientid,
                         'tokenamount' => $numBers,
                         'transferaction' => $transferType,
                         'createdat' => $createdat

@@ -47,6 +47,7 @@ class WalletMapper
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
     private string $burnWallet;
+    private string $companyWallet;
 
     const STATUS_DELETED = 6;
 
@@ -72,6 +73,7 @@ class WalletMapper
         }
 
         $this->burnWallet = $data['burn'];
+        $this->companyWallet = $data['peer'];
     }
 
     public function fetchPool(array $args = []): array
@@ -554,8 +556,6 @@ class WalletMapper
                 $transactionType = 'postComment';
             }elseif ($args['whereby'] == 5) {
                 $transactionType = 'postCreated';
-            }elseif ($args['whereby'] == 11) {
-                $transactionType = 'getPercentBeforeTransaction'; // PENDING: Should be changed according to the API Logic
             }
 
             /**
@@ -566,16 +566,20 @@ class WalletMapper
              * If the number of gems is negative, it's a burn operation.
              * If the number of gems is positive, it's a mint operation.
              */
-            if($numBers < 0){
+            $senderid = $userId;
+            if ($numBers < 0) {
                 $transferType = 'BURN';
-            }else{
+                $recipientid = $this->burnWallet;
+            } else {
                 $transferType = 'MINT';
+                $recipientid = $userId;
+                $senderid = $this->companyWallet;
             }
             $this->createAndSaveTransaction($transRepo, [
                 'operationid' => $tokenId,
                 'transactiontype' => $transactionType,
-                'senderid' => $userId,
-                'recipientid' => $this->burnWallet,   
+                'senderid' => $senderid,
+                'recipientid' => $recipientid,
                 'tokenamount' => $numBers,
                 'transferaction' => $transferType
             ]);
