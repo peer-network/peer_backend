@@ -1237,59 +1237,37 @@ class LogWinMapper
         $this->logger->info('LogWinMapper.migrateTokenTransfer started');
 
         $sql = "
-            WITH user_sums AS (
-                SELECT 
-                    userid,
-                    GREATEST(SUM(gems), 0) AS total_numbers
-                FROM gems
-                WHERE collected = 0 AND createdat < '2025-04-02 08:31'
-                GROUP BY userid
-            ),
-            total_sum AS (
-                SELECT SUM(total_numbers) AS overall_total FROM user_sums
-            )
             SELECT 
-                g.userid,
-                g.gemid,
-                g.postid,
-                g.fromid,
-                g.gems,
-                g.whereby,
-                g.createdat,
-                us.total_numbers,
-                (SELECT SUM(total_numbers) FROM user_sums) AS overall_total,
-                (us.total_numbers * 100.0 / ts.overall_total) AS percentage
+                DATE(g.createdat) AS created_date,
+                COUNT(*) AS total_gems
             FROM gems g
-            JOIN user_sums us ON g.userid = us.userid
-            CROSS JOIN total_sum ts
-            WHERE us.total_numbers > 0 
-            AND g.collected = 0 
-            AND g.createdat < '2025-04-02 08:31';
+            WHERE g.createdat <= '2025-04-02'
+            AND NOT EXISTS (
+                SELECT 1
+                FROM logwins l
+                WHERE g.postid = l.postid
+                    AND g.fromid = l.fromid
+                    AND g.whereby = l.whereby
+                    AND g.userid = l.userid
+            )
+            GROUP BY DATE(g.createdat)
+            ORDER BY created_date ASC;
         ";
         $this->logger->info('LogWinMapper.migrateGemsToLogWins SQL', ['sql' => $sql]);
 
         $stmt = $this->db->query($sql);
-        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $gemDays = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-        if (empty($data)) {
+        if (empty($gemDays)) {
             $this->logger->info('No gems to migrate to logwins');
             return true;
         }
 
-        $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
-        $dailyToken = DAILY_NUMBER_TOKEN;
-
-        $gemsintoken = TokenHelper::divRc((float)$dailyToken, (float)$totalGems);
-        $bestatigungInitial = TokenHelper::mulRc((float)$totalGems, (float)$gemsintoken);
-
-        $args = [
-            'winstatus' => [
-                'totalGems' => $totalGems,
-                'gemsintoken' => $gemsintoken,
-                'bestatigung' => $bestatigungInitial
-            ]
-        ];
-
+        // Initialize heavy dependencies only once
+        $this->initializeLiquidityPool();
+        $transRepo = new TransactionRepository($this->logger, $this->db);
+        
+        
         // Prepare insert queries only once
         $sqlLogWins = "INSERT INTO logwins 
             (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
@@ -1304,141 +1282,187 @@ class LogWinMapper
         $stmtLogWins = $this->db->prepare($sqlLogWins);
         $stmtWallet = $this->db->prepare($sqlWallet);
 
-        // Initialize heavy dependencies only once
-        $this->initializeLiquidityPool();
-        $transRepo = new TransactionRepository($this->logger, $this->db);
 
-        try {
-            $this->db->beginTransaction();
+        foreach ($gemDays as $key => $day) {
 
-            foreach ($data as $row) {
-                $userId = (string)$row['userid'];
+            $data = json_decode($day['gem_entries'], true);
 
-                if (!isset($args[$userId])) {
+            $sql = "
+                WITH user_sums AS (
+                    SELECT 
+                        userid,
+                        GREATEST(SUM(gems), 0) AS total_numbers
+                    FROM gems
+                    WHERE gems > 0 AND  createdat::date = '{$day['created_date']}' AND collected = 0
+                    GROUP BY userid
+                ),
+                total_sum AS (
+                    SELECT SUM(total_numbers) AS overall_total FROM user_sums
+                )
+                SELECT 
+                    g.userid,
+                    g.gemid,
+                    g.postid,
+                    g.fromid,
+                    g.gems,
+                    g.whereby,
+                    g.createdat,
+                    us.total_numbers,
+                    (SELECT SUM(total_numbers) FROM user_sums) AS overall_total,
+                    (us.total_numbers * 100.0 / ts.overall_total) AS percentage
+                FROM gems g
+                JOIN user_sums us ON g.userid = us.userid
+                CROSS JOIN total_sum ts
+                WHERE us.total_numbers > 0 AND collected = 0 AND createdat::date = '{$day['created_date']}';
+            ";
 
-                    // Right now, i am not using mulRc function as it is creating issues with Fatal Error on my system.
-                    // $totalTokenNumber = TokenHelper::mulRc((float)$row['total_numbers'], (float)$gemsintoken);
-                    $totalTokenNumber =  (float)$row['total_numbers'] * (float)$gemsintoken;
-                    $args[$userId] = [
-                        'userid' => $userId,
-                        'gems' => $row['total_numbers'],
-                        'tokens' => $totalTokenNumber,
-                        'percentage' => $row['percentage'],
-                        'details' => []
-                    ];
-                }
+            try {
+                $stmt = $this->db->query($sql);
+                $gemAllDays = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-                // Right now, i am not using mulRc function as it is creating issues with Fatal Error on my system.
-                // $rowgems2token = TokenHelper::mulRc((float)$row['gems'], (float)$gemsintoken);
-                $rowgems2token = (float) $row['gems'] * (float)$gemsintoken;
+                
+                $totalGems = isset($gemAllDays[0]['overall_total']) ? (string)$gemAllDays[0]['overall_total'] : '0';
+                $dailyToken = DAILY_NUMBER_TOKEN;
+
+                $gemsintoken = TokenHelper::divRc((float)$dailyToken, (float)$totalGems);
+                $bestatigungInitial = TokenHelper::mulRc((float)$totalGems, (float)$gemsintoken);
 
                 $args = [
-                    'gemid' => $row['gemid'],
-                    'userid' => $row['userid'],
-                    'postid' => $row['postid'],
-                    'fromid' => $row['fromid'],
-                    'gems' => $row['gems'],
-                    'numbers' => $rowgems2token,
-                    'whereby' => $row['whereby'],
-                    'createdat' => $row['createdat']
+                    'winstatus' => [
+                        'totalGems' => $totalGems,
+                        'gemsintoken' => $gemsintoken,
+                        'bestatigung' => $bestatigungInitial
+                    ]
                 ];
 
-                $postId = $args['postid'] ?? null;
-                $fromId = $args['fromid'] ?? null;
-                $gems = $args['gems'] ?? 0.0;
-                $numBers = $args['numbers'] ?? 0;
-                $createdat =  $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
-
-                try {
-                    // Insert into logwins
-                    $tokenId = self::generateUUID();
-                    $stmtLogWins->bindValue(':token', $tokenId, \PDO::PARAM_STR);
-                    $stmtLogWins->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                    $stmtLogWins->bindValue(':postid', $postId, \PDO::PARAM_STR);
-                    $stmtLogWins->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
-                    $stmtLogWins->bindValue(':gems', $gems, \PDO::PARAM_STR);
-                    $stmtLogWins->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-                    $stmtLogWins->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR);
-                    $stmtLogWins->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
-                    $stmtLogWins->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
-                    $stmtLogWins->execute();
-                    $stmtLogWins->closeCursor();
-
-                    // Create transaction entry
-                    $transactionType = match ($args['whereby']) {
-                        1 => 'postViewed',
-                        2 => 'postLiked',
-                        3 => 'postDisLiked',
-                        4 => 'postComment',
-                        5 => 'postCreated',
-                        default => '',
-                    };
-
-                    $transferType = ($numBers < 0) ? 'BURN' : 'MINT';
-
-                    $senderid = $userId;
-                    if ($numBers < 0) {
-                        $transferType = 'BURN';
-                        $recipientid = $this->burnWallet;
-                    } else {
-                        $transferType = 'MINT';
-                        $recipientid = $userId;
-                        $senderid = $this->companyWallet;
-                    }
-
-                    $this->createAndSaveTransaction($transRepo, [
-                        'operationid' => $tokenId,
-                        'transactiontype' => $transactionType,
-                        'senderid' => $senderid,
-                        'recipientid' => $recipientid,
-                        'tokenamount' => $numBers,
-                        'transferaction' => $transferType,
-                        'createdat' => $createdat
-                    ]);
-
-                    if ($transferType === 'BURN') {
-                        $this->saveWalletEntry($this->burnWallet, -$numBers);
-                    }
-
-                    $this->logger->info('Inserted into logwins successfully', [
-                        'userId' => $userId,
-                        'postid' => $postId
-                    ]);
-
-                    // Insert into wallet
-                    $stmtWallet->bindValue(':token', $this->getPeerToken(), \PDO::PARAM_STR);
-                    $stmtWallet->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                    $stmtWallet->bindValue(':postid', $postId, \PDO::PARAM_STR);
-                    $stmtWallet->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
-                    $stmtWallet->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-                    $stmtWallet->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR);
-                    $stmtWallet->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
-                    $stmtWallet->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
-                    $stmtWallet->execute();
-                    $stmtWallet->closeCursor();
-
-                    $this->logger->info('Inserted into wallet successfully', [
-                        'userId' => $userId,
-                        'postid' => $postId
-                    ]);
-                } catch (\Throwable $e) {
-                    $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
+                if(empty($gemAllDays)) {
+                    $this->logger->info('No gems to migrate for date', ['date' => $day['created_date']]);
+                    continue;
                 }
+                try {
+                    $this->db->beginTransaction();
+
+                    foreach ($gemAllDays as $row) {
+                        $userId = (string)$row['userid'];
+
+
+                        if($row['gems'] <= 0) {
+                            continue;
+                        }
+
+                        $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
+
+                        $args = [
+                            'gemid' => $row['gemid'],
+                            'userid' => $row['userid'],
+                            'postid' => $row['postid'],
+                            'fromid' => $row['fromid'],
+                            'gems' => $row['gems'],
+                            'numbers' => $rowgems2token,
+                            'whereby' => $row['whereby'],
+                            'createdat' => $row['createdat']
+                        ];
+
+                        $postId = $args['postid'] ?? null;
+                        $fromId = $args['fromid'] ?? null;
+                        $gems = $args['gems'] ?? 0.0;
+                        $numBers = $rowgems2token ?? 0;
+                        $createdat =  $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
+
+                        try {
+                            // Insert into logwins
+                            $tokenId = self::generateUUID();
+                            $stmtLogWins->bindValue(':token', $tokenId, \PDO::PARAM_STR);
+                            $stmtLogWins->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                            $stmtLogWins->bindValue(':postid', $postId, \PDO::PARAM_STR);
+                            $stmtLogWins->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
+                            $stmtLogWins->bindValue(':gems', $gems, \PDO::PARAM_STR);
+                            $stmtLogWins->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+                            $stmtLogWins->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR);
+                            $stmtLogWins->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
+                            $stmtLogWins->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
+                            $stmtLogWins->execute();
+                            $stmtLogWins->closeCursor();
+
+                            // Create transaction entry
+                            $transactionType = match ($args['whereby']) {
+                                1 => 'postViewed',
+                                2 => 'postLiked',
+                                3 => 'postDisLiked',
+                                4 => 'postComment',
+                                5 => 'postCreated',
+                                default => '',
+                            };
+
+                            $transferType = ($numBers < 0) ? 'BURN' : 'MINT';
+
+                            $senderid = $userId;
+                            if ($numBers < 0) {
+                                $transferType = 'BURN';
+                                $recipientid = $this->burnWallet;
+                            } else {
+                                $transferType = 'MINT';
+                                $recipientid = $userId;
+                                $senderid = $this->companyWallet;
+                            }
+
+                            $this->createAndSaveTransaction($transRepo, [
+                                'operationid' => $tokenId,
+                                'transactiontype' => $transactionType,
+                                'senderid' => $senderid,
+                                'recipientid' => $recipientid,
+                                'tokenamount' => $numBers,
+                                'transferaction' => $transferType,
+                                'createdat' => $createdat
+                            ]);
+
+                            if ($transferType === 'BURN') {
+                                $this->saveWalletEntry($this->burnWallet, -$numBers);
+                            }
+
+                            $this->logger->info('Inserted into logwins successfully', [
+                                'userId' => $userId,
+                                'postid' => $postId
+                            ]);
+
+                            // Insert into wallet
+                            $stmtWallet->bindValue(':token', $this->getPeerToken(), \PDO::PARAM_STR);
+                            $stmtWallet->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                            $stmtWallet->bindValue(':postid', $postId, \PDO::PARAM_STR);
+                            $stmtWallet->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
+                            $stmtWallet->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
+                            $stmtWallet->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR);
+                            $stmtWallet->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
+                            $stmtWallet->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
+                            $stmtWallet->execute();
+                            $stmtWallet->closeCursor();
+
+                            $this->logger->info('Inserted into wallet successfully', [
+                                'userId' => $userId,
+                                'postid' => $postId
+                            ]);
+                        } catch (\Throwable $e) {
+                            $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
+                        }
+                    }
+
+                    $this->db->commit();
+                } catch (\Throwable $e) {
+                    $this->db->rollBack();
+                    $this->logger->error('Transaction failed', ['exception' => $e->getMessage()]);
+                }
+
+                // Update gems as collected
+                try {
+                    $gemIds = array_column($gemAllDays, 'gemid');
+                    $quotedGemIds = array_map(fn($gemId) => $this->db->quote($gemId), $gemIds);
+                    $this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
+                } catch (\Throwable $e) {
+                    $this->logger->error('Error updating gems collected flag', ['exception' => $e->getMessage()]);
+                }
+            } catch (\Throwable $e) {
+                $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
             }
-
-            $this->db->commit();
-        } catch (\Throwable $e) {
-            $this->db->rollBack();
-            $this->logger->error('Transaction failed', ['exception' => $e->getMessage()]);
-        }
-
-        // Update gems as collected
-        try {
-            $gemIds = array_column($data, 'gemid');
-            $quotedGemIds = array_map(fn($gemId) => $this->db->quote($gemId), $gemIds);
-            $this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
-        } catch (\Throwable $e) {
-            $this->logger->error('Error updating gems collected flag', ['exception' => $e->getMessage()]);
         }
 
         return true;
