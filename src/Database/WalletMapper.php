@@ -113,11 +113,15 @@ class WalletMapper
             return self::respondWithError(31202);
         }
         $fees = ConstantsConfig::tokenomics()['FEES'];
+        $peerFee = (float)$fees['PEER'];
+        $poolFee = (float)$fees['POOL'];
+        $burnFee = (float)$fees['BURN'];
+        $inviteFee = (float)$fees['INVITATION'];
 
-        $requiredAmount = $numberoftokens * (1 + $fees['PEER'] + $fees['POOL'] + $fees['BURN']);
-        $feeAmount = round((float)$numberoftokens * $fees['POOL'], 2);
-        $peerAmount = round((float)$numberoftokens * $fees['PEER'], 2);
-        $burnAmount = round((float)$numberoftokens * $fees['BURN'], 2);
+        $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee);
+        $feeAmount = round((float)$numberoftokens * $poolFee, 2);
+        $peerAmount = round((float)$numberoftokens * $peerFee, 2);
+        $burnAmount = round((float)$numberoftokens * $burnFee, 2);
         $countAmount = $feeAmount + $peerAmount + $burnAmount;
         $inviterId = null;
         $inviterWin = 0.0;
@@ -130,9 +134,9 @@ class WalletMapper
 
             if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != 6) {
                 $inviterId = $result['invited'];
-                $inviterWin = round((float)$numberoftokens * $fees['INVITATION'], 2);
+                $inviterWin = round((float)$numberoftokens * $inviteFee, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
-                $requiredAmount = $numberoftokens * (1 + $fees['PEER'] + $fees['POOL'] + $fees['BURN'] + $fees['INVITATION']);
+                $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnAmount + $inviteFee);
                 $this->logger->info('Invited By', [
                     'invited' => $inviterId,
                 ]);
@@ -140,9 +144,9 @@ class WalletMapper
 
             // If user's account deleted then we will send that percentage amount to PEER
             if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == 6) {
-                $peerAmount = $peerAmount + round((float)$numberoftokens * $fees['INVITATION'], 2);
+                $peerAmount = $peerAmount + round((float)$numberoftokens * $inviteFee, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount;
-                $requiredAmount = $numberoftokens * (1 + $fees['PEER'] + $fees['POOL'] + $fees['BURN'] + $fees['INVITATION']);
+                $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee + $inviteFee);
             }
 
 
@@ -1142,7 +1146,7 @@ class WalletMapper
             $this->logger->info('Inviter found', ['inviterId' => $inviterId]);
 
             $fees = ConstantsConfig::tokenomics()['FEES'];
-            $percent = round((float)$tokenAmount * $fees['INVITATION'], 2);
+            $percent = round((float)$tokenAmount * $inviteFee, 2);
             $tosend = round((float)$tokenAmount - $percent, 2);
 
             $id = self::generateUUID();
