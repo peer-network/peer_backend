@@ -1,0 +1,94 @@
+enum TokenMovementFilterType {
+  TRANSACTION
+  AIRDROP
+  MINT
+  PAYMENT
+  BURN
+}
+
+enum GetOnly {
+  VIEW
+  LIKE
+  DISLIKE
+  COMMENTLIKE
+}
+
+enum DirectionFilterType {
+  INCOME
+  DEDUCTION
+}
+
+enum SortFilterType {
+  NEWEST
+  OLDEST
+}
+
+enum PostActionType {
+  LIKE
+  DISLIKE
+  REPORT
+  VIEW
+  SHARE
+  SAVE
+}
+
+enum PostType {
+  POST
+}
+
+enum CommentType {
+  COMMENT
+}
+
+enum ContentFilterType {
+  MYGRANDMALIKES
+  MYGRANDMAHATES
+}
+
+enum ContentType {
+  image
+  audio
+  video
+  text
+}
+
+enum PostFilterType {
+  IMAGE
+  AUDIO
+  VIDEO
+  TEXT
+  FOLLOWED
+  FOLLOWER
+  VIEWED
+}
+
+enum IgnoreOption {
+  YES
+  NO
+}
+
+enum PostSortType {
+  NEWEST
+  TRENDING
+  LIKES
+  DISLIKES
+  VIEWS
+  COMMENTS
+  FOR_ME
+}
+
+enum DayFilterType {
+  D0
+  D1
+  D2
+  D3
+  D4
+  D5
+  W0
+  M0
+  Y0
+}
+
+enum OnboardingType {
+  INTROONBOARDING
+}

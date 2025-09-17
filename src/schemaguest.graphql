@@ -8,9 +8,6 @@ type Query {
   guestListPost(postid: ID!): PostResponse!
 }
 
-scalar Decimal
-scalar Date
-
 type Mutation {
   register(input: RegistrationInput!): RegisterResponse!
   verifyAccount(userid: ID!): DefaultResponse!
@@ -28,64 +25,10 @@ type PostResponse {
   affectedRows: Post
 }
 
-type Post {
-  id: ID!
-  contenttype: String!
-  title: String!
-  media: String!
-  cover: String!
-  mediadescription: String!
-  createdat: Date!
-  amountlikes: Int!
-  amountviews: Int!
-  amountcomments: Int!
-  amountdislikes: Int!
-  amounttrending: Int!
-  isliked: Boolean!
-  isviewed: Boolean!
-  isreported: Boolean!
-  isdisliked: Boolean!
-  issaved: Boolean!
-  tags: [String]!
-  url: String!
-  user: ProfileUser!
-  comments: [Comment!]!
-}
-
-type Comment {
-  commentid: ID!
-  userid: ID!
-  postid: ID!
-  parentid: ID
-  content: String!
-  createdat: Date!
-  amountlikes: Int!
-  amountreplies: Int!
-  isliked: Boolean!
-  user: ProfileUser!
-}
-
-type ProfileUser {
-  id: ID!
-  username: String
-  slug: Int
-  img: String
-  isfollowed: Boolean
-  isfollowing: Boolean
-}
-
-
 type ReferralResponse {
   status: String!
   ResponseCode: String
   affectedRows: ReferralInfo
-}
-
-type ReferralInfo {
-  uid: String
-  username: String
-  slug: String
-  img: String
 }
 
 type ContactusResponsePayload {
@@ -101,14 +44,6 @@ type ContactusResponse {
   status: String!
   ResponseCode: String
   affectedRows: ContactusResponsePayload
-}
-
-type HelloResponse {
-  currentuserid: ID
-  currentVersion: String
-  wikiLink: String
-  lastMergedPullRequestNumber: String
-  companyAccountId: ID
 }
 
 type RegisterResponse {
@@ -134,12 +69,3 @@ type AuthPayload {
   accessToken: String
   refreshToken: String
 }
-
-input RegistrationInput {
-  email: String!
-  password: String!
-  username: String!
-  pkey: String
-  referralUuid: ID
-}
-

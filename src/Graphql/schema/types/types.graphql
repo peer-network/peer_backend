@@ -1,0 +1,403 @@
+type Post {
+  id: ID!
+  contenttype: String!
+  title: String!
+  media: String!
+  cover: String!
+  mediadescription: String!
+  createdat: Date!
+  amountlikes: Int!
+  amountviews: Int!
+  amountcomments: Int!
+  amountdislikes: Int!
+  amounttrending: Int!
+  isliked: Boolean!
+  isviewed: Boolean!
+  isreported: Boolean!
+  isdisliked: Boolean!
+  issaved: Boolean!
+  tags: [String]!
+  url: String!
+  user: ProfileUser!
+  comments: [Comment!]!
+}
+
+type Comment {
+  commentid: ID!
+  userid: ID!
+  postid: ID!
+  parentid: ID
+  content: String!
+  createdat: Date!
+  amountlikes: Int!
+  amountreplies: Int!
+  isliked: Boolean!
+  user: ProfileUser!
+}
+
+type ProfileUser {
+  id: ID!
+  username: String
+  slug: Int
+  img: String
+  isfollowed: Boolean
+  isfollowing: Boolean
+}
+
+type ReferralInfo {
+  uid: String
+  username: String
+  slug: String
+  img: String
+}
+
+type UserPreferences {
+  contentFilteringSeverityLevel: ContentFilterType
+  onboardingsWereShown: [OnboardingType!]!
+}
+
+type Transaction {
+  transactionid: String!
+  operationid: String!
+  transactiontype: String!
+  senderid: String!
+  recipientid: String!
+  tokenamount: Decimal!
+  transferaction: String!
+  message: String!
+  createdat: String!
+}
+
+type TransferToken {
+  tokenSend: Decimal
+  tokensSubstractedFromWallet: Decimal
+  createdat: String
+}
+
+type TodaysInteractionsDetailsData {
+  views: Decimal
+  likes: Decimal
+  dislikes: Decimal
+  comments: Decimal
+  viewsScore: Decimal
+  likesScore: Decimal
+  dislikesScore: Decimal
+  commentsScore: Decimal
+}
+
+type TodaysInteractionsData {
+  totalInteractions: Decimal
+  totalScore: Decimal
+  totalDetails: TodaysInteractionsDetailsData
+}
+
+type LogWins {
+  from: String
+  token: String
+  userid: String
+  postid: String
+  action: String
+  numbers: Decimal
+  createdat: String
+}
+
+type UserLogWins {
+  status: String
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [LogWins]
+  meta: DefaultResponse
+}
+
+type UserInfo {
+  userid: ID!
+  liquidity: Decimal!
+  amountposts: Int!
+  amountblocked: Int!
+  amountfollower: Int!
+  amountfollowed: Int!
+  amountfriends: Int!
+  invited: ID!
+  updatedat: Date
+  userPreferences: UserPreferences
+}
+
+type CommentInfo {
+  likes: Int!
+  reports: Int!
+  comments: Int!
+}
+
+type Chat {
+  id: ID!
+  image: String!
+  name: String!
+  createdat: Date
+  updatedat: Date
+  chatmessages: [ChatMessage!]!
+  chatparticipants: [ChatParticipant!]!
+}
+
+type ChatMessage {
+  id: ID!
+  senderid: ID!
+  chatid: ID!
+  content: String!
+  createdat: Date!
+}
+
+type ChatParticipant {
+  userid: ID!
+  img: String!
+  username: String!
+  slug: Int!
+  hasaccess: Int!
+}
+
+type Profile {
+  id: ID
+  username: String
+  status: Int
+  slug: Int
+  img: String
+  biography: String
+  isfollowed: Boolean
+  isfollowing: Boolean
+  amountposts: Int
+  amounttrending: Int
+  amountfollowed: Int
+  amountfollower: Int
+  amountfriends: Int
+  amountblocked: Int
+  imageposts: [ProfilePostMedia!]
+  textposts: [ProfilePostMedia!]
+  videoposts: [ProfilePostMedia!]
+  audioposts: [ProfilePostMedia!]
+}
+
+type ProfileInfo {
+  status: String
+  ResponseCode: String
+  affectedRows: Profile
+}
+
+type FollowRelations {
+  followers: [ProfileUser!]
+  following: [ProfileUser!]
+}
+
+type BlockedUser {
+  userid: String
+  img: String
+  username: String
+  slug: Int
+}
+
+type BlockedUsers {
+  iBlocked: [BlockedUser!]
+  blockedBy: [BlockedUser!]
+}
+
+type Tag {
+  name: String!
+}
+
+type ReferralUsers {
+  invitedBy: ProfileUser
+  iInvited: [ProfileUser!]!
+}
+
+type ActionPriceResult {
+  postPrice: Float!
+  likePrice: Float!
+  dislikePrice: Float!
+  commentPrice: Float!
+}
+
+type ActionGemsReturns {
+  viewGemsReturn: Float!
+  likeGemsReturn: Float!
+  dislikeGemsReturn: Float!
+  commentGemsReturn: Float!
+}
+
+type MintingData {
+  tokensMintedYesterday: Float!
+}
+
+type CurrentLiquidity {
+  status: String
+  ResponseCode: String
+  meta: DefaultResponse
+  currentliquidity: Decimal
+}
+
+type DailyGemStatusData {
+  d0: Decimal
+  d1: Decimal
+  d2: Decimal
+  d3: Decimal
+  d4: Decimal
+  d5: Decimal
+  w0: Decimal
+  m0: Decimal
+  y0: Decimal
+}
+
+type DailyGemsResultsData {
+  data: [DailyGemsResultsUserData]
+  totalGems: Decimal
+}
+
+type DailyGemsResultsUserData {
+  userid: ID
+  pkey: ID
+  gems: Decimal
+}
+
+type GemstersData {
+  winStatus: WinStatus
+  userStatus: [GemstersUserStatus]
+}
+
+type WinStatus {
+  totalGems: Decimal
+  gemsintoken: Decimal
+  bestatigung: Decimal
+}
+
+type GemstersUserStatus {
+  userid: ID
+  gems: Decimal
+  tokens: Decimal
+  percentage: Decimal
+  details: [GemstersUserStatusDetails]
+}
+
+type GemstersUserStatusDetails {
+  gemid: ID
+  userid: ID
+  postid: ID
+  fromid: ID
+  gems: Decimal
+  numbers: Decimal
+  whereby: Decimal
+  createdat: Date
+}
+
+type LiquidityPoolData {
+  overallTotalNumbers: Decimal
+  overallTotalNumbersq: Decimal
+  posts: [LiquidityPoolPostData]
+}
+
+type LiquidityPoolPostData {
+  postid: ID
+  totalNumbers: Decimal
+  totalNumbersq: Decimal
+  transactionCount: Decimal
+}
+
+type ProfilePostMedia {
+  id: ID!
+  title: String
+  contenttype: String!
+  media: String!
+  createdat: String
+}
+
+type PostCommentsData {
+  commentid: ID
+  userid: ID
+  postid: ID
+  parentid: ID
+  content: String
+  createdat: Date
+  amountlikes: Decimal
+  isliked: Boolean
+  user: BasicUserInfo
+  subcomments: [PostSubCommentsData]
+}
+
+type PostSubCommentsData {
+  commentid: ID
+  userid: ID
+  postid: ID
+  parentid: ID
+  content: String
+  createdat: Date
+  amountlikes: Decimal
+  amountreplies: Decimal,
+  isliked: Boolean
+  user: BasicUserInfo
+}
+
+type BasicUserInfo {
+  userid: ID
+  img: String
+  username: String
+  slug: Int
+  biography: String
+  updatedat: Date!
+}
+
+type User {
+  id: ID
+  username: String
+  status: Int
+  slug: Int
+  img: String
+  biography: String
+  createdat: Date
+  updatedat: Date
+}
+
+type PercentBeforeTransactionData {
+  inviterId: ID
+  tosend: Decimal
+  percentTransferred: Decimal
+}
+
+type RefreshMarketCapData {
+  NumberOfTokens: Decimal
+  NumberOfGems: Decimal
+  coverage: Decimal
+  TokenPrice: Decimal
+  GemsPrice: Decimal
+}
+
+type PostInfo {
+  likes: Int!
+  dislikes: Int!
+  reports: Int!
+  views: Int!
+  saves: Int!
+  shares: Int!
+  comments: Int!
+}
+
+type ChatMessageInfo {
+  messid: ID
+  chatid: ID
+  userid: ID
+  content: String
+  createdat: Date
+}
+
+type ChatInfo {
+  chatid: ID
+}
+
+type AllUserInfo {
+  followerid: ID
+  followername: String
+  followedid: ID
+  followedname: String
+}
+
+type AllUserFriends {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [AllUserInfo]
+}

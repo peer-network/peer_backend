@@ -107,12 +107,22 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(40301);
         }
 
+        $graphqlPath = "Graphql/schema/";
+        $typesPath = "types/";
         $contents = \file_get_contents(__DIR__ . '/' . $schema);
-        $schema = BuildSchema::build($contents);
+        $scalars = \file_get_contents(__DIR__ . '/' . $graphqlPath . "scalars.graphql");
+        $response = \file_get_contents(__DIR__ . '/' . $graphqlPath . "response.graphql");
+        $inputs = \file_get_contents(__DIR__ . '/' . $graphqlPath . "inputs.graphql");
+        $enum = \file_get_contents(__DIR__ . '/' . $graphqlPath . "enums.graphql");
+        $types = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql");
+
+        $schemaSource = $scalars . $enum . $inputs . $types . $response . $contents;
+
+        $resultSchema = BuildSchema::build($schemaSource);
 
         Executor::setDefaultFieldResolver([$this, 'fieldResolver']);
 
-        return $schema;
+        return $resultSchema;
     }
 
     public function setCurrentUserId(?string $bearerToken): void
@@ -775,9 +785,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'Postinfo' => [
+            'PostInfo' => [
                 'userid' => function (array $root): string {
-                    $this->logger->info('Query.Postinfo Resolvers');
+                    $this->logger->info('Query.PostInfo Resolvers');
                     return $root['userid'] ?? '';
                 },
                 'postid' => function (array $root): string {
@@ -933,9 +943,9 @@ class GraphQLSchemaBuilder
                     return $root['hasaccess'] ?? 0;
                 },
             ],
-            'Chatinfo' => [
+            'ChatInfo' => [
                 'chatid' => function (array $root): string {
-                    $this->logger->info('Query.Chatinfo Resolvers');
+                    $this->logger->info('Query.ChatInfo Resolvers');
                     return $root['chatid'] ?? '';
                 },
             ],
