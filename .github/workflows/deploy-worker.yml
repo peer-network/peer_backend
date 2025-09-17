@@ -19,6 +19,7 @@ jobs:
       - name: Publish to Cloudflare Workers
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          DISCORD_WEBHOOK_DEPENDABOT: ${{ secrets.DISCORD_WEBHOOK_DEPENDABOT }}
         run: |
           cd worker
           wrangler deploy
