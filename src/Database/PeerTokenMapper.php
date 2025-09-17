@@ -12,6 +12,7 @@ use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Fawaz\App\Status;
+use Fawaz\config\constants\ConstantsConfig;
 
 class PeerTokenMapper
 {
@@ -151,14 +152,19 @@ class PeerTokenMapper
             return self::respondWithError(31202);
         }
 
-        $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, PEERFEE, POOLFEE, BURNFEE);
+        $fees = ConstantsConfig::tokenomics()['FEES'];
+        $peerFee = (float) $fees['PEER'];
+        $poolFee = (float) $fees['POOL'];
+        $burnFee = (float) $fees['BURN'];
+        $inviteFee = (float)$fees['INVITATION'];
+        $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, $peerFee, $poolFee, $burnFee);
 
         $inviterId = $this->getInviterID($userId);
         try {
             if ($inviterId && !empty($inviterId)) {
-                $inviterWin = TokenHelper::mulRc($numberoftokens, INVTFEE);
+                $inviterWin = TokenHelper::mulRc($numberoftokens, $inviteFee);
 
-                $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, PEERFEE, POOLFEE, BURNFEE, INVTFEE);
+                $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, $peerFee, $poolFee, $burnFee, $inviteFee);
 
                 $this->logger->info('Invited By', [
                     'invited' => $inviterId,
@@ -273,7 +279,7 @@ class PeerTokenMapper
             }
 
             // 4. POOLWALLET: Fee To Pool Wallet
-            $feeAmount = TokenHelper::mulRc($numberoftokens, POOLFEE);
+            $feeAmount = TokenHelper::mulRc($numberoftokens, $poolFee);
             if ($feeAmount) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $transUniqueId,
@@ -301,7 +307,7 @@ class PeerTokenMapper
             }
 
             // 5. PEERWALLET: Fee To Peer Wallet
-            $peerAmount = TokenHelper::mulRc($numberoftokens, PEERFEE);
+            $peerAmount = TokenHelper::mulRc($numberoftokens, $peerFee);
             if ($peerAmount) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $transUniqueId,
@@ -329,7 +335,7 @@ class PeerTokenMapper
             }
 
             // 6. BURNWALLET: Burn Tokens
-            $burnAmount = TokenHelper::mulRc($numberoftokens, BURNFEE);
+            $burnAmount = TokenHelper::mulRc($numberoftokens, $burnFee);
             if ($burnAmount) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $transUniqueId,
