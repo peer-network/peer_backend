@@ -82,7 +82,6 @@ type Mutation {
 extend type User {
   situation: String
   email: String
-  password: String
   verified: Int
   roles_mask: Int
   ip: String
