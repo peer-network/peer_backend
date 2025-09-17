@@ -331,10 +331,6 @@
         "comment": "No referral data available",
         "userFriendlyComment": "No referral information available."
     },
-    "21004": {
-        "comment": "No onboarding available",
-        "userFriendlyComment": "No onboarding available."
-    },
     "21101": {
         "comment": "Information Not Found: No friends found. You haven't added any friends yet",
         "userFriendlyComment": "You haven't added any friends yet."
