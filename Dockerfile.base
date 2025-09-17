@@ -1,0 +1,22 @@
+FROM php:8.3-fpm-bullseye
+
+# Install system dependencies (ffmpeg included)
+RUN apt-get update && \
+    apt-get install -y \
+        nginx supervisor \
+        git unzip curl libpq-dev postgresql-client \
+        openssl libzip-dev zlib1g-dev libxml2-dev \
+        libcurl4-openssl-dev libgmp-dev \
+        libffi-dev pkg-config \
+        ffmpeg && \
+    docker-php-ext-configure ffi && \
+    docker-php-ext-install \
+        pgsql pdo pdo_pgsql bcmath xml curl gmp ffi && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Rust and Cargo
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
+    echo 'source $HOME/.cargo/env' >> /root/.bashrc
+ENV PATH="/root/.cargo/bin:$PATH"
+
+WORKDIR /var/www/html

@@ -1,11 +1,13 @@
-# Load .env file
+# Warn if .env file exists (Docker Compose auto-loads .env by default)
 ifneq (,$(wildcard .env))
-    include .env
-    export
+    $(warning Local .env detected. Docker Compose auto-loads this and it may override .env.ci. To avoid issues, either delete it or set COMPOSE_ENV_FILE=.env.ci)
 endif
 
 IMAGE_TAG=local
 export IMAGE_TAG
+
+# Force Docker Compose to use .env.ci instead of auto-loading .env
+export COMPOSE_ENV_FILE=.env.ci
 
 VOLUME_NAME = $(COMPOSE_PROJECT_NAME)_db_data
 COMPOSE_OVERRIDE = docker-compose.override.local.yml
@@ -14,9 +16,9 @@ COMPOSE_FILES = -f docker-compose.yml $(if $(wildcard $(COMPOSE_OVERRIDE)),-f $(
 PROJECT_NAME ?= peer_backend_local_$(USER)
 export COMPOSE_PROJECT_NAME := $(PROJECT_NAME)
 
-env: ## Copy .env.dev to .env for local development
-	cp .env.dev .env
-	@echo ".env created from .env.dev"
+env-ci: ## Copy .env.dev to .env.ci for local development
+	cp .env.dev .env.ci
+	@echo ".env.ci created from .env.dev"
 
 init: ## Prepare Postman environment files for testing
 	@echo "Using sql_files_for_import/ directly"
@@ -28,7 +30,7 @@ init: ## Prepare Postman environment files for testing
 
 reset-db-and-backend: ## Reset DB, backend, and remove all related Docker images
 	@echo "Bringing down docker-compose stack with volumes..."
-	-@docker-compose $(COMPOSE_FILES) down -v
+	-@docker-compose --env-file .env.ci $(COMPOSE_FILES) down -v
 
 	@echo "Removing docker volume ..."
 	-@docker volume rm $(VOLUME_NAME) 2>/dev/null || echo "Volume $(VOLUME_NAME) already removed or in use."
@@ -47,10 +49,10 @@ reset-db-and-backend: ## Reset DB, backend, and remove all related Docker images
 
 reload-backend: ## Rebuild and restart backend container
 	@echo "Rebuilding backend image..."
-	docker-compose $(COMPOSE_FILES) build backend
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) build backend
 
 	@echo "Recreating backend container..."
-	docker-compose $(COMPOSE_FILES) up -d --force-recreate backend
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) up -d --force-recreate backend
 
 	@echo "Waiting for backend to be healthy..."
 	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
@@ -60,12 +62,12 @@ reload-backend: ## Rebuild and restart backend container
 
 restart-db: ## Restart only the database (fresh schema & data, keep backend as-is)
 	@echo "Stopping and removing only the DB container and volume..."
-	docker-compose $(COMPOSE_FILES) stop db
-	docker-compose $(COMPOSE_FILES) rm -f db
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) stop db
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) rm -f db
 	docker volume rm $(VOLUME_NAME) 2>/dev/null || echo "DB volume already removed."
 
 	@echo "Recreating fresh DB..."
-	docker-compose $(COMPOSE_FILES) up -d db
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) up -d db
 
 	@echo "Waiting for Postgres healthcheck..."
 	until [ "$$(docker inspect --format='{{.State.Health.Status}}' $$(docker-compose $(COMPOSE_FILES) ps -q db))" = "healthy" ]; do \
@@ -74,7 +76,7 @@ restart-db: ## Restart only the database (fresh schema & data, keep backend as-i
 
 	@echo "Database restarted and ready. Backend container was untouched."
 
-dev: env reset-db-and-backend init ## Full setup: env, DB reset, vendors install, start DB+backend
+dev: env-ci reset-db-and-backend init ## Full setup: env.ci, DB reset, vendors install, start DB+backend
 	@echo "Installing Composer dependencies on local host..."
 	composer install --no-dev --prefer-dist --no-interaction
 
@@ -91,18 +93,18 @@ dev: env reset-db-and-backend init ## Full setup: env, DB reset, vendors install
 	find . -type f -exec chmod 666 {} \;
 
 	@echo "Building images..."
-	docker-compose $(COMPOSE_FILES) build
+	docker-compose --env-file .env.ci -f docker-compose.yml -f docker-compose.override.local.yml build
 
 	@echo "Starting DB..."
-	docker-compose $(COMPOSE_FILES) up -d db
+	docker-compose --env-file .env.ci -f docker-compose.yml -f docker-compose.override.local.yml up -d db
 
 	@echo "Waiting for Postgres to be healthy..."
-	until docker-compose $(COMPOSE_FILES) exec db pg_isready -U postgres | grep -q "accepting connections"; do \
+	until docker-compose --env-file .env.ci -f docker-compose.yml -f docker-compose.override.local.yml exec db pg_isready -U postgres | grep -q "accepting connections"; do \
 		echo "Waiting for DB..."; sleep 2; \
 	done
 
 	@echo "Starting backend..."
-	docker-compose $(COMPOSE_FILES) up -d backend
+	docker-compose --env-file .env.ci -f docker-compose.yml -f docker-compose.override.local.yml up -d backend
 	
 	@echo "Waiting for backend to be healthy..."
 	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
@@ -113,10 +115,10 @@ dev: env reset-db-and-backend init ## Full setup: env, DB reset, vendors install
 
 restart: ## Soft restart with fresh DB but keep current code & vendors
 	@echo "Stopping and removing Docker stack (incl. volumes)..."
-	docker-compose $(COMPOSE_FILES) down -v
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) down -v
 
 	@echo "Docker stack removed. Starting fresh DB + Backend with existing code & vendors..."
-	docker-compose $(COMPOSE_FILES) up -d db
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) up -d db
 
 	@echo "Waiting for Postgres healthcheck..."
 	until [ "$$(docker inspect --format='{{.State.Health.Status}}' $$(docker-compose $(COMPOSE_FILES) ps -q db))" = "healthy" ]; do \
@@ -124,7 +126,7 @@ restart: ## Soft restart with fresh DB but keep current code & vendors
 	done
 
 	@echo "Starting backend with current code..."
-	docker-compose $(COMPOSE_FILES) up -d backend
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) up -d backend
 
 	@echo "Waiting for backend to be healthy..."
 	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
@@ -141,13 +143,13 @@ ensure-jq: ## Ensure jq is installed (auto-install if missing)
 
 test: ensure-jq ## Run Newman tests inside Docker and generate HTML report
 	@echo "Building Newman container..."
-	docker-compose $(COMPOSE_FILES) build newman
+	docker-compose --env-file .env.ci -f docker-compose.yml -f docker-compose.override.local.yml build newman
 
 	@echo "Starting Newman container..."
-	docker-compose $(COMPOSE_FILES) up -d newman
+	docker-compose --env-file .env.ci -f docker-compose.yml -f docker-compose.override.local.yml up -d newman
 
 	@echo "Running merge script inside the container..."
-	docker-compose $(COMPOSE_FILES) run --rm newman \
+	docker-compose --env-file .env.ci -f docker-compose.yml -f docker-compose.override.local.yml run --rm newman \
 		node /etc/newman/merge-collections.js
 
 	jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {raw: "{{BACKEND_URL}}/graphql", protocol: "http", host: ["backend"], path: ["graphql"]}' \
@@ -163,7 +165,7 @@ test: ensure-jq ## Run Newman tests inside Docker and generate HTML report
 	mv -f tests/postman_collection/tmp_env_patched.json tests/postman_collection/tmp_env.json
 
 	@echo "Running Newman tests inside the container..."
-	docker-compose $(COMPOSE_FILES) run --rm newman \
+	docker-compose --env-file .env.ci -f docker-compose.yml -f docker-compose.override.local.yml run --rm newman \
 	    newman run /etc/newman/tmp_collection.json \
 	    --environment /etc/newman/tmp_env.json \
 	    --reporters cli,htmlextra \
@@ -196,29 +198,39 @@ clean-all: reset-db-and-backend  ## Remove containers, volumes, vendors, reports
 		echo "Could not remove newman folder (report.html). Might need sudo or manual cleanup."; \
 		true; \
 	}
-	@rm -f .env
+	@rm -f .env.ci
 	@rm -f supervisord.pid
 	@rm -f runtime-data/logs/errorlog.txt
 	@rm -f tests/postman_collection/tmp_*.json
 	@echo "Local project cleanup complete."
 
+clean-ci: reset-db-and-backend ## Cleanup for CI but keep reports
+	@rm -f composer.lock
+	@rm -rf vendor
+	@rm -rf sql_files_for_import_tmp
+	@rm -f .env.ci
+	@rm -f supervisord.pid
+	@rm -f runtime-data/logs/errorlog.txt
+	@rm -f tests/postman_collection/tmp_*.json
+	@echo "Local CI cleanup complete (reports preserved)."
+
 ci: ## Run full local CI workflow (setup, tests, cleanup)
 	$(MAKE) dev
 	$(MAKE) test
-	$(MAKE) clean-all
+	$(MAKE) clean-ci
 
 # ---- Developer Shortcuts ----
 .PHONY: logs db bash-backend
 
 logs: ## Tail backend container logs
-	@docker-compose $(COMPOSE_FILES) logs -f backend
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) logs -f backend
 
 db: ## Open psql shell into Postgres
-	@docker-compose $(COMPOSE_FILES) exec -e PGPASSWORD=$(DB_PASSWORD) db \
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) exec -e PGPASSWORD=$(DB_PASSWORD) db \
 	    psql -h $(DB_HOST) -U $(DB_USERNAME) -d $(DB_DATABASE)
 
 bash-backend: ## Open interactive shell in backend container
-	@docker-compose $(COMPOSE_FILES) exec backend bash
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) exec backend bash
 
 help: ## Show available make targets
 	@echo "Available targets:"
@@ -229,3 +241,7 @@ help: ## Show available make targets
 clean-prune: clean-all ## Remove ALL unused images, build cache, and volumes
 	@echo "WARNING: This will remove ALL unused images, build cache, and volumes on your system!"
 	docker system prune -af --volumes
+
+hot-ci:
+	$(MAKE) restart-db
+	$(MAKE) test

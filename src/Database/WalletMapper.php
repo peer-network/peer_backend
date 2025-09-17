@@ -1253,12 +1253,12 @@ class WalletMapper
         try {
             $results = $this->insertWinToLog($userId, $args);
             if ($results === false) {
-                return self::respondWithError(41206);
+                return self::respondWithError(41205);
             }
 
             $results = $this->insertWinToPool($userId, $args);
             if ($results === false) {
-                return self::respondWithError(41206);
+                return self::respondWithError(41205);
             }
 
             $this->logger->info('Wallet deduction successful.', [
@@ -1289,7 +1289,7 @@ class WalletMapper
                     'whereby' => $whereby,
                 ],
             ]);
-            return self::respondWithError(41206);
+            return self::respondWithError(41205);
         }
     }
 
