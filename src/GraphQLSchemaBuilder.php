@@ -86,37 +86,55 @@ class GraphQLSchemaBuilder
         $this->resolvers = $this->buildResolvers();
     }
 
-    public function build(): Schema|array
-    {
+    public function getQueriesDependingOnRole(): ?string {
+        $graphqlPath = "Graphql/schema/";
+        
+        $baseQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schema.graphql');
+        $guestOnlyQueries =  \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schemaguest.graphql');
+        $adminOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'admin_schema.graphql');
+        $bridgeOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql');
+
+        $adminSchema = $baseQueries . $adminOnlyQueries;
+        $guestSchema = $guestOnlyQueries;
+        $userSchema = $baseQueries;
+        $bridgeSchema = $bridgeOnlyQueries;
+
         if ($this->currentUserId === null) {
-            $schema = 'schemaguest.graphql';
+            $schema = $guestSchema;
         } else {
-            $schema = 'schema.graphql';
+            $schema = $userSchema;
         }
 
         if ($this->userRoles <= 0) {
             $schema = $schema;
         } elseif ($this->userRoles === 8) {
-            $schema = 'bridge_schema.graphql';
+            $schema = $bridgeSchema;
         } elseif ($this->userRoles === 16) {
-            $schema = 'admin_schema.graphql';
+            $schema = $adminSchema;
         }
 
+        return $schema;
+    }
+
+    public function build(): Schema|array
+    {
+        $graphqlPath = "Graphql/schema/";
+        $typesPath = "types/";
+
+        $scalars = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "scalars.graphql");
+        $response = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "response.graphql");
+        $inputs = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "inputs.graphql");
+        $enum = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "enums.graphql");
+        $types = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql");
+
+        $schema = $this->getQueriesDependingOnRole();
+        
         if (empty($schema)){
             $this->logger->error('Invalid schema', ['schema' => $schema]);
             return $this->respondWithError(40301);
         }
 
-        $graphqlPath = "Graphql/schema/";
-        $typesPath = "types/";
-        $contents = \file_get_contents(__DIR__ . '/' . $schema);
-        $scalars = \file_get_contents(__DIR__ . '/' . $graphqlPath . "scalars.graphql");
-        $response = \file_get_contents(__DIR__ . '/' . $graphqlPath . "response.graphql");
-        $inputs = \file_get_contents(__DIR__ . '/' . $graphqlPath . "inputs.graphql");
-        $enum = \file_get_contents(__DIR__ . '/' . $graphqlPath . "enums.graphql");
-        $types = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql");
-
-        $schemaSource = $scalars . $enum . $inputs . $types . $response . $contents;
+        $schemaSource = $scalars . $enum . $inputs . $types . $response . $schema;
 
         $resultSchema = BuildSchema::build($schemaSource);
 
@@ -1823,6 +1841,7 @@ class GraphQLSchemaBuilder
         return [
             'hello' => fn(mixed $root, array $args, mixed $context) => $this->resolveHello($root, $args, $context),
             'searchUser' => fn(mixed $root, array $args) => $this->resolveSearchUser($args),
+            'searchUserAdmin' => fn(mixed $root, array $args) => $this->resolveSearchUser($args),
             'listUsers' => fn(mixed $root, array $args) => $this->resolveUsers($args),
             'getProfile' => fn(mixed $root, array $args) => $this->resolveProfile($args),
             'listFollowRelations' => fn(mixed $root, array $args) => $this->resolveFollows($args),
@@ -1840,9 +1859,7 @@ class GraphQLSchemaBuilder
             'getDailyFreeStatus' => fn(mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
             'getpercentbeforetransaction' => fn(mixed $root, array $args) => $this->resolveBeforeTransaction($args),
             'refreshmarketcap' => fn(mixed $root, array $args) => $this->resolveMcap(),
-            'globalwins' => fn(mixed $root, array $args) => $this->walletService->callGlobalWins(),
             'gemster' => fn(mixed $root, array $args) => $this->walletService->callGemster(),
-            'gemsters' => fn(mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
             'balance' => fn(mixed $root, array $args) => $this->resolveLiquidity(),
             'getUserInfo' => fn(mixed $root, array $args) => $this->resolveUserInfo(),
             'listWinLogs' => fn(mixed $root, array $args) => $this->resolveFetchWinsLog($args),
@@ -1861,7 +1878,6 @@ class GraphQLSchemaBuilder
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
-            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'getTokenomics' => fn(mixed $root, array $args) => $this->resolveTokenomics(),
         ];
     }
@@ -1904,6 +1920,9 @@ class GraphQLSchemaBuilder
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveTransfer' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'resolveTransferV2' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
+            'globalwins' => fn(mixed $root, array $args) => $this->walletService->callGlobalWins(),
+            'gemsters' => fn(mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
+            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
         ];
     }
 

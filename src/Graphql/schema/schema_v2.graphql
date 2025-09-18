@@ -70,33 +70,33 @@ type Mutation {
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
 }
 
-type TransactionResponse {
+type DefaultResponse {
   status: String!
-  ResponseCode: String!
+  ResponseCode: String
+}
+
+type TransactionResponse {
+  meta: DefaultResponse
   affectedRows: [Transaction!]
 }
 
 type TransferTokenResponse {
-  status: String!
-  ResponseCode: String!
+  meta: DefaultResponse
   affectedRows: TransferToken!
 }
 
 type ListTodaysInteractionsResponse {
-  status: String!
-  ResponseCode: String
+  meta: DefaultResponse
   affectedRows: TodaysInteractionsData
 }
 
 type PostInteractionResponse {
-  status: String!
-  ResponseCode: String
+  meta: DefaultResponse
   affectedRows: [ProfileUser!]
 }
 
 type GetDailyResponse {
-  status: String!
-  ResponseCode: String!
+  meta: DefaultResponse
   affectedRows: [DailyFreeResponse]
 }
 
@@ -107,155 +107,127 @@ type DailyFreeResponse {
 }
 
 type PostEligibilityResponse {
-  status: String!
-  ResponseCode: String!
+  meta: DefaultResponse
   eligibilityToken: String!
 }
 
 type UserInfoResponse {
-  status: String!
-  ResponseCode: String!
+  meta: DefaultResponse
   affectedRows: UserInfo
 }
 
 type PostInfoResponse {
-  status: String!
-  ResponseCode: String!
+  meta: DefaultResponse
   affectedRows: PostInfo
 }
 
 type CommentInfoResponse {
-  status: String!
-  ResponseCode: String!
+  meta: DefaultResponse
   affectedRows: CommentInfo
 }
 
 type ChatResponse {
-  status: String!
+  meta: DefaultResponse
   counter: Int!
-  ResponseCode: String
   affectedRows: [Chat!]
 }
 
 type FollowStatusResponse {
-  status: String!
-  ResponseCode: String
+    meta: DefaultResponse
   isfollowing: Boolean
 }
 
-type DefaultResponse {
-  status: String!
-  ResponseCode: String
-}
-
 type UserPreferencesResponse {
-  status: String!
-  ResponseCode: String
+    meta: DefaultResponse
   affectedRows: UserPreferences
 }
 
 type AddPostResponse {
-  status: String!
-  ResponseCode: String
+  meta: DefaultResponse
   affectedRows: PostInfo
 }
 
 type AddChatResponse {
-  status: String!
-  ResponseCode: String
+  meta: DefaultResponse
   affectedRows: ChatInfo
 }
 
 type AddChatmessageResponse {
-  status: String!
+  meta: DefaultResponse
   counter: Int!
-  ResponseCode: String
   affectedRows: [ChatMessageInfo]
 }
 
 type BasicUserInfoResponse {
-  status: String!
-  ResponseCode: String
+  meta: DefaultResponse
   affectedRows: BasicUserInfo
 }
 
 type UserFriendsResponse {
-  status: String!
+  meta: DefaultResponse
   counter: Int!
-  ResponseCode: String
   affectedRows: [BasicUserInfo]
 }
 
 type FollowRelationsResponse {
-  status: String
+  meta: DefaultResponse
   counter: Int!
-  ResponseCode: String
   affectedRows: FollowRelations
 }
 
 type BlockedUsersResponse {
-  status: String
+  meta: DefaultResponse
   counter: Int!
-  ResponseCode: String
   affectedRows: BlockedUsers
 }
 
 type UserListResponse {
-  status: String!
+  meta: DefaultResponse
   counter: Int!
-  ResponseCode: String
   affectedRows: [User]
 }
 
 type TagSearchResponse {
-  status: String!
+  meta: DefaultResponse
   counter: Int!
-  ResponseCode: String
   affectedRows: [Tag]
 }
 
 type PostResponse {
-  status: String!
-  ResponseCode: String
+  meta: DefaultResponse
   affectedRows: Post
 }
 
 type PostListResponse {
-  status: String!
+  meta: DefaultResponse
   counter: Int!
-  ResponseCode: String
   affectedRows: [Post!]
 }
 
 type CommentResponse {
-  status: String!
+  meta: DefaultResponse
   counter: Int!
-  ResponseCode: String
   affectedRows: [Comment]
 }
 
 type ReferralInfoResponse {
-  status: String
-  ResponseCode: String
+  meta: DefaultResponse
   referralUuid: ID
   referralLink: String
 }
 type ReferralListResponse {
-  status: String!
-  counter: Int!
-  ResponseCode: String!
+  meta: DefaultResponse
+  counter: Int!!
   affectedRows: ReferralUsers!
 }
 
 type GetActionPricesResponse {
-    status: String!
-    ResponseCode: String!
-    affectedRows: ActionPriceResult!
+  meta: DefaultResponse
+  affectedRows: ActionPriceResult!
 }
 
 type TokenomicsResponse {
-  status: String!
-  ResponseCode: Int!                         
+  meta: DefaultResponse          
   actionTokenPrices: ActionPriceResult!
   actionGemsReturns: ActionGemsReturns!
   mintingData: MintingData!
