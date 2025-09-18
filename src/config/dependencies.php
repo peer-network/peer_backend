@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use Fawaz\BaseURL;
+use Fawaz\Utils\ResponseMessagesProvider;
 use Fawaz\Services\JWTService;
 use Fawaz\Services\Mailer;
 use Fawaz\Services\LiquidityPool;
@@ -73,5 +74,10 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 
             return $pdo;
         },
+
+        ResponseMessagesProvider::class => function(ContainerInterface $c) {
+            $path = __DIR__ . "/../../runtime-data/media/assets/response-codes.json";
+            return new ResponseMessagesProvider($path);
+        }
     ]);
 };
