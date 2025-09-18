@@ -54,7 +54,7 @@ use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use ReflectionNamedType;
 use Fawaz\App\PeerTokenService;
 use Fawaz\config\constants\ConstantsConfig;
-
+use Fawaz\Utils\ResponseMessagesProvider;
 
 class GraphQLSchemaBuilder
 {
@@ -81,7 +81,8 @@ class GraphQLSchemaBuilder
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
         protected JWTService $tokenService,
-        protected AlphaMintService $alphaMintService
+        protected AlphaMintService $alphaMintService,
+        protected ResponseMessagesProvider $responseMessagesProvider,
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -1034,6 +1035,9 @@ class GraphQLSchemaBuilder
                 },
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
+                },
+                'ResponseMessage' => function (array $root): string {
+                    return $root['ResponseMessage'] ?? '';
                 },
             ],
             'AuthPayload' => [
@@ -3283,16 +3287,21 @@ class GraphQLSchemaBuilder
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
-    protected function respondWithError(int $message): array
+    private function respondWithError(int $responseCode): array
     {
-        return ['status' => 'error', 'ResponseCode' => $message];
+        return [
+            'status' => 'error', 
+            'ResponseCode' => $responseCode,
+            'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$responseCode),
+        ];
     }
 
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    private function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
             'ResponseCode' => $message,
+            'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$message),
             'affectedRows' => $data,
         ];
 
