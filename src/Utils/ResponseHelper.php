@@ -4,9 +4,9 @@ namespace Fawaz\Utils;
 
 trait ResponseHelper
 {
-    function __construct(
-        private ResponseMessagesProvider $responseMessagesProvider
-    ) {}
+    // public function __construct(
+    //     private ResponseMessagesProvider $responseMessagesProvider
+    // ) {}
 
     private function argsToJsString($args) {
         return json_encode($args);
@@ -30,8 +30,8 @@ trait ResponseHelper
     {
         return [
             'status' => 'error', 
-            'ResponseCode' => $responseCode,
-            'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$responseCode),
+            'ResponseCode' => $responseCode, 
+            // 'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$responseCode)
         ];
     }
 
@@ -40,7 +40,7 @@ trait ResponseHelper
         $response = [
             'status' => 'success',
             'ResponseCode' => $message,
-            'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$message),
+            // 'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$message),
             'affectedRows' => $data,
         ];
 

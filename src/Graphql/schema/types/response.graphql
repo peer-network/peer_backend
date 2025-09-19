@@ -1,7 +1,7 @@
 type DefaultResponse {
   status: String!
   ResponseCode: String
-  ResponseMessage: String
+  # ResponseMessage: String
 }
 
 type HelloResponse {
