@@ -3,6 +3,7 @@
 namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
+use Fawaz\App\Specs\SpecTypes\ActiveUserSpec;
 use Fawaz\App\Specs\SpecTypes\ContentFilterSpec;
 use Fawaz\App\Specs\SpecTypes\CurrentUserIsBlockedUserSpec;
 use Fawaz\App\Specs\SpecTypes\UserIsBlockedByMeSpec;
@@ -68,6 +69,7 @@ final class UserServiceImpl implements UserServiceInterface
         $strategy = new GetProfileContentFilteringStrategy();
 
         $verifiedUserSpec = new VerifiedUserSpec($userId);
+        $activeUserSpec = new ActiveUserSpec($userId);
         $currentUserIsBlockedSpec = new CurrentUserIsBlockedUserSpec(
             $this->currentUserId,
             $userId
@@ -91,23 +93,25 @@ final class UserServiceImpl implements UserServiceInterface
         
         $userSpecs = [
             $verifiedUserSpec,
+            $activeUserSpec,
             $currentUserIsBlockedSpec,
             $usersContentFilterSpec
         ];
         $postSpecs = [
             $verifiedUserSpec,
+            $activeUserSpec,
             $currentUserIsBlockedSpec,
             $postsContentFilterSpec
         ];
 
         try {
-            $profileData = $this->userMapper->fetchProfileDataRaw(
+            $profileData = $this->userMapper->fetchProfileData(
                 $userId,
                 $this->currentUserId,
                 $userSpecs
             )->getArrayCopy();
 
-            $userReports = (int)$profileData['reports'];
+            $userReports = (int)$profileData['user_reports'];
             $user_dismiss_moderation_amount = (int)$profileData['user_count_content_moderation_dismissed'];
 
             $contentFilterService = new ContentFilterServiceImpl(

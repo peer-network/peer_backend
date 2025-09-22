@@ -2,7 +2,11 @@
 
 namespace Fawaz\App;
 
+use Fawaz\App\Specs\SpecTypes\ActiveUserSpec;
+use Fawaz\App\Specs\SpecTypes\BasicUserRolesSpec;
+use Fawaz\App\Specs\SpecTypes\UserRolesSpec;
 use Fawaz\App\Specs\SpecTypes\VerifiedAndActiveUserSpec;
+use Fawaz\App\Specs\SpecTypes\VerifiedUserSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -346,7 +350,17 @@ class UserService
             return self::respondWithError(31010);
         }
         try {
-            $users = $this->userMapper->getValidReferralInfoByLink($referralString);
+            $verifiedUserSpec = new VerifiedUserSpec($referralString);
+            $activeUserSpec = new ActiveUserSpec($referralString);
+            $userRolesSpec = new BasicUserRolesSpec($referralString);
+        
+            $userSpecs = [
+                $verifiedUserSpec,
+                $activeUserSpec,
+                $userRolesSpec
+            ];
+        
+            $users = $this->userMapper->getValidReferralInfoByLink($referralString, $userSpecs);
 
             if(!$users){
                 return self::respondWithError(31007); // No valid referral information found
@@ -780,63 +794,6 @@ class UserService
             $this->transactionManager->rollback();
             $this->logger->error('Failed to delete user', ['exception' => $e]);
             return self::respondWithError(41011);
-        }
-    }
-
-    public function Profile(?array $args = []): array
-    {
-        if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
-        }
-
-        $userId = $args['userid'] ?? $this->currentUserId;
-        $postLimit = min(max((int)($args['postLimit'] ?? 4), 1), 10);
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-
-        $this->logger->info('UserService.Profile started');
-
-        if (!self::isValidUUID($userId)) {
-            $this->logger->warning('Invalid UUID for profile', ['userId' => $userId]);
-            return self::respondWithError(30102);
-        }
-        if (!$this->userMapper->isUserExistById($userId)) {
-            $this->logger->warning('User not found for Follows', ['userId' => $userId]);
-        return self::respondWithError(31007);
-        }
-
-        $specs = [
-            (new VerifiedAndActiveUserSpec($userId))->toSql()
-        ];
-
-        try {
-            $profileData = $this->userMapper->fetchProfileDataRaw(
-                $userId,
-                $this->currentUserId,
-                $specs
-            )->getArrayCopy();
-
-            // $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId,$contentFilterBy)->getArrayCopy();
-            $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
-
-            $posts = $this->postMapper->fetchPostsByType($this->currentUserId,$userId, $postLimit,$contentFilterBy);
-
-            $contentTypes = ['image', 'video', 'audio', 'text'];
-            foreach ($contentTypes as $type) {
-                $profileData["{$type}posts"] = array_filter($posts, fn($post) => $post['contenttype'] === $type);
-            }
-
-            $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11008,
-                'affectedRows' => $profileData,
-            ];
-        } catch (\Throwable $e) {
-            $this->logger->error('Failed to fetch profile data', [
-                'userId' => $userId,
-                'exception' => $e->getMessage(),
-            ]);
-            return $this->createSuccessResponse(21001, []);
         }
     }
 

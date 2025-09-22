@@ -84,7 +84,7 @@ class Profile
             'textposts' => $this->textposts,
             'videoposts' => $this->videoposts,
             'audioposts' => $this->audioposts,
-            'reports' => $this->reports
+            'user_reports' => $this->reports
         ];
         return $att;
     }

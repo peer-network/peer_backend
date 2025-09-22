@@ -1123,78 +1123,6 @@ class UserMapper
         }
     }
 
-    public function fetchProfileData(string $userid, string $currentUserId, ?string $contentFilterBy): Profile|false 
-    {
-        $whereClauses = ["u.uid = :userid AND u.verified = :verified"];
-        // $whereClauses[] = 'u.status = 0';
-        $whereClausesString = implode(" AND ", $whereClauses);
-
-        $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
-            null,
-            $contentFilterBy
-        );
-
-        $sql = sprintf("
-            SELECT 
-                u.uid,
-                u.username,
-                u.slug,
-                u.status,
-                u.img,
-                u.biography,
-                ui.amountposts,
-                ui.amountfollower,
-                ui.amountfollowed,
-                ui.amountfriends,
-                ui.amountblocked,
-                ui.reports AS user_reports,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
-                COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
-            FROM users u
-            LEFT JOIN users_info ui ON ui.userid = u.uid
-            WHERE %s",
-            $whereClausesString
-         );
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            $stmt->bindValue(':verified', 1, \PDO::PARAM_INT);
-
-            $stmt->execute();
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-
-            if ($data !== false) {
-                $user_reports = (int)$data['user_reports'];
-                $user_dismiss_moderation_amount = (int)$data['user_count_content_moderation_dismissed'];
-
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::user,
-                    ContentType::user,
-                    $user_reports,$user_dismiss_moderation_amount,
-                    $currentUserId,$data['uid']
-                ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $data['username'] = $replacer->username($data['username']);
-                    $data['img'] = $replacer->profilePicturePath($data['img']);
-                }
-
-                return new Profile($data);
-            }
-
-            $this->logger->warning("No user found with ID", ['userid' => $userid]);
-            return false;
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in fetchProfileData", ['error' => $e->getMessage()]);
-            return false;
-        }
-    }
-
     private function setPassword(string $password): string
     {
         $this->logger->info("UserMapper.setPassword started");
@@ -1365,11 +1293,10 @@ class UserMapper
             'invitee_uuid' => $userId,
         ]);
 
-        $query = "
-        SELECT u.uid, u.status, u.username, u.slug, u.img
-        FROM users_info ui
-        JOIN users u ON ui.invited = u.uid
-        WHERE ui.userid = :invitee_uuid
+        $query = "SELECT u.uid, u.status, u.username, u.slug, u.img
+            FROM users_info ui
+            JOIN users u ON ui.invited = u.uid
+            WHERE ui.userid = :invitee_uuid
         ";
 
         $stmt = $this->db->prepare($query);
@@ -1383,8 +1310,7 @@ class UserMapper
 
     public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array 
     {
-        $query = "
-            SELECT u.uid, u.status, u.username, u.slug, u.img
+        $query = "SELECT u.uid, u.status, u.username, u.slug, u.img
             FROM users_info ui
             JOIN users u ON ui.userid = u.uid
             WHERE ui.invited = :userId
@@ -1726,9 +1652,9 @@ class UserMapper
     {
         $this->logger->info("UserMapper.fetchAllFriends started");
 
-        $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, u1.status as followerstatus, 
+        $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, u1.status as followerstatus,
                                 u2.uid AS followed, u2.username AS followedname, u2.slug AS followedslug, u2.status as followedstatus
-                FROM follows f1
+                FROM follows 
                 INNER JOIN follows f2 ON f1.followerid = f2.followedid 
                                      AND f1.followedid = f2.followerid
                 INNER JOIN users u1 ON u1.uid = f1.followerid
@@ -1997,20 +1923,40 @@ class UserMapper
         }
     }
 
-    public function getValidReferralInfoByLink(string $referralLink): array|null
+    public function getValidReferralInfoByLink(string $referralLink, array $specifications): array|null
     {
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $params = $allSpecs->paramsToPrepare;
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = "ur.referral_uuid = :referral_uuid";
+
         $this->logger->info("UserMapper.getValidReferralInfoByLink started", [
             'referralLink' => $referralLink,
         ]);
 
-        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.referral_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid AND u.roles_mask IN (:role1, :role2, :role3)";
+        $whereClausesString = implode(" AND ", $whereClauses);
+        
+        $query = sprintf("SELECT 
+                ur.referral_uuid,
+                ur.referral_link, 
+                u.username, 
+                u.slug, 
+                u.img, 
+                u.uid 
+            FROM 
+                user_referral_info ur 
+            LEFT JOIN users u 
+                ON u.uid = ur.referral_uuid  
+            WHERE %s",
+            $whereClausesString
+        );
 
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':referral_uuid', $referralLink, \PDO::PARAM_STR);
-        $stmt->bindValue(':role1', Role::USER, \PDO::PARAM_INT);
-        $stmt->bindValue(':role2', Role::ADMIN, \PDO::PARAM_INT);
-        $stmt->bindValue(':role3', Role::COMPANY_ACCOUNT, \PDO::PARAM_INT);
-        $stmt->execute();
+
+        $params['referral_uuid'] = $referralLink;
+    
+        $stmt->execute($params);
     
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
     
@@ -2020,12 +1966,10 @@ class UserMapper
         return $result ?: null;
     }
 
-    public function fetchProfileDataRaw(string $userid, string $currentUserId, array $specifications): Profile|false {
+    public function fetchProfileData(string $userid, string $currentUserId, array $specifications): Profile|false {
         
         $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
-
         $allSpecs = SpecificationSQLData::merge($specsSQL);
-        
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = "u.uid = :userid";
         $whereClausesString = implode(" AND ", $whereClauses);
