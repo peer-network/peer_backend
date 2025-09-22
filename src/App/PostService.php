@@ -599,6 +599,85 @@ class PostService
         return $results;
     }
 
+    public function searchPosts(?array $args = []): array|false
+    {
+        // if (!$this->checkAuthentication()) {
+        //     return $this->respondWithError(60501);
+        // } 
+
+        $searchBy = $args['searchBy'] ?? null;
+        $validSearchTypes = ['TITLE', 'DESCRIPTION', 'BOTH'];
+        if ($searchBy === null || !in_array(strtoupper($searchBy), $validSearchTypes, true)) {
+            $this->logger->error('Invalid searchBy parameter', ['searchBy' => $searchBy]);
+            return $this->respondWithError(30103);
+        }
+
+        $searchTerm = $args['searchTerm'] ?? null;
+        if (empty($searchTerm) || strlen(trim($searchTerm)) < 2) {
+            $this->logger->error('Invalid searchTerm - too short', ['searchTerm' => $searchTerm]);
+            return $this->respondWithError(30103);
+        }
+       
+        $searchTerm = trim($searchTerm);
+        if (strlen($searchTerm) > 100) {
+            $this->logger->error('Invalid searchTerm - too long', ['searchTerm' => $searchTerm]);
+            return $this->respondWithError(30103);
+        }   
+
+        $sortBy = $args['sortBy'] ?? null;
+        if ($sortBy !== null) {
+            $validSorts = ['NEWEST', 'TRENDING', 'LIKES', 'DISLIKES', 'VIEWS', 'COMMENTS', 'FOR_ME'];
+            if (!in_array($sortBy, $validSorts, true)) {
+                $this->logger->error('Invalid sortBy parameter', ['sortBy' => $sortBy]);
+                return $this->respondWithError(30103);
+            }
+        }
+
+        $filterBy = $args['filterBy'] ?? [];
+        if (!empty($filterBy) && is_array($filterBy)) {
+            $validTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED'];
+
+            // $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
+            $invalidTypes = array_diff($filterBy, $validTypes);
+
+            if (!empty($invalidTypes)) {
+                $this->logger->error('Invalid filterBy types', ['invalidTypes' => $invalidTypes]);
+                return $this->respondWithError(30103);
+            }
+        }
+
+        $this->logger->info("PostService.searchPosts started" , [
+            'searchBy' => $searchBy,
+            'searchTerm' => $searchTerm,
+            'sortBy' => $sortBy,
+            'filterBy' => $filterBy,
+        ]);
+
+        // $posts = $this->postMapper->searchPosts($searchTerm);
+        // if (empty($posts)) {
+        //     return $this->respondWithError(21501);
+        // }
+
+
+        $results = $this->postMapper->searchPosts($this->currentUserId, $args);
+
+
+        if (is_array($results)) {
+            $this->logger->info("PostService.searchPosts completed", [
+                'searchTerm' => $searchTerm,
+                'resultCount' => count($results),
+            ]);
+        } else {
+            $this->logger->warning("No posts found matching search criteria", [
+                'searchTerm' => $searchTerm,
+                'resultCount' => $results
+            ]);
+        }
+
+        return $results;
+    }
+
+
     public function getChatFeedsByID(string $feedid): ?array
     {
         if (!$this->checkAuthentication() || !self::isValidUUID($feedid)) {

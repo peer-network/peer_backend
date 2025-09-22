@@ -878,6 +878,180 @@ class PostMapper
         }
     }
 
+    public function searchPosts(string $currentUserId, ?array $args = []): array
+    {
+        $this->logger->info("PostMapper.searchPosts started");
+
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $searchBy = strtoupper($args['searchBy'] ?? 'BOTH');
+        $searchTerm = trim($args['searchTerm'] ?? '');
+        $filterBy = $args['filterBy'] ?? [];
+        $sortBy = $args['sortBy'] ?? 'NEWEST';
+
+
+        $selectFields = [
+            'p.postid',
+            'p.title',
+            'p.mediadescription',
+            'p.contenttype',
+            'p.media',
+            'p.cover',
+            'p.createdat',
+            'u.username',
+            'u.img',
+            'u.slug'
+        ];
+
+        $fromClause = 'posts p';
+        $joinClauses = ['INNER JOIN users u ON p.userid = u.uid'];
+        $whereClauses = ['p.feedid IS NULL'];
+        $parameters = [
+            'limit' => $limit,
+            'offset' => $offset,
+        ];
+
+
+        if (!empty($searchTerm)) {
+            $searchCondition = match ($searchBy) {
+                'TITLE' => 'p.title ILIKE :searchTerm',
+                'DESCRIPTION' => 'p.mediadescription ILIKE :searchTerm',
+                'BOTH' => '(p.title ILIKE :searchTerm OR p.mediadescription ILIKE :searchTerm)',
+                default => throw new \InvalidArgumentException("Invalid searchBy value: {$searchBy}")
+            };
+            
+            $whereClauses[] = $searchCondition;
+            $parameters['searchTerm'] = "%{$searchTerm}%";
+        }
+
+
+        $contentTypeBindings = [];
+        if (!empty($filterBy) && is_array($filterBy)) {
+            $contentTypeMap = [
+                'IMAGE' => 'image',
+                'AUDIO' => 'audio',
+                'VIDEO' => 'video',
+                'TEXT' => 'text',
+            ];
+
+            $validTypes = array_values(array_intersect_key(
+                $contentTypeMap, 
+                array_flip($filterBy)
+            ));
+
+            if (!empty($validTypes)) {
+                $placeholders = [];
+                foreach ($validTypes as $index => $contentType) {
+                    $paramName = "contentType_{$index}";
+                    $placeholders[] = ":{$paramName}";
+                    $contentTypeBindings[$paramName] = $contentType; 
+                }
+                
+                $whereClauses[] = 'p.contenttype IN (' . implode(', ', $placeholders) . ')';
+            }
+        }
+
+        
+        $whereClauses[] = 'u.status = :userStatus';
+        $whereClauses[] = '(u.roles_mask = 0 OR u.roles_mask = 16)';
+        $parameters['userStatus'] = 0;
+
+        
+        $orderByClause = match ($sortBy) {
+            'NEWEST' => 'ORDER BY p.createdat DESC',
+            default => 'ORDER BY p.createdat DESC'
+        };
+
+        
+        $sql = sprintf(
+            'SELECT DISTINCT %s FROM %s %s WHERE %s %s LIMIT :limit OFFSET :offset',
+            implode(', ', $selectFields),
+            $fromClause,
+            implode(' ', $joinClauses),
+            implode(' AND ', $whereClauses),
+            $orderByClause
+        );
+
+        try {
+            $this->logger->info("Executing  search query", [
+                'searchBy' => $searchBy,
+                'searchTerm' => $searchTerm,
+                'sql' => $sql
+            ]);
+
+        $statement = $this->db->prepare($sql);
+        
+        $statement->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $statement->bindValue(':userStatus', 0, \PDO::PARAM_INT);
+        
+        if (!empty($searchTerm)) {
+            $statement->bindValue(':searchTerm', "%{$searchTerm}%", \PDO::PARAM_STR);
+        }
+        
+        if (!empty($contentTypeBindings)) {
+            foreach ($contentTypeBindings as $paramName => $contentType) {
+                $statement->bindValue(":{$paramName}", $contentType, \PDO::PARAM_STR);
+            }
+        }
+        
+        $statement->execute();
+        $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        if (empty($results)) {
+            $this->logger->info("No posts found for search", [
+                'searchBy' => $searchBy,
+                'searchTerm' => $searchTerm
+            ]);
+            return [];
+        }
+
+        $posts = array_map(function (array $row): PostAdvanced {
+            $row['amountlikes'] = 0;
+            $row['amountviews'] = 0;
+            $row['amountdislikes'] = 0;
+            $row['amountcomments'] = 0;
+            $row['amounttrending'] = 0;
+            $row['isliked'] = false;
+            $row['isviewed'] = false;
+            $row['isreported'] = false;
+            $row['isdisliked'] = false;
+            $row['issaved'] = false;
+            $row['isfollowed'] = false;
+            $row['isfollowing'] = false;
+            $row['tags'] = [];
+            $row['url'] = '';
+            
+            return new PostAdvanced($row, [], false);
+        }, $results);
+
+        $this->logger->info(" search completed successfully", [
+            'searchBy' => $searchBy,
+            'searchTerm' => $searchTerm,
+            'resultCount' => count($posts)
+        ]);
+
+        return $posts;
+
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error in modern searchPosts", [
+                'error' => $e->getMessage(),
+                'searchBy' => $searchBy,
+                'searchTerm' => $searchTerm,
+                'sql' => $sql ?? 'SQL not built'
+            ]);
+            return [];
+        } catch (\Throwable $e) {
+            $this->logger->error('Unexpected error in modern searchPosts', [
+                'error' => $e->getMessage(),
+                'searchBy' => $searchBy,
+                'searchTerm' => $searchTerm
+            ]);
+            return [];
+        }
+    }
+
+
     /**
      * Move Uploaded File to Media Folder
      */

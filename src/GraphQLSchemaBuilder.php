@@ -1784,6 +1784,7 @@ class GraphQLSchemaBuilder
             'listFollowRelations' => fn(mixed $root, array $args) => $this->resolveFollows($args),
             'listFriends' => fn(mixed $root, array $args) => $this->resolveFriends($args),
             'listPosts' => fn(mixed $root, array $args) => $this->resolvePosts($args),
+            'searchPosts' => fn(mixed $root, array $args) => $this->resolveSearchPosts($args),
             'guestListPost' => fn(mixed $root, array $args) => $this->guestListPost($args),
             'getPostInfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
             'getCommentInfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentId']),
@@ -3087,6 +3088,54 @@ class GraphQLSchemaBuilder
             'affectedRows' => $data,
         ];
     }
+
+    protected function resolveSearchPosts(array $args): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        $this->logger->info('Query.resolveSearchPosts started');
+
+        $searchBy = $args['searchBy'] ?? null;
+        $validSearchTypes = ['TITLE', 'DESCRIPTION', 'BOTH'];
+        if ($searchBy === null || !in_array(strtoupper($searchBy), $validSearchTypes, true)) {
+            $this-> logger->error('Invalid searchBy parameter', ['searchBy' => $searchBy]);
+            return $this->respondWithError(30103);
+        }
+
+        $searchTerm = $args['searchTerm'] ?? null;
+        if(empty($searchTerm) || strlen($searchTerm) < 3){
+            $this-> logger->error('Invalid searchTerm parameter', ['searchTerm' => $searchTerm]);
+            return $this->respondWithError(30103);
+        }
+
+
+        $posts = $this->postService->searchPosts($args);
+        if (isset($posts['status']) && $posts['status'] === 'error') {
+            return $posts;
+        }
+
+        $commentOffset = 0;
+        $commentLimit = 10;
+
+        $data = array_map(
+            fn(PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit, null),
+            $posts
+        );
+        return [
+            'status' => 'success',
+            'counter' => count($data),
+            'ResponseCode' => empty($data) ? 21501 : 11501,
+            'affectedRows' => $data,
+        ];
+    }
+
 
     protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit, ?string $contentFilterBy = null): array
     {
