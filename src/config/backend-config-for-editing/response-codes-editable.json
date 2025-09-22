@@ -147,6 +147,10 @@
         "comment": "Success: Successfully added to wallet",
         "userFriendlyComment": "Funds added to your wallet."
     },
+    "11212": {
+        "comment": "Success: Successfully returned static tokenomics information",
+        "userFriendlyComment": "Tokenomics information loaded successfully"
+    },
     "11301": {
         "comment": "Success: Payment completed successfully",
         "userFriendlyComment": "Payment processed successfully!"
@@ -890,6 +894,10 @@
     "31511": {
         "comment": "Temporary File Error: A temporary file was used. Please try uploading the post again.",
         "userFriendlyComment": "Please try creating the post again."
+    },
+    "31512": {
+        "comment": " Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.",
+        "userFriendlyComment": "You have reached the limit of five files. Please try again in 1 hour."
     },
     "31601": {
         "comment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",
