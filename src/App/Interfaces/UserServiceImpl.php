@@ -124,7 +124,6 @@ final class UserServiceImpl implements UserServiceInterface
                     $this->currentUserId,
                     $profileData['uid']
             ) == ContentFilteringAction::replaceWithPlaceholder) {
-                echo "here";
                 $replacer = ContentReplacementPattern::flagged;
                 $profileData['username'] = $replacer->username($profileData['username']);
                 $profileData['img'] = $replacer->profilePicturePath($profileData['img']);
