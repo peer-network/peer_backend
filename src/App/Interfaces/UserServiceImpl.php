@@ -67,49 +67,79 @@ final class UserServiceImpl implements UserServiceInterface
 
         $strategy = new GetProfileContentFilteringStrategy();
 
-        $specs = [
-            new VerifiedUserSpec($userId),
-            new ContentFilterSpec(
-                $strategy,
-                $contentFilterBy,
-                $this->currentUserId
-            ),
-            new CurrentUserIsBlockedUserSpec(
-                $this->currentUserId,
-                $userId
-            )
+        $verifiedUserSpec = new VerifiedUserSpec($userId);
+        $currentUserIsBlockedSpec = new CurrentUserIsBlockedUserSpec(
+            $this->currentUserId,
+            $userId
+        );
+        $postsContentFilterSpec = new ContentFilterSpec(
+            $strategy,
+            $contentFilterBy,
+            $this->currentUserId,
+            $userId,
+            ContentType::post,
+            ContentType::post
+        );
+        $usersContentFilterSpec = new ContentFilterSpec(
+            $strategy,
+            $contentFilterBy,
+            $this->currentUserId,
+            $userId,
+            ContentType::user,
+            ContentType::user
+        );
+        
+        $userSpecs = [
+            $verifiedUserSpec,
+            $currentUserIsBlockedSpec,
+            $usersContentFilterSpec
+        ];
+        $postSpecs = [
+            $verifiedUserSpec,
+            $currentUserIsBlockedSpec,
+            $postsContentFilterSpec
         ];
 
         try {
             $profileData = $this->userMapper->fetchProfileDataRaw(
                 $userId,
                 $this->currentUserId,
-                $specs
+                $userSpecs
             )->getArrayCopy();
 
-            $user_reports = (int)$profileData['user_reports'];
+            $userReports = (int)$profileData['reports'];
             $user_dismiss_moderation_amount = (int)$profileData['user_count_content_moderation_dismissed'];
 
             $contentFilterService = new ContentFilterServiceImpl(
-                $strategy,null,$contentFilterBy
+                $strategy,
+                null,
+                $contentFilterBy
             );
             
             if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
-                    $user_reports,
+                    $userReports,
                     $user_dismiss_moderation_amount,
                     $this->currentUserId,
                     $profileData['uid']
             ) == ContentFilteringAction::replaceWithPlaceholder) {
+                echo "here";
                 $replacer = ContentReplacementPattern::flagged;
                 $profileData['username'] = $replacer->username($profileData['username']);
                 $profileData['img'] = $replacer->profilePicturePath($profileData['img']);
             }
+
             // $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId,$contentFilterBy)->getArrayCopy();
             $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
 
-            $posts = $this->postMapper->fetchPostsByType($this->currentUserId,$userId, $postLimit,$contentFilterBy);
+            $posts = $this->postMapper->fetchPostsByType(
+                $this->currentUserId,
+                $userId, 
+                $postLimit,
+                $contentFilterBy,
+                $postSpecs
+            );
 
             $contentTypes = ['image', 'video', 'audio', 'text'];
             foreach ($contentTypes as $type) {

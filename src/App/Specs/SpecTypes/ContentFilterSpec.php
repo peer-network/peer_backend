@@ -18,7 +18,10 @@ final class ContentFilterSpec implements Specification
     public function __construct(
         ContentFilteringStrategy $strategy, 
         ?string $contentFilterBy,
-        private string $currentUserId
+        private string $currentUserId,
+        private string $targetUserId,
+        private ContentType $contentTarget,
+        private ContentType $showingContent,
     ) {
         $this->contentFilterService = new ContentFilterServiceImpl(
             $strategy,
@@ -30,27 +33,12 @@ final class ContentFilterSpec implements Specification
     public function toSql(): ?SpecificationSQLData
     {
         if ($this->contentFilterService->getContentFilterAction(
-            ContentType::post,
-            ContentType::post,
-            null,
-            null,
-            $this->currentUserId, 
-            null
-        ) === ContentFilteringAction::hideContent) {
-            return (new ContentFilteringSpecificationFactory(
-                $this->contentFilterService
-            ))->build(
-                ContentType::post,
-                ContentFilteringAction::hideContent
-            );
-        }
-        if ($this->contentFilterService->getContentFilterAction(
             ContentType::user,
             ContentType::user,
             null,
             null,
             $this->currentUserId, 
-            null
+            $this->targetUserId
         ) === ContentFilteringAction::hideContent) {
             return (new ContentFilteringSpecificationFactory(
                 $this->contentFilterService

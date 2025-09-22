@@ -8,6 +8,8 @@ use PDO;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostMedia;
+use Fawaz\App\Specs\Specification;
+use Fawaz\App\Specs\SpecificationSQLData;
 use Fawaz\App\Status;
 use Fawaz\Database\Interfaces\PeerMapper;
 use Fawaz\config\constants\ConstantsConfig;
@@ -156,9 +158,20 @@ class PostMapper
         return false;
     }
 
-    public function fetchPostsByType(string $currentUserId, string $userid, int $limitPerType = 5, ?string $contentFilterBy = null): array
-    {        
-        $whereClauses = ["sub.row_num <= :limit"];
+    public function fetchPostsByType(
+        string $currentUserId, 
+        string $userid, 
+        int $limitPerType = 5, 
+        ?string $contentFilterBy = null,
+        array $specifications
+    ): array {        
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+
+        $whereClauses = $allSpecs->whereClauses;
+
+        $whereClauses[] = "sub.row_num <= :limit";
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new ContentFilterServiceImpl(
@@ -183,9 +196,7 @@ class PostMapper
                 JOIN users u ON p.userid = u.uid
                 WHERE p.userid = :userid 
                 AND p.feedid IS NULL
-                AND u.status != :status
             ) sub
-            LEFT JOIN users_info ui ON sub.userid = ui.userid
             LEFT JOIN post_info pi ON sub.postid = pi.postid AND pi.userid = sub.userid
             WHERE %s
             ORDER BY sub.contenttype, sub.createdat DESC",
@@ -193,10 +204,12 @@ class PostMapper
         );
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue('status', Status::DELETED, \PDO::PARAM_INT);
-        $stmt->bindValue('userid', $userid, \PDO::PARAM_STR);
-        $stmt->bindValue('limit', $limitPerType, \PDO::PARAM_INT);
-        $stmt->execute();
+        $params = $allSpecs->paramsToPrepare;
+        $params['userid'] = $userid;
+        $params['limit'] = $limitPerType;
+
+        $stmt->execute($params);
+
         $unfidtered_result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         $result = [];
 
