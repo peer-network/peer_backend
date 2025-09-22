@@ -1051,7 +1051,7 @@ class WalletMapper
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
-        $dailyToken = DAILY_NUMBER_TOKEN;
+        $dailyToken = (float)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
         // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
         $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
