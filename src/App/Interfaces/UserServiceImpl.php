@@ -3,12 +3,10 @@
 namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
-use Fawaz\App\Specs\AndSpecification;
-use Fawaz\App\Specs\ContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\ContentFilterSpec as SpecTypesContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\VerifiedAndActiveUserSpec;
-use Fawaz\App\Specs\SpecTypes\VerifiedUserSpec as SpecTypesVerifiedUserSpec;
-use Fawaz\App\Specs\VerifiedUserSpec;
+use Fawaz\App\Specs\SpecTypes\ContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\CurrentUserIsBlockedUserSpec;
+use Fawaz\App\Specs\SpecTypes\UserIsBlockedByMeSpec;
+use Fawaz\App\Specs\SpecTypes\VerifiedUserSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -67,51 +65,69 @@ final class UserServiceImpl implements UserServiceInterface
             return self::respondWithError(31007);
         }
 
-        // $specs = [
-        //     new SpecTypesContentFilterSpec(
-        //         new GetProfileContentFilteringStrategy(),
-        //         $contentFilterBy
-        //     ),
-        //     new VerifiedAndActiveUserSpec($userId),
-        // ];
+        $strategy = new GetProfileContentFilteringStrategy();
 
         $specs = [
-            new VerifiedAndActiveUserSpec($userId)
+            new VerifiedUserSpec($userId),
+            new ContentFilterSpec(
+                $strategy,
+                $contentFilterBy,
+                $this->currentUserId
+            ),
+            new CurrentUserIsBlockedUserSpec(
+                $this->currentUserId,
+                $userId
+            )
         ];
 
         try {
-            $data = $this->userMapper->fetchProfileDataRaw(
+            $profileData = $this->userMapper->fetchProfileDataRaw(
                 $userId,
                 $this->currentUserId,
                 $specs
             )->getArrayCopy();
 
-            $user_reports = (int)$data['user_reports'];
-            $user_dismiss_moderation_amount = (int)$data['user_count_content_moderation_dismissed'];
+            $user_reports = (int)$profileData['user_reports'];
+            $user_dismiss_moderation_amount = (int)$profileData['user_count_content_moderation_dismissed'];
 
-            // if ($contentFilterService->getContentFilterAction(
-            //         ContentType::user,
-            //         ContentType::user,
-            //         $user_reports,$user_dismiss_moderation_amount,
-            //         $currentUserId,$data['uid']
-            //     ) == ContentFilteringAction::replaceWithPlaceholder) {
-            //         $replacer = ContentReplacementPattern::flagged;
-            //         $data['username'] = $replacer->username($data['username']);
-            //         $data['img'] = $replacer->profilePicturePath($data['img']);
-            //     }
+            $contentFilterService = new ContentFilterServiceImpl(
+                $strategy,null,$contentFilterBy
+            );
+            
+            if ($contentFilterService->getContentFilterAction(
+                    ContentType::user,
+                    ContentType::user,
+                    $user_reports,
+                    $user_dismiss_moderation_amount,
+                    $this->currentUserId,
+                    $profileData['uid']
+            ) == ContentFilteringAction::replaceWithPlaceholder) {
+                $replacer = ContentReplacementPattern::flagged;
+                $profileData['username'] = $replacer->username($profileData['username']);
+                $profileData['img'] = $replacer->profilePicturePath($profileData['img']);
+            }
+            // $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId,$contentFilterBy)->getArrayCopy();
+            $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
 
-            $posts = [];
+            $posts = $this->postMapper->fetchPostsByType($this->currentUserId,$userId, $postLimit,$contentFilterBy);
 
             $contentTypes = ['image', 'video', 'audio', 'text'];
-
             foreach ($contentTypes as $type) {
-                $profileData["{$type}posts"] = [];
+                $profileData["{$type}posts"] = array_filter($posts, fn($post) => $post['contenttype'] === $type);
             }
 
-            return $this::createSuccessResponse(11008,$profileData,false);
-
+            $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11008,
+                'affectedRows' => $profileData,
+            ];
         } catch (\Throwable $e) {
-            return $this::respondWithError(21001, []);
+            $this->logger->error('Failed to fetch profile data', [
+                'userId' => $userId,
+                'exception' => $e->getMessage(),
+            ]);
+            return $this->createSuccessResponse(21001, []);
         }
     }
 }

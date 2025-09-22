@@ -71,7 +71,8 @@ class GraphQLSchemaBuilder
         protected ContactusService $contactusService,
         protected DailyFreeService $dailyFreeService,
         protected McapService $mcapService,
-        protected UserServiceInterface $userService,
+        protected UserServiceInterface $userServiceNew,
+        protected UserService $userService,
         protected UserInfoService $userInfoService,
         protected PoolService $poolService,
         protected PostInfoService $postInfoService,
@@ -146,6 +147,7 @@ class GraphQLSchemaBuilder
     {
         $this->alphaMintService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
+        $this->userServiceNew->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
         $this->postService->setCurrentUserId($userid);
@@ -2834,7 +2836,7 @@ class GraphQLSchemaBuilder
 
         $this->logger->info('Query.resolveProfile started');
 
-        $results = $this->userService->Profile($args);
+        $results = $this->userServiceNew->Profile($args);
         if (isset($results['status']) && $results['status'] === 'success') {
             $this->logger->info('Query.resolveProfile successful');
 
