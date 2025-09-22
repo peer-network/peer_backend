@@ -11,14 +11,15 @@ type Subscription {
 
 type Query {
   hello: HelloResponse!
-  searchUser(userid: ID,contentFilterBy: ContentFilterType, email: String, username: String, status: Int, verified: Int, ip: String, offset: Int, limit: Int): UserListResponse!
+  searchUser(userid: ID,contentFilterBy: ContentFilterType, username: String, offset: Int, limit: Int): UserListResponse!
   listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse!
   getProfile(userid: ID,contentFilterBy: ContentFilterType, postLimit: Int): ProfileInfo!
-  listFollowRelations(contentFilterBy: ContentFilterType,userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
+  listFollowRelations(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
   listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!
   getUserInfo: UserInfoResponse!
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
   listPosts(filterBy: [PostFilterType!], contentFilterBy: ContentFilterType, IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
+  searchPosts(searchBy: SearchFieldType! , searchTerm: String!, filterBy: [PostFilterType!] , sortBy: PostSortType, offset: Int , limit: Int) : PostListResponse!
   getPostInfo(postid: ID!): PostInfoResponse!
   getCommentInfo(commentId: ID!): CommentInfoResponse!
   listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
@@ -28,26 +29,17 @@ type Query {
   listChats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
   listChatMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
   getDailyFreeStatus: GetDailyResponse!
-  listTodaysInteractions: ListTodaysInteractionsResponse!
-  allfriends(offset: Int, limit: Int): AllUserFriends!
   balance: CurrentLiquidity!
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
-  getpercentbeforetransaction(tokenAmount: Int!): PercentBeforeTransactionResponse!
-  refreshmarketcap: RefreshMarketCapResponse!
-  globalwins: DefaultResponse!
-  gemster: GemsterResponse!
-  gemsters(day: DayFilterType!): GemstersResponse!
-  liquiditypool(userid: ID, postid: ID, fromid: ID, whereby: Int, offset: Int, limit: Int): LiquidityPoolResponse!
-  testingpool(offset: Int, limit: Int): TestingPoolResponse!
-  postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
-  dailygemstatus: DailyGemStatusResponse!
-  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
   getReferralInfo: ReferralInfoResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
+  listTodaysInteractions: ListTodaysInteractionsResponse!
+  getActionPrices: GetActionPricesResponse!
   postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
+  getTokenomics: TokenomicsResponse!
 }
 
 type Mutation {
@@ -70,12 +62,13 @@ type Mutation {
   createChatFeed(input: FeedInput!): AddPostResponse!
   likeComment(commentid: ID!): DefaultResponse!
   reportComment(commentid: ID!): DefaultResponse!
+  reportUser(userid: ID!): DefaultResponse!
+  deletePost(id: ID!): DefaultResponse!
   createPost(action: PostType!, input: PostInput!): PostResponse!
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: "Use `resolveTransferV2`.")
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
-  reportUser(userid: ID!): DefaultResponse!
 }
 
 scalar Decimal
@@ -88,14 +81,12 @@ enum TokenMovementFilterType{
   PAYMENT
   BURN
 }
-
 enum GetOnly {
   VIEW
   LIKE
   DISLIKE
   COMMENTLIKE
 }
-
 
 enum DirectionFilterType {
   INCOME
@@ -106,7 +97,6 @@ enum SortFilterType {
   NEWEST
   OLDEST
 }
-
 enum PostActionType {
   LIKE
   DISLIKE
@@ -125,67 +115,8 @@ enum CommentType {
 }
 
 enum ContentFilterType {
-  MYGRANDMALIKES,
+  MYGRANDMALIKES
   MYGRANDMAHATES
-}
-
-input UserPreferencesInput {
-  contentFilteringSeverityLevel: ContentFilterType
-}
-
-
-type Transaction {
-  transactionid: String!
-  operationid: String!
-  transactiontype: String!
-  senderid: String!
-  recipientid: String!
-  tokenamount: Decimal!
-  transferaction: String!
-  message: String!
-  createdat: String!
-}
-
-type TransactionResponse {
-  status: String!
-  ResponseCode: String!
-  affectedRows: [Transaction!]
-}
-
-
-type TransferTokenResponse {
-  status: String!
-  ResponseCode: String!
-  affectedRows: TransferToken!
-}
-
-type TransferToken {
-  tokenSend: Decimal
-  tokensSubstractedFromWallet: Decimal
-  createdat: String
-}
-
-
-
-type UserPreferences {
-  contentFilteringSeverityLevel: ContentFilterType
-}
-
-type ReferralInfoResponse {
-  status: String
-  ResponseCode: String
-  referralUuid: ID
-  referralLink: String
-}
-type ReferralListResponse {
-  status: String!
-  counter: Int!
-  ResponseCode: String!
-  affectedRows: ReferralUsers!
-}
-type ReferralUsers {
-  invitedBy: ProfileUser
-  iInvited: [ProfileUser!]!
 }
 
 enum ContentType {
@@ -232,10 +163,60 @@ enum DayFilterType {
   Y0
 }
 
-type PostEligibilityResponse {
+<<<<<<< HEAD:src/schema.graphl
+enum SearchFieldType { 
+  TITLE
+  DESCRIPTION
+  BOTH
+}
+
+input UserPreferencesInput {
+  contentFilteringSeverityLevel: ContentFilterType
+=======
+enum OnboardingType {
+  INTROONBOARDING
+>>>>>>> e9a65bc2c606878e89f4d3cf61f156f0443500ee:src/schema.graphql
+}
+
+input UserPreferencesInput {
+  contentFilteringSeverityLevel: ContentFilterType
+  shownOnboardings: [OnboardingType!]     
+}
+
+type Transaction {
+  transactionid: String!
+  operationid: String!
+  transactiontype: String!
+  senderid: String!
+  recipientid: String!
+  tokenamount: Decimal!
+  transferaction: String!
+  message: String!
+  createdat: String!
+}
+
+type TransactionResponse {
   status: String!
   ResponseCode: String!
-  eligibilityToken: String!
+  affectedRows: [Transaction!]
+}
+
+type TransferTokenResponse {
+  status: String!
+  ResponseCode: String!
+  affectedRows: TransferToken!
+}
+
+type TransferToken {
+  tokenSend: Decimal
+  tokensSubstractedFromWallet: Decimal
+  createdat: String
+}
+
+
+type UserPreferences {
+  contentFilteringSeverityLevel: ContentFilterType
+  onboardingsWereShown: [OnboardingType!]!
 }
 
 type ListTodaysInteractionsResponse {
@@ -244,16 +225,16 @@ type ListTodaysInteractionsResponse {
   affectedRows: TodaysInteractionsData
 }
 
-type PostInteractionResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: [ProfileUser!]
-}
-
 type TodaysInteractionsData {
   totalInteractions: Decimal
   totalScore: Decimal
   totalDetails: TodaysInteractionsDetailsData
+}
+
+type PostInteractionResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: [ProfileUser!]
 }
 
 type TodaysInteractionsDetailsData {
@@ -267,179 +248,13 @@ type TodaysInteractionsDetailsData {
   commentsScore: Decimal
 }
 
-type GemstersResponse {
-  status: String!
-  counter: Int!
-  ResponseCode: String
-  affectedRows: GemstersData
-}
-
-type GemstersData {
-  winStatus: WinStatus
-  userStatus: [GemstersUserStatus] 
-}
-
-type WinStatus {
-  totalGems: Decimal
-  gemsintoken: Decimal
-  bestatigung: Decimal
-}
-
-type GemstersUserStatus {
-  userid: ID,
-  gems: Decimal,
-  tokens: Decimal,
-  percentage: Decimal,
-  details: [GemstersUserStatusDetails]
-}
-
-type GemstersUserStatusDetails {
-  gemid: ID,
-  userid: ID,
-  postid: ID,
-  fromid: ID,
-  gems: Decimal,
-  numbers: Decimal,
-  whereby: Decimal,
-  createdat: Date
-}
-
-type GemsterResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: DailyGemStatusData
-}
-
-type LiquidityPoolResponse {
-  status: String!
-  counter: Int!
-  ResponseCode: String
-  affectedRows: LiquidityPoolData
-}
-
-type LiquidityPoolData {
-  overallTotalNumbers: Decimal
-  overallTotalNumbersq: Decimal
-  posts: [LiquidityPoolPostData]
-}
-
-type LiquidityPoolPostData {
-  postid: ID
-  totalNumbers: Decimal
-  totalNumbersq: Decimal
-  transactionCount: Decimal
-}
-
-type TestingPoolResponse {
-  status: String!
-  counter: Int!
-  ResponseCode: String
-  affectedRows: LiquidityPoolData
-}
-
-type PostCommentsResponse {
-  status: String!
-  counter: Int!
-  ResponseCode: String
-  affectedRows: [PostCommentsData]
-}
-
-type PostCommentsData {
-  commentid: ID
-  userid: ID
-  postid: ID
-  parentid: ID
-  content: String
-  createdat: Date
-  amountlikes: Decimal
-  isliked: Boolean
-  user: BasicUserInfo
-  subcomments: [PostSubCommentsData]
-}
-
-type PostSubCommentsData {
-  commentid: ID
-  userid: ID
-  postid: ID
-  parentid: ID
-  content: String
-  createdat: Date
-  amountlikes: Decimal
-  amountreplies: Decimal,
-  isliked: Boolean
-  user: BasicUserInfo
-}
-
-type PercentBeforeTransactionResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: PercentBeforeTransactionData
-}
-
-type PercentBeforeTransactionData {
-  inviterId: ID
-  tosend: Decimal
-  percentTransferred: Decimal
-}
-
-type RefreshMarketCapResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: RefreshMarketCapData
-}
-
-type RefreshMarketCapData {
-  NumberOfTokens: Decimal
-  NumberOfGems: Decimal
-  coverage: Decimal
-  TokenPrice: Decimal
-  GemsPrice: Decimal
-}
-
-type DailyGemStatusResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: DailyGemStatusData
-}
-
-type DailyGemsResultsResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: DailyGemsResultsData
-}
-
-type DailyGemStatusData {
-  d0: Decimal
-  d1: Decimal
-  d2: Decimal
-  d3: Decimal
-  d4: Decimal
-  d5: Decimal
-  w0: Decimal
-  m0: Decimal
-  y0: Decimal
-}
-
-type DailyGemsResultsData {
-  data: [DailyGemsResultsUserData],
-  totalGems: Decimal
-}
-
-type DailyGemsResultsUserData {
-  userid: ID
-  pkey: ID
-  gems: Decimal
-}
-
 type HelloResponse {
   currentuserid: ID
-  userroles: Int
   currentVersion: String
   wikiLink: String
   lastMergedPullRequestNumber: String
   companyAccountId: ID
 }
-
 
 type LogWins {
   from: String
@@ -468,6 +283,12 @@ type DailyFreeResponse {
   name: String!
   used: Int!
   available: Int!
+}
+
+type PostEligibilityResponse {
+  status: String!
+  ResponseCode: String!
+  eligibilityToken: String!
 }
 
 type CurrentLiquidity {
@@ -643,41 +464,19 @@ type UserFriendsResponse {
   affectedRows: [BasicUserInfo]
 }
 
-type AllUserInfo {
-  followerid: ID
-  followername: String
-  followedid: ID
-  followedname: String
-}
-
-type AllUserFriends {
-  status: String!
-  counter: Int!
-  ResponseCode: String
-  affectedRows: [AllUserInfo]
-}
-
 type User {
   id: ID
-  situation: String
-  email: String
   username: String
-  password: String
   status: Int
-  verified: Int
   slug: Int
-  roles_mask: Int
-  ip: String
   img: String
   biography: String
-  liquidity: Decimal
   createdat: Date
   updatedat: Date
 }
 
 type Profile {
   id: ID
-  situation: String
   username: String
   status: Int
   slug: Int
@@ -781,7 +580,7 @@ type Post {
   media: String!
   cover: String!
   mediadescription: String!
-   createdat: Date!
+ createdat: Date!
   amountlikes: Int!
   amountviews: Int!
   amountcomments: Int!
@@ -818,18 +617,29 @@ type CommentResponse {
   affectedRows: [Comment]
 }
 
-input RegistrationInput {
-  email: String!
-  password: String!
-  username: String!
+type ReferralInfoResponse {
+  status: String
+  ResponseCode: String
+  referralUuid: ID
+  referralLink: String
+}
+type ReferralListResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String!
+  affectedRows: ReferralUsers!
+}
+type ReferralUsers {
+  invitedBy: ProfileUser
+  iInvited: [ProfileUser!]!
 }
 
 input PostInput {
   title: String!
   mediadescription: String
   contenttype: ContentType!
-  media: [String]
-  cover: [String]
+  media: [String!]
+  cover: [String!]
   tags: [String!]
   uploadedFiles: String
 }
@@ -857,4 +667,36 @@ input FeedInput {
   media: String!
   mediadescription: String
   contenttype: String!
+}
+
+type ActionPriceResult {
+    postPrice: Float!
+    likePrice: Float!
+    dislikePrice: Float!
+    commentPrice: Float!
+}
+
+type GetActionPricesResponse {
+    status: String!
+    ResponseCode: String!
+    affectedRows: ActionPriceResult!
+}
+
+type TokenomicsResponse {
+  status: String!
+  ResponseCode: Int!                         
+  actionTokenPrices: ActionPriceResult!
+  actionGemsReturns: ActionGemsReturns!
+  mintingData: MintingData!
+}
+
+type ActionGemsReturns {
+  viewGemsReturn: Float!
+  likeGemsReturn: Float!
+  dislikeGemsReturn: Float!
+  commentGemsReturn: Float!
+}
+
+type MintingData {
+  tokensMintedYesterday: Float!
 }

@@ -147,6 +147,10 @@
         "comment": "Success: Successfully added to wallet",
         "userFriendlyComment": "Funds added to your wallet."
     },
+    "11212": {
+        "comment": "Success: Successfully returned static tokenomics information",
+        "userFriendlyComment": "Tokenomics information loaded successfully"
+    },
     "11301": {
         "comment": "Success: Payment completed successfully",
         "userFriendlyComment": "Payment processed successfully!"
@@ -807,7 +811,11 @@
         "comment": "Invalid Referral String: The referral code provided is invalid or does not match any existing records.",
         "userFriendlyComment": "The referral code you entered is invalid. Please check and try again."
     },
-    "31101": {
+    "31011": {
+        "comment": "INVALID_ONBOARDING_VALUE — input contains onboarding not listed in AVAILABLE_ONBOARDINGS",
+        "userFriendlyComment": "The onboarding value you entered is not valid. Please select a valid option and try again."
+    },
+     "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",
         "userFriendlyComment": "This action is only available for friends."
     },
@@ -886,6 +894,10 @@
     "31511": {
         "comment": "Temporary File Error: A temporary file was used. Please try uploading the post again.",
         "userFriendlyComment": "Please try creating the post again."
+    },
+    "31512": {
+        "comment": " Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.",
+        "userFriendlyComment": "You have reached the limit of five files. Please try again in 1 hour."
     },
     "31601": {
         "comment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",
