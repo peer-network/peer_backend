@@ -1384,13 +1384,14 @@ class WalletMapper
     public function callUserMove(string $userId): array
     {
         $tokenomics = ConstantsConfig::tokenomics();
+        $actionGemsReturns = $tokenomics['ACTION_GEMS_RETURNS'];
 
         try {
             $wins = [
-                ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['view'], 'key' => 'views'],
-                ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['like'], 'key' => 'likes'],
-                ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => -(float)$tokenomics['ACTION_GEMS_RETURNS']['dislike'], 'key' => 'dislikes'],
-                ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['comment'], 'key' => 'comments']
+                ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)$actionGemsReturns['view'], 'key' => 'views'],
+                ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)$actionGemsReturns['like'], 'key' => 'likes'],
+                ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => -(float)$actionGemsReturns['dislike'], 'key' => 'dislikes'],
+                ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)$actionGemsReturns['comment'], 'key' => 'comments']
             ];
 
             $totalInteractions = 0;
