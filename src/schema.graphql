@@ -163,19 +163,14 @@ enum DayFilterType {
   Y0
 }
 
-<<<<<<< HEAD:src/schema.graphl
 enum SearchFieldType { 
   TITLE
   DESCRIPTION
   BOTH
 }
 
-input UserPreferencesInput {
-  contentFilteringSeverityLevel: ContentFilterType
-=======
 enum OnboardingType {
   INTROONBOARDING
->>>>>>> e9a65bc2c606878e89f4d3cf61f156f0443500ee:src/schema.graphql
 }
 
 input UserPreferencesInput {
