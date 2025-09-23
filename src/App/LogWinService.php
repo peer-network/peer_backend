@@ -355,6 +355,42 @@ class LogWinService
         }
 
     }
+
+
+    
+
+    /**
+     * Update wallet balance to Zero for those users whose wallet balance is negative
+     */
+    public function logWinMigrationWalletNegativeToZero()
+    {
+
+        $this->logger->info('LogWinService.logWinMigrationWalletNegativeToZero started');
+
+
+        try {
+            $this->logWinMapper->logWinMigrationWalletNegativeToZero();
+
+
+            return [
+                'status' => 'Success - Wallet balance updated successfully.',
+                'ResponseCode' => 200
+            ];
+
+        }catch (\RuntimeException $e) {
+            $this->logger->error('RuntimeException in LogWinService.logWinMigrationWalletNegativeToZero: ' . $e->getMessage());
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => $e->getCode()
+            ];
+        }catch (\Exception $e) {
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => 41205
+            ];
+        }
+
+    }
     
 
 }

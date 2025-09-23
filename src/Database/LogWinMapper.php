@@ -977,6 +977,81 @@ class LogWinMapper
     }
 
     /**
+     * Update wallet balance to Zero for those users whose wallet balance is negative
+     *
+     */
+    public function logWinMigrationWalletNegativeToZero(): bool
+    {
+
+        \ignore_user_abort(true);
+
+        ini_set('max_execution_time', '0');
+
+        try {
+
+            $negativeUsersBal = ['a2dd49d4-d79d-45f6-871c-f2533521249f', '78c359ab-2cc8-43da-959d-2c4f453bdfb8', '9e4d646f-8085-4032-b7ad-d667bbc0fa9b', 'de0f6f8a-9ea7-4e3f-8412-d8d78d84c422', '1fb403b1-129e-4d8a-8d29-8900fa2bd048'];
+
+            
+            $this->initializeLiquidityPool();
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+
+            foreach ($negativeUsersBal as $key => $userId) {
+
+                $this->transactionManager->beginTransaction();
+
+                try {
+                    $numBers = 0;
+                    $recipientid = $userId;
+
+                    $operationid = self::generateUUID();
+                    $senderid = $this->companyWallet;
+                    $createdat = (new DateTime())->format('Y-m-d H:i:s.u');
+
+                    $transactionType = 'walletAdjustment';
+                    $transferaction = 'ADJUSTMENT';
+
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $operationid,
+                        'transactiontype' => $transactionType,
+                        'senderid' => $senderid,
+                        'recipientid' => $recipientid,
+                        'tokenamount' => 0,
+                        'transferaction' => $transferaction,
+                        'message' => 'Wallet adjustment as Records were negative. Setting balance to Zero',
+                        'createdat' => $createdat
+                    ]);
+
+
+                    $liquiditq = ((float) $this->decimalToQ64_96($numBers));
+
+                    $query = "UPDATE wallett
+                          SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
+                                WHERE userid = :userid";
+                    $stmt = $this->db->prepare($query);
+                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                    $stmt->bindValue(':liquidity', 0, \PDO::PARAM_STR);
+                    $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
+                    $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+
+                    $stmt->execute();
+                        
+                    $this->transactionManager->commit();
+
+                } catch (\Throwable $e) {
+                    $this->logger->error('Failed to update wallet for user: ' . $userId, ['exception' => $e->getMessage()]);
+                    $this->transactionManager->rollback();
+                    continue;
+                }
+            }
+
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID', 41401);
+        }
+    }
+
+
+    /**
      * Generate logwins entries for Dislike actions between 05th March 2025 to 02nd April 2025
      *
      * Used for Actions records:
