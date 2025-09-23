@@ -783,7 +783,7 @@ jobs:
     name: Notify on Gitleaks Failure
     runs-on: ubuntu-latest
     needs: [gitleaks_scan_staged, map_pr_to_discord]
-    if: needs.gitleaks_scan_staged.result == 'failure'
+    if: always() && needs.gitleaks_scan_staged.result == 'failure'
     steps:
       - name: Send Discord Notification for Gitleaks Failure
         env:
