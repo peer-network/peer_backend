@@ -796,10 +796,13 @@ jobs:
         run: |
           MESSAGE=":x: **Gitleaks Scan Failed!**\n"
           MESSAGE+="**PR:** $PR_TITLE\n"
-          MESSAGE+="Link: <$PR_URL>\n"
+          MESSAGE+="PR Link: <$PR_URL>\n"
           MESSAGE+="CI Run: <$RUN_URL>\n"
-          MESSAGE+="Author: $DISCORD_MENTION\n"
-          MESSAGE+="Secrets were detected by Gitleaks. See the report in the workflow artifacts\n"
+          MESSAGE+="Author: $DISCORD_MENTION\n\n"
+          MESSAGE+=":warning: **Secrets were detected by Gitleaks**\n"
+          MESSAGE+="You can:\n"
+          MESSAGE+="- [Click here to view workflow artifacts](<$RUN_URL>) (download the **gitleaks-report** artifact)\n"
+          MESSAGE+="- Or run \`make scan\` locally to reproduce.\n\n"
           MESSAGE+="Contact **Backend Lead / CTO / DevOps** if this is intentional."
           
           curl -H "Content-Type: application/json" \
