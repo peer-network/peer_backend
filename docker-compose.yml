@@ -86,8 +86,7 @@ services:
         [ -f keys/refresh_private.key ] || openssl genpkey -algorithm RSA -out keys/refresh_private.key -pkeyopt rsa_keygen_bits:2048 &&
         [ -f keys/refresh_public.key ] || openssl rsa -pubout -in keys/refresh_private.key -out keys/refresh_public.key &&
         chmod 644 keys/*.key &&
-        supervisord -c /etc/supervisord.conf &&
-        bash /var/www/html/cd-generate-backend-config.sh
+        supervisord -c /etc/supervisord.conf
       "
     healthcheck:
       test: [
