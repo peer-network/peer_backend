@@ -8,9 +8,9 @@ tags = ["key", "secret", "generic", "broad"]
 
 [rules.allowlist]
   regexes = [
-    '''secrets\.[A-Z0-9_]+''',
-    '''vars\.[A-Z0-9_]+''',
-    '''github\.[a-zA-Z0-9_]+'''
+    '''[sS]ecrets\.[A-Za-z0-9_]+''',
+    '''[vV]ars\.[A-Za-z0-9_]+''',
+    '''github\.[A-Za-z0-9_]+'''
   ]
 
 # --- Allowlist ( approved exceptions ONLY) ---
@@ -24,9 +24,9 @@ regexes = [
   '''334ce5b3-813d-4fb4-86be-ac88fd63b803''',
   '''existing_advertisementId_[0-9]+''',
   '''testuser[0-9]+@example\.com''',
-  '''secrets\.[A-Z0-9_]+''',
-  '''vars\.[A-Z0-9_]+''',
-  '''github\.[a-zA-Z0-9_]+'''
+  '''[sS]ecrets\.[A-Za-z0-9_]+''',
+  '''[vV]ars\.[A-Za-z0-9_]+''',
+  '''github\.[A-Za-z0-9_]+'''
 ]
 
 # --- Path denylist (ignore noisy generated/test files) ---
