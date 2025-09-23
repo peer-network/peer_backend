@@ -10,7 +10,7 @@ services:
       - ./sql_files_for_import:/docker-entrypoint-initdb.d
       - peer_backend_ci-cd_db-data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "55432:5432"
     networks:
       - my-network
     healthcheck:
