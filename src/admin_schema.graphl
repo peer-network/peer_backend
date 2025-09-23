@@ -54,6 +54,7 @@ type Query {
   logWinMigration03: DefaultResponse
   logWinMigration04: DefaultResponse
   logWinMigration05: DefaultResponse
+  logWinMigrationWalletUpdate: DefaultResponse
   alphaMint: DefaultResponse
 }
 

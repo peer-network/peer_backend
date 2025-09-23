@@ -847,12 +847,7 @@ class LogWinMapper
                     $stmt->execute();
 
 
-                    $this->initializeLiquidityPool();
-                    $transRepo = new TransactionRepository($this->logger, $this->db);
-
-
                     $transactionType = 'postLiked';
-
                     $transferType = 'BURN';
 
                     $this->createAndSaveTransaction($transRepo, [
@@ -886,6 +881,100 @@ class LogWinMapper
         }
     }
 
+
+    /**
+     * Update wallet balance for users whose has difference in logwin entries and wallet balance
+     *
+     */
+    public function logWinMigrationWalletUpdate(): bool
+    {
+
+        \ignore_user_abort(true);
+
+        ini_set('max_execution_time', '0');
+
+        try {
+
+            $sql = "SELECT u.uid, u.username, w.liquidity, 
+                        (SELECT sum(numbers) FROM logwins l WHERE l.userid = u.uid) AS logwin_total, 
+                        (
+                        SELECT		    
+                            COALESCE(SUM(CASE WHEN t.recipientid = u.uid THEN t.tokenamount END), 0)
+                        - COALESCE(SUM(CASE WHEN t.senderid = u.uid THEN ABS(t.tokenamount) END), 0) AS net_balance
+                        FROM transactions t
+                        ) AS transaction_total,
+                        (
+                        (SELECT sum(numbers) FROM logwins l WHERE l.userid = u.uid)
+                        - (
+                        SELECT		    
+                            COALESCE(SUM(CASE WHEN t.recipientid = u.uid THEN t.tokenamount END), 0)
+                        - COALESCE(SUM(CASE WHEN t.senderid = u.uid THEN ABS(t.tokenamount) END), 0) AS net_balance
+                        FROM transactions t
+                        )) AS logwind_tnx_diff,
+                        (
+                            (SELECT (SUM(numbers)) FROM logwins l WHERE l.userid = u.uid) - w.liquidity
+                        ) AS logwins_balance_diff,
+                        u.createdat 
+                    FROM users u 
+                        LEFT JOIN wallett w ON u.uid = w.userid 
+                    ORDER BY u.createdat ASC LIMIT 500;
+                    ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+
+            $balances = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+
+            
+            $this->initializeLiquidityPool();
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+
+            foreach ($balances as $key => $balance) {
+
+                if (empty($balance['logwins_balance_diff']) || $balance['logwins_balance_diff'] == 0 || $balance['logwin_total'] < 0) {
+                    continue;
+                }
+
+                $this->transactionManager->beginTransaction();
+
+                try {
+                    $numBers = $balance['logwins_balance_diff'];
+                    $recipientid = $balance['uid'];
+
+                    $operationid = self::generateUUID();
+                    $senderid = $this->companyWallet;
+                    $createdat = (new DateTime())->format('Y-m-d H:i:s.u');
+
+                    $transactionType = 'walletAdjustment';
+                    $transferaction = 'ADJUSTMENT';
+
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $operationid,
+                        'transactiontype' => $transactionType,
+                        'senderid' => $senderid,
+                        'recipientid' => $recipientid,
+                        'tokenamount' => 0,
+                        'transferaction' => $transferaction,
+                        'message' => 'Wallet adjustment as records mismatch - ' . $balance['logwins_balance_diff'],
+                        'createdat' => $createdat
+                    ]);
+
+                    $this->saveWalletEntry($recipientid, $numBers);
+
+                    $this->transactionManager->commit();
+
+                } catch (\Throwable $e) {
+                    $this->logger->error('Failed to update wallet for user: ' . $balance['username'], ['exception' => $e->getMessage()]);
+                    $this->transactionManager->rollback();
+                    continue;
+                }
+            }
+
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID', 41401);
+        }
+    }
 
     /**
      * Generate logwins entries for Dislike actions between 05th March 2025 to 02nd April 2025
@@ -959,12 +1048,7 @@ class LogWinMapper
                     $stmt->execute();
 
 
-                    $this->initializeLiquidityPool();
-                    $transRepo = new TransactionRepository($this->logger, $this->db);
-
-
                     $transactionType = 'postDisliked';
-
                     $transferType = 'BURN';
 
                     $this->createAndSaveTransaction($transRepo, [
@@ -1071,11 +1155,7 @@ class LogWinMapper
                     $stmt->execute();
 
 
-                    $this->initializeLiquidityPool();
-                    $transRepo = new TransactionRepository($this->logger, $this->db);
-
                     $transactionType = 'postCreated';
-
                     $transferType = 'BURN';
 
                     $this->createAndSaveTransaction($transRepo, [
@@ -1182,11 +1262,7 @@ class LogWinMapper
                     $stmt->execute();
 
 
-                    $this->initializeLiquidityPool();
-                    $transRepo = new TransactionRepository($this->logger, $this->db);
-
                     $transactionType = 'postComment';
-
                     $transferType = 'BURN';
 
                     $this->createAndSaveTransaction($transRepo, [

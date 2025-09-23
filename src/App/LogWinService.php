@@ -321,6 +321,40 @@ class LogWinService
         }
     }
 
+
+
+    /**
+     * Update wallet balance for users whose has difference in logwin entries and wallet balance
+     */
+    public function logWinMigrationWalletUpdate()
+    {
+
+        $this->logger->info('LogWinService.logWinMigrationWalletUpdate started');
+
+
+        try {
+            $this->logWinMapper->logWinMigrationWalletUpdate();
+
+
+            return [
+                'status' => 'Success - Wallet balance updated successfully.',
+                'ResponseCode' => 200
+            ];
+
+        }catch (\RuntimeException $e) {
+            $this->logger->error('RuntimeException in LogWinService.logWinMigrationWalletUpdate: ' . $e->getMessage());
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => $e->getCode()
+            ];
+        }catch (\Exception $e) {
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => 41205
+            ];
+        }
+
+    }
     
 
 }
