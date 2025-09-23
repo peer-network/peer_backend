@@ -3,10 +3,7 @@
 namespace Fawaz\App;
 
 use Fawaz\App\Specs\SpecTypes\ActiveUserSpec;
-use Fawaz\App\Specs\SpecTypes\BasicUserRolesSpec;
-use Fawaz\App\Specs\SpecTypes\UserRolesSpec;
-use Fawaz\App\Specs\SpecTypes\VerifiedAndActiveUserSpec;
-use Fawaz\App\Specs\SpecTypes\VerifiedUserSpec;
+use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -350,12 +347,10 @@ class UserService
             return self::respondWithError(31010);
         }
         try {
-            $verifiedUserSpec = new VerifiedUserSpec($referralString);
             $activeUserSpec = new ActiveUserSpec($referralString);
-            $userRolesSpec = new BasicUserRolesSpec($referralString);
+            $userRolesSpec = new BasicUserSpec($referralString);
         
             $userSpecs = [
-                $verifiedUserSpec,
                 $activeUserSpec,
                 $userRolesSpec
             ];
