@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "c6bfe79c-f9c0-420e-8701-d8cf48a228e2",
+		"_postman_id": "4bfdfdf6-a3db-4d00-862b-a5adee67f0c9",
 		"name": "001_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-c6bfe79c-f9c0-420e-8701-d8cf48a228e2?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-4bfdfdf6-a3db-4d00-862b-a5adee67f0c9?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -2440,6 +2440,52 @@
 			"response": []
 		},
 		{
+			"name": "Verification tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10701\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Verification of referral string (fail)",
 			"event": [
 				{
@@ -2699,52 +2745,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t1}}\") {\n        status\n        ResponseCode\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Verification tester 2",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"10701\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
