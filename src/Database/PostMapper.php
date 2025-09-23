@@ -1029,9 +1029,9 @@ class PostMapper
                 }
 
                 $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
-                $userResultObj[$key]['isfollowed']  = $prt['isfollowed'];
+                $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
                 $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
-            } 
+            }  
             
             return $userResultObj;
         } catch (\PDOException $e) {
