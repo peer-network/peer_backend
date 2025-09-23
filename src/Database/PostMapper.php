@@ -21,7 +21,6 @@ use Fawaz\App\User;
 use Fawaz\App\ValidationException;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Psr\Log\LoggerInterface;
-use Fawaz\config\constants;
 
 class PostMapper
 {
@@ -953,7 +952,7 @@ class PostMapper
     /**
      * Get Interactions based on Filter 
      */
-    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit): array
+    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit, string $contentFilterBy ): array
     {
         $this->logger->info("PostMapper.getInteractions started");
 
@@ -982,7 +981,8 @@ class PostMapper
                         u.status, 
                         (f1.followerid IS NOT NULL) AS isfollowing,
                         (f2.followerid IS NOT NULL) AS isfollowed,
-                        ui.reports
+                        COALESCE(ui.reports, 0) AS user_reports,
+                        COALESCE(ui.count_content_moderation_dismissed, 0) AS user_count_content_moderation_dismissed
                     FROM $needleTable uv 
                     LEFT JOIN users u ON u.uid = uv.userid
                     LEFT JOIN users_info ui ON ui.userid = u.uid  
@@ -1005,16 +1005,34 @@ class PostMapper
 
             $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            $contentFilterService = new ContentFilterServiceImpl(
+                new GetProfileContentFilteringStrategy(),
+                null,
+                $contentFilterBy 
+            );
             $userResultObj = [];
-            $threshold = constants\ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'] ?? 1;
-            foreach($userResults as $key => $prt){
-                if ((int)$prt['reports'] >= $threshold) {
-                    $prt['username'] = 'hidden_account';
+            foreach ($userResults as $key => $prt) {
+                $user_reports = (int)$prt['user_reports'];
+                $user_dismiss_moderation_amount = (int)$prt['user_count_content_moderation_dismissed'];
+                
+                if ($contentFilterService->getContentFilterAction(
+                        ContentType::user,
+                        ContentType::user,
+                        $user_reports,
+                        $user_dismiss_moderation_amount,
+                        $currentUserId,
+                        $prt['uid']
+                    ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $prt['username'] = $replacer->username($prt['username']);
+                    // slug не трогаем
+                    $prt['img'] = $replacer->profilePicturePath($prt['img']);
                 }
+
                 $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
-                $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
+                $userResultObj[$key]['isfollowed']  = $prt['isfollowed'];
                 $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
-            }  
+            } 
             
             return $userResultObj;
         } catch (\PDOException $e) {
