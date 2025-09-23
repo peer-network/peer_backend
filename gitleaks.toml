@@ -16,7 +16,10 @@ regexes = [
   '''85d5f836-b1f5-4c4e-9381-1b058e13df94''',
   '''334ce5b3-813d-4fb4-86be-ac88fd63b803''',
   '''existing_advertisementId_[0-9]+''',
-  '''testuser[0-9]+@example\.com'''
+  '''testuser[0-9]+@example\.com''',
+  '''secrets\.[A-Z0-9_]+''',
+  '''vars\.[A-Z0-9_]+''',
+  '''github\.[a-zA-Z0-9_]+'''
 ]
 
 # --- Path denylist (ignore noisy generated/test files) ---
