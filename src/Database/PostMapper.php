@@ -21,6 +21,7 @@ use Fawaz\App\User;
 use Fawaz\App\ValidationException;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Psr\Log\LoggerInterface;
+use Fawaz\config\constants;
 
 class PostMapper
 {
@@ -980,9 +981,11 @@ class PostMapper
                         u.img, 
                         u.status, 
                         (f1.followerid IS NOT NULL) AS isfollowing,
-                        (f2.followerid IS NOT NULL) AS isfollowed
+                        (f2.followerid IS NOT NULL) AS isfollowed,
+                        ui.reports
                     FROM $needleTable uv 
-                    LEFT JOIN users u ON u.uid = uv.userid  
+                    LEFT JOIN users u ON u.uid = uv.userid
+                    LEFT JOIN users_info ui ON ui.userid = u.uid  
                     LEFT JOIN 
                         follows f1 
                         ON u.uid = f1.followerid AND f1.followedid = :currentUserId 
@@ -1003,7 +1006,11 @@ class PostMapper
             $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $userResultObj = [];
+            $threshold = constants\ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER'] ?? 1;
             foreach($userResults as $key => $prt){
+                if ((int)$prt['reports'] >= $threshold) {
+                    $prt['username'] = 'hidden_account';
+                }
                 $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
                 $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
                 $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
