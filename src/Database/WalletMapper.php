@@ -832,12 +832,13 @@ class WalletMapper
         }
 
         $tokenomics = ConstantsConfig::tokenomics();
+        $actionGemsReturns = $tokenomics['ACTION_GEMS_RETURNS'];
 
         $wins = [
-            ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['view']],
-            ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['like']],
-            ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => -(float)$tokenomics['ACTION_GEMS_RETURNS']['dislike']],
-            ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)$tokenomics['ACTION_GEMS_RETURNS']['comment']]
+            ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)$actionGemsReturns['view']],
+            ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)$actionGemsReturns['like']],
+            ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => (float)$actionGemsReturns['dislike']],
+            ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)$actionGemsReturns['comment']]
         ];
 
         $totalInserts = 0;
