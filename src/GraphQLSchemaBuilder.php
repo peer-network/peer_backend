@@ -1039,6 +1039,9 @@ class GraphQLSchemaBuilder
                 'ResponseMessage' => function (array $root): string {
                     return $root['ResponseMessage'] ?? '';
                 },
+                'RequestId' => function (array $root): string {
+                    return $root['RequestId'] ?? '';
+                },
             ],
             'AuthPayload' => [
                 'status' => function (array $root): string {
