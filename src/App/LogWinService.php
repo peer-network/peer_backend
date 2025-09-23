@@ -49,9 +49,7 @@ class LogWinService
     }
 
     /**
-     * This will be Recurring function to migrate logwin data
-     * It will keep migrating data until all logwin records are processed
-     * 
+     * Migrate Gems to LogWins
      */
     public function logWinMigration(): ?array
     {
@@ -64,7 +62,7 @@ class LogWinService
             $this->logWinMapper->migrateGemsToLogWins();
 
             return [
-                'status' => 'Success - Gems logwin entries generated successfully. Please wait about 1 minute.',
+                'status' => 'Success - Gems logwin entries generated successfully.',
                 'ResponseCode' => 200
             ];
 
@@ -109,7 +107,7 @@ class LogWinService
                 // $message = 'View paid actions migration batch has more records to process. Wait for 10 seconds and call again.';
             }
             
-            $message = 'View paid actions migration batch processed. Please wait about 3 minutes to complete process.';
+            $message = 'View paid actions migration batch processed.';
 
             return [
                 'status' => $message,
@@ -209,7 +207,7 @@ class LogWinService
 
             }
             
-            $message = 'Token transfer migration batch processed. Please wait about 2-3 minutes to complete process.';
+            $message = 'Token transfer migration batch processed.';
 
             return [
                 'status' => $message,
@@ -258,7 +256,7 @@ class LogWinService
 
             }
             
-            $message = 'Token transfer migration batch processed. Please wait about 2-3 minutes to complete process.';
+            $message = 'Token transfer migration batch processed.';
 
             return [
                 'status' => $message,
@@ -303,7 +301,7 @@ class LogWinService
             $this->logWinMapper->generateCommentPaidActionToLogWins();
 
             return [
-                'status' => 'Success - Paid actions logwin entries generated successfully. Please wait about 30 seconds.',
+                'status' => 'Success - Paid actions logwin entries generated successfully.',
                 'ResponseCode' => 200
             ];
 
