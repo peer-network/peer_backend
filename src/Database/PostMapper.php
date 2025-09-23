@@ -952,7 +952,7 @@ class PostMapper
     /**
      * Get Interactions based on Filter 
      */
-    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit, string $contentFilterBy ): array
+    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit, ?string $contentFilterBy = null): array
     {
         $this->logger->info("PostMapper.getInteractions started");
 
@@ -1005,27 +1005,33 @@ class PostMapper
 
             $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            $contentFilterService = new ContentFilterServiceImpl(
-                new GetProfileContentFilteringStrategy(),
-                null,
-                $contentFilterBy 
-            );
+            $contentFilterService = null;
+            if ($contentFilterBy !== null) {
+                $contentFilterService = new ContentFilterServiceImpl(
+                    new GetProfileContentFilteringStrategy(),
+                    null,
+                    $contentFilterBy
+                );
+            }
             $userResultObj = [];
             foreach ($userResults as $key => $prt) {
-                $user_reports = (int)$prt['user_reports'];
-                $user_dismiss_moderation_amount = (int)$prt['user_count_content_moderation_dismissed'];
+                if ($contentFilterService !== null) {
+                    $user_reports = (int)($prt['user_reports'] ?? 0);
+                    $user_dismiss_moderation_amount = (int)($prt['user_count_content_moderation_dismissed'] ?? 0);
                 
-                if ($contentFilterService->getContentFilterAction(
+                    $action = $contentFilterService->getContentFilterAction(
                         ContentType::user,
                         ContentType::user,
                         $user_reports,
                         $user_dismiss_moderation_amount,
                         $currentUserId,
                         $prt['uid']
-                    ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $prt['username'] = $replacer->username($prt['username']);
-                    $prt['img'] = $replacer->profilePicturePath($prt['img']);
+                    );
+                    if ($action === ContentFilteringAction::replaceWithPlaceholder) {
+                        $replacer = ContentReplacementPattern::flagged;
+                        $prt['username'] = $replacer->username($prt['username']);
+                        $prt['img']      = $replacer->profilePicturePath($prt['img']);
+                    }
                 }
 
                 $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
