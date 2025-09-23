@@ -22,10 +22,9 @@ class Base64FileHandler
             ],
             'video' => [
                 'video/mp4', 'video/quicktime', 'video/x-m4v',
-                'video/x-msvideo', 'video/3gpp', 'video/x-matroska',
-                'video/webm'
+                'video/x-msvideo', 'video/3gpp', 'video/x-matroska'
             ],
-            'audio' => ['audio/mpeg', 'audio/wav'],
+            'audio' => ['audio/mpeg', 'audio/wav','audio/ogg', 'audio/x-wav'],
             'text' => ['text/plain'],
             default => []
         };
@@ -35,8 +34,8 @@ class Base64FileHandler
     {
         return match ($contentType) {
             'image' => ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'],
-            'video' => ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'webm', 'quicktime'],
-            'audio' => ['mp3', 'wav'],
+            'video' => ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'quicktime'],
+            'audio' => ['mp3', 'wav', 'ogg'],
             'text' => ['txt'],
             default => []
         };
@@ -99,7 +98,22 @@ class Base64FileHandler
             if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
               $width = $fileInfo['video']['resolution_x'];
               $height = $fileInfo['video']['resolution_y'];
-
+                // Check for Orientation
+                if(isset($fileInfo['jpg']['exif']['IFD0']['Orientation'])){
+                    $Orientation = $fileInfo['jpg']['exif']['IFD0']['Orientation'] ??= 1;
+                    // Handle image rotation based on EXIF Orientation
+                    if ($Orientation == 6 || $Orientation == 8) {
+                        $width = $fileInfo['video']['resolution_y'];
+                        $height = $fileInfo['video']['resolution_x'];
+                    }
+                }elseif(isset($fileInfo['video']['rotate'])){
+                    $Orientation = $fileInfo['video']['rotate'] ??= 0;
+                    // Handle video rotation
+                    if ($Orientation == 90 || $Orientation == 270) {
+                        $width = $fileInfo['video']['resolution_y'];
+                        $height = $fileInfo['video']['resolution_x'];
+                    }
+                }
               $gcd = gmp_intval(gmp_gcd($width, $height));
               $ratio = ($width / $gcd) . ':' . ($height / $gcd);
               $auflg = "{$width}x{$height}";
@@ -109,8 +123,7 @@ class Base64FileHandler
             $information['ratiofrm'] = isset($ratio) ? $ratio : null;
             $information['resolution'] = isset($auflg) ? $auflg : null;
 
-            return isset($information) ? (array)$information : null;
-            
+            return $information;            
         } catch (\Exception $e) {
             \error_log("getID3 Error: " . $e->getMessage());
             return null;
@@ -265,5 +278,19 @@ class Base64FileHandler
             'path' => "/$subfolder/$identifier.$fileExtension",
             'options' => $options ?: null
         ]);
+    }
+    public function encodeFileToBase64(string $filePath, string $mimeType): string
+    {
+        if (!is_file($filePath)) {
+            throw new \InvalidArgumentException("File not found: $filePath");
+        }
+
+        $binary = file_get_contents($filePath);
+        if ($binary === false) {
+            throw new \RuntimeException("Failed to read file: $filePath");
+        }
+
+        $base64 = base64_encode($binary);
+        return "data:$mimeType;base64," . $base64;
     }
 }

@@ -44,4 +44,3 @@ pub extern "C" fn divide_decimal(a: *const c_char, b: *const c_char) -> *const c
     let result = get_decimal(a) / divisor;
     decimal_result_to_cstr(result)
 }
-

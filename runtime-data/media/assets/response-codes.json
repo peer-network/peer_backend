@@ -138,7 +138,7 @@
             "comment": "Success: Successfully added to wallet",
             "userFriendlyComment": "Funds added to your wallet."
         },
-        "11212": {
+        "11219": {
             "comment": "Success: Successfully transferred to the wallet.",
             "userFriendlyComment": "Funds have been successfully transferred to the wallet."
         },

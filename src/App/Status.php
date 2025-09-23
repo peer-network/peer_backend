@@ -10,6 +10,7 @@ final class Status {
 	const BANNED = 3;
 	const LOCKED = 4;
 	const PENDING_REVIEW = 5;
+	const DELETED = 6;
 
 	public static function getMap() : array
 	{

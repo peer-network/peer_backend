@@ -5,15 +5,20 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Utils\HashObject;
 
-class Post
+class Post implements Hashable
 {
+    use HashObject;
+
     protected string $postid;
     protected string $userid;
     protected ?string $feedid;
     protected string $title;
     protected string $contenttype;
     protected string $media;
+    protected string $url;
     protected ?string $cover;
     protected string $mediadescription;
     protected string $createdat;
@@ -36,6 +41,7 @@ class Post
         $this->contenttype = $data['contenttype'] ?? 'text';
         $this->media = $data['media'] ?? '';
         $this->cover = $data['cover'] ?? null;
+        $this->url = $this->getPostUrl();
         $this->mediadescription = $data['mediadescription'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
@@ -51,6 +57,7 @@ class Post
             'contenttype' => $this->contenttype,
             'media' => $this->media,
             'cover' => $this->cover,
+            'url' => $this->url,
             'mediadescription' => $this->mediadescription,
             'createdat' => $this->createdat,
         ];
@@ -89,7 +96,7 @@ class Post
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -108,10 +115,12 @@ class Post
             $errorMessageString = implode("", $errorMessages);
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $postConst = ConstantsConfig::post();
         $specification = [
             'postid' => [
                 'required' => true,
@@ -147,11 +156,11 @@ class Post
                 ],
             ],
             'media' => [
-                'required' => true,
+                'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 1000,
+                        'min' => $postConst['MEDIA']['MIN_LENGTH'],
+                        'max' => $postConst['MEDIA']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -160,8 +169,8 @@ class Post
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 0,
-                        'max' => 1000,
+                        'min' => $postConst['COVER']['MIN_LENGTH'],
+                        'max' => $postConst['COVER']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -192,5 +201,27 @@ class Post
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+    public function getHashableContent(): string {
+        return implode('|', [
+            $this->title,
+            $this->contenttype,
+            $this->media,
+            $this->cover ?? '',
+            $this->mediadescription,
+        ]);
+    }
+
+    public function hashValue(): string {
+        return $this->hashObject($this);
+    }
+
+    public function getPostUrl(): string
+    {
+        if(empty($this->postid)) {
+            return '';
+        }
+        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
     }
 }

@@ -4,15 +4,15 @@ namespace Fawaz\Utils;
 
 trait ResponseHelper
 {
-    private static function argsToJsString($args) {
+    private function argsToJsString($args) {
         return json_encode($args);
     }
 
-    private static function argsToString($args) {
+    private function argsToString($args) {
         return serialize($args);
     }
 
-    private static function validateRequiredFields(array $args, array $requiredFields): array
+    private function validateRequiredFields(array $args, array $requiredFields): array
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
@@ -22,12 +22,12 @@ trait ResponseHelper
         return [];
     }
 
-    private static function respondWithError(string $responseCode): array
+    private function respondWithError(int $responseCode): array
     {
         return ['status' => 'error', 'ResponseCode' => $responseCode];
     }
 
-    private static function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    private function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -46,7 +46,7 @@ trait ResponseHelper
         return $response;
     }
 
-    private static function generateUUID(): string
+    private function generateUUID(): string
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
@@ -58,8 +58,20 @@ trait ResponseHelper
         );
     }
 
-    private static function isValidUUID(string $uuid): bool
+    private function isValidUUID(string $uuid): bool
     {
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
+
+    /**
+     * Validate Authenticated User
+     */
+    private function checkAuthentication($currentUserId): bool
+    {
+        if ($currentUserId === null) {
+            return false;
+        }
+        return true;
+    }
+
 }

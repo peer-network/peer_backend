@@ -17,17 +17,8 @@ const OTHERSHARED_=13;// whereby SHAREN POSTER
 const FREELIKE_=30;// whereby FREELIKE
 const FREECOMMENT_=31;// whereby FREECOMMENT
 const FREEPOST_=32;// whereby FREEPOST
-// DAILY FREE
-const DAILYFREEPOST=1;
-const DAILYFREELIKE=3;
-const DAILYFREECOMMENT=4;
-const DAILYFREEDISLIKE=0;
-// USER PAY
-const PRICELIKE=3;
-const PRICEDISLIKE=5;
-const PRICECOMMENT=0.5;
-const PRICEPOST=20;
 
+use Fawaz\App\AlphaMintService;
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
 use Fawaz\App\Comment;
@@ -36,6 +27,7 @@ use Fawaz\App\CommentInfoService;
 use Fawaz\App\CommentService;
 use Fawaz\App\ContactusService;
 use Fawaz\App\DailyFreeService;
+use Fawaz\App\Helpers\FeesAccountHelper;
 use Fawaz\App\McapService;
 use Fawaz\App\PoolService;
 use Fawaz\App\Post;
@@ -50,6 +42,9 @@ use Fawaz\App\PeerTokenService;
 use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\SearchUserContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -57,6 +52,9 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
+use ReflectionNamedType;
+use Fawaz\config\constants\ConstantsConfig;
+
 
 class GraphQLSchemaBuilder
 {
@@ -82,25 +80,26 @@ class GraphQLSchemaBuilder
         protected ChatService $chatService,
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
-        protected JWTService $tokenService
+        protected JWTService $tokenService,
+        protected AlphaMintService $alphaMintService
     ) {
         $this->resolvers = $this->buildResolvers();
     }
 
-    public function build(): Schema
+    public function build(): Schema|array
     {
         if ($this->currentUserId === null) {
-            $schema = 'schemaguest.graphl';
+            $schema = 'schemaguest.graphql';
         } else {
-            $schema = 'schema.graphl';
+            $schema = 'schema.graphql';
         }
 
         if ($this->userRoles <= 0) {
             $schema = $schema;
         } elseif ($this->userRoles === 8) {
-            $schema = 'bridge_schema.graphl';
+            $schema = 'bridge_schema.graphql';
         } elseif ($this->userRoles === 16) {
-            $schema = 'admin_schema.graphl';
+            $schema = 'admin_schema.graphql';
         }
 
         if (empty($schema)){
@@ -144,6 +143,7 @@ class GraphQLSchemaBuilder
 
     protected function setCurrentUserIdForServices(string $userid): void
     {
+        $this->alphaMintService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
@@ -177,6 +177,28 @@ class GraphQLSchemaBuilder
             'Query' => $this->buildQueryResolvers(),
             'Mutation' => $this->buildMutationResolvers(),
             'Subscription' => $this->buildSubscriptionResolvers(),
+            'UserPreferencesResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.DefaultResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'UserPreferences' => [
+                'contentFilteringSeverityLevel' => function (array $root): ?string {
+                    $this->logger->info('Query.UserPreferences Resolvers');
+                    return $root['contentFilteringSeverityLevel'];
+                },
+                'onboardingsWereShown' => function (array $root): array {
+                    $this->logger->info('Query.UserPreferences.onboardingsWereShown Resolver');
+                    return $root['onboardingsWereShown'] ?? [];
+                },
+            ],
             'TodaysInteractionsData' => [
                 'totalInteractions' => function (array $root): int {
                     $this->logger->info('Query.TodaysInteractionsData Resolvers');
@@ -254,6 +276,9 @@ class GraphQLSchemaBuilder
                 'lastMergedPullRequestNumber' => function (array $root): string {
                     return $root['lastMergedPullRequestNumber'] ?? '';
                 },
+                'companyAccountId' => function (array $root): string {
+                    return $root['companyAccountId'] ?? '';
+                },
             ],
             'RegisterResponse' => [
                 'status' => function (array $root): string {
@@ -267,6 +292,34 @@ class GraphQLSchemaBuilder
                     return $root['userid'] ?? '';
                 },
             ],
+            'ReferralResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ReferralResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'ReferralInfo' => [
+                'uid' => function (array $root): string {
+                    $this->logger->info('Query.ReferralInfo Resolvers');
+                    return $root['uid'] ?? '';
+                },
+                'username' => function (array $root): string {
+                    return $root['username'] ?? '';
+                },
+                'slug' => function (array $root): string {
+                    return $root['slug'] ?? '';
+                },
+                'img' => function (array $root): string {
+                    return $root['img'] ?? '';
+                },
+            ],
+
             'User' => [
                 'id' => function (array $root): string {
                     $this->logger->info('Query.User Resolvers');
@@ -326,36 +379,6 @@ class GraphQLSchemaBuilder
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
-                },
-            ],
-            'UserInfo' => [
-                'postid' => function (array $root): string {
-                    $this->logger->info('Query.UserInfo Resolvers');
-                    return $root['postid'] ?? '';
-                },
-                'userid' => function (array $root): string {
-                    return $root['userid'] ?? '';
-                },
-                'likes' => function (array $root): int {
-                    return $root['likes'] ?? 0;
-                },
-                'dislikes' => function (array $root): int {
-                    return $root['dislikes'] ?? 0;
-                },
-                'reports' => function (array $root): int {
-                    return $root['reports'] ?? 0;
-                },
-                'views' => function (array $root): int {
-                    return $root['views'] ?? 0;
-                },
-                'saves' => function (array $root): int {
-                    return $root['saves'] ?? 0;
-                },
-                'shares' => function (array $root): int {
-                    return $root['shares'] ?? 0;
-                },
-                'comments' => function (array $root): int {
-                    return $root['comments'] ?? 0;
                 },
             ],
             'UserListResponse' => [
@@ -485,9 +508,9 @@ class GraphQLSchemaBuilder
                     return $root['isfollowing'] ?? false;
                 },
             ],
-            'Userinfo' => [
+            'BasicUserInfo' => [
                 'userid' => function (array $root): string {
-                    $this->logger->info('Query.Userinfo Resolvers');
+                    $this->logger->info('Query.BasicUserInfo Resolvers');
                     return $root['uid'] ?? '';
                 },
                 'img' => function (array $root): string {
@@ -584,9 +607,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'Userinforesponse' => [
+            'BasicUserInfoResponse' => [
                 'status' => function (array $root): string {
-                    $this->logger->info('Query.Userinforesponse Resolvers');
+                    $this->logger->info('Query.BasicUserInfoResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -624,6 +647,9 @@ class GraphQLSchemaBuilder
                 },
                 'cover' => function (array $root): string {
                     return $root['cover'] ?? '';
+                },
+                'url' => function (array $root): string {
+                    return $root['url'] ?? '';
                 },
                 'mediadescription' => function (array $root): string {
                     return $root['mediadescription'] ?? '';
@@ -1093,6 +1119,9 @@ class GraphQLSchemaBuilder
                 'updatedat' => function (array $root): string {
                     return $root['updatedat'] ?? '';
                 },
+                'userPreferences' => function (array $root): array {
+                    return $root['userPreferences'] ?? [];
+                },
             ],
             'StandardResponse' => [
                 'status' => function (array $root): string {
@@ -1107,18 +1136,6 @@ class GraphQLSchemaBuilder
                 },
             ],
             'ListTodaysInteractionsResponse' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.StandardResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-                'affectedRows' => function (array $root): array {
-                    return $root['affectedRows'] ?? [];
-                },
-            ],
-            'PercentBeforeTransactionResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1532,13 +1549,13 @@ class GraphQLSchemaBuilder
                     return $root['follower'] ?? '';
                 },
                 'followername' => function (array $root): string {
-                    return $root['followername'].'.'.$root['followerslug'] ?? '';
+                    return ($root['followername'] ?? '') . '.' . ($root['followerslug'] ?? '');
                 },
                 'followedid' => function (array $root): string {
                     return $root['followed'] ?? '';
                 },
                 'followedname' => function (array $root): string {
-                    return $root['followedname'].'.'.$root['followedslug'] ?? '';
+                    return ($root['followedname'] ?? '') . '.' . ($root['followedslug'] ?? '');
                 },
             ],
             'AllUserFriends' => [
@@ -1573,7 +1590,7 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.SwapTokenResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
+                'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
                 'affectedRows' => function (array $root): array {
@@ -1633,7 +1650,7 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.AddLiquidityResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
+                'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
                 'affectedRows' => function (array $root): array {
@@ -1683,47 +1700,12 @@ class GraphQLSchemaBuilder
                     return $root['expectedBtcReturn'] ?? 0.0;
                 },
             ],
-            'TransferTokenResponse' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.TransferTokenResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'responseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-                'affectedRows' => function (array $root): array {
-                    return $root['affectedRows'] ?? [];
-                },
-            ],
-            'TransferToken' => [
-                'tokenSend' => function (array $root): float {
-                    return $root['tokenSend'] ?? 0.0;
-                },
-                'tokensSubstractedFromWallet' => function (array $root): float {
-                    return $root['tokensSubstractedFromWallet'] ?? 0.0;
-                },
-                'createdat' => function (array $root): string {
-                    return $root['createdat'] ?? '';
-                },
-            ],
-            'TransactionResponse' => [
-                'status' => function (array $root): string {
-                    $this->logger->info('Query.TransactionResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'responseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? '';
-                },
-                'affectedRows' => function (array $root): array {
-                    return $root['affectedRows'] ?? [];
-                },
-            ],
             'LiquidityPoolHistoryResponse' => [
                 'status' => function (array $root): string {
                     $this->logger->info('Query.LiquidityPoolHistoryResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
+                'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
                 'affectedRows' => function (array $root): array {
@@ -1735,7 +1717,7 @@ class GraphQLSchemaBuilder
                     $this->logger->info('Query.TokenPriceResponse Resolvers');
                     return $root['status'] ?? '';
                 },
-                'responseCode' => function (array $root): string {
+                'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
                  'currentTokenPrice' => function (array $root): string {
@@ -1743,35 +1725,6 @@ class GraphQLSchemaBuilder
                 },
                 'updatedAt' => function (array $root): string {
                     return $root['updatedAt'] ?? '';
-                },
-            ],
-            'Transaction' => [
-                'transactionid' => function (array $root): string {
-                    return $root['transactionid'] ?? '';
-                },
-                'transuniqueid' => function (array $root): string {
-                    return $root['transuniqueid'] ?? '';
-                },
-                'transactiontype' => function (array $root): string {
-                    return $root['transactiontype'] ?? '';
-                },
-                'senderid' => function (array $root): string {
-                    return $root['senderid'] ?? '';
-                },
-                'recipientid' => function (array $root): string {
-                    return $root['recipientid'] ?? '';
-                },
-                'tokenamount' => function (array $root): float {
-                    return $root['tokenamount'] ?? 0;
-                },
-                'transferaction' => function (array $root): string {
-                    return $root['transferaction'] ?? '';
-                },
-                'message' => function (array $root): string {
-                    return $root['message'] ?? '';
-                },
-                'createdat' => function (array $root): string {
-                    return $root['createdat'] ?? '';
                 },
             ],
             'LiquidityPoolTransaction' => [
@@ -1828,6 +1781,43 @@ class GraphQLSchemaBuilder
                 'commentPrice' => function (array $root): float {
                     return (float) ($root['commentPrice'] ?? 0);
                 },
+            ],
+            'ActionGemsReturns' => [
+                'viewGemsReturn' => function (array $root): float {
+                    return (float)($root['viewGemsReturn'] ?? 0.0);
+                },
+                'likeGemsReturn' => function (array $root): float {
+                    return (float)($root['likeGemsReturn'] ?? 0.0);
+                },
+                'dislikeGemsReturn' => function (array $root): float {
+                    return (float)($root['dislikeGemsReturn'] ?? 0.0);
+                },
+                'commentGemsReturn' => function (array $root): float {
+                    return (float)($root['commentGemsReturn'] ?? 0.0);
+                },
+            ],
+            'MintingData' => [
+                'tokensMintedYesterday' => function (array $root): float {
+                    return (float)($root['tokensMintedYesterday'] ?? 0.0);
+                },
+            ],
+            'TokenomicsResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.TokenomicsResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): int {
+                    return $root['ResponseCode'] ?? 0;
+                },
+                'actionTokenPrices' => function (array $root): array {
+                    return $root['actionTokenPrices'] ?? [];
+                },
+                'actionGemsReturns' => function (array $root): array {
+                    return $root['actionGemsReturns'] ?? [];
+                },
+                'mintingData' => function (array $root): array {
+                    return $root['mintingData'] ?? [];
+                },
             ],    
             'ResetPasswordRequestResponse' => [
                 'status' => function (array $root): string {
@@ -1840,7 +1830,95 @@ class GraphQLSchemaBuilder
                 'nextAttemptAt' => function (array $root): string {
                     return $root['nextAttemptAt'] ?? '';
                 },
-            ],                       
+            ],
+            'PostEligibilityResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.PostEligibilityResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
+                },
+                'eligibilityToken' => function (array $root): string {
+                    return $root['eligibilityToken'] ?? '';
+                }
+            ],
+             'TransactionResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.TransactionResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'TransferTokenResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.TransferTokenResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return  isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'TransferToken' => [
+                'tokenSend' => function (array $root): float {
+                    return $root['tokenSend'] ?? 0.0;
+                },
+                'tokensSubstractedFromWallet' => function (array $root): float {
+                    return $root['tokensSubstractedFromWallet'] ?? 0.0;
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ],
+            'Transaction' => [
+                'transactionid' => function (array $root): string {
+                    return $root['transactionid'] ?? '';
+                },
+                'operationid' => function (array $root): string {
+                    return $root['operationid'] ?? '';
+                },
+                'transactiontype' => function (array $root): string {
+                    return $root['transactiontype'] ?? '';
+                },
+                'senderid' => function (array $root): string {
+                    return $root['senderid'] ?? '';
+                },
+                'recipientid' => function (array $root): string {
+                    return $root['recipientid'] ?? '';
+                },
+                'tokenamount' => function (array $root): float {
+                    return $root['tokenamount'] ?? 0.0;
+                },
+                'transferaction' => function (array $root): string {
+                    return $root['transferaction'] ?? '';
+                },
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ],
+            'PostInteractionResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.PostInteractionResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
         ];
     }
 
@@ -1855,6 +1933,7 @@ class GraphQLSchemaBuilder
             'listFollowRelations' => fn(mixed $root, array $args) => $this->resolveFollows($args),
             'listFriends' => fn(mixed $root, array $args) => $this->resolveFriends($args),
             'listPosts' => fn(mixed $root, array $args) => $this->resolvePosts($args),
+            'guestListPost' => fn(mixed $root, array $args) => $this->guestListPost($args),
             'getPostInfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
             'getCommentInfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentId']),
             'listChildComments' => fn(mixed $root, array $args) => $this->resolveComments($args),
@@ -1883,10 +1962,14 @@ class GraphQLSchemaBuilder
             'dailygemsresults' => fn(mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
             'getReferralInfo' => fn(mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn(mixed $root, array $args) => $this->resolveReferralList($args),
-            'getTransactionHistory' => fn(mixed $root, array $args) => $this->peerTokenService->transactionsHistory($args),
             'getLiquidityPoolHistory' => fn(mixed $root, array $args) => $this->peerTokenService->getLiquidityPoolHistory($args),
             'getTokenPrice' => fn(mixed $root, array $args) => $this->peerTokenService->getTokenPrice(),
             'getActionPrices' => fn(mixed $root, array $args) => $this->resolveActionPrices(),
+            'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
+            'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
+            'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
+            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
+            'getTokenomics' => fn(mixed $root, array $args) => $this->resolveTokenomics(),
         ];
     }
 
@@ -1900,6 +1983,8 @@ class GraphQLSchemaBuilder
             'verifyAccount' => fn(mixed $root, array $args) => $this->verifyAccount($args['userid']),
             'login' => fn(mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn(mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
+            'verifyReferralString' => fn(mixed $root, array $args) => $this->userService->verifyReferral($args['referralString']),
+            'updateUserPreferences' => fn(mixed $root, array $args) => $this->userService->updateUserPreferences($args),
             'updateUsername' => fn(mixed $root, array $args) => $this->userService->setUsername($args),
             'updateEmail' => fn(mixed $root, array $args) => $this->userService->setEmail($args),
             'updatePassword' => fn(mixed $root, array $args) => $this->userService->setPassword($args),
@@ -1917,9 +2002,9 @@ class GraphQLSchemaBuilder
             'createChatFeed' => fn(mixed $root, array $args) => $this->postService->createPost($args['input']),
             'sendChatMessage' => fn(mixed $root, array $args) => $this->chatService->addMessage($args['chatid'], $args['content']),
             'deleteChatMessage' => fn(mixed $root, array $args) => $this->chatService->removeMessage($args['chatid'], $args['messid']),
-            'deletePost' => fn(mixed $root, array $args) => $this->postService->deletePost($args['id']),
             'likeComment' => fn(mixed $root, array $args) => $this->commentInfoService->likeComment($args['commentid']),
             'reportComment' => fn(mixed $root, array $args) => $this->commentInfoService->reportComment($args['commentid']),
+            'reportUser' => fn(mixed $root, array $args) => $this->userInfoService->reportUser($args['userid']),
             'contactus' => fn(mixed $root, array $args) => $this->ContactUs($args),
             'createComment' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
@@ -1928,6 +2013,7 @@ class GraphQLSchemaBuilder
             'swapTokens' => fn(mixed $root, array $args) => $this->peerTokenService->swapTokens($args),
             'addLiquidity' => fn(mixed $root, array $args) => $this->peerTokenService->addLiquidity($args),
             'updateSwapTranStatus' => fn(mixed $root, array $args) => $this->peerTokenService->updateSwapTranStatus($args),
+            'resolveTransferV2' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
         ];
     }
 
@@ -1948,7 +2034,8 @@ class GraphQLSchemaBuilder
         return [
             'userroles' => $this->userRoles,
             'currentuserid' => $this->currentUserId,
-            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? ""
+            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
+            'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
         ];
     }
 
@@ -2064,7 +2151,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolveFetchPaysLog No records found');
-        return $this->createSuccessResponse(21202);
+        return $this->createSuccessResponse(21202);    
     }
     
     protected function resolveReferralInfo(): ?array
@@ -2172,19 +2259,37 @@ class GraphQLSchemaBuilder
         try {
             $result = $this->poolService->getActionPrices();
 
-            return [
-                'status'        => 'success',
-                'ResponseCode'  => 11304,
-                'affectedRows'  => [
-                    'postPrice'     => isset($result['post_price']) ? (float) $result['post_price'] : 0.0,
-                    'likePrice'     => isset($result['like_price']) ? (float) $result['like_price'] : 0.0,
-                    'dislikePrice'  => isset($result['dislike_price']) ? (float) $result['dislike_price'] : 0.0,
-                    'commentPrice'  => isset($result['comment_price']) ? (float) $result['comment_price'] : 0.0,
-                ]
-            ];
+            if (
+                empty($result) ||
+                !isset($result['post_price'], $result['like_price'], $result['dislike_price'], $result['comment_price'])
+            ) {
+                $this->logger->warning('resolveActionPrices: DB result missing/invalid, falling back to constants');
 
-            $this->logger->info('resolveActionPrices: Successfully fetched prices', $response['affectedRows']);
-            
+                $tokenomics = ConstantsConfig::tokenomics();
+                $prices     = $tokenomics['ACTION_TOKEN_PRICES'] ?? [];
+
+                $affectedRows = [
+                    'postPrice'    => (float)($prices['post']    ?? 0.0),
+                    'likePrice'    => (float)($prices['like']    ?? 0.0),
+                    'dislikePrice' => (float)($prices['dislike'] ?? 0.0),
+                    'commentPrice' => (float)($prices['comment'] ?? 0.0),
+                ];
+            } else {
+                $affectedRows = [
+                    'postPrice'    => isset($result['post_price'])    ? (float)$result['post_price']    : 0.0,
+                    'likePrice'    => isset($result['like_price'])    ? (float)$result['like_price']    : 0.0,
+                    'dislikePrice' => isset($result['dislike_price']) ? (float)$result['dislike_price'] : 0.0,
+                    'commentPrice' => isset($result['comment_price']) ? (float)$result['comment_price'] : 0.0,
+                ];
+            }
+
+            $this->logger->info('resolveActionPrices: Successfully fetched prices', $affectedRows);
+
+            return [
+                'status'       => 'success',
+                'ResponseCode' => 11304,
+                'affectedRows' => $affectedRows,
+            ];
         } catch (\Throwable $e) {
             $this->logger->error('Query.resolveActionPrices exception', [
                 'message' => $e->getMessage(),
@@ -2192,6 +2297,46 @@ class GraphQLSchemaBuilder
             ]);
             return $this->respondWithError(41301);
         }
+    }
+
+    private function resolveTokenomics(): array
+    {
+        $this->logger->info('Query.getTokenomics started');
+
+        $tokenomics = ConstantsConfig::tokenomics();
+        $minting    = ConstantsConfig::minting();
+
+        $prices = $tokenomics['ACTION_TOKEN_PRICES'] ?? [];
+        $gems   = $tokenomics['ACTION_GEMS_RETURNS'] ?? [];
+
+        $actionTokenPrices = [
+            'postPrice'    => (float)($prices['post']    ?? 0.0),
+            'likePrice'    => (float)($prices['like']    ?? 0.0),
+            'dislikePrice' => (float)($prices['dislike'] ?? 0.0),
+            'commentPrice' => (float)($prices['comment'] ?? 0.0),
+        ];
+
+        $actionGemsReturns = [
+            'viewGemsReturn'    => (float)($gems['view']    ?? 0.0),
+            'likeGemsReturn'    => (float)($gems['like']    ?? 0.0),
+            'dislikeGemsReturn' => (float)($gems['dislike'] ?? 0.0),
+            'commentGemsReturn' => (float)($gems['comment'] ?? 0.0),
+        ];
+
+        $mintedYesterday = (float)($minting['DAILY_NUMBER_TOKEN'] ?? 0.0);
+
+        $payload = [
+            'status'            => 'success',
+            'ResponseCode'      => 11212, 
+            'actionTokenPrices' => $actionTokenPrices,
+            'actionGemsReturns' => $actionGemsReturns,
+            'mintingData'       => [
+                'tokensMintedYesterday' => $mintedYesterday,
+            ],
+        ];
+
+        $this->logger->info('Query.getTokenomics finished', ['payload' => $payload]);
+        return $payload;
     }
 
     protected function resolveChatMessages(array $args): ?array
@@ -2282,6 +2427,7 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.resolvePool started');
 
         $response = $this->walletService->fetchPool($args);
+
         if (isset($response['status']) && $response['status'] === 'error') {
             return $response;
         }
@@ -2295,11 +2441,13 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->warning('Query.resolvePool No transactions found');
-        return $this->respondWithError(41201);
+        return $this->respondWithError(41201);  
     }
 
     protected function resolveActionPost(?array $args = []): ?array
     {
+        $tokenomicsConfig = ConstantsConfig::tokenomics();
+        $dailyfreeConfig = ConstantsConfig :: dailyFree();
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
         }
@@ -2324,17 +2472,17 @@ class GraphQLSchemaBuilder
         }
 
         $dailyLimits = [
-            'like' => DAILYFREELIKE,
-            'comment' => DAILYFREECOMMENT,
-            'post' => DAILYFREEPOST,
-            'dislike' => DAILYFREEDISLIKE,
+            'like' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['like'],
+            'comment' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['comment'],
+            'post' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['post'],
+            'dislike' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['dislike'],
         ];
 
         $actionPrices = [
-            'like' => PRICELIKE,
-            'comment' => PRICECOMMENT,
-            'post' => PRICEPOST,
-            'dislike' => PRICEDISLIKE,
+            'like' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['like'],
+            'comment' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['comment'],
+            'post' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['post'],
+            'dislike' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['dislike'],
         ];
 
         $actionMaps = [
@@ -2610,7 +2758,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30242);
         }
 
-        $tokenAmount = (int)$args['tokenAmount'] ?? 0;
+        $tokenAmount = (int)$args['tokenAmount'];
 
         if ($tokenAmount < 10) {
             return $this->respondWithError(30243);
@@ -2715,6 +2863,7 @@ class GraphQLSchemaBuilder
         }
 
         $username = isset($args['username']) ? trim($args['username']) : null;
+        $usernameConfig = ConstantsConfig::user()['USERNAME'];
         $userId = $args['userid'] ?? null;
         $email = $args['email'] ?? null;
         $status = $args['status'] ?? null;
@@ -2733,11 +2882,11 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30201);
         }
 
-        if ($username !== null && (strlen($username) < 3 || strlen($username) > 23)) {
+        if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
             return $this->respondWithError(30202);
         }
 
-        if ($username !== null && !preg_match('/^[a-zA-Z0-9]+$/', $username)) {
+        if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
             return $this->respondWithError(30202);
         }
 
@@ -2755,7 +2904,7 @@ class GraphQLSchemaBuilder
 
         $data = $this->userService->fetchAllAdvance($args);
 
-        if ($data && count($data) > 0) {
+        if (!empty($data)) {
             $this->logger->info('Query.resolveSearchUser.fetchAll successful', ['userCount' => count($data)]);
 
             return $data;
@@ -2829,6 +2978,12 @@ class GraphQLSchemaBuilder
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
             return $validationResult;
         }
+        
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
 
         $this->logger->info('Query.resolveFriends started');
 
@@ -2882,6 +3037,12 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->info('Query.resolveUsers started');
+
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
 
         if ($this->userRoles === 16) {
             $results = $this->userService->fetchAllAdvance($args);
@@ -3005,34 +3166,100 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        if (empty($commentId)) {
+        if (trim($commentId) === '') {
             return $this->respondWithError(30101);
         }
 
-        if (!empty($commentId) && !self::isValidUUID($commentId)) {
+        if (!self::isValidUUID($commentId)) {
             return $this->respondWithError(30217);
         }
 
         $this->logger->info('Query.resolveCommentInfo started');
 
+
         $commentId = isset($commentId) ? trim($commentId) : '';
 
         if (!empty($commentId)) {
             $comments = $this->commentInfoService->findCommentInfo($commentId);
-
             if ($comments === false) {
                 return $this->createSuccessResponse(21505);
             }
         } else {
             return $this->createSuccessResponse(21506);
         }
-
         return [
             'status' => 'success',
             'ResponseCode' => 11602,
             'affectedRows' => $comments,
         ];
     }
+
+    /**
+     * Get transcation history with Filter
+     * 
+     */
+    public function transactionsHistory(array $args): array
+    {
+        $this->logger->info('GraphQLSchemaBuilder.transactionsHistory started');
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        try {
+            $results = $this->peerTokenService->transactionsHistory($args);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+                'affectedRows' => $results['affectedRows']
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
+            return self::respondWithError(41226);  // Error occurred while retrieving transaction history
+        }
+
+    }
+
+
+    /**
+     * Get Post Interaction history with Post and Comment
+     * 
+     */
+    public function postInteractions(array $args): array
+    {
+        $this->logger->info('GraphQLSchemaBuilder.postInteractions started');
+
+        if (!$this->checkAuthentication()) {
+            $this->logger->info("GraphQLSchemaBuilder.postInteractions failed due to authentication");
+            return self::respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        try {
+            $results = $this->postService->postInteractions($args);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => $results['ResponseCode'],
+                'affectedRows' => isset($results['affectedRows']) ? $results['affectedRows'] : []
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.postInteractions", ['exception' => $e->getMessage()]);
+            return self::respondWithError(41226);  // Error occurred while retrieving Post, Comment Interactions
+        }
+
+    }
+
 
     protected function resolvePosts(array $args): ?array
     {
@@ -3047,6 +3274,12 @@ class GraphQLSchemaBuilder
 
         $this->logger->info('Query.resolvePosts started');
 
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+            return $this->respondWithError(30103);
+        }
+
         $posts = $this->postService->findPostser($args);
         if (isset($posts['status']) && $posts['status'] === 'error') {
             return $posts;
@@ -3055,23 +3288,23 @@ class GraphQLSchemaBuilder
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
+
         $data = array_map(
-            fn(PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit),
+            fn(PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit,$contentFilterBy),
             $posts
         );
         return [
             'status' => 'success',
             'counter' => count($data),
-            'ResponseCode' => empty($data) ? 21518 : 11501,
+            'ResponseCode' => empty($data) ? 21501 : 11501,
             'affectedRows' => $data,
         ];
     }
 
-    protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit): array
+    protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit, ?string $contentFilterBy = null): array
     {
         $postArray = $post->getArrayCopy();
-        
-        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit);
+        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit,$contentFilterBy);
         
         $postArray['comments'] = array_map(
             fn(CommentAdvanced $comment) => $this->fetchCommentWithoutReplies($comment),
@@ -3117,7 +3350,7 @@ class GraphQLSchemaBuilder
                     if ($firstParamType instanceof ReflectionNamedType 
                         && !$firstParamType->isBuiltin() 
                         && $firstParamType->getName() !== 'mixed' 
-                        && !($source instanceof ($firstParamType->getName() ?? ''))) {
+                        && !($source instanceof ($firstParamType->getName()))) {
 
                         throw new \TypeError("Resolver for '{$fieldName}' expected type '{$firstParamType->getName()}', but received " . gettype($source));
                     }
@@ -3134,8 +3367,6 @@ class GraphQLSchemaBuilder
             $this->logger->alert("Unhandled error in resolver for '{$fieldName}': " . $e->getMessage(), ['exception' => (string)$e]);
             throw new \GraphQL\Error\UserError("An unexpected error occurred while resolving field '{$fieldName}'.");
         }
-
-        return Executor::defaultFieldResolver($source, $args, $context, $info);
     }
 
     protected static function isValidUUID(string $uuid): bool
@@ -3148,7 +3379,7 @@ class GraphQLSchemaBuilder
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -3178,50 +3409,56 @@ class GraphQLSchemaBuilder
         $messageOffset = isset($args['messageOffset']) ? (int)$args['messageOffset'] : null;
         $messageLimit = isset($args['messageLimit']) ? (int)$args['messageLimit'] : null;
 
+        $paging = ConstantsConfig::paging();
+        $minOffset = $paging['OFFSET']['MIN'];
+        $maxOffset = $paging['OFFSET']['MAX'];
+        $minLimit = $paging['LIMIT']['MIN'];
+        $maxLimit = $paging['LIMIT']['MAX'];
+
         if ($offset !== null) {
-            if ($offset < 0 || $offset > INT32_MAX) {
+            if ($offset < $minOffset || $offset > $maxOffset) {
                 return $this->respondWithError(30203);
             }
         }
 
         if ($limit !== null) {
-            if ($limit < 1 || $limit > 20) {  
+            if ($limit < $minLimit || $limit > $maxLimit) {  
                 return $this->respondWithError(30204);
             }
         }
 
         if ($postOffset !== null) {
-            if ($postOffset < 0 || $postOffset > INT32_MAX) {
+            if ($postOffset < $minOffset || $postOffset > $maxOffset) {
                 return $this->respondWithError(30203);
             }
         }
 
         if ($postLimit !== null) {
-            if ($postLimit < 1 || $postLimit > 20) {  
+            if ($postLimit < $minLimit || $postLimit > $maxLimit) {  
                 return $this->respondWithError(30204);
             }
         }
 
         if ($commentOffset !== null) {
-            if ($commentOffset < 0 || $commentOffset > INT32_MAX) {
+            if ($commentOffset < $minOffset || $commentOffset > $maxOffset) {
                 return $this->respondWithError(30215);
             }
         }
 
         if ($commentLimit !== null) {
-            if ($commentLimit < 1 || $commentLimit > 20) {  
+            if ($commentLimit < $minLimit || $commentLimit > $maxLimit) {  
                 return $this->respondWithError(30216);
             }
         }
 
         if ($messageOffset !== null) {
-            if ($messageOffset < 0 || $messageOffset > INT32_MAX) {
+            if ($messageOffset < $minOffset || $messageOffset > $maxOffset) {
                 return $this->respondWithError(30219);
             }
         }
 
         if ($messageLimit !== null) {
-            if ($messageLimit < 1 || $messageLimit > 20) {  
+            if ($messageLimit < $minLimit || $messageLimit > $maxLimit) {  
                 return $this->respondWithError(30220);
             }
         }
@@ -3377,6 +3614,11 @@ class GraphQLSchemaBuilder
                 return $this->respondWithError(60801);
             }
 
+            if ($user->getStatus() == 6) {
+                $this->logger->warning('Account has been deleted', ['email' => $email]);
+                return $this->respondWithError(30801);
+            }
+
             if (!$user->verifyPassword($password)) {
                 $this->logger->warning('Invalid password', ['email' => $email]);
                 return $this->respondWithError(30801);
@@ -3433,6 +3675,11 @@ class GraphQLSchemaBuilder
                 return $this->respondWithError(30901);
             }
 
+            $users = $this->userMapper->loadById($decodedToken->uid);
+            if (!$users) {
+                return $this->respondWithError(30901);
+            }
+
             $payload = [
                 'iss' => 'peerapp.de',
                 'aud' => 'peerapp.de',
@@ -3467,4 +3714,51 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(40901);
         }
     }
+
+    /**
+     * Guest List Post
+     * 
+     */
+    protected function guestListPost(array $args): ?array
+    {
+        $this->logger->info('Query.guestListPost started');
+
+        $posts = $this->postService->getGuestListPost($args);
+
+        if (isset($posts['status']) && $posts['status'] === 'error') {
+            return $posts;
+        }
+
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
+
+        $data = array_map(
+            fn(PostAdvanced $post) => $this->guestPostMapPostWithComments($post, $commentOffset, $commentLimit),
+            $posts
+        );
+
+        return [
+            'status' => 'success',
+            'counter' => count($data),
+            'ResponseCode' => empty($data) ? 21501 : 11501,
+            'affectedRows' => $data[0] ?? [],
+        ];
+    }
+
+    /**
+     * Map Guest Post with Comments
+     * 
+     */
+    protected function guestPostMapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit): array
+    {
+        $postArray = $post->getArrayCopy();
+        $comments = $this->commentService->fetchAllByGuestPostIdetaild($post->getPostId(), $commentOffset, $commentLimit);
+        
+        $postArray['comments'] = array_map(
+            fn(CommentAdvanced $comment) => $comment->getArrayCopy(),
+            $comments
+        );
+        return $postArray;
+    }
+
 }

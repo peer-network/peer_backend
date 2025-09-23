@@ -60,7 +60,8 @@ class UserInfoMapper
 
     public function update(UserInfo $user): UserInfo
     {
-        $this->logger->info('UserInfoMapper.update started', ['userid' => $user->getUserId()]);
+        $userid = $user->getUserId();
+        $this->logger->info('UserInfoMapper.update started', ['userid' => $userid]);
 
         try {
             $user->setUpdatedAt();
@@ -74,6 +75,7 @@ class UserInfoMapper
                           amountfriends = :amountfriends, 
                           amountblocked = :amountblocked, 
                           isprivate = :isprivate, 
+                          reports = :reports, 
                           invited = :invited,
                           phone = :phone,                          
                           pkey = :pkey,
@@ -89,6 +91,7 @@ class UserInfoMapper
             $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
             $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
+            $stmt->bindValue(':reports', $data['reports'], \PDO::PARAM_INT);
             $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
             $stmt->bindValue(':phone', $data['phone'], \PDO::PARAM_STR);
             $stmt->bindValue(':pkey', $data['pkey'], \PDO::PARAM_STR);
@@ -106,13 +109,13 @@ class UserInfoMapper
             return new UserInfo($data);
         } catch (\PDOException $e) {
             $this->logger->error("Database error in update", [
-                'userid' => $data['userid'],
+                'userid' => $userid,
                 'error' => $e->getMessage()
             ]);
             throw $e;
         } catch (\Exception $e) {
             $this->logger->error("Unexpected error in update", [
-                'userid' => $data['userid'],
+                'userid' => $userid,
                 'error' => $e->getMessage()
             ]);
             throw $e;
@@ -257,7 +260,6 @@ class UserInfoMapper
         $this->logger->info('UserInfoMapper.toggleUserFollow started');
 
         try {
-            $this->db->beginTransaction();
 
             $query = "SELECT COUNT(*) FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
             $stmt = $this->db->prepare($query);
@@ -297,12 +299,9 @@ class UserInfoMapper
             $this->updateFriendsCount($followerid);
             $this->updateFriendsCount($followeduserid);
 
-            $this->db->commit();
-
             return ['status' => 'success', 'ResponseCode' => $response, 'isfollowing' => $action];
 
         } catch (\Exception $e) {
-            $this->db->rollBack();
             $this->logger->error('Failed to toggle user follow', ['exception' => $e]);
             return ['status' => 'error', 'ResponseCode' => 41103];
         }
@@ -438,7 +437,6 @@ class UserInfoMapper
         ]);
 
         try {
-            $this->db->beginTransaction();
             
             $query = "SELECT COUNT(*) FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
             $stmt = $this->db->prepare($query);
@@ -478,17 +476,14 @@ class UserInfoMapper
                 $response = 11105;
             }
 
-            $this->db->commit();
             return ['status' => 'success', 'ResponseCode' => $response, 'isBlocked' => $action];
 
         } catch (\PDOException $e) {
-            $this->db->rollBack();
             $this->logger->error('Database error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);
             return ['status' => 'error', 'ResponseCode' => 41106];
         } catch (\Exception $e) {
-            $this->db->rollBack();
             $this->logger->error('Unexpected error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);

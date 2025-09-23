@@ -5,6 +5,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\Post;
 use Psr\Log\LoggerInterface;
+use Fawaz\App\NewsFeed;
 
 class NewsFeedMapper
 {
@@ -28,7 +29,7 @@ class NewsFeedMapper
         return (bool) $stmt->fetchColumn();
     }
 
-    public function loadById(string $id): Post|false
+    public function loadById(string $id): NewsFeed|false
     {
         $this->logger->info("NewsFeedMapper.loadById started");
 

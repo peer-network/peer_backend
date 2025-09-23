@@ -5,6 +5,7 @@ namespace Fawaz\App;
 use Fawaz\App\Wallet;
 use Fawaz\Database\WalletMapper;
 use Psr\Log\LoggerInterface;
+use \Exception;
 
 class WalletService
 {
@@ -24,12 +25,12 @@ class WalletService
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
-    private function respondWithError(string $message): array
+    private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -223,7 +224,7 @@ class WalletService
                     
             $affectedRows = [
                 'winStatus' => $winstatus ?? [],
-                'userStatus' => $userStatus ?? [],
+                'userStatus' => $userStatus,
             ];  
             
             return [
@@ -275,13 +276,7 @@ class WalletService
         $this->logger->info('WalletService.getUserWalletBalance started');
 
         try {
-            $results = $this->walletMapper->getUserWalletBalance($userId);
-
-            if ($results !== false) {
-                return $results;
-            }
-
-            return 0.0;
+            return $this->walletMapper->getUserWalletBalance($userId);
         } catch (\Exception $e) {
             return 0.0;
         }

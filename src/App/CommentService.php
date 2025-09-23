@@ -6,6 +6,7 @@ use Fawaz\App\Comment;
 use Fawaz\App\CommentInfo;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\CommentInfoMapper;
+use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\UserMapper;
 use Psr\Log\LoggerInterface;
@@ -19,7 +20,8 @@ class CommentService
         protected CommentMapper $commentMapper,
         protected CommentInfoMapper $commentInfoMapper,
         protected PostInfoMapper $postInfoMapper,
-        protected UserMapper $userMapper
+        protected UserMapper $userMapper,
+        protected TransactionManager $transactionManager
     ) {
     }
 
@@ -45,7 +47,7 @@ class CommentService
         return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
     }
 
-    protected function respondWithError(string $message): array
+    protected function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
@@ -115,6 +117,7 @@ class CommentService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             $commentId = $this->generateUUID();
             if (empty($commentId)) {
                 $this->logger->critical('Failed to generate comment ID');
@@ -139,11 +142,15 @@ class CommentService
             $result = $this->commentMapper->insert($comment);
 
             if (!$result) {
+                $this->logger->error('Failed to insert comment into database', ['commentData' => $commentData]);
+                $this->transactionManager->rollback();
                 return $this->respondWithError(41602);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
             if (!$postInfo) {
+                $this->logger->error('PostInfo not found for postId', ['postId' => $postId]);
+                $this->transactionManager->rollback();
                 return $this->respondWithError(31602);
             }
 
@@ -176,6 +183,8 @@ class CommentService
             $this->logger->info('Comment created successfully', ['commentResponse' => $commentResponse]);
 			$response = [$commentResponse];
 
+            $this->transactionManager->commit();
+            $this->logger->info('CommentService.createComment completed successfully');
             return [
                 'status' => 'success',
 				'counter' => count($response),
@@ -183,6 +192,7 @@ class CommentService
                 'affectedRows' => $response,
             ];
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Error occurred while creating comment', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -236,8 +246,16 @@ class CommentService
         return $results;
     }
 
-    public function fetchAllByPostIdetaild(string $postId, int $offset = 0, int $limit = 10): array
+    public function fetchAllByPostIdetaild(string $postId, int $offset = 0, int $limit = 10,?string $contentFilterBy = null): array
     {
-        return $this->commentMapper->fetchAllByPostIdetaild($postId, $this->currentUserId, $offset, $limit);
+        return $this->commentMapper->fetchAllByPostIdetaild($postId, $this->currentUserId, $offset, $limit,$contentFilterBy);
+    }
+
+    /**
+     * Get Comments for Geust based on Filter 
+     */
+    public function fetchAllByGuestPostIdetaild(string $postId, int $offset = 0, int $limit = 10): array
+    {
+        return $this->commentMapper->fetchAllByGuestPostIdetaild($postId, $offset, $limit);
     }
 }

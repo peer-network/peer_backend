@@ -5,17 +5,21 @@ namespace Fawaz\App\Models;
 
 use DateTime;
 use Fawaz\App\ValidationException;
+use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\Utils\ResponseHelper;
 
 class Transaction
 {
-    protected string $transactionId;
-    protected string $transUniqueId;
-    protected string $senderId;
-    protected string|null $recipientId;
-    protected string $transactionType;
-    protected string $tokenAmount;
-    protected $transferAction;
+    use ResponseHelper;
+
+    protected string $transactionid;
+    protected string $operationid;
+    protected string $senderid;
+    protected string $recipientid;
+    protected string $transactiontype;
+    protected float $tokenamount;
+    protected string $transferaction;
     protected ?string $message;
     protected ?string $createdat;
 
@@ -24,13 +28,13 @@ class Transaction
      */
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $this->transactionId = $data['transactionId'] ?? self::generateUUID();
-        $this->transUniqueId = $data['transUniqueId'] ?? null;
-        $this->senderId = $data['senderId'] ?? null;
-        $this->recipientId = $data['recipientId'] ?? null;
-        $this->transactionType = $data['transactionType'] ?? null;
-        $this->tokenAmount = $data['tokenAmount'] ?? null;
-        $this->transferAction = $data['transferAction'] ?? 'DEDUCT';
+        $this->transactionid = $data['transactionid'] ?? self::generateUUID();
+        $this->operationid = $data['operationid'] ?? null;
+        $this->senderid = $data['senderid'] ?? null;
+        $this->recipientid = $data['recipientid'] ?? null;
+        $this->transactiontype = $data['transactiontype'] ?? null;
+        $this->tokenamount = $data['tokenamount'] ?? null;
+        $this->transferaction = $data['transferaction'] ?? 'DEDUCT';
         $this->message = $data['message'] ?? null;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
 
@@ -39,50 +43,70 @@ class Transaction
         }
     }
     
+    /**
+     * Get Values of current state
+     */
+    public function getArrayCopy(): array
+    {
+        $att = [
+            'transactionid' => $this->transactionid,
+            'operationid' => $this->operationid,
+            'transactiontype' => $this->transactiontype,
+            'senderid' => $this->senderid,
+            'recipientid' => $this->recipientid,
+            'tokenamount' => $this->tokenamount,
+            'transferaction' => $this->transferaction,
+            'message' => $this->message,
+            'createdat' => $this->createdat,
+        ];
+        return $att;
+    }
 
     /**
      * Define Input filter
      */    
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $tranConfig = ConstantsConfig::transaction();
+
         $specification = [
-            'transactionId' => [
+            'transactionid' => [
                 'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'transUniqueId' => [
+            'operationid' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'senderId' => [
+            'senderid' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'recipientId' => [
+            'recipientid' => [
+                'required' => true,
+                'validators' => [['name' => 'Uuid']],
+            ],
+            'transactiontype' => [
                 'required' => false,
-                'validators' => [['name' => 'Uuid']],
-            ],
-            'transactionType' => [
-                'required' => true,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 63,
+                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
+                        'max' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
-            'tokenAmount' => [
+            'tokenamount' => [
                 'required' => true
             ],
-            'transferAction' => [
+            'transferaction' => [
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 63,
+                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
+                        'max' => $tranConfig['ACTIONTYPE']['MAX_LENGTH'],
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
@@ -92,8 +116,8 @@ class Transaction
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 0,
-                        'max' => 200,
+                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
+                        'max' => $tranConfig['ACTIONTYPE']['MAX_LENGTH'],
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
@@ -118,7 +142,7 @@ class Transaction
     /**
      * Apply Input filter
      */    
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -137,139 +161,89 @@ class Transaction
             $errorMessageString = implode("", $errorMessages);
             throw new ValidationException($errorMessageString);
         }
-    }
-
-
-    /**
-     * Generate UUID
-     */ 
-    private static function generateUUID(): string
-    {
-        return \sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0x0fff) | 0x4000,
-            \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
-        );
+        return false;
     }
 
     /**
-     * Getter and Setter methods for transactionId
+     * Getter method for transactionid
      */
     public function getTransactionId(): string
     {
-        return $this->transactionId;
-    }
-    public function setTransactionId(string $transactionId): void
-    {
-        $this->transactionId = $transactionId;
+        return $this->transactionid;
     }
 
     
     /**
-     * Getter and Setter methods for transUniqueId
+     * Getter method for operationid
      */
-    public function getTransUniqueId(): string
+    public function getOperationId(): string
     {
-        return $this->transUniqueId;
-    }
-    public function setTransUniqueId(string $transUniqueId): void
-    {
-        $this->transUniqueId = $transUniqueId;
+        return $this->operationid;
     }
 
 
     /**
-     * Getter and Setter methods for senderId
+     * Getter method for senderid
      */
     public function getSenderId(): string
     {
-        return $this->senderId;
-    }
-    public function setSenderId(string $senderId): void
-    {
-        $this->senderId = $senderId;
+        return $this->senderid;
     }
 
 
     /**
-     * Getter and Setter methods for recipientId
+     * Getter method for recipientid
      */
     public function getRecipientId(): string|null
     {
-        return $this->recipientId;
+        return $this->recipientid;
     }
-    public function setRecipientId(string $recipientId): void
-    {
-        $this->recipientId = $recipientId;
-    }
+
 
 
     /**
-     * Getter and Setter methods for transactionType
+     * Getter method for transactiontype
      */
     public function getTransactionType(): string|null
     {
-        return $this->transactionType;
+        return $this->transactiontype;
     }
-    public function setTransactionType(string $transactionType): void
-    {
-        $this->transactionType = $transactionType;
-    }
+
 
     
     /**
-     * Getter and Setter methods for tokenAmount
+     * Getter method for tokenamount
      */
-    public function getTokenAmount(): string
+    public function getTokenAmount(): float
     {
-        return $this->tokenAmount;
+        return $this->tokenamount;
     }
-    public function setTokenAmount(string $tokenAmount): void
-    {
-        $this->tokenAmount = $tokenAmount;
-    }
+
     
     
     /**
-     * Getter and Setter methods for transferAction
+     * Getter method for transferaction
      */
     public function getTransferAction(): string
     {
-        return $this->transferAction;
+        return $this->transferaction;
     }
-    public function setTransferAction(string $transferAction): void
-    {
-        $this->transferAction = $transferAction;
-    }
-    
 
     /**
-     * Getter and Setter methods for message
+     * Getter method for message
      */
     public function getMessage(): string|null
     {
         return $this->message;
     }
-    public function setMessage(string $message): void
-    {
-        $this->message = $message;
-    }
-    
-    
+
 
     /**
-     * Getter and Setter methods for createdat
+     * Getter method for createdat
      */
     public function getCreatedat(): string
     {
         return $this->createdat;
-    }
-    public function setCreatedat(string $createdat): void
-    {
-        $this->createdat = $createdat;
     }
 
 }

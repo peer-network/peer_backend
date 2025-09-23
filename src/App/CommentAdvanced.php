@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class CommentAdvanced
 {
@@ -16,6 +17,7 @@ class CommentAdvanced
     protected ?int $amountlikes;
     protected ?int $amountreplies;
     protected ?bool $isliked;
+    protected ?int $userstatus;
     protected ?array $user = [];
     
 
@@ -35,7 +37,12 @@ class CommentAdvanced
         $this->amountlikes = $data['amountlikes'] ?? 0;
         $this->amountreplies = $data['amountreplies'] ?? 0;
         $this->isliked = $data['isliked'] ?? false;
+        $this->userstatus = $data['userstatus'] ?? 0;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
+
+        if($this->userstatus == 6){
+            $this->content = "Comment by deleted Account";
+        }
     }
 
     // Array Copy methods
@@ -113,7 +120,7 @@ class CommentAdvanced
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -133,10 +140,12 @@ class CommentAdvanced
             
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $commentConfig = ConstantsConfig::comment();
         $specification = [
             'commentid' => [
                 'required' => true,
@@ -159,8 +168,8 @@ class CommentAdvanced
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 200,
+                        'min' => $commentConfig['CONTENT']['MIN_LENGTH'],
+                        'max' => $commentConfig['CONTENT']['MAX_LENGTH'],
                     ]],
                     ['name' => 'IsString'],
                 ],

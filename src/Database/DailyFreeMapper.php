@@ -5,6 +5,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\DailyFree;
 use Psr\Log\LoggerInterface;
+use \InvalidArgumentException;
 
 class DailyFreeMapper
 {
@@ -203,7 +204,6 @@ class DailyFreeMapper
         $column = $columnMap[$artType];
 
         try {
-            $this->db->beginTransaction();
 
             $query = "
                 INSERT INTO dailyfree (userid, liken, comments, posten, createdat)
@@ -225,14 +225,11 @@ class DailyFreeMapper
 
             $success = $stmt->execute();
 
-            $this->db->commit();
             return $success;
         } catch (\PDOException $e) {
-            $this->db->rollBack();
             $this->logger->error('Database error in incrementUserDailyUsage', ['exception' => $e->getMessage()]);
             return false;
         } catch (\Exception $e) {
-            $this->db->rollBack();
             $this->logger->error('Unexpected error in incrementUserDailyUsage', ['exception' => $e->getMessage()]);
             return false;
         }

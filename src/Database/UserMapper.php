@@ -7,14 +7,24 @@ use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
+use Fawaz\App\Role;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
+use Fawaz\config\constants\ConstantsConfig;
 use Psr\Log\LoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\DateService;
+use Fawaz\App\Status;
 
 class UserMapper
 {
+
     public function __construct(protected LoggerInterface $logger, protected PDO $db)
     {
     }
@@ -179,33 +189,47 @@ class UserMapper
         }
     }
 
-    public function fetchAll(array $args = []): array
+    public function fetchAll(string $currentUserId, array $args = []): array
     {
         $this->logger->info("UserMapper.fetchAll started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        
+        $whereClauses = ["verified = :verified"];
+        $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
+        $whereClausesString = implode(" AND ", $whereClauses);
 
-        $sql = "
+        $contentFilterService = new ContentFilterServiceImpl(
+            new ListPostsContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
+
+        $sql = sprintf("
             SELECT 
-                uid,
-                email,
-                username,
-                password,
-                status,
-                verified,
-                slug,
-                roles_mask,
-                ip,
-                img,
-                biography,
-                createdat,
-                updatedat
+                u.uid,
+                u.email,
+                u.username,
+                u.password,
+                u.status,
+                u.verified,
+                u.slug,
+                u.roles_mask,
+                u.ip,
+                u.img,
+                u.biography,
+                u.createdat,
+                u.updatedat,
+                ui.reports AS user_reports,
+                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed
             FROM 
-                users
-            WHERE 
-                verified = :verified
-        ";
+                users u
+            LEFT JOIN users_info ui ON uid = ui.userid
+            WHERE %s",
+            $whereClausesString,
+        );
 
         $conditions = [];
         $queryParams = [':verified' => 1];
@@ -221,10 +245,10 @@ class UserMapper
                 $queryParams[':username'] = '%' . $value . '%';
             }
         }
+        $conditions[] = "status != :status";
+        $queryParams[':status'] = Status::DELETED;
 
-        if ($conditions) {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        }
+        $sql .= " AND " . implode(" AND ", $conditions);
 
         $sql .= " ORDER BY uid LIMIT :limit OFFSET :offset";
         $queryParams[':limit'] = $limit;
@@ -248,9 +272,22 @@ class UserMapper
             $stmt->execute();
 
             $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {    
                 $this->logger->info("UserMapper.fetchAll.row started");
                 try {
+                    $user_reports = (int)$row['user_reports'];
+                    $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+                    if ($contentFilterService->getContentFilterAction(
+                        ContentType::user,
+                        ContentType::user,
+                        $user_reports,$user_dismiss_moderation_amount,
+                        $currentUserId,$row['uid']
+                    ) == ContentFilteringAction::replaceWithPlaceholder) {
+                        $replacer = ContentReplacementPattern::flagged;
+                        $row['username'] = $replacer->username($row['username']);
+                        $row['img'] = $replacer->profilePicturePath($row['img']);
+                    }
+
                     $results[] = new User([
                         'uid' => $row['uid'],
                         'email' => $row['email'],
@@ -264,7 +301,7 @@ class UserMapper
                         'img' => $row['img'],
                         'biography' => $row['biography'],
                         'createdat' => $row['createdat'],
-                        'updatedat' => $row['updatedat'],
+                        'updatedat' => $row['updatedat']
                     ]);
                 } catch (\Throwable $e) {
                     $this->logger->error("Failed to map user data", ['error' => $e->getMessage(), 'data' => $row]);
@@ -285,7 +322,7 @@ class UserMapper
         }
     }
 
-    public function fetchAllAdvance(array $args = [], ?string $currentUserId = null): array
+    public function fetchAllAdvance(array $args = [], ?string $currentUserId = null,?string $contentFilterBy = null): array
     {
         $this->logger->info("UserMapper.fetchAll started");
 
@@ -293,8 +330,18 @@ class UserMapper
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $trendlimit = 4;
         $trenddays = 7;
+        
+        $contentFilterService = new ContentFilterServiceImpl(
+            new GetProfileContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
 
-        $sql = "
+        $whereClauses = ["verified = :verified"];
+        // $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
+        $whereClausesString = implode(" AND ", $whereClauses);
+        
+        $sql = sprintf("
             SELECT 
                 u.uid,
                 u.email,
@@ -309,6 +356,8 @@ class UserMapper
                 u.biography,
                 u.createdat,
                 u.updatedat,
+                ui.reports AS user_reports,
+                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
                 COALESCE((
                     SELECT COUNT(p.postid)
                     FROM posts p
@@ -344,9 +393,10 @@ class UserMapper
                 follows f1 ON u.uid = f1.followerid AND f1.followedid = :currentUserId -- Is the current user followed by this user?
             LEFT JOIN 
                 follows f2 ON u.uid = f2.followedid AND f2.followerid = :currentUserId -- Is the current user following this user?
-            WHERE 
-                u.verified = :verified
-        ";
+            LEFT JOIN users_info ui ON ui.userid = u.uid
+            WHERE %s",
+            $whereClausesString
+        );
 
         $conditions = [];
         $queryParams = [':verified' => 1, ':currentUserId' => $currentUserId];
@@ -363,9 +413,10 @@ class UserMapper
             }
         }
 
-        if ($conditions) {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        }
+        $conditions[] = "u.status != :status";
+        $queryParams[':status'] = Status::DELETED;
+
+        $sql .= " AND " . implode(" AND ", $conditions);
 
         $sql .= " ORDER BY u.createdat DESC LIMIT :limit OFFSET :offset";
         $queryParams[':limit'] = $limit;
@@ -393,6 +444,19 @@ class UserMapper
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 $this->logger->info("UserMapper.fetchAll.row started");
                 try {
+                    $user_reports = (int)$row['user_reports'];
+                    $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+                    if ($contentFilterService->getContentFilterAction(
+                        ContentType::user,
+                        ContentType::user,
+                        $user_reports,$user_dismiss_moderation_amount,
+                        $currentUserId,$row['uid']
+                    ) == ContentFilteringAction::replaceWithPlaceholder) {
+                        $replacer = ContentReplacementPattern::flagged;
+                        $row['username'] = $replacer->username($row['username']);
+                        $row['img'] = $replacer->profilePicturePath($row['img']);
+                    }
+
                     $results[] = new UserAdvanced([
                         'uid' => $row['uid'],
                         'email' => $row['email'],
@@ -505,11 +569,12 @@ class UserMapper
         try {
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
                     FROM users 
-                    WHERE uid = :id";
+                    WHERE uid = :id AND status != :status";
             
             $stmt = $this->db->prepare($sql);
             
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
             
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -558,7 +623,7 @@ class UserMapper
         $this->logger->info("UserMapper.loadUserInfoById started", ['id' => $id]);
 
         try {
-            $sql = "SELECT uid, username, slug, img, biography, updatedat FROM users WHERE uid = :id";
+            $sql = "SELECT uid, username, status, slug, img, biography, updatedat FROM users WHERE uid = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);  // Use bindValue here
             $stmt->execute();
@@ -566,7 +631,7 @@ class UserMapper
 
             if ($data !== false) {
                 $this->logger->info("User info fetched successfully", ['id' => $id]);
-                return $data;
+                return (new User($data, [], false))->getArrayCopy();
             }
 
             $this->logger->warning("No user found with id", ['id' => $id]);
@@ -626,6 +691,30 @@ class UserMapper
             return $exists;
         } catch (\Throwable $e) {
             $this->logger->error("General error while checking name and slug", ['username' => $username, 'slug' => $slug, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    
+    public function getUserByNameAndSlug(string $username, int $slug): User|bool
+    {
+        $this->logger->info("UserMapper.checkIfNameAndSlugExist started", ['username' => $username, 'slug' => $slug]);
+
+        try {
+            $sql = "SELECT * FROM users WHERE username = :username AND slug = :slug";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['username' => $username, 'slug' => $slug]);
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($data !== false) {
+                return new User($data);
+            }
+
+            $this->logger->warning("No user found with email", ['email' => $username]);
+            return false;
+
+        } catch (\Throwable $e) {
+            $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
             return false;
         }
     }
@@ -714,16 +803,33 @@ class UserMapper
     public function fetchFriends(
         string $userId, 
         int $offset = 0, 
-        int $limit = 10
+        int $limit = 10,
+        ?string $contentFilterBy = null
     ): ?array {
         $this->logger->info("UserMapper.fetchFriends started", ['userId' => $userId]);
 
+        $contentFilterService = new ContentFilterServiceImpl(
+            new GetProfileContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
+
         try {
             $sql = "
-                SELECT u.uid, u.username, u.slug, u.updatedat, u.biography, u.img 
+                SELECT 
+                    u.uid, 
+                    u.username, 
+                    u.slug, 
+                    u.status,
+                    u.updatedat, 
+                    u.biography, 
+                    u.img,
+                    ui.reports AS user_reports,
+                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed
                 FROM follows f1 
                 INNER JOIN follows f2 ON f1.followedid = f2.followerid 
                 INNER JOIN users u ON f1.followedid = u.uid 
+                LEFT JOIN users_info ui ON ui.userid = u.uid
                 WHERE f1.followerid = :userId 
                 AND f2.followedid = :userId
                 ORDER BY u.username ASC
@@ -739,14 +845,38 @@ class UserMapper
             $stmt->execute();
 
             $friends = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $filtered_friends = [];
 
-            if ($friends) {
-                $this->logger->info("fetchFriends retrieved friends", ['count' => count($friends)]);
+
+            foreach ($friends as $row) {
+                $user_reports = (int)$row['user_reports'];
+                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+
+                $frdObj = (new User($row, [], false))->getArrayCopy();
+
+                $row['username'] = $frdObj['username'];
+                $row['img'] = $frdObj['img'];
+                $row['biography'] = $frdObj['biography'];
+
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::user,
+                    ContentType::user,
+                    $user_reports,$user_dismiss_moderation_amount
+                ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $row['username'] = $replacer->username($row['username']);
+                    $row['img'] = $replacer->profilePicturePath($row['img']);
+                }
+                $filtered_friends[] = $row;
+            }
+
+            if ($filtered_friends) {
+                $this->logger->info("fetchFriends retrieved friends", ['count' => count($filtered_friends)]);
             } else {
                 $this->logger->warning("No friends found for user", ['userId' => $userId]);
             }
 
-            return $friends ?: null;
+            return $filtered_friends ?: null;
         } catch (\Throwable $e) {
             $this->logger->error("Database error in fetchFriends", ['error' => $e->getMessage()]);
             return null;
@@ -757,9 +887,16 @@ class UserMapper
         string $userId, 
         string $currentUserId, 
         int $offset = 0, 
-        int $limit = 10
+        int $limit = 10,
+        ?string $contentFilterBy = null
     ): array {
         $this->logger->info("UserMapper.fetchFollowers started", ['userId' => $userId]);
+
+        $contentFilterService = new ContentFilterServiceImpl(
+            new GetProfileContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
 
         try {
             $sql = "
@@ -767,7 +904,10 @@ class UserMapper
                     f.followerid AS uid, 
                     u.username, 
                     u.slug,
+                    u.status,
                     u.img,
+                    ui.reports AS user_reports,
+                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
                     EXISTS (
                         SELECT 1 
                         FROM follows ff 
@@ -780,6 +920,7 @@ class UserMapper
                     ) AS isfollowing
                 FROM follows f
                 JOIN users u ON u.uid = f.followerid
+                LEFT JOIN users_info ui ON ui.userid = u.uid
                 WHERE f.followedid = :userId
                 ORDER BY f.createdat DESC
                 LIMIT :limit OFFSET :offset
@@ -796,8 +937,26 @@ class UserMapper
             $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
+            $filtered_results = [];
+            
+            foreach ($uniqueResults as $row) {
+                $user_reports = (int)$row['user_reports'];
+                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+                
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::user,
+                    ContentType::user,
+                    $user_reports,$user_dismiss_moderation_amount,
+                    $currentUserId,$row['uid']
+                ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $row['username'] = $replacer->username($row['username']);
+                    $row['img'] = $replacer->profilePicturePath($row['img']);
+                }
+                $filtered_results[] = $row;
+            }
 
-            $users = array_map(fn($row) => new ProfilUser($row), $uniqueResults);
+            $users = array_map(fn($row) => new ProfilUser($row), $filtered_results);
 
             $this->logger->info(
                 count($users) > 0 ? "fetchFollowers retrieved users" : "No users found",
@@ -815,9 +974,16 @@ class UserMapper
         string $userId, 
         string $currentUserId, 
         int $offset = 0, 
-        int $limit = 10
+        int $limit = 10,
+        ?string $contentFilterBy = null
     ): array {
         $this->logger->info("UserMapper.fetchFollowing started", ['userId' => $userId]);
+
+        $contentFilterService = new ContentFilterServiceImpl(
+            new GetProfileContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
 
         try {
             $sql = "
@@ -826,6 +992,9 @@ class UserMapper
                     u.username, 
                     u.slug,
                     u.img,
+                    u.status,
+                    ui.reports AS user_reports,
+                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
                     EXISTS (
                         SELECT 1 
                         FROM follows ff 
@@ -838,6 +1007,7 @@ class UserMapper
                     ) AS isfollowing
                 FROM follows f
                 JOIN users u ON u.uid = f.followedid
+                LEFT JOIN users_info ui ON ui.userid = u.uid
                 WHERE f.followerid = :userId
                 ORDER BY f.createdat DESC
                 LIMIT :limit OFFSET :offset
@@ -854,8 +1024,26 @@ class UserMapper
             $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
+            $filtered_results = [];
+            
+            foreach ($uniqueResults as $row) {
+                $user_reports = (int)$row['user_reports'];
+                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+                
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::user,
+                    ContentType::user,
+                    $user_reports,$user_dismiss_moderation_amount,
+                    $currentUserId,$row['uid']
+                ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $row['username'] = $replacer->username($row['username']);
+                    $row['img'] = $replacer->profilePicturePath($row['img']);
+                }
+                $filtered_results[] = $row;
+            }
 
-            $users = array_map(fn($row) => new ProfilUser($row), $uniqueResults);
+            $users = array_map(fn($row) => new ProfilUser($row), $filtered_results);
 
             $this->logger->info(
                 count($users) > 0 ? "fetchFollowing retrieved users" : "No users found",
@@ -933,9 +1121,19 @@ class UserMapper
         }
     }
 
-    public function fetchProfileData(string $userid, string $currentUserId): Profile|false 
+    public function fetchProfileData(string $userid, string $currentUserId, ?string $contentFilterBy): Profile|false 
     {
-        $sql = "
+        $whereClauses = ["u.uid = :userid AND u.verified = :verified"];
+        // $whereClauses[] = 'u.status = 0';
+        $whereClausesString = implode(" AND ", $whereClauses);
+
+        $contentFilterService = new ContentFilterServiceImpl(
+            new GetProfileContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
+
+        $sql = sprintf("
             SELECT 
                 u.uid,
                 u.username,
@@ -948,13 +1146,16 @@ class UserMapper
                 ui.amountfollowed,
                 ui.amountfriends,
                 ui.amountblocked,
+                ui.reports AS user_reports,
+                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
                 COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
             FROM users u
             LEFT JOIN users_info ui ON ui.userid = u.uid
-            WHERE u.uid = :userid AND u.verified = :verified
-        ";
+            WHERE %s",
+            $whereClausesString
+         );
 
         try {
             $stmt = $this->db->prepare($sql);
@@ -965,7 +1166,22 @@ class UserMapper
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
+
             if ($data !== false) {
+                $user_reports = (int)$data['user_reports'];
+                $user_dismiss_moderation_amount = (int)$data['user_count_content_moderation_dismissed'];
+
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::user,
+                    ContentType::user,
+                    $user_reports,$user_dismiss_moderation_amount,
+                    $currentUserId,$data['uid']
+                ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer = ContentReplacementPattern::flagged;
+                    $data['username'] = $replacer->username($data['username']);
+                    $data['img'] = $replacer->profilePicturePath($data['img']);
+                }
+
                 return new Profile($data);
             }
 
@@ -1008,7 +1224,7 @@ class UserMapper
             $userid = $userData->getUserId();
             $password = $userData->getPassword();
 
-            $hashedPassword = method_exists($this, 'setPassword') ? $this->setPassword($password) : \password_hash($password, \PASSWORD_BCRYPT, ['time_cost' => 4, 'memory_cost' => 2048, 'threads' => 1]);
+            $hashedPassword = $this->setPassword($password);
             $userData->setPassword($hashedPassword);
 
             if (!$userData->getReferralUuid()) {
@@ -1148,7 +1364,7 @@ class UserMapper
         ]);
 
         $query = "
-        SELECT u.uid, u.username, u.slug, u.img
+        SELECT u.uid, u.status, u.username, u.slug, u.img
         FROM users_info ui
         JOIN users u ON ui.invited = u.uid
         WHERE ui.userid = :invitee_uuid
@@ -1160,13 +1376,13 @@ class UserMapper
 
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        return $result ?: null;
+        return $result ? ((new User($result, [], false))->getArrayCopy()) : null;
     }
 
     public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array 
     {
         $query = "
-            SELECT u.uid, u.username, u.slug, u.img
+            SELECT u.uid, u.status, u.username, u.slug, u.img
             FROM users_info ui
             JOIN users u ON ui.userid = u.uid
             WHERE ui.invited = :userId
@@ -1182,12 +1398,7 @@ class UserMapper
 
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         return [
-            'iInvited' => array_map(fn($row) => [
-                'uid' => $row['uid'],
-                'username' => $row['username'],
-                'slug' => (int)$row['slug'],
-                'img' => $row['img'],
-            ], $data)
+            'iInvited' => array_map(fn($user) => (new User($user, [], false))->getArrayCopy(), $data)
         ];
     }
 
@@ -1367,15 +1578,27 @@ class UserMapper
         }
     }
 
+    /**
+     * Delete User Account.
+     * Flags the account as deleted by setting status to Status::DELETED.
+     *
+     * Usage of constant improves readability:
+     * const Status::DELETED = 6;
+     *
+     * @param string $id User unique identifier (uid).
+     * @return bool True if user was flagged as deleted, false otherwise.
+     * @throws \RuntimeException if database operation fails.
+     */
     public function delete(string $id): bool
     {
         $this->logger->info("UserMapper.delete started");
 
-        $query = "DELETE FROM users WHERE uid = :uid";
+        $query = "UPDATE users SET status = :status WHERE uid = :uid";
 
         try {
             $stmt = $this->db->prepare($query);
 
+            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
             $stmt->bindValue(':uid', $id, \PDO::PARAM_STR);
 
             $stmt->execute();
@@ -1501,8 +1724,8 @@ class UserMapper
     {
         $this->logger->info("UserMapper.fetchAllFriends started");
 
-        $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, 
-                                u2.uid AS followed, u2.username AS followedname, u2.slug AS followedslug
+        $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, u1.status as followerstatus, 
+                                u2.uid AS followed, u2.username AS followedname, u2.slug AS followedslug, u2.status as followedstatus
                 FROM follows f1
                 INNER JOIN follows f2 ON f1.followerid = f2.followedid 
                                      AND f1.followedid = f2.followerid
@@ -1517,7 +1740,29 @@ class UserMapper
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $userResultObj = [];
+            foreach($userResults as $key => $prt){
+                $userObj = [
+                        'status' => $prt['followerstatus'],
+                        'username' => $prt['followername'],
+                    ];
+                $userObj = (new User($userObj, [], false))->getArrayCopy();
+
+                $userResultObj[$key] = $prt;
+                $userResultObj[$key]['followername'] = $userObj['username'];
+
+                $userObj = [
+                        'status' => $prt['followedstatus'],
+                        'username' => $prt['followedname'],
+                    ];
+                $userObj = (new User($userObj, [], false))->getArrayCopy();
+                $userResultObj[$key]['followedname'] = $userObj['username'];
+
+            }   
+            
+            return $userResultObj;
         } catch (\Throwable $e) {
             $this->logger->error('Database error in fetchFriends: ', ['exception' => $e->getMessage()]);
             return null;
@@ -1748,6 +1993,28 @@ class UserMapper
             ]);
             return null;
         }
-        return null;
+    }
+
+    public function getValidReferralInfoByLink(string $referralLink): array|null
+    {
+        $this->logger->info("UserMapper.getValidReferralInfoByLink started", [
+            'referralLink' => $referralLink,
+        ]);
+
+        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.referral_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid AND u.roles_mask IN (:role1, :role2, :role3)";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':referral_uuid', $referralLink, \PDO::PARAM_STR);
+        $stmt->bindValue(':role1', Role::USER, \PDO::PARAM_INT);
+        $stmt->bindValue(':role2', Role::ADMIN, \PDO::PARAM_INT);
+        $stmt->bindValue(':role3', Role::COMPANY_ACCOUNT, \PDO::PARAM_INT);
+        $stmt->execute();
+    
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+    
+        $this->logger->info("Referral info query result", ['result' => $result]);
+
+
+        return $result ?: null;
     }
 }

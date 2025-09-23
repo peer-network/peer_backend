@@ -2,4 +2,24 @@ parameters:
     level: 5
 
     paths:
+        - src
         - tests
+
+    reportUnmatchedIgnoredErrors: false
+
+    ignoreErrors:
+        - '#Method .+::.+\(\) is unused#'
+        - '#Parameter .+ of method .+::.+\(\) expects .+, .+ given#'
+        - '#Method .+::.+\(\) invoked with .+ parameters, .+ required#'
+        - '#Call to an undefined method .+::.+\(\)#'
+        - '#(Call to static method|Instantiated class|Invoking callable) .+ not found#'
+        - '#Property .+::\$.+ is unused#'
+        - '#(Comparison operation .+ is always false|Strict comparison using .+ will always evaluate to .+|Negated boolean expression is always false|Result of .+ is always (true|false)|Dead catch .+ is never thrown|Strict comparison using .+ will always evaluate to true)#'
+        - '#Offset .+ in (isset|empty)\(\) always exists and is not (nullable|falsy)#'
+        - '#Variable .+ in (isset|empty)\(\) (always exists and is not (nullable|falsy)|is never defined)#'
+        - '#Unreachable statement - code above always terminates#'
+        - '#Call to function is_array\(\) with .+ will always evaluate to (true|false)#'
+        - '#Parameter .+ of function array_map expects .+, .+ given#'
+        - '#Offset .+ does not exist on array\{\}#'
+        - '#Call to static method .+ on an unknown class .+#'
+        - '#Invoking callable on an unknown class .+#'

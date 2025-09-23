@@ -1,0 +1,62 @@
+name: Dependabot Alerts to Discord (Scheduled)
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch:
+  
+permissions:
+  contents: read
+  security-events: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Dependabot Alerts
+        run: |
+          curl -s -H "Authorization: Bearer ${{ secrets.DEPENDABOT_TOKEN }}" \
+               -H "Accept: application/vnd.github+json" \
+               https://api.github.com/repos/${{ github.repository }}/dependabot/alerts \
+               > alerts.json
+
+          if [ ! -s alerts.json ]; then
+            echo "alerts.json is empty (no permissions or no alerts)"
+            cat alerts.json
+            exit 0
+          fi
+
+          echo "Alerts:"
+          cat alerts.json
+
+      - name: Send Discord Notification
+        run: |
+          count=$(jq length alerts.json)
+          if [ "$count" -gt 0 ]; then
+            MESSAGE=":rotating_light: **$count Dependabot Security Alerts Found!**\n\n"
+            index=1
+            for row in $(jq -c '.[]' alerts.json); do
+              pkg=$(echo $row | jq -r '.dependency.package.name')
+              severity=$(echo $row | jq -r '.security_advisory.severity')
+              fixed_in=$(echo $row | jq -r '.security_vulnerability.first_patched_version.identifier')
+              advisory=$(echo $row | jq -r '.security_advisory.references[0].url')
+
+              MESSAGE+="$index. $pkg — $severity"
+              if [ "$fixed_in" != "null" ]; then
+                MESSAGE+=" — fixed in $fixed_in"
+              fi
+              MESSAGE+="\n$advisory\n\n"
+
+              index=$((index+1))
+            done
+
+            # Send to Discord
+            curl -H "Content-Type: application/json" \
+                 -X POST \
+                 -d "{\"content\": \"$MESSAGE\"}" \
+                 "$DISCORD_WEBHOOK_URL"
+          else
+            echo "No alerts found."
+          fi
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_DEPENDABOT }}

@@ -16,6 +16,7 @@ class PostAdvanced
     protected ?string $cover;
     protected string $mediadescription;
     protected string $contenttype;
+    protected string $url;
     protected ?int $amountlikes;
     protected ?int $amountdislikes;
     protected ?int $amountviews;
@@ -62,6 +63,7 @@ class PostAdvanced
         $this->issaved = $data['issaved'] ?? false;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
+        $this->url = $this->getPostUrl();
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
@@ -78,6 +80,7 @@ class PostAdvanced
             'title' => $this->title,
             'media' => $this->media,
             'cover' => $this->cover,
+            'url' => $this->url,
             'mediadescription' => $this->mediadescription,
             'contenttype' => $this->contenttype,
             'amountlikes' => $this->amountlikes,
@@ -121,7 +124,19 @@ class PostAdvanced
     {
         return $this->title;
     }
-
+    
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+    public function getMediaDescription(): string
+    {
+        return $this->mediadescription;
+    }
+    public function setMediaDescription(string $mediadescription): void
+    {
+        $this->mediadescription = $mediadescription;
+    }
     public function getUserId(): string
     {
         return $this->userid;
@@ -136,6 +151,10 @@ class PostAdvanced
     {
         return $this->media;
     }
+    public function setMedia(string $media): void
+    {
+        $this->media = $media;
+    }
 
     public function getContentType(): string
     {
@@ -143,7 +162,7 @@ class PostAdvanced
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -163,10 +182,12 @@ class PostAdvanced
             
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $postConst = ConstantsConfig::post();
         $specification = [
             'postid' => [
                 'required' => true,
@@ -196,8 +217,8 @@ class PostAdvanced
                 'required' => true,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 1000,
+                        'min' => $postConst['MEDIA']['MIN_LENGTH'],
+                        'max' => $postConst['MEDIA']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -206,8 +227,8 @@ class PostAdvanced
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 0,
-                        'max' => 1000,
+                        'min' => $postConst['COVER']['MIN_LENGTH'],
+                        'max' => $postConst['COVER']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -331,5 +352,13 @@ class PostAdvanced
         }
 
         return (new PeerInputFilter($specification));
+    }
+    
+    public function getPostUrl(): string
+    {
+        if(empty($this->postid)) {
+            return '';
+        }
+        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
     }
 }

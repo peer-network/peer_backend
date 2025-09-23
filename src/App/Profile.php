@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class Profile
 {
@@ -51,6 +52,12 @@ class Profile
         $this->textposts = isset($data['textposts']) && is_array($data['textposts']) ? $data['textposts'] : [];
         $this->videoposts = isset($data['videoposts']) && is_array($data['videoposts']) ? $data['videoposts'] : [];
         $this->audioposts = isset($data['audioposts']) && is_array($data['audioposts']) ? $data['audioposts'] : [];
+
+        if(($this->status == 6 )){
+            $this->username = 'Deleted_Account';
+            $this->img = '/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg';
+            $this->biography = '/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt';
+        }
     }
 
     // Array Copy methods
@@ -101,7 +108,7 @@ class Profile
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -121,10 +128,12 @@ class Profile
             
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $userConfig = ConstantsConfig::user();
         $specification = [
             'uid' => [
                 'required' => true,
@@ -148,7 +157,10 @@ class Profile
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 00001, 'max' => 99999]],
+                    ['name' => 'validateIntRange', 'options' => [
+                        'min' => $userConfig['SLUG']['MIN_LENGTH'], 
+                        'max' => $userConfig['SLUG']['MAX_LENGTH']
+                        ]],
                 ],
             ],
             'img' => [
@@ -156,8 +168,8 @@ class Profile
                 'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 30,
-                        'max' => 100,
+                        'min' => $userConfig['IMAGE']['MIN_LENGTH'],
+                        'max' => $userConfig['IMAGE']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],
@@ -167,8 +179,8 @@ class Profile
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 3,
-                        'max' => 500,
+                        'min' => $userConfig['BIOGRAPHY']['MIN_LENGTH'],
+                        'max' => $userConfig['BIOGRAPHY']['MAX_LENGTH'],
                     ]],
                     ['name' => 'isString'],
                 ],

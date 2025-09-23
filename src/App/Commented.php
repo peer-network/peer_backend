@@ -4,6 +4,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\constants\ConstantsConfig;
 
 class Commented
 {
@@ -17,6 +18,7 @@ class Commented
     protected ?bool $isliked;
     protected ?array $user = [];
     protected ?array $subcomments = [];
+    protected ?int $userstatus;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -35,6 +37,11 @@ class Commented
         $this->isliked = $data['isliked'] ?? false;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->subcomments = isset($data['subcomments']) && is_array($data['subcomments']) ? $data['subcomments'] : [];
+        $this->userstatus = $data['userstatus'] ?? 0;
+
+        if($this->userstatus == 6){
+            $this->content = "Comment by deleted Account";
+        }
     }
 
     // Array Copy methods
@@ -111,18 +118,18 @@ class Commented
         $this->content = $content;
     }
 
-    public function getSubComments(): string
+    public function getSubComments(): array
     {
         return $this->subcomments;
     }
 
-    public function setSubComments(string $subcomments): void
+    public function setSubComments(array $subcomments): void
     {
         $this->subcomments = $subcomments;
     }
 
     // Validation and Array Filtering methods
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -142,10 +149,12 @@ class Commented
             
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
+        $commentConfig = ConstantsConfig::comment();
         $specification = [
             'commentid' => [
                 'required' => true,
@@ -168,8 +177,8 @@ class Commented
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => 2,
-                        'max' => 200,
+                        'min' => $commentConfig['CONTENT']['MIN_LENGTH'],
+                        'max' => $commentConfig['CONTENT']['MAX_LENGTH'],
                     ]],
                     ['name' => 'IsString'],
                 ],

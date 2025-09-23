@@ -24,6 +24,7 @@ use function is_object;
 use function is_string;
 use function sprintf;
 use function method_exists;
+use Fawaz\config\constants\ConstantsConfig;
 
 class ValidationException extends Exception {}
 
@@ -45,6 +46,52 @@ class PeerInputFilter
     public function setData(array $data): void
     {
         $this->data = $data;
+    }
+
+    /**
+     * Apply a filter method dynamically by its name.
+     *
+     * @param string $filterName Name of the filter method to call
+     * @param mixed $value The value to be filtered.
+     * @param array $options Optional arguments passed to the filter method.
+     *
+     * @return mixed The filtered result.
+     *
+     * @throws ValidationException If the requested filter does not exist.
+     */
+    public function applyFilter(string $filterName, mixed $value, array $options = []): mixed
+    {
+        if (!method_exists($this, $filterName)) {
+            $this->errors[$filterName][] = "Filter '$filterName' does not exist.";
+            throw new ValidationException("Filter '$filterName' does not exist.");
+        }
+
+        $result = $this->$filterName($value, $options);
+        
+        return $result;
+    }
+
+    /**
+     * Apply a validator method dynamically by its name.
+     *
+     * @param string $validatorName Name of the validator method to call.
+     * @param mixed $value The value to be validated.
+     * @param array $options Optional arguments passed to the validator method.
+     *
+     * @return bool True if validation passes, false otherwise.
+     *
+     * @throws ValidationException If the requested validator does not exist.
+     */
+    public function applyValidator(string $validatorName, mixed $value, array $options = []): bool
+    {
+        if (!method_exists($this, $validatorName)) {
+            $this->errors[$validatorName][] = "Validator '$validatorName' does not exist.";
+            throw new ValidationException("Validator '$validatorName' does not exist.");
+        }
+
+        $result = $this->$validatorName($value, $options);
+        
+        return $result;
     }
 
     public function isValid(): bool
@@ -82,15 +129,13 @@ class PeerInputFilter
                     $options = $validator['options'] ?? [];
                     if (method_exists($this, $validatorName)) {
                         if (!$this->$validatorName($this->data[$field], $options)) {
-                            if (isset($this->errors[$field]) && is_array($this->errors[$field])){
-                                if (!empty($this->errors[$field][0])){
+                            if (isset($this->errors[$field])) {
+                                if (!empty($this->errors[$field][0])) {
                                     continue;
-                                }
-                            } else {
-                                if (!empty($this->errors[$field])){    
-                                    continue;
-                                }
                             }
+                        } elseif (!empty($this->errors[$field])) {
+                            continue;
+                        }
                             $this->errors[$field][] = $field;
                             if (!empty($validator['break_chain_on_failure'])) {
                                 break;
@@ -285,8 +330,8 @@ class PeerInputFilter
 
     protected function StringLength(string $value, array $options = []): bool
     {
-        $min =  (int)$options['min'] ?? 0;
-        $max = (int)$options['max'] ?? PHP_INT_MAX;
+        $min =  (int)($options['min'] ?? 0);
+        $max = (int)($options['max'] ?? PHP_INT_MAX);
         $errorCode = $options['errorCode'] ?? 40301;
         $length = strlen($value);   
 
@@ -599,17 +644,19 @@ class PeerInputFilter
 
     protected function validatePassword(string $value, array $options = []): bool
     {
+        $passwordConfig = ConstantsConfig::user()['PASSWORD'];
+
         if ($value === '') {
             $this->errors['password'][] = 30101;
             return false;
         }
 
-        if (strlen($value) < 8 || strlen($value) > 128) {
+        if (strlen($value) < $passwordConfig['MIN_LENGTH'] || strlen($value) > $passwordConfig['MAX_LENGTH']) {
             $this->errors['password'][] = 30226;
             return false;
         }
 
-        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $value)) {
+        if (!preg_match('/' . $passwordConfig['PATTERN'] . '/u', $value)) {
             $this->errors['password'][] = 30226;
             return false;
         }
@@ -620,18 +667,19 @@ class PeerInputFilter
     protected function validateUsername(string $value, array $options = []): bool
     {
         $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
+        $usernameConfig = ConstantsConfig::user()['USERNAME'];
 
         if ($value === '') {
             $this->errors['username'][] = 30202;
             return false;
         }
 
-        if (strlen($value) < 3 || strlen($value) > 23) {
+        if (strlen($value) < $usernameConfig['MIN_LENGTH'] || strlen($value) > $usernameConfig['MAX_LENGTH']) {
             $this->errors['username'][] = 30202;
             return false;
         }
 
-        if (!preg_match('/^[a-zA-Z0-9_]{3,23}$/', $value)) {
+        if (!preg_match('/' . $usernameConfig['PATTERN'] . '/u', $value)) {
             $this->errors['username'][] = 30202;
             return false;
         }
@@ -651,6 +699,8 @@ class PeerInputFilter
 
     protected function validateTagName(string $value, array $options = []): bool
     {
+        $tagConfig = ConstantsConfig::post()['TAG'];
+
         if ($value === '') {
             $this->errors['tag'][] = 30101;
             return false;
@@ -659,12 +709,12 @@ class PeerInputFilter
         $value = trim($value);
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
-        if (strlen($value) < 2 || strlen($value) > 53) {
-            $this->errors['tag'][] = 30211;
+        if (strlen($value) < $tagConfig['MIN_LENGTH'] || strlen($value) > $tagConfig['MAX_LENGTH']) {
+            $this->errors['tag'][] = 30103;
             return false;
         }
 
-        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $value)) {
+        if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $value)) {
             $this->errors['tag'][] = 30103;
             return false;
         }
@@ -681,13 +731,14 @@ class PeerInputFilter
 
         $value = trim($value);
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $walletConst = ConstantsConfig::wallet();
 
-        if (strlen($value) < 43 || strlen($value) > 44) {
+        if (strlen($value) < $walletConst['SOLANA_PUBKEY']['MIN_LENGTH'] || strlen($value) > $walletConst['SOLANA_PUBKEY']['MAX_LENGTH']) {
             $this->errors['pkey'][] = 30254;
             return false;
         }
 
-        if (!preg_match('/^[1-9A-HJ-NP-Za-km-z]{43,44}$/', $value)) {
+        if (!preg_match('/' . $walletConst['SOLANA_PUBKEY']['PATTERN'] . '/u', $value)) {
             $this->errors['pkey'][] = 30254;
             return false;
         }
@@ -697,6 +748,8 @@ class PeerInputFilter
 
     protected function validatePhoneNumber(string $value, array $options = []): bool
     {
+        $phoneConfig = ConstantsConfig::user()['PHONENUMBER'];
+
         if ($value === '') {
             $this->errors['phone'][] = 30103;
             return false;
@@ -705,9 +758,8 @@ class PeerInputFilter
         $value = trim($value);
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
-        $pattern = '/^\+?[1-9]\d{0,2}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{1,4}[\s.-]?\d{1,9}$/';
 
-        if (!preg_match($pattern, $value)) {
+        if (!preg_match('/' . $phoneConfig['PATTERN'] . '/u', $value)) {
             $this->errors['phone'][] = 30253;
             return false;
         }
@@ -715,51 +767,51 @@ class PeerInputFilter
         return true;
     }
 
-	protected function validateResetToken(string $value, array $options = []): bool
-	{
-		if ($value === '') {
-			$this->errors['reset_token'][] = 'Reset token is required.';
-			return false;
-		}
+    protected function validateResetToken(string $value, array $options = []): bool
+    {
+        if ($value === '') {
+            $this->errors['reset_token'][] = 'Reset token is required.';
+            return false;
+        }
 
-		$value = trim($value);
-		$value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $value = trim($value);
+        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
-		if (strlen($value) !== 64) {
-			$this->errors['reset_token'][] = 'Reset token must be exactly 64 characters.';
-			return false;
-		}
+        if (strlen($value) !== 64) {
+            $this->errors['reset_token'][] = 'Reset token must be exactly 64 characters.';
+            return false;
+        }
 
-		if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
-			$this->errors['reset_token'][] = 'Invalid reset token format.';
-			return false;
-		}
+        if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
+            $this->errors['reset_token'][] = 'Invalid reset token format.';
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	protected function validateActivationToken(string $value, array $options = []): bool
-	{
-		if ($value === '') {
-			$this->errors['activation_token'][] = 'Activation token is required.';
-			return false;
-		}
+    protected function validateActivationToken(string $value, array $options = []): bool
+    {
+        if ($value === '') {
+            $this->errors['activation_token'][] = 'Activation token is required.';
+            return false;
+        }
 
-		$value = trim($value);
-		$value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $value = trim($value);
+        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
-		if (strlen($value) !== 64) {
-			$this->errors['activation_token'][] = 'Activation token must be exactly 64 characters.';
-			return false;
-		}
+        if (strlen($value) !== 64) {
+            $this->errors['activation_token'][] = 'Activation token must be exactly 64 characters.';
+            return false;
+        }
 
-		if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
-			$this->errors['activation_token'][] = 'Invalid activation token format.';
-			return false;
-		}
+        if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
+            $this->errors['activation_token'][] = 'Invalid activation token format.';
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     protected function validateImage(string $imagePath, array $options = []): bool
     {

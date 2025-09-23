@@ -6,19 +6,16 @@ const LIKE_=2;
 const COMMENT_=4;
 const POST_=5;
 
-const DAILYFREEPOST=1;
-const DAILYFREELIKE=3;
-const DAILYFREECOMMENT=4;
-
 use Fawaz\App\DailyFree;
 use Fawaz\Database\DailyFreeMapper;
+use Fawaz\Database\Interfaces\TransactionManager;
 use Psr\Log\LoggerInterface;
 
 class DailyFreeService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected DailyFreeMapper $dailyFreeMapper)
+    public function __construct(protected LoggerInterface $logger, protected DailyFreeMapper $dailyFreeMapper, protected TransactionManager $transactionManager)
     {
     }
 
@@ -32,7 +29,7 @@ class DailyFreeService
         return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
     }
 
-    private function respondWithError(string $message): array
+    private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
@@ -53,18 +50,20 @@ class DailyFreeService
         try {
             $affectedRows = $this->dailyFreeMapper->getUserDailyAvailability($userId);
 
-            if ($affectedRows !== false) {
-                return [
-                    'status' => 'success',
-                    'ResponseCode' =>  11303,
-                    'affectedRows' => $affectedRows,
-                ];
+            if ($affectedRows === false) {
+                $this->logger->warning('DailyFree availability not found', ['userId' => $userId]);
+                return $this->respondWithError(40301);
             }
 
-            return [];
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11303,
+                'affectedRows' => $affectedRows,
+            ];
+
         } catch (\Throwable $e) {
-            $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage()]);
-            return [];
+            $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage(), 'userId' => $userId]);
+            return $this->respondWithError(40301);
         }
     }
 
@@ -76,7 +75,7 @@ class DailyFreeService
             $results = $this->dailyFreeMapper->getUserDailyUsage($userId, $artType);
             $this->logger->info('DailyFreeService.getUserDailyUsage results', ['results' => $results]);
 
-            return ($results !== false) ? (int)$results : 0;
+            return $results;
         } catch (\Throwable $e) {
             $this->logger->error('Error in getUserDailyUsage', ['exception' => $e->getMessage()]);
             return 0;
@@ -88,8 +87,20 @@ class DailyFreeService
         $this->logger->info('DailyFreeService.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
 
         try {
-            return $this->dailyFreeMapper->incrementUserDailyUsage($userId, $artType);
+            $this->transactionManager->beginTransaction();
+            $response =  $this->dailyFreeMapper->incrementUserDailyUsage($userId, $artType);
+
+            if (!$response) {
+                $this->logger->error('Failed to increment daily usage', ['userId' => $userId, 'artType' => $artType]);
+                $this->transactionManager->rollback();
+                return false;
+            }
+            $this->transactionManager->commit();
+            $this->logger->info('Daily usage incremented successfully');
+
+            return true;
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Error in incrementUserDailyUsage', ['exception' => $e->getMessage()]);
             return false;
         }

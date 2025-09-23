@@ -5,6 +5,7 @@ namespace Fawaz\App;
 use Fawaz\App\Tag;
 use Fawaz\Database\TagMapper;
 use Psr\Log\LoggerInterface;
+use Fawaz\config\constants\ConstantsConfig;
 
 class TagService
 {
@@ -51,18 +52,21 @@ class TagService
             return false;
         }
 
+        $tagNameConfig = ConstantsConfig::post()['TAG'];
         $tagName = htmlspecialchars($tagName, ENT_QUOTES, 'UTF-8'); // Schutz vor XSS
 
         $length = strlen($tagName);
-        return $length >= 2 && $length <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
+        return $length >= $tagNameConfig['MIN_LENGTH']
+            && $length <= $tagNameConfig['MAX_LENGTH']
+            && preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName);
     }
 
-    private function respondWithError(string $message): array
+    private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    private function createSuccessResponse(string $message, array $data = []): array
+    private function createSuccessResponse(int $message, array $data = []): array
     {
         return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
     }
@@ -99,9 +103,9 @@ class TagService
 
             return $this->createSuccessResponse(11702, [$tagData]);
 
-        } catch (\Throwable $e) {
-            return $this->respondWithError(40301);
         } catch (ValidationException $e) {
+            return $this->respondWithError(40301);
+        } catch (\Throwable $e) {
             return $this->respondWithError(40301);
         } finally {
             $this->logger->debug('createTag function execution completed');

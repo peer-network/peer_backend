@@ -5,12 +5,15 @@ namespace Fawaz\App;
 use Fawaz\App\TagPost;
 use Fawaz\Database\TagPostMapper;
 use Psr\Log\LoggerInterface;
+use Fawaz\Database\TagMapper;
+use Fawaz\config\constants\ConstantsConfig;
+
 
 class TagPostService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected TagPostMapper $tagPostMapper)
+    public function __construct(protected LoggerInterface $logger, protected TagPostMapper $tagPostMapper, protected TagMapper $tagMapper)
     {
     }
 
@@ -47,7 +50,11 @@ class TagPostService
 
     private function isValidTagName(?string $tagName): bool
     {
-        return $tagName && strlen($tagName) >= 2 && strlen($tagName) <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
+        $tagNameConfig = ConstantsConfig::post()['TAG'];
+        return $tagName && 
+            strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] && 
+            strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] && 
+            preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName);
     }
 
     private function validateTagName(string $tagName): array|bool
@@ -56,20 +63,24 @@ class TagPostService
             return $this->respondWithError(30101);
         }
 
-        if (strlen($tagName) < 2 || strlen($tagName) > 50 || !preg_match('/^[a-zA-Z]+$/', $tagName)) {
+        $tagNameConfig = ConstantsConfig::post()['TAG'];
+
+        if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] ||
+            strlen($tagName) > $tagNameConfig['MAX_LENGTH'] ||
+            !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
             return $this->respondWithError(30255);
         }
 
         return true;
     }
 
-    public function handleTags(array $tags, string $postId, int $maxTags = 10): void
+    public function handleTags(array $tags, string $postId, int $maxTags = 10): ?array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
         }
 
-        $maxTags = min(max((int)($maxTags ?? 5), 1), 10);
+        $maxTags = min(max($maxTags, 1), 10);
         if (count($tags) > $maxTags) {
             return $this->respondWithError(30211);
         }
@@ -81,7 +92,10 @@ class TagPostService
                 return $this->respondWithError(30255);
             }
 
-            $tag = $this->tagMapper->loadByName($tagName) ?? $this->createTag($tagName);
+            $tag = $this->tagMapper->loadByName($tagName);
+            if (!$tag){
+                $tag = $this->createTag($tagName);
+            }
             $tagPost = new TagPost([
                 'postid' => $postId,
                 'tagid' => $tag->getTagId(),
@@ -89,6 +103,8 @@ class TagPostService
             ]);
             $this->tagPostMapper->insert($tagPost);
         }
+
+        return ['status' => 'success'];
     }
 
     public function createTag(string $tagName): array
@@ -138,18 +154,13 @@ class TagPostService
             $this->logger->debug('createTag function execution completed');
         }
     }
-
-    private function isValidTagName(?string $tagName): bool
-    {
-        return $tagName && strlen($tagName) >= 2 && strlen($tagName) <= 50 && preg_match('/^[a-zA-Z]+$/', $tagName);
-    }
-
-    private function respondWithError(string $message): array
+    
+    private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    private function createSuccessResponse(string $message, array $data = []): array
+    private function createSuccessResponse(int $message, array $data = []): array
     {
         return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
     }

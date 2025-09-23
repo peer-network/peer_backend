@@ -5,9 +5,11 @@ schema {
 
 type Query {
   hello: HelloResponse
+  guestListPost(postid: ID!): PostResponse!
 }
 
 scalar Decimal
+scalar Date
 
 type Mutation {
   register(input: RegistrationInput!): RegisterResponse!
@@ -16,7 +18,74 @@ type Mutation {
   requestPasswordReset(email: String!): ResetPasswordRequestResponse!
   resetPassword(token: String!, password: String!): DefaultResponse
   refreshToken(refreshToken: String!): AuthPayload!
+  verifyReferralString(referralString: String!): ReferralResponse!
   contactus(name: String!, email: String!, message: String!): ContactusResponse!
+}
+
+type PostResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: Post
+}
+
+type Post {
+  id: ID!
+  contenttype: String!
+  title: String!
+  media: String!
+  cover: String!
+  mediadescription: String!
+  createdat: Date!
+  amountlikes: Int!
+  amountviews: Int!
+  amountcomments: Int!
+  amountdislikes: Int!
+  amounttrending: Int!
+  isliked: Boolean!
+  isviewed: Boolean!
+  isreported: Boolean!
+  isdisliked: Boolean!
+  issaved: Boolean!
+  tags: [String]!
+  url: String!
+  user: ProfileUser!
+  comments: [Comment!]!
+}
+
+type Comment {
+  commentid: ID!
+  userid: ID!
+  postid: ID!
+  parentid: ID
+  content: String!
+  createdat: Date!
+  amountlikes: Int!
+  amountreplies: Int!
+  isliked: Boolean!
+  user: ProfileUser!
+}
+
+type ProfileUser {
+  id: ID!
+  username: String
+  slug: Int
+  img: String
+  isfollowed: Boolean
+  isfollowing: Boolean
+}
+
+
+type ReferralResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: ReferralInfo
+}
+
+type ReferralInfo {
+  uid: String
+  username: String
+  slug: String
+  img: String
 }
 
 type ContactusResponsePayload {
@@ -39,6 +108,7 @@ type HelloResponse {
   currentVersion: String
   wikiLink: String
   lastMergedPullRequestNumber: String
+  companyAccountId: ID
 }
 
 type RegisterResponse {
