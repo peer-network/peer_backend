@@ -13,7 +13,7 @@ VOLUME_NAME = $(COMPOSE_PROJECT_NAME)_db_data
 COMPOSE_OVERRIDE = docker-compose.override.local.yml
 COMPOSE_FILES = -f docker-compose.yml $(if $(wildcard $(COMPOSE_OVERRIDE)),-f $(COMPOSE_OVERRIDE))
 
-PROJECT_NAME ?= peer_backend_local_$(USER)
+PROJECT_NAME ?= peer_backend_local_$(shell echo $(USER) | tr '[:upper:]' '[:lower:]')
 export COMPOSE_PROJECT_NAME := $(PROJECT_NAME)
 
 env-ci: ## Copy .env.dev to .env.ci for local development
