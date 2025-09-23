@@ -93,13 +93,11 @@ final class UserServiceImpl implements UserServiceInterface
         
         $userSpecs = [
             $verifiedUserSpec,
-            $activeUserSpec,
             $currentUserIsBlockedSpec,
             $usersContentFilterSpec
         ];
         $postSpecs = [
             $verifiedUserSpec,
-            $activeUserSpec,
             $currentUserIsBlockedSpec,
             $postsContentFilterSpec
         ];
