@@ -1,13 +1,16 @@
 const fs = require("fs");
 const path = "/etc/newman";
- 
-const collections = [
-  "001_graphql_postman_collection.json",
-  "002_graphql_postman_collection.json",
-  "003_graphql_postman_collection.json",
-  "004_graphql_postman_collection.json"
-];
- 
+
+let collections = fs.readdirSync(path).filter(file =>
+  file.endsWith("_graphql_postman_collection.json")
+);
+
+collections.sort((a, b) => {
+  const numA = parseInt(a.split("_")[0], 10);
+  const numB = parseInt(b.split("_")[0], 10);
+  return numA - numB;
+});
+
 let merged = {
   info: {
     name: "Merged Collection",
@@ -15,7 +18,7 @@ let merged = {
   },
   item: [],
 };
- 
+
 collections.forEach((file) => {
   const filePath = `${path}/${file}`;
   if (fs.existsSync(filePath)) {

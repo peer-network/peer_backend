@@ -379,10 +379,10 @@ jobs:
 
       - name: Rewrite GraphQL and Upload-post Endpoints in Postman Collections (using jq)
         run: |
-          for file in tests/postman_collection/001_graphql_postman_collection.json \
-                     tests/postman_collection/002_graphql_postman_collection.json \
-                     tests/postman_collection/003_graphql_postman_collection.json \
-                     tests/postman_collection/004_graphql_postman_collection.json; do
+          files=$(ls tests/postman_collection/*_graphql_postman_collection.json | sort)
+
+          for file in $files; do
+            echo "Processing $file ..."
 
             # Replace GraphQL endpoints
             jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {
