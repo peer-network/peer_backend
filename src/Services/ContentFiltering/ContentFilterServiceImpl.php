@@ -59,10 +59,10 @@ class ContentFilterServiceImpl {
         return $this->getDefaultContentFilteringString();
     }
 
-    public function getDefaultContentFilteringString(): string {
+    public function getDefaultContentFilteringString(): ?string {
         $allowedTypes = $this->contentSeverityLevels;
     
-        return $allowedTypes[0];
+        return null;
     }
 
     public function getContentFilterAction(
