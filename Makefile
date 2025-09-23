@@ -76,7 +76,7 @@ restart-db: ## Restart only the database (fresh schema & data, keep backend as-i
 
 	@echo "Database restarted and ready. Backend container was untouched."
 
-dev: env-ci reset-db-and-backend init ## Full setup: env.ci, DB reset, vendors install, start DB+backend
+dev: env-ci reset-db-and-backend init scan ## Full setup: env.ci, DB reset, vendors install, start DB+backend
 	@echo "Installing Composer dependencies on local host..."
 	composer install --no-dev --prefer-dist --no-interaction
 
@@ -199,6 +199,7 @@ clean-all: reset-db-and-backend  ## Remove containers, volumes, vendors, reports
 		true; \
 	}
 	@rm -f .env.ci
+	@rm -rf .gitleaks_out
 	@rm -f supervisord.pid
 	@rm -f runtime-data/logs/errorlog.txt
 	@rm -f tests/postman_collection/tmp_*.json
@@ -245,3 +246,30 @@ clean-prune: clean-all ## Remove ALL unused images, build cache, and volumes
 hot-ci:
 	$(MAKE) restart-db
 	$(MAKE) test
+
+install-hooks: ## Install Git hooks for pre-commit scanning
+	@echo "Installing Git hooks..."
+	git config core.hooksPath .githooks
+	chmod +x .githooks/*
+	@echo "Pre-commit hook installed. Gitleaks will now run on every commit."
+
+scan: ## Run Gitleaks scan on staged changes only
+	@echo "Running Gitleaks scan on staged changes..."
+	@mkdir -p .gitleaks_out
+	@git diff --cached --unified=0 --no-color | \
+	docker run --rm -i -v $(PWD):/repo ghcr.io/gitleaks/gitleaks:v8.28.0 \
+	  detect \
+	    --pipe \
+	    --config=/repo/gitleaks.toml \
+	    --report-format=json \
+	    --report-path=/repo/.gitleaks_out/gitleaks-report.json \
+	    --no-banner | tee .gitleaks_out/gitleaks.log
+	@echo ""
+	@if grep -q '"RuleID":' .gitleaks_out/gitleaks-report.json; then \
+		echo "Secrets found in repository!"; \
+		echo "Full report written to .gitleaks_out/gitleaks-report.json"; \
+		echo "Contact backend lead / CTO / DevOps if this is intentional."; \
+		exit 1; \
+	else \
+		echo "No secrets found in repository."; \
+	fi
