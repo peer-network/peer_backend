@@ -34,6 +34,8 @@ type Query {
   getReferralInfo: ReferralInfoResponse!
   referralList(offset: Int, limit: Int): ReferralListResponse!
   listTodaysInteractions: ListTodaysInteractionsResponse!
+  getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
+  getTokenPrice: TokenPriceResponse!
   getActionPrices: GetActionPricesResponse!
   postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
@@ -66,6 +68,7 @@ type Mutation {
   createPost(action: PostType!, input: PostInput!): PostResponse!
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
+  swapTokens(btcAddress: ID!, numberoftokens: Decimal!, password: String!): SwapTokenResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: "Use `resolveTransferV2`.")
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
 }
@@ -104,6 +107,8 @@ enum PostActionType {
   SHARE
   SAVE
 }
+
+
 
 enum PostType {
   POST
@@ -253,6 +258,44 @@ type LogWins {
   numbers: Decimal
   createdat: String
 }
+
+
+type LiquidityPoolHistoryResponse {
+  status: String!
+  ResponseCode: Int!
+  affectedRows: [LiquidityPoolTransaction!]
+}
+type TokenPriceResponse {
+  status: String!
+  ResponseCode: Int!
+  currentTokenPrice: String!
+  updatedAt: String
+}
+type LiquidityPoolTransaction {
+  swapid: String!
+  transactionid: String!
+  transactiontype: String!
+  senderid: String!
+  tokenamount: Decimal!
+  btcamount: Decimal!
+  status: String!
+  message: String!
+  createdat: String!
+}
+
+
+type SwapToken {
+  tokenSend: Decimal
+  tokensSubstractedFromWallet: Decimal
+  expectedBtcReturn: Decimal
+}
+
+type SwapTokenResponse {
+  status: String!
+  ResponseCode: Int!
+  affectedRows: SwapToken!
+}
+
 
 type UserLogWins {
   status: String

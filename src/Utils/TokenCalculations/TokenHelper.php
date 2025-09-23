@@ -8,6 +8,35 @@ use FFI;
 class TokenHelper
 {
     /**
+     * Calculates the Peer Token price in EUR based on BTC-EUR and PeerToken-BTC prices.
+     *
+     * @param string $btcEURPrice Current BTC to EUR price.
+     * @param string $peerTokenBTCPrice Current PeerToken to BTC price.
+     * @return float|null Calculated PeerToken price in EUR.
+     */
+    public static function calculatePeerTokenEURPrice(string $btcEURPrice, string $peerTokenBTCPrice): ?string
+    {
+        $peerValue = self::mulRc((float) $btcEURPrice, (float) $peerTokenBTCPrice);
+
+        return (string) $peerValue;
+    }
+
+    /**
+     * Calculates the price of one Peer Token in BTC based on liquidity pool data.
+     *
+     * @param float $btcPoolBTCAmount Total BTC in the liquidity pool.
+     * @param float $liqPoolTokenAmount Total Peer Tokens in the liquidity pool.
+     * @return float|null Peer Token price in BTC with 10-digit precision.
+     */
+    public static function calculatePeerTokenPriceValue(string $btcPoolBTCAmount, string $liqPoolTokenAmount): ?string
+    {
+        $beforeToken = self::divRc((float) $btcPoolBTCAmount, (float) $liqPoolTokenAmount);
+        
+        return (string) ($beforeToken);
+    }
+
+
+    /**
      * Calculates the total number of Peer Tokens required including all applicable fees.
      *
      * @param float $numberOfTokens Base amount of tokens.
@@ -139,6 +168,7 @@ class TokenHelper
             $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.so';
         }
         
+
         // Load FFI bindings
         $ffi = FFI::cdef("
             const char* add_decimal(const char* a, const char* b);
@@ -148,5 +178,6 @@ class TokenHelper
         ", $relativePath);
 
         return $ffi;
+
     }
 }
