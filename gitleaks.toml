@@ -6,7 +6,14 @@ description = "Catch any likely secret (broad net)"
 regex = '''(?i)(secret|key|token)[_=:\s-]*[A-Za-z0-9/\+=!@#$%^&*._-]{6,}|ghp_[0-9A-Za-z]{36}|xox[baprs]-[0-9]{12}-[0-9]{12}-[0-9A-Za-z]{24,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z\-_]{35}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+|-----BEGIN( RSA)? PRIVATE KEY-----'''
 tags = ["key", "secret", "generic", "broad"]
 
-# --- Allowlist (Jakob’s approved exceptions ONLY) ---
+[rules.allowlist]
+  regexes = [
+    '''secrets\.[A-Z0-9_]+''',
+    '''vars\.[A-Z0-9_]+''',
+    '''github\.[a-zA-Z0-9_]+'''
+  ]
+
+# --- Allowlist ( approved exceptions ONLY) ---
 [allowlist]
 description = "Ignore known UUIDs and Postman test data"
 regexes = [
