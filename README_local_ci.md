@@ -177,7 +177,7 @@ This will:
 make clean-all
 ```
 
-This ensures your environment is fully cleaned (reports, vendors, and temp files) before the next run.
+This ensures your environment is fully cleaned (reports, vendors, gitleak report, and temp files) before the next run.
 
 ---
 
@@ -233,11 +233,13 @@ ensure-jq : Ensure jq is installed (auto-install if missing)
 env-ci : Copy .env.dev to .env.ci for local development
 help : Show available make targets
 init : Prepare Postman environment files for testing
+install-hooks : Install Git hooks for pre-commit scanning
 logs : Tail backend container logs
 reload-backend : Rebuild and restart backend container
 reset-db-and-backend : Reset DB, backend, and remove all related Docker images
 restart-db : Restart only the database (fresh schema & data, keep backend as-is)
 restart : Soft restart with fresh DB but keep current code & vendors
+scan : Run Gitleaks scan on staged changes only
 test : Run Newman tests inside Docker and generate HTML report
 
 ---
@@ -260,6 +262,37 @@ This will:
 
 ⚠️ Warning: This is destructive. It will nuke caches and volumes you might want for other projects.
 ✅ Use this if you need a completely fresh Docker environment.
+
+---
+
+### 12. Install Pre-Commit Hook (Gitleaks)
+
+To automatically scan for secrets before every commit, install the Git hook once:
+
+```bash
+make install-hooks
+```
+
+This will:
+
+- Configure Git to use .githooks/pre-commit
+- Make the hook executable
+- Run Gitleaks on staged changes during each git commit
+
+---
+
+### 13. Run Gitleaks Manually
+
+To scan staged changes (like pre-commit):
+
+```bash
+make scan
+```
+
+This will:
+
+- Run a Gitleaks scan on your staged changes before they’re committed.
+- It will write a report to .gitleaks_out/gitleaks-report.json.
 
 ---
 
