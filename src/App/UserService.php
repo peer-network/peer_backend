@@ -530,7 +530,7 @@ class UserService
 
     private function updateOnboardings($userPreferences, array $shownOnboardingsIn): void
     {
-        $available = ConstantsConfig::onboarding()['AVAILABLE_ONBOARDINGS'] ?? [];
+        $available = ConstantsConfig::onboarding()['AVAILABLE_ONBOARDINGS'];
         if (empty($available)) {
             $this->logger->error('updateUserPreferences: AVAILABLE_ONBOARDINGS list is empty');
             throw new \RuntimeException('No available onboardings configured', 40301);// List is empty, response code = 4XXXX

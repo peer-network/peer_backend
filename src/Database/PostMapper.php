@@ -1136,7 +1136,7 @@ class PostMapper
                 ],
             ],[],false);
 
-            return ((is_array($results) && count($results) > 0) ? $results : []);
+            return (!empty($results) ? $results : []);
         } catch (\PDOException $e) {
             $this->logger->error("Database error in PostMapper.getGuestListPost", [
                 'error' => $e->getMessage(),
