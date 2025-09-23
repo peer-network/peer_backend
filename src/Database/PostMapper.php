@@ -1025,7 +1025,6 @@ class PostMapper
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $prt['username'] = $replacer->username($prt['username']);
-                    // slug не трогаем
                     $prt['img'] = $replacer->profilePicturePath($prt['img']);
                 }
 
