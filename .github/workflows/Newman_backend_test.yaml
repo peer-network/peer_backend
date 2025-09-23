@@ -802,6 +802,7 @@ jobs:
           MESSAGE+=":warning: **Secrets were detected by Gitleaks**\n"
           MESSAGE+="You can:\n"
           MESSAGE+="- [Click here to view workflow artifacts](<$RUN_URL>) (download the **gitleaks-report** artifact)\n"
+          MESSAGE+="- Check the **Actions → Artifacts** tab to view/download the report\n"
           MESSAGE+="- Or run \`make scan\` locally to reproduce.\n\n"
           MESSAGE+="Contact **Backend Lead / CTO / DevOps** if this is intentional."
           
