@@ -4,10 +4,9 @@ namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
 use Fawaz\App\Specs\SpecTypes\ActiveUserSpec;
+use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
 use Fawaz\App\Specs\SpecTypes\ContentFilterSpec;
 use Fawaz\App\Specs\SpecTypes\CurrentUserIsBlockedUserSpec;
-use Fawaz\App\Specs\SpecTypes\UserIsBlockedByMeSpec;
-use Fawaz\App\Specs\SpecTypes\VerifiedUserSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -68,8 +67,8 @@ final class UserServiceImpl implements UserServiceInterface
 
         $strategy = new GetProfileContentFilteringStrategy();
 
-        $verifiedUserSpec = new VerifiedUserSpec($userId);
         $activeUserSpec = new ActiveUserSpec($userId);
+        $basicUserSpec = new BasicUserSpec($userId);
         $currentUserIsBlockedSpec = new CurrentUserIsBlockedUserSpec(
             $this->currentUserId,
             $userId
@@ -92,12 +91,12 @@ final class UserServiceImpl implements UserServiceInterface
         );
         
         $userSpecs = [
-            $verifiedUserSpec,
+            $basicUserSpec,
             $currentUserIsBlockedSpec,
             $usersContentFilterSpec
         ];
         $postSpecs = [
-            $verifiedUserSpec,
+            $basicUserSpec,
             $currentUserIsBlockedSpec,
             $postsContentFilterSpec
         ];

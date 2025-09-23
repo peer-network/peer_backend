@@ -18,11 +18,12 @@ final class BasicUserSpec implements Specification
         return new SpecificationSQLData(
             [
                 "EXISTS (
-                SELECT 1
-                FROM users basicUserSpec_users
-                WHERE basicUserSpec_users.uid = :basicUserSpec_users_userid AND
-                basicUserSpec_users.roles_mask IN (0,2,16)) AND
-                basicUserSpec_users.verified = 1"
+                    SELECT 1
+                    FROM users basicUserSpec_users
+                    WHERE basicUserSpec_users.uid = :basicUserSpec_users_userid AND
+                    basicUserSpec_users.roles_mask IN (0,2,16) AND
+                    basicUserSpec_users.verified = 1
+                )"
             ],[
                 "basicUserSpec_users_userid" => $this->userid
             ]

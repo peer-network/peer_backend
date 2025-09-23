@@ -33,8 +33,8 @@ final class ContentFilterSpec implements Specification
     public function toSql(): ?SpecificationSQLData
     {
         if ($this->contentFilterService->getContentFilterAction(
-            ContentType::user,
-            ContentType::user,
+            $this->contentTarget,
+            $this->showingContent,
             null,
             null,
             $this->currentUserId, 
