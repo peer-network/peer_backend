@@ -76,7 +76,6 @@ jobs:
       - run: |
           echo " PR branch is behind the base branch."
           exit 1
-
   gitleaks_scan_staged:
     name: Gitleaks PR Scan
     uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
