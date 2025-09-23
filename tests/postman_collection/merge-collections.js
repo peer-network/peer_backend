@@ -4,7 +4,8 @@ const path = "/etc/newman";
 const collections = [
   "001_graphql_postman_collection.json",
   "002_graphql_postman_collection.json",
-  "003_graphql_postman_collection.json"
+  "003_graphql_postman_collection.json",
+  "004_graphql_postman_collection.json"
 ];
  
 let merged = {
