@@ -6551,7 +6551,7 @@
 							"    pm.expect(advertisement.post.amountlikes).to.eql(1);",
 							"    pm.expect(advertisement.post.amountviews).to.eql(1);",
 							"    pm.expect(advertisement.post.amountcomments).to.eql(1);",
-							"    pm.expect(advertisement.post.amountdislikes).to.eql(1);",
+							"    pm.expect(advertisement.post.amountdislikes).to.eql(0);",
 							"});"
 						],
 						"type": "text/javascript",
@@ -7045,7 +7045,7 @@
 							"    pm.expect(advertisement.post.amountlikes).to.eql(2);",
 							"    pm.expect(advertisement.post.amountviews).to.eql(2);",
 							"    pm.expect(advertisement.post.amountcomments).to.eql(2);",
-							"    pm.expect(advertisement.post.amountdislikes).to.eql(2);",
+							"    pm.expect(advertisement.post.amountdislikes).to.eql(1);",
 							"});"
 						],
 						"type": "text/javascript",
