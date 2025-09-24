@@ -259,9 +259,9 @@ check-hooks: ## Verify that Git hooks are installed and executable
 		exit 1; \
 	fi
 	@if [ ! -x .githooks/pre-commit ]; then \
-		echo "Pre-commit hook is not executable. Run 'chmod +x .githooks/pre-commit' and commit it."; \
-		exit 1; \
-	fi
+        echo "Fixing pre-commit hook permissions..."; \
+        chmod +x .githooks/pre-commit; \
+    fi
 	@echo "Git hooks are present and executable."
 
 scan: check-hooks ## Run Gitleaks scan on staged changes only
