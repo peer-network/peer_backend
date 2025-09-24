@@ -1,47 +1,74 @@
 input RegistrationInput {
+  """User’s email address. Must be in valid email format."""
   email: String!
+  """Password: 8–128 chars, must include uppercase, lowercase and number."""
   password: String!
+  """Username: 3–23 chars, must contain letters; may contain numbers and underscores."""
   username: String!
+  """Optional Solana public key. 43–44 chars, no 0, O, I, 1."""
   pkey: String
+  """Optional referral UUID (ties registration to a referrer)."""
   referralUuid: ID
 }
 
 input PostInput {
+  """Title (2–63 characters; letters, numbers, spaces, -, _)."""
   title: String!
+  """Media description (3–500 characters)."""
   mediadescription: String
+  """Content type (ENUM: image, audio, video, text)."""
   contenttype: ContentType!
+  """Media files (base64-encoded strings)."""
   media: [String!]
+  """Cover images (base64-encoded strings)."""
   cover: [String!]
+  """Tags (max 10, each 2–53 characters)."""
   tags: [String!]
+  """Reference to files uploaded via multipart flow."""
   uploadedFiles: String
 }
 
 input ChatInput {
+  """Chat name (valid string)."""
   name: String!
+  """Chat image (base64, must be a valid image)."""
   image: String
+  """List of recipient user IDs."""
   recipients: [String!]!
 }
 
 input UpdateChatInput {
+  """Chat ID (UUID).""Chat ID (UUID).""Chat ID (UUID)."""
   chatid: ID!
+  """New chat name (valid string)."""
   name: String
+  """New image (base64, must be a valid image)."""
   image: String
 }
 
 input ChatParticipantsInput {
+  """Chat ID (UUID)."""
   chatid: ID!
+  """List of recipient user IDs."""
   recipients: [String!]!
 }
 
 input FeedInput {
+  """Feed ID."""
   feedid: ID!
+  """Title (2–30 characters)."""
   title: String!
+  """Media (base64, must be valid image/audio/video/text)."""
   media: String!
+  """Media description (3–500 characters)."""
   mediadescription: String
+  """Content type (ENUM: image, audio, video, text)."""
   contenttype: String!
 }
 
 input UserPreferencesInput {
+  """User’s sensitive content filter level (ENUM: MYGRANDMALIKES, MYGRANDMAHATES)."""
   contentFilteringSeverityLevel: ContentFilterType
+  """List of onboarding screens already shown to the user."""
   shownOnboardings: [OnboardingType!]
 }
