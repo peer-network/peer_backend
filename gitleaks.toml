@@ -9,7 +9,7 @@ tags = ["key", "secret", "generic", "broad"]
 [[rules]]
 id = "entropy-catch-all"
 description = "Catch any high-entropy random string (broad net for unknown keys)"
-regex = '''[A-Za-z0-9\+=!@#$%^&*.-]{20,}'''
+regex = '''[A-Za-z0-9\+=!@#$%^&*.-]{30,}'''
 entropy = 3.5
 tags = ["key", "secret", "generic", "broad"]
 
