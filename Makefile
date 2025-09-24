@@ -256,19 +256,37 @@ install-hooks: ## Install Git hooks for pre-commit scanning
 scan: ## Run Gitleaks scan on staged changes only
 	@echo "Running Gitleaks scan on staged changes..."
 	@mkdir -p .gitleaks_out
-	@git diff --cached --unified=0 --no-color | \
-	docker run --rm -i -v $(PWD):/repo ghcr.io/gitleaks/gitleaks:v8.28.0 \
-	  detect \
-	    --pipe \
-	    --config=/repo/gitleaks.toml \
-	    --report-format=json \
-	    --report-path=/repo/.gitleaks_out/gitleaks-report.json \
-	    --no-banner | tee .gitleaks_out/gitleaks.log
+	@if command -v gitleaks >/dev/null 2>&1; then \
+		echo "⚡ Using local gitleaks binary"; \
+		git diff --cached --unified=0 --no-color | \
+		  gitleaks detect \
+		    --pipe \
+		    --config=gitleaks.toml \
+		    --report-format=json \
+		    --report-path=.gitleaks_out/gitleaks-report.json \
+		    --no-banner | tee .gitleaks_out/gitleaks.log; \
+	else \
+		echo "Local gitleaks not found, using Docker fallback"; \
+		git diff --cached --unified=0 --no-color | \
+		  docker run --rm -i -v $$(pwd):/repo ghcr.io/gitleaks/gitleaks:v8.28.0 \
+		    detect \
+		      --pipe \
+		      --config=/repo/gitleaks.toml \
+		      --report-format=json \
+		      --report-path=/repo/.gitleaks_out/gitleaks-report.json \
+		      --no-banner | tee .gitleaks_out/gitleaks.log; \
+	fi
 	@echo ""
 	@if grep -q '"RuleID":' .gitleaks_out/gitleaks-report.json; then \
-		echo "Secrets found in repository!"; \
-		echo "Full report written to .gitleaks_out/gitleaks-report.json"; \
-		echo "Contact backend lead / CTO / DevOps if this is intentional."; \
+		echo "Possible secrets detected! See .gitleaks_out/gitleaks-report.json"; \
+		echo ""; \
+		echo "Reminder: Do NOT bypass with 'git commit --no-verify'."; \
+		echo "CI will still block your PR even if you bypass locally."; \
+		echo ""; \
+		echo "If this secret is actually required in the repo (false positive or approved usage),"; \
+		echo "you MUST meet with the CTO / Team Lead / DevOps to approve"; \
+		echo "and add it to the gitleaks ignore list."; \
+		echo ""; \
 		exit 1; \
 	else \
 		echo "No secrets found in repository."; \
