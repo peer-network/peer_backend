@@ -2,10 +2,14 @@
 declare(strict_types=1);
 
 use Fawaz\BaseURL;
+use Fawaz\Utils\ResponseMessagesProvider;
 use Fawaz\Services\JWTService;
 use Fawaz\Services\Mailer;
 use Fawaz\Services\LiquidityPool;
 use DI\ContainerBuilder;
+use Fawaz\Utils\PeerLogger;
+use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Utils\ResponseMessagesProviderImpl;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
@@ -18,6 +22,16 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 
         BaseURL::class => fn (ContainerInterface $c) => new BaseURL($c->get('settings')['base_url']),
 
+        PeerLoggerInterface::class => function (ContainerInterface $c) {
+            $settings = $c->get('settings')['logger'];
+
+            $logger = new PeerLogger($settings['name']);
+
+            $handler = new StreamHandler($settings['path'], $settings['level']);
+            $logger->pushHandler($handler);
+
+            return $logger;
+        },
         LoggerInterface::class => function (ContainerInterface $c) {
             $settings = $c->get('settings')['logger'];
 
@@ -73,5 +87,10 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 
             return $pdo;
         },
+
+        ResponseMessagesProvider::class => function(ContainerInterface $c) {
+            $path = __DIR__ . "/../../runtime-data/media/assets/response-codes.json";
+            return new ResponseMessagesProviderImpl($path);
+        }
     ]);
 };
