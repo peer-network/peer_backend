@@ -804,7 +804,9 @@ jobs:
           MESSAGE+="- [Click here to view workflow artifacts](<$RUN_URL>) (download the **gitleaks-report** artifact)\n"
           MESSAGE+="- Check the **Actions → Artifacts** tab to view/download the report\n"
           MESSAGE+="- Or run \`make scan\` locally to reproduce.\n\n"
-          MESSAGE+="Contact **Backend Lead / CTO / DevOps** if this is intentional."
+          MESSAGE+=":no_entry: **Reminder:** Do NOT bypass with \`git commit --no-verify\`. CI will still block your PR.\n"
+          MESSAGE+="If this secret is actually required in the repo (false positive or approved usage),\n"
+          MESSAGE+="you MUST meet with the **CTO / Team Lead / DevOps** to approve and add it to the gitleaks ignore list."
           
           curl -H "Content-Type: application/json" \
                -X POST \
