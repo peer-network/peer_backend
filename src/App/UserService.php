@@ -506,11 +506,6 @@ class UserService
 
             $contentFilteringSeverityLevelString = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
 
-            if ($contentFilteringSeverityLevelString === null) {
-                $this->logger->error('UserService.updateUserPreferences: failed to get contentFilteringSeverityLevelString');
-                $this->transactionManager->rollback();
-                return self::respondWithError(40301); // 402x1
-            }
             $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
             $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
