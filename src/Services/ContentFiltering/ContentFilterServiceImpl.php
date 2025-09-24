@@ -53,7 +53,7 @@ class ContentFilterServiceImpl {
     public function getContentFilteringStringFromSeverityLevel(?int $contentFilterSeverityLevel): ?string {
         $allowedTypes = $this->contentSeverityLevels;
         
-        if ($contentFilterSeverityLevel && isset($allowedTypes[$contentFilterSeverityLevel]) && !empty($allowedTypes[$contentFilterSeverityLevel])) {
+        if ($contentFilterSeverityLevel !== null && isset($allowedTypes[$contentFilterSeverityLevel]) && !empty($allowedTypes[$contentFilterSeverityLevel])) {
             return $allowedTypes[$contentFilterSeverityLevel];
         }
         return $this->getDefaultContentFilteringString();

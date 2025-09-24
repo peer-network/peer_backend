@@ -488,11 +488,7 @@ class UserService
 
             if ($contentFiltering && !empty($contentFiltering)) {
                 $contentFilteringSeverityLevel = $contentFilterService->getContentFilteringSeverityLevel($contentFiltering);
-                
-                if($contentFilteringSeverityLevel === null){
-                    $this->logger->error('UserService.updateUserPreferences: failed to get ContentFilteringSeverityLevel');
-                    return $this->respondWithError(30103);
-                }
+
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
                 $userPreferences->setUpdatedAt();
             }
@@ -505,7 +501,7 @@ class UserService
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
             $contentFilteringSeverityLevelString = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
-
+            
             $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
             $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
