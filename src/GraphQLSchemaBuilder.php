@@ -3295,8 +3295,7 @@ class GraphQLSchemaBuilder
     {
         return [
             'status' => 'error', 
-            'ResponseCode' => $responseCode,
-            'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$responseCode),
+            'ResponseCode' => $responseCode
         ];
     }
 
@@ -3305,7 +3304,6 @@ class GraphQLSchemaBuilder
         $response = [
             'status' => 'success',
             'ResponseCode' => $message,
-            'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$message),
             'affectedRows' => $data,
         ];
 
