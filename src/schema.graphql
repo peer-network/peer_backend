@@ -37,7 +37,7 @@ type Query {
   getActionPrices: GetActionPricesResponse!
   postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
-  postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
+  postInteractions(getOnly: GetOnly!,contentFilterBy: ContentFilterType, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
   getTokenomics: TokenomicsResponse!
 }
 

@@ -952,7 +952,7 @@ class PostMapper
     /**
      * Get Interactions based on Filter 
      */
-    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit): array
+    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit, ?string $contentFilterBy = null): array
     {
         $this->logger->info("PostMapper.getInteractions started");
 
@@ -980,9 +980,12 @@ class PostMapper
                         u.img, 
                         u.status, 
                         (f1.followerid IS NOT NULL) AS isfollowing,
-                        (f2.followerid IS NOT NULL) AS isfollowed
+                        (f2.followerid IS NOT NULL) AS isfollowed,
+                        COALESCE(ui.reports, 0) AS user_reports,
+                        COALESCE(ui.count_content_moderation_dismissed, 0) AS user_count_content_moderation_dismissed
                     FROM $needleTable uv 
-                    LEFT JOIN users u ON u.uid = uv.userid  
+                    LEFT JOIN users u ON u.uid = uv.userid
+                    LEFT JOIN users_info ui ON ui.userid = u.uid  
                     LEFT JOIN 
                         follows f1 
                         ON u.uid = f1.followerid AND f1.followedid = :currentUserId 
@@ -1002,8 +1005,34 @@ class PostMapper
 
             $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            $contentFilterService = null;
+            if ($contentFilterBy !== null) {
+                $contentFilterService = new ContentFilterServiceImpl(
+                    new ListPostsContentFilteringStrategy(),
+                    null,
+                    $contentFilterBy
+                );
+            }
             $userResultObj = [];
-            foreach($userResults as $key => $prt){
+            foreach ($userResults as $key => $prt) {
+                if ($contentFilterService !== null) {
+                    $user_reports = (int)($prt['user_reports'] ?? 0);
+                    $user_dismiss_moderation_amount = (int)($prt['user_count_content_moderation_dismissed'] ?? 0);
+                
+                    $action = $contentFilterService->getContentFilterAction(
+                        ContentType::post,
+                        ContentType::user,
+                        $user_reports,
+                        $user_dismiss_moderation_amount,
+                        $currentUserId,
+                        $prt['uid']
+                    );
+                    if ($action === ContentFilteringAction::replaceWithPlaceholder) {
+                        $replacer = ContentReplacementPattern::flagged;
+                        $prt['username'] = $replacer->username($prt['username']);
+                        $prt['img']      = $replacer->profilePicturePath($prt['img']);
+                    }
+                }
                 $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
                 $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
                 $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
