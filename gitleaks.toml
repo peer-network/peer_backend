@@ -3,7 +3,14 @@
 [[rules]]
 id = "mega-catch-all"
 description = "Catch any likely secret (broad net)"
-regex = '''(?i)(secret|key|token)\s*[=:]\s*[A-Za-z0-9/\+=!@#$%^&*._-]{6,}|ghp_[0-9A-Za-z]{36}|xox[baprs]-[0-9]{12}-[0-9]{12}-[0-9A-Za-z]{24,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z\-_]{35}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+|-----BEGIN( RSA)? PRIVATE KEY-----'''
+regex = '''(?i)(secret|key|token|pat|password|auth|credential|bearer|jwt|session|client)\s*[=:]\s*[A-Za-z0-9/\+=!@#$%^&*._-]{6,}|ghp_[0-9A-Za-z]{36}|xox[baprs]-[0-9]{12}-[0-9]{12}-[0-9A-Za-z]{24,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z\-_]{35}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+|-----BEGIN( RSA)? PRIVATE KEY-----'''
+tags = ["key", "secret", "generic", "broad"]
+
+[[rules]]
+id = "entropy-catch-all"
+description = "Catch any high-entropy random string (broad net for unknown keys)"
+regex = '''[A-Za-z0-9/\+=!@#$%^&*._-]{20,}'''
+entropy = 3.5
 tags = ["key", "secret", "generic", "broad"]
 
 [rules.allowlist]
