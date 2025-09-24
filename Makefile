@@ -92,6 +92,9 @@ dev: env-ci reset-db-and-backend init check-hooks scan ## Full setup: env.ci, DB
 	find . -type d -exec chmod 777 {} \;
 	find . -type f -exec chmod 666 {} \;
 
+	@echo "Restoring executable bit on git hooks..."
+	chmod +x .githooks/*
+
 	@echo "Building images..."
 	docker-compose --env-file .env.ci -f docker-compose.yml -f docker-compose.override.local.yml build
 
