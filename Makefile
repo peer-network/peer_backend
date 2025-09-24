@@ -76,7 +76,7 @@ restart-db: ## Restart only the database (fresh schema & data, keep backend as-i
 
 	@echo "Database restarted and ready. Backend container was untouched."
 
-dev: env-ci reset-db-and-backend init scan ## Full setup: env.ci, DB reset, vendors install, start DB+backend
+dev: env-ci reset-db-and-backend init check-hooks scan ## Full setup: env.ci, DB reset, vendors install, start DB+backend
 	@echo "Installing Composer dependencies on local host..."
 	composer install --no-dev --prefer-dist --no-interaction
 
@@ -215,7 +215,7 @@ clean-ci: reset-db-and-backend ## Cleanup for CI but keep reports
 	@rm -f tests/postman_collection/tmp_*.json
 	@echo "Local CI cleanup complete (reports preserved)."
 
-ci: ## Run full local CI workflow (setup, tests, cleanup)
+ci: check-hooks ## Run full local CI workflow (setup, tests, cleanup)
 	$(MAKE) dev
 	$(MAKE) test
 	$(MAKE) clean-ci
@@ -253,7 +253,18 @@ install-hooks: ## Install Git hooks for pre-commit scanning
 	chmod +x .githooks/*
 	@echo "Pre-commit hook installed. Gitleaks will now run on every commit."
 
-scan: ## Run Gitleaks scan on staged changes only
+check-hooks: ## Verify that Git hooks are installed and executable
+	@if [ ! -f .githooks/pre-commit ]; then \
+		echo "Pre-commit hook missing in .githooks/. Run 'make install-hooks'"; \
+		exit 1; \
+	fi
+	@if [ ! -x .githooks/pre-commit ]; then \
+		echo "Pre-commit hook is not executable. Run 'chmod +x .githooks/pre-commit' and commit it."; \
+		exit 1; \
+	fi
+	@echo "Git hooks are present and executable."
+
+scan: check-hooks ## Run Gitleaks scan on staged changes only
 	@echo "Running Gitleaks scan on staged changes..."
 	@mkdir -p .gitleaks_out
 	@if command -v gitleaks >/dev/null 2>&1; then \
