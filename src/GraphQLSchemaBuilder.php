@@ -54,6 +54,7 @@ use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use ReflectionNamedType;
 use Fawaz\App\PeerTokenService;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
 
 class GraphQLSchemaBuilder
@@ -63,7 +64,7 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
         protected CommentMapper $commentMapper,
@@ -1037,10 +1038,10 @@ class GraphQLSchemaBuilder
                     return $root['ResponseCode'] ?? '';
                 },
                 'ResponseMessage' => function (array $root): string {
-                    return $root['ResponseMessage'] ?? '';
+                    return $this->responseMessagesProvider->getMessage($root['ResponseCode']) ?? '';
                 },
                 'RequestId' => function (array $root): string {
-                    return $root['RequestId'] ?? '';
+                    return $this->logger->getRequestUid();
                 },
             ],
             'AuthPayload' => [
@@ -3294,8 +3295,7 @@ class GraphQLSchemaBuilder
     {
         return [
             'status' => 'error', 
-            'ResponseCode' => $responseCode,
-            'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$responseCode),
+            'ResponseCode' => $responseCode
         ];
     }
 
@@ -3304,7 +3304,6 @@ class GraphQLSchemaBuilder
         $response = [
             'status' => 'success',
             'ResponseCode' => $message,
-            'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$message),
             'affectedRows' => $data,
         ];
 
