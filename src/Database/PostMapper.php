@@ -1008,7 +1008,7 @@ class PostMapper
             $contentFilterService = null;
             if ($contentFilterBy !== null) {
                 $contentFilterService = new ContentFilterServiceImpl(
-                    new GetProfileContentFilteringStrategy(),
+                    new ListPostsContentFilteringStrategy(),
                     null,
                     $contentFilterBy
                 );
@@ -1020,7 +1020,7 @@ class PostMapper
                     $user_dismiss_moderation_amount = (int)($prt['user_count_content_moderation_dismissed'] ?? 0);
                 
                     $action = $contentFilterService->getContentFilterAction(
-                        ContentType::user,
+                        ContentType::post,
                         ContentType::user,
                         $user_reports,
                         $user_dismiss_moderation_amount,
