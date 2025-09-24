@@ -9,7 +9,7 @@ tags = ["key", "secret", "generic", "broad"]
 [[rules]]
 id = "entropy-catch-all"
 description = "Catch any high-entropy random string (broad net for unknown keys)"
-regex = '''[A-Za-z0-9/\+=!@#$%^&*._-]{20,}'''
+regex = '''[A-Za-z0-9\+=!@#$%^&*.-]{20,}'''
 entropy = 3.5
 tags = ["key", "secret", "generic", "broad"]
 
@@ -20,7 +20,8 @@ regexes = [
   '''\.gitleaks_out/.*''',
   '''^ghcr\.io/gitleaks/gitleaks.*''',
   '''^/repo/.*''',
-  '''^--config=.*gitleaks\.toml$''',
+  '''^[\+\-]?--config=.*gitleaks.*$''',
+  '''\^--config=.*gitleaks.*$''',
   '''(?i)secrets\.[A-Za-z0-9_]+''',
   '''(?i)vars\.[A-Za-z0-9_]+''',
   '''(?i)github\.[A-Za-z0-9_]+'''
