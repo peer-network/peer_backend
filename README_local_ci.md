@@ -16,8 +16,48 @@ Make sure you have the following installed:
 - composer
 - curl
 - php (required only for Composer on host; e.g. sudo apt install php-cli on Ubuntu/WSL, or brew install php on macOS. Backend itself runs in Docker.)
+- Gitleaks v8.28.0 (required for pre-commit and make scan)
 
 (If `jq` is missing, `make` will auto-install it on Ubuntu/WSL via `sudo apt install jq`.)
+
+Install Gitleaks v8.28.0
+
+We use Gitleaks
+ to prevent secrets from entering the repo.
+The pre-commit hook will prefer a local binary (faster) and fall back to Docker if missing.
+
+macOS (Apple Silicon / Intel):
+
+brew install gitleaks
+# or manual install
+curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_darwin_arm64.tar.gz \
+  | tar -xz && sudo mv gitleaks /usr/local/bin/
+
+Linux (x86_64):
+
+wget https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz
+tar -xvzf gitleaks_8.28.0_linux_x64.tar.gz
+sudo mv gitleaks /usr/local/bin/
+
+Linux (ARM64, e.g. Raspberry Pi):
+
+wget https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_arm64.tar.gz
+tar -xvzf gitleaks_8.28.0_linux_arm64.tar.gz
+sudo mv gitleaks /usr/local/bin/
+
+Windows (PowerShell):
+
+Download gitleaks_8.28.0_windows_x64.zip
+
+Extract gitleaks.exe into a folder in your PATH (e.g. C:\Program Files\Gitleaks\).
+
+Verify with:
+
+gitleaks version
+# should print: 8.28.0
+
+WSL (Ubuntu on Windows):
+Use the Linux (x86_64) instructions above.
 
 ---
 
