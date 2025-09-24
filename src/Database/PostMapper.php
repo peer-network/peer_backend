@@ -1033,7 +1033,6 @@ class PostMapper
                         $prt['img']      = $replacer->profilePicturePath($prt['img']);
                     }
                 }
-
                 $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
                 $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
                 $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
