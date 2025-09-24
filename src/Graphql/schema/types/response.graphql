@@ -1,9 +1,3 @@
-type DefaultResponse {
-  status: String!
-  ResponseCode: String
-  # ResponseMessage: String
-}
-
 type HelloResponse {
   currentuserid: ID
   currentVersion: String
@@ -13,8 +7,9 @@ type HelloResponse {
 }
 
 type ReferralResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: ReferralInfo
 }
 
@@ -28,57 +23,66 @@ type ContactusResponsePayload {
 }
 
 type ContactusResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: ContactusResponsePayload
 }
 
 type RegisterResponse {
-  status: String
-  ResponseCode: String
+  common: DefaultResponse
+  status: String!
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   userid: ID
 }
 
 type ResetPasswordRequestResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   nextAttemptAt: String
 }
 
 type AuthPayload {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   accessToken: String
   refreshToken: String
 }
 
 type TransactionResponse {
-  status: String!
-  ResponseCode: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [Transaction!]
 }
 
 type TransferTokenResponse {
-  status: String!
-  ResponseCode: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: TransferToken!
 }
 
 type ListTodaysInteractionsResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: TodaysInteractionsData
 }
 
 type PostInteractionResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [ProfileUser!]
 }
 
 type GetDailyResponse {
-  status: String!
-  ResponseCode: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [DailyFreeResponse]
 }
 
@@ -89,149 +93,178 @@ type DailyFreeResponse {
 }
 
 type PostEligibilityResponse {
-  status: String!
-  ResponseCode: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   eligibilityToken: String!
 }
 
 type UserInfoResponse {
-  status: String!
-  ResponseCode: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: UserInfo
 }
 
 type PostInfoResponse {
-  status: String!
-  ResponseCode: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: PostInfo
 }
 
 type CommentInfoResponse {
-  status: String!
-  ResponseCode: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: CommentInfo
 }
 
 type ChatResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [Chat!]
 }
 
 type FollowStatusResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   isfollowing: Boolean
 }
 
-type UserPreferencesResponse {
+type DefaultResponse {
   status: String!
+  RequestId: String
   ResponseCode: String
+}
+
+type UserPreferencesResponse {
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: UserPreferences
 }
 
 type AddPostResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: PostInfo
 }
 
 type AddChatResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: ChatInfo
 }
 
 type AddChatmessageResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [ChatMessageInfo]
 }
 
 type BasicUserInfoResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: BasicUserInfo
 }
 
 type UserFriendsResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [BasicUserInfo]
 }
 
 type FollowRelationsResponse {
-  status: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: FollowRelations
 }
 
 type BlockedUsersResponse {
-  status: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: BlockedUsers
 }
 
 type UserListResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [User]
 }
 
 type TagSearchResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [Tag]
 }
 
 type PostResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: Post
 }
 
 type PostListResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [Post!]
 }
 
 type CommentResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [Comment]
 }
 
 type ReferralInfoResponse {
-  status: String
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   referralUuid: ID
   referralLink: String
 }
 type ReferralListResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String!
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: ReferralUsers!
 }
 
 type GetActionPricesResponse {
-    status: String!
-    ResponseCode: String!
+  common: DefaultResponse
+    status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+    ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
     affectedRows: ActionPriceResult!
 }
 
 type TokenomicsResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   ResponseCode: Int!                         
   actionTokenPrices: ActionPriceResult!
   actionGemsReturns: ActionGemsReturns!
@@ -239,59 +272,68 @@ type TokenomicsResponse {
 }
 
 type DailyGemStatusResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: DailyGemStatusData
 }
 
 type DailyGemsResultsResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: DailyGemsResultsData
 }
 
 type GemstersResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: GemstersData
 }
 
 type GemsterResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: DailyGemStatusData
 }
 
 type LiquidityPoolResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: LiquidityPoolData
 }
 
 type TestingPoolResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: LiquidityPoolData
 }
 
 type PostCommentsResponse {
-  status: String!
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [PostCommentsData]
 }
 
 type PercentBeforeTransactionResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: PercentBeforeTransactionData
 }
 
 type RefreshMarketCapResponse {
-  status: String!
-  ResponseCode: String
+  common: DefaultResponse
+  status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: RefreshMarketCapData
 }
