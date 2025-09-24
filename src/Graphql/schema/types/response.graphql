@@ -6,6 +6,13 @@ type HelloResponse {
   companyAccountId: ID
 }
 
+type DefaultResponse {
+  status: String!
+  RequestId: String
+  ResponseCode: String
+  ResponseMessage: String
+}
+
 type ReferralResponse {
   common: DefaultResponse
   status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
@@ -133,12 +140,6 @@ type FollowStatusResponse {
   status: String! @deprecated(reason: "use common.status . this field will be removed after 15 October`.")
   ResponseCode: String @deprecated(reason: "use common.ResponseCode . this field will be removed after 15 October`.")
   isfollowing: Boolean
-}
-
-type DefaultResponse {
-  status: String!
-  RequestId: String
-  ResponseCode: String
 }
 
 type UserPreferencesResponse {

@@ -9,6 +9,7 @@ use Fawaz\Services\LiquidityPool;
 use DI\ContainerBuilder;
 use Fawaz\Utils\PeerLogger;
 use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Utils\ResponseMessagesProviderImpl;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
@@ -89,7 +90,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 
         ResponseMessagesProvider::class => function(ContainerInterface $c) {
             $path = __DIR__ . "/../../runtime-data/media/assets/response-codes.json";
-            return new ResponseMessagesProvider($path);
+            return new ResponseMessagesProviderImpl($path);
         }
     ]);
 };

@@ -1038,7 +1038,7 @@ class GraphQLSchemaBuilder
                     return $root['ResponseCode'] ?? '';
                 },
                 'ResponseMessage' => function (array $root): string {
-                    return $root['ResponseMessage'] ?? '';
+                    return $this->responseMessagesProvider->getMessage($root['ResponseCode']) ?? '';
                 },
                 'RequestId' => function (array $root): string {
                     return $this->logger->getRequestUid();
