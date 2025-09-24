@@ -363,7 +363,7 @@ class ConstantsConfig
         'PASSWORD' => [
             'MIN_LENGTH' => 8,
             'MAX_LENGTH' => 128,
-            'PATTERN' => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$',
+            "PATTERN" => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'
         ],
         'USERNAME' => [
             'MIN_LENGTH' => 3,
