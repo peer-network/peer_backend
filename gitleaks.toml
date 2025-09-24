@@ -14,8 +14,13 @@ entropy = 3.5
 tags = ["key", "secret", "generic", "broad"]
 
 [rules.allowlist]
-description = "Ignore GitHub placeholders for this rule only"
+description = "Ignore CLI flags, file paths, and GitHub placeholders"
 regexes = [
+  '''^--[a-zA-Z0-9._=-]+$''',
+  '''\.gitleaks_out/.*''',
+  '''^ghcr\.io/gitleaks/gitleaks.*''',
+  '''^/repo/.*''',
+  '''^--config=.*gitleaks\.toml$''',
   '''(?i)secrets\.[A-Za-z0-9_]+''',
   '''(?i)vars\.[A-Za-z0-9_]+''',
   '''(?i)github\.[A-Za-z0-9_]+'''
