@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "7b279d43-ac28-4ef9-9178-6aad100bd83d",
-		"name": "002_graphql_short",
+		"_postman_id": "18071071-e665-492d-b6b9-764aeb4aa740",
+		"name": "002_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-7b279d43-ac28-4ef9-9178-6aad100bd83d?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-18071071-e665-492d-b6b9-764aeb4aa740?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -13806,12 +13806,12 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Check contentFilteringSeverityLevel = MYGRANDMALIKES\", function () {",
+							"pm.test(\"Check contentFilteringSeverityLevel = null\", function () {",
 							"    const response = pm.response.json();",
 							"    const level = response?.data?.getUserInfo?.affectedRows?.userPreferences?.contentFilteringSeverityLevel;",
 							"",
-							"    pm.expect(level, \"contentFilteringSeverityLevel should be MYGRANDMALIKES\")",
-							"        .to.eql(\"MYGRANDMALIKES\");",
+							"    pm.expect(level, \"contentFilteringSeverityLevel should be null\")",
+							"        .to.eql(null);",
 							"});"
 						],
 						"type": "text/javascript",
@@ -14273,6 +14273,395 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query GetCommentInfo {\n    getCommentInfo(commentId: \"{{commentid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            likes\n            reports\n            comments\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetchpayslog",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"21202\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPaymentLogs {\n    listPaymentLogs(day: D0) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            from\n            token\n            userid\n            postid\n            action\n            numbers\n            createdat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Gemster",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11207\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"pm.test(\"d0 is 0\", function () {",
+							"    const json = pm.response.json();",
+							"    pm.expect(json?.data?.gemster?.affectedRows?.d0).to.eql(0);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Gemster {\n    gemster {\n        status\n        ResponseCode\n        affectedRows {\n            d0\n            d1\n            d2\n            d3\n            d4\n            d5\n            w0\n            m0\n            y0\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetchwinslog",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11203\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Fetchwinslog {\n    listWinLogs(day: D0) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            from\n            token\n            userid\n            postid\n            action\n            numbers\n            createdat\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Globalwins",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11206\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Globalwins {\n    globalwins {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Gemsters",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// --- Parse once ---",
+							"const json = pm.response.json();",
+							"const gemsters = json?.data?.gemsters;",
+							"const affected = gemsters?.affectedRows;",
+							"const userStatus = Array.isArray(affected?.userStatus) ? affected.userStatus : [];",
+							"",
+							"// --- Helpers ---",
+							"function toNum(x) { return Number(x) || 0; }",
+							"function sum(arr, sel) { return arr.reduce((acc, it) => acc + toNum(sel(it)), 0); }",
+							"function approxEqual(a, b, eps = 1e-6) { return Math.abs(toNum(a) - toNum(b)) <= eps; }",
+							"",
+							"// --- Totals ---",
+							"const totalPercentage = sum(userStatus, u => u.percentage);",
+							"const totalGems = sum(userStatus, u => u.gems);",
+							"const totalTokens = sum(userStatus, u => u.tokens);",
+							"",
+							"// d0 source: env var `d0` > winStatus.totalGems > 0",
+							"const d0Env = pm.environment.get(\"d0\");",
+							"const d0FromEnv = d0Env !== undefined && d0Env !== null ? toNum(d0Env) : null;",
+							"const d0FromPayload = toNum(affected?.winStatus?.totalGems);",
+							"const d0 = d0FromEnv !== null ? d0FromEnv : d0FromPayload;",
+							"",
+							"// --- Assertions ---",
+							"pm.test(\"Percentages sum to 100\", function () {",
+							"  pm.expect(",
+							"    approxEqual(totalPercentage, 100, 1e-6),",
+							"    `sum(percentage)=${totalPercentage}`",
+							"  ).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Total gems equals d0\", function () {",
+							"  pm.expect(",
+							"    approxEqual(totalGems, d0, 1e-6),",
+							"    `sum(gems)=${totalGems}, d0=${d0}`",
+							"  ).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Total tokens equals 5000\", function () {",
+							"  pm.expect(",
+							"    approxEqual(totalTokens, 5000, 1e-6),",
+							"    `sum(tokens)=${totalTokens}`",
+							"  ).to.be.true;",
+							"});",
+							"",
+							"// --- Optional sanity checks ---",
+							"pm.test(\"userStatus array present\", function () {",
+							"  pm.expect(userStatus, \"userStatus missing/empty\").to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"// --- Diagnostics (Postman Console) ---",
+							"console.log(\"Diagnostics:\", {",
+							"  totalPercentage,",
+							"  totalGems,",
+							"  totalTokens,",
+							"  d0_used: d0,",
+							"  d0_source: d0FromEnv !== null ? \"env.d0\" : \"affected.winStatus.totalGems\",",
+							"  userCount: userStatus.length",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Gemsters {\n    gemsters(day: D0) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            winStatus {\n                totalGems\n                gemsintoken\n                bestatigung\n            }\n            userStatus {\n                userid\n                gems\n                tokens\n                percentage\n                details {\n                    gemid\n                    userid\n                    postid\n                    fromid\n                    gems\n                    numbers\n                    whereby\n                    createdat\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},

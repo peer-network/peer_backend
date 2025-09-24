@@ -488,11 +488,7 @@ class UserService
 
             if ($contentFiltering && !empty($contentFiltering)) {
                 $contentFilteringSeverityLevel = $contentFilterService->getContentFilteringSeverityLevel($contentFiltering);
-                
-                if($contentFilteringSeverityLevel === null){
-                    $this->logger->error('UserService.updateUserPreferences: failed to get ContentFilteringSeverityLevel');
-                    return $this->respondWithError(30103);
-                }
+
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
                 $userPreferences->setUpdatedAt();
             }
@@ -505,12 +501,7 @@ class UserService
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
             $contentFilteringSeverityLevelString = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
-
-            if ($contentFilteringSeverityLevelString === null) {
-                $this->logger->error('UserService.updateUserPreferences: failed to get contentFilteringSeverityLevelString');
-                $this->transactionManager->rollback();
-                return self::respondWithError(40301); // 402x1
-            }
+            
             $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
             $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
@@ -533,7 +524,7 @@ class UserService
         $available = ConstantsConfig::onboarding()['AVAILABLE_ONBOARDINGS'] ?? [];
         if (empty($available)) {
             $this->logger->error('updateUserPreferences: AVAILABLE_ONBOARDINGS list is empty');
-            throw new \RuntimeException('No available onboardings configured', 00000);// List is empty, response code = 4XXXX
+            throw new \RuntimeException('No available onboardings configured', 40301);// List is empty, response code = 4XXXX
         }
 
         foreach ($shownOnboardingsIn as $onboarding) {

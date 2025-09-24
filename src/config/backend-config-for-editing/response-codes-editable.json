@@ -147,6 +147,10 @@
         "comment": "Success: Successfully added to wallet",
         "userFriendlyComment": "Funds added to your wallet."
     },
+    "11212": {
+        "comment": "Success: Successfully returned static tokenomics information",
+        "userFriendlyComment": "Tokenomics information loaded successfully"
+    },
     "11301": {
         "comment": "Success: Payment completed successfully",
         "userFriendlyComment": "Payment processed successfully!"
@@ -588,8 +592,8 @@
         "userFriendlyComment": "Current password required to change email."
     },
     "30226": {
-        "comment": "The 'password' field (User new password) must be between {USER.PASSWORD.MIN_LENGTH} and {USER.PASSWORD.MAX_LENGTH} characters long and contain at least one lowercase letter, one uppercase letter, and one number",
-        "userFriendlyComment": "Password must be {USER.PASSWORD.MIN_LENGTH}-{USER.PASSWORD.MAX_LENGTH} chars with uppercase, lowercase and numbers."
+        "comment": "The 'password' field (User new password) must be between {USER.PASSWORD.MIN_LENGTH} and {USER.PASSWORD.MAX_LENGTH} characters long and contain at least one lowercase letter, one uppercase letter, one number and one special character(except '\"\\)",
+        "userFriendlyComment": "Password must be {USER.PASSWORD.MIN_LENGTH}-{USER.PASSWORD.MAX_LENGTH} chars with uppercase, lowercase, numbers and special characters(except '\"\\)"
     },
     "30227": {
         "comment": "The 'expassword' field (User current password) is required to update the password",
@@ -922,6 +926,10 @@
     "31511": {
         "comment": "Temporary File Error: A temporary file was used. Please try uploading the post again.",
         "userFriendlyComment": "Please try creating the post again."
+    },
+    "31512": {
+        "comment": " Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.",
+        "userFriendlyComment": "You have reached the limit of five files. Please try again in 1 hour."
     },
     "31601": {
         "comment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",

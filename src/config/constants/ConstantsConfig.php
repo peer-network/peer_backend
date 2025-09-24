@@ -203,6 +203,12 @@ class ConstantsConfig
             'dislike' => -3.0,
             'comment' => 2.0,
         ],
+        'FEES' => [
+            'INVITATION' => 0.01,
+            'POOL'       => 0.01,
+            'PEER'       => 0.02,
+            'BURN'       => 0.01,
+        ],
     ];
 
     private const COMMENT = [
@@ -357,7 +363,7 @@ class ConstantsConfig
         'PASSWORD' => [
             'MIN_LENGTH' => 8,
             'MAX_LENGTH' => 128,
-            'PATTERN' => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$',
+            "PATTERN" => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'
         ],
         'USERNAME' => [
             'MIN_LENGTH' => 3,

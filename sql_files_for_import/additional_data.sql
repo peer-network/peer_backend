@@ -13,6 +13,7 @@ VALUES ('b9e94945-abd7-46a5-8c92-59037f1d73bf', 100000, 0, 0, 0, 0, 0, 0, NULL, 
 
 INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('b9e94945-abd7-46a5-8c92-59037f1d73bf', 100000, 0);
 
+INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('b9e94945-abd7-46a5-8c92-59037f1d73bf', null, '[]');
 
 -- tester02
 INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
@@ -28,6 +29,8 @@ VALUES ('6520ac47-f262-4f7e-b643-9dc5ee4cfa82', 100000, 0, 0, 0, 0, 0, 0, NULL, 
 
 INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('6520ac47-f262-4f7e-b643-9dc5ee4cfa82', 100000, 0);
 
+INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('6520ac47-f262-4f7e-b643-9dc5ee4cfa82', null, '[]');
+
 -- tester03
 INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
 VALUES ('dbe72768-0d47-4d29-99e7-b6ec4eadfaa3', 'tester03@tester.de', 'tester03',
@@ -42,6 +45,7 @@ VALUES ('dbe72768-0d47-4d29-99e7-b6ec4eadfaa3', 100000, 0, 0, 0, 0, 0, 0, NULL, 
 
 INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('dbe72768-0d47-4d29-99e7-b6ec4eadfaa3', 100000, 0);
 
+INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('dbe72768-0d47-4d29-99e7-b6ec4eadfaa3', null, '[]');
 
 -- burn_account
 INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
@@ -88,6 +92,8 @@ INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfo
 VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df93', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
 INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df93', 0, 0);
+
+INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df93', null, '[]');
 
 -- btc_account
 INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
