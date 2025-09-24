@@ -1034,6 +1034,12 @@ class LogWinMapper
                     $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
 
                     $stmt->execute();
+
+                    $sqlUpdate = "UPDATE users_info SET liquidity = :liquidity, updatedat = CURRENT_TIMESTAMP WHERE userid = :userid";
+                    $sqlUpdateStmt = $this->db->prepare($sqlUpdate);
+                    $sqlUpdateStmt->bindValue(':liquidity', 0, \PDO::PARAM_STR);
+                    $sqlUpdateStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                    $sqlUpdateStmt->execute();
                         
                     $this->transactionManager->commit();
 
