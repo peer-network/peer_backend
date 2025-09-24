@@ -36,8 +36,8 @@ class AdvertisementMapper
             ->format('Y-m-d H:i:s');
 
         // ---- Filterbedingungen + gemeinsame Parameter
-        $conditions    = [];
-        $paramsCommon  = [];
+        $conditions   = [];
+        $paramsCommon = [];
 
         if (!empty($filterBy['from'])) {
             $conditions[] = "al.createdat >= :from";
@@ -69,7 +69,7 @@ class AdvertisementMapper
 
         $whereClause = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
 
-        // ---- Sort
+        // ---- Sortierung
         $orderByMap = [
             'NEWEST'        => 'al.createdat DESC',
             'OLDEST'        => 'al.createdat ASC',
@@ -78,28 +78,28 @@ class AdvertisementMapper
         ];
         $orderByClause = $orderByMap[$sortBy] ?? $orderByMap['NEWEST'];
 
-        // ---- Voraggregation Gems pro Post (keine Duplikate)
-        $gemsAgg = "
-            SELECT postid, COALESCE(SUM(gems),0) AS gems_earned
-            FROM gems
-            WHERE collected = 1
-            GROUP BY postid
-        ";
-
-        // ---- Stats (distinct Ads, plus Summen über betroffene Posts)
+        // ---- STATS: distinct Ads + Gems pro Ad-Zeitfenster
         $sSql = "
             WITH al_filtered AS (
                 SELECT *
                 FROM advertisements_log al
                 $whereClause
             ),
-            -- nur die betroffenen Posts einmalig
+            ad_gems AS (
+                SELECT
+                    al.advertisementid,
+                    COALESCE(SUM(lw.gems), 0) AS gems_earned
+                FROM al_filtered al
+                LEFT JOIN logwins lw
+                  ON lw.postid = al.postid
+                 AND lw.createdat >= al.timestart
+                 AND lw.createdat <  al.timeend
+                GROUP BY al.advertisementid
+            ),
+            -- für Post-weite Summen (Likes/Views/...)
             post_set AS (
                 SELECT DISTINCT postid FROM al_filtered
             ),
-            gems_by_post AS ($gemsAgg),
-
-            -- Voraggregationen pro Post (aus advertisements_info)
             likes_by_post AS (
                 SELECT postid, SUM(likes) AS cnt
                 FROM advertisements_info
@@ -126,245 +126,199 @@ class AdvertisementMapper
                 GROUP BY postid
             )
             SELECT
-                -- Ausgaben/Anzahl auf Basis der gefilterten Logs
-                COALESCE(SUM(al_filtered.tokencost), 0) AS total_token_spent,
-                COALESCE(SUM(al_filtered.eurocost), 0)  AS total_euro_spent,
-                COUNT(DISTINCT al_filtered.advertisementid) AS total_ads,
-
-                -- Summen über die distinct Posts
-                COALESCE((
-                    SELECT SUM(gbp.gems_earned)
-                    FROM post_set ps
-                    LEFT JOIN gems_by_post gbp USING (postid)
-                ), 0) AS total_gems_earned,
-
-                COALESCE((
-                    SELECT SUM(lb.cnt)
-                    FROM post_set ps
-                    LEFT JOIN likes_by_post lb USING (postid)
-                ), 0) AS total_amount_likes,
-
-                COALESCE((
-                    SELECT SUM(vb.cnt)
-                    FROM post_set ps
-                    LEFT JOIN views_by_post vb USING (postid)
-                ), 0) AS total_amount_views,
-
-                COALESCE((
-                    SELECT SUM(cb.cnt)
-                    FROM post_set ps
-                    LEFT JOIN comments_by_post cb USING (postid)
-                ), 0) AS total_amount_comments,
-
-                COALESCE((
-                    SELECT SUM(db.cnt)
-                    FROM post_set ps
-                    LEFT JOIN dislikes_by_post db USING (postid)
-                ), 0) AS total_amount_dislikes,
-
-                COALESCE((
-                    SELECT SUM(rp.cnt)
-                    FROM post_set ps
-                    LEFT JOIN reports_by_post rp USING (postid)
-                ), 0) AS total_amount_reports
+                COALESCE(SUM(al_filtered.tokencost), 0)                 AS total_token_spent,
+                COALESCE(SUM(al_filtered.eurocost), 0)                  AS total_euro_spent,
+                COUNT(*) AS total_ads,
+                COALESCE((SELECT SUM(gems_earned) FROM ad_gems), 0)     AS total_gems_earned,
+                COALESCE((SELECT SUM(lb.cnt) FROM post_set ps LEFT JOIN likes_by_post    lb USING (postid)), 0) AS total_amount_likes,
+                COALESCE((SELECT SUM(vb.cnt) FROM post_set ps LEFT JOIN views_by_post    vb USING (postid)), 0) AS total_amount_views,
+                COALESCE((SELECT SUM(cb.cnt) FROM post_set ps LEFT JOIN comments_by_post cb USING (postid)), 0) AS total_amount_comments,
+                COALESCE((SELECT SUM(db.cnt) FROM post_set ps LEFT JOIN dislikes_by_post db USING (postid)), 0) AS total_amount_dislikes,
+                COALESCE((SELECT SUM(rp.cnt) FROM post_set ps LEFT JOIN reports_by_post  rp USING (postid)), 0) AS total_amount_reports
             FROM al_filtered
         ";
 
-        // ---- Datenliste (dedupliziert: eine Zeile je advertisementid)
+        // ---- DATA: 1 Row je Anzeige (neueste Log-Zeile), gemsearned pro Anzeige-Zeitfenster
         $dSql = "
-            WITH gems_by_post AS ($gemsAgg),
-            al_filtered AS (
-                SELECT *
-                FROM advertisements_log al
-                $whereClause
-            ),
-            latest_al AS (
-                SELECT *
-                FROM (
-                    SELECT al.*,
-                           ROW_NUMBER() OVER (
-                             PARTITION BY al.advertisementid
-                             ORDER BY al.createdat DESC, al.id DESC
-                           ) AS rn
-                    FROM al_filtered al
-                ) s
-                WHERE s.rn = 1
-            )
-            SELECT
-                -- top-level (Ad)
-                al.advertisementid               AS advertisementid,
-                al.postid                        AS postid,
-                al.userid                        AS creatorid,
-                al.createdat                     AS createdat,
-                al.status                        AS status,
-                al.timestart                     AS timeframestart,
-                al.timeend                       AS timeframeend,
-                al.tokencost                     AS totaltokencost,
-                al.eurocost                      AS totaleurocost,
-                COALESCE(gbp.gems_earned, 0)     AS gemsearned,
+			WITH al_filtered AS (
+			  SELECT *
+			  FROM advertisements_log al
+			  $whereClause
+			),
+			-- HIER der einzige Change: latest_al ist jetzt einfach al_filtered (keine ROW_NUMBER/DISTINCT mehr)
+			latest_al AS (
+			  SELECT * FROM al_filtered
+			),
+			ad_gems AS (
+			  SELECT
+				  al.advertisementid,
+				  COALESCE(SUM(lw.gems), 0)    AS gems_earned,
+				  COALESCE(SUM(lw.numbers), 0) AS numbers_earned
+			  FROM latest_al al
+			  LEFT JOIN logwins lw
+				ON lw.postid = al.postid
+			   AND lw.createdat >= al.timestart
+			   AND lw.createdat <  al.timeend
+			  GROUP BY al.advertisementid
+			),
+			tags_by_post AS (
+			  SELECT pt.postid, COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]'::json) AS tags
+			  FROM post_tags pt
+			  JOIN tags t ON t.tagid = pt.tagid
+			  GROUP BY pt.postid
+			)
+			SELECT
+			  -- ab hier ALLES wie vorher, nur dass FROM latest_al al jetzt ALLE Log-Zeilen liefert
+			  al.id               AS log_id,
+			  al.advertisementid  AS advertisementid,
+			  al.postid           AS postid,
+			  al.userid           AS creatorid,
+			  al.status           AS status,
+			  al.timestart        AS timeframestart,
+			  al.timeend          AS timeframeend,
+			  al.tokencost        AS totaltokencost,
+			  al.eurocost         AS totaleurocost,
+			  al.createdat        AS createdat,
 
-                -- Metriken aus advertisements_info (für genau DIESE Anzeige)
-                COALESCE(ai.amountlikes,    0)   AS adsamountlikes,
-                COALESCE(ai.amountviews,    0)   AS adsamountviews,
-                COALESCE(ai.amountcomments, 0)   AS adsamountcomments,
-                COALESCE(ai.amountdislikes, 0)   AS adsamountdislikes,
-                COALESCE(ai.amountreports,  0)   AS adsamountreports,
+			  COALESCE(ag.gems_earned,    0) AS gemsearned,
+			  COALESCE(ag.numbers_earned, 0) AS numbersearned,
 
-                -- post-objekt (Owner & Felder aus posts)
-                p.userid                         AS post_owner_id,
-                p.createdat                      AS post_createdat,
-                p.contenttype                    AS contenttype,
-                p.title                          AS title,
-                p.media                          AS media,
-                p.cover                          AS cover,
-                p.mediadescription               AS mediadescription,
+			  p.userid                         AS post_owner_id,
+			  p.createdat                      AS post_createdat,
+			  p.contenttype                    AS contenttype,
+			  p.title                          AS title,
+			  p.media                          AS media,
+			  p.cover                          AS cover,
+			  p.mediadescription               AS mediadescription,
 
-                -- Postweite Metriken & Flags (gesamt pro Post, relativ zum Ad-Creator)
-                m.amountlikes                    AS amountlikes,
-                m.amountviews                    AS amountviews,
-                m.amountcomments                 AS amountcomments,
-                m.amountdislikes                 AS amountdislikes,
-                m.amountreports                  AS amountreports,
-                m.amounttrending                 AS amounttrending,
-                (m.isliked      )::int           AS isliked,
-                (m.isviewed     )::int           AS isviewed,
-                (m.isreported   )::int           AS isreported,
-                (m.isdisliked   )::int           AS isdisliked,
-                (m.issaved      )::int           AS issaved,
-                tg.tags                          AS tags,
+			  m.amountlikes                    AS amountlikes,
+			  m.amountviews                    AS amountviews,
+			  m.amountcomments                 AS amountcomments,
+			  m.amountdislikes                 AS amountdislikes,
+			  m.amountreports                  AS amountreports,
+			  m.amounttrending                 AS amounttrending,
+			  (m.isliked      )::int           AS isliked,
+			  (m.isviewed     )::int           AS isviewed,
+			  (m.isreported   )::int           AS isreported,
+			  (m.isdisliked   )::int           AS isdisliked,
+			  (m.issaved      )::int           AS issaved,
+			  tg.tags                          AS tags,
 
-                -- Kommentare als JSON-Array
-                cm.comments                      AS comments,
+			  cm.comments                      AS comments,
 
-                -- Creator (Ad-User)
-                u.username                       AS creator_username,
-                u.slug                           AS creator_slug,
-                u.img                            AS creator_img,
+			  u.username                       AS creator_username,
+			  u.slug                           AS creator_slug,
+			  u.img                            AS creator_img,
 
-                -- Post Owner (User des Posts)
-                pu.username                      AS post_username,
-                pu.slug                          AS post_slug,
-                pu.img                           AS post_userimg,
+			  pu.username                      AS post_username,
+			  pu.slug                          AS post_slug,
+			  pu.img                           AS post_userimg,
 
-                -- Relationship-Flags (Creator ↔ Post Owner)
-                (m.isfollowed   )::int           AS isfollowed,
-                (m.isfollowing  )::int           AS isfollowing,
-                (m.isfriend     )::int           AS isfriend
+			  (m.isfollowed   )::int           AS isfollowed,
+			  (m.isfollowing  )::int           AS isfollowing,
+			  (m.isfriend     )::int           AS isfriend,
 
-            FROM latest_al al
-            LEFT JOIN gems_by_post gbp ON gbp.postid = al.postid
-            LEFT JOIN posts p          ON p.postid   = al.postid
-            LEFT JOIN users u          ON u.uid      = al.userid
-            LEFT JOIN users pu         ON pu.uid     = p.userid
+			  COALESCE(ai.amountlikes,    0)   AS adsamountlikes,
+			  COALESCE(ai.amountviews,    0)   AS adsamountviews,
+			  COALESCE(ai.amountcomments, 0)   AS adsamountcomments,
+			  COALESCE(ai.amountdislikes, 0)   AS adsamountdislikes,
+			  COALESCE(ai.amountreports,  0)   AS adsamountreports
 
-            -- Ad-spezifische Metriken (join auf advertisementid UND postid)
-            LEFT JOIN LATERAL (
-                SELECT
-                    ai.likes    AS amountlikes,
-                    ai.dislikes AS amountdislikes,
-                    ai.views    AS amountviews,
-                    ai.reports  AS amountreports,
-                    ai.comments AS amountcomments
-                FROM advertisements_info ai
-                WHERE ai.advertisementid = al.advertisementid
-                  AND ai.postid = p.postid
-                LIMIT 1
-            ) ai ON TRUE
+			FROM latest_al al
+			LEFT JOIN ad_gems ag      ON ag.advertisementid = al.advertisementid
+			LEFT JOIN posts p         ON p.postid   = al.postid
+			LEFT JOIN users u         ON u.uid      = al.userid
+			LEFT JOIN users pu        ON pu.uid     = p.userid
 
-            -- Postweite Metriken & Flags relativ zum Ad-Creator
-            LEFT JOIN LATERAL (
-                SELECT
-                    (SELECT COUNT(*) FROM user_post_likes    upl WHERE upl.postid = p.postid) AS amountlikes,
-                    (SELECT COUNT(*) FROM user_post_dislikes upd WHERE upd.postid = p.postid) AS amountdislikes,
-                    (SELECT COUNT(*) FROM user_post_views    upv WHERE upv.postid = p.postid) AS amountviews,
-                    (SELECT COUNT(*) FROM user_post_reports  upr WHERE upr.postid = p.postid) AS amountreports,
-                    (SELECT COUNT(*) FROM comments           cmt WHERE cmt.postid = p.postid)  AS amountcomments,
+			LEFT JOIN LATERAL (
+			  SELECT
+				  ai.likes    AS amountlikes,
+				  ai.dislikes AS amountdislikes,
+				  ai.views    AS amountviews,
+				  ai.reports  AS amountreports,
+				  ai.comments AS amountcomments
+			  FROM advertisements_info ai
+			  WHERE ai.advertisementid = al.advertisementid
+				AND ai.postid          = p.postid
+			  LIMIT 1
+			) ai ON TRUE
 
-                    COALESCE((
-                        SELECT SUM(numbers) FROM logwins lw
-                        WHERE lw.postid = p.postid
-                          AND lw.createdat >= :trend_since
-                    ), 0) AS amounttrending,
+			LEFT JOIN LATERAL (
+			  SELECT
+				  (SELECT COUNT(*) FROM user_post_likes    upl WHERE upl.postid = p.postid) AS amountlikes,
+				  (SELECT COUNT(*) FROM user_post_dislikes upd WHERE upd.postid = p.postid) AS amountdislikes,
+				  (SELECT COUNT(*) FROM user_post_views    upv WHERE upv.postid = p.postid) AS amountviews,
+				  (SELECT COUNT(*) FROM user_post_reports  upr WHERE upr.postid = p.postid) AS amountreports,
+				  (SELECT COUNT(*) FROM comments           cmt WHERE cmt.postid = p.postid)  AS amountcomments,
+				  COALESCE((
+					  SELECT SUM(numbers) FROM logwins lw
+					  WHERE lw.postid = p.postid AND lw.createdat >= :trend_since
+				  ), 0) AS amounttrending,
+				  EXISTS (SELECT 1 FROM user_post_likes    upl2 WHERE upl2.postid = p.postid AND upl2.userid = al.userid) AS isliked,
+				  EXISTS (SELECT 1 FROM user_post_views    upv2 WHERE upv2.postid = p.postid AND upv2.userid = al.userid) AS isviewed,
+				  EXISTS (SELECT 1 FROM user_post_reports  upr2 WHERE upr2.postid = p.postid AND upr2.userid = al.userid) AS isreported,
+				  EXISTS (SELECT 1 FROM user_post_dislikes upd2 WHERE upd2.postid = p.postid AND upd2.userid = al.userid) AS isdisliked,
+				  EXISTS (SELECT 1 FROM user_post_saves    ups2 WHERE  ups2.postid = p.postid AND  ups2.userid = al.userid) AS issaved,
+				  EXISTS (SELECT 1 FROM follows f WHERE f.followedid = p.userid AND f.followerid = al.userid) AS isfollowed,
+				  EXISTS (SELECT 1 FROM follows f WHERE f.followerid = p.userid AND f.followedid = al.userid) AS isfollowing,
+				  EXISTS (
+					  SELECT 1 FROM follows f1
+					  WHERE f1.followerid = al.userid AND f1.followedid = p.userid
+						AND EXISTS (SELECT 1 FROM follows f2
+									WHERE f2.followerid = p.userid AND f2.followedid = al.userid)
+				  ) AS isfriend
+			) m ON TRUE
 
-                    EXISTS (SELECT 1 FROM user_post_likes    upl2 WHERE upl2.postid = p.postid AND upl2.userid = al.userid) AS isliked,
-                    EXISTS (SELECT 1 FROM user_post_views    upv2 WHERE upv2.postid = p.postid AND upv2.userid = al.userid) AS isviewed,
-                    EXISTS (SELECT 1 FROM user_post_reports  upr2 WHERE upr2.postid = p.postid AND upr2.userid = al.userid) AS isreported,
-                    EXISTS (SELECT 1 FROM user_post_dislikes upd2 WHERE upd2.postid = p.postid AND upd2.userid = al.userid) AS isdisliked,
-                    EXISTS (SELECT 1 FROM user_post_saves    ups2 WHERE  ups2.postid = p.postid AND ups2.userid = al.userid) AS issaved,
+			LEFT JOIN tags_by_post tg ON tg.postid = p.postid
 
-                    EXISTS (SELECT 1 FROM follows f WHERE f.followedid = p.userid AND f.followerid = al.userid) AS isfollowed,
-                    EXISTS (SELECT 1 FROM follows f WHERE f.followerid = p.userid AND f.followedid = al.userid) AS isfollowing,
-                    EXISTS (
-                        SELECT 1 FROM follows f1
-                        WHERE f1.followerid = al.userid
-                          AND f1.followedid = p.userid
-                          AND EXISTS (
-                              SELECT 1 FROM follows f2
-                              WHERE f2.followerid = p.userid
-                                AND f2.followedid = al.userid
-                          )
-                    ) AS isfriend
-            ) m ON TRUE
+			LEFT JOIN LATERAL (
+			  SELECT COALESCE(
+				  JSON_AGG(
+					  JSON_BUILD_OBJECT(
+						  'commentid',  c.commentid::text,
+						  'postid',     c.postid::text,
+						  'parentid',   c.parentid::text,
+						  'content',    c.content,
+						  'createdat',  c.createdat,
+						  'amountlikes',   COALESCE(ci.likes, 0),
+						  'amountreplies', COALESCE(ci.comments, 0),
+						  'isliked', EXISTS (
+							  SELECT 1 FROM user_comment_likes ucl
+							  WHERE ucl.commentid = c.commentid
+								AND ucl.userid    = al.userid
+						  ),
+						  'user', JSON_BUILD_OBJECT(
+							  'uid',       cu.uid::text,
+							  'username',  cu.username,
+							  'slug',      cu.slug,
+							  'img',       cu.img,
+							  'isfollowed',  EXISTS (SELECT 1 FROM follows f WHERE f.followedid = cu.uid AND f.followerid = al.userid),
+							  'isfollowing', EXISTS (SELECT 1 FROM follows f WHERE f.followerid = cu.uid AND f.followedid = al.userid),
+							  'isfriend',    EXISTS (
+								  SELECT 1 FROM follows f1
+								  WHERE f1.followerid = al.userid
+									AND f1.followedid = cu.uid
+									AND EXISTS (
+										SELECT 1 FROM follows f2
+										WHERE  f2.followerid = cu.uid
+										  AND  f2.followedid = al.userid
+									)
+							  )
+						  )
+					  )
+					  ORDER BY c.createdat ASC
+				  ),
+				  '[]'::json
+			  ) AS comments
+			  FROM comments c
+			  JOIN users cu ON cu.uid = c.userid
+			  LEFT JOIN comment_info ci ON ci.commentid = c.commentid
+			  WHERE c.postid = p.postid
+			) cm ON TRUE
 
-            -- Tags als JSON-Array
-            LEFT JOIN LATERAL (
-                SELECT COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]'::json) AS tags
-                FROM post_tags pt
-                JOIN tags t ON t.tagid = pt.tagid
-                WHERE pt.postid = p.postid
-            ) tg ON TRUE
+			ORDER BY $orderByClause, al.id DESC
+			LIMIT :limit OFFSET :offset";
 
-            -- Kommentare als JSON-Array (inkl. User + Flags)
-            LEFT JOIN LATERAL (
-                SELECT COALESCE(
-                    JSON_AGG(
-                        JSON_BUILD_OBJECT(
-                            'commentid',  c.commentid::text,
-                            'postid',     c.postid::text,
-                            'parentid',   c.parentid::text,
-                            'content',    c.content,
-                            'createdat',  c.createdat,
-                            'amountlikes',   COALESCE(ci.likes, 0),
-                            'amountreplies', COALESCE(ci.comments, 0),
-                            'isliked', EXISTS (
-                                SELECT 1 FROM user_comment_likes ucl
-                                WHERE ucl.commentid = c.commentid
-                                  AND ucl.userid    = al.userid
-                            ),
-                            'user', JSON_BUILD_OBJECT(
-                                'uid',       cu.uid::text,
-                                'username',  cu.username,
-                                'slug',      cu.slug,
-                                'img',       cu.img,
-                                'isfollowed',  EXISTS (SELECT 1 FROM follows f WHERE f.followedid = cu.uid AND f.followerid = al.userid),
-                                'isfollowing', EXISTS (SELECT 1 FROM follows f WHERE f.followerid = cu.uid AND f.followedid = al.userid),
-                                'isfriend',    EXISTS (
-                                    SELECT 1 FROM follows f1
-                                    WHERE f1.followerid = al.userid
-                                      AND f1.followedid = cu.uid
-                                      AND EXISTS (
-                                          SELECT 1 FROM follows f2
-                                          WHERE  f2.followerid = cu.uid
-                                            AND  f2.followedid = al.userid
-                                      )
-                                )
-                            )
-                        )
-                        ORDER BY c.createdat ASC
-                    ),
-                    '[]'::json
-                ) AS comments
-                FROM comments c
-                JOIN users cu ON cu.uid = c.userid
-                LEFT JOIN comment_info ci ON ci.commentid = c.commentid
-                WHERE c.postid = p.postid
-            ) cm ON TRUE
-
-            ORDER BY $orderByClause, al.id DESC
-            LIMIT :limit OFFSET :offset
-        ";
-
-        // getrennte Parameter: Stats ohne :trend_since, Data mit :trend_since
         $paramsStats = $paramsCommon;
         $paramsData  = $paramsCommon + [':trend_since' => $trendSince];
 
@@ -398,7 +352,7 @@ class AdvertisementMapper
                     'stats' => [
                         'tokenSpent'     => (float)($stats['total_token_spent'] ?? 0),
                         'euroSpent'      => (float)($stats['total_euro_spent'] ?? 0),
-                        'amountAds'      => (int)($stats['total_ads'] ?? 0),  // DISTINCT Ads
+                        'amountAds'      => (int)($stats['total_ads'] ?? 0),
                         'gemsEarned'     => (float)($stats['total_gems_earned'] ?? 0),
                         'amountLikes'    => (int)($stats['total_amount_likes'] ?? 0),
                         'amountViews'    => (int)($stats['total_amount_views'] ?? 0),
