@@ -1215,6 +1215,8 @@ class WalletMapper
             3 => ['price' => $prices['dislike'], 'whereby' => DISLIKE_, 'text' => 'Buy dislike'],
             4 => ['price' => $prices['comment'], 'whereby' => COMMENT_, 'text' => 'Buy comment'],
             5 => ['price' => $prices['post'], 'whereby' => POST_, 'text' => 'Buy post'],
+            6 => ['price' => $prices['advertisementBasic'], 'whereby' => POSTINVESTBASIC_, 'text' => 'Buy advertise basic'],
+            7 => ['price' => $prices['advertisementPinned'], 'whereby' => POSTINVESTPREMIUM_, 'text' => 'Buy advertise pinned'],
         ];
 
         if (!isset($mapping[$art])) {
