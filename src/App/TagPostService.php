@@ -7,13 +7,13 @@ use Fawaz\Database\TagPostMapper;
 use Psr\Log\LoggerInterface;
 use Fawaz\Database\TagMapper;
 use Fawaz\config\constants\ConstantsConfig;
-
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class TagPostService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected TagPostMapper $tagPostMapper, protected TagMapper $tagMapper)
+    public function __construct(protected LoggerInterface $logger, protected TagPostMapper $tagPostMapper, protected TagMapper $tagMapper, protected TransactionManager $transactionManager)
     {
     }
 
@@ -126,9 +126,11 @@ class TagPostService
             if ($tag) {
                 return $this->createSuccessResponse(21702);
             }
+            $this->transactionManager->beginTransaction();
 
             $tagId = $this->generateUUID();
             if (empty($tagId)) {
+                $this->transactionManager->rollback();
                 $this->logger->critical('Failed to generate tag ID');
                 return $this->respondWithError(41701);
             }
@@ -137,14 +139,17 @@ class TagPostService
             $tag = new Tag($tagData);
 
             if (!$this->tagMapper->insert($tag)) {
+                $this->transactionManager->rollback();
                 $this->logger->error('Failed to insert tag into database', ['tagName' => $tagName]);
                 return $this->respondWithError(41703);
             }
 
+            $this->transactionManager->commit();
             $this->logger->info('Tag created successfully', ['tagName' => $tagName]);
             return $this->createSuccessResponse(11702, [$tagData]);
 
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Error occurred while creating tag', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
