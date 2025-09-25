@@ -804,7 +804,7 @@ class PeerTokenMapper
     }
 
     // DONE
-    public function getTokenPriceValue(): ?string
+    public function getTokenPriceValue(): ?float
     {
         $this->logger->info('PeerTokenMapper.getTokenPriceValue');
 
@@ -817,8 +817,8 @@ class PeerTokenMapper
                 throw new \RuntimeException("Invalid LP data retrieved.");
             }
 
-            // Ensure both values are strings
-            $liqPoolTokenAmount = (string) $liqPool['liquidity'];
+            // Ensure both values are floats
+            $liqPoolTokenAmount = (float) $liqPool['liquidity'];
 
             if ($liqPoolTokenAmount == 0 || $btcPoolBTCAmount == 0) {
                 $this->logger->error("liqudityPool or btcPool liquidity is 0");
@@ -899,7 +899,7 @@ class PeerTokenMapper
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
             return self::respondWithError(30264);
         }
-        $numberoftokensToSwap = (string) $args['numberoftokens'] ?? 0.0;
+        $numberoftokensToSwap = (float) $args['numberoftokens'] ?? 0.0;
 
         // Get EUR/BTC price
         $btcPrice = BtcService::getOrUpdateBitcoinPrice($this->logger, $this->db);
@@ -918,6 +918,7 @@ class PeerTokenMapper
 
         $peerTokenEURPrice = TokenHelper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
 
+        var_dump(($peerTokenEURPrice)); exit;
         if (TokenHelper::mulRc($peerTokenEURPrice, $numberoftokensToSwap) < 10) {
             $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
                 'btcPrice' => $btcPrice,
@@ -932,14 +933,20 @@ class PeerTokenMapper
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
 
-        $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokensToSwap, PEERFEE, POOLFEE, BURNFEE);
+        $fees = ConstantsConfig::tokenomics()['FEES'];
+        $peerFee = (float) $fees['PEER'];
+        $poolFee = (float) $fees['POOL'];
+        $burnFee = (float) $fees['BURN'];
+        $inviteFee = (float)$fees['INVITATION'];
+        $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokensToSwap, $peerFee, $poolFee, $burnFee);
 
+        var_dump($requiredAmount); exit;
         $inviterId = $this->getInviterID($userId);
         try {
             if ($inviterId && !empty($inviterId)) {
-                $inviterWin = TokenHelper::mulRc($numberoftokensToSwap, INVTFEE);
+                $inviterWin = TokenHelper::mulRc($numberoftokensToSwap, $inviteFee);
 
-                $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokensToSwap, PEERFEE, POOLFEE, BURNFEE, INVTFEE);
+                $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokensToSwap, $peerFee, $poolFee, $burnFee, $inviteFee);
 
                 $this->logger->info('Invited By', [
                     'invited' => $inviterId,

@@ -489,7 +489,7 @@ type SwapTokenResponse {
 type TokenPriceResponse {
   status: String!
   ResponseCode: Int!
-  currentTokenPrice: String!
+  currentTokenPrice: Decimal!
   updatedAt: String
 }
 

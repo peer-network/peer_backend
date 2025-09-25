@@ -12,7 +12,7 @@ class BtcService
      /**
      * Returns the current BTC/EUR price, updating the DB if needed.
      */
-    public static function getOrUpdateBitcoinPrice(LoggerInterface $logger, PDO $db): string
+    public static function getOrUpdateBitcoinPrice(LoggerInterface $logger, PDO $db): float
     {
         $tokenPriceRepo = new TokenEuroPriceRepository($logger, $db);
         $btcTokenObj = new TokenEuroPrice(['token' => 'BTC']);
@@ -41,7 +41,7 @@ class BtcService
             $btcPrice = $tokenPrice->getEuroPrice();
         }
 
-        return $btcPrice;
+        return (float) $btcPrice;
     }
     /**
      * Fetches the current Bitcoin price in EUR from the CoinGecko API.
