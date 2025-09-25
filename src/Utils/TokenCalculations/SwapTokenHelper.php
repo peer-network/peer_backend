@@ -16,7 +16,7 @@ class SwapTokenHelper
      * @param float $POOLFEE Liquidity Pool fee.
      * @return float Amount of BTC the user will receive after fees and pool adjustment.
      */
-    public static function calculateBtc(string $btcLpTokenReserve, string $lpTokenReserve, string $tokensToSwap, float $POOLFEE = 0.01): string
+    public static function calculateBtc(float $btcLpTokenReserve, float $lpTokenReserve, float $tokensToSwap, float $POOLFEE = 0.01): float
     {
         // Convert inputs to Q96 fixed-point format
         $tokensToSwapQ96 = $tokensToSwap;

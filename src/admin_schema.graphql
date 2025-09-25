@@ -513,7 +513,7 @@ type LiquidityPoolTransaction {
 type AddLiquidity {
   newTokenAmount: Decimal
   newBtcAmount: Decimal
-  newTokenPrice: String
+  newTokenPrice: Decimal
 }
 
 type AddLiquidityResponse {

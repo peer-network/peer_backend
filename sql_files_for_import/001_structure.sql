@@ -531,47 +531,6 @@ CREATE TABLE IF NOT EXISTS wallet (
 );
 CREATE INDEX IF NOT EXISTS idx_wallet_userid ON wallet(userid);
 
-ALTER TABLE wallet ADD message VARCHAR(255) NULL;
-ALTER TABLE logwins ADD message VARCHAR(255) NULL;
-
--- Table: transactions
-CREATE TABLE IF NOT EXISTS transactions (
-    transactionId UUID PRIMARY KEY,
-    transUniqueId UUID NOT NULL,
-    transactionType VARCHAR(255) DEFAULT NULL,
-    senderId UUID DEFAULT NULL,
-    recipientId UUID DEFAULT NULL,
-    tokenAmount VARCHAR(255) DEFAULT 0 NOT NULL,
-    transferAction VARCHAR(255) DEFAULT NULL,
-    message VARCHAR(255) DEFAULT NULL,
-    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_senderId FOREIGN KEY (senderId) REFERENCES users(uid),
-    CONSTRAINT fk_recipientId FOREIGN KEY (recipientId) REFERENCES users(uid)
-);
-
--- Table: btc_swap_transactions
-CREATE TABLE IF NOT EXISTS btc_swap_transactions (
-    swapId UUID PRIMARY KEY,
-    transUniqueId UUID NOT NULL,
-    transactionType VARCHAR(255) DEFAULT NULL,
-    userId UUID DEFAULT NULL,
-    btcAddress VARCHAR(255) DEFAULT NULL,
-    tokenAmount VARCHAR(255) DEFAULT 0 NOT NULL,
-    btcAmount VARCHAR(255) DEFAULT 0 NOT NULL,
-    status VARCHAR(255) DEFAULT NULL,
-    message VARCHAR(255) DEFAULT NULL,
-    createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_userId FOREIGN KEY (userId) REFERENCES users(uid),
-    CONSTRAINT fk_transUniqueId FOREIGN KEY (transUniqueId) REFERENCES transactions(transactionId) ON DELETE CASCADE
-);
-
--- Table: token_euro_price
-CREATE TABLE IF NOT EXISTS token_euro_price (
-    token VARCHAR(255) DEFAULT NULL,
-    europrice NUMERIC(30,10) DEFAULT NULL,
-    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
 -- Table: wallett
 CREATE TABLE IF NOT EXISTS wallett (
     userid UUID PRIMARY KEY,

@@ -14,11 +14,11 @@ class TokenHelper
      * @param string $peerTokenBTCPrice Current PeerToken to BTC price.
      * @return float|null Calculated PeerToken price in EUR.
      */
-    public static function calculatePeerTokenEURPrice(string $btcEURPrice, string $peerTokenBTCPrice): ?string
+    public static function calculatePeerTokenEURPrice(float $btcEURPrice, float $peerTokenBTCPrice): ?float
     {
         $peerValue = self::mulRc((float) $btcEURPrice, (float) $peerTokenBTCPrice);
 
-        return (string) $peerValue;
+        return (float) $peerValue;
     }
 
     /**
@@ -28,11 +28,11 @@ class TokenHelper
      * @param float $liqPoolTokenAmount Total Peer Tokens in the liquidity pool.
      * @return float|null Peer Token price in BTC with 10-digit precision.
      */
-    public static function calculatePeerTokenPriceValue(string $btcPoolBTCAmount, string $liqPoolTokenAmount): ?string
+    public static function calculatePeerTokenPriceValue(float $btcPoolBTCAmount, float $liqPoolTokenAmount): ?float
     {
         $beforeToken = self::divRc((float) $btcPoolBTCAmount, (float) $liqPoolTokenAmount);
         
-        return (string) ($beforeToken);
+        return (float) ($beforeToken);
     }
 
 

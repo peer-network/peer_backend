@@ -72,7 +72,7 @@ class PeerTokenMapper
             $stmt->execute();
             $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            return $walletInfo['liquidity'];
+            return (float) $walletInfo['liquidity'];
         } catch (\PDOException $e) {
             $this->logger->error(
                 "PeerTokenMapper.getLpToken: Exception occurred while getting loop accounts",
@@ -763,7 +763,7 @@ class PeerTokenMapper
             }
 
             // Ensure both values are strings
-            $liquidity = (string) $getLpToken['liquidity'];
+            $liquidity = (float) $getLpToken['liquidity'];
 
             if ($liquidity == 0) {
                 return [
@@ -1145,7 +1145,7 @@ class PeerTokenMapper
      * @return float BTC Liquidity in account
      */
     // DONE
-    public function getLpTokenBtcLP(): string
+    public function getLpTokenBtcLP(): float
     {
 
         $this->logger->info("PeerTokenMapper.getLpToken started");
@@ -1169,7 +1169,7 @@ class PeerTokenMapper
             if (!isset($walletInfo['liquidity']) || empty($walletInfo['liquidity'])) {
                 throw new \RuntimeException("Failed to get accounts: " . "btcPool liquidity amount is invalid");
             }
-            $liquidity = (string) $walletInfo['liquidity'];
+            $liquidity = (float) $walletInfo['liquidity'];
 
             return $liquidity;
         } catch (\PDOException $e) {
@@ -1196,11 +1196,10 @@ class PeerTokenMapper
     /**
      * Add New Liquidity
      * 
-     * @param int $userId
+     * @param string $userId
      * @param array $args
      * @return array
      */
-    // DONE
     public function addLiquidity(string $userId, array $args): array
     {
         $this->logger->info("addLiquidity started");
@@ -1274,7 +1273,7 @@ class PeerTokenMapper
                 'ResponseCode' => 11218, // Successfully update with Liquidity into Pool
                 'newTokenAmount' => $newTokenAmount,
                 'newBtcAmount' => $newBtcAmount,
-                'newTokenPrice' => $tokenPrice   // TODO: Replace with dynamic calculation
+                'newTokenPrice' => $tokenPrice
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Liquidity error', ['exception' => $e]);
@@ -1305,18 +1304,18 @@ class PeerTokenMapper
      * @param string $transactionType
      * @param string $transferAction
      */
-    private function saveLiquidity($userId, string $recipientWallet, string $amount, string $transactionType, string $transferAction): void
+    private function saveLiquidity(string $userId, string $recipientWallet, string $amount, string $transactionType, string $transferAction): void
     {
-        $this->walletMapper->saveWalletEntry($recipientWallet, $amount);
+        $this->walletMapper->saveWalletEntry($recipientWallet, (float) $amount);
 
         $transaction = new Transaction([
-            'transUniqueId' => self::generateUUID(),
-            'transactionType' => $transactionType,
-            'senderId' => $userId,
-            'recipientId' => $recipientWallet,
-            'tokenAmount' => $amount,
-            'transferAction' => $transferAction,
-        ]);
+            'operationid' => self::generateUUID(),
+            'transactiontype' => $transactionType,
+            'senderid' => $userId,
+            'recipientid' => $recipientWallet,
+            'tokenamount' => $amount,
+            'transferaction' => $transferAction,
+        ], ['operationid', 'senderid', 'tokenamount'], false);
 
         $repo = new TransactionRepository($this->logger, $this->db);
         $repo->saveTransaction($transaction);
