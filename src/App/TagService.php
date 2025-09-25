@@ -6,12 +6,13 @@ use Fawaz\App\Tag;
 use Fawaz\Database\TagMapper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class TagService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected TagMapper $tagMapper)
+    public function __construct(protected LoggerInterface $logger, protected TagMapper $tagMapper, protected TransactionManager $transactionManager)
     {
     }
 
@@ -81,15 +82,18 @@ class TagService
         $tagName = !empty($tagName) ? trim($tagName) : null;
 
         try {
+            $this->transactionManager->beginTransaction();
             $tagValid = new Tag(['name' => $tagName], ['name']);
             $tag = $this->tagMapper->loadByName($tagName);
 
             if ($tag) {
+                $this->transactionManager->rollback();
                 return $this->respondWithError('Tag already exists.');
             }
 
             $tagId = $this->generateUUID();
             if (empty($tagId)) {
+                $this->transactionManager->rollback();
                 $this->logger->critical('Failed to generate tag ID');
                 return $this->respondWithError(41704);
             }
@@ -98,14 +102,18 @@ class TagService
             $tag = new Tag($tagData);
 
             if (!$this->tagMapper->insert($tag)) {
+                $this->transactionManager->rollback();
                 return $this->respondWithError(41703);
             }
 
+            $this->transactionManager->commit();
             return $this->createSuccessResponse(11702, [$tagData]);
 
         } catch (ValidationException $e) {
+            $this->transactionManager->rollback();
             return $this->respondWithError(40301);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             return $this->respondWithError(40301);
         } finally {
             $this->logger->debug('createTag function execution completed');
