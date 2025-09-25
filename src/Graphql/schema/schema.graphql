@@ -5,67 +5,177 @@ schema {
 }
 
 type Subscription {
+  "Subscribe to new messages for a chat (server pushes newly created messages)."
   getChatMessages(chatid: ID!): AddChatmessageResponse!
+    "Publish a message to a chat (returns the created message and notifies subscribers)."
   setChatMessages(chatid: ID!, content: String!): AddChatmessageResponse!
 }
 
 type Query {
+  "Returns basic service info (e.g., current user ID and version)"
   hello: HelloResponse!
+
+  "Search for users using filters like username or user ID"
   searchUser(userid: ID,contentFilterBy: ContentFilterType, username: String, offset: Int, limit: Int): UserListResponse!
+
+  "List all users with pagination support"
   listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse!
+
+  "Retrieve a user's public profile and posts"
   getProfile(userid: ID,contentFilterBy: ContentFilterType, postLimit: Int): ProfileInfo!
+
+  "List followers and followings of a user with pagination"
   listFollowRelations(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
+
+  "List friends of the current user with pagination"
   listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!
+
+  "Returns detailed user stats for the currently logged-in user"
   getUserInfo: UserInfoResponse!
+
+  "List users blocked by or blocking the current user"
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
+
+  "List posts using filters like tags, sort type, date range, and pagination"
   listPosts(filterBy: [PostFilterType!], contentFilterBy: ContentFilterType, IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
+
+  "Get engagement summary of a specific post"
   getPostInfo(postid: ID!): PostInfoResponse!
+
+  "Get engagement summary of a specific comment"
   getCommentInfo(commentId: ID!): CommentInfoResponse!
+
+  "List child comments of a given comment with pagination"
   listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
+
+  "List all tags with pagination"
   listTags(offset: Int, limit: Int): TagSearchResponse!
+
+  "Search for tags by name with pagination"
   searchTags(tagName: String!, offset: Int, limit: Int): TagSearchResponse!
+
+  "Get detailed info about a specific chat, including messages and participants"
   getChat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse!
+
+  "List all chats of the current user with pagination and filters"
   listChats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
+
+  "List messages of a chat with pagination"
   listChatMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
+
+  "Check daily free interaction quota (e.g., free posts or actions)"
   getDailyFreeStatus: GetDailyResponse!
+
+  "Get current token liquidity balance"
   balance: CurrentLiquidity!
+
+  "List the user's win logs by day filter and pagination"
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
+
+  "List the user's token transfer logs by day filter and pagination"
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
+
+  "Return referral program UUID and personal referral link."
   getReferralInfo: ReferralInfoResponse!
+
+  "List referred users with pagination."
   referralList(offset: Int, limit: Int): ReferralListResponse!
+
+  "Returns a summary of today's interactions"
   listTodaysInteractions: ListTodaysInteractionsResponse!
+
+  "Return current action token prices and related parameters."
   getActionPrices: GetActionPricesResponse!
+
+  "Check if the user is eligible to create a post, returning an eligibility token."
   postEligibility: PostEligibilityResponse!
+
+  "Return filtered list of token transactions (by type, direction, date range, sort, pagination)."
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
+
+  "List users who interacted with a given post or comment (like, dislike, view, etc.)."
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
+
+  "Return global tokenomics configuration, including action prices, GEM returns, and minting data."
   getTokenomics: TokenomicsResponse!
 }
 
 type Mutation {
+  "Update user preferences (content filter level, completed onboardings)."
   updateUserPreferences(userPreferences: UserPreferencesInput): UserPreferencesResponse!
+
+  "Change the username (requires current password)"
   updateUsername(username: String!, password: String!): DefaultResponse!
+
+  "Change the email address (requires current password)"
   updateEmail(email: String!, password: String!): DefaultResponse!
+
+  "Change the password (requires current password)"
   updatePassword(password: String!, expassword: String!): DefaultResponse!
+
+  "Update the biography text of the user profile. Must be between 3 and 5000 characters long"
   updateBio(biography: String!): DefaultResponse!
+
+  "Upload or update the profile image (base64-encoded)"
   updateProfileImage(img: String!): DefaultResponse!
+
+  "Follow or unfollow a user"
   toggleUserFollowStatus(userid: ID!): FollowStatusResponse!
+
+  "Block or unblock a user"
   toggleBlockUserStatus(userid: ID!): DefaultResponse!
+
+  "Permanently delete the current account (requires password)"
   deleteAccount(password: String!): DefaultResponse!
+
+  "Create a new chat with specified participants"
   createChat(input: ChatInput!): AddChatResponse!
+
+  "Update the name and/or image of an existing chat"
   updateChatInformations(input: UpdateChatInput!): AddChatResponse!
+
+  "Add one or more participants to an existing chat"
   addChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
+
+  "Remove one or more participants from an existing chat"
   removeChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
+
+  "Send a message in a chat"
   sendChatMessage(chatid: ID!, content: String!): AddChatmessageResponse!
+
+  "Delete a specific message from a chat"
   deleteChatMessage(chatid: ID!, messid: Int!): DefaultResponse!
+
+  "Delete a chat and all its messages"
   deleteChat(id: ID!): DefaultResponse!
+
+  "Create a post for a specific feed (e.g. group or channel)"
   createChatFeed(input: FeedInput!): AddPostResponse!
+
+  "Like a comment"
   likeComment(commentid: ID!): DefaultResponse!
+
+  "Report a comment for moderation"
   reportComment(commentid: ID!): DefaultResponse!
+
+  "Report a user for moderation."
   reportUser(userid: ID!): DefaultResponse!
+
+  "Delete a post created by the user"
   deletePost(id: ID!): DefaultResponse!
+
+  "Create a new post (image, text, video, or audio)"
   createPost(action: PostType!, input: PostInput!): PostResponse!
+
+  "Create a comment or reply on a post"
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
+
+  "Perform an action on a post (e.g., like, dislike, report, view, etc.)"
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
+
+  "Transfer tokens to another user"
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: "Use `resolveTransferV2`.")
+
+  "Transfer tokens to another user with decimal precision and optional message."
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
 }
