@@ -3,6 +3,8 @@ ifneq (,$(wildcard .env))
     $(warning Local .env detected. Docker Compose auto-loads this and it may override .env.ci. To avoid issues, either delete it or set COMPOSE_ENV_FILE=.env.ci)
 endif
 
+GITLEAKS_VERSION = 8.28.0
+
 IMAGE_TAG=local
 export IMAGE_TAG
 
@@ -249,6 +251,26 @@ clean-prune: clean-all ## Remove ALL unused images, build cache, and volumes
 hot-ci:
 	$(MAKE) restart-db
 	$(MAKE) test
+ensure-gitleaks: ## Ensure Gitleaks is installed locally (auto-install if missing)
+	@if command -v gitleaks >/dev/null 2>&1; then \
+		echo "Gitleaks already installed: $$(gitleaks version)"; \
+	else \
+		echo "⚡ Installing Gitleaks v$(GITLEAKS_VERSION)..."; \
+		OS=$$(uname -s | tr '[:upper:]' '[:lower:]'); \
+		ARCH=$$(uname -m); \
+		case "$$OS-$$ARCH" in \
+			linux-x86_64)   URL="https://github.com/gitleaks/gitleaks/releases/download/v$(GITLEAKS_VERSION)/gitleaks_$(GITLEAKS_VERSION)_linux_x64.tar.gz" ;; \
+			linux-aarch64)  URL="https://github.com/gitleaks/gitleaks/releases/download/v$(GITLEAKS_VERSION)/gitleaks_$(GITLEAKS_VERSION)_linux_arm64.tar.gz" ;; \
+			darwin-arm64)   URL="https://github.com/gitleaks/gitleaks/releases/download/v$(GITLEAKS_VERSION)/gitleaks_$(GITLEAKS_VERSION)_darwin_arm64.tar.gz" ;; \
+			darwin-x86_64)  URL="https://github.com/gitleaks/gitleaks/releases/download/v$(GITLEAKS_VERSION)/gitleaks_$(GITLEAKS_VERSION)_darwin_x64.tar.gz" ;; \
+			*) echo "Unsupported OS/Arch ($$OS-$$ARCH). Please install manually." && exit 1 ;; \
+		esac; \
+		curl -sSL $$URL -o gitleaks.tar.gz; \
+		tar -xvzf gitleaks.tar.gz gitleaks; \
+		sudo mv gitleaks /usr/local/bin/; \
+		rm -f gitleaks.tar.gz; \
+		echo "Installed gitleaks v$(GITLEAKS_VERSION)"; \
+	fi
 
 install-hooks: ## Install Git hooks for pre-commit scanning
 	@echo "Installing Git hooks..."
@@ -267,7 +289,7 @@ check-hooks: ## Verify that Git hooks are installed and executable
     fi
 	@echo "Git hooks are present and executable."
 
-scan: check-hooks ## Run Gitleaks scan on staged changes only
+scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
 	@echo "Running Gitleaks scan on staged changes..."
 	@mkdir -p .gitleaks_out
 	@if command -v gitleaks >/dev/null 2>&1; then \
