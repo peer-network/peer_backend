@@ -1224,7 +1224,7 @@ class WalletMapper
             return self::respondWithError(30105);
         }
 
-        $price = (!empty($price) && (int)$price) ? $price : $mapping[$art]['price'];
+        $price = (!empty($args['price']) && (int)$args['price']) ? (int)$args['price'] : $mapping[$art]['price'];
         $whereby = $mapping[$art]['whereby'];
         $text = $mapping[$art]['text'];
 
