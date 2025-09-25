@@ -263,12 +263,14 @@ Example output:
 
 Available targets:
 bash-backend : Open interactive shell in backend container
+check-hooks               Verify that Git hooks are installed and executable
 ci : Run full local CI workflow (setup, tests, cleanup)
 clean-all : Remove containers, volumes, vendors, reports, logs
 clean-ci : Cleanup for CI but keep reports
 clean-prune : Remove ALL unused images, build cache, and volumes
 db : Open psql shell into Postgres
 dev : Full setup: env, DB reset, vendors install, start DB+backend
+ensure-gitleaks           Ensure Gitleaks is installed locally (auto-install if missing)
 ensure-jq : Ensure jq is installed (auto-install if missing)
 env-ci : Copy .env.dev to .env.ci for local development
 help : Show available make targets
