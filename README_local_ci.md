@@ -19,6 +19,7 @@ Make sure you have the following installed:
 - Gitleaks v8.28.0 (required for pre-commit and make scan)
 
 (If `jq` is missing, `make` will auto-install it on Ubuntu/WSL via `sudo apt install jq`.)
+(If `gitleaks` is missing, `make` will auto-install v8.28.0 on Ubuntu/WSL via `curl` when you run `make scan`, and place it in `/usr/local/bin`.)
 
 Install Gitleaks v8.28.0
 
