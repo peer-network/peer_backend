@@ -2146,13 +2146,13 @@ class GraphQLSchemaBuilder
                 $this->logger->warning('resolveActionPrices: DB result missing/invalid, falling back to constants');
 
                 $tokenomics = ConstantsConfig::tokenomics();
-                $prices     = $tokenomics['ACTION_TOKEN_PRICES'] ?? [];
+                $prices     = $tokenomics['ACTION_TOKEN_PRICES'];
 
                 $affectedRows = [
-                    'postPrice'    => (float)($prices['post']    ?? 0.0),
-                    'likePrice'    => (float)($prices['like']    ?? 0.0),
-                    'dislikePrice' => (float)($prices['dislike'] ?? 0.0),
-                    'commentPrice' => (float)($prices['comment'] ?? 0.0),
+                    'postPrice'    => (float)$prices['post'],
+                    'likePrice'    => (float)$prices['like'],
+                    'dislikePrice' => (float)$prices['dislike'],
+                    'commentPrice' => (float)$prices['comment'],
                 ];
             } else {
                 $affectedRows = [
@@ -2186,24 +2186,24 @@ class GraphQLSchemaBuilder
         $tokenomics = ConstantsConfig::tokenomics();
         $minting    = ConstantsConfig::minting();
 
-        $prices = $tokenomics['ACTION_TOKEN_PRICES'] ?? [];
-        $gems   = $tokenomics['ACTION_GEMS_RETURNS'] ?? [];
+        $prices = $tokenomics['ACTION_TOKEN_PRICES'];
+        $gems   = $tokenomics['ACTION_GEMS_RETURNS'];
 
         $actionTokenPrices = [
-            'postPrice'    => (float)($prices['post']    ?? 0.0),
-            'likePrice'    => (float)($prices['like']    ?? 0.0),
-            'dislikePrice' => (float)($prices['dislike'] ?? 0.0),
-            'commentPrice' => (float)($prices['comment'] ?? 0.0),
+            'postPrice'    => (float)$prices['post'],
+            'likePrice'    => (float)$prices['like'],
+            'dislikePrice' => (float)$prices['dislike'],
+            'commentPrice' => (float)$prices['comment'],
         ];
 
         $actionGemsReturns = [
-            'viewGemsReturn'    => (float)($gems['view']    ?? 0.0),
-            'likeGemsReturn'    => (float)($gems['like']    ?? 0.0),
-            'dislikeGemsReturn' => (float)($gems['dislike'] ?? 0.0),
-            'commentGemsReturn' => (float)($gems['comment'] ?? 0.0),
+            'viewGemsReturn'    => (float)$gems['view'],
+            'likeGemsReturn'    => (float)$gems['like'],
+            'dislikeGemsReturn' => (float)$gems['dislike'],
+            'commentGemsReturn' => (float)$gems['comment'],
         ];
 
-        $mintedYesterday = (float)($minting['DAILY_NUMBER_TOKEN'] ?? 0.0);
+        $mintedYesterday = (float)$minting['DAILY_NUMBER_TOKEN'];
 
         $payload = [
             'status'            => 'success',

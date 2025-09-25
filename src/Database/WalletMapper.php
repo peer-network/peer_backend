@@ -722,7 +722,7 @@ class WalletMapper
         }
     }
 
-    public function insertWinToLog(string $userId, array $args): bool
+    public function insertWinToLog(string $userId, array $args): array|bool
     {
         \ignore_user_abort(true);
 
@@ -1147,6 +1147,7 @@ class WalletMapper
             $this->logger->info('Inviter found', ['inviterId' => $inviterId]);
 
             $fees = ConstantsConfig::tokenomics()['FEES'];
+            $inviteFee = (float)$fees['INVITATION'];
             $percent = round((float)$tokenAmount * $inviteFee, 2);
             $tosend = round((float)$tokenAmount - $percent, 2);
 
