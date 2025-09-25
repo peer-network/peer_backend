@@ -20,11 +20,6 @@ use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 
-// USER PAY
-const PRICELIKE=3;
-const PRICEDISLIKE=5;
-const PRICECOMMENT=0.5;
-const PRICEPOST=20;
 const DISLIKE_=3;// whereby DISLIKE
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
@@ -703,19 +698,22 @@ class PostService
 
         $this->logger->info('GraphQLSchemaBuilder.postEligibility started');
 
+        $dailyFree = ConstantsConfig::dailyFree()['DAILY_FREE_ACTIONS'];
+        $prices    = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
+
         try {
             $dailyLimits = [
-                'like' => DAILYFREELIKE,
-                'comment' => DAILYFREECOMMENT,
-                'post' => DAILYFREEPOST,
-                'dislike' => DAILYFREEDISLIKE,
+                'like' => $dailyFree['like'],
+                'comment' => $dailyFree['comment'],
+                'post' => $dailyFree['post'],
+                'dislike' => $dailyFree['dislike'],
             ];
 
             $actionPrices = [
-                'like' => PRICELIKE,
-                'comment' => PRICECOMMENT,
-                'post' => PRICEPOST,
-                'dislike' => PRICEDISLIKE,
+                'like' => $prices['like'],
+                'comment' => $prices['comment'],
+                'post' => $prices['post'],
+                'dislike' => $prices['dislike'],
             ];
 
             $actionMaps = [

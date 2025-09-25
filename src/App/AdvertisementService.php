@@ -4,6 +4,8 @@ namespace Fawaz\App;
 
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\AdvertisementMapper;
+use Fawaz\Database\PostMapper;
+use Fawaz\Database\UserMapper;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use InvalidArgumentException;
@@ -29,6 +31,8 @@ class AdvertisementService
     public function __construct(
         protected LoggerInterface $logger,
         protected AdvertisementMapper $advertisementMapper,
+        protected UserMapper $userMapper,
+        protected PostMapper $postMapper,
     ) {}
 
     public function setCurrentUserId(string $userid): void
@@ -295,15 +299,27 @@ class AdvertisementService
         }
 
         if ($advertisementId !== null && !self::isValidUUID($advertisementId)) {
-            return $this->respondWithError(30209);
+            return $this->respondWithError(30269);
+        }
+
+        if ($advertisementId !== null && !$this->advertisementMapper->advertisementExistsById($advertisementId)) {
+            return $this->respondWithError(32019);
         }
 
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
         }
 
+        if ($postId !== null && !$this->postMapper->postExistsById($postId)) {
+            return $this->respondWithError(31510);
+        }
+
         if ($userId !== null && !self::isValidUUID($userId)) {
             return $this->respondWithError(30201);
+        }
+
+        if ($userId !== null && !$this->userMapper->isUserExistById($userId)) {
+            return $this->respondWithError(31007);
         }
 
         $sortBy = $args['sort'] ?? [];
@@ -390,6 +406,14 @@ class AdvertisementService
 
         if ($userId !== null && !self::isValidUUID($userId)) {
             return $this->respondWithError(30201);
+        }
+
+        if ($userId !== null && !$this->userMapper->isUserExistById($userId)) {
+            return $this->respondWithError(31007);
+        }
+
+        if ($postId !== null && !$this->postMapper->postExistsById($postId)) {
+            return $this->respondWithError(31510);
         }
 
         if ($tag !== null) {

@@ -379,9 +379,10 @@ jobs:
 
       - name: Rewrite GraphQL and Upload-post Endpoints in Postman Collections (using jq)
         run: |
-          for file in tests/postman_collection/001_graphql_postman_collection.json \
-                     tests/postman_collection/002_graphql_postman_collection.json \
-                     tests/postman_collection/003_graphql_postman_collection.json; do
+          files=$(ls tests/postman_collection/*_graphql_postman_collection.json | sort)
+
+          for file in $files; do
+            echo "Processing $file ..."
 
             # Replace GraphQL endpoints
             jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {
@@ -777,6 +778,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [aggregate_outcome, build_and_test]
     if: always()
+    concurrency:
+      group: reports-deploy
+      cancel-in-progress: false
     steps:
       - name: Download PHP 8.2 HTMLExtra report
         uses: actions/download-artifact@v5
@@ -815,7 +819,24 @@ jobs:
           git config user.name "GitHub Actions"
           git add reports
           git commit -m "Deploy reports for run $GITHUB_RUN_ID (keep last 10)" || echo "No changes to commit"
-          git push origin gh-pages --force
+
+          n=0
+          until [ $n -ge 5 ]
+          do
+            if git push origin gh-pages --force; then
+              echo "Push succeeded on attempt $((n+1))"
+              break
+            else
+              n=$((n+1))
+              echo "Push failed (attempt $n), retrying in 5s..."
+              sleep 5
+            fi
+          done
+
+          if [ $n -eq 5 ]; then
+            echo "Push failed after 5 attempts, giving up."
+            exit 1
+          fi
           
   send_success_discord_notification:
     name: Send Discord Notification for Successful CI

@@ -28,6 +28,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    environment:
+      DB_HOST: db
     volumes:
       - ./src:/var/www/html/src
       - ./runtime-data/logs:/var/www/html/runtime-data/logs

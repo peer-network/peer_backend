@@ -1,17 +1,19 @@
-# Load .env file
+# Warn if .env file exists (Docker Compose auto-loads .env by default)
 ifneq (,$(wildcard .env))
-    include .env
-    export
+    $(warning Local .env detected. Docker Compose auto-loads this and it may override .env.ci. To avoid issues, either delete it or set COMPOSE_ENV_FILE=.env.ci)
 endif
 
 IMAGE_TAG=local
 export IMAGE_TAG
 
+# Force Docker Compose to use .env.ci instead of auto-loading .env
+export COMPOSE_ENV_FILE=.env.ci
+
 VOLUME_NAME = $(COMPOSE_PROJECT_NAME)_db_data
 COMPOSE_OVERRIDE = docker-compose.override.local.yml
 COMPOSE_FILES = -f docker-compose.yml $(if $(wildcard $(COMPOSE_OVERRIDE)),-f $(COMPOSE_OVERRIDE))
 
-PROJECT_NAME ?= peer_backend_local_$(USER)
+PROJECT_NAME ?= peer_backend_local_$(shell echo $(USER) | tr '[:upper:]' '[:lower:]')
 export COMPOSE_PROJECT_NAME := $(PROJECT_NAME)
 
 env-ci: ## Copy .env.dev to .env.ci for local development
@@ -239,3 +241,7 @@ help: ## Show available make targets
 clean-prune: clean-all ## Remove ALL unused images, build cache, and volumes
 	@echo "WARNING: This will remove ALL unused images, build cache, and volumes on your system!"
 	docker system prune -af --volumes
+
+hot-ci:
+	$(MAKE) restart-db
+	$(MAKE) test

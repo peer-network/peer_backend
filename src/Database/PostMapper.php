@@ -616,7 +616,11 @@ class PostMapper
             $params['to'] = $to;
         }
         if ($tag !== null) {
-            $whereClauses[] = "t.name = :tag";
+            if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
+                $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
+                return [];
+            }
+            $whereClauses[] = "t.name ILIKE :tag";
             $params['tag'] = $tag;
         }
         if (!empty($tags)) {
@@ -1275,7 +1279,7 @@ class PostMapper
                     $this->logger->warning("Cap reached: user has {$cnt} records in last hour with restricted statuses", [
                         'userId' => $userId,
                     ]);
-                    throw new ValidationException('Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.', [40301]); // Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED
+                    throw new ValidationException('Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.', [31512]); // Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED
                 }
             }
 
