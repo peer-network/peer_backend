@@ -18,6 +18,7 @@ const FREELIKE_=30;// whereby FREELIKE
 const FREECOMMENT_=31;// whereby FREECOMMENT
 const FREEPOST_=32;// whereby FREEPOST
 
+use Fawaz\App\LogWinService;
 use Fawaz\App\AlphaMintService;
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
@@ -63,6 +64,7 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
+        protected LogWinService $logWinService,
         protected LoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
@@ -157,6 +159,7 @@ class GraphQLSchemaBuilder
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
+        $this->logWinService->setCurrentUserId($userid);
     }
 
     protected function getStatusNameByID(int $status): ?string
@@ -1851,6 +1854,14 @@ class GraphQLSchemaBuilder
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
+            'logWinMigration' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration(),
+            'logWinMigration02' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration02(),
+            'logWinMigration03' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration03(),
+            'logWinMigration04' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration04(),
+            'logWinMigration05' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration05(),
+            'logWinsPaidActionForMarchApril' => fn(mixed $root, array $args) => $this->logWinService->logwinsPaidActionForMarchApril(),
+            'logWinMigrationWalletUpdate' => fn(mixed $root, array $args) => $this->logWinService->logWinMigrationWalletUpdate(),
+            'logWinMigrationWalletNegativeToZero' => fn(mixed $root, array $args) => $this->logWinService->logWinMigrationWalletNegativeToZero(),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'getTokenomics' => fn(mixed $root, array $args) => $this->resolveTokenomics(),
         ];
@@ -2628,6 +2639,16 @@ class GraphQLSchemaBuilder
         return $this->createSuccessResponse(21701);
     }
 
+    /**
+     * This Method uses logWins.
+     * 
+     * Need to check first, is this API in co-operation or not, and if it is than, what is it for?
+     * 
+     * And Accordingly, logWins for Transactions should be changed
+     * 
+     * NOTE: If it used than it is not working correctly i think.
+     * Giving SQL Error like: "SQLSTATE[23505]: Unique violation: 7 ERROR:  duplicate key value violates unique constraint \"logwins_pkey\"\nDETAIL:  Key (token)=(4aa1f21b-759c-49cd-9432-03844c03ba75) already exists."} {"uid":"1241e34"}
+     */
     protected function resolveBeforeTransaction(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
