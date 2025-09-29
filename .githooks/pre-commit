@@ -1,0 +1,45 @@
+#!/bin/sh
+echo "Running Gitleaks pre-commit scan on staged changes..."
+
+mkdir -p .gitleaks_out
+
+# Prefer local gitleaks if available, fallback to Docker
+if command -v gitleaks >/dev/null 2>&1; then
+  echo "⚡ Using local gitleaks binary"
+  SCAN_CMD="gitleaks detect \
+    --pipe \
+    --config=gitleaks.toml \
+    --report-format=json \
+    --report-path=.gitleaks_out/gitleaks-precommit.json \
+    --no-banner"
+else
+  echo "Local gitleaks not found, using Docker fallback"
+  SCAN_CMD="docker run --rm -i -v \"$(pwd)\":/repo ghcr.io/gitleaks/gitleaks:v8.28.0 detect \
+    --pipe \
+    --config=/repo/gitleaks.toml \
+    --report-format=json \
+    --report-path=/repo/.gitleaks_out/gitleaks-precommit.json \
+    --no-banner"
+fi
+
+# Run scan
+git diff --cached --unified=0 --no-color | sh -c "$SCAN_CMD"
+
+status=$?
+
+if [ $status -ne 0 ]; then
+  echo "Possible secrets detected! See .gitleaks_out/gitleaks-precommit.json"
+  echo "Commit aborted."
+  echo ""
+  echo "Reminder: Do NOT bypass with 'git commit --no-verify'."
+  echo "CI will still block your PR even if you bypass locally."
+  echo ""
+  echo "If this secret is actually required in the repo (false positive or approved usage),"
+  echo "you MUST meet with the CTO / Team Lead / DevOps to approve"
+  echo "and add it to the gitleaks ignore list."
+  echo "Tip: You can also run 'make scan' manually to debug."
+  exit 1
+fi
+
+echo "No secrets found. Commit allowed."
+exit 0
