@@ -40,7 +40,8 @@ regexes = [
   '''testuser[0-9]+@example\.com''',
   '''LogWin(Service|Mapper)\.\w+''',
   '''logWinMigrationWalletNegativeToZero''',
-  '''generate(Like|Dislike|Post|Comment)PaidActionToLogWins'''
+  '''generate(Like|Dislike|Post|Comment)PaidActionToLogWins''',
+  '''ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'''
 ]
 
 # --- Path denylist (ignore noisy generated/test files) ---
