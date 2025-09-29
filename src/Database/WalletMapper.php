@@ -722,7 +722,7 @@ class WalletMapper
         }
     }
 
-    public function insertWinToLog(string $userId, array $args): bool
+    public function insertWinToLog(string $userId, array $args): array|bool
     {
         \ignore_user_abort(true);
 
@@ -1147,6 +1147,7 @@ class WalletMapper
             $this->logger->info('Inviter found', ['inviterId' => $inviterId]);
 
             $fees = ConstantsConfig::tokenomics()['FEES'];
+            $inviteFee = (float)$fees['INVITATION'];
             $percent = round((float)$tokenAmount * $inviteFee, 2);
             $tosend = round((float)$tokenAmount - $percent, 2);
 
@@ -1336,34 +1337,36 @@ class WalletMapper
         $this->logger->info('WalletMapper.saveWalletEntry started');
 
         try {
-            $query = "SELECT 1 FROM wallett WHERE userid = :userid";
-            $stmt = $this->db->prepare($query);
+            $stmt = $this->db->prepare("SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE");
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
             $stmt->execute();
-            $userExists = $stmt->fetchColumn(); 
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if (!$userExists) {
+            if (!$row) {
+                // User does not exist, insert new wallet entry
                 $newLiquidity = abs($liquidity);
-                $liquiditq = ((float)$this->decimalToQ64_96($newLiquidity));
+                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
 
-                $query = "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
-                          VALUES (:userid, :liquidity, :liquiditq, :updatedat)";
-                $stmt = $this->db->prepare($query);
+                $stmt = $this->db->prepare(
+                    "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
+                    VALUES (:userid, :liquidity, :liquiditq, :updatedat)"
+                );
                 $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
                 $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
-
                 $stmt->execute();
             } else {
-                $currentBalance = $this->getUserWalletBalance($userId);
+                // User exists, safely calculate new liquidity
+                $currentBalance = (float)$row['liquidity'];
                 $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
-                $liquiditq = ((float)$this->decimalToQ64_96($newLiquidity));
+                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
 
-                $query = "UPDATE wallett
-                          SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
-                          WHERE userid = :userid";
-                $stmt = $this->db->prepare($query);
+                $stmt = $this->db->prepare(
+                    "UPDATE wallett
+                    SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
+                    WHERE userid = :userid"
+                );
                 $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
