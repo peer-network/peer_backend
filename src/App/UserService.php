@@ -254,7 +254,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::User.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError(40601);
         }
 
         try {
@@ -264,7 +264,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::Tokenize.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError(40601);
         }
 
         try {
@@ -274,7 +274,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::UserInfo.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError(40601);
         }
 
         try {
@@ -284,7 +284,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::UserPreferences.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError(41016);
         }
 
         try {
@@ -303,7 +303,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::Wallett.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError(40601);
         }
 
         try {
@@ -313,7 +313,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::DailyFree.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError(40601);
         }
 
         $this->userMapper->logLoginDaten($id);
