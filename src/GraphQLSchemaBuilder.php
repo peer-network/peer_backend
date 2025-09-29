@@ -1861,6 +1861,7 @@ class GraphQLSchemaBuilder
 
         return [
             'requestPasswordReset' => fn(mixed $root, array $args) => $this->userService->requestPasswordReset($args['email']),
+            'resetPasswordTokenVerify' => fn(mixed $root, array $args) => $this->userService->resetPasswordTokenVerify($args['token']),
             'resetPassword' => fn(mixed $root, array $args) => $this->userService->resetPassword($args),
             'register' => fn(mixed $root, array $args) => $this->createUser($args['input']),
             'verifyAccount' => fn(mixed $root, array $args) => $this->verifyAccount($args['userid']),
