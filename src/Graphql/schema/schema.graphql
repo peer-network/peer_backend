@@ -5,9 +5,9 @@ schema {
 }
 
 type Subscription {
-  "Subscribe to new messages for a chat (server pushes newly created messages)."
+  "Not in use"
   getChatMessages(chatid: ID!): AddChatmessageResponse!
-    "Publish a message to a chat (returns the created message and notifies subscribers)."
+  "Not in use"
   setChatMessages(chatid: ID!, content: String!): AddChatmessageResponse!
 }
 
@@ -15,28 +15,28 @@ type Query {
   "Returns basic service info (e.g., current user ID and version)"
   hello: HelloResponse!
 
-  "Search for users using filters like username or user ID"
+  "Search for users (supports pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   searchUser(userid: ID,contentFilterBy: ContentFilterType, username: String, offset: Int, limit: Int): UserListResponse!
 
-  "List all users with pagination support"
+  "List all users (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse!
 
   "Retrieve a user's public profile and posts"
   getProfile(userid: ID,contentFilterBy: ContentFilterType, postLimit: Int): ProfileInfo!
 
-  "List followers and followings of a user with pagination"
+  "List followers and followings (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   listFollowRelations(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
 
-  "List friends of the current user with pagination"
+  "List friends (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!
 
   "Returns detailed user stats for the currently logged-in user"
   getUserInfo: UserInfoResponse!
 
-  "List users blocked by or blocking the current user"
+  "List users blocked by or blocking the current user (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
 
-  "List posts using filters like tags, sort type, date range, and pagination"
+  "List posts with filters (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX}; commentOffset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, commentLimit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   listPosts(filterBy: [PostFilterType!], contentFilterBy: ContentFilterType, IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
 
   "Get engagement summary of a specific post"
@@ -45,34 +45,34 @@ type Query {
   "Get engagement summary of a specific comment"
   getCommentInfo(commentId: ID!): CommentInfoResponse!
 
-  "List child comments of a given comment with pagination"
+  "List child comments (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
 
-  "List all tags with pagination"
+  "List all tags (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   listTags(offset: Int, limit: Int): TagSearchResponse!
 
-  "Search for tags by name with pagination"
+  "Search tags by name (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   searchTags(tagName: String!, offset: Int, limit: Int): TagSearchResponse!
 
-  "Get detailed info about a specific chat, including messages and participants"
+  "Not in use"
   getChat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse!
 
-  "List all chats of the current user with pagination and filters"
+  "Not in use"
   listChats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
 
-  "List messages of a chat with pagination"
+  "Not in use"
   listChatMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
 
-  "Check daily free interaction quota (e.g., free posts or actions)"
+  "Check daily free interaction quota (see {DAILY_FREE.DAILY_FREE_ACTIONS.*})."
   getDailyFreeStatus: GetDailyResponse!
 
   "Get current token liquidity balance"
   balance: CurrentLiquidity!
 
-  "List the user's win logs by day filter and pagination"
+  "List the user's win logs (day filter; pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
 
-  "List the user's token transfer logs by day filter and pagination"
+  "List the user's token transfer logs (day filter; pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
 
   "Return referral program UUID and personal referral link."
@@ -84,19 +84,19 @@ type Query {
   "Returns a summary of today's interactions"
   listTodaysInteractions: ListTodaysInteractionsResponse!
 
-  "Return current action token prices and related parameters."
+  "Return current action token prices (see {TOKENOMICS.ACTION_TOKEN_PRICES.*})."
   getActionPrices: GetActionPricesResponse!
 
-  "Check if the user is eligible to create a post, returning an eligibility token."
+  "Verify daily limits and wallet balance for post creation. If successful, returns a short-lived eligibilityToken required for uploading a post."
   postEligibility: PostEligibilityResponse!
 
-  "Return filtered list of token transactions (by type, direction, date range, sort, pagination)."
+  "Return filtered list of token transactions (by type, direction, date range, sort, pagination {PAGING.*})."
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
 
-  "List users who interacted with a given post or comment (like, dislike, view, etc.)."
+  "List users who interacted with a post/comment (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
 
-  "Return global tokenomics configuration, including action prices, GEM returns, and minting data."
+"Return global tokenomics configuration (prices {TOKENOMICS.ACTION_TOKEN_PRICES.*}, GEM returns {TOKENOMICS.ACTION_GEMS_RETURNS.*}, minting {MINTING.DAILY_NUMBER_TOKEN})."
   getTokenomics: TokenomicsResponse!
 }
 
@@ -104,19 +104,19 @@ type Mutation {
   "Update user preferences (content filter level, completed onboardings)."
   updateUserPreferences(userPreferences: UserPreferencesInput): UserPreferencesResponse!
 
-  "Change the username (requires current password)"
+  "Change the username (requires current password). Username must match {USER.USERNAME.PATTERN} and be {USER.USERNAME.MIN_LENGTH}–{USER.USERNAME.MAX_LENGTH} chars."
   updateUsername(username: String!, password: String!): DefaultResponse!
 
   "Change the email address (requires current password)"
   updateEmail(email: String!, password: String!): DefaultResponse!
 
-  "Change the password (requires current password)"
+  "Change the password (requires current password). New password must match {USER.PASSWORD.PATTERN} and be {USER.PASSWORD.MIN_LENGTH}–{USER.PASSWORD.MAX_LENGTH} chars."
   updatePassword(password: String!, expassword: String!): DefaultResponse!
 
-  "Update the biography text of the user profile. Must be between 3 and 5000 characters long"
+  "Update biography text ({USER.BIOGRAPHY.MIN_LENGTH}–{USER.BIOGRAPHY.MAX_LENGTH} chars)."
   updateBio(biography: String!): DefaultResponse!
 
-  "Upload or update the profile image (base64-encoded)"
+  "Upload or update profile image (base64). Length {USER.IMAGE.MIN_LENGTH}–{USER.IMAGE.MAX_LENGTH}; recommended size ≤ {USER.AVATAR.MAX_SIZE_MB} MB."
   updateProfileImage(img: String!): DefaultResponse!
 
   "Follow or unfollow a user"
@@ -128,28 +128,28 @@ type Mutation {
   "Permanently delete the current account (requires password)"
   deleteAccount(password: String!): DefaultResponse!
 
-  "Create a new chat with specified participants"
+  "Not in use"
   createChat(input: ChatInput!): AddChatResponse!
 
-  "Update the name and/or image of an existing chat"
+  "Not in use"
   updateChatInformations(input: UpdateChatInput!): AddChatResponse!
 
-  "Add one or more participants to an existing chat"
+  "Not in use"
   addChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
 
-  "Remove one or more participants from an existing chat"
+  "Not in use"
   removeChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
 
-  "Send a message in a chat"
+  "Not in use"
   sendChatMessage(chatid: ID!, content: String!): AddChatmessageResponse!
 
-  "Delete a specific message from a chat"
+  "Not in use"
   deleteChatMessage(chatid: ID!, messid: Int!): DefaultResponse!
 
-  "Delete a chat and all its messages"
+  "Not in use"
   deleteChat(id: ID!): DefaultResponse!
 
-  "Create a post for a specific feed (e.g. group or channel)"
+  "Not in use"
   createChatFeed(input: FeedInput!): AddPostResponse!
 
   "Like a comment"
@@ -167,7 +167,7 @@ type Mutation {
   "Create a new post (image, text, video, or audio)"
   createPost(action: PostType!, input: PostInput!): PostResponse!
 
-  "Create a comment or reply on a post"
+  "Create a comment or reply (content {COMMENT.CONTENT.MIN_LENGTH}–{COMMENT.CONTENT.MAX_LENGTH} chars)."
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
 
   "Perform an action on a post (e.g., like, dislike, report, view, etc.)"

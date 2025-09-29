@@ -1,48 +1,48 @@
 input RegistrationInput {
   """User’s email address. Must be in valid email format."""
   email: String!
-  """Password: 8–128 chars, must include uppercase, lowercase and number."""
+  """Password: 8–128 chars; must match ^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$."""
   password: String!
-  """Username: 3–23 chars, must contain letters; may contain numbers and underscores."""
+  """Username: 3–23 chars; must match ^[a-zA-Z0-9_-]+$."""
   username: String!
-  """Optional Solana public key. 43–44 chars, no 0, O, I, 1."""
+  """Optional Solana public key. 43–44 chars; must match ^[1-9A-HJ-NP-Za-km-z]{43,44}$."""
   pkey: String
   """Optional referral UUID (ties registration to a referrer)."""
   referralUuid: ID
 }
 
 input PostInput {
-  """Title (2–63 characters; letters, numbers, spaces, -, _)."""
+  """Title (2–63 chars); must match ^[a-zA-Z0-9_]+$."""
   title: String!
-  """Media description (3–500 characters)."""
+  """Media description (3–500 chars)."""
   mediadescription: String
   """Content type (ENUM: image, audio, video, text)."""
   contenttype: ContentType!
-  """Media files (base64-encoded strings)."""
+  """Media files (base64-encoded strings). Each item length 30–3000. Max per content type: 1 audio, 5 images, 1 text, 2 videos."""
   media: [String!]
-  """Cover images (base64-encoded strings)."""
+  """Cover images (base64-encoded strings). Each item length 0–1000. Max per content type: 1/1/1/1."""
   cover: [String!]
-  """Tags (max 10, each 2–53 characters)."""
+  """Tags (max 10; each 2–53 chars; must match [a-zA-Z]+)."""
   tags: [String!]
   """Reference to files uploaded via multipart flow."""
   uploadedFiles: String
 }
 
 input ChatInput {
-  """Chat name (valid string)."""
+  """Chat name (3–53 chars)."""
   name: String!
-  """Chat image (base64, must be a valid image)."""
+  """Chat image (base64). Length 30–100."""
   image: String
   """List of recipient user IDs."""
   recipients: [String!]!
 }
 
 input UpdateChatInput {
-  """Chat ID (UUID).""Chat ID (UUID).""Chat ID (UUID)."""
+  """Chat ID (UUID)."""
   chatid: ID!
-  """New chat name (valid string)."""
+  """New chat name (3–53 chars)."""
   name: String
-  """New image (base64, must be a valid image)."""
+  """New image (base64). Length 30–100."""
   image: String
 }
 

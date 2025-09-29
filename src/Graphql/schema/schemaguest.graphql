@@ -24,7 +24,7 @@ type Mutation {
   "Sends a password reset link to a valid email address"
   requestPasswordReset(email: String!): ResetPasswordRequestResponse!
 
-  "Resets password using token and new password"
+  "Resets password using token and new password ({USER.PASSWORD.MIN_LENGTH}–{USER.PASSWORD.MAX_LENGTH} chars; must match {USER.PASSWORD.PATTERN})."
   resetPassword(token: String!, password: String!): DefaultResponse
 
   "Refresh tokens using a valid refresh token."
@@ -33,6 +33,6 @@ type Mutation {
   "Validate a referral string and return referral info."
   verifyReferralString(referralString: String!): ReferralResponse!
 
-  "Send a 'Contact Us' message."
+  "Send a 'Contact Us' message (name {CONTACT.NAME.MIN_LENGTH}–{CONTACT.NAME.MAX_LENGTH} chars; message {CONTACT.MESSAGE.MIN_LENGTH}–{CONTACT.MESSAGE.MAX_LENGTH} chars)."
   contactus(name: String!, email: String!, message: String!): ContactusResponse!
 }
