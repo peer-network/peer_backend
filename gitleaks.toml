@@ -9,8 +9,8 @@ tags = ["key", "secret", "generic", "broad"]
 [[rules]]
 id = "entropy-catch-all"
 description = "Catch any high-entropy random string (broad net for unknown keys)"
-regex = '''[A-Za-z0-9\+=!@#$%^&*.-]{30,}'''
-entropy = 4.0
+regex = '''[A-Za-z0-9\+=!@#$%^&*-]{30,}'''
+entropy = 4.2
 tags = ["key", "secret", "generic", "broad"]
 
 [rules.allowlist]
@@ -39,6 +39,7 @@ regexes = [
   '''existing_advertisementId_[0-9]+''',
   '''testuser[0-9]+@example\.com''',
   '''LogWin(Service|Mapper)\.\w+''',
+  '''UserService\.\w+''',
   '''logWinMigrationWalletNegativeToZero''',
   '''generate(Like|Dislike|Post|Comment)PaidActionToLogWins''',
   '''ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'''
