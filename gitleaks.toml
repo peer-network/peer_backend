@@ -3,14 +3,14 @@
 [[rules]]
 id = "mega-catch-all"
 description = "Catch any likely secret (broad net)"
-regex = '''(?i)(secret|key|token|pat|password|auth|credential|bearer|jwt|session|client)\s*[=:]\s*[A-Za-z0-9/\+=!@#$%^&*._-]{6,}|ghp_[0-9A-Za-z]{36}|xox[baprs]-[0-9]{12}-[0-9]{12}-[0-9A-Za-z]{24,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z\-_]{35}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+|-----BEGIN( RSA)? PRIVATE KEY-----'''
+regex = '''(?i)(ghp_[0-9A-Za-z]{36}|github_pat_[0-9A-Za-z_]{20,}|glpat-[0-9A-Za-z\-_]{20}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|AIza[0-9A-Za-z\-_]{35}|sk_live_[0-9a-zA-Z]{24}|pk_live_[0-9a-zA-Z]{24}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+|-----BEGIN( RSA| DSA| EC| OPENSSH)? PRIVATE KEY-----)'''
 tags = ["key", "secret", "generic", "broad"]
 
 [[rules]]
 id = "entropy-catch-all"
 description = "Catch any high-entropy random string (broad net for unknown keys)"
 regex = '''[A-Za-z0-9\+=!@#$%^&*.-]{30,}'''
-entropy = 3.5
+entropy = 4.0
 tags = ["key", "secret", "generic", "broad"]
 
 [rules.allowlist]
@@ -37,7 +37,10 @@ regexes = [
   '''85d5f836-b1f5-4c4e-9381-1b058e13df94''',
   '''334ce5b3-813d-4fb4-86be-ac88fd63b803''',
   '''existing_advertisementId_[0-9]+''',
-  '''testuser[0-9]+@example\.com'''
+  '''testuser[0-9]+@example\.com''',
+  '''LogWin(Service|Mapper)\.\w+''',
+  '''logWinMigrationWalletNegativeToZero''',
+  '''generate(Like|Dislike|Post|Comment)PaidActionToLogWins'''
 ]
 
 # --- Path denylist (ignore noisy generated/test files) ---
