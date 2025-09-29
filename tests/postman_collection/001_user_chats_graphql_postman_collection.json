@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "4bfdfdf6-a3db-4d00-862b-a5adee67f0c9",
-		"name": "001_graphql",
+		"name": "001_user_chats_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
 		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-4bfdfdf6-a3db-4d00-862b-a5adee67f0c9?action=share&source=collection_link&creator=43606001"
