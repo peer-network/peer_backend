@@ -76,6 +76,13 @@ jobs:
       - run: |
           echo " PR branch is behind the base branch."
           exit 1
+  gitleaks_scan_staged:
+    name: Gitleaks PR Scan
+    uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
+    with:
+      config: "gitleaks.toml"
+    secrets: inherit
+
 
   # validate_sql_files:
   #   name: Ensure Only Valid SQL Files Are Changed
@@ -138,8 +145,8 @@ jobs:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
     needs: [
-      check_branch_sync
-      # validate_sql_files
+      check_branch_sync, gitleaks_scan_staged
+      # validate_sql_files 
     ]
     if: 
       needs.check_branch_sync.outputs.is_behind == 'false'
@@ -701,7 +708,7 @@ jobs:
               echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
               ;;
           esac
- 
+
   send_newman_discord_notification:
     name: Send Discord Notification for Newman Failures
     runs-on: ubuntu-latest
@@ -771,6 +778,40 @@ jobs:
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{\"content\": \"${MESSAGE}\"}" \
+               "$DISCORD_WEBHOOK_URL"
+
+  notify_gitleaks_failure:
+    name: Notify on Gitleaks Failure
+    runs-on: ubuntu-latest
+    needs: [gitleaks_scan_staged, map_pr_to_discord]
+    if: always() && needs.gitleaks_scan_staged.result == 'failure'
+    steps:
+      - name: Send Discord Notification for Gitleaks Failure
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          MESSAGE=":x: **Gitleaks Scan Failed!**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="PR Link: <$PR_URL>\n"
+          MESSAGE+="CI Run: <$RUN_URL>\n"
+          MESSAGE+="Author: $DISCORD_MENTION\n\n"
+          MESSAGE+=":warning: **Secrets were detected by Gitleaks**\n"
+          MESSAGE+="You can:\n"
+          MESSAGE+="- [Click here to view workflow artifacts](<$RUN_URL>) (download the **gitleaks-report** artifact)\n"
+          MESSAGE+="- Check the **Actions → Artifacts** tab to view/download the report\n"
+          MESSAGE+="- Or run \`make scan\` locally to reproduce.\n\n"
+          MESSAGE+=":no_entry: **Reminder:** Do NOT bypass with \`git commit --no-verify\`. CI will still block your PR.\n"
+          MESSAGE+="If this secret is actually required in the repo (false positive or approved usage),\n"
+          MESSAGE+="you MUST meet with the **CTO / Team Lead / DevOps** to approve and add it to the gitleaks ignore list."
+          
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"$MESSAGE\"}" \
                "$DISCORD_WEBHOOK_URL"
 
   deploy_html_reports_to_peer_backend_reports:
