@@ -4,21 +4,22 @@ declare(strict_types=1);
 namespace Fawaz\Database;
 
 use DateTime;
-use Fawaz\App\Models\MultipartPost;
 use PDO;
+use Fawaz\App\Models\MultipartPost;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostMedia;
+use Fawaz\App\Role;
 use Fawaz\App\Status;
-use Fawaz\Database\Interfaces\PeerMapper;
+use Fawaz\App\User;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\PeerMapper;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-use Fawaz\App\User;
 use Fawaz\App\ValidationException;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Psr\Log\LoggerInterface;
@@ -75,6 +76,17 @@ class PostMapper
         $sql = "SELECT COUNT(*) FROM posts WHERE postid = :postid AND userid = :currentUserId";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid, 'currentUserId' => $currentUserId]);
+
+        return (bool) $stmt->fetchColumn();
+    }
+
+    public function postExistsById(string $postId): bool
+    {
+        $this->logger->info("PostMapper.postExistsById started");
+
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM posts WHERE postid = :postId");
+        $stmt->bindValue(':postId', $postId, \PDO::PARAM_STR);
+        $stmt->execute();
 
         return (bool) $stmt->fetchColumn();
     }
@@ -485,7 +497,6 @@ class PostMapper
             $stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
             $stmt->bindValue(':contenttype', $data['contenttype'], \PDO::PARAM_STR);
             $stmt->bindValue(':media', $data['media'], \PDO::PARAM_STR);
-            //$stmt->bindValue(':options', $data['options'], \PDO::PARAM_STR);
             $stmt->bindValue(':options', $data['options'] ?? null, $data['options'] !== null ? \PDO::PARAM_STR : \PDO::PARAM_NULL);
 
             $stmt->execute();
@@ -552,37 +563,31 @@ class PostMapper
     //         return false;
     //     }
     // }
-    
+
     public function findPostser(string $currentUserId, ?array $args = []): array
     {
         $this->logger->info("PostMapper.findPostser started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $limit  = min(max((int)($args['limit']  ?? 10), 1), 20);
 
-        $post_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
+        $post_report_amount_to_hide     = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
         $post_dismiss_moderation_amount = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['POST'];
 
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $from = $args['from'] ?? null;
-        $to = $args['to'] ?? null;
-        $filterBy = $args['filterBy'] ?? [];
-        $Ignorlist = $args['IgnorList'] ?? 'NO';
-        $sortBy = $args['sortBy'] ?? null;
-        $title = $args['title'] ?? null;
-        $tag = $args['tag'] ?? null; 
-        $postId = $args['postid'] ?? null;
-        $userId = $args['userid'] ?? null;
+        $trenddays = 7;
 
-        $whereClauses = ["p.feedid IS NULL"];
-        $joinClausesString = "
-            users u ON p.userid = u.uid
-            LEFT JOIN post_tags pt ON p.postid = pt.postid
-            LEFT JOIN tags t ON pt.tagid = t.tagid
-            LEFT JOIN post_info pi ON p.postid = pi.postid AND pi.userid = p.userid
-            LEFT JOIN users_info ui ON p.userid = ui.userid
-        ";
-        
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $from     = $args['from']     ?? null;
+        $to       = $args['to']       ?? null;
+        $filterBy = $args['filterBy'] ?? [];
+        $Ignorlist= $args['IgnorList']?? 'NO';
+        $sortBy   = $args['sortBy']   ?? null;
+        $title    = $args['title']    ?? null;
+        $tag      = $args['tag']      ?? null;
+        $tags     = $args['tags']     ?? [];
+        $postId   = $args['postid']   ?? null;
+        $userId   = $args['userid']   ?? null;
+
         $contentFilterService = new ContentFilterServiceImpl(
             new ListPostsContentFilteringStrategy(),
             null,
@@ -590,100 +595,116 @@ class PostMapper
         );
 
         $params = ['currentUserId' => $currentUserId];
-
-        $trendlimit = 4;
-        $trenddays = 17;
+        $whereClauses = ["p.feedid IS NULL"];
 
         if ($postId !== null) {
-            $whereClauses[] = "p.postid = :postId"; 
+            $whereClauses[] = "p.postid = :postId";
             $params['postId'] = $postId;
         }
-
         if ($userId !== null) {
             $whereClauses[] = "p.userid = :userId";
             $params['userId'] = $userId;
         }
-        // Remove DELETED User's post
-        $whereClauses[] = "u.status != :status";
-        $params['status'] = Status::DELETED;
-
         if ($title !== null) {
             $whereClauses[] = "p.title ILIKE :title";
             $params['title'] = '%' . $title . '%';
         }
-
         if ($from !== null) {
             $whereClauses[] = "p.createdat >= :from";
             $params['from'] = $from;
         }
-
         if ($to !== null) {
             $whereClauses[] = "p.createdat <= :to";
             $params['to'] = $to;
         }
-
         if ($tag !== null) {
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
                 $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
                 return [];
             }
-            $whereClauses[] = "t.name = :tag";
+            $whereClauses[] = "t.name ILIKE :tag";
             $params['tag'] = $tag;
         }
+        if (!empty($tags)) {
+            $tagPlaceholders = [];
+            foreach ($tags as $i => $tg) {
+                $ph = "tag$i";
+                $tagPlaceholders[] = ':' . $ph;
+                $params[$ph] = $tg;
+            }
+            $whereClauses[] = "t.name IN (" . implode(", ", $tagPlaceholders) . ")";
+        }
 
-        // dont show posts from not active accounts
-        $whereClauses[] = 'u.status = 0 AND (u.roles_mask = 0 OR u.roles_mask = 16)';
+        // Nur normale User & Admin-Accounts
+        $whereClauses[] = 'u.status = :stNormal AND u.roles_mask IN (:roleUser, :roleAdmin)';
+        $params['stNormal']  = Status::NORMAL;
+        $params['roleUser']  = Role::USER;
+        $params['roleAdmin'] = Role::ADMIN;
 
-        // here to decide whether to hide post ot not from feed
-        // send callback with post query changes to filtering object????
+        // Content Filtering: eigene Posts immer sichtbar
         if ($contentFilterService->getContentFilterAction(
             ContentType::post,
             ContentType::post
         ) === ContentFilteringAction::hideContent) {
-            $whereClauses[] = '((pi.reports < :post_report_amount_to_hide OR pi.count_content_moderation_dismissed > :post_dismiss_moderation_amount) OR p.userid = :currentUserId)';
-            $params['post_report_amount_to_hide'] = $post_report_amount_to_hide;
+            $params['post_report_amount_to_hide']     = $post_report_amount_to_hide;
             $params['post_dismiss_moderation_amount'] = $post_dismiss_moderation_amount;
+            $whereClauses[] = '(
+                p.userid = :currentUserId
+                OR (
+                    pi.reports < :post_report_amount_to_hide
+                    OR pi.count_content_moderation_dismissed > :post_dismiss_moderation_amount
+                )
+            )';
         }
 
+        // Filter: Content-Typ / Beziehungen / Viewed
         if (!empty($filterBy) && is_array($filterBy)) {
-            $validTypes = [];
+            $validTypes  = [];
             $userFilters = [];
 
             $mapping = [
                 'IMAGE' => 'image',
                 'AUDIO' => 'audio',
                 'VIDEO' => 'video',
-                'TEXT' => 'text',
+                'TEXT'  => 'text',
             ];
-
             $userMapping = [
                 'FOLLOWED' => "p.userid IN (SELECT followedid FROM follows WHERE followerid = :currentUserId)",
                 'FOLLOWER' => "p.userid IN (SELECT followerid FROM follows WHERE followedid = :currentUserId)",
+                'FRIENDS'  => "EXISTS (
+                    SELECT 1 FROM follows f1
+                    WHERE f1.followerid = :currentUserId AND f1.followedid = p.userid
+                    AND EXISTS (
+                        SELECT 1 FROM follows f2
+                        WHERE f2.followerid = p.userid AND f2.followedid = :currentUserId
+                    )
+                )",
             ];
 
             foreach ($filterBy as $type) {
                 if (isset($mapping[$type])) {
-                    $validTypes[] = $mapping[$type]; 
+                    $validTypes[] = $mapping[$type];
                 } elseif (isset($userMapping[$type])) {
-                    $userFilters[] = $userMapping[$type]; 
+                    $userFilters[] = $userMapping[$type];
                 }
             }
+
+            // eigene Posts auch bei FOLLOWED/FOLLOWER einschließen
             if (in_array('FOLLOWED', $filterBy, true) || in_array('FOLLOWER', $filterBy, true)) {
                 $userFilters[] = "p.userid = :currentUserId";
             }
-            
+
             if (in_array('VIEWED', $filterBy, true)) {
                 $whereClauses[] = "EXISTS (
                     SELECT 1 FROM user_post_views upv
                     WHERE upv.postid = p.postid
-                    AND upv.userid = :currentUserId
+                      AND upv.userid = :currentUserId
                 )";
             }
 
             if (!empty($validTypes)) {
                 $placeholders = implode(", ", array_map(fn($k) => ":filter$k", array_keys($validTypes)));
                 $whereClauses[] = "p.contenttype IN ($placeholders)";
-
                 foreach ($validTypes as $key => $value) {
                     $params["filter$key"] = $value;
                 }
@@ -694,9 +715,16 @@ class PostMapper
             }
         }
 
-        if (!empty($Ignorlist) && $Ignorlist === 'YES') {
-            $whereClauses[] = "p.userid NOT IN (SELECT blockedid FROM user_block_user WHERE blockerid = :currentUserId)";
+        // Blockliste
+        if ($Ignorlist === 'YES') {
+            $whereClauses[] = "p.userid NOT IN (
+                SELECT blockedid FROM user_block_user WHERE blockerid = :currentUserId
+                UNION
+                SELECT blockerid FROM user_block_user WHERE blockedid = :currentUserId
+            )";
         }
+
+        // FOR_ME: nicht eigene & optional noch nicht gesehene
         if ($sortBy === 'FOR_ME') {
             $whereClauses[] = "p.userid != :currentUserId";
 
@@ -704,179 +732,193 @@ class PostMapper
                 $whereClauses[] = "NOT EXISTS (
                     SELECT 1 FROM user_post_views upv
                     WHERE upv.postid = p.postid
-                    AND upv.userid = :currentUserId
+                      AND upv.userid = :currentUserId
                 )";
             }
         }
 
-        $orderBy = match ($sortBy) {
-            'FOR_ME' => "CASE
-                            WHEN EXISTS (
-                                SELECT 1 FROM follows f1
-                                WHERE f1.followerid = :currentUserId
-                                AND f1.followedid = p.userid
-                                AND EXISTS (
-                                    SELECT 1 FROM follows f2
-                                    WHERE f2.followerid = p.userid
-                                    AND f2.followedid = :currentUserId
-                                )
-                            ) THEN 1
-                            WHEN EXISTS (
-                                SELECT 1 FROM follows f1
-                                WHERE f1.followerid = :currentUserId
-                                AND f1.followedid = p.userid
-                            ) THEN 2
-                            WHEN EXISTS (
-                                SELECT 1 FROM follows f1
-                                WHERE f1.followerid IN (
-                                SELECT followedid FROM follows WHERE followerid = :currentUserId
-                                )
-                                AND f1.followedid = p.userid
-                            ) THEN 3
-                            ELSE 4
-                            END,
-                            p.createdat DESC",
-            'NEWEST' => "p.createdat DESC",
-            'FOLLOWER' => "isfollowing DESC, p.createdat DESC",
-            'FOLLOWED' => "isfollowed DESC, p.createdat DESC",
-            'TRENDING' => "amounttrending DESC, p.createdat DESC",
-            'LIKES' => "amountlikes DESC, p.createdat DESC",
-            'DISLIKES' => "amountdislikes DESC, p.createdat DESC",
-            'VIEWS' => "amountviews DESC, p.createdat DESC",
-            'COMMENTS' => "amountcomments DESC, p.createdat DESC",
-            default => "p.createdat DESC",
+        $orderByClause = match ($sortBy) {
+            'FOR_ME'   => "ORDER BY isfriend DESC, isfollowed DESC, friendoffriends DESC, createdat DESC",
+            'NEWEST'   => "ORDER BY createdat DESC",
+            'OLDEST'   => "ORDER BY createdat ASC",
+            'TRENDING' => "ORDER BY amounttrending DESC, createdat DESC",
+            'LIKES'    => "ORDER BY amountlikes DESC, createdat DESC",
+            'DISLIKES' => "ORDER BY amountdislikes DESC, createdat DESC",
+            'VIEWS'    => "ORDER BY amountviews DESC, createdat DESC",
+            'COMMENTS' => "ORDER BY amountcomments DESC, createdat DESC",
+            'FOLLOWER' => "ORDER BY isfollowing DESC, createdat DESC",
+            'FOLLOWED' => "ORDER BY isfollowed DESC, createdat DESC",
+            'RELEVANT' => "ORDER BY isfollowed DESC, isliked DESC, amountcomments DESC, createdat DESC",
+            'FRIENDS'  => "ORDER BY isfriend DESC, createdat DESC",
+            default    => "ORDER BY createdat DESC",
         };
 
-        $whereClausesString = implode(" AND ", $whereClauses);
+        // --- WICHTIG: KEINE aktiven Ads (NOT EXISTS) 
+        $sql = "
+            WITH base_posts AS (
+                SELECT 
+                    p.postid,
+                    p.userid,
+                    p.contenttype,
+                    p.title,
+                    p.media,
+                    p.cover,
+                    p.mediadescription,
+                    p.createdat AS createdat,
+                    u.username,
+                    u.slug,
+                    u.img AS userimg,
+                    u.status AS userstatus,
 
-        $sql = sprintf(
-            "SELECT 
-                p.postid, 
-                p.userid, 
-                p.contenttype, 
-                p.title, 
-                p.media, 
-                p.cover, 
-                p.mediadescription, 
-                p.createdat, 
-                u.username, 
-				u.slug,
-                u.img AS userimg,
-                MAX(u.status) AS user_status,
-                MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
-                MAX(pi.count_content_moderation_dismissed) AS post_count_content_moderation_dismissed,
-                MAX(ui.reports) AS user_reports,
-                MAX(pi.reports) AS post_reports,
-                COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
-                (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) as amountlikes,
-                (SELECT COUNT(*) FROM user_post_dislikes WHERE postid = p.postid) as amountdislikes,
-                (SELECT COUNT(*) FROM user_post_views WHERE postid = p.postid) as amountviews,
-                (SELECT COUNT(*) FROM comments WHERE postid = p.postid) as amountcomments,
-                COALESCE((
-                    SELECT SUM(w.numbers)
-                    FROM logwins w
-                    WHERE w.postid = p.postid
-                      AND w.createdat >= NOW() - INTERVAL '$trenddays days'
-                ), 0) AS amounttrending,
-                EXISTS (SELECT 1 FROM user_post_likes WHERE postid = p.postid AND userid = :currentUserId) as isliked,
-                EXISTS (SELECT 1 FROM user_post_views WHERE postid = p.postid AND userid = :currentUserId) as isviewed,
-                EXISTS (SELECT 1 FROM user_post_reports WHERE postid = p.postid AND userid = :currentUserId) as isreported,
-                EXISTS (SELECT 1 FROM user_post_dislikes WHERE postid = p.postid AND userid = :currentUserId) as isdisliked,
-                EXISTS (SELECT 1 FROM user_post_saves WHERE postid = p.postid AND userid = :currentUserId) as issaved,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = p.userid AND followerid = :currentUserId) as isfollowed,
-                EXISTS (SELECT 1 FROM follows WHERE followerid = p.userid AND followedid = :currentUserId) as isfollowing
-            FROM posts p
-            JOIN %s
-            WHERE %s
-            GROUP BY p.postid, u.username, u.slug, u.img
-            ORDER BY %s
-            LIMIT :limit OFFSET :offset",
-            $joinClausesString,
-            $whereClausesString,
-            $orderBy
-        );
+                    -- Moderations-/Report-Daten
+                    MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
+                    MAX(pi.count_content_moderation_dismissed) AS post_count_content_moderation_dismissed,
+                    MAX(ui.reports) AS user_reports,
+                    MAX(pi.reports) AS post_reports,
 
-        $params['limit'] = $limit;
-        $params['offset'] = $offset;
+                    COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
+
+                    (SELECT COUNT(*) FROM user_post_likes    WHERE postid = p.postid) AS amountlikes,
+                    (SELECT COUNT(*) FROM user_post_dislikes WHERE postid = p.postid) AS amountdislikes,
+                    (SELECT COUNT(*) FROM user_post_views    WHERE postid = p.postid) AS amountviews,
+                    (SELECT COUNT(*) FROM comments           WHERE postid = p.postid) AS amountcomments,
+
+                    COALESCE((
+                        SELECT SUM(numbers)
+                        FROM logwins
+                        WHERE postid = p.postid
+                          AND createdat >= NOW() - INTERVAL '$trenddays days'
+                    ), 0) AS amounttrending,
+
+                    EXISTS (SELECT 1 FROM user_post_likes    WHERE postid = p.postid AND userid = :currentUserId) AS isliked,
+                    EXISTS (SELECT 1 FROM user_post_views    WHERE postid = p.postid AND userid = :currentUserId) AS isviewed,
+                    EXISTS (SELECT 1 FROM user_post_reports  WHERE postid = p.postid AND userid = :currentUserId) AS isreported,
+                    EXISTS (SELECT 1 FROM user_post_dislikes WHERE postid = p.postid AND userid = :currentUserId) AS isdisliked,
+                    EXISTS (SELECT 1 FROM user_post_saves    WHERE postid = p.postid AND userid = :currentUserId) AS issaved,
+
+                    EXISTS (SELECT 1 FROM follows WHERE followedid = p.userid AND followerid = :currentUserId) AS isfollowed,
+                    EXISTS (SELECT 1 FROM follows WHERE followerid = p.userid AND followedid = :currentUserId) AS isfollowing,
+
+                    EXISTS (
+                        SELECT 1 FROM follows f1
+                        WHERE f1.followerid = :currentUserId
+                          AND f1.followedid = p.userid
+                          AND EXISTS (
+                              SELECT 1 FROM follows f2
+                              WHERE f2.followerid = p.userid
+                                AND f2.followedid = :currentUserId
+                          )
+                    ) AS isfriend,
+
+                    EXISTS (
+                        SELECT 1 FROM follows f1
+                        WHERE f1.followerid IN (
+                            SELECT followedid FROM follows WHERE followerid = :currentUserId
+                        ) AND f1.followedid = p.userid
+                    ) AS friendoffriends
+
+                FROM posts p
+                JOIN users u           ON p.userid = u.uid
+                LEFT JOIN post_info pi ON pi.postid = p.postid AND pi.userid = p.userid
+                LEFT JOIN users_info ui ON ui.userid = p.userid
+                LEFT JOIN post_tags pt  ON pt.postid = p.postid
+                LEFT JOIN tags t        ON t.tagid = pt.tagid
+                WHERE " . implode(" AND ", $whereClauses) . "
+                AND NOT EXISTS (
+                  SELECT 1
+                  FROM advertisements a
+                  WHERE a.postid = p.postid
+                    AND a.timestart <= NOW()
+                    AND a.timeend > NOW()
+                )
+                GROUP BY
+                    p.postid, p.userid, p.contenttype, p.title, p.media, p.cover,
+                    p.mediadescription, p.createdat,
+                    u.username, u.slug, userimg, userstatus
+            )
+            SELECT * FROM base_posts
+            $orderByClause
+            LIMIT :limit OFFSET :offset
+        ";
 
         try {
             $stmt = $this->db->prepare($sql);
-
-            $results = [];
-			if ($stmt->execute($params)) {
-				//$this->logger->info("Get post successfully");
-				while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-					$row['tags'] = json_decode($row['tags'], true) ?? [];
-
-                    // here to decide if to replace post/user content or not
-                    // send callback with user object changes???? 
-                    $user_reports = (int)$row['user_reports'];
-                    $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
-
-                    if ($row['user_status'] != 0) {
-                        $replacer = ContentReplacementPattern::suspended;
-                        $row['username'] = $replacer->username($row['username']);
-                        $row['img'] = $replacer->profilePicturePath($row['img']);
-                    }
-
-                    if ($contentFilterService->getContentFilterAction(
-                        ContentType::post,
-                        ContentType::user,
-                        $user_reports,$user_dismiss_moderation_amount,
-                        $currentUserId, $row['userid']
-                    ) == ContentFilteringAction::replaceWithPlaceholder) {
-                        $replacer = ContentReplacementPattern::flagged;
-                        $row['username'] = $replacer->username($row['username']);
-                        $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
-                    }
-
-                    $results[] = new PostAdvanced([
-						'postid' => $row['postid'],
-						'userid' => $row['userid'],
-						'contenttype' => $row['contenttype'],
-						'title' => $row['title'],
-						'media' => $row['media'],
-						'cover' => $row['cover'],
-						'mediadescription' => $row['mediadescription'],
-						'createdat' => $row['createdat'],
-						'amountlikes' => (int)$row['amountlikes'],
-						'amountviews' => (int)$row['amountviews'],
-						'amountcomments' => (int)$row['amountcomments'],
-						'amountdislikes' => (int)$row['amountdislikes'],
-						'amounttrending' => (int)$row['amounttrending'],
-						'isliked' => (bool)$row['isliked'],
-						'isviewed' => (bool)$row['isviewed'],
-						'isreported' => (bool)$row['isreported'],
-						'isdisliked' => (bool)$row['isdisliked'],
-						'issaved' => (bool)$row['issaved'],
-						'tags' => $row['tags'],
-						'user' => [
-							'uid' => $row['userid'],
-							'username' => $row['username'],
-							'slug' => $row['slug'],
-							'img' => $row['userimg'],
-							'isfollowed' => (bool)$row['isfollowed'],
-							'isfollowing' => (bool)$row['isfollowing'],
-						],
-					],[],false);
-				}
-            } else {
-                //$this->logger->warning("Failed to Get post info"]);
+            foreach ($params as $k => $v) {
+                $stmt->bindValue(':' . ltrim($k, ':'), $v);
             }
+            $stmt->bindValue(':limit',  $limit,  \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->execute();
+
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $results = array_map(function (array $row) use ($contentFilterService, $currentUserId) {
+                $row['tags'] = json_decode($row['tags'], true) ?? [];
+
+                // User-Placeholder anwenden, falls nötig
+                $user_reports = (int)$row['user_reports'];
+                $user_dismiss = (int)$row['user_count_content_moderation_dismissed'];
+
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::post,
+                    ContentType::user,
+                    $user_reports,
+                    $user_dismiss,
+                    $currentUserId,
+                    $row['userid']
+                ) === ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer       = ContentReplacementPattern::flagged;
+                    $row['username']= $replacer->username($row['username']);
+                    $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
+                }
+
+                return self::mapRowToPost($row);
+            }, $rows);
+
+            //$this->logger->info('findPostser.results', ['postArray' => array_map(fn(PostAdvanced $p) => $p->getArrayCopy(), $results)]);
 
             return $results;
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error in findPostser", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return [];
-        } catch (\Exception $e) {
-            $this->logger->error('Database error in findPostser', [
+
+        } catch (\Throwable $e) {
+            $this->logger->error('General error in findPostser', [
                 'error' => $e->getMessage(),
             ]);
             return [];
         }
+    }
+
+    private static function mapRowToPost(array $row): PostAdvanced
+    {
+        return new PostAdvanced([
+            'postid' => (string)$row['postid'],
+            'userid' => (string)$row['userid'],
+            'contenttype' => (string)$row['contenttype'],
+            'title' => (string)$row['title'],
+            'media' => (string)$row['media'],
+            'cover' => (string)$row['cover'],
+            'mediadescription' => (string)$row['mediadescription'],
+            'createdat' => (string)$row['createdat'],
+            'amountlikes' => (int)$row['amountlikes'],
+            'amountviews' => (int)$row['amountviews'],
+            'amountcomments' => (int)$row['amountcomments'],
+            'amountdislikes' => (int)$row['amountdislikes'],
+            'amounttrending' => (int)$row['amounttrending'],
+            'isliked' => (bool)$row['isliked'],
+            'isviewed' => (bool)$row['isviewed'],
+            'isreported' => (bool)$row['isreported'],
+            'isdisliked' => (bool)$row['isdisliked'],
+            'issaved' => (bool)$row['issaved'],
+            'tags' => $row['tags'],
+            'user' => [
+                'uid' => (string)$row['userid'],
+                'username' => (string)$row['username'],
+                'slug' => (int)$row['slug'],
+                'img' => (string)$row['userimg'],
+                'isfollowed' => (bool)$row['isfollowed'],
+                'isfollowing' => (bool)$row['isfollowing'],
+                'isfriend' => (bool)$row['isfriend'],
+            ],
+        ]);
     }
 
     /**
@@ -953,7 +995,7 @@ class PostMapper
     /**
      * Get Interactions based on Filter 
      */
-    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit): array
+    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit, ?string $contentFilterBy = null): array
     {
         $this->logger->info("PostMapper.getInteractions started");
 
@@ -981,9 +1023,12 @@ class PostMapper
                         u.img, 
                         u.status, 
                         (f1.followerid IS NOT NULL) AS isfollowing,
-                        (f2.followerid IS NOT NULL) AS isfollowed
+                        (f2.followerid IS NOT NULL) AS isfollowed,
+                        COALESCE(ui.reports, 0) AS user_reports,
+                        COALESCE(ui.count_content_moderation_dismissed, 0) AS user_count_content_moderation_dismissed
                     FROM $needleTable uv 
-                    LEFT JOIN users u ON u.uid = uv.userid  
+                    LEFT JOIN users u ON u.uid = uv.userid
+                    LEFT JOIN users_info ui ON ui.userid = u.uid  
                     LEFT JOIN 
                         follows f1 
                         ON u.uid = f1.followerid AND f1.followedid = :currentUserId 
@@ -994,17 +1039,43 @@ class PostMapper
                     LIMIT :limit OFFSET :offset";
 
             $stmt = $this->db->prepare($sql);
-			$stmt->bindParam(':postid', $postOrCommentId, \PDO::PARAM_STR);
-			$stmt->bindParam(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-			$stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
-			$stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindParam(':postid', $postOrCommentId, \PDO::PARAM_STR);
+            $stmt->bindParam(':currentUserId', $currentUserId, \PDO::PARAM_STR);
+            $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
 
-			$stmt->execute();
+            $stmt->execute();
 
             $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            $contentFilterService = null;
+            if ($contentFilterBy !== null) {
+                $contentFilterService = new ContentFilterServiceImpl(
+                    new ListPostsContentFilteringStrategy(),
+                    null,
+                    $contentFilterBy
+                );
+            }
             $userResultObj = [];
-            foreach($userResults as $key => $prt){
+            foreach ($userResults as $key => $prt) {
+                if ($contentFilterService !== null) {
+                    $user_reports = (int)($prt['user_reports'] ?? 0);
+                    $user_dismiss_moderation_amount = (int)($prt['user_count_content_moderation_dismissed'] ?? 0);
+                
+                    $action = $contentFilterService->getContentFilterAction(
+                        ContentType::post,
+                        ContentType::user,
+                        $user_reports,
+                        $user_dismiss_moderation_amount,
+                        $currentUserId,
+                        $prt['uid']
+                    );
+                    if ($action === ContentFilteringAction::replaceWithPlaceholder) {
+                        $replacer = ContentReplacementPattern::flagged;
+                        $prt['username'] = $replacer->username($prt['username']);
+                        $prt['img']      = $replacer->profilePicturePath($prt['img']);
+                    }
+                }
                 $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
                 $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
                 $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
@@ -1068,7 +1139,7 @@ class PostMapper
                 p.mediadescription, 
                 p.createdat, 
                 u.username, 
-				u.slug,
+                u.slug,
                 u.img AS userimg,
                 MAX(u.status) AS user_status,
                 MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
@@ -1137,7 +1208,7 @@ class PostMapper
                 ],
             ],[],false);
 
-            return ((is_array($results) && count($results) > 0) ? $results : []);
+            return (!empty($results) ? $results : []);
         } catch (\PDOException $e) {
             $this->logger->error("Database error in PostMapper.getGuestListPost", [
                 'error' => $e->getMessage(),
@@ -1239,7 +1310,7 @@ class PostMapper
                     $this->logger->warning("Cap reached: user has {$cnt} records in last hour with restricted statuses", [
                         'userId' => $userId,
                     ]);
-                    throw new ValidationException('Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.', [40301]); // Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED
+                    throw new ValidationException('Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.', [31512]); // Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED
                 }
             }
 
@@ -1304,6 +1375,4 @@ class PostMapper
             throw $e;
         }
     }
-
-
 }

@@ -8,13 +8,14 @@ use Fawaz\Database\WalletMapper;
 use Psr\Log\LoggerInterface;
 use \Exception;
 use Fawaz\Utils\ResponseHelper;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class WalletService
 {
     use ResponseHelper;
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected WalletMapper $walletMapper)
+    public function __construct(protected LoggerInterface $logger, protected WalletMapper $walletMapper, protected TransactionManager $transactionManager)
     {
     }
 
@@ -266,14 +267,18 @@ class WalletService
         $this->logger->info('WalletService.deductFromWallet started');
 
         try {
+            $this->transactionManager->beginTransaction();
             $response = $this->walletMapper->deductFromWallets($userId, $args);
             if ($response['status'] === 'success') {
+                $this->transactionManager->commit();
                 return $response;
             } else {
+                $this->transactionManager->rollBack();
                 return $response;
             }
 
         } catch (\Exception $e) {
+            $this->transactionManager->rollBack();
             return $this::respondWithError(40301);
         }
     }

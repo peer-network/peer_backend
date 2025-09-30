@@ -8,13 +8,14 @@ use Fawaz\Database\TagMapper;
 use Psr\Log\LoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class TagService
 {
     use ResponseHelper;
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected TagMapper $tagMapper)
+    public function __construct(protected LoggerInterface $logger, protected TagMapper $tagMapper, protected TransactionManager $transactionManager)
     {
     }
 
@@ -74,15 +75,18 @@ class TagService
         $tagName = !empty($tagName) ? trim($tagName) : null;
 
         try {
+            $this->transactionManager->beginTransaction();
             $tagValid = new Tag(['name' => $tagName], ['name']);
             $tag = $this->tagMapper->loadByName($tagName);
 
             if ($tag) {
-                return $this::createSuccessResponse(21702);//'Tag already exists.'
+                $this->transactionManager->rollback();
+                return $this::respondWithError(21702);//'Tag already exists.'
             }
 
             $tagId = $this->generateUUID();
             if (empty($tagId)) {
+                $this->transactionManager->rollback();
                 $this->logger->critical('Failed to generate tag ID');
                 return $this::respondWithError(41704);
             }
@@ -91,15 +95,19 @@ class TagService
             $tag = new Tag($tagData);
 
             if (!$this->tagMapper->insert($tag)) {
-                return $this::respondWithError(41703);
+                $this->transactionManager->rollback();
+                return $this->respondWithError(41703);
             }
 
-            return $this::createSuccessResponse(11702, [$tagData]);
+            $this->transactionManager->commit();
+            return $this->createSuccessResponse(11702, [$tagData]);
 
         } catch (ValidationException $e) {
-            return $this::respondWithError(40301);
+            $this->transactionManager->rollback();
+            return $this->respondWithError(40301);
         } catch (\Throwable $e) {
-            return $this::respondWithError(40301);
+            $this->transactionManager->rollback();
+            return $this->respondWithError(40301);
         } finally {
             $this->logger->debug('createTag function execution completed');
         }

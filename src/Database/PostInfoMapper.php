@@ -101,53 +101,69 @@ class PostInfoMapper
     public function update(PostInfo $postInfo): void
     {
         $this->logger->info("PostInfoMapper.update started");
-
-        $data = $postInfo->getArrayCopy(); 
-
-        $sql = "UPDATE post_info 
-                SET likes = :likes, 
-                    dislikes = :dislikes, 
-                    reports = :reports, 
-                    views = :views, 
-                    saves = :saves, 
-                    shares = :shares, 
-                    comments = :comments 
-                WHERE postid = :postid";
+        $data = $postInfo->getArrayCopy();
 
         try {
-            $stmt = $this->db->prepare($sql);
+            $stmtSel = $this->db->prepare("
+                SELECT likes, dislikes, reports, views, saves, shares, comments
+                FROM post_info
+                WHERE postid = :postid
+                FOR UPDATE
+            ");
+            $stmtSel->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
+            $stmtSel->execute();
+            $old = $stmtSel->fetch(\PDO::FETCH_ASSOC) ?: [
+                'likes'=>0,'dislikes'=>0,'reports'=>0,'views'=>0,'saves'=>0,'shares'=>0,'comments'=>0
+            ];
 
-            // Bind each value explicitly
-            $stmt->bindValue(':likes', $data['likes'], \PDO::PARAM_INT);
-            $stmt->bindValue(':dislikes', $data['dislikes'], \PDO::PARAM_INT);
-            $stmt->bindValue(':reports', $data['reports'], \PDO::PARAM_INT);
-            $stmt->bindValue(':views', $data['views'], \PDO::PARAM_INT);
-            $stmt->bindValue(':saves', $data['saves'], \PDO::PARAM_INT);
-            $stmt->bindValue(':shares', $data['shares'], \PDO::PARAM_INT);
-            $stmt->bindValue(':comments', $data['comments'], \PDO::PARAM_INT);
-            $stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
+            // Bereit (positiv clampen Logik erweitern)
+            $dLikes    = max(0, (int)$data['likes']    - (int)$old['likes']);
+            $dDislikes = max(0, (int)$data['dislikes'] - (int)$old['dislikes']);
+            $dReports  = max(0, (int)$data['reports']  - (int)$old['reports']);
+            $dViews    = max(0, (int)$data['views']    - (int)$old['views']);
+            $dSaves    = max(0, (int)$data['saves']    - (int)$old['saves']);
+            $dShares   = max(0, (int)$data['shares']   - (int)$old['shares']);
+            $dComments = max(0, (int)$data['comments'] - (int)$old['comments']);
 
-            if ($stmt->execute()) {
-                $this->logger->info("Updated post info successfully", ['postid' => $data['postid']]);
-            } else {
-                $this->logger->warning("Failed to update post info", ['postid' => $data['postid']]);
+            // post_info auf absolute Werte setzen
+            $stmtUpd = $this->db->prepare("
+                UPDATE post_info
+                SET likes=:likes, dislikes=:dislikes, reports=:reports,
+                    views=:views, saves=:saves, shares=:shares, comments=:comments
+                WHERE postid=:postid
+            ");
+            // Jeden Wert explizit binden
+            $stmtUpd->bindValue(':likes',    (int)$data['likes'],    \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':dislikes', (int)$data['dislikes'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':reports',  (int)$data['reports'],  \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':views',    (int)$data['views'],    \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':saves',    (int)$data['saves'],    \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':shares',   (int)$data['shares'],   \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':comments', (int)$data['comments'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':postid',   $data['postid'],        \PDO::PARAM_STR);
+
+            if (!$stmtUpd->execute()) {
+                throw new \RuntimeException("post_info update failed");
             }
-        } catch (\PDOException $e) {
-            $this->logger->error(
-                "PostInfoMapper.update: Exception occurred while updating post info",
-                [
-                    'postid' => $data['postid'] ?? null,
-                    'exception' => $e->getMessage()
-                ]
-            );
-        } catch (\Exception $e) {
-            $this->logger->critical(
-                "PostInfoMapper.update: Unexpected exception occurred",
-                [
-                    'postid' => $data['postid'] ?? null,
-                    'exception' => $e->getMessage()
-                ]
-            );
+
+            // Bereit auf eine aktive Anzeige buchen
+            if (($dLikes+$dDislikes+$dReports+$dViews+$dSaves+$dShares+$dComments) > 0) {
+                $affected = $this->mapRowToActiveAdsInfo(
+                    $data['postid'], $dLikes, $dDislikes, $dReports, $dViews, $dSaves, $dShares, $dComments
+                );
+                $this->logger->info("Ad info bumped (one active ad)", [
+                    'postid' => $data['postid'], 'affected_rows' => $affected
+                ]);
+            }
+
+            $this->logger->info("Updated post info (+ads info, Variant B) successfully", ['postid' => $data['postid']]);
+
+        } catch (\Throwable $e) {
+            $this->logger->error("PostInfoMapper.update failed/rolled back", [
+                'postid' => $data['postid'] ?? null,
+                'exception' => $e->getMessage()
+            ]);
+            throw $e;
         }
     }
 
@@ -304,4 +320,50 @@ class PostInfoMapper
         }
     }
 
+    private function mapRowToActiveAdsInfo(
+        string $postId,
+        int $dLikes, 
+        int $dDislikes, 
+        int $dReports, 
+        int $dViews,
+        int $dSaves, 
+        int $dShares, 
+        int $dComments): int {
+        $sql = "
+            WITH one_ad AS (
+              SELECT a.advertisementid
+              FROM advertisements a
+              WHERE a.postid = :postid
+                AND a.timestart <= now()
+                AND a.timeend   >  now()
+              ORDER BY a.timestart DESC
+              LIMIT 1
+            )
+            UPDATE advertisements_info ai
+            SET likes    = ai.likes    + :dLikes,
+                dislikes = ai.dislikes + :dDislikes,
+                reports  = ai.reports  + :dReports,
+                views    = ai.views    + :dViews,
+                saves    = ai.saves    + :dSaves,
+                shares   = ai.shares   + :dShares,
+                comments = ai.comments + :dComments,
+                updatedat= :updatedat
+            FROM one_ad oa
+            WHERE ai.advertisementid = oa.advertisementid
+        ";
+        $stmt = $this->db->prepare($sql);
+        $updatedat = (new \DateTime())->format('Y-m-d H:i:s.u');
+        // Jeden Wert explizit binden
+        $stmt->bindValue(':postid',    $postId,    \PDO::PARAM_STR);
+        $stmt->bindValue(':dLikes',    $dLikes,    \PDO::PARAM_INT);
+        $stmt->bindValue(':dDislikes', $dDislikes, \PDO::PARAM_INT);
+        $stmt->bindValue(':dReports',  $dReports,  \PDO::PARAM_INT);
+        $stmt->bindValue(':dViews',    $dViews,    \PDO::PARAM_INT);
+        $stmt->bindValue(':dSaves',    $dSaves,    \PDO::PARAM_INT);
+        $stmt->bindValue(':dShares',   $dShares,   \PDO::PARAM_INT);
+        $stmt->bindValue(':dComments', $dComments, \PDO::PARAM_INT);
+        $stmt->bindValue(':updatedat', $updatedat, \PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
 }

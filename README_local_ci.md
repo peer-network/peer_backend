@@ -15,8 +15,50 @@ Make sure you have the following installed:
 - jq
 - composer
 - curl
+- php (required only for Composer on host; e.g. sudo apt install php-cli on Ubuntu/WSL, or brew install php on macOS. Backend itself runs in Docker.)
+- Gitleaks v8.28.0 (required for pre-commit and make scan)
 
 (If `jq` is missing, `make` will auto-install it on Ubuntu/WSL via `sudo apt install jq`.)
+(If `gitleaks` is missing, `make` will auto-install v8.28.0 on Ubuntu/WSL via `curl` when you run `make scan`, and place it in `/usr/local/bin`.)
+
+Install Gitleaks v8.28.0
+
+We use Gitleaks
+ to prevent secrets from entering the repo.
+The pre-commit hook will prefer a local binary (faster) and fall back to Docker if missing.
+
+macOS (Apple Silicon / Intel):
+
+brew install gitleaks
+# or manual install
+curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_darwin_arm64.tar.gz \
+  | tar -xz && sudo mv gitleaks /usr/local/bin/
+
+Linux (x86_64):
+
+wget https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz
+tar -xvzf gitleaks_8.28.0_linux_x64.tar.gz
+sudo mv gitleaks /usr/local/bin/
+
+Linux (ARM64, e.g. Raspberry Pi):
+
+wget https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_arm64.tar.gz
+tar -xvzf gitleaks_8.28.0_linux_arm64.tar.gz
+sudo mv gitleaks /usr/local/bin/
+
+Windows (PowerShell):
+
+Download gitleaks_8.28.0_windows_x64.zip
+
+Extract gitleaks.exe into a folder in your PATH (e.g. C:\Program Files\Gitleaks\).
+
+Verify with:
+
+gitleaks version
+# should print: 8.28.0
+
+WSL (Ubuntu on Windows):
+Use the Linux (x86_64) instructions above.
 
 ---
 
@@ -42,7 +84,7 @@ make dev
 
 This will:
 
-- Create `.env` from `.env.dev`  
+- Create `.env.ci` from `.env.dev`  
 - Reset Docker containers, images and volumes (full clean)  
 - Copy SQL files and Postman test files  
 - Install PHP dependencies via composer on your host  
@@ -123,7 +165,23 @@ This will:
 
 ---
 
-### 7. Full Cleanup
+### 7a. CI Cleanup (keep reports)
+
+If you want to clean up your local CI run but keep generated reports (so you can still view the HTMLExtra results), run:
+
+```bash
+make clean-ci
+```
+This will:
+
+- Stop Docker containers and remove volumes
+- Delete .env.ci, vendor/, temp SQL, and temp Postman JSON files
+- Preserve HTML test reports
+- This is the cleanup step that make ci calls at the end of its run.
+
+---
+
+### 7b. Full Cleanup
 
 To stop and remove everything (containers, volumes, files):
 
@@ -134,7 +192,7 @@ make clean-all
 This will:
 
 - Stop Docker containers and remove volumes
-- Delete `.env`, `vendor/`, temp SQL, Postman tmp files, reports, logs
+- Delete `.env.ci`, `vendor/`, temp SQL, Postman tmp files, reports, logs
 
 ---
 
@@ -152,7 +210,15 @@ This will:
 - Execute the Newman test suite with the same Postman collections as remote CI
 - Generate an HTML report of the test results
 - Skip interactive steps so it can run unattended
-- Clean up containers, volumes, and temp files automatically at the end
+- Run make clean-ci at the end (removes containers, volumes, vendors, tmp files, etc. but preserves reports so you can view them)
+
+⚠️ Important: After reviewing your report, run:
+
+```bash
+make clean-all
+```
+
+This ensures your environment is fully cleaned (reports, vendors, gitleak report, and temp files) before the next run.
 
 ---
 
@@ -198,20 +264,25 @@ Example output:
 
 Available targets:
 bash-backend : Open interactive shell in backend container
+check-hooks               Verify that Git hooks are installed and executable
 ci : Run full local CI workflow (setup, tests, cleanup)
 clean-all : Remove containers, volumes, vendors, reports, logs
+clean-ci : Cleanup for CI but keep reports
 clean-prune : Remove ALL unused images, build cache, and volumes
 db : Open psql shell into Postgres
 dev : Full setup: env, DB reset, vendors install, start DB+backend
+ensure-gitleaks           Ensure Gitleaks is installed locally (auto-install if missing)
 ensure-jq : Ensure jq is installed (auto-install if missing)
-env : Copy .env.dev to .env for local development
+env-ci : Copy .env.dev to .env.ci for local development
 help : Show available make targets
 init : Prepare Postman environment files for testing
+install-hooks : Install Git hooks for pre-commit scanning
 logs : Tail backend container logs
 reload-backend : Rebuild and restart backend container
 reset-db-and-backend : Reset DB, backend, and remove all related Docker images
 restart-db : Restart only the database (fresh schema & data, keep backend as-is)
 restart : Soft restart with fresh DB but keep current code & vendors
+scan : Run Gitleaks scan on staged changes only
 test : Run Newman tests inside Docker and generate HTML report
 
 ---
@@ -234,6 +305,37 @@ This will:
 
 ⚠️ Warning: This is destructive. It will nuke caches and volumes you might want for other projects.
 ✅ Use this if you need a completely fresh Docker environment.
+
+---
+
+### 12. Install Pre-Commit Hook (Gitleaks)
+
+To automatically scan for secrets before every commit, install the Git hook once:
+
+```bash
+make install-hooks
+```
+
+This will:
+
+- Configure Git to use .githooks/pre-commit
+- Make the hook executable
+- Run Gitleaks on staged changes during each git commit
+
+---
+
+### 13. Run Gitleaks Manually
+
+To scan staged changes (like pre-commit):
+
+```bash
+make scan
+```
+
+This will:
+
+- Run a Gitleaks scan on your staged changes before they’re committed.
+- It will write a report to .gitleaks_out/gitleaks-report.json.
 
 ---
 

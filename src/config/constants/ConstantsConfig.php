@@ -15,10 +15,21 @@ class ConstantsConfig
             "CONTACT" => $this::contact(),
             "PAGING" => $this::paging(),
             "WALLET" => $this::wallet(),
-            "WALLETT" => $this::wallett(),        
+            "WALLETT" => $this::wallett(),    
+            "ONBOARDING" => $this::onboarding(),
+            "DAILY_FREE" => $this::dailyFree(),
+            "TOKENOMICS" => $this::tokenomics(),
+            "MINTING" => $this::minting(),
         ];
     }
-
+    /**
+     * @return array{
+     *     AVAILABLE_ONBOARDINGS: string[]
+     * }
+     */
+    public static function onboarding(): array {
+        return ConstantsConfig::ONBOARDING;
+    }
     /**
      * @return array{
      *     CONTENT: array{MIN_LENGTH: int, MAX_LENGTH: int}
@@ -137,6 +148,72 @@ class ConstantsConfig
     public static function contentFiltering() {
         return ConstantsModeration::contentFiltering();
     }
+
+    /**
+     * @return array{
+     *     DAILY_FREE_ACTIONS: array{ post: int, like: int, comment: int, dislike: int }
+     * }
+     */
+    public static function dailyFree(): array {
+        return ConstantsConfig::DAILY_FREE;
+    }
+
+    /**
+     * @return array{
+     *     ACTION_TOKEN_PRICES: array{ post: float, like: float, dislike: float, comment: float },
+     *     ACTION_GEMS_RETURNS: array{ view: float, like: float, dislike: float, comment: float },
+     *     FEES: array{ PEER: float, POOL: float, BURN: float, INVITATION: float }
+     * }
+     */
+    public static function tokenomics(): array {
+        return ConstantsConfig::TOKENOMICS;
+    }
+    /**
+     * @return array{ DAILY_NUMBER_TOKEN: float }
+     */
+    public static function minting(): array {
+        return ConstantsConfig::MINTING;
+    }
+
+    private const ONBOARDING = [
+        'AVAILABLE_ONBOARDINGS' => [
+            'INTROONBOARDING',
+        ],
+    ];
+    private const DAILY_FREE = [
+        'DAILY_FREE_ACTIONS' => [
+            'post'    => 1,  
+            'like'    => 3,  
+            'comment' => 4,  
+            'dislike' => 0,  
+        ],
+    ];
+    private const MINTING = [
+        'DAILY_NUMBER_TOKEN' => 5000.0,
+    ];
+
+    private const TOKENOMICS = [
+        'ACTION_TOKEN_PRICES' => [
+            'post'    => 20.0,   
+            'like'    => 3.0,    
+            'dislike' => 3.0,    
+            'comment' => 1.0,
+            'advertisementBasic' => 500.0,
+            'advertisementPinned' => 2000.0,
+        ],
+        'ACTION_GEMS_RETURNS' => [
+            'view'    => 0.25,  
+            'like'    => 5.0,
+            'dislike' => -3.0,
+            'comment' => 2.0,
+        ],
+        'FEES' => [
+            'INVITATION' => 0.01,
+            'POOL'       => 0.01,
+            'PEER'       => 0.02,
+            'BURN'       => 0.01,
+        ],
+    ];
 
     private const COMMENT = [
         'CONTENT' => [
@@ -290,7 +367,7 @@ class ConstantsConfig
         'PASSWORD' => [
             'MIN_LENGTH' => 8,
             'MAX_LENGTH' => 128,
-            'PATTERN' => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$',
+            "PATTERN" => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'
         ],
         'USERNAME' => [
             'MIN_LENGTH' => 3,

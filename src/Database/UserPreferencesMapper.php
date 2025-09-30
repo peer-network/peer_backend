@@ -6,6 +6,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\UserPreferences;
 use Psr\Log\LoggerInterface;
+use Fawaz\Utils\JsonHelper;
 
 class UserPreferencesMapper
 {
@@ -19,7 +20,7 @@ class UserPreferencesMapper
 
         try {
             $stmt = $this->db->prepare(
-                'SELECT userid, content_filtering_severity_level, updatedat
+                'SELECT userid, content_filtering_severity_level, updatedat, onboardingswereshown
                  FROM user_preferences 
                  WHERE userid = :id'
             );
@@ -32,6 +33,7 @@ class UserPreferencesMapper
             if ($data) {
                 $this->logger->info('User preferences loaded successfully', ['id' => $id, 'data' => $data]);
                 $data['contentFilteringSeverityLevel'] = $data['content_filtering_severity_level'];
+                $data['onboardingsWereShown'] = JsonHelper::decode($data['onboardingswereshown'] ?? '[]') ?? [];
                 return new UserPreferences($data);
             } else {
                 $this->logger->warning("No user found with given ID", ['id' => $id]);
@@ -59,16 +61,16 @@ class UserPreferencesMapper
         $data = $user->getArrayCopy();
 
         $query = "INSERT INTO user_preferences
-                  (userid, content_filtering_severity_level, updatedat)
+                  (userid, content_filtering_severity_level, updatedat, onboardingswereshown)
                   VALUES 
-                  (:userid, :content_filtering_severity_level , :updatedat)";
-
+                  (:userid, :content_filtering_severity_level , :updatedat, :onboardings::jsonb)";
         try {
             $stmt = $this->db->prepare($query);
 
             $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
             $stmt->bindValue(':content_filtering_severity_level', $data['contentFilteringSeverityLevel'], \PDO::PARAM_INT);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':onboardings', json_encode($data['onboardingsWereShown'] ?? [], JSON_UNESCAPED_UNICODE), \PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -94,13 +96,15 @@ class UserPreferencesMapper
         try {
             $query = "UPDATE user_preferences 
                       SET content_filtering_severity_level = :content_filtering_severity_level, 
-                          updatedat = :updatedat 
+                          updatedat = :updatedat,
+                          onboardingswereshown = :onboardings::jsonb
                       WHERE userid = :userid";
 
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':content_filtering_severity_level', $data['contentFilteringSeverityLevel'], \PDO::PARAM_INT);
             $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':onboardings', json_encode($data['onboardingsWereShown'] ?? [], JSON_UNESCAPED_UNICODE), \PDO::PARAM_STR);
 
             $stmt->execute();
 

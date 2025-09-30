@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\config\constants\ConstantsConfig;
+
 class Rechnen {
 
     // @return string
@@ -39,55 +41,57 @@ class Rechnen {
     }
 
     // @return float val
-    public static function calculate_cost_plus_feesum(float $price = 1, float $sum = 1, float $tax = PEERFEE): float 
+    public static function calculate_cost_plus_feesum(float $price = 1, float $sum = 1): float 
     {
         if ($price == 0 || $sum == 0) {
             return 0;
         }
-
+        $tax = (float)ConstantsConfig::tokenomics()['FEES']['PEER'];
         return ($price*$sum) + (($price*$sum) * $tax);
     }
 
     // @return float val
-    public static function calculate_cost_to_wallet(float $price = 1, float $sum = 1, float $tax = PEERFEE): float 
+    public static function calculate_cost_to_wallet(float $price = 1, float $sum = 1): float 
     {
         if ($price == 0 || $sum == 0) {
             return 0;
         }
 
+        $tax = (float)ConstantsConfig::tokenomics()['FEES']['PEER'];
         $sales_tax = $tax;
         return ($price * $sum) - (($price * $sum) * $sales_tax);
     }
 
     // @return float val
-    public static function calculate_total_feesum(float $price = 1, float $sum = 1, float $tax = PEERFEE): float 
+    public static function calculate_total_feesum(float $price = 1, float $sum = 1): float 
     {
         if ($price == 0 || $sum == 0) {
             return 0;
         }
 
+        $tax = (float)ConstantsConfig::tokenomics()['FEES']['PEER'];
         $sales_tax = $tax;
         return ($sum * $price) * $sales_tax;
     }
 
     // @return float val
-    public static function calculate_feesum_once(float $price = 1, float $sum = 1, float $tax = PEERFEE): float 
+    public static function calculate_feesum_once(float $price = 1, float $sum = 1): float 
     {
         if ($price == 0 || $sum == 0) {
             return 0;
         }
-
+        $tax = (float)ConstantsConfig::tokenomics()['FEES']['PEER'];
         return ((($sum * $price) * $tax) / $sum);
     }
 
     // @return float val
-    public static function calculate_total_burn_feesum(float $price = 1, float $sum = 1, float $tax = PEERFEE): float 
+    public static function calculate_total_burn_feesum(float $price = 1, float $sum = 1): float 
     {
         if ($price == 0 || $sum == 0) {
             return 0;
         }
-
-        return self::calculate_total_feesum($price, $sum, $tax);
+        $tax = (float)ConstantsConfig::tokenomics()['FEES']['PEER'];
+        return ($price * $sum) * $tax;
     }
 
     // @return float val

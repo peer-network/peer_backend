@@ -10,36 +10,22 @@ use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Psr\Log\LoggerInterface;
+use Fawaz\config\constants\ConstantsConfig;
 
 use function DI\string;
 
 const TABLESTOGEMS = true;
-const DAILY_NUMBER_TOKEN= 5000;
 const VIEW_=1;
 const LIKE_=2;
 const DISLIKE_=3;
 const COMMENT_=4;
 const POST_=5;
+const POSTINVESTBASIC_=6;
+const POSTINVESTPREMIUM_=7;
 const INVITATION_=11;
-
-const RECEIVELIKE=5;
-const RECEIVEDISLIKE=4;
-const RECEIVECOMMENT=2;
-const RECEIVEPOSTVIEW=0.25;
-
-const PRICELIKE=3;
-const PRICEDISLIKE=5;
-const PRICECOMMENT=0.5;
-const PRICEPOST=20;
-
 const DIRECTDEBIT_=14;
 const CREDIT_=15;
 const TRANSFER_=18;
-
-const INVTFEE=0.01;
-const POOLFEE=0.01;
-const PEERFEE=0.02;
-const BURNFEE=0.01;
 
 class WalletMapper
 {
@@ -64,23 +50,23 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.transferToken started');
 
-		$accountsResult = $this->pool->returnAccounts();
+        $accountsResult = $this->pool->returnAccounts();
 
-		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
-			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
-			return self::respondWithError(40701);
-		}
+        if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
+            $this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
+            return self::respondWithError(40701);
+        }
 
-		$liqpool = $accountsResult['response'] ?? null;
+        $liqpool = $accountsResult['response'] ?? null;
 
-		if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
-			$this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
-			return self::respondWithError(30102);
-		}
+        if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
+            $this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
+            return self::respondWithError(30102);
+        }
 
-		$this->poolWallet = $liqpool['pool'];
-		$this->burnWallet = $liqpool['burn'];
-		$this->peerWallet = $liqpool['peer'];
+        $this->poolWallet = $liqpool['pool'];
+        $this->burnWallet = $liqpool['burn'];
+        $this->peerWallet = $liqpool['peer'];
 
         $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
 
@@ -134,11 +120,16 @@ class WalletMapper
             $this->logger->warning('Send and Receive Same Wallet Error.');
             return self::respondWithError(31202);
         }
+        $fees = ConstantsConfig::tokenomics()['FEES'];
+        $peerFee = (float)$fees['PEER'];
+        $poolFee = (float)$fees['POOL'];
+        $burnFee = (float)$fees['BURN'];
+        $inviteFee = (float)$fees['INVITATION'];
 
-        $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE);
-        $feeAmount = round((float)$numberoftokens * POOLFEE, 2);
-        $peerAmount = round((float)$numberoftokens * PEERFEE, 2);
-        $burnAmount = round((float)$numberoftokens * BURNFEE, 2);
+        $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee);
+        $feeAmount = round((float)$numberoftokens * $poolFee, 2);
+        $peerAmount = round((float)$numberoftokens * $peerFee, 2);
+        $burnAmount = round((float)$numberoftokens * $burnFee, 2);
         $countAmount = $feeAmount + $peerAmount + $burnAmount;
         $inviterId = null;
         $inviterWin = 0.0;
@@ -151,9 +142,9 @@ class WalletMapper
 
             if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != 6) {
                 $inviterId = $result['invited'];
-                $inviterWin = round((float)$numberoftokens * INVTFEE, 2);
+                $inviterWin = round((float)$numberoftokens * $inviteFee, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
-                $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
+                $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnAmount + $inviteFee);
                 $this->logger->info('Invited By', [
                     'invited' => $inviterId,
                 ]);
@@ -161,9 +152,9 @@ class WalletMapper
 
             // If user's account deleted then we will send that percentage amount to PEER
             if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == 6) {
-                $peerAmount += round((float)$numberoftokens * INVTFEE, 2);
+                $peerAmount = $peerAmount + round((float)$numberoftokens * $inviteFee, 2);
                 $countAmount = $feeAmount + $peerAmount + $burnAmount;
-                $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE + INVTFEE);
+                $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee + $inviteFee);
             }
 
 
@@ -750,7 +741,7 @@ class WalletMapper
             return self::respondWithError(40301);        }
     }
 
-    public function insertWinToLog(string $userId, array $args): bool
+    public function insertWinToLog(string $userId, array $args): array|bool
     {
         \ignore_user_abort(true);
 
@@ -765,7 +756,7 @@ class WalletMapper
         $id = self::generateUUID();
         if (empty($id)) {
             $this->logger->critical('Failed to generate logwins ID');
-            return self::respondWithError(41401);
+            return false;
         }
 
         $sql = "INSERT INTO logwins 
@@ -859,11 +850,14 @@ class WalletMapper
             return self::respondWithError(41215);
         }
 
+        $tokenomics = ConstantsConfig::tokenomics();
+        $actionGemsReturns = $tokenomics['ACTION_GEMS_RETURNS'];
+
         $wins = [
-            ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)RECEIVEPOSTVIEW],
-            ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)RECEIVELIKE],
-            ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => -(float)RECEIVEDISLIKE],
-            ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)RECEIVECOMMENT]
+            ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)$actionGemsReturns['view']],
+            ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)$actionGemsReturns['like']],
+            ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => (float)$actionGemsReturns['dislike']],
+            ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)$actionGemsReturns['comment']]
         ];
 
         $totalInserts = 0;
@@ -1070,8 +1064,9 @@ class WalletMapper
             return self::createSuccessResponse(21206);
         }
 
-        $totalGems = isset($data[0]['overall_total']) ? $data[0]['overall_total'] : '0';
-        $dailyToken = (float)DAILY_NUMBER_TOKEN;
+        $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
+        $dailyToken = (float)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
+
         // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
         $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
 
@@ -1163,7 +1158,9 @@ class WalletMapper
             $inviterId = $result['invited'];
             $this->logger->info('Inviter found', ['inviterId' => $inviterId]);
 
-            $percent = round((float)$tokenAmount * INVTFEE, 2);
+            $fees = ConstantsConfig::tokenomics()['FEES'];
+            $inviteFee = (float)$fees['INVITATION'];
+            $percent = round((float)$tokenAmount * $inviteFee, 2);
             $tosend = round((float)$tokenAmount - $percent, 2);
 
             $id = self::generateUUID();
@@ -1219,17 +1216,20 @@ class WalletMapper
     public function deductFromWallets(string $userId, ?array $args = []): array
     {
         $this->logger->info('WalletMapper.deductFromWallets started');
-        $this->logger->info('deductFromWallets commenrs args.', ['args' => $args]);
+        $this->logger->info('WalletMapper.deductFromWallets', ['args' => $args]);
 
         $postId = $args['postid'] ?? null;
         $art = $args['art'] ?? null;
         $fromId = $args['fromid'] ?? null;
+        $prices = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
 
         $mapping = [
-            2 => ['price' => PRICELIKE, 'whereby' => LIKE_, 'text' => 'Buy like'],
-            3 => ['price' => PRICEDISLIKE, 'whereby' => DISLIKE_, 'text' => 'Buy dislike'],
-            4 => ['price' => PRICECOMMENT, 'whereby' => COMMENT_, 'text' => 'Buy comment'],
-            5 => ['price' => PRICEPOST, 'whereby' => POST_, 'text' => 'Buy post'],
+            2 => ['price' => $prices['like'], 'whereby' => LIKE_, 'text' => 'Buy like'],
+            3 => ['price' => $prices['dislike'], 'whereby' => DISLIKE_, 'text' => 'Buy dislike'],
+            4 => ['price' => $prices['comment'], 'whereby' => COMMENT_, 'text' => 'Buy comment'],
+            5 => ['price' => $prices['post'], 'whereby' => POST_, 'text' => 'Buy post'],
+            6 => ['price' => $prices['advertisementBasic'], 'whereby' => POSTINVESTBASIC_, 'text' => 'Buy advertise basic'],
+            7 => ['price' => $prices['advertisementPinned'], 'whereby' => POSTINVESTPREMIUM_, 'text' => 'Buy advertise pinned'],
         ];
 
         if (!isset($mapping[$art])) {
@@ -1237,7 +1237,7 @@ class WalletMapper
             return self::respondWithError(30105);
         }
 
-        $price = $mapping[$art]['price'];
+        $price = (!empty($args['price']) && (int)$args['price']) ? (int)$args['price'] : $mapping[$art]['price'];
         $whereby = $mapping[$art]['whereby'];
         $text = $mapping[$art]['text'];
 
@@ -1264,12 +1264,20 @@ class WalletMapper
         try {
             $results = $this->insertWinToLog($userId, $args);
             if ($results === false) {
-                return self::respondWithError(41206);
+                $this->logger->warning("Error occurred in deductFromWallets.insertWinToLog", [
+                    'userId' => $userId,
+                    'args' => $args,
+                ]);
+                return self::respondWithError(41205);
             }
 
             $results = $this->insertWinToPool($userId, $args);
             if ($results === false) {
-                return self::respondWithError(41206);
+                $this->logger->warning("Error occurred in deductFromWallets.insertWinToPool", [
+                    'userId' => $userId,
+                    'args' => $args,
+                ]);
+                return self::respondWithError(41205);
             }
 
             $this->logger->info('Wallet deduction successful.', [
@@ -1301,7 +1309,11 @@ class WalletMapper
                     'whereby' => $whereby,
                 ],
             ]);
-            return self::respondWithError(41206);
+            $this->logger->warning("Error occurred in deductFromWallets.Throwable", [
+                'userId' => $userId,
+                'args' => $args,
+            ]);
+            return self::respondWithError(41205);
         }
     }
 
@@ -1353,34 +1365,36 @@ class WalletMapper
         $this->logger->info('WalletMapper.saveWalletEntry started');
 
         try {
-            $query = "SELECT 1 FROM wallett WHERE userid = :userid";
-            $stmt = $this->db->prepare($query);
+            $stmt = $this->db->prepare("SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE");
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
             $stmt->execute();
-            $userExists = $stmt->fetchColumn(); 
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if (!$userExists) {
+            if (!$row) {
+                // User does not exist, insert new wallet entry
                 $newLiquidity = abs($liquidity);
-                $liquiditq = ((float)$this->decimalToQ64_96($newLiquidity));
+                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
 
-                $query = "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
-                          VALUES (:userid, :liquidity, :liquiditq, :updatedat)";
-                $stmt = $this->db->prepare($query);
+                $stmt = $this->db->prepare(
+                    "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
+                    VALUES (:userid, :liquidity, :liquiditq, :updatedat)"
+                );
                 $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
                 $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
-
                 $stmt->execute();
             } else {
-                $currentBalance = $this->getUserWalletBalance($userId);
+                // User exists, safely calculate new liquidity
+                $currentBalance = (float)$row['liquidity'];
                 $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
-                $liquiditq = ((float)$this->decimalToQ64_96($newLiquidity));
+                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
 
-                $query = "UPDATE wallett
-                          SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
-                          WHERE userid = :userid";
-                $stmt = $this->db->prepare($query);
+                $stmt = $this->db->prepare(
+                    "UPDATE wallett
+                    SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
+                    WHERE userid = :userid"
+                );
                 $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
@@ -1394,19 +1408,22 @@ class WalletMapper
 
             return $newLiquidity;
         } catch (\Throwable $e) {
-            $this->logger->error('Database error in saveWalletEntry: ' . $e->getMessage());
+            $this->logger->error('Database error in saveWalletEntry: ' . $e);
             throw new \RuntimeException('Unable to save wallet entry');
         }
     }
 
     public function callUserMove(string $userId): array
     {
+        $tokenomics = ConstantsConfig::tokenomics();
+        $actionGemsReturns = $tokenomics['ACTION_GEMS_RETURNS'];
+
         try {
             $wins = [
-                ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)RECEIVEPOSTVIEW, 'key' => 'views'],
-                ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)RECEIVELIKE, 'key' => 'likes'],
-                ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => -(float)RECEIVEDISLIKE, 'key' => 'dislikes'],
-                ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)RECEIVECOMMENT, 'key' => 'comments']
+                ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)$actionGemsReturns['view'], 'key' => 'views'],
+                ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)$actionGemsReturns['like'], 'key' => 'likes'],
+                ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => -(float)$actionGemsReturns['dislike'], 'key' => 'dislikes'],
+                ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)$actionGemsReturns['comment'], 'key' => 'comments']
             ];
 
             $totalInteractions = 0;
@@ -1520,10 +1537,10 @@ class WalletMapper
     {
         $scaleFactor = \bcpow('2', '96');
 
-		// Convert float to plain decimal string 
-		$decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
+        // Convert float to plain decimal string 
+        $decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
 
-		$scaledValue = \bcmul($decimalString, $scaleFactor, 0);
+        $scaledValue = \bcmul($decimalString, $scaleFactor, 0);
 
         return $scaledValue;
     }

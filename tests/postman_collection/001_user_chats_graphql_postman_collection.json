@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "c6bfe79c-f9c0-420e-8701-d8cf48a228e2",
-		"name": "001_graphql",
+		"_postman_id": "4bfdfdf6-a3db-4d00-862b-a5adee67f0c9",
+		"name": "001_user_chats_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-c6bfe79c-f9c0-420e-8701-d8cf48a228e2?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-4bfdfdf6-a3db-4d00-862b-a5adee67f0c9?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -2376,6 +2376,52 @@
 			"response": []
 		},
 		{
+			"name": "Verification tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10701\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Verification of referral string (fail)",
 			"event": [
 				{
@@ -2635,52 +2681,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t1}}\") {\n        status\n        ResponseCode\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Verification tester 2",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('10701');",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9736,7 +9736,7 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Comment with commentid and userid_t2 has username 'Deleted Account'\", function () {",
+							"pm.test(\"Comment with commentid and userid_t2 has username 'Deleted_Account'\", function () {",
 							"    const response = pm.response.json();",
 							"    const posts = response.data?.listPosts?.affectedRows || [];",
 							"",
@@ -9761,7 +9761,7 @@
 							"        throw new Error(`Comment with ID ${expectedCommentId} and userid ${expectedUserId} not found.`);",
 							"    }",
 							"",
-							"    pm.expect(commentFound.user?.username, `Username for comment ${expectedCommentId}`).to.eql(\"Deleted Account\");",
+							"    pm.expect(commentFound.user?.username, `Username for comment ${expectedCommentId}`).to.eql(\"Deleted_Account\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -10018,7 +10018,7 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"invitedBy matches userid_t2 and has username 'Deleted Account'\", function () {",
+							"pm.test(\"invitedBy matches userid_t2 and has username 'Deleted_Account'\", function () {",
 							"    const response = pm.response.json();",
 							"    const invitedBy = response.data?.referralList?.affectedRows?.invitedBy;",
 							"    const expectedUserId = pm.environment.get(\"userid_t2\");",
@@ -10029,7 +10029,7 @@
 							"",
 							"    pm.expect(invitedBy, \"invitedBy object should exist\").to.exist;",
 							"    pm.expect(invitedBy.id, \"invitedBy.id should match userid_t2\").to.eql(expectedUserId);",
-							"    pm.expect(invitedBy.username, \"invitedBy.username should be 'Deleted Account'\").to.eql(\"Deleted Account\");",
+							"    pm.expect(invitedBy.username, \"invitedBy.username should be 'Deleted_Account'\").to.eql(\"Deleted_Account\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -10153,7 +10153,7 @@
 							"    pm.expect(profile, \"Profile should exist\").to.exist;",
 							"",
 							"    if (profile.id === expectedUserId) {",
-							"        pm.expect(profile.username, \"Username should be 'Deleted Account'\").to.eql(\"Deleted Account\");",
+							"        pm.expect(profile.username, \"Username should be 'Deleted_Account'\").to.eql(\"Deleted_Account\");",
 							"",
 							"        pm.expect(profile.biography, \"Biography should be a file path like '/userData/<uuid>.txt'\")",
 							"          .to.match(/^\\/userData\\/[a-f0-9\\-]{36}\\.txt$/);",
@@ -10216,7 +10216,7 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"User from userid_t2 in followers and following has username 'Deleted Account'\", function () {",
+							"pm.test(\"User from userid_t2 in followers and following has username 'Deleted_Account'\", function () {",
 							"    const response = pm.response.json();",
 							"    const relations = response.data?.listFollowRelations?.affectedRows || {};",
 							"    const expectedUserId = pm.environment.get(\"userid_t2\");",
@@ -10233,7 +10233,7 @@
 							"            throw new Error(`User with ID ${expectedUserId} not found in '${listName}' list.`);",
 							"        }",
 							"",
-							"        pm.expect(user.username, `User ${user.id} in ${listName} should be 'Deleted Account'`).to.eql(\"Deleted Account\");",
+							"        pm.expect(user.username, `User ${user.id} in ${listName} should be 'Deleted_Account'`).to.eql(\"Deleted_Account\");",
 							"    };",
 							"",
 							"    checkList(\"followers\");",
@@ -10295,7 +10295,7 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Friend with userid_t2 has username 'Deleted Account'\", function () {",
+							"pm.test(\"Friend with userid_t2 has username 'Deleted_Account'\", function () {",
 							"    const response = pm.response.json();",
 							"    const friends = response.data?.listFriends?.affectedRows || [];",
 							"    const expectedUserId = pm.environment.get(\"userid_t2\");",
@@ -10310,7 +10310,7 @@
 							"        throw new Error(`Friend with userid ${expectedUserId} not found.`);",
 							"    }",
 							"",
-							"    pm.expect(friend.username, \"Username should be 'Deleted Account'\").to.eql(\"Deleted Account\");",
+							"    pm.expect(friend.username, \"Username should be 'Deleted_Account'\").to.eql(\"Deleted_Account\");",
 							"});"
 						],
 						"type": "text/javascript",

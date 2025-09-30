@@ -7,11 +7,6 @@ const LIKE_=2;
 const COMMENT_=4;
 const POST_=5;
 
-const DAILYFREEPOST=1;
-const DAILYFREELIKE=3;
-const DAILYFREECOMMENT=4;
-const DAILYFREEDISLIKE=0;
-
 use Fawaz\App\DailyFree;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\Interfaces\TransactionManager;

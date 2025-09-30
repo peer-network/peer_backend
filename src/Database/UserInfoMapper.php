@@ -296,7 +296,7 @@ class UserInfoMapper
                 $response = "11104";
             }
 
-            $this->updateChatsStatus($followerid, $followeduserid);
+            // $this->updateChatsStatus($followerid, $followeduserid);
             $this->updateFriendsCount($followerid);
             $this->updateFriendsCount($followeduserid);
 

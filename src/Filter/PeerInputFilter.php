@@ -290,6 +290,26 @@ class PeerInputFilter
         return $inclusive ? $valueTimestamp <= $maxTimestamp : $valueTimestamp < $maxTimestamp;
     }
 
+    protected function TimeEndAfterTimeStart(string $timeend, array $options = []): bool
+    {
+        $timestart = $options['timestart'] ?? null;
+
+        if (!$timestart) {
+            $this->errors['timestart'][] = 30251;
+            return false;
+        }
+
+        $start = DateTime::createFromFormat('Y-m-d H:i:s.u', $timestart);
+        $end = DateTime::createFromFormat('Y-m-d H:i:s.u', $timeend);
+
+        if (!$start || !$end) {
+            $this->errors['datetime'][] = 30252;
+            return false;
+        }
+
+        return $end > $start;
+    }
+
     protected function validateIntRange(mixed $value, array $options = []): bool
     {
         if (!is_numeric($value) || (int)$value != $value) {
@@ -346,23 +366,27 @@ class PeerInputFilter
     protected function ArrayValues(mixed $value, array $options = []): bool
     {
         if (!is_array($value)) {
+            $this->errors['ArrayValues'][] = 40301;
             return false;
         }
 
         $validator = $options['validator'] ?? null;
         if (!$validator || !isset($validator['name'])) {
             $this->errors['ArrayValues'][] = "40301";
+            return false;
         }
 
         $validatorName = $validator['name'];
         $validatorOptions = $validator['options'] ?? [];
 
-        foreach ($value as $item) {
-            if (!method_exists($this, $validatorName)) {
-                $this->errors['ArrayValues'][] = "Validator method $validatorName does not exist.";
-            }
+        if (!method_exists($this, $validatorName)) {
+            $this->errors['ArrayValues'][] = 40301;
+            return false;
+        }
 
+        foreach ($value as $index => $item) {
             if (!$this->$validatorName($item, $validatorOptions)) {
+                $this->errors['ArrayValues'][] = 40301;
                 return false;
             }
         }
@@ -514,6 +538,7 @@ class PeerInputFilter
 
     protected function ValidateChatStructure(mixed $chatmessage, array $options = []): bool
     {
+        $chatConfig = ConstantsConfig::chat();
         if (is_array($chatmessage)) {
             $chatmessage = (object)$chatmessage;
         }
@@ -521,8 +546,8 @@ class PeerInputFilter
         return isset($chatmessage->messid) && $this->IsNumeric($chatmessage->messid) &&
                isset($chatmessage->chatid) && $this->Uuid($chatmessage->chatid) &&
                isset($chatmessage->userid) && $this->Uuid($chatmessage->userid) &&
-               isset($chatmessage->content) && $this->StringLength($chatmessage->content, ['min' => 1, 'max' => 100]) &&
-               isset($chatmessage->createdat) && $this->StringLength($chatmessage->createdat, ['min' => 1,'max' => 40]);
+               isset($chatmessage->content) && $this->StringLength($chatmessage->content, ['min' => $chatConfig['MESSAGE']['MIN_LENGTH'], 'max' => $chatConfig['MESSAGE']['MAX_LENGTH']]) &&
+               isset($chatmessage->createdat) && $this->LessThan($chatmessage->createdat, ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function ValidateParticipants(array $participants, array $options = []): bool
@@ -542,14 +567,15 @@ class PeerInputFilter
 
     protected function ValidateParticipantStructure(mixed $participant, array $options = []): bool
     {
+        $chatConfig = ConstantsConfig::chat();
         if (is_array($participant)) {
             $participant = (object)$participant;
         }
 
         return isset($participant->userid) && $this->Uuid($participant->userid) &&
-               isset($participant->username) && $this->StringLength($participant->username, ['min' => 3, 'max' => 23]) &&
-               isset($participant->img) && $this->StringLength($participant->img, ['min' => 0, 'max' => 100]) &&
-               isset($participant->hasaccess) && $this->IsNumeric($participant->hasaccess);
+               isset($participant->username) && $this->validateUsername($participant->username) &&
+               isset($participant->img) && $this->StringLength($participant->img, ['min' => $chatConfig['IMAGE']['MIN_LENGTH'], 'max' => $chatConfig['IMAGE']['MAX_LENGTH']]) &&
+               isset($participant->hasaccess) && $this->validateIntRange($participant->hasaccess, ['min' => $chatConfig['ACCESS_LEVEL']['MIN'], 'max' => $chatConfig['ACCESS_LEVEL']['MAX']]);
     }
 
     protected function ValidateUsers(array $users, array $options = []): bool
@@ -569,13 +595,14 @@ class PeerInputFilter
 
     protected function ValidateUserStructure(mixed $user, array $options = []): bool
     {
+        $userConfig = ConstantsConfig::user();
         if (is_array($user)) {
             $user = (object)$user;
         }
 
         return isset($user->uid) && $this->Uuid($user->uid) &&
-               isset($user->username) && $this->StringLength($user->username, ['min' => 3, 'max' => 23]) &&
-               isset($user->img) && $this->StringLength($user->img, ['min' => 10, 'max' => 100]) &&
+               isset($user->username) && $this->validateUsername($user->username) &&
+               isset($user->img) && $this->StringLength($user->img, ['min' => $userConfig['IMAGE']['MIN_LENGTH'], 'max' => $userConfig['IMAGE']['MAX_LENGTH']]) &&
                isset($user->isfollowed) && is_bool($user->isfollowed) &&
                isset($user->isfollowing) && is_bool($user->isfollowing);
     }
@@ -597,15 +624,16 @@ class PeerInputFilter
 
     protected function ValidatePostStructure(mixed $profilepost, array $options = []): bool
     {
+        $postConst = ConstantsConfig::post();
         if (is_array($profilepost)) {
             $profilepost = (object)$profilepost;
         }
 
         return isset($profilepost->postid) && $this->Uuid($profilepost->postid) &&
-               isset($profilepost->title) && $this->StringLength($profilepost->title, ['min' => 3, 'max' => 96]) &&
+               isset($profilepost->title) && $this->StringLength($profilepost->title, ['min' => $postConst['TITLE']['MIN_LENGTH'], 'max' => $postConst['TITLE']['MAX_LENGTH']]) &&
                isset($profilepost->contenttype) && $this->InArray($profilepost->contenttype, ['haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery']]) &&
-               isset($profilepost->media) && $this->StringLength($profilepost->media, ['min' => 10, 'max' => 100]) &&
-               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => \date('Y-m-d H:i:s.u'), 'inclusive' => true]);
+               isset($profilepost->media) && $this->StringLength($profilepost->media, ['min' => $postConst['MEDIA']['MIN_LENGTH'], 'max' => $postConst['MEDIA']['MAX_LENGTH']]) &&
+               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function ValidatePostPure(array $profileposts, array $options = []): bool
@@ -625,16 +653,17 @@ class PeerInputFilter
 
     protected function ValidatePostPureStructure(mixed $profilepost, array $options = []): bool
     {
+        $postConst = ConstantsConfig::post();
         if (is_array($profilepost)) {
             $profilepost = (object)$profilepost;
         }
 
         return isset($profilepost->postid) && $this->Uuid($profilepost->postid) &&
                isset($profilepost->userid) && $this->Uuid($profilepost->userid) &&
-               isset($profilepost->title) && $this->StringLength($profilepost->title, ['min' => 3, 'max' => 96]) &&
+               isset($profilepost->title) && $this->StringLength($profilepost->title, ['min' => $postConst['TITLE']['MIN_LENGTH'], 'max' => $postConst['TITLE']['MAX_LENGTH']]) &&
                isset($profilepost->contenttype) && $this->InArray($profilepost->contenttype, ['haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery']]) &&
-               isset($profilepost->media) && $this->StringLength($profilepost->media, ['min' => 10, 'max' => 100]) &&
-               isset($profilepost->mediadescription) && $this->StringLength($profilepost->mediadescription, ['min' => 3, 'max' => 440]) &&
+               isset($profilepost->media) && $this->StringLength($profilepost->media, ['min' => $postConst['MEDIA']['MIN_LENGTH'], 'max' => $postConst['MEDIA']['MAX_LENGTH']]) &&
+               isset($profilepost->mediadescription) && $this->StringLength($profilepost->mediadescription, ['min' => $postConst['MEDIADESCRIPTION']['MIN_LENGTH'], 'max' => $postConst['MEDIADESCRIPTION']['MAX_LENGTH']]) &&
                isset($profilepost->amountlikes) && $this->IsNumeric($profilepost->amountlikes) &&
                isset($profilepost->amountdislikes) && $this->IsNumeric($profilepost->amountdislikes) &&
                isset($profilepost->amountviews) && $this->IsNumeric($profilepost->amountviews) &&
