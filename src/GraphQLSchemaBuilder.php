@@ -890,7 +890,7 @@ class GraphQLSchemaBuilder
                     return $root['postid'] ?? '';
                 },
                 'advertisementtype' => function (array $root): string {
-                    return strtoupper($root['status']) ?? '';
+                    return strtoupper($root['status']);
                 },
                 'startdate' => function (array $root): string {
                     return $root['timestart'] ?? '';
@@ -1883,7 +1883,7 @@ class GraphQLSchemaBuilder
                     return $root['createdat'] ?? '';
                 },
                 'type' => function (array $root): string {
-                    return strtoupper($root['status']) ?? 'BASIC';
+                    return strtoupper($root['status']);
                 },
                 'timeframeStart' => function (array $root): string {
                     return $root['timestart'] ?? '';
@@ -1922,7 +1922,7 @@ class GraphQLSchemaBuilder
                     return $root['postid'] ?? '';
                 },
                 'type' => function (array $root): string {
-                    return strtoupper($root['status']) ?? 'BASIC';
+                    return strtoupper($root['status']);
                 },
                 'timeframeStart' => function (array $root): string {
                     return $root['timestart'] ?? '';
@@ -3650,12 +3650,12 @@ class GraphQLSchemaBuilder
         );
 
         $this->logger->info('findAdvertiser', ['data' => $data]);
-        return [
-            'status' => 'success',
-            'counter' => count($data),
-            'ResponseCode' => empty($data) ? 21501 : 11501,
-            'affectedRows' => $data,
-        ];
+
+        return self::createSuccessResponse(
+            empty($data) ? 21501 : 11501,
+            $data,
+            false
+        );
     }
 
     protected function mapPostWithAdvertisement(Advertisements $advertise): ?array

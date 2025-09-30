@@ -1024,7 +1024,7 @@ class AdvertisementMapper
             'user' => [
                 'uid' => (string)$row['tuserid'],
                 'username' => (string)$row['tusername'],
-                'slug' => (string)$row['tslug'],
+                'slug' => (int)$row['tslug'],
                 'img' => (string)$row['timg'],
                 'isfollowed' => (bool)$row['tisfollowed'],
                 'isfollowing' => (bool)$row['tisfollowing'],

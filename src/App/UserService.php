@@ -1084,7 +1084,7 @@ class UserService
     {
         $this->logger->info('UserService.resetPasswordTokenVerify started');
 
-        if (empty($token) || !is_string($token)) {
+        if (empty($token)) {
             $this->logger->warning('Invalid reset token', ['token' => $token]);
             return self::respondWithError(31904);
         }

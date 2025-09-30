@@ -755,10 +755,10 @@ class ChatService
 //        $this->sendToWebSocket($requestData);
 
         return [
-    'status' => 'error',
-    'ResponseCode' => "00000",
-    'affectedRows' => [],
-];
+            'status' => 'error',
+            'ResponseCode' => "00000",
+            'affectedRows' => [],
+        ];
 
     }
 

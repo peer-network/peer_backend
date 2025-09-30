@@ -34,7 +34,7 @@ class Transaction
         $this->senderid = $data['senderid'] ?? null;
         $this->recipientid = $data['recipientid'] ?? null;
         $this->transactiontype = $data['transactiontype'] ?? null;
-        $this->tokenamount = (float)$data['tokenamount'] ?? null;
+        $this->tokenamount = (float)$data['tokenamount'];
         $this->transferaction = $data['transferaction'] ?? 'DEDUCT';
         $this->message = $data['message'] ?? null;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
