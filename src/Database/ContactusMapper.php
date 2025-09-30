@@ -254,32 +254,32 @@ class ContactusMapper
         }
     }
 
-    public function delete(int $id): bool
-    {
-        $this->logger->info("ContactusMapper.delete started", ['id' => $id]);
+    // public function delete(int $id): bool
+    // {
+    //     $this->logger->info("ContactusMapper.delete started", ['id' => $id]);
 
-        try {
-            $query = "DELETE FROM contactus WHERE msgid = :id";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':id', $id, \PDO::PARAM_INT); // Explizite Parameterbindung
+    //     try {
+    //         $query = "DELETE FROM contactus WHERE msgid = :id";
+    //         $stmt = $this->db->prepare($query);
+    //         $stmt->bindValue(':id', $id, \PDO::PARAM_INT); // Explizite Parameterbindung
 
-            $stmt->execute();
+    //         $stmt->execute();
 
-            $deleted = (bool) $stmt->rowCount();
-            if ($deleted) {
-                $this->logger->info("Deleted contact from database", ['id' => $id]);
-            } else {
-                $this->logger->info("No contact found to delete in database for id", ['id' => $id]);
-            }
+    //         $deleted = (bool) $stmt->rowCount();
+    //         if ($deleted) {
+    //             $this->logger->info("Deleted contact from database", ['id' => $id]);
+    //         } else {
+    //             $this->logger->info("No contact found to delete in database for id", ['id' => $id]);
+    //         }
 
-            return $deleted;
-        } catch (\Throwable $e) {
-            $this->logger->error("Error deleting contact from database", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'id' => $id,
-            ]);
-            throw new \RuntimeException("An error occurred while deleting the contact.");
-        }
-    }
+    //         return $deleted;
+    //     } catch (\Throwable $e) {
+    //         $this->logger->error("Error deleting contact from database", [
+    //             'error' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString(),
+    //             'id' => $id,
+    //         ]);
+    //         throw new \RuntimeException("An error occurred while deleting the contact.");
+    //     }
+    // }
 }

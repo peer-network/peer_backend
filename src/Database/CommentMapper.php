@@ -72,25 +72,25 @@ class CommentMapper
         return new Comment($daten);
     }
 
-    public function delete(string $commentid): bool
-    {
-        $this->logger->info("CommentMapper.delete started");
+    // public function delete(string $commentid): bool
+    // {
+    //     $this->logger->info("CommentMapper.delete started");
 
-        $query = "DELETE FROM comments WHERE commentid = :commentid";
+    //     $query = "DELETE FROM comments WHERE commentid = :commentid";
 
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['commentid' => $commentid]);
+    //     $stmt = $this->db->prepare($query);
+    //     $stmt->execute(['commentid' => $commentid]);
 
-        $deleted = (bool)$stmt->rowCount();
+    //     $deleted = (bool)$stmt->rowCount();
 
-        if ($deleted) {
-            $this->logger->info("Deleted comment from database", ['commentid' => $commentid]);
-        } else {
-            $this->logger->warning("No comment found to delete in database for", ['commentid' => $commentid]);
-        }
+    //     if ($deleted) {
+    //         $this->logger->info("Deleted comment from database", ['commentid' => $commentid]);
+    //     } else {
+    //         $this->logger->warning("No comment found to delete in database for", ['commentid' => $commentid]);
+    //     }
 
-        return $deleted;
-    }
+    //     return $deleted;
+    // }
 
     public function fetchAllByPostIdetaild(string $postId, string $currentUserId, int $offset = 0, int $limit = 10,?string $contentFilterBy = null): array
     {

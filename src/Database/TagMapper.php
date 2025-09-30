@@ -177,30 +177,30 @@ class TagMapper
         }
     }
 
-    public function delete(string $id): bool
-    {
-        $this->logger->info("TagMapper.delete started");
+    // public function delete(string $id): bool
+    // {
+    //     $this->logger->info("TagMapper.delete started");
 
-        try {
-            $query = "DELETE FROM tags WHERE tagid = :id";
-            $stmt = $this->db->prepare($query);
-            $stmt->execute(['id' => $id]);
+    //     try {
+    //         $query = "DELETE FROM tags WHERE tagid = :id";
+    //         $stmt = $this->db->prepare($query);
+    //         $stmt->execute(['id' => $id]);
 
-            $deleted = (bool)$stmt->rowCount();
-            if ($deleted) {
-                $this->logger->info("Deleted tag from database", ['id' => $id]);
-            } else {
-                $this->logger->warning("No tag found to delete in database for id", ['id' => $id]);
-            }
+    //         $deleted = (bool)$stmt->rowCount();
+    //         if ($deleted) {
+    //             $this->logger->info("Deleted tag from database", ['id' => $id]);
+    //         } else {
+    //             $this->logger->warning("No tag found to delete in database for id", ['id' => $id]);
+    //         }
 
-            return $deleted;
+    //         return $deleted;
 
-        } catch (\Throwable $e) {
-            $this->logger->error("Error deleting tag from database", [
-                'error' => $e->getMessage(),
-                'id' => $id,
-            ]);
-            throw $e;
-        }
-    }
+    //     } catch (\Throwable $e) {
+    //         $this->logger->error("Error deleting tag from database", [
+    //             'error' => $e->getMessage(),
+    //             'id' => $id,
+    //         ]);
+    //         throw $e;
+    //     }
+    // }
 }

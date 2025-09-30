@@ -120,23 +120,23 @@ class McapMapper
         return new Mcap($data);
     }
 
-    public function delete(int $capid): bool
-    {
-        $this->logger->info("McapMapper.delete started");
+    // public function delete(int $capid): bool
+    // {
+    //     $this->logger->info("McapMapper.delete started");
 
-        $query = "DELETE FROM mcap WHERE capid = :capid";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['capid' => $capid]);
+    //     $query = "DELETE FROM mcap WHERE capid = :capid";
+    //     $stmt = $this->db->prepare($query);
+    //     $stmt->execute(['capid' => $capid]);
 
-        $deleted = (bool)$stmt->rowCount();
-        if ($deleted) {
-            $this->logger->info("Deleted capid from database", ['capid' => $capid]);
-        } else {
-            $this->logger->warning("No capid found to delete in database", ['capid' => $capid]);
-        }
+    //     $deleted = (bool)$stmt->rowCount();
+    //     if ($deleted) {
+    //         $this->logger->info("Deleted capid from database", ['capid' => $capid]);
+    //     } else {
+    //         $this->logger->warning("No capid found to delete in database", ['capid' => $capid]);
+    //     }
 
-        return $deleted;
-    }
+    //     return $deleted;
+    // }
 
     protected function getLastPrice(): ?array
     {

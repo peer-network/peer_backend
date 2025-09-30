@@ -626,35 +626,35 @@ class ChatMapper
         }
     }
 
-    public function delete(string $id): bool
-    {
-        $this->logger->info("ChatMapper.delete started");
+    // public function delete(string $id): bool
+    // {
+    //     $this->logger->info("ChatMapper.delete started");
 
-        $query = "DELETE FROM chats WHERE chatid = :id";
+    //     $query = "DELETE FROM chats WHERE chatid = :id";
 
-        try {
-            $stmt = $this->db->prepare($query);
+    //     try {
+    //         $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
+    //         $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
 
-            $stmt->execute();
+    //         $stmt->execute();
 
-            $deleted = (bool)$stmt->rowCount();
-            if ($deleted) {
-                $this->logger->info("Deleted chat from database", ['id' => $id]);
-            } else {
-                $this->logger->warning("No chat found to delete in database for id", ['id' => $id]);
-            }
+    //         $deleted = (bool)$stmt->rowCount();
+    //         if ($deleted) {
+    //             $this->logger->info("Deleted chat from database", ['id' => $id]);
+    //         } else {
+    //             $this->logger->warning("No chat found to delete in database for id", ['id' => $id]);
+    //         }
 
-            return $deleted;
-        } catch (\Throwable $e) {
-            $this->logger->error("Error deleting chat from database", [
-                'exception' => $e->getMessage()
-            ]);
+    //         return $deleted;
+    //     } catch (\Throwable $e) {
+    //         $this->logger->error("Error deleting chat from database", [
+    //             'exception' => $e->getMessage()
+    //         ]);
             
-            throw new \RuntimeException("Failed to delete chat: " . $e->getMessage());
-        }
-    }
+    //         throw new \RuntimeException("Failed to delete chat: " . $e->getMessage());
+    //     }
+    // }
 
     public function deleteParticipant(string $chatid, string $participantId): bool
     {
@@ -687,36 +687,36 @@ class ChatMapper
         }
     }
 
-    public function deleteMessage(string $chatid, int $messid): bool
-    {
-        $this->logger->info("ChatMapper.deleteMessage started");
+    // public function deleteMessage(string $chatid, int $messid): bool
+    // {
+    //     $this->logger->info("ChatMapper.deleteMessage started");
 
-        $query = "DELETE FROM chatmessages WHERE chatid = :chatid AND messid = :messid";
+    //     $query = "DELETE FROM chatmessages WHERE chatid = :chatid AND messid = :messid";
 
-        try {
-            $stmt = $this->db->prepare($query);
+    //     try {
+    //         $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':chatid', $chatid, \PDO::PARAM_STR);
-            $stmt->bindValue(':messid', $messid, \PDO::PARAM_INT);
+    //         $stmt->bindValue(':chatid', $chatid, \PDO::PARAM_STR);
+    //         $stmt->bindValue(':messid', $messid, \PDO::PARAM_INT);
 
-            $stmt->execute();
+    //         $stmt->execute();
 
-            $deleted = (bool)$stmt->rowCount();
-            if ($deleted) {
-                $this->logger->info("Deleted message from chat", ['chatid' => $chatid, 'messid' => $messid]);
-            } else {
-                $this->logger->warning("No message found to delete from chat", ['chatid' => $chatid, 'messid' => $messid]);
-            }
+    //         $deleted = (bool)$stmt->rowCount();
+    //         if ($deleted) {
+    //             $this->logger->info("Deleted message from chat", ['chatid' => $chatid, 'messid' => $messid]);
+    //         } else {
+    //             $this->logger->warning("No message found to delete from chat", ['chatid' => $chatid, 'messid' => $messid]);
+    //         }
 
-            return $deleted;
-        } catch (\Throwable $e) {
-            $this->logger->error("Error deleting message from chat", [
-                'exception' => $e->getMessage()
-            ]);
+    //         return $deleted;
+    //     } catch (\Throwable $e) {
+    //         $this->logger->error("Error deleting message from chat", [
+    //             'exception' => $e->getMessage()
+    //         ]);
 
-            throw new \RuntimeException("Failed to delete message from chat: " . $e->getMessage());
-        }
-    }
+    //         throw new \RuntimeException("Failed to delete message from chat: " . $e->getMessage());
+    //     }
+    // }
 
     public function findChatser(string $currentUserId, ?array $args = []): array
     {

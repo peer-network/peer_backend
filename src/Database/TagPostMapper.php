@@ -100,23 +100,23 @@ class TagPostMapper
         return new TagPost($data);
     }
 
-    public function deleteByPostId(string $postid): bool
-    {
-        $this->logger->info("TagPostMapper.deleteByPostId started");
+    // public function deleteByPostId(string $postid): bool
+    // {
+    //     $this->logger->info("TagPostMapper.deleteByPostId started");
 
-        $query = "DELETE FROM post_tags WHERE postid = :postid";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['postid' => $postid]);
+    //     $query = "DELETE FROM post_tags WHERE postid = :postid";
+    //     $stmt = $this->db->prepare($query);
+    //     $stmt->execute(['postid' => $postid]);
 
-        $deleted = (bool) $stmt->rowCount();
-        if ($deleted) {
-            $this->logger->info("Deleted post_tags by postid from database", ['postid' => $postid]);
-        } else {
-            $this->logger->warning("No post_tags found to delete for postid", ['postid' => $postid]);
-        }
+    //     $deleted = (bool) $stmt->rowCount();
+    //     if ($deleted) {
+    //         $this->logger->info("Deleted post_tags by postid from database", ['postid' => $postid]);
+    //     } else {
+    //         $this->logger->warning("No post_tags found to delete for postid", ['postid' => $postid]);
+    //     }
 
-        return $deleted;
-    }
+    //     return $deleted;
+    // }
 
     public function deleteByTagId(string $tagid): bool
     {
