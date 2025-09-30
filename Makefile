@@ -11,6 +11,11 @@ export IMAGE_TAG
 # Force Docker Compose to use .env.ci instead of auto-loading .env
 export COMPOSE_ENV_FILE=.env.ci
 
+# Permanent Postgres settings
+PERM_DB_CONTAINER = $(COMPOSE_PROJECT_NAME)_pg_perm
+PERM_DB_VOLUME    = $(COMPOSE_PROJECT_NAME)_perm_db_data
+PERM_DB_PORT      = 5433
+
 VOLUME_NAME = $(COMPOSE_PROJECT_NAME)_db_data
 COMPOSE_OVERRIDE = docker-compose.override.local.yml
 COMPOSE_FILES = -f docker-compose.yml $(if $(wildcard $(COMPOSE_OVERRIDE)),-f $(COMPOSE_OVERRIDE))
@@ -139,6 +144,52 @@ restart: ## Soft restart with fresh DB but keep current code & vendors
 	done
 
 	@echo "Soft restart completed. DB is clean and current code is live!"
+
+permanent-db: ## Start a permanent Postgres container (data persists)
+	@echo "Starting permanent Postgres..."
+	docker run -d \
+		--name $(PERM_DB_CONTAINER) \
+		--restart unless-stopped \
+		-e POSTGRES_USER=$(DB_USERNAME) \
+		-e POSTGRES_PASSWORD=$(DB_PASSWORD) \
+		-e POSTGRES_DB=$(DB_DATABASE) \
+		-v $(PERM_DB_VOLUME):/var/lib/postgresql/data \
+		-p $(PERM_DB_PORT):5432 \
+		postgres:15 || echo "Permanent DB already running"
+
+	@echo "Permanent DB is ready at localhost:$(PERM_DB_PORT)"
+
+stop-permanent-db: ## Stop permanent Postgres (data volume kept)
+	@docker stop $(PERM_DB_CONTAINER) || true
+	@docker rm $(PERM_DB_CONTAINER) || true
+	@echo "Permanent Postgres stopped. Data volume still exists."
+
+wipe-permanent-db: stop-permanent-db ## Stop the permanent DB and delete its data volume (full reset)
+	@docker volume rm $(PERM_DB_VOLUME) || true
+	@echo "Permanent Postgres volume $(PERM_DB_VOLUME) removed."
+
+swap-permanent-db: ## Point backend to permanent Postgres
+	@sed -i.bak \
+		-e 's/^DB_HOST=.*/DB_HOST=localhost/' \
+		-e 's/^DB_PORT=.*/DB_PORT=$(PERM_DB_PORT)/' \
+		.env.ci && rm -f .env.ci.bak
+	@echo "Backend now configured to use permanent DB at localhost:$(PERM_DB_PORT)"
+
+swap-temp-db: ## Point backend back to ephemeral Postgres (make dev)
+	@sed -i.bak \
+		-e 's/^DB_HOST=.*/DB_HOST=db/' \
+		-e 's/^DB_PORT=.*/DB_PORT=5432/' \
+		.env.ci && rm -f .env.ci.bak
+	@echo "Backend now configured to use ephemeral DB inside Docker"
+
+show-db-mode: ## Show whether backend is using permanent or ephemeral DB
+	@if grep -q '^DB_HOST=localhost' .env.ci && grep -q '^DB_PORT=$(PERM_DB_PORT)' .env.ci; then \
+		echo "Backend is configured to use PERMANENT DB at localhost:$(PERM_DB_PORT)"; \
+	elif grep -q '^DB_HOST=db' .env.ci && grep -q '^DB_PORT=5432' .env.ci; then \
+		echo "⚡ Backend is configured to use EPHEMERAL DB inside Docker (db:5432)"; \
+	else \
+		echo "Could not detect DB mode. Please check .env.ci"; \
+	fi
 
 ensure-jq: ## Ensure jq is installed (auto-install if missing)
 	@command -v jq >/dev/null 2>&1 || { \
