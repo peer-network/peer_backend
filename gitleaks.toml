@@ -36,6 +36,8 @@ regexes = [
   '''3f6d55c1-9731-4f28-8b85-5a30cd7c5cc4''',
   '''85d5f836-b1f5-4c4e-9381-1b058e13df94''',
   '''334ce5b3-813d-4fb4-86be-ac88fd63b803''',
+  '''1c9448a1-3608-423f-a038-2f267c943151.webp''',
+  '''hasShortActiveAdWithUpcomingAd''',
   '''existing_advertisementId_[0-9]+''',
   '''testuser[0-9]+@example\.com''',
   '''LogWin(Service|Mapper)\.\w+''',
