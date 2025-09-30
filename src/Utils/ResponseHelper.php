@@ -5,6 +5,10 @@ namespace Fawaz\Utils;
 
 trait ResponseHelper
 {
+    // public function __construct(
+    //     private ResponseMessagesProvider $responseMessagesProvider
+    // ) {}
+
     private function argsToJsString($args) {
         return json_encode($args);
     }

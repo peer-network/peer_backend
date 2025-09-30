@@ -15264,7 +15264,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Globalwins {\n    globalwins {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation Globalwins {\n    globalwins {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -15370,7 +15370,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Gemsters {\n    gemsters(day: D0) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            winStatus {\n                totalGems\n                gemsintoken\n                bestatigung\n            }\n            userStatus {\n                userid\n                gems\n                tokens\n                percentage\n                details {\n                    gemid\n                    userid\n                    postid\n                    fromid\n                    gems\n                    numbers\n                    whereby\n                    createdat\n                }\n            }\n        }\n    }\n}\n",
+						"query": "mutation Gemsters {\n    gemsters(day: D0) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            winStatus {\n                totalGems\n                gemsintoken\n                bestatigung\n            }\n            userStatus {\n                userid\n                gems\n                tokens\n                percentage\n                details {\n                    gemid\n                    userid\n                    postid\n                    fromid\n                    gems\n                    numbers\n                    whereby\n                    createdat\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
