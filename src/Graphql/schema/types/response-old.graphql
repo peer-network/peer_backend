@@ -1,0 +1,297 @@
+type DefaultResponse {
+  status: String!
+  ResponseCode: String
+  # ResponseMessage: String
+}
+
+type HelloResponse {
+  currentuserid: ID
+  currentVersion: String
+  wikiLink: String
+  lastMergedPullRequestNumber: String
+  companyAccountId: ID
+}
+
+type ReferralResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: ReferralInfo
+}
+
+type ContactusResponsePayload {
+  msgid: Decimal,
+  email: String,
+  name: String,
+  message: String,
+  ip: String,
+  createdat: String
+}
+
+type ContactusResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: ContactusResponsePayload
+}
+
+type RegisterResponse {
+  status: String
+  ResponseCode: String
+  userid: ID
+}
+
+type ResetPasswordRequestResponse {
+  status: String!
+  ResponseCode: String
+  nextAttemptAt: String
+}
+
+type AuthPayload {
+  status: String!
+  ResponseCode: String
+  accessToken: String
+  refreshToken: String
+}
+
+type TransactionResponse {
+  status: String!
+  ResponseCode: String!
+  affectedRows: [Transaction!]
+}
+
+type TransferTokenResponse {
+  status: String!
+  ResponseCode: String!
+  affectedRows: TransferToken!
+}
+
+type ListTodaysInteractionsResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: TodaysInteractionsData
+}
+
+type PostInteractionResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: [ProfileUser!]
+}
+
+type GetDailyResponse {
+  status: String!
+  ResponseCode: String!
+  affectedRows: [DailyFreeResponse]
+}
+
+type DailyFreeResponse {
+  name: String!
+  used: Int!
+  available: Int!
+}
+
+type PostEligibilityResponse {
+  status: String!
+  ResponseCode: String!
+  eligibilityToken: String!
+}
+
+type UserInfoResponse {
+  status: String!
+  ResponseCode: String!
+  affectedRows: UserInfo
+}
+
+type PostInfoResponse {
+  status: String!
+  ResponseCode: String!
+  affectedRows: PostInfo
+}
+
+type CommentInfoResponse {
+  status: String!
+  ResponseCode: String!
+  affectedRows: CommentInfo
+}
+
+type ChatResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [Chat!]
+}
+
+type FollowStatusResponse {
+  status: String!
+  ResponseCode: String
+  isfollowing: Boolean
+}
+
+type UserPreferencesResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: UserPreferences
+}
+
+type AddPostResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: PostInfo
+}
+
+type AddChatResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: ChatInfo
+}
+
+type AddChatmessageResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [ChatMessageInfo]
+}
+
+type BasicUserInfoResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: BasicUserInfo
+}
+
+type UserFriendsResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [BasicUserInfo]
+}
+
+type FollowRelationsResponse {
+  status: String
+  counter: Int!
+  ResponseCode: String
+  affectedRows: FollowRelations
+}
+
+type BlockedUsersResponse {
+  status: String
+  counter: Int!
+  ResponseCode: String
+  affectedRows: BlockedUsers
+}
+
+type UserListResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [User]
+}
+
+type TagSearchResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [Tag]
+}
+
+type PostResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: Post
+}
+
+type PostListResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [Post!]
+}
+
+type CommentResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [Comment]
+}
+
+type ReferralInfoResponse {
+  status: String
+  ResponseCode: String
+  referralUuid: ID
+  referralLink: String
+}
+type ReferralListResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String!
+  affectedRows: ReferralUsers!
+}
+
+type GetActionPricesResponse {
+    status: String!
+    ResponseCode: String!
+    affectedRows: ActionPriceResult!
+}
+
+type TokenomicsResponse {
+  status: String!
+  ResponseCode: Int!                         
+  actionTokenPrices: ActionPriceResult!
+  actionGemsReturns: ActionGemsReturns!
+  mintingData: MintingData!
+}
+
+type DailyGemStatusResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DailyGemStatusData
+}
+
+type DailyGemsResultsResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DailyGemsResultsData
+}
+
+type GemstersResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: GemstersData
+}
+
+type GemsterResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: DailyGemStatusData
+}
+
+type LiquidityPoolResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: LiquidityPoolData
+}
+
+type TestingPoolResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: LiquidityPoolData
+}
+
+type PostCommentsResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [PostCommentsData]
+}
+
+type PercentBeforeTransactionResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: PercentBeforeTransactionData
+}
+
+type RefreshMarketCapResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: RefreshMarketCapData
+}
