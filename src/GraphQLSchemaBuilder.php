@@ -1070,6 +1070,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'ListAdvertisementPostsResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.ListAdvertisementPostsResponse Resolvers');
                     return $root['status'] ?? '';

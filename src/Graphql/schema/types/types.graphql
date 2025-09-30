@@ -1,16 +1,3 @@
-type AddPostResponse {
-  status: String!
-  ResponseCode: String
-  affectedRows: Postinfo
-}
-
-type ListAdvertisementPostsResponse {
-  status: String!
-  counter: Int!
-  ResponseCode: String
-  affectedRows: [AdvertisementPost!]
-}
-
 type AdvertisementPost {
   post: Post!
   advertisement: AdvCreator!
@@ -78,6 +65,15 @@ type AdvertisementRow {
   totalEuroCost: Float!
 }
 
+type ContactusResponsePayload {
+  msgid: Decimal,
+  email: String,
+  name: String,
+  message: String,
+  ip: String,
+  createdat: String
+}
+
 type ListAdvertisementData {
   status: String!
   ResponseCode: String
@@ -128,6 +124,7 @@ type ProfileUser {
   img: String
   isfollowed: Boolean
   isfollowing: Boolean
+  isfriend: Boolean
 }
 
 type ReferralInfo {

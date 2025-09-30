@@ -1,3 +1,18 @@
+type DefaultResponse {
+  status: String!
+  RequestId: String
+  ResponseCode: String
+  ResponseMessage: String
+}
+
+type ListAdvertisementPostsResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  counter: Int!
+  affectedRows: [AdvertisementPost!]
+}
+
 type HelloResponse {
   currentuserid: ID
   currentVersion: String
@@ -6,27 +21,11 @@ type HelloResponse {
   companyAccountId: ID
 }
 
-type DefaultResponse {
-  status: String!
-  RequestId: String
-  ResponseCode: String
-  ResponseMessage: String
-}
-
 type ReferralResponse {
   meta: DefaultResponse
   status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
   ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: ReferralInfo
-}
-
-type ContactusResponsePayload {
-  msgid: Decimal,
-  email: String,
-  name: String,
-  message: String,
-  ip: String,
-  createdat: String
 }
 
 type ContactusResponse {
