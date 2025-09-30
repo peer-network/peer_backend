@@ -47,7 +47,7 @@ class AlphaMintService
     public function alphaMint(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return self::createResponse(60501);
+            return self::respondWithError(60501);
         }
 
         $this->logger->info('UserService.alphaMint started');
@@ -83,7 +83,7 @@ class AlphaMintService
 
                 if(!$alphaUsers || !is_array($alphaUsers)) {
                     $this->logger->error('Failed to load alpha users data from JSON file');
-                    return self::createResponse(41020);
+                    return self::respondWithError(41020);
                 }
                 $userCounts = 0;
                 $excluedUsers = [];
@@ -133,7 +133,7 @@ class AlphaMintService
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Failed to mint alpha', ['exception' => $e]);
-            return self::createResponse(41020);
+            return self::respondWithError(41020);
         }
     }
 

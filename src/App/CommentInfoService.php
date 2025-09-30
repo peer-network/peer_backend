@@ -46,11 +46,11 @@ class CommentInfoService
     public function deleteCommentInfo(string $commentId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this::createResponse(60501);
+            return $this::respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this::createResponse(30201);
+            return $this::respondWithError(30201);
         }
 
         $this->logger->info('CommentInfoService.deleteCommentInfo started');
@@ -58,18 +58,18 @@ class CommentInfoService
         if ($this->commentMapper->delete($commentId)) {
             return ['status' => 'success', 'ResponseCode' => "11606"];
         } else {
-            return $this::createResponse(41603);
+            return $this::respondWithError(41603);
         }
     }
 
     public function countLikes(string $commentId): int|array
     {
         if (!$this->checkAuthentication()) {
-            return $this::createResponse(60501);
+            return $this::respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this::createResponse(30103);
+            return $this::respondWithError(30103);
         }
 
         $this->logger->info('CommentInfoService.countLikes started');
@@ -77,7 +77,7 @@ class CommentInfoService
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentInfo) {
-            return $this::createResponse(31601);
+            return $this::respondWithError(31601);
         }
 
         return $this->commentInfoMapper->countLikes($commentId);
@@ -86,11 +86,11 @@ class CommentInfoService
     public function likeComment(string $commentId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this::createResponse(60501);
+            return $this::respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this::createResponse(30201);
+            return $this::respondWithError(30201);
         }
 
         $this->logger->info('CommentInfoService.likeComment started');
@@ -98,11 +98,11 @@ class CommentInfoService
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentInfo) {
-            return $this::createResponse(31601);
+            return $this::respondWithError(31601);
         }
 
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
-            return $this::createResponse(31606);
+            return $this::respondWithError(31606);
         }
 
         try{
@@ -111,7 +111,7 @@ class CommentInfoService
             $exists = $this->commentInfoMapper->addUserActivity('likeComment', $this->currentUserId, $commentId);
 
             if (!$exists) {
-                return $this::createResponse(31604);
+                return $this::respondWithError(31604);
             }
 
             $commentInfo->setLikes($commentInfo->getLikes() + 1);
@@ -119,11 +119,11 @@ class CommentInfoService
 
             $this->transactionManager->commit();
 
-            return $this::createResponse(11603);
+            return $this::createSuccessResponse(11603);
         }catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('Error while fetching comment data', ['exception' => $e]);
-            return $this::createResponse(41601);
+            return $this::respondWithError(41601);
         }
     }
 
@@ -132,40 +132,40 @@ class CommentInfoService
         $this->logger->info('CommentInfoService.reportComment started');
 
         if (!$this->checkAuthentication()) {
-            return $this::createResponse(60501);
+            return $this::respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
-            return $this::createResponse(30201);
+            return $this::respondWithError(30201);
         }
         
         try {
             $comment = $this->commentMapper->loadById($commentId);
             if (!$comment) {
                 $this->logger->error('Comment not found');
-                return $this::createResponse(31601);
+                return $this::respondWithError(31601);
             }
 
             $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
             if (!$commentInfo) {
                 $this->logger->error('Error while fetching comment data from db');
-                return $this::createResponse(31601);
+                return $this::respondWithError(31601);
             }
         } catch (\Exception $e) {
             $this->logger->error('Error while fetching data for report generation ', ['exception' => $e]);
-            return $this::createResponse(41601);
+            return $this::respondWithError(41601);
         }
         
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
             $this->logger->warning("User tries to report on his own comment");
-            return $this::createResponse(31607);
+            return $this::respondWithError(31607);
         }
         
         $contentHash = $comment->hashValue();
         if (empty($contentHash)) {
             $this->logger->error('Failed to generate content hash of content');
-            return $this::createResponse(41601);
+            return $this::respondWithError(41601);
         }
 
         try {
@@ -180,30 +180,30 @@ class CommentInfoService
 
             if ($exists === null) {
                 $this->logger->error("Failed to add report");
-                return $this::createResponse(41601);
+                return $this::respondWithError(41601);
             }
 
             if ($exists === true) {
                 $this->logger->error('Post report already exists');
-                return $this::createResponse(31605);
+                return $this::respondWithError(31605);
             }
 
             $commentInfo->setReports($commentInfo->getReports() + 1);
             $this->commentInfoMapper->update($commentInfo);
 
             $this->transactionManager->commit();
-            return $this::createResponse(11604);
+            return $this::createSuccessResponse(11604);
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('Error while adding report to db or updating info data', ['exception' => $e]);
-            return $this::createResponse(41601);
+            return $this::respondWithError(41601);
         }
     }
 
     public function findCommentInfo(string $commentId): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this::createResponse(60501);
+            return $this::respondWithError(60501);
         }
 
         $this->logger->info("CommentInfoService.findCommentInfo started");
@@ -211,7 +211,7 @@ class CommentInfoService
         $commentinfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentinfo) {
-            return $this::createResponse(31601);
+            return $this::respondWithError(31601);
         }
 
         $results = $commentinfo->getArrayCopy();

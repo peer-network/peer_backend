@@ -48,16 +48,16 @@ class McapService
             if ($results !== false) {
                 $affectedRows = $results->getArrayCopy();
                 $this->logger->info("McapService.loadLastId mcap found", ['affectedRows' => $affectedRows]);
-                return $this::createResponse(
+                return $this::createSuccessResponse(
                     11021,
                     $affectedRows,
                     false
                 );
             }
 
-            return $this::createResponse(31201);
+            return $this::respondWithError(31201);
         } catch (\Exception $e) {
-            return $this::createResponse(41206);
+            return $this::respondWithError(41206);
         }
     }
 
@@ -83,9 +83,9 @@ class McapService
                 return $success;
             }
 
-            return $this::createResponse(21001);
+            return $this::createSuccessResponse(21001);
         } catch (\Exception $e) {
-            return $this::createResponse(41207);
+            return $this::respondWithError(41207);
         }
     }
 }

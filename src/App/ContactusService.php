@@ -63,7 +63,7 @@ class ContactusService
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return $this::createResponse(00000);//"$field is required"
+                return $this::respondWithError(00000);//"$field is required"
             }
         }
         return [];
@@ -119,20 +119,20 @@ class ContactusService
     public function loadById(string $type, string $value): array
     {
         if (!$this->checkAuthentication()) {
-            return $this::createResponse(60501);
+            return $this::respondWithError(60501);
         }
 
         if (!in_array($type, ['id', 'name'], true)) {
-            return $this::createResponse(30105);
+            return $this::respondWithError(30105);
         }
 
         if (empty($value)) {
-            return $this::createResponse(30102);
+            return $this::respondWithError(30102);
         }
 
         if ($type === 'id') {
             if (!ctype_digit($value)) {
-                return $this::createResponse(30105);
+                return $this::respondWithError(30105);
             }
             $value = (int)$value;
         }
@@ -146,7 +146,7 @@ class ContactusService
             $exist = ($type === 'id') ? $this->contactUsMapper->loadById($value) : $this->contactUsMapper->loadByName($value);
 
             if ($exist === null) {
-                return $this::createResponse(40401);
+                return $this::respondWithError(40401);
             }
 
             $existData = $exist->getArrayCopy();
@@ -166,18 +166,18 @@ class ContactusService
                 'value' => $value,
             ]);
 
-            return $this::createResponse(40301);
+            return $this::respondWithError(40301);
         }
     }
 
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this::createResponse(60501);
+            return $this::respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this::createResponse(30101);
+            return $this::respondWithError(30101);
         }
 
         $this->logger->info("ContactusService.fetchAll started", [
@@ -188,7 +188,7 @@ class ContactusService
             $exist = $this->contactUsMapper->fetchAll($args);
 
             if (empty($exist)) {
-                return $this::createResponse(40401);
+                return $this::respondWithError(40401);
             }
 
             $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $exist);
@@ -206,7 +206,7 @@ class ContactusService
                 'args' => $args,
             ]);
 
-            return $this::createResponse(40301);
+            return $this::respondWithError(40301);
         }
     }
 }

@@ -39,7 +39,7 @@ class PeerTokenService
         $this->logger->info('WalletService.transferToken started');
 
         if (!$this->checkAuthentication()) {
-            return $this::createResponse(60501);
+            return $this::respondWithError(60501);
         }
         try {
             $this->transactionManager->beginTransaction();
@@ -51,7 +51,7 @@ class PeerTokenService
             } else {
                 $this->logger->info('PeerTokenService.transferToken completed successfully', ['response' => $response]);
                 $this->transactionManager->commit();
-                return $this::createResponse(
+                return $this::createSuccessResponse(
                     11211,
                     [
                         'tokenSend'                  => $response['tokenSend'],
@@ -65,7 +65,7 @@ class PeerTokenService
 
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
-            return $this::createResponse(41229); // Failed to transfer token
+            return $this::respondWithError(41229); // Failed to transfer token
         }
     }
 
@@ -81,7 +81,7 @@ class PeerTokenService
         try {
             $results = $this->peerTokenMapper->getTransactions($this->currentUserId, $args);
 
-            return $this::createResponse(
+            return $this::createSuccessResponse(
                 (int)$results['ResponseCode'],
                 $results['affectedRows'],
                 false // no counter needed for existing data

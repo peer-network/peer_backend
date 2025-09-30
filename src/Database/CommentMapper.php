@@ -389,7 +389,7 @@ class CommentMapper
 			$parentExists = $parentStmt->fetchColumn();
 
 			if (!$parentExists) {
-				return $this::createResponse(31601);
+				return $this::respondWithError(31601);
 			}
 
 			// Fetch child comments
@@ -490,7 +490,7 @@ class CommentMapper
 			return $comments;
 		} catch (\Throwable $e) {
 			$this->logger->error("Error in fetchByParentId", ['message' => $e->getMessage()]);
-			return $this::createResponse(41606);
+			return $this::respondWithError(41606);
 		}
 	}
 

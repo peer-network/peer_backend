@@ -50,7 +50,7 @@ final class UserServiceImpl implements UserServiceInterface
 
     public function Profile(?array $args = []): array {
         if (!self::checkAuthentication($this->currentUserId)) {
-            return self::createResponse(60501);
+            return self::respondWithError(60501);
         }
 
         $userId = $args['userid'] ?? $this->currentUserId;
@@ -60,10 +60,10 @@ final class UserServiceImpl implements UserServiceInterface
         $this->logger->info('UserService.Profile started');
 
         if (!self::isValidUUID($userId)) {
-            return self::createResponse(30102);
+            return self::respondWithError(30102);
         }
         if (!$this->userMapper->isUserExistById($userId)) {
-            return self::createResponse(31007);
+            return self::respondWithError(31007);
         }
 
         $specs = [
@@ -99,14 +99,14 @@ final class UserServiceImpl implements UserServiceInterface
                 $profileData["{$type}posts"] = [];
             }
 
-            return $this::createResponse(
+            return $this::createSuccessResponse(
                 11008,
                 $profileData,
                 false
             );
 
         } catch (\Throwable $e) {
-            return $this::createResponse(21001, []);
+            return $this::createSuccessResponse(21001, []);
         }
     }
 }

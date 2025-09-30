@@ -68,14 +68,14 @@ class WalletMapper
 
 		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
 			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
-			return self::createResponse(40701);
+			return self::respondWithError(40701);
 		}
 
 		$liqpool = $accountsResult['response'] ?? null;
 
 		if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
 			$this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
-			return self::createResponse(30102);
+			return self::respondWithError(30102);
 		}
 
 		$this->poolWallet = $liqpool['pool'];
@@ -89,7 +89,7 @@ class WalletMapper
             $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                 'Balance' => $currentBalance,
             ]);
-            return self::createResponse(51301);
+            return self::respondWithError(51301);
         }
 
         $recipient = (string) $args['recipient'];
@@ -98,7 +98,7 @@ class WalletMapper
                 'recipient' => $recipient,
                 'Balance' => $currentBalance,
             ]);
-            return self::createResponse(30201);
+            return self::respondWithError(30201);
         }
 
         $numberoftokens = (float) $args['numberoftokens'];
@@ -107,7 +107,7 @@ class WalletMapper
                 'numberoftokens' => $numberoftokens,
                 'Balance' => $currentBalance,
             ]);
-            return self::createResponse(30264);
+            return self::respondWithError(30264);
         }
 
         try {
@@ -122,17 +122,17 @@ class WalletMapper
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
              ]);
-            return self::createResponse(40301);
+            return self::respondWithError(40301);
         }
 
         if (empty($row)) {
             $this->logger->warning('Unknown Id Exception.');
-            return self::createResponse(31007);
+            return self::respondWithError(31007);
         }
 
         if ((string)$row === $userId) {
             $this->logger->warning('Send and Receive Same Wallet Error.');
-            return self::createResponse(31202);
+            return self::respondWithError(31202);
         }
 
         $requiredAmount = $numberoftokens * (1 + PEERFEE + POOLFEE + BURNFEE);
@@ -172,7 +172,7 @@ class WalletMapper
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return self::createResponse(40301);
+            return self::respondWithError(40301);
         }
 
         if ($currentBalance < $requiredAmount) {
@@ -181,7 +181,7 @@ class WalletMapper
                 'Balance' => $currentBalance,
                 'requiredAmount' => $requiredAmount,
             ]);
-            return self::createResponse(51301);
+            return self::respondWithError(51301);
         }
 
         try {
@@ -191,7 +191,7 @@ class WalletMapper
                 $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::createResponse(41401);
+                    return self::respondWithError(41401);
                 }
 
                 $args = [
@@ -211,7 +211,7 @@ class WalletMapper
                 if (empty($id)) {
                     $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::createResponse(41401);
+                    return self::respondWithError(41401);
                 }
 
                 $args = [
@@ -232,7 +232,7 @@ class WalletMapper
                     if (empty($id)) {
                         $this->db->rollBack();
                         $this->logger->critical('Failed to generate logwins ID');
-                        return self::createResponse(41401);
+                        return self::respondWithError(41401);
                     }
 
                     $args = [
@@ -253,7 +253,7 @@ class WalletMapper
                 if (empty($id)) {
                     $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::createResponse(41401);
+                    return self::respondWithError(41401);
                 }
 
                 $args = [
@@ -273,7 +273,7 @@ class WalletMapper
                 if (empty($id)) {
                     $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::createResponse(41401);
+                    return self::respondWithError(41401);
                 }
 
                 $args = [
@@ -293,7 +293,7 @@ class WalletMapper
                 if (empty($id)) {
                     $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::createResponse(41401);
+                    return self::respondWithError(41401);
                 }
 
                 $args = [
@@ -313,7 +313,7 @@ class WalletMapper
                 if (empty($id)) {
                     $this->db->rollBack();
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::createResponse(41401);
+                    return self::respondWithError(41401);
                 }
 
                 $args = [
@@ -335,7 +335,7 @@ class WalletMapper
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return self::createResponse(40301);        
+            return self::respondWithError(40301);        
         }
     }
 
@@ -684,12 +684,12 @@ class WalletMapper
 
         if (empty($userid)) {
             $this->logger->error('UserID is missing');
-            return self::createResponse(30101);
+            return self::respondWithError(30101);
         }
 
         if (!in_array($type, ['win', 'pay'], true)) {
             $this->logger->error('Type is not provided');
-            return self::createResponse(30105);
+            return self::respondWithError(30105);
         }
 
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -747,7 +747,7 @@ class WalletMapper
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return self::createResponse(40301);        }
+            return self::respondWithError(40301);        }
     }
 
     public function insertWinToLog(string $userId, array $args): bool
@@ -765,7 +765,7 @@ class WalletMapper
         $id = self::generateUUID();
         if (empty($id)) {
             $this->logger->critical('Failed to generate logwins ID');
-            return self::createResponse(41401);
+            return self::respondWithError(41401);
         }
 
         $sql = "INSERT INTO logwins 
@@ -856,7 +856,7 @@ class WalletMapper
     public function callGlobalWins(): array
     {
         if (!TABLESTOGEMS) {
-            return self::createResponse(41215);
+            return self::respondWithError(41215);
         }
 
         $wins = [
@@ -909,7 +909,7 @@ class WalletMapper
             $entries = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ' . $tableName, ['exception' => $e]);
-            return self::createResponse(41208);
+            return self::respondWithError(41208);
         }
 
         if (empty($entries)) {
@@ -935,7 +935,7 @@ class WalletMapper
                     if (empty($id)) {
                         $this->logger->critical('Failed to generate gems ID');
                         $this->db->rollback();
-                        return self::createResponse(41401);
+                        return self::respondWithError(41401);
                     }
 
                     $stmt->execute([
@@ -962,7 +962,7 @@ class WalletMapper
             } catch (\Throwable $e) {
                 $this->db->rollback();
                 $this->logger->error('Error inserting into gems for ' . $tableName, ['exception' => $e]);
-                return self::createResponse(41210);
+                return self::respondWithError(41210);
             }
         }
 
@@ -995,10 +995,10 @@ class WalletMapper
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
-            return self::createResponse(41208);
+            return self::respondWithError(41208);
         }
 
-        return $this::createResponse(11207, $entries, false);
+        return $this::createSuccessResponse(11207, $entries, false);
 
     }
 
@@ -1021,7 +1021,7 @@ class WalletMapper
         ];
 
         if (!array_key_exists($day, $dayOptionsRaw)) {
-            return self::createResponse(30105);
+            return self::respondWithError(30105);
         }
 
         $whereConditionRaw = $dayOptionsRaw[$day];
@@ -1063,11 +1063,11 @@ class WalletMapper
             //$this->logger->info('fetching data for ', ['data' => $data]);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
-            return self::createResponse(41209);
+            return self::respondWithError(41209);
         }
 
         if (empty($data)) {
-            return self::createResponse(21206);
+            return self::createSuccessResponse(21206);
         }
 
         $totalGems = isset($data[0]['overall_total']) ? $data[0]['overall_total'] : '0';
@@ -1126,7 +1126,7 @@ class WalletMapper
 
             } catch (\Throwable $e) {
                 $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
-                return self::createResponse(41212);
+                return self::respondWithError(41212);
             }
 
             return [
@@ -1146,7 +1146,7 @@ class WalletMapper
 
         if ($account <= $tokenAmount) {
             $this->logger->warning('Insufficient funds for the transaction', ['userid' => $userId, 'accountBalance' => $account, 'tokenAmount' => $tokenAmount]);
-            return self::createResponse(51401);
+            return self::respondWithError(51401);
         }
 
         try {
@@ -1157,7 +1157,7 @@ class WalletMapper
 
             if (!$result || !$result['invited']) {
                 $this->logger->warning('No inviter found for the given user', ['userid' => $userId]);
-                return self::createResponse(21401);
+                return self::createSuccessResponse(21401);
             }
 
             $inviterId = $result['invited'];
@@ -1169,7 +1169,7 @@ class WalletMapper
             $id = self::generateUUID();
             if (empty($id)) {
                 $this->logger->critical('Failed to generate logwins ID');
-                return self::createResponse(41401);
+                return self::respondWithError(41401);
             }
 
                 $args = [
@@ -1185,7 +1185,7 @@ class WalletMapper
                 $id = self::generateUUID();
                 if (empty($id)) {
                     $this->logger->critical('Failed to generate logwins ID');
-                    return self::createResponse(41401);
+                    return self::respondWithError(41401);
                 }
 
                 $args = [
@@ -1199,7 +1199,7 @@ class WalletMapper
 
                 $this->insertWinToLog($inviterId, $args);
 
-            return $this::createResponse(
+            return $this::createSuccessResponse(
                 11402,
                 [
                     'inviterId'          => $inviterId,
@@ -1212,7 +1212,7 @@ class WalletMapper
 
         } catch (\Throwable $e) {
             $this->logger->error('Throwable occurred during transaction', ['exception' => $e]);
-            return self::createResponse(41401);
+            return self::respondWithError(41401);
         }
     }
 
@@ -1234,7 +1234,7 @@ class WalletMapper
 
         if (!isset($mapping[$art])) {
             $this->logger->error('Invalid art type provided.', ['art' => $art]);
-            return self::createResponse(30105);
+            return self::respondWithError(30105);
         }
 
         $price = $mapping[$art]['price'];
@@ -1249,7 +1249,7 @@ class WalletMapper
                 'Balance' => $currentBalance,
                 'requiredAmount' => $price,
             ]);
-            return self::createResponse(51301);
+            return self::respondWithError(51301);
         }
 
         $args = [
@@ -1264,12 +1264,12 @@ class WalletMapper
         try {
             $results = $this->insertWinToLog($userId, $args);
             if ($results === false) {
-                return self::createResponse(41206);
+                return self::respondWithError(41206);
             }
 
             $results = $this->insertWinToPool($userId, $args);
             if ($results === false) {
-                return self::createResponse(41206);
+                return self::respondWithError(41206);
             }
 
             $this->logger->info('Wallet deduction successful.', [
@@ -1280,7 +1280,7 @@ class WalletMapper
                 'whereby' => $whereby,
             ]);
 
-            return $this::createResponse(
+            return $this::createSuccessResponse(
                 11209,
                 [
                     'userId'   => $userId,
@@ -1301,7 +1301,7 @@ class WalletMapper
                     'whereby' => $whereby,
                 ],
             ]);
-            return self::createResponse(41206);
+            return self::respondWithError(41206);
         }
     }
 

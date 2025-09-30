@@ -17,17 +17,43 @@ trait ResponseHelper
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return self::createResponse(30301);
+                return self::respondWithError(30301);
             }
         }
         return [];
     }
 
-    private function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
+    private function createSuccessResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
+    {
+        return $this->createResponse(
+            $responseCode,
+            $data,
+            $countEnabled,
+            $countKey,
+            false
+        );
+    }
+
+    private function respondWithError(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
+    {
+        return $this->createResponse(
+            $responseCode,
+            $data,
+            $countEnabled,
+            $countKey,
+            true
+        );
+    }
+    
+    private function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?bool $isError = null): array
     {
         // Determine if it is success (codes starting with 1 or 2) or error (3,4,5,6)
         $firstDigit = (int)substr((string)$responseCode, 0, 1);
         $isSuccess = $firstDigit === 1 || $firstDigit === 2;
+
+        if ($isError !== null) {
+            $isSuccess = !$isError;
+        }
 
         $response = [
             'status' => $isSuccess ? 'success' : 'error',
@@ -43,30 +69,6 @@ trait ResponseHelper
                 } else {
                     $response['counter'] = count($data);
                 }
-            }
-        }
-
-        return $response;
-    }
-
-    private function respondWithError(int $responseCode): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $responseCode];
-    }
-
-    private function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
             }
         }
 

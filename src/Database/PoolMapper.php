@@ -116,10 +116,10 @@ class PoolMapper
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
-            return $this::createResponse(40301);
+            return $this::respondWithError(40301);
         }
 
-        return $this::createResponse(11207, $entries, false);
+        return $this::createSuccessResponse(11207, $entries, false);
 
     }
 
@@ -142,7 +142,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            return $this::createResponse(30223);
+            return $this::respondWithError(30223);
         }
 
         $whereCondition = $dayOptions[$day];
@@ -181,11 +181,11 @@ class PoolMapper
             $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
-            return $this::createResponse(40301);
+            return $this::respondWithError(40301);
         }
 
         if (empty($data)) {
-            return $this::createResponse(21202); //'No records found for ' . $day
+            return $this::createSuccessResponse(21202); //'No records found for ' . $day
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
@@ -214,7 +214,7 @@ class PoolMapper
             ];
 
             if (!isset($mapping[$whereby])) {
-                return $this::createResponse(41221);
+                return $this::respondWithError(41221);
             }
 
             $whereby = $mapping[$whereby]['text'];
@@ -229,7 +229,7 @@ class PoolMapper
             ];
         }
         
-        return $this::createResponse(40301);
+        return $this::respondWithError(40301);
     }
 
     private function decimalToQ64_96(float $value): string

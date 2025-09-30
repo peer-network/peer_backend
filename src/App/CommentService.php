@@ -68,7 +68,7 @@ class CommentService
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return $this::createResponse(30265);
+                return $this::respondWithError(30265);
             }
         }
         return [];
@@ -77,11 +77,11 @@ class CommentService
     public function createComment(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this::createResponse(60501);
+            return $this::respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this::createResponse(30101);
+            return $this::respondWithError(30101);
         }
 
         $this->logger->info('CommentService.createComment started');
@@ -97,20 +97,20 @@ class CommentService
         $parentId = isset($args['parentid']) ? trim($args['parentid']) : null;
         
         if (!$this->validateUUID($postId)) {
-            return $this::createResponse(30209, ['postid' => $postId]);
+            return $this::respondWithError(30209, ['postid' => $postId]);
         }
 
         if ($parentId !== null && !$this->validateUUID($parentId)) {
-			return $this::createResponse(31603, ['parentId' => $parentId]);
+			return $this::respondWithError(31603, ['parentId' => $parentId]);
         }
 
         if ($content === '') {
-            return $this::createResponse(30101);
+            return $this::respondWithError(30101);
         }
 
         if ($parentId !== null) {
             if (!$this->commentMapper->isParentTopLevel($parentId)) {
-                return $this::createResponse(41604);
+                return $this::respondWithError(41604);
             }
         }
 
@@ -119,7 +119,7 @@ class CommentService
             $commentId = $this->generateUUID();
             if (empty($commentId)) {
                 $this->logger->critical('Failed to generate comment ID');
-                return $this::createResponse(41607);
+                return $this::respondWithError(41607);
             }
 
             $commentData = [
@@ -138,7 +138,7 @@ class CommentService
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
-                return $this::createResponse(30265);
+                return $this::respondWithError(30265);
             }
 
             $result = $this->commentMapper->insert($comment);
@@ -146,14 +146,14 @@ class CommentService
             if (!$result) {
                 $this->logger->error('Failed to insert comment into database', ['commentData' => $commentData]);
                 $this->transactionManager->rollback();
-                return $this::createResponse(41602);
+                return $this::respondWithError(41602);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
             if (!$postInfo) {
                 $this->logger->error('PostInfo not found for postId', ['postId' => $postId]);
                 $this->transactionManager->rollback();
-                return $this::createResponse(31602);
+                return $this::respondWithError(31602);
             }
 
             $postInfo->setComments($postInfo->getComments() + 1);
@@ -199,7 +199,7 @@ class CommentService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this::createResponse(41602);
+            return $this::respondWithError(41602);
         } finally {
             $this->logger->debug('createComment function execution completed');
         }
@@ -208,7 +208,7 @@ class CommentService
     public function fetchByParentId(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this::createResponse(60501);
+            return $this::respondWithError(60501);
         }
 
         $parentId = $args['parent'] ?? null;
@@ -217,7 +217,7 @@ class CommentService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if ($parentId !== null && !self::isValidUUID($parentId)) {
-            return $this::createResponse(30209);
+            return $this::respondWithError(30209);
         }
 
         $this->logger->info("CommentService.fetchByParentId started");
@@ -230,7 +230,7 @@ class CommentService
     public function fetchAllByPostId(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this::createResponse(60501);
+            return $this::respondWithError(60501);
         }
 
         $postId = $args['postid'] ?? null;
@@ -239,7 +239,7 @@ class CommentService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this::createResponse(30209);
+            return $this::respondWithError(30209);
         }
 
         $this->logger->info("CommentService.fetchAllByPostId started");
