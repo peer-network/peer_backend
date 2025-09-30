@@ -158,11 +158,29 @@ class ConstantsConfig
         return ConstantsConfig::DAILY_FREE;
     }
 
-    /**
+
+    /** 
      * @return array{
-     *     ACTION_TOKEN_PRICES: array{ post: float, like: float, dislike: float, comment: float },
-     *     ACTION_GEMS_RETURNS: array{ view: float, like: float, dislike: float, comment: float },
-     *     FEES: array{ PEER: float, POOL: float, BURN: float, INVITATION: float }
+     *     ACTION_TOKEN_PRICES: array{
+     *         post: float,
+     *         like: float,
+     *         dislike: float,
+     *         comment: float,
+     *         advertisementBasic: float,
+     *         advertisementPinned: float
+     *     },
+     *     ACTION_GEMS_RETURNS: array{
+     *         view: float,
+     *         like: float,
+     *         dislike: float,
+     *         comment: float
+     *     },
+     *     FEES: array{
+     *         INVITATION: float,
+     *         POOL: float,
+     *         PEER: float,
+     *         BURN: float
+     *     }
      * }
      */
     public static function tokenomics(): array {

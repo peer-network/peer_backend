@@ -105,10 +105,6 @@ trait ResponseHelper
 
     private static function validateDate(string $date, string $format = 'Y-m-d'): bool 
     {
-        if (!is_string($date)) {
-            return false;
-        }
-
         $d = \DateTime::createFromFormat($format, $date);
         return $d && $d->format($format) === $date;
     }

@@ -839,7 +839,7 @@ class PostService
         return $results;
     }
 
-    public function postExistsById(string $postId): bool
+    public function postExistsById(string $postId): bool|array
     {
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);

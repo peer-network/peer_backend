@@ -8,12 +8,6 @@ use Fawaz\App\Advertisements;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\Role;
 use Fawaz\App\Status;
-use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
-use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Psr\Log\LoggerInterface;
 
 class AdvertisementMapper
@@ -377,7 +371,7 @@ class AdvertisementMapper
         }
     }
 
-    private static function mapRowToAdvertisementt(array $row): ?array
+    private static function mapRowToAdvertisementt(array $row): array
     {
         $tags = is_string($row['tags'] ?? null) ? json_decode($row['tags'], true) : ($row['tags'] ?? []);
         if (!is_array($tags)) $tags = [];
