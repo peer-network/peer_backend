@@ -1,37 +1,39 @@
 input RegistrationInput {
   """User’s email address. Must be in valid email format."""
   email: String!
-  """Password: 8–128 chars; must match ^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$."""
+  """Password: {USER.PASSWORD.MIN_LENGTH}–{USER.PASSWORD.MAX_LENGTH} chars; must match {USER.PASSWORD.PATTERN}."""
   password: String!
-  """Username: 3–23 chars; must match ^[a-zA-Z0-9_-]+$."""
+  """Username: {USER.USERNAME.MIN_LENGTH}–{USER.USERNAME.MAX_LENGTH} chars; must match {USER.USERNAME.PATTERN}."""
   username: String!
-  """Optional Solana public key. 43–44 chars; must match ^[1-9A-HJ-NP-Za-km-z]{43,44}$."""
+  """Optional Solana public key. {USER.PKEY.MIN_LENGTH}–{USER.PKEY.MAX_LENGTH} chars; must match {USER.PKEY.PATTERN}."""
   pkey: String
   """Optional referral UUID (ties registration to a referrer)."""
   referralUuid: ID
 }
 
 input PostInput {
-  """Title (2–63 chars); must match ^[a-zA-Z0-9_]+$."""
+  """Title ({POST.TITLE.MIN_LENGTH}–{POST.TITLE.MAX_LENGTH} chars); must match {POST.TITLE.PATTERN}."""
   title: String!
-  """Media description (3–500 chars)."""
+  """Media description ({POST.MEDIA_DESCRIPTION.MIN_LENGTH}–{POST.MEDIA_DESCRIPTION.MAX_LENGTH} chars)."""
   mediadescription: String
   """Content type (ENUM: image, audio, video, text)."""
   contenttype: ContentType!
-  """Media files (base64-encoded strings). Each item length 30–3000. Max per content type: 1 audio, 5 images, 1 text, 2 videos."""
+  """Media files (base64-encoded strings). Each item length {POST.MEDIA.MIN_LENGTH}–{POST.MEDIA.MAX_LENGTH}.
+     Max per content type: {POST.MEDIA.LIMIT.AUDIO} audio, {POST.MEDIA.LIMIT.IMAGE} images, {POST.MEDIA.LIMIT.TEXT} text, {POST.MEDIA.LIMIT.VIDEO} videos."""
   media: [String!]
-  """Cover images (base64-encoded strings). Each item length 0–1000. Max per content type: 1/1/1/1."""
+  """Cover images (base64-encoded strings). Each item length {POST.COVER.MIN_LENGTH}–{POST.COVER.MAX_LENGTH}.
+     Max per content type: {POST.COVER.LIMIT.AUDIO}/{POST.COVER.LIMIT.IMAGE}/{POST.COVER.LIMIT.TEXT}/{POST.COVER.LIMIT.VIDEO}."""
   cover: [String!]
-  """Tags (max 10; each 2–53 chars; must match [a-zA-Z]+)."""
+  """Tags (max {POST.TAGS.LIMIT}; each {POST.TAG.MIN_LENGTH}–{POST.TAG.MAX_LENGTH} chars; must match {POST.TAG.PATTERN})."""
   tags: [String!]
   """Reference to files uploaded via multipart flow."""
   uploadedFiles: String
 }
 
 input ChatInput {
-  """Chat name (3–53 chars)."""
+  """Chat name ({CHAT.NAME.MIN_LENGTH}–{CHAT.NAME.MAX_LENGTH} chars)."""
   name: String!
-  """Chat image (base64). Length 30–100."""
+  """Chat image (base64). Length {CHAT.IMAGE.MIN_LENGTH}–{CHAT.IMAGE.MAX_LENGTH}."""
   image: String
   """List of recipient user IDs."""
   recipients: [String!]!
@@ -40,9 +42,9 @@ input ChatInput {
 input UpdateChatInput {
   """Chat ID (UUID)."""
   chatid: ID!
-  """New chat name (3–53 chars)."""
+  """New chat name ({CHAT.NAME.MIN_LENGTH}–{CHAT.NAME.MAX_LENGTH} chars)."""
   name: String
-  """New image (base64). Length 30–100."""
+  """New image (base64). Length {CHAT.IMAGE.MIN_LENGTH}–{CHAT.IMAGE.MAX_LENGTH}."""
   image: String
 }
 
