@@ -148,7 +148,81 @@ This drops the DB volume, recreates it, runs your migrations / seed and starts t
 
 ---
 
-### 6. Run Postman (Newman) Tests Locally
+### 6. Permanent Database (Optional)
+
+By default, make dev uses an ephemeral Postgres DB inside Docker (db:5432) — dropped and recreated often.
+If you want a database that persists across runs (not wiped on make dev), you can use the Permanent DB.
+Start permanent Postgres run:
+
+```bash
+make permanent-db
+```
+This will:
+
+- Starts a dedicated Postgres container bound to localhost:5433
+- Uses a named Docker volume (e.g. peer_backend_local_<user>_perm_db_data)
+- Keeps schema & data even if you stop/restart Docker
+
+### 6a. Stop permanent Postgres (keep data)
+
+Run:
+
+```bash
+make stop-permanent-db
+```
+- Stops and removes the container, but keeps your data volume
+
+### 6b. Wipe permanent Postgres (full reset)
+
+Run:
+
+```bash
+make wipe-permanent-db
+```
+- Stops the container
+- Deletes the named volume
+- Next make permanent-db will start with a fresh DB
+
+### 6c. Swap backend between DB modes
+
+Use ephemeral (default for make dev):
+
+```bash
+make swap-temp-db
+```
+
+- This points the backend to the ephemeral Postgres running inside Docker (db:5432).
+- It’s dropped and recreated whenever you run make dev or make restart-db, so it always starts fresh.
+
+Use permanent:
+
+```bash
+make swap-permanent-db
+```
+
+- It runs in its own container on localhost:5433.
+- It uses a named Docker volume (e.g. peer_backend_local_<user>_perm_db_data).
+- That volume is not touched by make dev or make restart-db.
+- So all schema changes, data inserts, and migrations stay in place between sessions.
+
+The only time you lose data is if you run:
+
+make wipe-permanent-db .
+
+### 6d. Check current db mode:
+
+```bash
+make show-db-mode
+```
+
+- Example:
+
+⚡ Backend is configured to use EPHEMERAL DB inside Docker (db:5432)
+Backend is configured to use PERMANENT DB at localhost:5433
+
+---
+
+### 7. Run Postman (Newman) Tests Locally
 
 Once the backend and database are up, run:
 
@@ -278,12 +352,19 @@ help : Show available make targets
 init : Prepare Postman environment files for testing
 install-hooks : Install Git hooks for pre-commit scanning
 logs : Tail backend container logs
+permanent-db : Start a permanent Postgres container (data persists)
 reload-backend : Rebuild and restart backend container
 reset-db-and-backend : Reset DB, backend, and remove all related Docker images
 restart-db : Restart only the database (fresh schema & data, keep backend as-is)
 restart : Soft restart with fresh DB but keep current code & vendors
 scan : Run Gitleaks scan on staged changes only
+show-db-mode : Show whether backend is using permanent or ephemeral DB
+stop-permanent-db : Stop permanent Postgres (data volume kept)
+swap-permanent-db : Point backend to permanent Postgres
+swap-temp-db : Point backend back to ephemeral Postgres (make dev)
+wipe-permanent-db : Delete permanent DB volume
 test : Run Newman tests inside Docker and generate HTML report
+wipe-permanent-db : Stop the permanent DB and delete its data volume (full reset)
 
 ---
 
