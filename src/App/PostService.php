@@ -790,6 +790,7 @@ class PostService
 
         $getOnly = $args['getOnly'] ?? null;
         $postOrCommentId = $args['postOrCommentId'] ?? null;
+        $contentFilterBy = $args['contentFilterBy'] ?? 'MYGRANDMAHATES';
 
 
         if($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])){
@@ -803,7 +804,14 @@ class PostService
         }
 
         try {
-            $result = $this->postMapper->getInteractions($getOnly, $postOrCommentId, $this->currentUserId, $offset, $limit);
+            $result = $this->postMapper->getInteractions(
+                $getOnly, 
+                $postOrCommentId, 
+                $this->currentUserId, 
+                $offset, 
+                $limit,
+                $contentFilterBy
+            );
 
             $this->logger->info("Interaction fetched successfully", ['count' => count($result)]);
             return $this->createSuccessResponse(11205, $result);
