@@ -17,8 +17,9 @@ const LIKE_=2;
 const DISLIKE_=3;
 const COMMENT_=4;
 const POST_=5;
+const POSTINVESTBASIC_=6;
+const POSTINVESTPREMIUM_=7;
 const INVITATION_=11;
-
 const DIRECTDEBIT_=14;
 const CREDIT_=15;
 const TRANSFER_=18;
@@ -46,23 +47,23 @@ class WalletMapper
 
         $this->logger->info('WalletMapper.transferToken started');
 
-		$accountsResult = $this->pool->returnAccounts();
+        $accountsResult = $this->pool->returnAccounts();
 
-		if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
-			$this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
-			return self::respondWithError(40701);
-		}
+        if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
+            $this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
+            return self::respondWithError(40701);
+        }
 
-		$liqpool = $accountsResult['response'] ?? null;
+        $liqpool = $accountsResult['response'] ?? null;
 
-		if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
-			$this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
-			return self::respondWithError(30102);
-		}
+        if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
+            $this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
+            return self::respondWithError(30102);
+        }
 
-		$this->poolWallet = $liqpool['pool'];
-		$this->burnWallet = $liqpool['burn'];
-		$this->peerWallet = $liqpool['peer'];
+        $this->poolWallet = $liqpool['pool'];
+        $this->burnWallet = $liqpool['burn'];
+        $this->peerWallet = $liqpool['peer'];
 
         $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
 
@@ -737,7 +738,7 @@ class WalletMapper
         $id = self::generateUUID();
         if (empty($id)) {
             $this->logger->critical('Failed to generate logwins ID');
-            return self::respondWithError(41401);
+            return false;
         }
 
         $sql = "INSERT INTO logwins 
@@ -1203,7 +1204,7 @@ class WalletMapper
     public function deductFromWallets(string $userId, ?array $args = []): array
     {
         $this->logger->info('WalletMapper.deductFromWallets started');
-        $this->logger->info('deductFromWallets commenrs args.', ['args' => $args]);
+        $this->logger->info('WalletMapper.deductFromWallets', ['args' => $args]);
 
         $postId = $args['postid'] ?? null;
         $art = $args['art'] ?? null;
@@ -1215,6 +1216,8 @@ class WalletMapper
             3 => ['price' => $prices['dislike'], 'whereby' => DISLIKE_, 'text' => 'Buy dislike'],
             4 => ['price' => $prices['comment'], 'whereby' => COMMENT_, 'text' => 'Buy comment'],
             5 => ['price' => $prices['post'], 'whereby' => POST_, 'text' => 'Buy post'],
+            6 => ['price' => $prices['advertisementBasic'], 'whereby' => POSTINVESTBASIC_, 'text' => 'Buy advertise basic'],
+            7 => ['price' => $prices['advertisementPinned'], 'whereby' => POSTINVESTPREMIUM_, 'text' => 'Buy advertise pinned'],
         ];
 
         if (!isset($mapping[$art])) {
@@ -1222,7 +1225,7 @@ class WalletMapper
             return self::respondWithError(30105);
         }
 
-        $price = $mapping[$art]['price'];
+        $price = (!empty($args['price']) && (int)$args['price']) ? (int)$args['price'] : $mapping[$art]['price'];
         $whereby = $mapping[$art]['whereby'];
         $text = $mapping[$art]['text'];
 
@@ -1249,11 +1252,19 @@ class WalletMapper
         try {
             $results = $this->insertWinToLog($userId, $args);
             if ($results === false) {
+                $this->logger->warning("Error occurred in deductFromWallets.insertWinToLog", [
+                    'userId' => $userId,
+                    'args' => $args,
+                ]);
                 return self::respondWithError(41205);
             }
 
             $results = $this->insertWinToPool($userId, $args);
             if ($results === false) {
+                $this->logger->warning("Error occurred in deductFromWallets.insertWinToPool", [
+                    'userId' => $userId,
+                    'args' => $args,
+                ]);
                 return self::respondWithError(41205);
             }
 
@@ -1284,6 +1295,10 @@ class WalletMapper
                     'numbers' => -abs($price),
                     'whereby' => $whereby,
                 ],
+            ]);
+            $this->logger->warning("Error occurred in deductFromWallets.Throwable", [
+                'userId' => $userId,
+                'args' => $args,
             ]);
             return self::respondWithError(41205);
         }
@@ -1380,7 +1395,7 @@ class WalletMapper
 
             return $newLiquidity;
         } catch (\Throwable $e) {
-            $this->logger->error('Database error in saveWalletEntry: ' . $e->getMessage());
+            $this->logger->error('Database error in saveWalletEntry: ' . $e);
             throw new \RuntimeException('Unable to save wallet entry');
         }
     }
@@ -1509,10 +1524,10 @@ class WalletMapper
     {
         $scaleFactor = \bcpow('2', '96');
 
-		// Convert float to plain decimal string 
-		$decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
+        // Convert float to plain decimal string 
+        $decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
 
-		$scaledValue = \bcmul($decimalString, $scaleFactor, 0);
+        $scaledValue = \bcmul($decimalString, $scaleFactor, 0);
 
         return $scaledValue;
     }

@@ -19,6 +19,7 @@ type Query {
   getUserInfo: UserInfoResponse!
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
   listPosts(filterBy: [PostFilterType!], contentFilterBy: ContentFilterType, IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
+  listAdvertisementPosts(filterBy: [ContentType!], userid: ID, postid: ID, tag: String, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): ListAdvertisementPostsResponse!
   getPostInfo(postid: ID!): PostInfoResponse!
   getCommentInfo(commentId: ID!): CommentInfoResponse!
   listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
@@ -39,6 +40,7 @@ type Query {
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   postInteractions(getOnly: GetOnly!, contentFilterBy: ContentFilterType, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
   getTokenomics: TokenomicsResponse!
+  advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
 }
 
 type Mutation {
@@ -68,4 +70,6 @@ type Mutation {
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: "Use `resolveTransferV2`.")
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
+  advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): ListAdvertisementData!
+  advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!, forceUpdate: Boolean): ListAdvertisementData!
 }

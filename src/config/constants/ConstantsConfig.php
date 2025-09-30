@@ -196,7 +196,9 @@ class ConstantsConfig
             'post'    => 20.0,   
             'like'    => 3.0,    
             'dislike' => 3.0,    
-            'comment' => 1.0,    
+            'comment' => 1.0,
+            'advertisementBasic' => 500.0,
+            'advertisementPinned' => 2000.0,
         ],
         'ACTION_GEMS_RETURNS' => [
             'view'    => 0.25,  

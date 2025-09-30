@@ -1,3 +1,12 @@
+input AdvertisementHistoryFilter {
+  from: Date
+  to: Date
+  type: AdvertisementType
+  advertisementId: ID
+  postId: ID
+  userId: ID
+}
+
 input RegistrationInput {
   email: String!
   password: String!

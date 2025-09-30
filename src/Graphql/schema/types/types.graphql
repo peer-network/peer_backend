@@ -1,3 +1,89 @@
+type AddPostResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: Postinfo
+}
+
+type ListAdvertisementPostsResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [AdvertisementPost!]
+}
+
+type AdvertisementPost {
+  post: Post!
+  advertisement: AdvCreator!
+}
+
+type AdvCreator {
+  advertisementid: ID!
+  postid: ID!
+  advertisementtype: AdvertisementType!
+  startdate: Date!
+  enddate: Date!
+  createdat: Date!
+  user: ProfileUser!
+}
+
+# merged alt + neu
+type Advertisement {
+  id: ID!
+  createdAt: Date!
+  type: AdvertisementType!
+  timeframeStart: Date!
+  timeframeEnd: Date!
+  totalTokenCost: Float!
+  totalEuroCost: Float!
+  gemsEarned: Float!
+  amountLikes: Int!
+  amountViews: Int!
+  amountComments: Int!
+  amountDislikes: Int!
+  amountReports: Int!
+  user: ProfileUser!
+  post: Post!
+}
+
+type TotalAdvertisementHistoryStats { 
+  tokenSpent: Float!
+  euroSpent: Float!
+  amountAds: Int!
+  gemsEarned: Float!
+  amountLikes: Int!
+  amountViews: Int! 
+  amountComments: Int!
+  amountDislikes: Int!
+  amountReports: Int!
+}
+
+type AdvertisementHistoryResult {
+  stats: TotalAdvertisementHistoryStats
+  advertisements: [Advertisement]
+}
+
+type ListedAdvertisementData {
+  status: String!
+  ResponseCode: String
+  affectedRows: AdvertisementHistoryResult
+}
+
+type AdvertisementRow {
+  id: ID!
+  createdAt: Date!
+  type: AdvertisementType!
+  timeframeStart: Date!
+  timeframeEnd: Date!
+  totalTokenCost: Float!
+  totalEuroCost: Float!
+}
+
+type ListAdvertisementData {
+  status: String!
+  ResponseCode: String
+  affectedRows: [AdvertisementRow]
+}
+
 type Post {
   id: ID!
   contenttype: String!
