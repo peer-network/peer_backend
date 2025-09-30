@@ -937,27 +937,6 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'PostInfo' => [
-                'userid' => function (array $root): string {
-                    $this->logger->info('Query.PostInfo Resolvers');
-                    return $root['userid'] ?? '';
-                },
-                'postid' => function (array $root): string {
-                    return $root['postid'] ?? '';
-                },
-                'title' => function (array $root): string {
-                    return $root['title'] ?? '';
-                },
-                'media' => function (array $root): string {
-                    return $root['media'] ?? '';
-                },
-                'mediadescription' => function (array $root): string {
-                    return $root['mediadescription'] ?? '';
-                },
-                'contenttype' => function (array $root): string {
-                    return $root['contenttype'] ?? '';
-                },
-            ],
             'Comment' => [
                 'commentid' => function (array $root): string {
                     $this->logger->info('Query.Comment Resolvers');
