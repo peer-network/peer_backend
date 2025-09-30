@@ -19,6 +19,7 @@ type Query {
   getUserInfo: UserInfoResponse!
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
   listPosts(filterBy: [PostFilterType!], contentFilterBy: ContentFilterType, IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
+  listAdvertisementPosts(filterBy: [ContentType!], userid: ID, postid: ID, tag: String, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): ListAdvertisementPostsResponse!
   getPostInfo(postid: ID!): PostInfoResponse!
   getCommentInfo(commentId: ID!): CommentInfoResponse!
   listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
@@ -37,6 +38,7 @@ type Query {
   getActionPrices: GetActionPricesResponse!
   postEligibility: PostEligibilityResponse!
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
+  advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
   postInteractions(getOnly: GetOnly!,contentFilterBy: ContentFilterType, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
   getTokenomics: TokenomicsResponse!
 }
@@ -68,6 +70,8 @@ type Mutation {
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: "Use `resolveTransferV2`.")
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
+  advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): ListAdvertisementData!
+  advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!, forceUpdate: Boolean): ListAdvertisementData!
 }
 
 scalar Decimal
@@ -80,6 +84,7 @@ enum TokenMovementFilterType{
   PAYMENT
   BURN
 }
+
 enum GetOnly {
   VIEW
   LIKE
@@ -96,6 +101,25 @@ enum SortFilterType {
   NEWEST
   OLDEST
 }
+
+enum AdDuration {
+  ONE_DAY
+  TWO_DAYS
+  THREE_DAYS
+  FOUR_DAYS
+  FIVE_DAYS
+  SIX_DAYS
+  SEVEN_DAYS
+}
+
+enum AdvertisementBasicPlan {
+  BASIC
+}
+
+enum AdvertisementPinnedPlan {
+  PINNED
+}
+
 enum PostActionType {
   LIKE
   DISLIKE
@@ -133,6 +157,7 @@ enum PostFilterType {
   FOLLOWED
   FOLLOWER
   VIEWED
+  FRIENDS
 }
 
 enum IgnoreOption {
@@ -148,6 +173,11 @@ enum PostSortType {
   VIEWS
   COMMENTS
   FOR_ME
+  OLDEST
+  FOLLOWER
+  FOLLOWED
+  RELEVANT
+  FRIENDS
 }
 
 enum DayFilterType {
@@ -160,6 +190,76 @@ enum DayFilterType {
   W0
   M0
   Y0
+}
+
+enum AdvertisementType {
+  PINNED
+  BASIC
+}
+
+enum AdvertisementSort {
+  NEWEST
+  OLDEST
+  BIGGEST_COST
+  SMALLEST_COST
+}
+
+# merged alt + neu
+type Advertisement {
+  id: ID!
+  createdAt: Date!
+  type: AdvertisementType!
+  timeframeStart: Date!
+  timeframeEnd: Date!
+  totalTokenCost: Float!
+  totalEuroCost: Float!
+  gemsEarned: Float!
+  amountLikes: Int!
+  amountViews: Int!
+  amountComments: Int!
+  amountDislikes: Int!
+  amountReports: Int!
+  user : ProfileUser!
+  post : Post!
+}
+
+type TotalAdvertisementHistoryStats { 
+  tokenSpent: Float!
+  euroSpent: Float!
+  amountAds: Int!
+  gemsEarned: Float!
+  amountLikes: Int!
+  amountViews: Int! 
+  amountComments: Int!
+  amountDislikes: Int!
+  amountReports: Int!
+}
+
+type AdvertisementHistoryResult {
+  stats: TotalAdvertisementHistoryStats
+  advertisements: [Advertisement]
+}
+
+type ListedAdvertisementData {
+  status: String!
+  ResponseCode: String
+  affectedRows: AdvertisementHistoryResult
+}
+
+type AdvertisementRow {
+  id: ID!
+  createdAt: Date!
+  type: AdvertisementType!
+  timeframeStart: Date!
+  timeframeEnd: Date!
+  totalTokenCost: Float!
+  totalEuroCost: Float!
+}
+
+type ListAdvertisementData {
+  status: String!
+  ResponseCode: String
+  affectedRows: [AdvertisementRow]
 }
 
 enum OnboardingType {
@@ -200,7 +300,6 @@ type TransferToken {
   tokensSubstractedFromWallet: Decimal
   createdat: String
 }
-
 
 type UserPreferences {
   contentFilteringSeverityLevel: ContentFilterType
@@ -497,6 +596,7 @@ type ProfileUser {
   img: String
   isfollowed: Boolean
   isfollowing: Boolean
+  isfriend: Boolean
 }
 
 type FollowRelations {
@@ -568,7 +668,7 @@ type Post {
   media: String!
   cover: String!
   mediadescription: String!
- createdat: Date!
+  createdat: Date!
   amountlikes: Int!
   amountviews: Int!
   amountcomments: Int!
@@ -579,8 +679,8 @@ type Post {
   isreported: Boolean!
   isdisliked: Boolean!
   issaved: Boolean!
-  tags: [String]!
   url: String!
+  tags: [String]!
   user: ProfileUser!
   comments: [Comment!]!
 }
@@ -603,6 +703,28 @@ type CommentResponse {
   counter: Int!
   ResponseCode: String
   affectedRows: [Comment]
+}
+
+type ListAdvertisementPostsResponse {
+  status: String!
+  counter: Int!
+  ResponseCode: String
+  affectedRows: [AdvertisementPost!]
+}
+
+type AdvertisementPost {
+  post: Post!
+  advertisement: AdvCreator!
+}
+
+type AdvCreator {
+  advertisementid: ID!
+  postid: ID!
+  advertisementtype: AdvertisementType!
+  startdate: Date!
+  enddate: Date!
+  createdat: Date!
+  user: ProfileUser!
 }
 
 type ReferralInfoResponse {
@@ -668,6 +790,15 @@ type GetActionPricesResponse {
     status: String!
     ResponseCode: String!
     affectedRows: ActionPriceResult!
+}
+
+input AdvertisementHistoryFilter {
+  from: Date
+  to: Date
+  type: AdvertisementType
+  advertisementId: ID
+  postId: ID
+  userId: ID
 }
 
 type TokenomicsResponse {
