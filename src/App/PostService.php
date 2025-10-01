@@ -20,18 +20,14 @@ use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 
-// USER PAY
-const PRICELIKE=3;
-const PRICEDISLIKE=5;
-const PRICECOMMENT=0.5;
-const PRICEPOST=20;
 const DISLIKE_=3;// whereby DISLIKE
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 
 class PostService
 {
-	use ResponseHelper;
+    use ResponseHelper;
+
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -91,7 +87,6 @@ class PostService
     private function argsToString($args) {
         return serialize($args);
     }
-
 
     private function validateCoverCount(array $args, string $contenttype): array {
         if (!is_array($args['cover'])) {
@@ -573,7 +568,7 @@ class PostService
         }
 
         if (!empty($filterBy) && is_array($filterBy)) {
-            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED'];
+            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED', 'FRIENDS'];
 
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
@@ -703,19 +698,22 @@ class PostService
 
         $this->logger->info('GraphQLSchemaBuilder.postEligibility started');
 
+        $dailyFree = ConstantsConfig::dailyFree()['DAILY_FREE_ACTIONS'];
+        $prices    = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
+
         try {
             $dailyLimits = [
-                'like' => DAILYFREELIKE,
-                'comment' => DAILYFREECOMMENT,
-                'post' => DAILYFREEPOST,
-                'dislike' => DAILYFREEDISLIKE,
+                'like' => $dailyFree['like'],
+                'comment' => $dailyFree['comment'],
+                'post' => $dailyFree['post'],
+                'dislike' => $dailyFree['dislike'],
             ];
 
             $actionPrices = [
-                'like' => PRICELIKE,
-                'comment' => PRICECOMMENT,
-                'post' => PRICEPOST,
-                'dislike' => PRICEDISLIKE,
+                'like' => $prices['like'],
+                'comment' => $prices['comment'],
+                'post' => $prices['post'],
+                'dislike' => $prices['dislike'],
             ];
 
             $actionMaps = [
@@ -792,6 +790,7 @@ class PostService
 
         $getOnly = $args['getOnly'] ?? null;
         $postOrCommentId = $args['postOrCommentId'] ?? null;
+        $contentFilterBy = $args['contentFilterBy'] ?? 'MYGRANDMAHATES';
 
 
         if($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])){
@@ -805,7 +804,14 @@ class PostService
         }
 
         try {
-            $result = $this->postMapper->getInteractions($getOnly, $postOrCommentId, $this->currentUserId, $offset, $limit);
+            $result = $this->postMapper->getInteractions(
+                $getOnly, 
+                $postOrCommentId, 
+                $this->currentUserId, 
+                $offset, 
+                $limit,
+                $contentFilterBy
+            );
 
             $this->logger->info("Interaction fetched successfully", ['count' => count($result)]);
             return $this->createSuccessResponse(11205, $result);
@@ -840,5 +846,21 @@ class PostService
 
         return $results;
     }
-    
+
+    public function postExistsById(string $postId): bool
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->info('PostService.postExistsById started');
+
+        try {
+            return $this->postMapper->postExistsById($postId);
+
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed fetch Post', ['postId' => $postId, 'exception' => $e]);
+            return false;
+        }
+    }
 }

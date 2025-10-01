@@ -488,11 +488,7 @@ class UserService
 
             if ($contentFiltering && !empty($contentFiltering)) {
                 $contentFilteringSeverityLevel = $contentFilterService->getContentFilteringSeverityLevel($contentFiltering);
-                
-                if($contentFilteringSeverityLevel === null){
-                    $this->logger->error('UserService.updateUserPreferences: failed to get ContentFilteringSeverityLevel');
-                    return $this->respondWithError(30103);
-                }
+
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
                 $userPreferences->setUpdatedAt();
             }
@@ -505,12 +501,7 @@ class UserService
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
             $contentFilteringSeverityLevelString = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
-
-            if ($contentFilteringSeverityLevelString === null) {
-                $this->logger->error('UserService.updateUserPreferences: failed to get contentFilteringSeverityLevelString');
-                $this->transactionManager->rollback();
-                return self::respondWithError(40301); // 402x1
-            }
+            
             $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
             $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
@@ -530,7 +521,7 @@ class UserService
 
     private function updateOnboardings($userPreferences, array $shownOnboardingsIn): void
     {
-        $available = ConstantsConfig::onboarding()['AVAILABLE_ONBOARDINGS'] ?? [];
+        $available = ConstantsConfig::onboarding()['AVAILABLE_ONBOARDINGS'];
         if (empty($available)) {
             $this->logger->error('updateUserPreferences: AVAILABLE_ONBOARDINGS list is empty');
             throw new \RuntimeException('No available onboardings configured', 40301);// List is empty, response code = 4XXXX
@@ -1087,7 +1078,39 @@ class UserService
         return $this->genericPasswordResetSuccessResponse();
 
     }
-    
+
+    /**
+     * Verify password reset token validity which was sent to user's email at the time of password reset request.
+     * 
+     */
+    public function resetPasswordTokenVerify(string $token): array
+    {
+        $this->logger->info('UserService.resetPasswordTokenVerify started');
+
+        if (empty($token) || !is_string($token)) {
+            $this->logger->warning('Invalid reset token', ['token' => $token]);
+            return self::respondWithError(31904);
+        }
+
+        try {
+            $isValidToken = $this->userMapper->getPasswordResetRequest($token);
+
+            if (!$isValidToken) {
+                $this->logger->warning('Invalid or expired reset token. ', ['token' => $token]);
+                return self::respondWithError(31904);
+            }
+
+            $this->logger->info('Token verified successfully', ['token' => $token]);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => 11902,
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Unexpected error during token verification', ['error' => $e->getMessage(), 'token' => $token]);
+            return self::respondWithError(41004);
+        }
+    }
     /**
      * Standard success response (avoids revealing account existence).
      */
