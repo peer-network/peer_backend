@@ -76,4 +76,57 @@ class ResponseMessagesValueInjector
         }
         return $constants;
     }
+
+    public static function injectSchemaPlaceholders(array $schemaFiles, ?string $suffix = '.generated.graphql'): array
+    {
+        $constants = (new ConstantsConfig())->getData();
+        $map = self::flattenConstantsMap($constants);
+
+        $report = [];
+        foreach ($schemaFiles as $in) {
+            if (!is_file($in)) {
+                continue;
+            }
+
+            $sdl = file_get_contents($in);
+            if ($sdl === false) {
+                throw new \RuntimeException("Cannot read schema: {$in}");
+            }
+
+            $patched = preg_replace_callback(
+                '/\{([A-Z0-9_.]+)\}/',
+                static fn(array $m) => $map[$m[1]] ?? $m[0],
+                $sdl
+            );
+
+            $out = $suffix ? ($in . $suffix) : $in;
+            if (file_put_contents($out, $patched) === false) {
+                throw new \RuntimeException("Cannot write schema: {$out}");
+            }
+
+            $report[$in] = $out;
+        }
+
+        return $report;
+    }
+
+    private static function flattenConstantsMap(array $data, string $prefix = ''): array
+    {
+        $out = [];
+        foreach ($data as $k => $v) {
+            $key = $prefix === '' ? (string)$k : $prefix . '.' . (string)$k;
+
+            if (is_array($v)) {
+                $out += self::flattenConstantsMap($v, $key);
+                continue;
+            }
+
+            if (is_bool($v)) {
+                $out[$key] = $v ? 'true' : 'false';
+            } else {
+                $out[$key] = addcslashes((string)$v, "\\\"");
+            }
+        }
+        return $out;
+    }
 }

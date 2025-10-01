@@ -90,11 +90,25 @@ class GraphQLSchemaBuilder
 
     public function getQueriesDependingOnRole(): ?string {
         $graphqlPath = "Graphql/schema/";
-        
-        $baseQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schema.graphql');
-        $guestOnlyQueries =  \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schemaguest.graphql');
-        $adminOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'admin_schema.graphql');
-        $bridgeOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql');
+        $suffix = getenv('GRAPHQL_SCHEMA_SUFFIX') ?: '';
+
+        $paths = [
+            'base'   => __DIR__ . '/' . $graphqlPath . 'schema.graphql',
+            'guest'  => __DIR__ . '/' . $graphqlPath . 'schemaguest.graphql',
+            'admin'  => __DIR__ . '/' . $graphqlPath . 'admin_schema.graphql',
+            'bridge' => __DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql',
+        ];
+
+        if ($suffix !== '') {
+            foreach ($paths as $key => $path) {
+                $paths[$key] .= $suffix;
+            }
+        }
+
+        $baseQueries      = \file_get_contents($paths['base']);
+        $guestOnlyQueries = \file_get_contents($paths['guest']);
+        $adminOnlyQueries = \file_get_contents($paths['admin']);
+        $bridgeOnlyQueries= \file_get_contents($paths['bridge']);
 
         $adminSchema = $baseQueries . $adminOnlyQueries;
         $guestSchema = $guestOnlyQueries;
@@ -121,16 +135,32 @@ class GraphQLSchemaBuilder
     public function build(): Schema|array
     {
         $graphqlPath = "Graphql/schema/";
-        $typesPath = "types/";
+        $typesPath   = "types/";
+        $suffix = getenv('GRAPHQL_SCHEMA_SUFFIX') ?: '';
 
-        $scalars = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "scalars.graphql");
-        $response = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "response.graphql");
-        $inputs = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "inputs.graphql");
-        $enum = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "enums.graphql");
-        $types = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql");
+        $paths = [
+            'scalars'  => __DIR__ . '/' . $graphqlPath . $typesPath . "scalars.graphql",
+            'response' => __DIR__ . '/' . $graphqlPath . $typesPath . "response.graphql",
+            'inputs'   => __DIR__ . '/' . $graphqlPath . $typesPath . "inputs.graphql",
+            'enums'    => __DIR__ . '/' . $graphqlPath . $typesPath . "enums.graphql",
+            'types'    => __DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql",
+        ];
+
+        if ($suffix !== '') {
+            foreach ($paths as $k => $p) {
+                if (is_file($p . $suffix)) {
+                    $paths[$k] = $p . $suffix;
+                }
+            }
+        }
+
+        $scalars  = \file_get_contents($paths['scalars']);
+        $response = \file_get_contents($paths['response']);
+        $inputs   = \file_get_contents($paths['inputs']);
+        $enum     = \file_get_contents($paths['enums']);
+        $types    = \file_get_contents($paths['types']);
 
         $schema = $this->getQueriesDependingOnRole();
-        
         if (empty($schema)){
             $this->logger->error('Invalid schema', ['schema' => $schema]);
             return $this->respondWithError(40301);
