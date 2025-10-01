@@ -63,7 +63,7 @@ type Query {
   "Not in use"
   listChatMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
 
-  "Check daily free interaction quota (see {DAILY_FREE.DAILY_FREE_ACTIONS.*})."
+  "Check daily free interaction quota (post {DAILY_FREE.DAILY_FREE_ACTIONS.post}, like {DAILY_FREE.DAILY_FREE_ACTIONS.like}, comment {DAILY_FREE.DAILY_FREE_ACTIONS.comment}, dislike {DAILY_FREE.DAILY_FREE_ACTIONS.dislike})."
   getDailyFreeStatus: GetDailyResponse!
 
   "Get current token liquidity balance"
@@ -84,19 +84,19 @@ type Query {
   "Returns a summary of today's interactions"
   listTodaysInteractions: ListTodaysInteractionsResponse!
 
-  "Return current action token prices (see {TOKENOMICS.ACTION_TOKEN_PRICES.*})."
+  "Return current action token prices (post {TOKENOMICS.ACTION_TOKEN_PRICES.post}, like {TOKENOMICS.ACTION_TOKEN_PRICES.like}, dislike {TOKENOMICS.ACTION_TOKEN_PRICES.dislike}, comment {TOKENOMICS.ACTION_TOKEN_PRICES.comment})."
   getActionPrices: GetActionPricesResponse!
 
   "Verify daily limits and wallet balance for post creation. If successful, returns a short-lived eligibilityToken required for uploading a post."
   postEligibility: PostEligibilityResponse!
 
-  "Return filtered list of token transactions (by type, direction, date range, sort, pagination {PAGING.*})."
+  "Return filtered list of token transactions (by type, direction, date range; pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
 
   "List users who interacted with a post/comment (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
 
-"Return global tokenomics configuration (prices {TOKENOMICS.ACTION_TOKEN_PRICES.*}, GEM returns {TOKENOMICS.ACTION_GEMS_RETURNS.*}, minting {MINTING.DAILY_NUMBER_TOKEN})."
+  "Return global tokenomics configuration (prices: post {TOKENOMICS.ACTION_TOKEN_PRICES.post}, like {TOKENOMICS.ACTION_TOKEN_PRICES.like}, dislike {TOKENOMICS.ACTION_TOKEN_PRICES.dislike}, comment {TOKENOMICS.ACTION_TOKEN_PRICES.comment}; GEM returns: view {TOKENOMICS.ACTION_GEMS_RETURNS.view}, like {TOKENOMICS.ACTION_GEMS_RETURNS.like}, dislike {TOKENOMICS.ACTION_GEMS_RETURNS.dislike}, comment {TOKENOMICS.ACTION_GEMS_RETURNS.comment}; minting {MINTING.DAILY_NUMBER_TOKEN})."
   getTokenomics: TokenomicsResponse!
 }
 

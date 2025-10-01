@@ -5,7 +5,7 @@ input RegistrationInput {
   password: String!
   """Username: {USER.USERNAME.MIN_LENGTH}–{USER.USERNAME.MAX_LENGTH} chars; must match {USER.USERNAME.PATTERN}."""
   username: String!
-  """Optional Solana public key. {USER.PKEY.MIN_LENGTH}–{USER.PKEY.MAX_LENGTH} chars; must match {USER.PKEY.PATTERN}."""
+  """Optional Solana public key. {WALLET.SOLANA_PUBKEY.MIN_LENGTH}–{WALLET.SOLANA_PUBKEY.MAX_LENGTH} chars; must match {WALLET.SOLANA_PUBKEY.PATTERN}."""
   pkey: String
   """Optional referral UUID (ties registration to a referrer)."""
   referralUuid: ID
@@ -14,17 +14,17 @@ input RegistrationInput {
 input PostInput {
   """Title ({POST.TITLE.MIN_LENGTH}–{POST.TITLE.MAX_LENGTH} chars); must match {POST.TITLE.PATTERN}."""
   title: String!
-  """Media description ({POST.MEDIA_DESCRIPTION.MIN_LENGTH}–{POST.MEDIA_DESCRIPTION.MAX_LENGTH} chars)."""
+  """Media description ({POST.MEDIADESCRIPTION.MIN_LENGTH}–{POST.MEDIADESCRIPTION.MAX_LENGTH} chars)."""
   mediadescription: String
   """Content type (ENUM: image, audio, video, text)."""
   contenttype: ContentType!
   """Media files (base64-encoded strings). Each item length {POST.MEDIA.MIN_LENGTH}–{POST.MEDIA.MAX_LENGTH}.
-     Max per content type: {POST.MEDIA.LIMIT.AUDIO} audio, {POST.MEDIA.LIMIT.IMAGE} images, {POST.MEDIA.LIMIT.TEXT} text, {POST.MEDIA.LIMIT.VIDEO} videos."""
+     Max per content type: {POST.MEDIALIMIT.AUDIO} audio, {POST.MEDIALIMIT.IMAGE} images, {POST.MEDIALIMIT.TEXT} text, {POST.MEDIALIMIT.VIDEO} videos."""
   media: [String!]
   """Cover images (base64-encoded strings). Each item length {POST.COVER.MIN_LENGTH}–{POST.COVER.MAX_LENGTH}.
-     Max per content type: {POST.COVER.LIMIT.AUDIO}/{POST.COVER.LIMIT.IMAGE}/{POST.COVER.LIMIT.TEXT}/{POST.COVER.LIMIT.VIDEO}."""
+     Max per content type: {POST.COVERLIMIT.AUDIO}/{POST.COVERLIMIT.IMAGE}/{POST.COVERLIMIT.TEXT}/{POST.COVERLIMIT.VIDEO}."""
   cover: [String!]
-  """Tags (max {POST.TAGS.LIMIT}; each {POST.TAG.MIN_LENGTH}–{POST.TAG.MAX_LENGTH} chars; must match {POST.TAG.PATTERN})."""
+  """Tags (max {POST.TAG.MAX_COUNT.CREATE}; each {POST.TAG.MIN_LENGTH}–{POST.TAG.MAX_LENGTH} chars; must match {POST.TAG.PATTERN})."""
   tags: [String!]
   """Reference to files uploaded via multipart flow."""
   uploadedFiles: String
