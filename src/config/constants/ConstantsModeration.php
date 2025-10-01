@@ -41,7 +41,7 @@ class ConstantsModeration
      * @var array
      */
     private const CONTENT_MODERATION_STATUS = [
-        'waitingForReview' => 'Waiting for review',
+        'waiting_for_review' => 'Waiting for review',
         'hidden' => 'Hidden',
         'restored' => 'Restored',
         'illegal' => 'Illegal',

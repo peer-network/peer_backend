@@ -1,0 +1,7 @@
+extend type Query {
+  moderationItems(userId: ID, status: ModerationStatus, offset: Int, limit: Int): ModerationItemListResponse!
+}
+
+# extend type Mutation {
+#   # updateModerationItemStatus(itemId: ID!, status: ModerationStatus!): ModerationItemResponse!
+# }

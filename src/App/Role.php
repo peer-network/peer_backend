@@ -13,7 +13,7 @@ final class Role {
     const CONTRIBUTOR = 32;
     const COORDINATOR = 64;
     const CREATOR = 128;
-    const SUPER_MODERATOR = 256;
+    const SUPER_MODERATOR = 256; // can be considered as moderators
     const DIRECTOR = 512;
     const EDITOR = 1024;
     const EMPLOYEE = 2048;

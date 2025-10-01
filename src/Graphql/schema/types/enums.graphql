@@ -127,3 +127,10 @@ enum DayFilterType {
 enum OnboardingType {
   INTROONBOARDING
 }
+
+enum ModerationStatus {
+  waiting_for_review
+  hidden
+  restored
+  illegal
+}

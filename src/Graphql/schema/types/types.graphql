@@ -484,3 +484,26 @@ type AllUserFriends {
   ResponseCode: String
   affectedRows: [AllUserInfo]
 }
+
+type ModerationItemListResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: [ModerationItem!]!
+  meta: DefaultResponse
+}
+type ModerationItem {
+  reportid: ID!
+  reporterid: ID!
+  targetid:  ID!
+  targettype: String!
+  status: String!
+  message: String!
+  createdat: String!
+  targetcontent: TargetContent
+}
+
+type TargetContent {
+  post: Post
+  comment: Comment
+  user: ProfileUser
+}

@@ -57,6 +57,7 @@ use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use Fawaz\App\PeerTokenService;
+use Fawaz\App\Role;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
@@ -101,8 +102,10 @@ class GraphQLSchemaBuilder
         $guestOnlyQueries =  \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schemaguest.graphql');
         $adminOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'admin_schema.graphql');
         $bridgeOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql');
+        $moderatorOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'moderator_schema.graphql');
 
         $adminSchema = $baseQueries . $adminOnlyQueries;
+        $moderatorSchema = $baseQueries . $moderatorOnlyQueries;
         $guestSchema = $guestOnlyQueries;
         $userSchema = $baseQueries;
         $bridgeSchema = $bridgeOnlyQueries;
@@ -119,6 +122,8 @@ class GraphQLSchemaBuilder
             $schema = $bridgeSchema;
         } elseif ($this->userRoles === 16) {
             $schema = $adminSchema;
+        } elseif ($this->userRoles === Role::SUPER_MODERATOR) { // Role::SUPER_MODERATOR
+            $schema = $moderatorSchema;
         }
 
         return $schema;
