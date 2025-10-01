@@ -24,6 +24,8 @@ type Mutation {
   "Sends a password reset link to a valid email address"
   requestPasswordReset(email: String!): ResetPasswordRequestResponse!
 
+  resetPasswordTokenVerify(token: String!): DefaultResponse!
+  
   "Resets password using token and new password ({USER.PASSWORD.MIN_LENGTH}–{USER.PASSWORD.MAX_LENGTH} chars; must match {USER.PASSWORD.PATTERN})."
   resetPassword(token: String!, password: String!): DefaultResponse
 

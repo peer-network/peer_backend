@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "18071071-e665-492d-b6b9-764aeb4aa740",
-		"name": "002_graphql",
+		"_postman_id": "d53e698b-e13f-433d-88ee-30c551bb7021",
+		"name": "002_graphql_PIHA",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-18071071-e665-492d-b6b9-764aeb4aa740?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-d53e698b-e13f-433d-88ee-30c551bb7021?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -384,7 +384,23 @@
 							"        throw new Error(\"Failed to validate media resolutions.\");",
 							"    }",
 							"});",
-							""
+							"",
+							"pm.test(\"Save (createdat + 1 day) as startday\", function () {",
+							"    const createdAt = pm.response.json()?.data?.createPost?.affectedRows?.createdat;",
+							"",
+							"    pm.expect(createdAt, \"createdat should exist\").to.be.a(\"string\").that.is.not.empty;",
+							"",
+							"    const date = new Date(createdAt);",
+							"    date.setDate(date.getDate() + 1);",
+							"",
+							"    const yyyy = date.getFullYear();",
+							"    const mm = String(date.getMonth() + 1).padStart(2, \"0\");",
+							"    const dd = String(date.getDate()).padStart(2, \"0\");",
+							"",
+							"    const nextDay = `${yyyy}-${mm}-${dd}`;",
+							"",
+							"    pm.environment.set(\"startday\", nextDay);",
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -5397,106 +5413,6 @@
 			"response": []
 		},
 		{
-			"name": "PostInteractions(LIKE)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"let commentResponse = {};",
-							"try {",
-							"    commentResponse = pm.response.json();",
-							"} catch (e) {",
-							"    console.log(\"Failed to parse JSON:\", e);",
-							"}",
-							"",
-							"let commentResponseCode = \"\";",
-							"let status = \"\";",
-							"",
-							"try {",
-							"    status = commentResponse?.data?.createComment?.status || \"\";",
-							"    commentResponseCode = commentResponse?.data?.createComment?.ResponseCode || \"\";",
-							"} catch (e) {",
-							"    console.log(\"Error accessing response properties:\", e);",
-							"}",
-							"",
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect([\"11605\", \"11608\"]).to.include(commentResponseCode);",
-							"});",
-							"",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(status).to.eql(\"success\");",
-							"});",
-							"",
-							"if (commentResponseCode === \"11608\") {",
-							"    pm.environment.set(\"isDailyFreeComment\", \"true\");",
-							"    console.log(\"This was a Daily Free Comment.\");",
-							"} else {",
-							"    pm.environment.unset(\"isDailyFreeComment\");",
-							"    console.log(\"Not a Daily Free Comment.\");",
-							"}",
-							"let response = {};",
-							"try {",
-							"    response = pm.response.json();",
-							"} catch (err) {",
-							"    console.log(\"Failed to parse JSON:\", err);",
-							"}",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    try {",
-							"        const commentId = response?.data?.createComment?.affectedRows?.[0]?.commentid;",
-							"        if (commentId) {",
-							"            pm.environment.set(\"commentid\", commentId);",
-							"            console.log(\"commentid set to:\", commentId);",
-							"        } else {",
-							"            console.log(\"No commentid found in response.\");",
-							"        }",
-							"    } catch (err) {",
-							"        console.log(\"Error extracting commentid:\", err);",
-							"    }",
-							"} else {",
-							"    console.log(\"Error detected in response, skipping commentid set.\");",
-							"}"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{postid}}\", content: \"{{comment_content}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Check current liquidity",
 			"event": [
 				{
@@ -10132,7 +10048,7 @@
 			"response": []
 		},
 		{
-			"name": "Conten engagement (view)",
+			"name": "Content engagement (view)",
 			"event": [
 				{
 					"listen": "test",
@@ -11584,9 +11500,9 @@
 							"    pm.expect(diff).to.eql(1);",
 							"});",
 							"",
-							"pm.test(\"Comment count dropped by exactly 2\", function () {",
+							"pm.test(\"Comment count dropped by exactly 1\", function () {",
 							"    const diff = originalCommentCount - currentCommentCount;",
-							"    pm.expect(diff).to.eql(2);",
+							"    pm.expect(diff).to.eql(1);",
 							"});",
 							"",
 							"console.log(`Posts: ${originalPostCount} → ${currentPostCount}`);",
@@ -13759,6 +13675,815 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query GetProfile {\n    getProfile(userid: \"{{w_userid_t2}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            isfollowed\n            isfollowing\n            amountposts\n            amounttrending\n            amountfollowed\n            amountfollower\n            amountfriends\n            amountblocked\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Report user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11012\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ReportUser {\n    reportUser(userid: \"{{w_userid_t3}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm content engagement (like)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let affectedRow = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0] || {};",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"    const expectedUsername = \"hidden_account\";",
+							"",
+							"    if (affectedRow?.id) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedRow.id).to.eql(expectedId);",
+							"        });",
+							"        pm.test(\"Username is hidden_account\", function () {",
+							"            pm.expect(affectedRow.username).to.eql(expectedUsername);",
+							"        });",
+							"",
+							"        console.log(\"Affected ID:\", affectedRow.id);",
+							"        console.log(\"Username:\", affectedRow.username);",
+							"    } else {",
+							"        console.log(\"No affected row found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping tests.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: LIKE, contentFilterBy: MYGRANDMALIKES, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm content engagement (dislike)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let affectedRow = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0] || {};",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"    const expectedUsername = \"hidden_account\";",
+							"",
+							"    if (affectedRow?.id) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedRow.id).to.eql(expectedId);",
+							"        });",
+							"        pm.test(\"Username is hidden_account\", function () {",
+							"            pm.expect(affectedRow.username).to.eql(expectedUsername);",
+							"        });",
+							"",
+							"        console.log(\"Affected ID:\", affectedRow.id);",
+							"        console.log(\"Username:\", affectedRow.username);",
+							"    } else {",
+							"        console.log(\"No affected row found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping tests.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: DISLIKE, contentFilterBy: MYGRANDMALIKES, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm content engagement (view)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let affectedRow = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0] || {};",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"    const expectedUsername = \"hidden_account\";",
+							"",
+							"    if (affectedRow?.id) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedRow.id).to.eql(expectedId);",
+							"        });",
+							"        pm.test(\"Username is hidden_account\", function () {",
+							"            pm.expect(affectedRow.username).to.eql(expectedUsername);",
+							"        });",
+							"",
+							"        console.log(\"Affected ID:\", affectedRow.id);",
+							"        console.log(\"Username:\", affectedRow.username);",
+							"    } else {",
+							"        console.log(\"No affected row found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping tests.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: VIEW, contentFilterBy: MYGRANDMALIKES, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm content engagement (comments likes)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let affectedRow = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0] || {};",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"    const expectedUsername = \"hidden_account\";",
+							"",
+							"    if (affectedRow?.id) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedRow.id).to.eql(expectedId);",
+							"        });",
+							"        pm.test(\"Username is hidden_account\", function () {",
+							"            pm.expect(affectedRow.username).to.eql(expectedUsername);",
+							"        });",
+							"",
+							"        console.log(\"Affected ID:\", affectedRow.id);",
+							"        console.log(\"Username:\", affectedRow.username);",
+							"    } else {",
+							"        console.log(\"No affected row found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping tests.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: COMMENTLIKE, contentFilterBy: MYGRANDMALIKES, postOrCommentId: \"{{commentid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm content engagement (like) without filter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let affectedRow = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0] || {};",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"    const expectedUsername = \"tester03\";",
+							"",
+							"    if (affectedRow?.id) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedRow.id).to.eql(expectedId);",
+							"        });",
+							"        pm.test(\"Username is tester03\", function () {",
+							"            pm.expect(affectedRow.username).to.eql(expectedUsername);",
+							"        });",
+							"",
+							"        console.log(\"Affected ID:\", affectedRow.id);",
+							"        console.log(\"Username:\", affectedRow.username);",
+							"    } else {",
+							"        console.log(\"No affected row found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping tests.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: LIKE, contentFilterBy: MYGRANDMAHATES, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm content engagement (dislike) without filter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let affectedRow = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0] || {};",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"    const expectedUsername = \"tester03\";",
+							"",
+							"    if (affectedRow?.id) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedRow.id).to.eql(expectedId);",
+							"        });",
+							"        pm.test(\"Username is tester03\", function () {",
+							"            pm.expect(affectedRow.username).to.eql(expectedUsername);",
+							"        });",
+							"",
+							"        console.log(\"Affected ID:\", affectedRow.id);",
+							"        console.log(\"Username:\", affectedRow.username);",
+							"    } else {",
+							"        console.log(\"No affected row found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping tests.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: DISLIKE, contentFilterBy: MYGRANDMAHATES, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm content engagement (view) without filter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let affectedRow = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0] || {};",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"    const expectedUsername = \"tester03\";",
+							"",
+							"    if (affectedRow?.id) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedRow.id).to.eql(expectedId);",
+							"        });",
+							"        pm.test(\"Username is tester03\", function () {",
+							"            pm.expect(affectedRow.username).to.eql(expectedUsername);",
+							"        });",
+							"",
+							"        console.log(\"Affected ID:\", affectedRow.id);",
+							"        console.log(\"Username:\", affectedRow.username);",
+							"    } else {",
+							"        console.log(\"No affected row found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping tests.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: VIEW, contentFilterBy: MYGRANDMAHATES, postOrCommentId: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm content engagement (comments likes) without filter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText.includes(\"11205\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let postInteractionResponse = {};",
+							"try {",
+							"    postInteractionResponse = pm.response.json();",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse JSON:\", e);",
+							"}",
+							"",
+							"let affectedRow = postInteractionResponse?.data?.postInteractions?.affectedRows?.[0] || {};",
+							"",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    const expectedId = pm.environment.get(\"w_userid_t3\");",
+							"    const expectedUsername = \"tester03\";",
+							"",
+							"    if (affectedRow?.id) {",
+							"        pm.test(\"Affected user ID matches w_userid_t3\", function () {",
+							"            pm.expect(affectedRow.id).to.eql(expectedId);",
+							"        });",
+							"        pm.test(\"Username is tester03\", function () {",
+							"            pm.expect(affectedRow.username).to.eql(expectedUsername);",
+							"        });",
+							"",
+							"        console.log(\"Affected ID:\", affectedRow.id);",
+							"        console.log(\"Username:\", affectedRow.username);",
+							"    } else {",
+							"        console.log(\"No affected row found.\");",
+							"    }",
+							"} else {",
+							"    console.log(\"Error detected in response, skipping tests.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query PostInteractions {\n    postInteractions(getOnly: COMMENTLIKE, contentFilterBy: MYGRANDMAHATES, postOrCommentId: \"{{commentid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            slug\n            img\n            isfollowed\n            isfollowing\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},

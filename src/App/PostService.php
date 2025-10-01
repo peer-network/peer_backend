@@ -26,7 +26,8 @@ use Fawaz\Database\Interfaces\TransactionManager;
 
 class PostService
 {
-	use ResponseHelper;
+    use ResponseHelper;
+
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -86,7 +87,6 @@ class PostService
     private function argsToString($args) {
         return serialize($args);
     }
-
 
     private function validateCoverCount(array $args, string $contenttype): array {
         if (!is_array($args['cover'])) {
@@ -568,7 +568,7 @@ class PostService
         }
 
         if (!empty($filterBy) && is_array($filterBy)) {
-            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED'];
+            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED', 'FRIENDS'];
 
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
@@ -790,6 +790,7 @@ class PostService
 
         $getOnly = $args['getOnly'] ?? null;
         $postOrCommentId = $args['postOrCommentId'] ?? null;
+        $contentFilterBy = $args['contentFilterBy'] ?? 'MYGRANDMAHATES';
 
 
         if($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])){
@@ -803,7 +804,14 @@ class PostService
         }
 
         try {
-            $result = $this->postMapper->getInteractions($getOnly, $postOrCommentId, $this->currentUserId, $offset, $limit);
+            $result = $this->postMapper->getInteractions(
+                $getOnly, 
+                $postOrCommentId, 
+                $this->currentUserId, 
+                $offset, 
+                $limit,
+                $contentFilterBy
+            );
 
             $this->logger->info("Interaction fetched successfully", ['count' => count($result)]);
             return $this->createSuccessResponse(11205, $result);
@@ -838,5 +846,21 @@ class PostService
 
         return $results;
     }
-    
+
+    public function postExistsById(string $postId): bool
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->info('PostService.postExistsById started');
+
+        try {
+            return $this->postMapper->postExistsById($postId);
+
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed fetch Post', ['postId' => $postId, 'exception' => $e]);
+            return false;
+        }
+    }
 }

@@ -150,7 +150,7 @@ class ConstantsConfig
 
     /**
      * @return array{
-     *     DAILY_FREE: array{ post: int, like: int, comment: int, dislike: int }
+     *     DAILY_FREE_ACTIONS: array{ post: int, like: int, comment: int, dislike: int }
      * }
      */
     public static function dailyFree(): array {
@@ -160,7 +160,8 @@ class ConstantsConfig
     /**
      * @return array{
      *     ACTION_TOKEN_PRICES: array{ post: float, like: float, dislike: float, comment: float },
-     *     ACTION_GEMS_RETURNS: array{ view: float, like: float, dislike: float, comment: float }
+     *     ACTION_GEMS_RETURNS: array{ view: float, like: float, dislike: float, comment: float },
+     *     FEES: array{ PEER: float, POOL: float, BURN: float, INVITATION: float }
      * }
      */
     public static function tokenomics(): array {
@@ -195,7 +196,9 @@ class ConstantsConfig
             'post'    => 20.0,   
             'like'    => 3.0,    
             'dislike' => 3.0,    
-            'comment' => 1.0,    
+            'comment' => 1.0,
+            'advertisementBasic' => 500.0,
+            'advertisementPinned' => 2000.0,
         ],
         'ACTION_GEMS_RETURNS' => [
             'view'    => 0.25,  

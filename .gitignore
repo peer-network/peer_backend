@@ -42,3 +42,5 @@ src/Graphql/schema/types/inputs.graphql.generated.graphql
 src/Graphql/schema/types/response.graphql.generated.graphql
 src/Graphql/schema/types/scalars.graphql.generated.graphql
 src/Graphql/schema/types/types.graphql.generated.graphql
+.gitleaks_out/
+

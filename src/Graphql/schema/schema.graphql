@@ -39,6 +39,8 @@ type Query {
   "List posts with filters (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX}; commentOffset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, commentLimit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
   listPosts(filterBy: [PostFilterType!], contentFilterBy: ContentFilterType, IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
 
+  listAdvertisementPosts(filterBy: [ContentType!], userid: ID, postid: ID, tag: String, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): ListAdvertisementPostsResponse!
+  
   "Get engagement summary of a specific post"
   getPostInfo(postid: ID!): PostInfoResponse!
 
@@ -94,10 +96,12 @@ type Query {
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
 
   "List users who interacted with a post/comment (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."
-  postInteractions(getOnly: GetOnly!, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
+  postInteractions(getOnly: GetOnly!, contentFilterBy: ContentFilterType, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
 
   "Return global tokenomics configuration (prices: post {TOKENOMICS.ACTION_TOKEN_PRICES.post}, like {TOKENOMICS.ACTION_TOKEN_PRICES.like}, dislike {TOKENOMICS.ACTION_TOKEN_PRICES.dislike}, comment {TOKENOMICS.ACTION_TOKEN_PRICES.comment}; GEM returns: view {TOKENOMICS.ACTION_GEMS_RETURNS.view}, like {TOKENOMICS.ACTION_GEMS_RETURNS.like}, dislike {TOKENOMICS.ACTION_GEMS_RETURNS.dislike}, comment {TOKENOMICS.ACTION_GEMS_RETURNS.comment}; minting {MINTING.DAILY_NUMBER_TOKEN})."
   getTokenomics: TokenomicsResponse!
+  
+  advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
 }
 
 type Mutation {
@@ -178,4 +182,6 @@ type Mutation {
 
   "Transfer tokens to another user with decimal precision and optional message."
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
+  advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): ListAdvertisementData!
+  advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!, forceUpdate: Boolean): ListAdvertisementData!
 }
