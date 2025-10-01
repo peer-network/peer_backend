@@ -33,3 +33,12 @@ sql_files_for_import_tmp/
 supervisord.pid
 changelog
 .idea
+src/Graphql/schema/admin_schema.graphql.generated.graphql
+src/Graphql/schema/bridge_schema.graphql.generated.graphql
+src/Graphql/schema/schema.graphql.generated.graphql
+src/Graphql/schema/schemaguest.graphql.generated.graphql
+src/Graphql/schema/types/enums.graphql.generated.graphql
+src/Graphql/schema/types/inputs.graphql.generated.graphql
+src/Graphql/schema/types/response.graphql.generated.graphql
+src/Graphql/schema/types/scalars.graphql.generated.graphql
+src/Graphql/schema/types/types.graphql.generated.graphql
