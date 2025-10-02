@@ -34,9 +34,6 @@ try {
         __DIR__ . '/../../../src/Graphql/schema/types/types.graphql',
     ];
 
-    // $schemaFiles = [
-    //     __DIR__ . '/../../../src/Graphql/schema/',
-    // ];
     if (!empty($schemaFiles)) {
         $report = ConstantValuesInjectorImpl::injectSchemaPlaceholders(
             $schemaFiles,
@@ -48,5 +45,5 @@ try {
     }
     echo("ConfigGeneration: Done! \n");
 } catch (\Exception $e) {
-    echo "ConfigGeneration: Erorr: " . $e->getMessage();
+    echo "ConfigGeneration: Error: " . $e->getMessage();
 }
