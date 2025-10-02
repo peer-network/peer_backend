@@ -33,3 +33,4 @@ supervisord.pid
 changelog
 .idea
 .gitleaks_out/
+*.generated

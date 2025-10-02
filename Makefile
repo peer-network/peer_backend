@@ -327,3 +327,6 @@ scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
 	else \
 		echo "No secrets found in repository."; \
 	fi
+
+gen:
+	bash cd-generate-backend-config.sh
