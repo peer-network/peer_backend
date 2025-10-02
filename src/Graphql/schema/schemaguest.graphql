@@ -13,6 +13,7 @@ type Mutation {
   verifyAccount(userid: ID!): DefaultResponse!
   login(email: String!, password: String!): AuthPayload!
   requestPasswordReset(email: String!): ResetPasswordRequestResponse!
+  resetPasswordTokenVerify(token: String!): DefaultResponse!
   resetPassword(token: String!, password: String!): DefaultResponse
   refreshToken(refreshToken: String!): AuthPayload!
   verifyReferralString(referralString: String!): ReferralResponse!
