@@ -62,6 +62,7 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
 use DateTimeImmutable;
+use Fawaz\App\ModerationService;
 
 class GraphQLSchemaBuilder
 {
@@ -90,6 +91,7 @@ class GraphQLSchemaBuilder
         protected AdvertisementService $advertisementService,
         protected JWTService $tokenService,
         protected AlphaMintService $alphaMintService,
+        protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
     ) {
         $this->resolvers = $this->buildResolvers();
@@ -185,6 +187,7 @@ class GraphQLSchemaBuilder
     protected function setCurrentUserIdForServices(string $userid): void
     {
         $this->alphaMintService->setCurrentUserId($userid);
+        $this->moderationService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
@@ -2435,6 +2438,41 @@ class GraphQLSchemaBuilder
                     return $root['advertisements'] ?? [];
                 },
             ],
+            'ModerationStatsResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ModerationStatsResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): ?array {
+                    return $root['affectedRows'] ?? null;
+                },
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+            ],
+            'ModerationStats' => [
+                'AmountAwaitingReview' => function (array $root): int {
+                    return $root['AmountAwaitingReview'] ?? 0;
+                },
+                'AmountHidden' => function (array $root): int {
+                    return $root['AmountHidden'] ?? 0;
+                },
+                'AmountRestored' => function (array $root): int {
+                    return $root['AmountRestored'] ?? 0;
+                },
+                'AmountIllegal' => function (array $root): int {
+                    return $root['AmountIllegal'] ?? 0;
+                }
+            ],
+
         ];
     }
 
@@ -2485,6 +2523,7 @@ class GraphQLSchemaBuilder
             'advertisementHistory' => fn(mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'getTokenomics' => fn(mixed $root, array $args) => $this->resolveTokenomics(),
+            'moderationStats' => fn(mixed $root, array $args) => $this->moderationService->getModerationStats(),
         ];
     }
 

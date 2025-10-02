@@ -485,6 +485,18 @@ type AllUserFriends {
   affectedRows: [AllUserInfo]
 }
 
+type ModerationStatsResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: ModerationStats
+  meta: DefaultResponse
+}
+type ModerationStats {
+  AmountAwaitingReview: Int!
+  AmountHidden: Int!
+  AmountRestored: Int!
+  AmountIllegal: Int!
+}
 type ModerationItemListResponse {
   status: String!
   ResponseCode: String

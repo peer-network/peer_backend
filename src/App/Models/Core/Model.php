@@ -5,14 +5,15 @@ namespace Fawaz\App\Models\Core;
 
 use PDO;
 
-class Model
+abstract class Model
 {
     protected static $db;
-    protected static string $table;
     protected static string $orderBy = 'createdat';
     protected static string $limit = '';
     protected array $wheres = [];
     protected array $joins = [];
+
+    abstract protected static function table(): string;
 
     /**
      * Set the PDO database connection
@@ -32,7 +33,7 @@ class Model
 
     /**
      * Find a record by its ID
-     * protected static string $table must be defined in the child class
+     * protected static string static::table() must be defined in the child class
      * 
      * @param mixed $id
      * 
@@ -41,7 +42,60 @@ class Model
      */
     public static function find($id): array|false
     {
-        return static::query()->where('uid', '=', $id)->limit(1)->all()[0] ?? null;
+        $result = static::query()->where('uid', '=', $id)->limit(1)->all()[0] ?? null;
+
+        return $result ?: false;
+    }
+
+    /**
+     * Get the first record matching the query
+     */
+    public function first(): array|false
+    {
+        $db = static::getDB();
+
+        $params = [];
+
+        $joinsSql = $this->buildJoins();
+        $whereSql = $this->buildWhere($params);
+
+        $sql = "SELECT * FROM " . static::table() . " {$joinsSql} {$whereSql} " . static::$orderBy . " LIMIT 1";
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    }
+
+    /**
+     * Count records matching the query
+     */
+    public function count(): int
+    {
+        $db = static::getDB();
+
+        $params = [];
+
+        $joinsSql = $this->buildJoins();
+        $whereSql = $this->buildWhere($params);
+
+        $sql = "SELECT COUNT(*) as count FROM " . static::table() . " {$joinsSql} {$whereSql}";
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return (int)($result['count'] ?? 0);
+    }
+
+    /**
+     * Check if any record exists matching the query
+     */
+    public function exists(): bool
+    {
+        return $this->count() > 0;
     }
 
     /**
@@ -67,7 +121,7 @@ class Model
         $joinsSql = $this->buildJoins();
         $whereSql = $this->buildWhere($params);
 
-        $sql = "SELECT * FROM " . static::$table . " {$joinsSql} {$whereSql} " . static::$orderBy . " " . static::$limit;
+        $sql = "SELECT * FROM " . static::table() . " {$joinsSql} {$whereSql} " . static::$orderBy . " " . static::$limit;
 
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
@@ -136,7 +190,7 @@ class Model
      * Examples:
      * Model::where('status', 'active') // 2 args, defaults to '=' operator
      */
-    public function where(string $column, string $operatorOrValue, $value = null): static
+    public function where(string $column, string|int|bool|float $operatorOrValue, $value = null): static
     {
         if ($value === null) {
             $this->wheres[] = ['AND', $column, '=', $operatorOrValue];
