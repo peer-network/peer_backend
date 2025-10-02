@@ -96,11 +96,11 @@ class GraphQLSchemaBuilder
 
     public function getQueriesDependingOnRole(): ?string {
         $graphqlPath = "Graphql/schema/";
-        
-        $baseQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schema.graphql');
-        $guestOnlyQueries =  \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schemaguest.graphql');
-        $adminOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'admin_schema.graphql');
-        $bridgeOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql');
+
+        $baseQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schema.graphql.generated');
+        $guestOnlyQueries =  \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schemaguest.graphql.generated');
+        $adminOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'admin_schema.graphql.generated');
+        $bridgeOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql.generated');
 
         $adminSchema = $baseQueries . $adminOnlyQueries;
         $guestSchema = $guestOnlyQueries;
@@ -129,11 +129,11 @@ class GraphQLSchemaBuilder
         $graphqlPath = "Graphql/schema/";
         $typesPath = "types/";
 
-        $scalars = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "scalars.graphql");
-        $response = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "response.graphql");
-        $inputs = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "inputs.graphql");
-        $enum = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "enums.graphql");
-        $types = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql");
+        $scalars = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "scalars.graphql.generated");
+        $response = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "response.graphql.generated");
+        $inputs = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "inputs.graphql.generated");
+        $enum = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "enums.graphql.generated");
+        $types = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql.generated");
 
         $schema = $this->getQueriesDependingOnRole();
         
