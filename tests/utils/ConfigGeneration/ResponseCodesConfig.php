@@ -5,7 +5,7 @@ namespace Tests\utils\ConfigGeneration;
 
 use Exception;
 use Tests\utils\ConfigGeneration\JSONHandler;
-use Tests\utils\ConfigGeneration\ConstantsInjection\ConstantValuesInjectorImpl;
+use Tests\utils\ConstantsInjection\ConstantValuesInjectorImpl;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 

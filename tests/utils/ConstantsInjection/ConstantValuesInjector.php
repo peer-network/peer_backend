@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\utils\ConfigGeneration\ConstantsInjection;
+namespace Tests\utils\ConstantsInjection;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
