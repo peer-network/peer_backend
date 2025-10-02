@@ -897,6 +897,7 @@ class PostMapper
             'mediadescription' => (string)$row['mediadescription'],
             'createdat' => (string)$row['createdat'],
             'amountlikes' => (int)$row['amountlikes'],
+            'amountreports' => (int)$row['post_reports'],
             'amountviews' => (int)$row['amountviews'],
             'amountcomments' => (int)$row['amountcomments'],
             'amountdislikes' => (int)$row['amountdislikes'],

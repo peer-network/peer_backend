@@ -804,6 +804,9 @@ class GraphQLSchemaBuilder
                 'amounttrending' => function (array $root): int {
                     return $root['amounttrending'] ?? 0;
                 },
+                'amountreports' => function (array $root): int {
+                    return $root['amountreports'] ?? 0;
+                },
                 'isliked' => function (array $root): bool {
                     return $root['isliked'] ?? false;
                 },
