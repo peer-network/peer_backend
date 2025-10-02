@@ -96,25 +96,11 @@ class GraphQLSchemaBuilder
 
     public function getQueriesDependingOnRole(): ?string {
         $graphqlPath = "Graphql/schema/";
-        $suffix = getenv('GRAPHQL_SCHEMA_SUFFIX') ?: '';
 
-        $paths = [
-            'base'   => __DIR__ . '/' . $graphqlPath . 'schema.graphql',
-            'guest'  => __DIR__ . '/' . $graphqlPath . 'schemaguest.graphql',
-            'admin'  => __DIR__ . '/' . $graphqlPath . 'admin_schema.graphql',
-            'bridge' => __DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql',
-        ];
-
-        if ($suffix !== '') {
-            foreach ($paths as $key => $path) {
-                $paths[$key] .= $suffix;
-            }
-        }
-
-        $baseQueries      = \file_get_contents($paths['base']);
-        $guestOnlyQueries = \file_get_contents($paths['guest']);
-        $adminOnlyQueries = \file_get_contents($paths['admin']);
-        $bridgeOnlyQueries= \file_get_contents($paths['bridge']);
+        $baseQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schema.graphql.generated');
+        $guestOnlyQueries =  \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schemaguest.graphql.generated');
+        $adminOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'admin_schema.graphql.generated');
+        $bridgeOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql.generated');
 
         $adminSchema = $baseQueries . $adminOnlyQueries;
         $guestSchema = $guestOnlyQueries;
@@ -142,29 +128,12 @@ class GraphQLSchemaBuilder
     {
         $graphqlPath = "Graphql/schema/";
         $typesPath   = "types/";
-        $suffix = getenv('GRAPHQL_SCHEMA_SUFFIX') ?: '';
 
-        $paths = [
-            'scalars'  => __DIR__ . '/' . $graphqlPath . $typesPath . "scalars.graphql",
-            'response' => __DIR__ . '/' . $graphqlPath . $typesPath . "response.graphql",
-            'inputs'   => __DIR__ . '/' . $graphqlPath . $typesPath . "inputs.graphql",
-            'enums'    => __DIR__ . '/' . $graphqlPath . $typesPath . "enums.graphql",
-            'types'    => __DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql",
-        ];
-
-        if ($suffix !== '') {
-            foreach ($paths as $k => $p) {
-                if (is_file($p . $suffix)) {
-                    $paths[$k] = $p . $suffix;
-                }
-            }
-        }
-
-        $scalars  = \file_get_contents($paths['scalars']);
-        $response = \file_get_contents($paths['response']);
-        $inputs   = \file_get_contents($paths['inputs']);
-        $enum     = \file_get_contents($paths['enums']);
-        $types    = \file_get_contents($paths['types']);
+        $scalars = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "scalars.graphql.generated");
+        $response = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "response.graphql.generated");
+        $inputs = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "inputs.graphql.generated");
+        $enum = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "enums.graphql.generated");
+        $types = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql.generated");
 
         $schema = $this->getQueriesDependingOnRole();
         if (empty($schema)){

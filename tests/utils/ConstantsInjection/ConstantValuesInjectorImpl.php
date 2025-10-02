@@ -1,19 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\utils\ConfigGeneration;
+namespace Tests\utils\ConstantsInjection;
 
 use Exception;
 use Fawaz\config\constants\ConstantsConfig;
-use Tests\utils\ConfigGeneration\MessageEntry;
-
-use function PHPUnit\Framework\isArray;
-use function PHPUnit\Framework\isNumeric;
-use function PHPUnit\Framework\isString;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
-class ResponseMessagesValueInjector
+class ConstantValuesInjectorImpl implements ConstantValuesInjector
 {
     private array $constants;
 
@@ -24,26 +19,39 @@ class ResponseMessagesValueInjector
     }
 
     /**
-    **  @param array<string, MessageEntry> 
-    **/
-    public function injectConstants(array $data): array
-    {
-        echo("ConfigGeneration: ResponseMessagesValueInjector: injectConstants: start \n");
-            
-        /** @var array<string, MessageEntry> */
-        $injectedData = [];
+     * Recursively injects constants into all string fields of any array/object.
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+    */
+    public function injectConstants(array $data): array {
+        echo("ConfigGeneration: ConstantValuesInjectorImpl: injectConstants: start \n");
 
-        foreach ($data as $code => $entry) {
-            $injectedData[$code] = $data[$code];
-            if (empty($entry->comment) || empty($entry->userFriendlyComment)) {
-                throw new Exception("Error: ResponseMessagesValueInjector: Empty Message found for code " . $code);
-            }
+        return $this->processValue($data);
+    }
 
-            $injectedData[$code]->userFriendlyComment = $this->replacePlaceholders($data[$code]->userFriendlyComment);
-            $injectedData[$code]->comment = $this->replacePlaceholders($data[$code]->comment);
+    private function processValue($value) {
+        if (is_string($value)) {
+            return $this->replacePlaceholders($value);
         }
 
-        return $injectedData;
+        if (is_array($value)) {
+            $processed = [];
+            foreach ($value as $key => $subValue) {
+                $processed[$key] = $this->processValue($subValue);
+            }
+            return $processed;
+        }
+
+        if (is_object($value)) {
+            foreach ($value as $field => $subValue) {
+                $value->$field = $this->processValue($subValue);
+            }
+            return $value;
+        }
+
+        // Non-string scalars (int, float, bool, null) stay untouched
+        return $value;
     }
 
     private function replacePlaceholders(string $text): string
@@ -61,18 +69,20 @@ class ResponseMessagesValueInjector
     private function getValueFromPath(array $constants, array $path): string|int
     {
         if (empty($constants) || empty($path)) {
-            throw new Exception("Error: ResponseMessagesValueInjector: getValueFromPath: invalid input arguments ");
+            throw new Exception("Error: ConstantValuesInjectorImpl: getValueFromPath: invalid input arguments ");
         }
         foreach ($path as $key) {
             if (!is_array($constants) || !array_key_exists($key, $constants)) {
-                throw new Exception("Error: ResponseMessagesValueInjector: getValueFromPath: invalid CONSTANTS: " . implode(",",$constants));
+                throw new Exception("Error: ConstantValuesInjectorImpl: getValueFromPath: invalid CONSTANTS: " . implode(",",$constants));
             }
             $constants = $constants[$key];
         }
 
 
         if (is_array($constants)) {
-            throw new Exception("Error: ResponseMessagesValueInjector: getValueFromPath: invalid path or contants: constant value is not found by path:" . implode(" ",$path) . ", Faulty result: " . implode(",",$constants));
+            throw new Exception(
+                "Error: ConstantValuesInjectorImpl: getValueFromPath: invalid path or contants: constant value is not found by path:" . implode(" ",$path) . ", Faulty result: " . implode(",",$constants)
+            );
         }
         return $constants;
     }
