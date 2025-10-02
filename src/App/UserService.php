@@ -1203,9 +1203,14 @@ class UserService
             $user->validatePass($args);
             $this->userMapper->updatePass($user);
 
+            $this->userMapper->deleteAccessTokensByUserId($user->getUserId());
+            $this->userMapper->deleteRefreshTokensByUserId($user->getUserId());
+
             $this->userMapper->deletePasswordResetToken($args['token']);
 
-            $this->logger->info('User password updated successfully', ['userId' => $this->currentUserId]);
+            $this->logger->info('User password updated and tokens invalidated', [
+                'userId' => $user->getUserId()
+            ]);
             $this->transactionManager->commit();
             return [
                 'status' => 'success',

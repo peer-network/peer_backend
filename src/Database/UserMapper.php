@@ -1720,6 +1720,48 @@ class UserMapper
         }
     }
 
+    public function deleteAccessTokensByUserId(string $userId): void
+    {
+        $this->logger->info('UserMapper.deleteAccessTokensByUserId started', ['userId' => $userId]);
+
+        $sql = 'DELETE FROM access_tokens WHERE userid = :userId';
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->execute();
+
+            $this->logger->info('Access tokens deleted', ['userId' => $userId]);
+        } catch (\Throwable $e) {
+            $this->logger->error('UserMapper.deleteAccessTokensByUserId failed', [
+                'userId' => $userId,
+                'error'  => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    public function deleteRefreshTokensByUserId(string $userId): void
+    {
+        $this->logger->info('UserMapper.deleteRefreshTokensByUserId started', ['userId' => $userId]);
+
+        $sql = 'DELETE FROM refresh_tokens WHERE userid = :userId';
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->execute();
+
+            $this->logger->info('Refresh tokens deleted', ['userId' => $userId]);
+        } catch (\Throwable $e) {
+            $this->logger->error('UserMapper.deleteRefreshTokensByUserId failed', [
+                'userId' => $userId,
+                'error'  => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
     public function fetchAllFriends(int $offset = 0, int $limit = 20): ?array
     {
         $this->logger->info("UserMapper.fetchAllFriends started");
