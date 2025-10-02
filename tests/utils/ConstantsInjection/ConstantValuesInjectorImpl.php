@@ -109,6 +109,10 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
                 $sdl
             );
 
+            if (preg_match('/\{[A-Z0-9_.]+\}/', $patched)) {
+                throw new \RuntimeException("Schema injection failed: unresolved placeholder(s) in {$in}");
+            }
+
             $out = $suffix ? ($in . $suffix) : $in;
             if (file_put_contents($out, $patched) === false) {
                 throw new \RuntimeException("Cannot write schema: {$out}");
