@@ -5,32 +5,24 @@ namespace Tests\utils\ConfigGeneration;
 
 use Exception;
 use Tests\utils\ConfigGeneration\JSONHandler;
-use Tests\utils\ConfigGeneration\ResponseMessagesValueInjector;
-use Tests\utils\ConfigGeneration\MessageEntry;
+use Tests\utils\ConfigGeneration\ConstantsInjection\ConstantValuesInjectorImpl;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
 class ResponseCodesConfig implements DataGeneratable {
-    /** @var array<string, MessageEntry> */
     private array $data = [];
 
 
     public function __construct(string $filePath) {
         $decoded = JSONHandler::parseInputJson($filePath, true);
 
-        foreach ($decoded as $code => $entry) { 
-            $this->data[$code] = new MessageEntry(
-                $entry['comment'],
-                $entry['userFriendlyComment']
-            );
-        }
-
-        $injector = new ResponseMessagesValueInjector();
-        $injectedData = $injector->injectConstants($this->data);
+        $injector = new ConstantValuesInjectorImpl();
+        $injectedData = $injector->injectConstants($decoded);
 
         if (empty($injectedData)) {
             throw new Exception("ResponseCodesConfig: injectConstantsToMessages: result is empty");
         }
+
         $this->data = $injectedData;
         $this->validate();
     }
@@ -45,13 +37,34 @@ class ResponseCodesConfig implements DataGeneratable {
         $this->validateCodes();
     }
 
-    private function validateMessages(): void {
-         foreach ($this->data as $code => $entry) {
-            if (empty($entry->comment) || empty($entry->userFriendlyComment)) {
-                throw new Exception("ResponseCodesConfig: validateMessages: Empty Message found for code " . $code);
+    /**
+     * Validates that all string fields in the given array/object are non-empty
+     * and contain only valid placeholders if present.
+     *
+     * @throws Exception
+     */
+    private function validateMessages(): void
+    {
+        foreach ($this->data as $code => $entry) {
+            $this->validateValue($entry, $code);
+        }
+    }
+
+    private function validateValue($value, string|int $path = ''): void
+    {
+        if (is_string($value)) {
+            if (trim($value) === '') {
+                throw new Exception("ResponseCodesConfig: validateMessages: Empty string found at path {$path}");
             }
-            $this->isStringContainsPlaceholders($entry->comment);
-            $this->isStringContainsPlaceholders($entry->userFriendlyComment);
+            $this->isStringContainsPlaceholders($value);
+        } elseif (is_array($value)) {
+            foreach ($value as $key => $subValue) {
+                $this->validateValue($subValue, $path . '.' . $key);
+            }
+        } elseif (is_object($value)) {
+            foreach (get_object_vars($value) as $key => $subValue) {
+                $this->validateValue($subValue, $path . '.' . $key);
+            }
         }
     }
 

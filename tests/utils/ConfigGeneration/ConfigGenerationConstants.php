@@ -28,7 +28,8 @@ enum ConfigGenerationConstants : string implements DataGeneratable {
         {
             ConfigGenerationConstants::endpoints => (new EndpointsConfig($path))->getData(),
             ConfigGenerationConstants::repsonseCodes => (new ResponseCodesConfig($path))->getData(),
-            ConfigGenerationConstants::constants => (new ConstantsConfigGeneratable())->getData(),
+            ConfigGenerationConstants::constants => (new ConstantsConfigGeneratable())->getData()
+            // ConfigGenerationConstants::graphqlSchema => (new GraphQLSchemaGeneratable())->getData()
         };
     }    
 
