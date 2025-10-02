@@ -109,7 +109,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
                 $sdl
             );
 
-            if (preg_match('/\{[A-Z0-9_.]+\}/', $patched)) {
+            if (preg_match('/""".*?\{[A-Z0-9_.]+\}.*?"""/s', $patched)) {
                 throw new \RuntimeException("Schema injection failed: unresolved placeholder(s) in {$in}");
             }
 
