@@ -7,6 +7,7 @@ use Fawaz\Services\JWTService;
 use Fawaz\Services\Mailer;
 use Fawaz\Services\LiquidityPool;
 use DI\ContainerBuilder;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Utils\PeerLogger;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProviderImpl;
@@ -85,6 +86,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
+            Model::setDB($pdo);
             return $pdo;
         },
 
