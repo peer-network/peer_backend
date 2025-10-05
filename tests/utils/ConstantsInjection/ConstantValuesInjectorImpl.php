@@ -105,8 +105,15 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
             }
 
             $patched = preg_replace_callback(
-                '/\{([A-Z0-9_.]+)\}/',
-                static fn(array $m) => $map[$m[1]] ?? $m[0],
+                '/"""(.*?)"""/s',
+                static function (array $m) use ($map) {
+                    $inner = preg_replace_callback(
+                        '/\{([A-Za-z0-9_.\*]+)\}/',
+                        static fn(array $mm) => $map[$mm[1]] ?? $mm[0],
+                        $m[1]
+                    );
+                    return '"""' . $inner . '"""';
+                },
                 $sdl
             );
 
