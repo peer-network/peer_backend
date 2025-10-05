@@ -33,9 +33,48 @@ try {
     ];
 
     if (!empty($schemaFiles)) {
-        $report = ConstantValuesInjectorImpl::injectSchemaPlaceholders($schemaFiles);
-        foreach ($report as $in => $out) {
-            echo "Schema injected: {$in} -> {$out}\n";
+        $injector = new ConstantValuesInjectorImpl;
+        
+
+        foreach ($schemaFiles as $in) {
+            if (!is_file($in)) {
+                continue;
+            }
+
+            $sdl = file_get_contents($in);
+
+            if ($sdl === false) {
+                throw new \RuntimeException("Cannot read schema: {$in}");
+            }
+
+            $patched = $injector->injectConstants($sdl);
+
+            preg_replace_callback(
+                '/"""(.*?)"""/s',
+                static function (array $m) use (&$errors) {
+                    $inner = $m[1];
+                    // Optional: validate no empty placeholders {}
+                    if (preg_match('/\{([A-Z0-9_.]+)\}/',, $inner)) {
+                        $errors[] = "Empty placeholder found in block: " . substr($inner, 0, 50) . '...';
+                    }
+
+                    return $m[0]; // no changes to the original string
+                },
+                $patched
+            );
+
+            if ($errors) {
+                echo "Validation errors found:\n";
+                foreach ($errors as $err) {
+                    echo "- $err\n";
+                }
+                throw new \RuntimeException("Unresolved placeholders");
+            } 
+
+            $out = $in . ".generated";
+            if (file_put_contents($out, $patched) === false) {
+                throw new \RuntimeException("Cannot write schema: {$out}");
+            }
         }
     }
     echo("ConfigGeneration: Done! \n");
