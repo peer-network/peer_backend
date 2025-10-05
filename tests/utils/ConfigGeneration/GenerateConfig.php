@@ -20,8 +20,6 @@ try {
     $pathsConfig = new ConfigUrl();
     JSONHandler::generateJSONtoFile(Constants::$pathToAssets . "config.json", $pathsConfig->getData(), "config", false);
 
-    $suffix = '.generated';
-
     $schemaFiles = [
         __DIR__ . '/../../../src/Graphql/schema/admin_schema.graphql',
         __DIR__ . '/../../../src/Graphql/schema/bridge_schema.graphql',
@@ -35,10 +33,7 @@ try {
     ];
 
     if (!empty($schemaFiles)) {
-        $report = ConstantValuesInjectorImpl::injectSchemaPlaceholders(
-            $schemaFiles,
-            $suffix
-        );
+        $report = ConstantValuesInjectorImpl::injectSchemaPlaceholders($schemaFiles);
         foreach ($report as $in => $out) {
             echo "Schema injected: {$in} -> {$out}\n";
         }

@@ -87,8 +87,9 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
         return $constants;
     }
 
-    public static function injectSchemaPlaceholders(array $schemaFiles, ?string $suffix = '.generated.graphql'): array
+    public static function injectSchemaPlaceholders(array $schemaFiles): array
     {
+        $suffix = '.graphql.generated';
         $constants = (new ConstantsConfig())->getData();
         $map = self::flattenConstantsMap($constants);
 
@@ -113,7 +114,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
                 throw new \RuntimeException("Schema injection failed: unresolved placeholder(s) in {$in}");
             }
 
-            $out = $suffix ? ($in . $suffix) : $in;
+            $out = $in . $suffix;
             if (file_put_contents($out, $patched) === false) {
                 throw new \RuntimeException("Cannot write schema: {$out}");
             }
