@@ -9,7 +9,7 @@ use Fawaz\Database\ReportsMapper;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Utils\ReportTargetType;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 
@@ -19,7 +19,7 @@ class UserInfoService
     private Base64FileHandler $base64filehandler;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected UserInfoMapper $userInfoMapper,
         protected UserMapper $userMapper,
         protected UserPreferencesMapper $userPreferencesMapper,

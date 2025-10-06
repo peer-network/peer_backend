@@ -9,13 +9,13 @@ use Fawaz\App\ChatMessages;
 use Fawaz\App\NewsFeed;
 use Fawaz\App\Status;
 use Fawaz\App\User;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class ChatMapper
 {
     const STATUS_DELETED = 6;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 

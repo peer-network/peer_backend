@@ -4,13 +4,13 @@ namespace Fawaz\App;
 
 use Fawaz\App\Pool;
 use Fawaz\Database\PoolMapper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class PoolService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected PoolMapper $poolMapper)
+    public function __construct(protected PeerLoggerInterface $logger, protected PoolMapper $poolMapper)
     {
     }
 

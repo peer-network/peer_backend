@@ -4,12 +4,12 @@ namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\UserPreferences;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\JsonHelper;
 
 class UserPreferencesMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 

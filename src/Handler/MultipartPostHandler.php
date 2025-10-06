@@ -7,14 +7,14 @@ use Fawaz\App\PostService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Slim\Psr7\Response;
 use Slim\Psr7\UploadedFile;
 
 class MultipartPostHandler implements RequestHandlerInterface
 {
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected MultipartPostService $multipartPostService
     ) {
     }

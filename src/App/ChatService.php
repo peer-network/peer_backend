@@ -7,7 +7,7 @@ use Fawaz\App\ChatParticipants;
 use Fawaz\App\ChatMessages;
 use Fawaz\Database\ChatMapper;
 use Fawaz\Services\Base64FileHandler;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Ratchet\Client\Connector;
 use React\EventLoop\Factory as EventLoopFactory;
 use Fawaz\config\constants\ConstantsConfig;
@@ -18,7 +18,7 @@ class ChatService
     protected ?string $currentUserId = null;
     private Base64FileHandler $base64filehandler;
 
-    public function __construct(protected LoggerInterface $logger, protected ChatMapper $chatMapper, protected TransactionManager $transactionManager)
+    public function __construct(protected PeerLoggerInterface $logger, protected ChatMapper $chatMapper, protected TransactionManager $transactionManager)
     {
         $this->base64filehandler = new Base64FileHandler();
     }

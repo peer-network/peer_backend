@@ -6,6 +6,7 @@ namespace Fawaz\Utils;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 
+// @phpstan-ignore class.extendsFinalByPhpDoc
 class PeerLogger extends Logger implements PeerLoggerInterface {
     public function __construct($o)
     {
