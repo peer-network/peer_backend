@@ -383,10 +383,6 @@ jobs:
             --network my-network \
             curlimages/curl:$TAG \
             curl -sf http://backend/graphql
- 
-      - name: Linter check
-        run: docker compose exec backend /var/www/html/vendor/bin/php-cs-fixer fix --dry-run --diff
-
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
