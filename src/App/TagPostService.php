@@ -113,7 +113,7 @@ class TagPostService
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('TagService.createTag started');
+        $this->logger->debug('TagService.createTag started');
 
         $tagName = trim($tagName);
         if (!$this->isValidTagName($tagName)) {
@@ -129,11 +129,6 @@ class TagPostService
             $this->transactionManager->beginTransaction();
 
             $tagId = $this->generateUUID();
-            if (empty($tagId)) {
-                $this->transactionManager->rollback();
-                $this->logger->critical('Failed to generate tag ID');
-                return $this->respondWithError(41701);
-            }
 
             $tagData = ['tagid' => $tagId, 'name' => $tagName];
             $tag = new Tag($tagData);
@@ -176,7 +171,7 @@ class TagPostService
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('TagPostService.fetchAll started');
+        $this->logger->debug('TagPostService.fetchAll started');
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);

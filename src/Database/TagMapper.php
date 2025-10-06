@@ -19,7 +19,7 @@ class TagMapper
 
     public function fetchAll(int $offset, int $limit): array
     {
-        $this->logger->info("TagMapper.fetchAll started");
+        $this->logger->debug("TagMapper.fetchAll started");
 
         $sql = "SELECT * FROM tags ORDER BY name ASC LIMIT :limit OFFSET :offset";
 
@@ -48,7 +48,7 @@ class TagMapper
 
     public function loadById(int $id): Tag|false
     {
-        $this->logger->info("TagMapper.loadById started");
+        $this->logger->debug("TagMapper.loadById started");
 
         $sql = "SELECT * FROM tags WHERE tagid = :id";
         $stmt = $this->db->prepare($sql);
@@ -66,7 +66,7 @@ class TagMapper
 
     public function loadByName(string $name): Tag|false
     {
-        $this->logger->info("TagMapper.loadByName started");
+        $this->logger->debug("TagMapper.loadByName started");
 
         $sql = "SELECT * FROM tags WHERE name = :name";
         $stmt = $this->db->prepare($sql);
@@ -85,7 +85,7 @@ class TagMapper
 
     public function searchByName(?array $args = []): array|false
     {
-        $this->logger->info("TagMapper.loadByName started");
+        $this->logger->debug("TagMapper.loadByName started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -129,7 +129,7 @@ class TagMapper
 
     public function insert(Tag $tag): Tag|false
     {
-        $this->logger->info("TagMapper.insert started");
+        $this->logger->debug("TagMapper.insert started");
 
         try {
             $data = $tag->getArrayCopy();
@@ -157,7 +157,7 @@ class TagMapper
 
     public function update(Tag $tag): Tag|false
     {
-        $this->logger->info("TagMapper.update started");
+        $this->logger->debug("TagMapper.update started");
 
         try {
             $data = $tag->getArrayCopy();
@@ -179,7 +179,7 @@ class TagMapper
 
     public function delete(string $id): bool
     {
-        $this->logger->info("TagMapper.delete started");
+        $this->logger->debug("TagMapper.delete started");
 
         try {
             $query = "DELETE FROM tags WHERE tagid = :id";

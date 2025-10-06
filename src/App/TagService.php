@@ -78,7 +78,7 @@ class TagService
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('TagService.createTag started');
+        $this->logger->debug('TagService.createTag started');
         $tagName = !empty($tagName) ? trim($tagName) : null;
 
         try {
@@ -92,11 +92,6 @@ class TagService
             }
 
             $tagId = $this->generateUUID();
-            if (empty($tagId)) {
-                $this->transactionManager->rollback();
-                $this->logger->critical('Failed to generate tag ID');
-                return $this->respondWithError(41704);
-            }
 
             $tagData = ['tagid' => $tagId, 'name' => $tagName];
             $tag = new Tag($tagData);
@@ -122,7 +117,7 @@ class TagService
 
     public function fetchAll(?array $args = []): array
     {
-        $this->logger->info("TagService.fetchAll started");
+        $this->logger->debug("TagService.fetchAll started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -140,7 +135,7 @@ class TagService
 
     public function loadTag(array $args): array
     {
-        $this->logger->info("TagService.loadTag started");
+        $this->logger->debug("TagService.loadTag started");
 
         try {
 

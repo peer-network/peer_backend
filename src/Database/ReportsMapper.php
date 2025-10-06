@@ -37,7 +37,7 @@ class ReportsMapper
         ?string $message = NULL
     ): ?bool {
 
-        $this->logger->info("ReportsMapper.addReports started");
+        $this->logger->debug("ReportsMapper.addReports started");
 
         $reportId = $this->generateUUID();
 

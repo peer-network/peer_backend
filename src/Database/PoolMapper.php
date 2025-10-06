@@ -43,7 +43,7 @@ class PoolMapper
 
     public function fetchPool(array $args = []): array
     {
-        $this->logger->info('WalletMapper.fetchPool started');
+        $this->logger->debug('WalletMapper.fetchPool started');
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = max((int)($args['limit'] ?? self::DEFAULT_LIMIT), 1);
@@ -154,7 +154,7 @@ class PoolMapper
     {
         \ignore_user_abort(true);
 
-        $this->logger->info('WalletMapper.getTimeSortedMatch started');
+        $this->logger->debug('WalletMapper.getTimeSortedMatch started');
 
         $dayOptions = [
             "D0" => "createdat::date = CURRENT_DATE",

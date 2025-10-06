@@ -135,7 +135,7 @@ class UserService
 
     public function createUser(array $args): array
     {
-        $this->logger->info('UserService.createUser started');
+        $this->logger->debug('UserService.createUser started');
 
         $requiredFields = ['username', 'email', 'password'];
         $validationErrors = self::validateRequiredFields($args, $requiredFields);
@@ -144,10 +144,6 @@ class UserService
         }
 
         $id = self::generateUUID();
-        if (empty($id)) {
-            $this->logger->critical('Failed to generate user ID');
-            return $this->respondWithError(40602);
-        }
 
         $pkey = $args['pkey'] ?? null;
         $mediaFile = isset($args['img']) ? trim($args['img']) : '';
@@ -192,7 +188,7 @@ class UserService
 			'updatedat' => (new \DateTime())->format('Y-m-d H:i:s.u')
         ];
 
-		$this->logger->info('UserService.createUser.verificationData started', ['verificationData' => $verificationData]);
+		$this->logger->debug('UserService.createUser.verificationData started', ['verificationData' => $verificationData]);
 
         $userData = [
             'uid' => $id,
@@ -471,7 +467,7 @@ class UserService
         }
         $contentFilterService = new ContentFilterServiceImpl();
 
-        $this->logger->info('UserService.updateUserPreferences started');
+        $this->logger->debug('UserService.updateUserPreferences started');
 
         $newUserPreferences = $args['userPreferences'];
         $contentFiltering = $newUserPreferences['contentFilteringSeverityLevel'] ?? null;
@@ -568,7 +564,7 @@ class UserService
             return self::respondWithError(30101);
         }
 
-        $this->logger->info('UserService.setPassword started');
+        $this->logger->debug('UserService.setPassword started');
 
         $newPassword = $args['password'] ?? null;
         $currentPassword = $args['expassword'] ?? null;
@@ -621,7 +617,7 @@ class UserService
             return self::respondWithError(30101);
         }
 
-        $this->logger->info('UserService.setEmail started');
+        $this->logger->debug('UserService.setEmail started');
 
         $email = $args['email'] ?? null;
         $exPassword = $args['password'] ?? null;    
@@ -684,7 +680,7 @@ class UserService
             return self::respondWithError(30101);
         }
 
-        $this->logger->info('UserService.setUsername started');
+        $this->logger->debug('UserService.setUsername started');
 
         $username = trim($args['username']);
         $password = $args['password'] ?? null;
@@ -728,7 +724,7 @@ class UserService
             ];
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
-            $this->logger->error('Failed to update username', ['exception' => $e]);
+            $this->logger->warning('Failed to update username', ['exception' => $e]);
             return self::respondWithError(30202);
         }
     }
@@ -743,7 +739,7 @@ class UserService
             return self::respondWithError(30101);
         }
 
-        $this->logger->info('UserService.deleteAccount started');
+        $this->logger->debug('UserService.deleteAccount started');
 
         $userId = $this->currentUserId;
 
@@ -783,7 +779,7 @@ class UserService
         $postLimit = min(max((int)($args['postLimit'] ?? 4), 1), 10);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-        $this->logger->info('UserService.Profile started');
+        $this->logger->debug('UserService.Profile started');
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID for profile', ['userId' => $userId]);
@@ -822,7 +818,7 @@ class UserService
 
     public function Follows(?array $args = []): array
     {
-        $this->logger->info('UserService.Follows started');
+        $this->logger->debug('UserService.Follows started');
 
         $userId = $args['userid'] ?? $this->currentUserId;
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -936,7 +932,7 @@ class UserService
     public function fetchAllAdvance(?array $args = []): array
     {
 
-        $this->logger->info('UserService.fetchAllAdvance started');
+        $this->logger->debug('UserService.fetchAllAdvance started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
@@ -966,7 +962,7 @@ class UserService
     public function fetchAll(?array $args = []): array
     {
 
-        $this->logger->info('UserService.fetchAll started');
+        $this->logger->debug('UserService.fetchAll started');
 
         try {
             $users = $this->userMapper->fetchAll($this->currentUserId, $args);
@@ -998,7 +994,7 @@ class UserService
      */
     public function requestPasswordReset(string $email): array
     {
-        $this->logger->info('UserService.requestPasswordReset started');
+        $this->logger->debug('UserService.requestPasswordReset started');
 
         $updatedAt = $this->getCurrentTimestamp();
         $expiresAt = $this->getFutureTimestamp('+1 hour');
@@ -1085,7 +1081,7 @@ class UserService
      */
     public function resetPasswordTokenVerify(string $token): array
     {
-        $this->logger->info('UserService.resetPasswordTokenVerify started');
+        $this->logger->debug('UserService.resetPasswordTokenVerify started');
 
         if (empty($token) || !is_string($token)) {
             $this->logger->warning('Invalid reset token', ['token' => $token]);
@@ -1165,7 +1161,7 @@ class UserService
      */
     public function resetPassword(?array $args): array
     {
-        $this->logger->info('UserService.resetPassword started');
+        $this->logger->debug('UserService.resetPassword started');
 
         $newPassword = $args['password'] ?? null;
 

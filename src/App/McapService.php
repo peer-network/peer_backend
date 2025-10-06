@@ -56,7 +56,7 @@ class McapService
     public function loadLastId(): array
     {
 
-        $this->logger->info('McapService.loadLastId started');
+        $this->logger->debug('McapService.loadLastId started');
 
         try {
             $fetchUpdate = $this->mcapMapper->fetchAndUpdateMarketPrices();
@@ -86,7 +86,7 @@ class McapService
     public function fetchAll(?array $args = []): array
     {
 
-        $this->logger->info('McapService.fetchAll started');
+        $this->logger->debug('McapService.fetchAll started');
 
         try {
             $offset = isset($args['offset']) ? (int) $args['offset'] : 0;

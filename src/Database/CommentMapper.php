@@ -33,7 +33,7 @@ class CommentMapper
 
     public function isCreator(string $commentid, string $userid): bool
     {
-        $this->logger->info("CommentMapper.isCreator started");
+        $this->logger->debug("CommentMapper.isCreator started");
 
         $sql = "SELECT COUNT(*) FROM comments WHERE commentid = :commentid AND userid = :userid";
         $stmt = $this->db->prepare($sql);
@@ -43,7 +43,7 @@ class CommentMapper
 
     public function insert(Comment $comment): Comment
     {
-        $this->logger->info("CommentMapper.insert started");
+        $this->logger->debug("CommentMapper.insert started");
 
         $daten = $data = $comment->getArrayCopy();
 
@@ -74,7 +74,7 @@ class CommentMapper
 
     public function delete(string $commentid): bool
     {
-        $this->logger->info("CommentMapper.delete started");
+        $this->logger->debug("CommentMapper.delete started");
 
         $query = "DELETE FROM comments WHERE commentid = :commentid";
 
@@ -94,7 +94,7 @@ class CommentMapper
 
     public function fetchAllByPostIdetaild(string $postId, string $currentUserId, int $offset = 0, int $limit = 10,?string $contentFilterBy = null): array
     {
-        $this->logger->info("CommentMapper.fetchAllByPostIdetaild started");
+        $this->logger->debug("CommentMapper.fetchAllByPostIdetaild started");
 
         $contentFilterService = new ContentFilterServiceImpl(
             new ListPostsContentFilteringStrategy(),
@@ -241,7 +241,7 @@ class CommentMapper
 
     public function fetchAllByPostIdd(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
     {
-        $this->logger->info("CommentMapper.fetchAllByPostId started");
+        $this->logger->debug("CommentMapper.fetchAllByPostId started");
 
         $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.postid = :postId AND c.parentid IS NULL ORDER BY c.createdat ASC LIMIT :limit OFFSET :offset";
         $params = [
@@ -264,7 +264,7 @@ class CommentMapper
 
     public function fetchAllByPostId(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
     {
-        $this->logger->info("CommentMapper.fetchAllByPostId started");
+        $this->logger->debug("CommentMapper.fetchAllByPostId started");
 
         $sql = "SELECT 
             c.*, 
@@ -379,7 +379,7 @@ class CommentMapper
 	public function fetchByParentId(string $parentId, string $currentUserId, int $offset = 0, int $limit = 10): array
 	{
 		try {
-			$this->logger->info("CommentMapper.fetchByParentId started");
+			$this->logger->debug("CommentMapper.fetchByParentId started");
 
 			// Check if the parent ID exists
 			$parentCheckSql = "SELECT 1 FROM comments WHERE commentid = :parentId LIMIT 1";
@@ -496,7 +496,7 @@ class CommentMapper
 
     public function fetchByParentIdd(string $parentId, string $currentUserId, int $offset = 0, int $limit = 10): array
     {
-        $this->logger->info("CommentMapper.fetchByParentId started");
+        $this->logger->debug("CommentMapper.fetchByParentId started");
 
         $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.parentid = :parentid ORDER BY c.createdat ASC LIMIT :limit OFFSET :offset";
         $params = [
@@ -519,7 +519,7 @@ class CommentMapper
 
     public function loadById(string $commentid): Comment|false
     {
-        $this->logger->info("CommentMapper.loadById started");
+        $this->logger->debug("CommentMapper.loadById started");
         
         $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.commentid = :id";
 
@@ -540,7 +540,7 @@ class CommentMapper
 
     public function isParentTopLevel(string $commentId): bool
     {
-        $this->logger->info("CommentMapper.isParentTopLevel started");
+        $this->logger->debug("CommentMapper.isParentTopLevel started");
 
         $sql = "SELECT COUNT(*) FROM comments WHERE commentid = :commentId AND parentid IS NULL";
         $stmt = $this->db->prepare($sql);
@@ -553,7 +553,7 @@ class CommentMapper
      */
     public function fetchAllByGuestPostIdetaild(string $postId, int $offset = 0, int $limit = 10): array
     {
-        $this->logger->info("CommentMapper.fetchAllByGuestPostIdetaild started");
+        $this->logger->debug("CommentMapper.fetchAllByGuestPostIdetaild started");
 
         $whereClauses = ["c.postid = :postId AND c.parentid IS NULL"];
 
@@ -646,7 +646,7 @@ class CommentMapper
     
     public function fetchAllByParentId(string $parentId, int $offset = 0, int $limit = 10): array
     {
-        $this->logger->info("CommentMapper.fetchAllByParentId started");
+        $this->logger->debug("CommentMapper.fetchAllByParentId started");
 
         $sql = "
             SELECT 

@@ -15,7 +15,7 @@ class UserPreferencesMapper
 
     public function loadPreferencesById(string $id): UserPreferences|false
     {
-        $this->logger->info('UserPreferencesMapper.loadPreferencesById started', ['id' => $id]);
+        $this->logger->debug('UserPreferencesMapper.loadPreferencesById started', ['id' => $id]);
 
         try {
             $stmt = $this->db->prepare(
@@ -55,7 +55,7 @@ class UserPreferencesMapper
 
     public function insert(UserPreferences $user): UserPreferences
     {
-        $this->logger->info("UserPreferencesMapper.insert started");
+        $this->logger->debug("UserPreferencesMapper.insert started");
 
         $data = $user->getArrayCopy();
 
@@ -87,7 +87,7 @@ class UserPreferencesMapper
 
     public function update(UserPreferences $userPreferences): UserPreferences
     {
-        $this->logger->info('UserPreferences.update started', ['userid' => $userPreferences->getUserId()]);
+        $this->logger->debug('UserPreferences.update started', ['userid' => $userPreferences->getUserId()]);
 
         $userPreferences->setUpdatedAt();
         $data = $userPreferences->getArrayCopy();
