@@ -12,6 +12,7 @@ abstract class Model
     protected static string $limit = '';
     protected array $wheres = [];
     protected array $joins = [];
+    protected array $selects = [];
 
     abstract protected static function table(): string;
 
@@ -152,8 +153,13 @@ abstract class Model
         // Calculate offset
         $offset = ($page - 1) * $perPage;
 
+        // Determine columns to select
+        $selectColumns = !empty($this->selects)
+        ? implode(', ', $this->selects)
+        : static::table() . '.*';
+
         // Fetch data with limit and offset
-        $sql = "SELECT * FROM " . static::table() . " {$joinsSql} {$whereSql} " . static::$orderBy . " LIMIT :limit OFFSET :offset";
+        $sql = "SELECT {$selectColumns} FROM " . static::table() . " {$joinsSql} {$whereSql} " . static::$orderBy . " LIMIT :limit OFFSET :offset";
         $stmt = $db->prepare($sql);
 
         // Bind limit and offset
@@ -182,6 +188,24 @@ abstract class Model
     }
 
     /**
+     * Specify which columns to select
+     * 
+     * @param string ...$columns One or more column names
+     * @return static
+     */
+    public function select(string ...$columns): static
+    {
+        if (empty($columns)) {
+            $this->selects = ['*'];
+        } else {
+            $this->selects = $columns;
+        }
+        return $this;
+    }
+
+
+
+    /**
      * Order results by a specific column
      */
     public function orderBy(string $column, string $direction = 'ASC'): static
@@ -196,9 +220,9 @@ abstract class Model
     /**
      * Add a JOIN clause to the query
      */
-    public function join(string $table, string $firstColumn, string $operator, string $secondColumn, string $type = 'INNER'): static
+    public function join(string $table, string $firstColumn, string $operator, string $secondColumn, string $type = 'LEFT'): static
     {
-        $this->joins[] = strtoupper($type) . " JOIN {$table} ON {$firstColumn} {$operator} {$secondColumn}";
+        $this->joins[] = strtoupper($type) . "  JOIN {$table} ON {$firstColumn} {$operator} {$secondColumn}";
         return $this;
     }
 

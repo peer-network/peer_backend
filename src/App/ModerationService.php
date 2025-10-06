@@ -79,8 +79,63 @@ class ModerationService {
 
         $items = UserReport::query()
             ->join('users', 'user_reports.reporter_userid', '=', 'users.uid')
+            ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
+            ->join('post_info', 'posts.postid', '=', 'post_info.postid')
+            ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
+            ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
+            ->select('user_reports.*', 'users.username as reporter_username', 'users.email as reporter_email', 'posts.*', 'post_info.*', 'comments.*', 'target_user.*')
             ->paginate($page, $limit);
 
+        // Map records according to the target type
+        // $items['data'] = array_map(function($item) {
+
+        //     var_dump($item); exit;
+        //     if($item['targettype'] === 'post') {
+        //         $item['post'] = [  
+        //             'id' =>   
+        //             'contenttype' =>   
+        //             'title' =>   
+        //             'media' =>   
+        //             'cover' =>   
+        //             'mediadescription' =>   
+        //             'createdat' =>   
+        //             'amountreports' =>   
+        //             'amountlikes' =>   
+        //             'amountviews' =>   
+        //             'amountcomments' =>   
+        //             'amountdislikes' =>   
+        //             'amounttrending' =>   
+        //             'isliked' =>   
+        //             'isviewed' =>   
+        //             'isreported' =>   
+        //             'isdisliked' =>   
+        //             'issaved' =>   
+        //             'tags' =>   
+        //             'url' =>   
+        //         ];
+        //     } elseif($item['targettype'] === 'comment') {
+        //         return [
+        //             'reportId' => $item['reportid'],
+        //             'moderationTicketId' => $item['moderationticketid'],
+        //             'reporterUserId' => $item['reporter_userid'],
+        //             'reporterUsername' => $item['reporter_username'],
+        //             'reporterEmail' => $item['reporter_email'],
+        //             'targetType' => $item['targettype'],
+        //             'targetId' => $item['targetid'],
+        //             'reason' => $item['reason'],
+        //             'status' => $item['status'],
+        //             'createdAt' => $item['createdat'],
+        //             'commentId' => $item['commentid'],
+        //             'commentContent' => $item['content'] ?? null,
+        //             'commentCreatedAt' => $item['createdat'] ?? null,
+        //             'commentAuthorId' => $item['authorid'] ?? null,
+        //             'commentAuthorUsername' => $item['username'] ?? null,
+        //             'commentAuthorEmail' => $item['email'] ?? null,
+        //         ];
+        //     }
+        //     return $item;
+        // }, $items['data']);
+        // var_dump($items); exit;
         return self::createSuccessResponse(20001,  $items['data'], false);
     }
 
