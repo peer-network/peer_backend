@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
+use DateTime;
 use Fawaz\App\Models\UserReport;
 use Fawaz\config\constants\ConstantsModeration;
 use Fawaz\Utils\ResponseHelper;
+use Fawaz\App\Models\Moderation;
 use Psr\Log\LoggerInterface;
 
 class ModerationService {
@@ -113,6 +115,17 @@ class ModerationService {
         UserReport::query()->where('reportid', $targetContentId)->updateColumns([
             'status' => $moderationAction,
         ]); 
+
+        $createdat = (string)(new DateTime())->format('Y-m-d H:i:s.u');
+
+        // var_dump($report[0]); exit;
+        Moderation::insert([
+            'uid' => self::generateUUID(),
+            'moderationticketid' => $report[0]['moderationticketid'],
+            'moderatorid' => $this->currentUserId,
+            'status' => $moderationAction,
+            'createdat' => $createdat,
+        ]);
 
         return self::createSuccessResponse(20001, [], false); // Moderation action performed successfully
     }
