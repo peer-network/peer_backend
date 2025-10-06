@@ -134,3 +134,9 @@ enum ModerationStatus {
   restored
   illegal
 }
+
+enum ModerationContentType {
+  POST
+  COMMENT
+  USER
+}

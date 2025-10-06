@@ -131,6 +131,68 @@ abstract class Model
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+
+    /**
+     * Paginate results
+     * 
+     * @param int $page The current page (1-based)
+     * @param int $perPage Number of records per page
+     * 
+     * @return array An array containing 'data', 'total', 'per_page', 'current_page', 'last_page'
+     */
+    public function paginate(int $page = 1, int $perPage = 10): array
+    {
+        $db = static::getDB();
+        $params = [];
+
+        $joinsSql = $this->buildJoins();
+        $whereSql = $this->buildWhere($params);
+
+        $this->latest();
+        // Calculate offset
+        $offset = ($page - 1) * $perPage;
+
+        // Fetch data with limit and offset
+        $sql = "SELECT * FROM " . static::table() . " {$joinsSql} {$whereSql} " . static::$orderBy . " LIMIT :limit OFFSET :offset";
+        $stmt = $db->prepare($sql);
+
+        // Bind limit and offset
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+        // Bind other where parameters
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val);
+        }
+
+        $stmt->execute();
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Get total count
+        $total = $this->count();
+        $lastPage = (int) ceil($total / $perPage);
+
+        return [
+            'data' => $data,
+            'total' => $total,
+            'per_page' => $perPage,
+            'current_page' => $page,
+            'last_page' => $lastPage,
+        ];
+    }
+
+    /**
+     * Order results by a specific column
+     */
+    public function orderBy(string $column, string $direction = 'ASC'): static
+    {
+        $direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+        $aliasColumn = str_contains($column, '.') ? $column : static::table() . '.' . $column;
+        static::$orderBy = "ORDER BY {$aliasColumn} {$direction}";
+        return $this;
+    }
+
+
     /**
      * Add a JOIN clause to the query
      */
@@ -301,7 +363,8 @@ abstract class Model
      */
     public function latest(string $column = 'createdat'): static
     {
-        static::$orderBy = "ORDER BY {$column} DESC";
+        $aliasColumn = str_contains($column, '.') ? $column : static::table() . '.' . $column;
+        static::$orderBy = "ORDER BY {$aliasColumn} DESC";
         return $this;
     }
 
@@ -314,7 +377,9 @@ abstract class Model
      */
     public function oldest(string $column = 'createdat'): static
     {
-        static::$orderBy = "ORDER BY {$column} ASC";
+        $aliasColumn = str_contains($column, '.') ? $column : static::table() . '.' . $column;
+
+        static::$orderBy = "ORDER BY {$aliasColumn} ASC";
         return $this;
     }
 

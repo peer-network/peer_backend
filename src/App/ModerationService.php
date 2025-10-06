@@ -61,4 +61,24 @@ class ModerationService {
             'AmountIllegal' => $amountIllegal,
         ], false);
     }
+
+    /**
+     * Get Moderation Items
+     */
+    public function getModerationItems(array $args): array
+    {
+        if(!$this->isAuthorized()) {
+            $this->logger->warning("Unauthorized access attempt to get moderation items by user ID: {$this->currentUserId}");
+            return self::respondWithError(0000);
+        }
+
+        $page = max((int)($args['page'] ?? 1), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+
+        $items = UserReport::query()
+            ->join('users', 'user_reports.reporter_userid', '=', 'users.uid')
+            ->paginate($page, $limit);
+
+        return self::createSuccessResponse(20001,  $items['data'], false);
+    }
 }

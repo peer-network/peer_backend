@@ -2475,7 +2475,60 @@ class GraphQLSchemaBuilder
                     return $root['AmountIllegal'] ?? 0;
                 }
             ],
+            'ModerationItemListResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ModerationItemListResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): ?array {
+                    return $root['affectedRows'] ?? null;
+                },
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+            ],
+            'ModerationItem' => [
+                'reportid' => function (array $root): string {
+                    $this->logger->info('Query.ModerationItem Resolvers');
+                    return $root['reportid'] ?? '';
+                },
+                'reporterid' => function (array $root): string {
+                    return $root['reporter_userid'] ?? '';
+                },
+                
+                'targetid' => function (array $root): string {
+                    return $root['targetid'] ?? '';
+                },
 
+                
+                'targetype' => function (array $root): string {
+                    return $root['targetype'] ?? '';
+                },
+                
+                'status' => function (array $root): string {
+                    return $root['status'] ?? '';
+                },
+
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+
+
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ]
         ];
     }
 
@@ -2527,6 +2580,7 @@ class GraphQLSchemaBuilder
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'getTokenomics' => fn(mixed $root, array $args) => $this->resolveTokenomics(),
             'moderationStats' => fn(mixed $root, array $args) => $this->moderationService->getModerationStats(),
+            'moderationItems' => fn(mixed $root, array $args) => $this->moderationService->getModerationItems($args),
         ];
     }
 

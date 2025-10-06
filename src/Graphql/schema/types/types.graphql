@@ -512,7 +512,8 @@ type ModerationItem {
   status: String!
   message: String!
   createdat: String!
-  targetcontent: TargetContent
+  targetcontent: TargetContent!
+  reporter: BasicUserInfo!
 }
 
 type TargetContent {
