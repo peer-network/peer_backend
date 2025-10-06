@@ -10,7 +10,6 @@ use Fawaz\App\Models\Core\Model;
  * Table: user_reports
  * Has Foreign Keys:
  *  1. moderationticketid -> moderation_tickets(uid)
- *  2. moderationid -> moderations(uid)
  */
 class UserReport extends Model
 {

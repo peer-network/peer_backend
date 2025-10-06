@@ -47,4 +47,12 @@ class ConstantsModeration
         'illegal' => 'Illegal',
     ];
 
+    /**
+     * Moderation Tickets Status
+     * 
+     * @var string
+     */
+    public const MODERATION_TICKETS_STATUS_OPEN = 'open';
+    public const MODERATION_TICKETS_STATUS_CLOSED = 'closed';
+
 }

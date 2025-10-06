@@ -59,6 +59,8 @@ abstract class Model
         $joinsSql = $this->buildJoins();
         $whereSql = $this->buildWhere($params);
 
+        $this->latest();
+
         $sql = "SELECT * FROM " . static::table() . " {$joinsSql} {$whereSql} " . static::$orderBy . " LIMIT 1";
 
         $stmt = $db->prepare($sql);
@@ -216,6 +218,24 @@ abstract class Model
             $this->wheres[] = ['OR', $column, $operatorOrValue, $value];
         }
         return $this;
+    }
+
+
+    /**
+     * Insert a new record into the table
+     */
+    public static function insert(array $data): bool
+    {
+        $db = static::getDB();
+
+        $columns = array_keys($data);
+        $placeholders = array_map(fn($col) => ":{$col}", $columns);
+
+        $sql = "INSERT INTO " . static::table() . " (" . implode(", ", $columns) . ") VALUES (" . implode(", ", $placeholders) . ")";
+
+        $stmt = $db->prepare($sql);
+
+        return $stmt->execute($data);
     }
 
 

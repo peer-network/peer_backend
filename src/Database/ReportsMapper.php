@@ -6,6 +6,10 @@ use PDO;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\ReportTargetType;
 use DateTime;
+use Fawaz\App\Models\UserReport;
+use Fawaz\App\Models\ModerationTicket;
+use Fawaz\App\Models\Moderation;
+use Fawaz\config\constants\ConstantsModeration;
 
 class ReportsMapper
 {
@@ -72,6 +76,10 @@ class ReportsMapper
             }
 
             $createdat = (string)(new DateTime())->format('Y-m-d H:i:s.u');
+
+            // Add Ticket for reports
+            $moderationTicketId = $this->getTicketId($targetid, $targetTypeString, $createdat);
+
             // Insert a new record
             $sql = "INSERT INTO user_reports (
                 reportid, 
@@ -80,6 +88,7 @@ class ReportsMapper
                 targettype, 
                 collected, 
                 createdat,
+                moderationticketid,
                 hash_content_sha256
             ) VALUES (
                 :reportid, 
@@ -88,6 +97,7 @@ class ReportsMapper
                 :targettype, 
                 :collected, 
                 :createdat,
+                :moderationticketid,
                 :hash_content_sha256
             )";
 
@@ -96,6 +106,7 @@ class ReportsMapper
             $stmt->bindValue(':reporter_userid', $reporter_userid, \PDO::PARAM_STR);
             $stmt->bindValue(':targetid', $targetid, \PDO::PARAM_STR);
             $stmt->bindValue(':targettype', $targetTypeString, \PDO::PARAM_STR);
+            $stmt->bindValue(':moderationticketid', $moderationTicketId, \PDO::PARAM_STR);
             $stmt->bindValue(':collected', 0, \PDO::PARAM_STR);
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
             $stmt->bindValue(':hash_content_sha256', $hash_content_sha256, \PDO::PARAM_STR);
@@ -114,4 +125,42 @@ class ReportsMapper
             return null;
         }
     }
+
+
+    /**
+     * Get TicketId by TargetId and TargetType
+     * 
+     * Check if a ticket already exists for the target (post, comment, user)
+     * If exists, use the existing ticket ID
+     * If not, create a new ticket
+     */
+    private function getTicketId(string $targetid, string $targettype, string $createdat): string {
+        $moderationTicketId = $this->generateUUID();
+
+        $existingTicket = UserReport::query()->where('targetid', $targetid)->where('targettype', $targettype)->first();
+
+
+        if($existingTicket && isset($existingTicket['moderationticketid']) && $existingTicket['moderationticketid']) {
+            $ticketStatus = ModerationTicket::query()->where('uid', $existingTicket['moderationticketid'])->where('status', ConstantsModeration::MODERATION_TICKETS_STATUS_OPEN)->first();
+            if($ticketStatus) {
+                // Ticket is already open and awaiting review
+                $this->logger->info("ReportsMapper: addReport: Ticket already exists and is awaiting review");
+                $moderationTicketId = $existingTicket['moderationticketid'];
+            }
+        }else{
+
+            $status = ConstantsModeration::MODERATION_TICKETS_STATUS_OPEN;
+
+            $data = [
+                'uid' => $moderationTicketId,
+                'status' => $status,
+                'createdat' => $createdat
+            ];
+
+            ModerationTicket::query()->insert($data);
+        }
+
+        return $moderationTicketId;
+    }
+
 }
