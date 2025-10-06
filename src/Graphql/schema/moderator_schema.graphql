@@ -3,6 +3,6 @@ extend type Query {
   moderationItems(status: ModerationStatus, contentType: ModerationContentType, page: Int, limit: Int): ModerationItemListResponse!
 }
 
-# extend type Mutation {
-#   # updateModerationItemStatus(itemId: ID!, status: ModerationStatus!): ModerationItemResponse!
-# }
+extend type Mutation {
+  performModeration(targetContentId: ID!, moderationAction: ModerationStatus!): DefaultResponse!
+}

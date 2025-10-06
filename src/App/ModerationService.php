@@ -81,4 +81,39 @@ class ModerationService {
 
         return self::createSuccessResponse(20001,  $items['data'], false);
     }
+
+    /**
+     * Perform Moderation Action
+     * 
+     * Update status of a moderation item
+     *  1. waiting_for_review
+     *  2. hidden
+     *  3. restored
+     *  4. illegal
+     */
+    public function performModerationAction(array $args): array
+    {
+        if(!$this->isAuthorized()) {
+            $this->logger->warning("Unauthorized access attempt to perform moderation action by user ID: {$this->currentUserId}");
+            return self::respondWithError(0000);
+        }
+
+        $targetContentId = $args['targetContentId'] ?? null;
+        $moderationAction = $args['moderationAction'] ?? null;
+
+        if(!$targetContentId || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
+            return self::respondWithError(0000); // Invalid input
+        }
+
+        $report = UserReport::query()->where('reportid', $targetContentId)->first();
+        if(!$report) {
+            return self::respondWithError(0000); // Report not found
+        }
+
+        UserReport::query()->where('reportid', $targetContentId)->updateColumns([
+            'status' => $moderationAction,
+        ]); 
+
+        return self::createSuccessResponse(20001, [], false); // Moderation action performed successfully
+    }
 }

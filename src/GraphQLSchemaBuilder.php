@@ -2627,6 +2627,7 @@ class GraphQLSchemaBuilder
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'advertisePostBasic' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
             'advertisePostPinned' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
+            'performModeration' => fn(mixed $root, array $args) => $this->moderationService->performModerationAction($args),
         ];
     }
 

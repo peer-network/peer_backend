@@ -300,6 +300,28 @@ abstract class Model
         return $stmt->execute($data);
     }
 
+    /**
+     * Update records matching the query
+     */
+    public function updateColumns(array $data): bool
+    {
+        $db = static::getDB();
+        $params = [];
+        $setClauses = [];
+
+        foreach ($data as $col => $val) {
+            $param = ":set_{$col}";
+            $setClauses[] = "{$col} = {$param}";
+            $params[$param] = $val;
+        }
+        $joinsSql = $this->buildJoins();
+        $whereSql = $this->buildWhere($params);
+
+        $sql = "UPDATE " . static::table() . " SET " . implode(", ", $setClauses) . " {$whereSql}";
+        $stmt = $db->prepare($sql);
+
+        return $stmt->execute($params);
+    }
 
 
     /**
