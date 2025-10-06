@@ -259,7 +259,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::User.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         try {
@@ -269,7 +269,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::Tokenize.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         try {
@@ -279,7 +279,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::UserInfo.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         try {
@@ -289,7 +289,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::UserPreferences.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         try {
@@ -308,7 +308,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::Wallett.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         try {
@@ -318,7 +318,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::DailyFree.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         $this->userMapper->logLoginDaten($id);

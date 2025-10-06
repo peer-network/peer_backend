@@ -217,7 +217,7 @@ class AdvertisementService
             } catch (\Throwable $e) {
                 $this->logger->error('Fehler beim Validieren des Advertisements', ['exception' => $e]);
                 // Die richtige errorCode.
-                return self::respondWithError($e->getMessage());
+                return self::respondWithError((int)$e->getMessage());
             }
 
             if ($CostPlan === self::PLAN_BASIC) 
