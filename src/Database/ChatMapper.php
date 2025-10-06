@@ -29,7 +29,7 @@ class ChatMapper
 
     public function isCreator(string $chatid, string $currentUserId): bool
     {
-        $this->logger->info("ChatMapper.isCreator started", [
+        $this->logger->debug("ChatMapper.isCreator started", [
             'chatid' => $chatid,
             'currentUserId' => $currentUserId
         ]);
@@ -53,7 +53,7 @@ class ChatMapper
 
     public function isParticipantExist(string $chatid, string $currentUserId): bool
     {
-        $this->logger->info("ChatMapper.isParticipantExist started", [
+        $this->logger->debug("ChatMapper.isParticipantExist started", [
             'chatid' => $chatid,
             'currentUserId' => $currentUserId
         ]);
@@ -77,7 +77,7 @@ class ChatMapper
 
     public function isPrivate(string $chatid): bool
     {
-        $this->logger->info("ChatMapper.isPrivate started", ['chatid' => $chatid]);
+        $this->logger->debug("ChatMapper.isPrivate started", ['chatid' => $chatid]);
 
         try {
             $sql = "SELECT COUNT(*) FROM chats WHERE chatid = :chatid AND ispublic = 0";
@@ -94,7 +94,7 @@ class ChatMapper
 
     public function fetchFriends(string $userid): array
     {
-        $this->logger->info("ChatMapper.fetchFriends started", ['userid' => $userid]);
+        $this->logger->debug("ChatMapper.fetchFriends started", ['userid' => $userid]);
 
         try {
             $sql = "SELECT u.uid, u.username, u.slug, u.updatedat, u.biography, u.img 
@@ -119,7 +119,7 @@ class ChatMapper
 
     public function getPrivateChatBetweenUsers(string $userId1, string $userId2): bool
     {
-        $this->logger->info("ChatMapper.getPrivateChatBetweenUsers started", [
+        $this->logger->debug("ChatMapper.getPrivateChatBetweenUsers started", [
             'userId1' => $userId1,
             'userId2' => $userId2
         ]);
@@ -152,7 +152,7 @@ class ChatMapper
 
     public function loadById(string $id): Chat|array
     {
-        $this->logger->info("ChatMapper.loadById started", ['id' => $id]);
+        $this->logger->debug("ChatMapper.loadById started", ['id' => $id]);
 
         try {
             $sql = "SELECT * FROM chats WHERE chatid = :id";
@@ -175,7 +175,7 @@ class ChatMapper
 
     public function loadChatById(string $currentUserId, ?array $args = []): array
     {
-        $this->logger->info("ChatMapper.loadChatById started");
+        $this->logger->debug("ChatMapper.loadChatById started");
 
         $chatId = $args['chatid'] ?? null;
 
@@ -350,7 +350,7 @@ class ChatMapper
 
     public function getChatMessages(array $args): array
     {
-        $this->logger->info("ChatMapper.getChatMessages started");
+        $this->logger->debug("ChatMapper.getChatMessages started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -378,7 +378,7 @@ class ChatMapper
 
     public function insert(Chat $chat): Chat
     {
-        $this->logger->info("ChatMapper.insert started");
+        $this->logger->debug("ChatMapper.insert started");
 
         $data = $chat->getArrayCopy();
 
@@ -412,7 +412,7 @@ class ChatMapper
 
     public function insertFeed(NewsFeed $feed): NewsFeed
     {
-        $this->logger->info("ChatMapper.insertFeed started");
+        $this->logger->debug("ChatMapper.insertFeed started");
 
         $data = $feed->getArrayCopy();
 
@@ -445,7 +445,7 @@ class ChatMapper
 
     public function insertPart(ChatParticipants $participant): array
     {
-        $this->logger->info("ChatMapper.insertPart started");
+        $this->logger->debug("ChatMapper.insertPart started");
 
         $data = $participant->getArrayCopy();
 
@@ -498,7 +498,7 @@ class ChatMapper
 
     public function insertMess(ChatMessages $chatmessage): array
     {
-        $this->logger->info("ChatMapper.insertMess started");
+        $this->logger->debug("ChatMapper.insertMess started");
 
         $data = $chatmessage->getArrayCopy();
 
@@ -560,7 +560,7 @@ class ChatMapper
 
     public function update(Chat $chat): Chat
     {
-        $this->logger->info("ChatMapper.update started");
+        $this->logger->debug("ChatMapper.update started");
 
         $data = $chat->getArrayCopy();
         $query = "UPDATE chats
@@ -599,7 +599,7 @@ class ChatMapper
 
     public function delete(string $id): bool
     {
-        $this->logger->info("ChatMapper.delete started");
+        $this->logger->debug("ChatMapper.delete started");
 
         $query = "DELETE FROM chats WHERE chatid = :id";
 
@@ -629,7 +629,7 @@ class ChatMapper
 
     public function deleteParticipant(string $chatid, string $participantId): bool
     {
-        $this->logger->info("ChatMapper.deleteParticipant started");
+        $this->logger->debug("ChatMapper.deleteParticipant started");
 
         $query = "DELETE FROM chatparticipants WHERE chatid = :chatid AND userid = :participantId";
 
@@ -660,7 +660,7 @@ class ChatMapper
 
     public function deleteMessage(string $chatid, int $messid): bool
     {
-        $this->logger->info("ChatMapper.deleteMessage started");
+        $this->logger->debug("ChatMapper.deleteMessage started");
 
         $query = "DELETE FROM chatmessages WHERE chatid = :chatid AND messid = :messid";
 
@@ -691,7 +691,7 @@ class ChatMapper
 
     public function findChatser(string $currentUserId, ?array $args = []): array
     {
-        $this->logger->info("ChatMapper.findChatser started");
+        $this->logger->debug("ChatMapper.findChatser started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -830,7 +830,7 @@ class ChatMapper
 
     public function updateLastSeenMessage(string $user_id, string $chat_id, int $last_seen_message_id): void
     {
-        $this->logger->info("ChatMapper.updateLastSeenMessage started");
+        $this->logger->debug("ChatMapper.updateLastSeenMessage started");
 
         $query = "
             INSERT INTO user_chat_status (userid, chatid, last_seen_message_id)
@@ -863,7 +863,7 @@ class ChatMapper
 
     public function getUnseenMessages(string $user_id, string $chat_id): array|false
     {
-        $this->logger->info("ChatMapper.getUnseenMessages started");
+        $this->logger->debug("ChatMapper.getUnseenMessages started");
 
         $query = "
             SELECT * FROM chatmessages 
@@ -910,7 +910,7 @@ class ChatMapper
 
     public function loadMessageById(int $id): array|false
     {
-        $this->logger->info("ChatMapper.loadMessageById started", ['id' => $id]);
+        $this->logger->debug("ChatMapper.loadMessageById started", ['id' => $id]);
 
         try {
             $sql = "SELECT * FROM chatmessages WHERE messid = :id";

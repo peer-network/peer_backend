@@ -46,7 +46,7 @@ class WalletService
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info("WalletService.fetchPool started");
+        $this->logger->debug("WalletService.fetchPool started");
 
         $fetchPool = $this->walletMapper->fetchPool($args);
         return $fetchPool;
@@ -58,7 +58,7 @@ class WalletService
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info("WalletService.fetchAll started");
+        $this->logger->debug("WalletService.fetchAll started");
 
         $fetchAll = array_map(
             static function (Wallet $wallet) {
@@ -93,7 +93,7 @@ class WalletService
             return $this::respondWithError(30105);
         }
 
-        $this->logger->info("WalletService.fetchWalletById started");
+        $this->logger->debug("WalletService.fetchWalletById started");
 
         try {
             $wallets = $this->walletMapper->loadWalletById($this->currentUserId, $args);
@@ -226,14 +226,14 @@ class WalletService
 
     public function getPercentBeforeTransaction(string $userId, int $tokenAmount): array
     {
-        $this->logger->info('WalletService.getPercentBeforeTransaction started');
+        $this->logger->debug('WalletService.getPercentBeforeTransaction started');
 
         return $this->walletMapper->getPercentBeforeTransaction($userId, $tokenAmount);
     }
 
     public function loadLiquidityById(string $userId): array
     {
-        $this->logger->info('WalletService.loadLiquidityById started');
+        $this->logger->debug('WalletService.loadLiquidityById started');
 
         try {
             $results = $this->walletMapper->loadLiquidityById($userId);
@@ -255,7 +255,7 @@ class WalletService
 
     public function getUserWalletBalance(string $userId): float
     {
-        $this->logger->info('WalletService.getUserWalletBalance started');
+        $this->logger->debug('WalletService.getUserWalletBalance started');
 
         try {
             return $this->walletMapper->getUserWalletBalance($userId);
@@ -266,7 +266,7 @@ class WalletService
 
     public function deductFromWallet(string $userId, ?array $args = []): ?array
     {
-        $this->logger->info('WalletService.deductFromWallet started');
+        $this->logger->debug('WalletService.deductFromWallet started');
 
         try {
             $this->transactionManager->beginTransaction();
@@ -287,7 +287,7 @@ class WalletService
 
     public function callUserMove(): ?array
     {
-        $this->logger->info('WalletService.callUserMove started');
+        $this->logger->debug('WalletService.callUserMove started');
 
         try {
             $response = $this->walletMapper->callUserMove($this->currentUserId);
@@ -305,7 +305,7 @@ class WalletService
 
     public function transferToken(array $args): array
     {
-        $this->logger->info('WalletService.transferToken started');
+        $this->logger->debug('WalletService.transferToken started');
 
         try {
             $response = $this->walletMapper->transferToken($this->currentUserId, $args);

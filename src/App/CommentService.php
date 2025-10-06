@@ -84,7 +84,7 @@ class CommentService
             return $this::respondWithError(30101);
         }
 
-        $this->logger->info('CommentService.createComment started');
+        $this->logger->debug('CommentService.createComment started');
 
         $requiredFields = ['content', 'postid'];
         $validationErrors = $this->validateRequiredFields($args, $requiredFields);
@@ -117,10 +117,6 @@ class CommentService
         try {
             $this->transactionManager->beginTransaction();
             $commentId = $this->generateUUID();
-            if (empty($commentId)) {
-                $this->logger->critical('Failed to generate comment ID');
-                return $this::respondWithError(41607);
-            }
 
             $commentData = [
                 'commentid' => $commentId,
@@ -151,7 +147,7 @@ class CommentService
 
             $postInfo = $this->postInfoMapper->loadById($postId);
             if (!$postInfo) {
-                $this->logger->error('PostInfo not found for postId', ['postId' => $postId]);
+                $this->logger->warning('PostInfo not found for postId', ['postId' => $postId]);
                 $this->transactionManager->rollback();
                 return $this::respondWithError(31602);
             }
@@ -220,7 +216,7 @@ class CommentService
             return $this::respondWithError(30209);
         }
 
-        $this->logger->info("CommentService.fetchByParentId started");
+        $this->logger->debug("CommentService.fetchByParentId started");
 
         $results = $this->commentMapper->fetchByParentId($parentId, $this->currentUserId, $offset, $limit);
 
@@ -242,7 +238,7 @@ class CommentService
             return $this::respondWithError(30209);
         }
 
-        $this->logger->info("CommentService.fetchAllByPostId started");
+        $this->logger->debug("CommentService.fetchAllByPostId started");
 
         $results = $this->commentMapper->fetchAllByPostId($postId, $this->currentUserId, $offset, $limit);
         return $results;

@@ -53,7 +53,7 @@ class CommentInfoService
             return $this::respondWithError(30201);
         }
 
-        $this->logger->info('CommentInfoService.deleteCommentInfo started');
+        $this->logger->debug('CommentInfoService.deleteCommentInfo started');
 
         if ($this->commentMapper->delete($commentId)) {
             return ['status' => 'success', 'ResponseCode' => "11606"];
@@ -72,7 +72,7 @@ class CommentInfoService
             return $this::respondWithError(30103);
         }
 
-        $this->logger->info('CommentInfoService.countLikes started');
+        $this->logger->debug('CommentInfoService.countLikes started');
 
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
@@ -93,7 +93,7 @@ class CommentInfoService
             return $this::respondWithError(30201);
         }
 
-        $this->logger->info('CommentInfoService.likeComment started');
+        $this->logger->debug('CommentInfoService.likeComment started');
 
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
@@ -129,7 +129,7 @@ class CommentInfoService
 
     public function reportComment(string $commentId): array
     {
-        $this->logger->info('CommentInfoService.reportComment started');
+        $this->logger->debug('CommentInfoService.reportComment started');
 
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
@@ -142,15 +142,15 @@ class CommentInfoService
         try {
             $comment = $this->commentMapper->loadById($commentId);
             if (!$comment) {
-                $this->logger->error('Comment not found');
-                return $this::respondWithError(31601);
+                $this->logger->warning('Comment not found');
+                return $this->respondWithError(31601);
             }
 
             $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
             if (!$commentInfo) {
-                $this->logger->error('Error while fetching comment data from db');
-                return $this::respondWithError(31601);
+                $this->logger->warning('Error while fetching comment data from db');
+                return $this->respondWithError(31601);
             }
         } catch (\Exception $e) {
             $this->logger->error('Error while fetching data for report generation ', ['exception' => $e]);
@@ -184,8 +184,8 @@ class CommentInfoService
             }
 
             if ($exists === true) {
-                $this->logger->error('Post report already exists');
-                return $this::respondWithError(31605);
+                $this->logger->warning('Post report already exists');
+                return $this->respondWithError(31605);
             }
 
             $commentInfo->setReports($commentInfo->getReports() + 1);
@@ -206,7 +206,7 @@ class CommentInfoService
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info("CommentInfoService.findCommentInfo started");
+        $this->logger->debug("CommentInfoService.findCommentInfo started");
 
         $commentinfo = $this->commentInfoMapper->loadById($commentId);
 

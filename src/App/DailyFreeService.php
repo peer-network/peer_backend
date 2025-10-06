@@ -43,7 +43,7 @@ class DailyFreeService
 
     public function getUserDailyAvailability(string $userId): array
     {
-        $this->logger->info('DailyFreeService.getUserDailyAvailability started', ['userId' => $userId]);
+        $this->logger->debug('DailyFreeService.getUserDailyAvailability started', ['userId' => $userId]);
 
         try {
             $affectedRows = $this->dailyFreeMapper->getUserDailyAvailability($userId);
@@ -63,7 +63,7 @@ class DailyFreeService
 
     public function getUserDailyUsage(string $userId, int $artType): int
     {
-        $this->logger->info('DailyFreeService.getUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
+        $this->logger->debug('DailyFreeService.getUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
 
         try {
             $results = $this->dailyFreeMapper->getUserDailyUsage($userId, $artType);
@@ -78,7 +78,7 @@ class DailyFreeService
 
     public function incrementUserDailyUsage(string $userId, int $artType): bool
     {
-        $this->logger->info('DailyFreeService.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
+        $this->logger->debug('DailyFreeService.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
 
         try {
             $this->transactionManager->beginTransaction();

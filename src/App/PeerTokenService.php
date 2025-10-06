@@ -36,7 +36,7 @@ class PeerTokenService
 
     public function transferToken(array $args): array
     {
-        $this->logger->info('WalletService.transferToken started');
+        $this->logger->debug('WalletService.transferToken started');
 
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
@@ -76,7 +76,7 @@ class PeerTokenService
      */
     public function transactionsHistory(array $args): array
     {
-        $this->logger->info('PeerTokenService.transactionsHistory started');
+        $this->logger->debug('PeerTokenService.transactionsHistory started');
 
         try {
             $results = $this->peerTokenMapper->getTransactions($this->currentUserId, $args);

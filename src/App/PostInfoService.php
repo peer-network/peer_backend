@@ -53,7 +53,7 @@ class PostInfoService
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('PostInfoService.updatePostInfo started');
+        $this->logger->debug('PostInfoService.updatePostInfo started');
 
         try {
             $this->transactionManager->beginTransaction();
@@ -78,7 +78,7 @@ class PostInfoService
     //         return $this::respondWithError(30209);
     //     }
 
-    //     $this->logger->info('PostInfoService.deletePostInfo started');
+    //     $this->logger->debug('PostInfoService.deletePostInfo started');
 
     //     if ($this->postInfoMapper->delete($postId)) {
     //         return ['status' => 'success', 'ResponseCode' => "11510",];
@@ -97,7 +97,7 @@ class PostInfoService
             return $this::respondWithError(30209);
         }
 
-        $this->logger->info('PostInfoService.likePost started');
+        $this->logger->debug('PostInfoService.likePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
         if ($postInfo === null) {
@@ -145,7 +145,7 @@ class PostInfoService
             return $this::respondWithError(30209);
         }
 
-        $this->logger->info('PostInfoService.dislikePost started');
+        $this->logger->debug('PostInfoService.dislikePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
         if ($postInfo === null) {
@@ -187,7 +187,7 @@ class PostInfoService
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('PostInfoService.reportPost started');
+        $this->logger->debug('PostInfoService.reportPost started');
 
         if (!self::isValidUUID($postId)) {
             return $this::respondWithError(30209);
@@ -196,14 +196,14 @@ class PostInfoService
         try {
             $post = $this->postMapper->loadById($postId);
             if (!$post) {
-                $this->logger->error('PostInfoService: reportPost: Post not found');
-                return $this::respondWithError(31510);
+                $this->logger->warning('PostInfoService: reportPost: Post not found');
+                return $this->respondWithError(31510);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
             if ($postInfo === null) {
-                $this->logger->error('PostInfoService: reportPost: Error while fetching comment data from db');
-                return $this::respondWithError(31602);
+                $this->logger->warning('PostInfoService: reportPost: Error while fetching comment data from db');
+                return $this->respondWithError(31602);
             }
         } catch (\Exception $e) {
             $this->logger->error('PostInfoService: reportPost: Error while fetching data for report generation ', ['exception' => $e]);
@@ -268,7 +268,7 @@ class PostInfoService
             return $this::respondWithError(30209);
         }
 
-        $this->logger->info('PostInfoService.viewPost started');
+        $this->logger->debug('PostInfoService.viewPost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
         if ($postInfo === null) {
@@ -313,7 +313,7 @@ class PostInfoService
             return $this::respondWithError(30209);
         }
 
-        $this->logger->info('PostInfoService.sharePost started');
+        $this->logger->debug('PostInfoService.sharePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
         if ($postInfo === null) {
@@ -355,7 +355,7 @@ class PostInfoService
             return $this::respondWithError(30201);
         }
 
-        $this->logger->info('PostInfoService.toggleUserFollow started');
+        $this->logger->debug('PostInfoService.toggleUserFollow started');
 
         if (!$this->postInfoMapper->isUserExistById($followedUserId)) {
             return $this::respondWithError(31105);
@@ -386,7 +386,7 @@ class PostInfoService
             return $this::respondWithError(30209);
         }
 
-        $this->logger->info('PostInfoService.savePost started');
+        $this->logger->debug('PostInfoService.savePost started');
 
         $this->transactionManager->beginTransaction();
 
@@ -409,7 +409,7 @@ class PostInfoService
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info("PostInfoService.findPostInfo started");
+        $this->logger->debug("PostInfoService.findPostInfo started");
 
         $postinfo = $this->postInfoMapper->loadById($postId);
         if ($postinfo === null) {

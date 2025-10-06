@@ -20,7 +20,7 @@ class PostInfoMapper
 
     public function loadById(string $postid): ?PostInfo
     {
-        $this->logger->info("PostInfoMapper.loadById started");
+        $this->logger->debug("PostInfoMapper.loadById started");
 
         $sql = "SELECT * FROM post_info WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -36,7 +36,7 @@ class PostInfoMapper
 
     public function isUserExistById(string $id): bool
     {
-        $this->logger->info("PostInfoMapper.isUserExistById started");
+        $this->logger->debug("PostInfoMapper.isUserExistById started");
 
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :id");
         $stmt->bindParam(':id', $id);
@@ -47,7 +47,7 @@ class PostInfoMapper
 
     public function insert(PostInfo $postInfo): bool
     {
-        $this->logger->info("PostInfoMapper.insert started");
+        $this->logger->debug("PostInfoMapper.insert started");
 
         $data = $postInfo->getArrayCopy();
 
@@ -100,7 +100,7 @@ class PostInfoMapper
 
     public function update(PostInfo $postInfo): void
     {
-        $this->logger->info("PostInfoMapper.update started");
+        $this->logger->debug("PostInfoMapper.update started");
         $data = $postInfo->getArrayCopy();
 
         try {
@@ -169,7 +169,7 @@ class PostInfoMapper
 
     public function addUserActivity(string $action, string $userid, string $postid): bool
     {
-        $this->logger->info("PostInfoMapper.addUserActivity started");
+        $this->logger->debug("PostInfoMapper.addUserActivity started");
 
         $table = match ($action) {
             'likePost' => 'user_post_likes',
@@ -220,7 +220,7 @@ class PostInfoMapper
 
     public function togglePostSaved(string $userid, string $postid): array
     {
-        $this->logger->info("PostInfoMapper.togglePostSaved started");
+        $this->logger->debug("PostInfoMapper.togglePostSaved started");
 
         try {
 
@@ -277,7 +277,7 @@ class PostInfoMapper
 
     public function toggleUserFollow(string $followerid, string $followeduserid): array
     {
-        $this->logger->info("PostInfoMapper.toggleUserFollow started");
+        $this->logger->debug("PostInfoMapper.toggleUserFollow started");
 
         try {
 

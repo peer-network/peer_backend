@@ -23,7 +23,7 @@ class TransactionRepository
      */
     public function saveTransaction(Transaction $transaction)
     {
-        $this->logger->info("TransactionRepository.saveTransaction started");
+        $this->logger->debug("TransactionRepository.saveTransaction started");
 
         $query = "INSERT INTO transactions 
                   (transactionid, operationid, transactiontype, senderid, recipientid, tokenamount, transferaction, message, createdat)

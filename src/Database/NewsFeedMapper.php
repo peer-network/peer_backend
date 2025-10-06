@@ -21,7 +21,7 @@ class NewsFeedMapper
 
     public function isCreator(string $feedid, string $currentUserId): bool
     {
-        $this->logger->info("NewsFeedMapper.isCreator started");
+        $this->logger->debug("NewsFeedMapper.isCreator started");
 
         $sql = "SELECT COUNT(*) FROM posts WHERE feedid = :feedid AND userid = :currentUserId";
         $stmt = $this->db->prepare($sql);
@@ -32,7 +32,7 @@ class NewsFeedMapper
 
     public function loadById(string $id): NewsFeed|false
     {
-        $this->logger->info("NewsFeedMapper.loadById started");
+        $this->logger->debug("NewsFeedMapper.loadById started");
 
         $sql = "SELECT * FROM posts WHERE feedid = :feedid";
         $stmt = $this->db->prepare($sql);
@@ -49,7 +49,7 @@ class NewsFeedMapper
 
     public function userInfoForFeeds(string $id): array
     {
-        $this->logger->info("NewsFeedMapper.userInfoForFeeds started");
+        $this->logger->debug("NewsFeedMapper.userInfoForFeeds started");
 
         $sql = "SELECT uid AS id, username, img FROM users WHERE uid = :id";
         $stmt = $this->db->prepare($sql);
@@ -67,7 +67,7 @@ class NewsFeedMapper
     // Create a NewsFeedM
     public function insert(Post $post): Post
     {
-        $this->logger->info("NewsFeedMapper.insert started");
+        $this->logger->debug("NewsFeedMapper.insert started");
 
         $data = $post->getArrayCopy();
 
@@ -83,7 +83,7 @@ class NewsFeedMapper
 
     public function delete(string $id): bool
     {
-        $this->logger->info("NewsFeedMapper.delete started");
+        $this->logger->debug("NewsFeedMapper.delete started");
 
         $query = "DELETE FROM posts WHERE feedid = :feedid";
 
@@ -103,7 +103,7 @@ class NewsFeedMapper
 
     public function getAllPosts(?string $feedid): array
     {
-        $this->logger->info("NewsFeedMapper.getAllPosts started");
+        $this->logger->debug("NewsFeedMapper.getAllPosts started");
 
         $sql = "SELECT * FROM posts WHERE feedid = :feedid";
         $stmt = $this->db->prepare($sql);

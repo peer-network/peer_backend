@@ -129,15 +129,11 @@ class AdvertisementService
             return self::respondWithError(30101);
         }
 
-        $this->logger->info('AdvertisementService.createAdvertisement started');
+        $this->logger->debug('AdvertisementService.createAdvertisement started');
 
 
         // UUID generieren
         $advertisementId = self::generateUUID();
-        if (empty($advertisementId)) {
-            $this->logger->critical('Fehler beim Generieren der AdvertisementId-ID');
-            return self::respondWithError(42006); // Fehler beim Generieren der AdvertisementId-ID
-        }
 
         $postId = $args['postid'] ?? null;
         $date = $args['durationInDays'] ?? null;
@@ -275,7 +271,7 @@ class AdvertisementService
             return self::respondWithError(60501);
         }
 
-        $this->logger->info('AdvertisementService.fetchAll started');
+        $this->logger->debug('AdvertisementService.fetchAll started');
 
         $advertiseActions = ['BASIC', 'PINNED'];
         $filter = $args['filter'] ?? [];
@@ -347,7 +343,7 @@ class AdvertisementService
     public function isAdvertisementDurationValid(string $postId): bool
     {
 
-        $this->logger->info('AdvertisementService.isAdvertisementDurationValid started');
+        $this->logger->debug('AdvertisementService.isAdvertisementDurationValid started');
 
         try {
             return $this->advertisementMapper->isAdvertisementDurationValid($postId, $this->currentUserId);
@@ -360,7 +356,7 @@ class AdvertisementService
     public function hasShortActiveAdWithUpcomingAd(string $postId): bool
     {
 
-        $this->logger->info('AdvertisementService.hasShortActiveAdWithUpcomingAd started');
+        $this->logger->debug('AdvertisementService.hasShortActiveAdWithUpcomingAd started');
 
         try {
             return $this->advertisementMapper->hasShortActiveAdWithUpcomingAd($postId, $this->currentUserId);
@@ -373,7 +369,7 @@ class AdvertisementService
     public function convertEuroToTokens(float $amount = 0, int $rescode = 0): array
     {
 
-        $this->logger->info('AdvertisementService.convertEuroToTokens started');
+        $this->logger->debug('AdvertisementService.convertEuroToTokens started');
 
         try {
             $fetchPrices = $this->advertisementMapper->convertEuroToTokens($amount, $rescode);
@@ -419,7 +415,7 @@ class AdvertisementService
 
         if ($tag !== null) {
             if (!preg_match('/' . $titleConfig['PATTERN'] . '/u', $tag)) {
-                $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
+                $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }
         }
@@ -434,7 +430,7 @@ class AdvertisementService
             }
         }
 
-        $this->logger->info("AdvertisementService.findAdvertiser started");
+        $this->logger->debug("AdvertisementService.findAdvertiser started");
 
         $results = $this->advertisementMapper->findAdvertiser($this->currentUserId, $args);
         //$this->logger->info('findAdvertiser', ['results' => $results]);

@@ -99,11 +99,11 @@ class GraphQLSchemaBuilder
 
     public function getQueriesDependingOnRole(): ?string {
         $graphqlPath = "Graphql/schema/";
-        
-        $baseQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schema.graphql');
-        $guestOnlyQueries =  \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schemaguest.graphql');
-        $adminOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'admin_schema.graphql');
-        $bridgeOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql');
+
+        $baseQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schema.graphql.generated');
+        $guestOnlyQueries =  \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schemaguest.graphql.generated');
+        $adminOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'admin_schema.graphql.generated');
+        $bridgeOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql.generated');
 
         $adminSchema = $baseQueries . $adminOnlyQueries;
         $guestSchema = $guestOnlyQueries;
@@ -130,16 +130,15 @@ class GraphQLSchemaBuilder
     public function build(): Schema|array
     {
         $graphqlPath = "Graphql/schema/";
-        $typesPath = "types/";
+        $typesPath   = "types/";
 
-        $scalars = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "scalars.graphql");
-        $response = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "response.graphql");
-        $inputs = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "inputs.graphql");
-        $enum = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "enums.graphql");
-        $types = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql");
+        $scalars = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "scalars.graphql.generated");
+        $response = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "response.graphql.generated");
+        $inputs = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "inputs.graphql.generated");
+        $enum = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "enums.graphql.generated");
+        $types = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql.generated");
 
         $schema = $this->getQueriesDependingOnRole();
-        
         if (empty($schema)){
             $this->logger->error('Invalid schema', ['schema' => $schema]);
             return $this::respondWithError(40301);
@@ -166,7 +165,7 @@ class GraphQLSchemaBuilder
                         $this->currentUserId = $decodedToken->uid;
                         $this->userRoles = $decodedToken->rol;
                         $this->setCurrentUserIdForServices($this->currentUserId);
-                        $this->logger->info('Query.setCurrentUserId started');
+                        $this->logger->debug('Query.setCurrentUserId started');
                     }
                 } else {
                     $this->currentUserId = null;
@@ -2520,7 +2519,7 @@ class GraphQLSchemaBuilder
 
     protected function resolveHello(mixed $root, array $args, mixed $context): array
     {
-        $this->logger->info('Query.hello started', ['args' => $args]);
+        $this->logger->debug('Query.hello started', ['args' => $args]);
 
         $lastMergedPullRequestNumber = LastGithubPullRequestNumberProvider::getValue();
 
@@ -2536,7 +2535,7 @@ class GraphQLSchemaBuilder
     protected function advertisePostBasicResolver(?array $args = []): int
     {
         try {
-            $this->logger->info('Query.advertisePostBasicResolver started');
+            $this->logger->debug('Query.advertisePostBasicResolver started');
 
             $postId = $args['postid'];
             $duration = $args['durationInDays'];
@@ -2554,7 +2553,7 @@ class GraphQLSchemaBuilder
     protected function advertisePostPinnedResolver(?array $args = []): int
     {
         try {
-            $this->logger->info('Query.advertisePostPinnedResolver started');
+            $this->logger->debug('Query.advertisePostPinnedResolver started');
 
             $postId = $args['postid'];
 
@@ -2772,7 +2771,7 @@ class GraphQLSchemaBuilder
 
     protected function createUser(array $args): ?array
     {
-        $this->logger->info('Query.createUser started');
+        $this->logger->debug('Query.createUser started');
 
         $response = $this->userService->createUser($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -2798,7 +2797,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveBlocklist started');
+        $this->logger->debug('Query.resolveBlocklist started');
 
         $response = $this->userInfoService->loadBlocklist($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -2832,7 +2831,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveFetchWinsLog started');
+        $this->logger->debug('Query.resolveFetchWinsLog started');
 
         $response = $this->walletService->callFetchWinsLog($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -2866,7 +2865,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveFetchPaysLog started');
+        $this->logger->debug('Query.resolveFetchPaysLog started');
 
         $response = $this->walletService->callFetchPaysLog($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -2891,7 +2890,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveReferralInfo started');
+        $this->logger->debug('Query.resolveReferralInfo started');
 
         try {
             $userId = $this->currentUserId;
@@ -2928,7 +2927,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveReferralList started');
+        $this->logger->debug('Query.resolveReferralList started');
 
         $userId = $this->currentUserId;
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -2985,7 +2984,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('PoolService.getActionPrices started');
+        $this->logger->debug('PoolService.getActionPrices started');
 
         try {
             $result = $this->poolService->getActionPrices();
@@ -3026,7 +3025,7 @@ class GraphQLSchemaBuilder
 
     private function resolveTokenomics(): array
     {
-        $this->logger->info('Query.getTokenomics started');
+        $this->logger->debug('Query.getTokenomics started');
 
         $tokenomics = ConstantsConfig::tokenomics();
         $minting    = ConstantsConfig::minting();
@@ -3098,7 +3097,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveChatMessages started');
+        $this->logger->debug('Query.resolveChatMessages started');
 
         $response = $this->chatService->readChatMessages($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -3123,7 +3122,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolvePool started');
+        $this->logger->debug('Query.resolvePool started');
 
         $response = $this->walletService->fetchPool($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -3149,7 +3148,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolvePool started');
+        $this->logger->debug('Query.resolvePool started');
 
         $response = $this->walletService->fetchPool($args);
 
@@ -3177,7 +3176,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveActionPost started');
+        $this->logger->debug('Query.resolveActionPost started');
 
         $postId = $args['postid'] ?? null;
         $action = $args['action'] = strtolower($args['action'] ?? 'LIKE');
@@ -3219,8 +3218,8 @@ class GraphQLSchemaBuilder
 
         // Validations
         if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
-            $this->logger->error('Invalid action parameter', ['action' => $action]);
-            return $this::respondWithError(30105);
+            $this->logger->warning('Invalid action parameter', ['action' => $action]);
+            return $this->respondWithError(30105);
         }
 
         $limit = $dailyLimits[$action];
@@ -3276,7 +3275,7 @@ class GraphQLSchemaBuilder
                         return $response;
                     }
 
-                    $this->logger->error("{$action}Post failed", ['response' => $response]);
+                        $this->logger->error("{$action}Post failed", ['response' => $response]);
                     $response['affectedRows'] = $args;
                     return $response;
                 }
@@ -3347,7 +3346,7 @@ class GraphQLSchemaBuilder
                 return $response;
             }
 
-            $this->logger->error("{$action}Post failed after wallet deduction", ['response' => $response]);
+                $this->logger->error("{$action}Post failed after wallet deduction", ['response' => $response]);
             $response['affectedRows'] = $args;
             return $response;
         } catch (\Throwable $e) {
@@ -3431,7 +3430,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveTags started');
+        $this->logger->debug('Query.resolveTags started');
 
         $tags = $this->tagService->fetchAll($args);
         if (isset($tags['status']) && $tags['status'] === 'success') {
@@ -3458,7 +3457,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveTagsearch started');
+        $this->logger->debug('Query.resolveTagsearch started');
         $data = $this->tagService->loadTag($args);
         if (isset($data['status']) && $data['status'] === 'success') {
             $this->logger->info('Query.resolveTagsearch successful');
@@ -3510,7 +3509,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveLiquidity started');
+        $this->logger->debug('Query.resolveLiquidity started');
 
         $results = $this->walletService->loadLiquidityById($this->currentUserId);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -3532,7 +3531,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveMcap started');
+        $this->logger->debug('Query.resolveMcap started');
 
         $results = $this->mcapService->loadLastId();
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -3555,7 +3554,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveUserInfo started');
+        $this->logger->debug('Query.resolveUserInfo started');
 
         $results = $this->userInfoService->loadInfoById();
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -3625,7 +3624,7 @@ class GraphQLSchemaBuilder
 
         $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
 
-        $this->logger->info('Query.resolveSearchUser started');
+        $this->logger->debug('Query.resolveSearchUser started');
 
         $data = $this->userService->fetchAllAdvance($args);
 
@@ -3649,7 +3648,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveFollows started');
+        $this->logger->debug('Query.resolveFollows started');
 
         $results = $this->userService->Follows($args);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -3676,7 +3675,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(30201);
         }
 
-        $this->logger->info('Query.resolveProfile started');
+        $this->logger->debug('Query.resolveProfile started');
 
         $results = $this->userService->Profile($args);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -3710,7 +3709,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(30103);
         }
 
-        $this->logger->info('Query.resolveFriends started');
+        $this->logger->debug('Query.resolveFriends started');
 
         $results = $this->userService->getFriends($args);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -3733,7 +3732,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveAllFriends started');
+        $this->logger->debug('Query.resolveAllFriends started');
 
         $results = $this->userService->getAllFriends($args);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -3761,7 +3760,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveUsers started');
+        $this->logger->debug('Query.resolveUsers started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
@@ -3802,7 +3801,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(30218);
         }
 
-        $this->logger->info('Query.resolveChat started');
+        $this->logger->debug('Query.resolveChat started');
 
         $response = $this->chatService->loadChatById($args);
 
@@ -3831,7 +3830,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveChats started');
+        $this->logger->debug('Query.resolveChats started');
         $chats = $this->chatService->findChatser($args);
         if ($chats) {
             $data = array_map(
@@ -3869,7 +3868,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(30209);
         }
 
-        $this->logger->info('Query.resolvePostInfo started');
+        $this->logger->debug('Query.resolvePostInfo started');
 
         $postId = isset($postId) ? trim($postId) : '';
 
@@ -3899,7 +3898,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(30217);
         }
 
-        $this->logger->info('Query.resolveCommentInfo started');
+        $this->logger->debug('Query.resolveCommentInfo started');
 
 
         $commentId = isset($commentId) ? trim($commentId) : '';
@@ -3921,7 +3920,7 @@ class GraphQLSchemaBuilder
      */
     public function transactionsHistory(array $args): array
     {
-        $this->logger->info('GraphQLSchemaBuilder.transactionsHistory started');
+        $this->logger->debug('GraphQLSchemaBuilder.transactionsHistory started');
 
         if (!$this->checkAuthentication()) {
             return self::respondWithError(60501);
@@ -3948,7 +3947,7 @@ class GraphQLSchemaBuilder
      */
     public function postInteractions(array $args): array
     {
-        $this->logger->info('GraphQLSchemaBuilder.postInteractions started');
+        $this->logger->debug('GraphQLSchemaBuilder.postInteractions started');
 
         if (!$this->checkAuthentication()) {
             $this->logger->info("GraphQLSchemaBuilder.postInteractions failed due to authentication");
@@ -3987,7 +3986,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolvePosts started');
+        $this->logger->debug('Query.resolvePosts started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
@@ -4027,7 +4026,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveAdvertisementsPosts started');
+        $this->logger->debug('Query.resolveAdvertisementsPosts started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
@@ -4224,7 +4223,7 @@ class GraphQLSchemaBuilder
 
     protected function ContactUs(?array $args = []): array
     {
-        $this->logger->info('Query.ContactUs started');
+        $this->logger->debug('Query.ContactUs started');
 
         $ip = filter_var($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', FILTER_VALIDATE_IP) ?: '0.0.0.0';
         if ($ip === '0.0.0.0') {
@@ -4236,8 +4235,8 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($args)) {
-            $this->logger->error('Mandatory args missing.');
-            return $this::respondWithError(30101);
+            $this->logger->warning('Mandatory args missing.');
+            return $this->respondWithError(30101);
         }
 
         $email = isset($args['email']) ? trim($args['email']) : null;
@@ -4279,7 +4278,7 @@ class GraphQLSchemaBuilder
 
             return $this::createSuccessResponse(10401, $insertedContact->getArrayCopy(), false);
         } catch (\Throwable $e) {
-            $this->logger->error('Unexpected error during contact creation', [
+            $this->logger->warning('Unexpected error during contact creation', [
                 'error' => $e->getMessage(),
                 'args' => $args,
             ]);
@@ -4297,7 +4296,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(30201);
         }
 
-        $this->logger->info('Query.verifyAccount started');
+        $this->logger->debug('Query.verifyAccount started');
 
         try {
             $user = $this->userMapper->loadById($userid);
@@ -4332,7 +4331,7 @@ class GraphQLSchemaBuilder
 
     protected function login(string $email, string $password): array
     {
-        $this->logger->info('Query.login started');
+        $this->logger->debug('Query.login started');
 
         try {
             if (empty($email) || empty($password)) {
@@ -4405,7 +4404,7 @@ class GraphQLSchemaBuilder
 
     protected function refreshToken(string $refreshToken): array
     {
-        $this->logger->info('Query.refreshToken started');
+        $this->logger->debug('Query.refreshToken started');
 
         try {
             if (empty($refreshToken)) {
@@ -4464,7 +4463,7 @@ class GraphQLSchemaBuilder
      */
     protected function guestListPost(array $args): ?array
     {
-        $this->logger->info('Query.guestListPost started');
+        $this->logger->debug('Query.guestListPost started');
 
         $posts = $this->postService->getGuestListPost($args);
 

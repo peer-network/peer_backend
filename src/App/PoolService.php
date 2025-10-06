@@ -42,7 +42,7 @@ class PoolService
             return $this::respondWithError(60501);
         }
 
-        $this->logger->info("WalletService.fetchPool started");
+        $this->logger->debug("WalletService.fetchPool started");
 
         $fetchPool = $this->poolMapper->fetchPool($args);
         return $fetchPool;

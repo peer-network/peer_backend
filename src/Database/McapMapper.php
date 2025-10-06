@@ -18,7 +18,7 @@ class McapMapper
 
     public function fetchAll(int $offset, int $limit): array
     {
-        $this->logger->info("McapMapper.fetchAll started");
+        $this->logger->debug("McapMapper.fetchAll started");
 
         $sql = "SELECT * FROM mcap ORDER BY capid DESC LIMIT :limit OFFSET :offset";
 
@@ -47,7 +47,7 @@ class McapMapper
 
     public function loadLastId(): Mcap|false
     {
-        $this->logger->info("McapMapper.loadLastId started");
+        $this->logger->debug("McapMapper.loadLastId started");
 
         try {
             $sql = "SELECT * FROM mcap ORDER BY createdat DESC LIMIT 1";
@@ -70,7 +70,7 @@ class McapMapper
 
     public function insert(Mcap $mcap): Mcap
     {
-        $this->logger->info("McapMapper.insert started");
+        $this->logger->debug("McapMapper.insert started");
 
         $send = $data = $mcap->getArrayCopy();
         unset($data['capid']);
@@ -86,7 +86,7 @@ class McapMapper
 
     public function update(Mcap $mcap): Mcap
     {
-        $this->logger->info("McapMapper.update started");
+        $this->logger->debug("McapMapper.update started");
 
         $data = $mcap->getArrayCopy();
 
@@ -102,7 +102,7 @@ class McapMapper
 
     public function delete(int $capid): bool
     {
-        $this->logger->info("McapMapper.delete started");
+        $this->logger->debug("McapMapper.delete started");
 
         $query = "DELETE FROM mcap WHERE capid = :capid";
         $stmt = $this->db->prepare($query);
@@ -120,7 +120,7 @@ class McapMapper
 
     protected function getLastPrice(): ?array
     {
-        $this->logger->info('McapMapper.getLastPrice started');
+        $this->logger->debug('McapMapper.getLastPrice started');
 
         try {
             $sql = "SELECT coverage, daytokens, createdat FROM mcap ORDER BY createdat DESC LIMIT 1";
@@ -134,7 +134,7 @@ class McapMapper
 
     public function fetchAndUpdateMarketPrices(): array
     {
-        $this->logger->info('McapMapper.fetchAndUpdateMarketPrices started');
+        $this->logger->debug('McapMapper.fetchAndUpdateMarketPrices started');
 
         try {
             $numberoftokens = (float) $this->db->query('SELECT SUM(liquidity) FROM wallett')->fetchColumn() ?: 0;
@@ -200,7 +200,7 @@ class McapMapper
 
     public function refreshMarketData(): array
     {
-        $this->logger->info('McapMapper.refreshMarketData started.');
+        $this->logger->debug('McapMapper.refreshMarketData started.');
 
         try {
             $url = 'https://exchange-api.lcx.com/market/tickers';

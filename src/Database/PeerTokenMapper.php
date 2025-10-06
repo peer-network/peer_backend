@@ -71,7 +71,7 @@ class PeerTokenMapper
     {
         \ignore_user_abort(true);
 
-        $this->logger->info('PeerTokenMapper.transferToken started');
+        $this->logger->debug('PeerTokenMapper.transferToken started');
 
         $recipient = (string) $args['recipient'];
 
@@ -205,10 +205,6 @@ class PeerTokenMapper
                 // ]);
 
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -235,10 +231,6 @@ class PeerTokenMapper
                 ]);
 
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -262,10 +254,6 @@ class PeerTokenMapper
                     'transferaction' => 'INVITER_FEE'
                 ]);
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -290,10 +278,6 @@ class PeerTokenMapper
                     'transferaction' => 'POOL_FEE'
                 ]);
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -318,10 +302,6 @@ class PeerTokenMapper
                     'transferaction' => 'PEER_FEE'
                 ]);
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -346,10 +326,6 @@ class PeerTokenMapper
                     'transferaction' => 'BURN_FEE'
                 ]);
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -409,7 +385,7 @@ class PeerTokenMapper
      */
     public function getUserWalletBalance(string $userId): string
     {
-        $this->logger->info('WalletMapper.getUserWalletBalance started');
+        $this->logger->debug('WalletMapper.getUserWalletBalance started');
 
         $query = "SELECT liquidity AS balance 
                   FROM wallett 
@@ -447,7 +423,7 @@ class PeerTokenMapper
     // DONE
     public function getTransactions(string $userId, array $args): ?array
     {
-        $this->logger->info("PeerTokenMapper.getTransactions started");
+        $this->logger->debug("PeerTokenMapper.getTransactions started");
 
         // Define FILTER mappings. 
         $typeMap = [

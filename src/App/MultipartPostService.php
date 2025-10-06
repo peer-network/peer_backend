@@ -35,7 +35,7 @@ class MultipartPostService
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
                 if ($decodedToken) {
                     $this->currentUserId = $decodedToken->uid;
-                    $this->logger->info('Query.setCurrentUserId started');
+                    $this->logger->debug('Query.setCurrentUserId started');
                 } else {
                     $this->currentUserId = null;
                 }
@@ -144,7 +144,7 @@ class MultipartPostService
      */
     public function updateTokenStatus($eligibilityToken): void
     {
-        $this->logger->info("MultipartPostService.updateTokenStatus started");
+        $this->logger->debug("MultipartPostService.updateTokenStatus started");
 
         try {
             $updateSql = "
@@ -172,7 +172,7 @@ class MultipartPostService
      */
     public function checkTokenExpiry($requestObj): void
     {
-        $this->logger->info("MultipartPostService.checkTokenExpiry started");
+        $this->logger->debug("MultipartPostService.checkTokenExpiry started");
 
         if(empty($requestObj['token'])){
             throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty
