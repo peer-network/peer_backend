@@ -386,7 +386,7 @@ class UserInfoMapper
             $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
             $stmt->execute();
 
-            \$this->logger->debug('Query.setFollowUserResponse Resolvers', ['uid' => $followerid]);
+            $this->logger->debug('Query.setFollowUserResponse Resolvers', ['uid' => $followerid]);
         } catch (\InvalidArgumentException $e) {
             $this->logger->error('Failed to toggle user follow', [
                 'exception' => $e->getMessage(),
