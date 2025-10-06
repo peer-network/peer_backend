@@ -146,7 +146,7 @@ ensure-jq: ## Ensure jq is installed (auto-install if missing)
 		sudo apt update && sudo apt install -y jq; \
 	}
 
-test: ensure-jq ## Run Newman tests inside Docker and generate HTML report
+test: linter ensure-jq ## Run Newman tests inside Docker and generate HTML report
 	@echo "Building Newman container..."
 	docker-compose --env-file .env.ci -f docker-compose.yml -f docker-compose.override.local.yml build newman
 
@@ -224,9 +224,6 @@ ci: check-hooks ## Run full local CI workflow (setup, tests, cleanup)
 	$(MAKE) dev
 	$(MAKE) test
 	$(MAKE) clean-ci
-
-# ---- Developer Shortcuts ----
-.PHONY: logs db bash-backend
 
 logs: ## Tail backend container logs
 	@docker-compose --env-file .env.ci $(COMPOSE_FILES) logs -f backend
@@ -330,3 +327,14 @@ scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
 
 gen:
 	bash cd-generate-backend-config.sh
+
+linter:
+	@echo "Linter check"
+	vendor/bin/php-cs-fixer fix --dry-run --diff
+# 	vendor/bin/phpstan analyse
+
+fix-linter:
+	vendor/bin/php-cs-fixer fix
+
+# ---- Developer Shortcuts ----
+.PHONY: logs db bash-backend linter
