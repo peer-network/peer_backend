@@ -163,7 +163,7 @@ class AdvertisementService
 
             if ($CostPlan !== null && $CostPlan === self::PLAN_BASIC) 
             {
-                if ($postId && $date && $CostPlan && $startday) {
+                if ($startday) {
                     $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', $startday);
                     $timestamps = $this->formatStartAndEndTimestamps($startDate, $date);
 

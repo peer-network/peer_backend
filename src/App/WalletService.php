@@ -15,9 +15,11 @@ class WalletService
     use ResponseHelper;
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected WalletMapper $walletMapper, protected TransactionManager $transactionManager)
-    {
-    }
+    public function __construct(
+        protected LoggerInterface $logger, 
+        protected WalletMapper $walletMapper, 
+        protected TransactionManager $transactionManager
+    ) {}
 
     public function setCurrentUserId(string $userId): void
     {
