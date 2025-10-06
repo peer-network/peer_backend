@@ -250,7 +250,7 @@ class UserInfoMapper
 
         if ($users) {
             return $users;
-        } 
+        }
 
         return null;
     }
@@ -437,7 +437,7 @@ class UserInfoMapper
         ]);
 
         try {
-            
+
             $query = "SELECT COUNT(*) FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
@@ -513,8 +513,8 @@ class UserInfoMapper
             $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $blockedBy = []; 
-            $iBlocked = []; 
+            $blockedBy = [];
+            $iBlocked = [];
 
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 if ($row['blockedid'] === $myUserId) {
@@ -534,7 +534,7 @@ class UserInfoMapper
                 }
             }
 
-            $counter = count($blockedBy) + count($iBlocked); 
+            $counter = count($blockedBy) + count($iBlocked);
 
             $this->logger->info("Fetched block relationships", [
                 'blockedByCount' => count($blockedBy),

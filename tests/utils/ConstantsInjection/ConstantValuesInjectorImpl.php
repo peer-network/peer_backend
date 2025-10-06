@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\utils\ConstantsInjection;
@@ -24,13 +25,15 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
      * @param array<string, mixed> $data
      * @return array<string, mixed>
     */
-    public function injectConstants(array $data): array {
+    public function injectConstants(array $data): array
+    {
         echo("ConfigGeneration: ConstantValuesInjectorImpl: injectConstants: start \n");
 
         return $this->processValue($data);
     }
 
-    private function processValue($value) {
+    private function processValue($value)
+    {
         if (is_string($value)) {
             return $this->replacePlaceholders($value);
         }
@@ -61,7 +64,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
             function ($matches) {
                 $path = explode('.', $matches[1]);
                 return $this->getValueFromPath($this->constants, $path);
-            }, 
+            },
             $text
         );
     }
@@ -73,7 +76,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
         }
         foreach ($path as $key) {
             if (!is_array($constants) || !array_key_exists($key, $constants)) {
-                throw new Exception("Error: ConstantValuesInjectorImpl: getValueFromPath: invalid CONSTANTS: " . implode(",",$constants));
+                throw new Exception("Error: ConstantValuesInjectorImpl: getValueFromPath: invalid CONSTANTS: " . implode(",", $constants));
             }
             $constants = $constants[$key];
         }
@@ -81,7 +84,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
 
         if (is_array($constants)) {
             throw new Exception(
-                "Error: ConstantValuesInjectorImpl: getValueFromPath: invalid path or contants: constant value is not found by path:" . implode(" ",$path) . ", Faulty result: " . implode(",",$constants)
+                "Error: ConstantValuesInjectorImpl: getValueFromPath: invalid path or contants: constant value is not found by path:" . implode(" ", $path) . ", Faulty result: " . implode(",", $constants)
             );
         }
         return $constants;
@@ -105,7 +108,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
 
             $patched = preg_replace_callback(
                 '/\{([A-Z0-9_.]+)\}/',
-                static fn(array $m) => $map[$m[1]] ?? $m[0],
+                static fn (array $m) => $map[$m[1]] ?? $m[0],
                 $sdl
             );
 

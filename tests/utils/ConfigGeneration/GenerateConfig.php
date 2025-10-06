@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\utils\ConfigGeneration;
@@ -13,7 +14,7 @@ use Tests\utils\ConstantsInjection\ConstantValuesInjectorImpl;
 try {
     $files = ConfigGenerationConstants::cases();
 
-    foreach($files as $file) {
+    foreach ($files as $file) {
         JSONHandler::generateJSONtoFile(Constants::$pathToAssets . $file->outputFileName(), $file->getData(), $file->getName());
     }
 

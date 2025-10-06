@@ -39,7 +39,7 @@ class Commented
         $this->subcomments = isset($data['subcomments']) && is_array($data['subcomments']) ? $data['subcomments'] : [];
         $this->userstatus = $data['userstatus'] ?? 0;
 
-        if($this->userstatus == 6){
+        if ($this->userstatus == 6) {
             $this->content = "Comment by deleted Account";
         }
     }
@@ -146,7 +146,7 @@ class Commented
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -210,7 +210,7 @@ class Commented
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

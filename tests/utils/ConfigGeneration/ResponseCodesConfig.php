@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\utils\ConfigGeneration;
@@ -9,11 +10,13 @@ use Tests\utils\ConstantsInjection\ConstantValuesInjectorImpl;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
-class ResponseCodesConfig implements DataGeneratable {
+class ResponseCodesConfig implements DataGeneratable
+{
     private array $data = [];
 
 
-    public function __construct(string $filePath) {
+    public function __construct(string $filePath)
+    {
         $decoded = JSONHandler::parseInputJson($filePath, true);
 
         $injector = new ConstantValuesInjectorImpl();
@@ -27,11 +30,13 @@ class ResponseCodesConfig implements DataGeneratable {
         $this->validate();
     }
 
-    public function getData(): array {
+    public function getData(): array
+    {
         return $this->data;
     }
 
-    private function validate(): void {
+    private function validate(): void
+    {
         echo("ConfigGeneration: ResponseCodesConfig: validate: start \n");
         $this->validateMessages();
         $this->validateCodes();
@@ -68,14 +73,16 @@ class ResponseCodesConfig implements DataGeneratable {
         }
     }
 
-    private function isStringContainsPlaceholders($input) {
+    private function isStringContainsPlaceholders($input)
+    {
         // Returns false if curly braces are found
         if (preg_match('/[{}]/', $input)) {
             throw new Exception("ResponseCodesConfig: validateMessages: message still contains a placeholder" . $input);
         }
     }
 
-    private function validateCodes(): void {
+    private function validateCodes(): void
+    {
         $codes = array_keys($this->data);
 
         foreach ($codes as $code) {
@@ -87,7 +94,7 @@ class ResponseCodesConfig implements DataGeneratable {
                 throw new Exception("Error: Invalid Code " . $code . ": should have a lenght of 5");
             }
             $firstSection = (int)$codeString[0];
-            if ($firstSection < 1 || $firstSection > 6 ) {
+            if ($firstSection < 1 || $firstSection > 6) {
                 throw new Exception("Error: Invalid Code " . $code . ": first digit should be within 1 and 6");
             }
         }

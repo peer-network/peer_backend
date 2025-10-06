@@ -33,7 +33,8 @@ class AdvertisementService
         protected AdvertisementMapper $advertisementMapper,
         protected UserMapper $userMapper,
         protected PostMapper $postMapper,
-    ) {}
+    ) {
+    }
 
     public function setCurrentUserId(string $userid): void
     {
@@ -82,41 +83,41 @@ class AdvertisementService
         return true;
     }
 
-	private function formatStartAndEndTimestamps(\DateTimeImmutable $startDate, string $durationKey): array
-	{
-		$dateFilters = [
-			'ONE_DAY' => '+1 days',
-			'TWO_DAYS' => '+2 days',
-			'THREE_DAYS' => '+3 days',
-			'FOUR_DAYS' => '+4 days',
-			'FIVE_DAYS' => '+5 days',
-			'SIX_DAYS' => '+6 days',
-			'SEVEN_DAYS' => '+7 days',
-		];
+    private function formatStartAndEndTimestamps(\DateTimeImmutable $startDate, string $durationKey): array
+    {
+        $dateFilters = [
+            'ONE_DAY' => '+1 days',
+            'TWO_DAYS' => '+2 days',
+            'THREE_DAYS' => '+3 days',
+            'FOUR_DAYS' => '+4 days',
+            'FIVE_DAYS' => '+5 days',
+            'SIX_DAYS' => '+6 days',
+            'SEVEN_DAYS' => '+7 days',
+        ];
 
-		if (!isset($dateFilters[$durationKey])) {
-			$this->logger->warning("Ungültige Werbedauer: $durationKey");
-			return self::respondWithError(32001);
-		}
+        if (!isset($dateFilters[$durationKey])) {
+            $this->logger->warning("Ungültige Werbedauer: $durationKey");
+            return self::respondWithError(32001);
+        }
 
-        // Fix microsecond. 
-		do {
-			$microseconds = (string) random_int(100000, 999999);
-			$firstDigit = $microseconds[0];
-			$lastDigit = $microseconds[5];
-		} while ($firstDigit === '0' || $lastDigit === '0' || $lastDigit === '1');
+        // Fix microsecond.
+        do {
+            $microseconds = (string) random_int(100000, 999999);
+            $firstDigit = $microseconds[0];
+            $lastDigit = $microseconds[5];
+        } while ($firstDigit === '0' || $lastDigit === '0' || $lastDigit === '1');
 
         // Startdatum um 00:00:00
-		$start = $startDate->setTime(0, 0, 0);
-		
-        // Enddatum = start + duration - 1 Second, Geandert weil es hat konflikte mit dem enddate gehabt.
-		$end = $start->modify($dateFilters[$durationKey])->modify('-1 second');
+        $start = $startDate->setTime(0, 0, 0);
 
-		return [
-			'timestart' => $start->format("Y-m-d H:i:s") . '.' . $microseconds,
-			'timeend' => $end->format("Y-m-d H:i:s") . '.' . $microseconds,
-		];
-	}
+        // Enddatum = start + duration - 1 Second, Geandert weil es hat konflikte mit dem enddate gehabt.
+        $end = $start->modify($dateFilters[$durationKey])->modify('-1 second');
+
+        return [
+            'timestart' => $start->format("Y-m-d H:i:s") . '.' . $microseconds,
+            'timeend' => $end->format("Y-m-d H:i:s") . '.' . $microseconds,
+        ];
+    }
 
     public function createAdvertisement(array $args = []): array
     {
@@ -156,8 +157,7 @@ class AdvertisementService
 
         try {
 
-            if ($CostPlan !== null && $CostPlan === self::PLAN_BASIC) 
-            {
+            if ($CostPlan !== null && $CostPlan === self::PLAN_BASIC) {
                 if ($postId && $date && $CostPlan && $startday) {
                     $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', $startday);
                     $timestamps = $this->formatStartAndEndTimestamps($startDate, $date);
@@ -174,11 +174,8 @@ class AdvertisementService
                     $this->logger->warning('Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
-            } 
-            elseif ($CostPlan !== null && $CostPlan === self::PLAN_PINNED) 
-            {
-                if ($this->advertisementMapper->hasActiveAdvertisement($postId, \strtolower($CostPlan)) === true && empty($forcing)) 
-                {
+            } elseif ($CostPlan !== null && $CostPlan === self::PLAN_PINNED) {
+                if ($this->advertisementMapper->hasActiveAdvertisement($postId, \strtolower($CostPlan)) === true && empty($forcing)) {
                     $this->logger->warning('Pinned Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).
                 }
@@ -192,9 +189,7 @@ class AdvertisementService
                 }
 
                 $this->logger->info('PLAN IS PINNED');
-            } 
-            else 
-            {
+            } else {
                 $this->logger->warning('Fehler, Falsche CostPlan angegeben.', ['CostPlan' => $CostPlan]);
                 return self::respondWithError(42007); // Fehler, Falsche CostPlan angegeben
             }
@@ -219,16 +214,12 @@ class AdvertisementService
                 return self::respondWithError($e->getMessage());
             }
 
-            if ($CostPlan === self::PLAN_BASIC) 
-            {
+            if ($CostPlan === self::PLAN_BASIC) {
                 $resp = $this->advertisementMapper->insert($advertisement);
                 $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                 $rescode = 12001; // Advertisement post erfolgreich erstellt.
-            } 
-            elseif ($CostPlan === self::PLAN_PINNED) 
-            {
-                if ($this->advertisementMapper->isAdvertisementIdExist($postId, \strtolower($CostPlan)) === true) 
-                {                    
+            } elseif ($CostPlan === self::PLAN_PINNED) {
+                if ($this->advertisementMapper->isAdvertisementIdExist($postId, \strtolower($CostPlan)) === true) {
                     $advertData = $this->advertisementMapper->fetchByAdvID($postId, \strtolower($CostPlan));
                     $data = $advertData[0];
                     $data->setUserId($this->currentUserId);
@@ -240,16 +231,12 @@ class AdvertisementService
                     $resp = $this->advertisementMapper->update($data);
                     $this->logger->info('Update Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                     $rescode = 12005; // Advertisement post erfolgreich aktualisiert.
-                } 
-                else 
-                {
+                } else {
                     $resp = $this->advertisementMapper->insert($advertisement);
                     $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                     $rescode = 12001; // Advertisement post erfolgreich erstellt.
                 }
-            }
-            else 
-            {
+            } else {
                 $this->logger->warning('Fehler, Falsche CostPlan angegeben.');
                 return self::respondWithError(32005); // Fehler, Falsche CostPlan angegeben.
             }
@@ -282,7 +269,7 @@ class AdvertisementService
         $userId = $filter['userId'] ?? null;
 
 
-		if ($from !== null && !self::validateDate($from)) {
+        if ($from !== null && !self::validateDate($from)) {
             return self::respondWithError(30212);
         }
 
@@ -374,7 +361,7 @@ class AdvertisementService
             $fetchPrices = $this->advertisementMapper->convertEuroToTokens($amount, $rescode);
 
             if ($fetchPrices) {
-                $fetchPrices['ResponseCode'] = json_encode ($fetchPrices['affectedRows']);
+                $fetchPrices['ResponseCode'] = json_encode($fetchPrices['affectedRows']);
                 return $fetchPrices;
             }
 
@@ -391,7 +378,7 @@ class AdvertisementService
         }
 
         $filterBy = $args['filterBy'] ?? [];
-        $tag = $args['tag'] ?? null; 
+        $tag = $args['tag'] ?? null;
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
         $titleConfig = ConstantsConfig::post()['TITLE'];
@@ -435,7 +422,7 @@ class AdvertisementService
         //$this->logger->info('findAdvertiser', ['results' => $results]);
         $this->logger->info("AdvertisementService.findAdvertiser Done");
         if (empty($results) && $postId != null) {
-            return $this->respondWithError(31510); 
+            return $this->respondWithError(31510);
         }
 
         return $results;

@@ -5,7 +5,7 @@ namespace Fawaz\App;
 use Fawaz\App\Wallet;
 use Fawaz\Database\WalletMapper;
 use Psr\Log\LoggerInterface;
-use \Exception;
+use Exception;
 use Fawaz\Database\Interfaces\TransactionManager;
 
 class WalletService
@@ -31,7 +31,7 @@ class WalletService
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
         $response = [
             'status' => 'success',
@@ -221,26 +221,26 @@ class WalletService
             $winstatus = $gemsters['affectedRows']['data'][0];
             unset($gemsters['affectedRows']['data'][0]);
 
-            $userStatus= array_values($gemsters['affectedRows']['data']);
-                    
+            $userStatus = array_values($gemsters['affectedRows']['data']);
+
             $affectedRows = [
                 'winStatus' => $winstatus ?? [],
                 'userStatus' => $userStatus,
-            ];  
-            
+            ];
+
             return [
                 'status' => $gemsters['status'],
                 'counter' => $gemsters['counter'] ?? 0,
-                'ResponseCode' => $gemsters['ResponseCode'],        
+                'ResponseCode' => $gemsters['ResponseCode'],
                 'affectedRows' => $affectedRows
             ];
-        } 
+        }
         return [
             'status' => $gemsters['status'],
             'counter' => 0,
             'ResponseCode' => $gemsters['ResponseCode'],
             'affectedRows' => []
-        ];     
+        ];
     }
 
     public function getPercentBeforeTransaction(string $userId, int $tokenAmount): array
@@ -257,7 +257,7 @@ class WalletService
         try {
             $results = $this->walletMapper->loadLiquidityById($userId);
 
-            if ($results !== false ) {
+            if ($results !== false) {
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => 11204,

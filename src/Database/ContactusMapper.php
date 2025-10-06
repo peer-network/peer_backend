@@ -76,14 +76,14 @@ class ContactusMapper
                           WHERE ip = :ip";
                 $stmt = $this->db->prepare($query);
                 $stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
-                $stmt->bindValue(':now', $now->format('Y-m-d H:i:s'), \PDO::PARAM_STR); 
+                $stmt->bindValue(':now', $now->format('Y-m-d H:i:s'), \PDO::PARAM_STR);
                 $stmt->execute();
             } else {
                 $query = "INSERT INTO contactus_rate_limit (ip, request_count, last_request)
                           VALUES (:ip, 1, :now)";
                 $stmt = $this->db->prepare($query);
                 $stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
-                $stmt->bindValue(':now', $now->format('Y-m-d H:i:s'), \PDO::PARAM_STR); 
+                $stmt->bindValue(':now', $now->format('Y-m-d H:i:s'), \PDO::PARAM_STR);
                 $stmt->execute();
             }
 
@@ -109,7 +109,7 @@ class ContactusMapper
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new Contactus($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+            $results = array_map(fn ($row) => new Contactus($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched contacts successfully" : "No contacts found",
@@ -117,7 +117,7 @@ class ContactusMapper
             );
 
             return $results;
-        } catch (\Throwable $e) { 
+        } catch (\Throwable $e) {
             $this->logger->error("Error fetching contacts", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -174,7 +174,7 @@ class ContactusMapper
             }
 
             $this->logger->info("No contact found with name", ['name' => $name]);
-            return null; 
+            return null;
         } catch (\Throwable $e) {
             $this->logger->error("Database error in loadByName", [
                 'error' => $e->getMessage(),
@@ -242,7 +242,7 @@ class ContactusMapper
                 return new Contactus($data);
             } else {
                 $this->logger->info("No changes made to the contact", ['contact' => $data]);
-                return null;  
+                return null;
             }
         } catch (\Throwable $e) {
             $this->logger->error("Error updating contact in database", [
@@ -250,7 +250,7 @@ class ContactusMapper
                 'trace' => $e->getTraceAsString(),
                 'data' => $contact->getArrayCopy(),
             ]);
-            return null; 
+            return null;
         }
     }
 

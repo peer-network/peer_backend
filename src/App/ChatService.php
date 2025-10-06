@@ -32,15 +32,18 @@ class ChatService
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
         $response = [
             'status' => 'success',
@@ -154,7 +157,7 @@ class ChatService
                     }
 
                 } else {
-                    return $this->respondWithError(31007); 
+                    return $this->respondWithError(31007);
                 }
 
             }
@@ -565,7 +568,7 @@ class ChatService
         $this->logger->debug('ChatService.addMessage started', ['chatId' => $chatId]);
 
         $chat = $this->chatMapper->loadById($chatId);
-        
+
         if (is_array($chat) && isset($chat['status']) && $chat['status'] === 'error') {
             return $chat; // Immediately return if chat is invalid
         }
@@ -665,7 +668,7 @@ class ChatService
 
         if ($users) {
             return $users;
-        } 
+        }
 
         return null;
     }
@@ -688,15 +691,15 @@ class ChatService
             $result = $this->chatMapper->loadChatById($this->currentUserId, $args);
 
             if ($result['status'] !== 'success') {
-            throw new ValidationException($result['ResponseCode']);
-    } 
+                throw new ValidationException($result['ResponseCode']);
+            }
             if (empty($result['data']) || empty($result['data']['chat'])) {
-            return [
-                'status' => 'success',
-                'ResponseCode' => 21801,
-                'data' => null,
-            ];
-    }
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => 21801,
+                    'data' => null,
+                ];
+            }
 
             $chatData = $result['data'];
 

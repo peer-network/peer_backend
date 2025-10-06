@@ -2,8 +2,9 @@
 
 namespace Fawaz\Database\Interfaces;
 
-interface RollbackableDatabase {
-    function beginTransaction() : bool;
-    function commit() : bool;
-    function rollback() : bool;
+interface RollbackableDatabase
+{
+    public function beginTransaction(): bool;
+    public function commit(): bool;
+    public function rollback(): bool;
 }

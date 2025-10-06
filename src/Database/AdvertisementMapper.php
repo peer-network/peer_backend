@@ -26,7 +26,7 @@ class AdvertisementMapper
         $this->logger->debug("AdvertisementMapper.fetchAllWithStats started");
 
         $offset    = isset($args['offset']) ? (int)$args['offset'] : 0;
-        $limit     = isset($args['limit'])  ? (int)$args['limit']  : 10;
+        $limit     = isset($args['limit']) ? (int)$args['limit'] : 10;
         $filterBy  = $args['filter'] ?? [];
         $sortBy    = strtoupper($args['sort'] ?? 'NEWEST');
         $trendDays = isset($args['trenddays']) ? (int)$args['trenddays'] : 7;
@@ -326,7 +326,9 @@ class AdvertisementMapper
             // Stats
             $statsStmt = $this->db->prepare($sSql);
             foreach ($paramsStats as $k => $v) {
-                if ($v !== null) $statsStmt->bindValue($k, $v);
+                if ($v !== null) {
+                    $statsStmt->bindValue($k, $v);
+                }
             }
             $statsStmt->execute();
             $stats = $statsStmt->fetch(\PDO::FETCH_ASSOC) ?: [];
@@ -335,9 +337,11 @@ class AdvertisementMapper
             // Data
             $dataStmt = $this->db->prepare($dSql);
             foreach ($paramsData as $k => $v) {
-                if ($v !== null) $dataStmt->bindValue($k, $v);
+                if ($v !== null) {
+                    $dataStmt->bindValue($k, $v);
+                }
             }
-            $dataStmt->bindValue(':limit',  $limit,  \PDO::PARAM_INT);
+            $dataStmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
             $dataStmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $dataStmt->execute();
             $rows = $dataStmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -379,10 +383,14 @@ class AdvertisementMapper
     private static function mapRowToAdvertisementt(array $row): ?array
     {
         $tags = is_string($row['tags'] ?? null) ? json_decode($row['tags'], true) : ($row['tags'] ?? []);
-        if (!is_array($tags)) $tags = [];
+        if (!is_array($tags)) {
+            $tags = [];
+        }
 
         $comments = is_string($row['comments'] ?? null) ? json_decode($row['comments'], true) : ($row['comments'] ?? []);
-        if (!is_array($comments)) $comments = [];
+        if (!is_array($comments)) {
+            $comments = [];
+        }
 
         return [
             'advertisementid' => (string)$row['advertisementid'],
@@ -417,7 +425,7 @@ class AdvertisementMapper
                 'title'           => (string)$row['title'],
                 'media'           => (string)$row['media'],
                 'cover'           => (string)$row['cover'],
-                'mediadescription'=> (string)$row['mediadescription'],
+                'mediadescription' => (string)$row['mediadescription'],
                 'createdat'       => (string)$row['post_createdat'],
                 'amountlikes'     => (int)$row['amountlikes'],
                 'amountviews'     => (int)$row['amountviews'],
@@ -548,7 +556,7 @@ class AdvertisementMapper
             $stmt->bindValue(':status', $status, \PDO::PARAM_STR);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new Advertisements($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+            $results = array_map(fn ($row) => new Advertisements($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched advertisementId successfully" : "No advertisements found for userid.",
@@ -650,7 +658,7 @@ class AdvertisementMapper
             $stmt->bindValue(':userid', $currentUserId);
             $stmt->bindValue(':status', $status);
             $stmt->bindValue(':newStart', $newStart);
-            $stmt->bindValue(':newEnd',   $newEnd);
+            $stmt->bindValue(':newEnd', $newEnd);
             $stmt->execute();
 
             $hasConflict = (bool) $stmt->fetchColumn();

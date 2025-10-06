@@ -8,14 +8,13 @@ use Psr\Log\LoggerInterface;
 
 class TransactionRepository
 {
-
     /**
      * Assign Transaction object while instantiated
      */
     public function __construct(protected LoggerInterface $logger, protected PDO $db)
     {
     }
-    
+
 
     /**
      * Save transaction data
@@ -66,5 +65,5 @@ class TransactionRepository
         }
     }
 
-    
+
 }

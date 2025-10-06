@@ -1,11 +1,13 @@
 <?php
 
 namespace Fawaz\config\constants;
+
 use Fawaz\config\constants\ConstantsModeration;
 
 class ConstantsConfig
 {
-    public function getData() {
+    public function getData()
+    {
         return [
             "POST" => $this::post(),
             "COMMENT" => $this::comment(),
@@ -14,7 +16,7 @@ class ConstantsConfig
             "CONTACT" => $this::contact(),
             "PAGING" => $this::paging(),
             "WALLET" => $this::wallet(),
-            "WALLETT" => $this::wallett(),    
+            "WALLETT" => $this::wallett(),
             "ONBOARDING" => $this::onboarding(),
             "DAILY_FREE" => $this::dailyFree(),
             "TOKENOMICS" => $this::tokenomics(),
@@ -26,7 +28,8 @@ class ConstantsConfig
      *     AVAILABLE_ONBOARDINGS: string[]
      * }
      */
-    public static function onboarding(): array {
+    public static function onboarding(): array
+    {
         return ConstantsConfig::ONBOARDING;
     }
     /**
@@ -34,7 +37,8 @@ class ConstantsConfig
      *     CONTENT: array{MIN_LENGTH: int, MAX_LENGTH: int}
      * }
      */
-    public static function comment() {
+    public static function comment()
+    {
         return ConstantsConfig::COMMENT;
     }
     /**
@@ -57,7 +61,8 @@ class ConstantsConfig
      *     }
      * }
      */
-    public static function post(): array {
+    public static function post(): array
+    {
         return ConstantsConfig::POST;
     }
 
@@ -70,7 +75,8 @@ class ConstantsConfig
      *     WHEREBY: array{MIN: int, MAX: int}
      * }
      */
-    public static function wallet() {
+    public static function wallet()
+    {
         return ConstantsConfig::WALLET;
     }
 
@@ -80,7 +86,8 @@ class ConstantsConfig
      *     LIQUIDITQ: array{MIN: int, MAX: float}
      * }
      */
-    public static function wallett() {
+    public static function wallett()
+    {
         return ConstantsConfig::WALLETT;
     }
 
@@ -97,7 +104,8 @@ class ConstantsConfig
      *     TRANSACTION: array{MIN_TOKENS: int}
      * }
      */
-    public static function user() {
+    public static function user()
+    {
         return ConstantsConfig::USER;
     }
 
@@ -110,7 +118,8 @@ class ConstantsConfig
      *     ACCESS_LEVEL: array{MIN: int, MAX: int, USER: int, ADMIN: int}
      * }
      */
-    public static function chat() {
+    public static function chat()
+    {
         return ConstantsConfig::CHAT;
     }
 
@@ -120,7 +129,8 @@ class ConstantsConfig
      *     MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int}
      * }
      */
-    public static function contact() {
+    public static function contact()
+    {
         return ConstantsConfig::CONTACT;
     }
 
@@ -130,7 +140,8 @@ class ConstantsConfig
      *     LIMIT: array{MIN: int, MAX: int}
      * }
      */
-    public static function paging() {
+    public static function paging()
+    {
         return ConstantsConfig::PAGING;
     }
 
@@ -140,11 +151,13 @@ class ConstantsConfig
      *     TYPE: array{MIN_LENGTH: int, MAX_LENGTH: int}
      * }
      */
-    public static function transaction() {
+    public static function transaction()
+    {
         return ConstantsConfig::TRANSACTION;
     }
 
-    public static function contentFiltering() {
+    public static function contentFiltering()
+    {
         return ConstantsModeration::contentFiltering();
     }
 
@@ -153,7 +166,8 @@ class ConstantsConfig
      *     DAILY_FREE_ACTIONS: array{ post: int, like: int, comment: int, dislike: int }
      * }
      */
-    public static function dailyFree(): array {
+    public static function dailyFree(): array
+    {
         return ConstantsConfig::DAILY_FREE;
     }
 
@@ -164,13 +178,15 @@ class ConstantsConfig
      *     FEES: array{ PEER: float, POOL: float, BURN: float, INVITATION: float }
      * }
      */
-    public static function tokenomics(): array {
+    public static function tokenomics(): array
+    {
         return ConstantsConfig::TOKENOMICS;
     }
     /**
      * @return array{ DAILY_NUMBER_TOKEN: float }
      */
-    public static function minting(): array {
+    public static function minting(): array
+    {
         return ConstantsConfig::MINTING;
     }
 
@@ -181,10 +197,10 @@ class ConstantsConfig
     ];
     private const DAILY_FREE = [
         'DAILY_FREE_ACTIONS' => [
-            'post'    => 1,  
-            'like'    => 3,  
-            'comment' => 4,  
-            'dislike' => 0,  
+            'post'    => 1,
+            'like'    => 3,
+            'comment' => 4,
+            'dislike' => 0,
         ],
     ];
     private const MINTING = [
@@ -193,15 +209,15 @@ class ConstantsConfig
 
     private const TOKENOMICS = [
         'ACTION_TOKEN_PRICES' => [
-            'post'    => 20.0,   
-            'like'    => 3.0,    
-            'dislike' => 3.0,    
+            'post'    => 20.0,
+            'like'    => 3.0,
+            'dislike' => 3.0,
             'comment' => 1.0,
             'advertisementBasic' => 500.0,
             'advertisementPinned' => 2000.0,
         ],
         'ACTION_GEMS_RETURNS' => [
-            'view'    => 0.25,  
+            'view'    => 0.25,
             'like'    => 5.0,
             'dislike' => -3.0,
             'comment' => 2.0,
@@ -218,21 +234,21 @@ class ConstantsConfig
         'CONTENT' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 200,
-        ], 
+        ],
     ];
 
     private const TRANSACTION = [
         'ACTIONTYPE' => [
             'MIN_LENGTH' => 0,
             'MAX_LENGTH' => 200,
-        ], 
+        ],
         'TYPE' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 63,
-        ], 
+        ],
     ];
-    
-    
+
+
     private const POST = [
         'TITLE' => [
             'MIN_LENGTH' => 2,
@@ -360,8 +376,8 @@ class ConstantsConfig
             'MIN' => 1,
             'MAX' => 20,
         ],
-    ];  
- 
+    ];
+
     private const USER = [
         'PASSWORD' => [
             'MIN_LENGTH' => 8,
@@ -372,7 +388,7 @@ class ConstantsConfig
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 23,
             'PATTERN' => '^[a-zA-Z0-9_-]+$',
-        ],  
+        ],
         'BIOGRAPHY' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 5000,

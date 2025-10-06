@@ -8,11 +8,13 @@ trait ResponseHelper
     //     private ResponseMessagesProvider $responseMessagesProvider
     // ) {}
 
-    private function argsToJsString($args) {
+    private function argsToJsString($args)
+    {
         return json_encode($args);
     }
 
-    private function argsToString($args) {
+    private function argsToString($args)
+    {
         return serialize($args);
     }
 
@@ -29,13 +31,13 @@ trait ResponseHelper
     private function respondWithError(int $responseCode): array
     {
         return [
-            'status' => 'error', 
-            'ResponseCode' => $responseCode, 
+            'status' => 'error',
+            'ResponseCode' => $responseCode,
             // 'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$responseCode)
         ];
     }
 
-    private function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    private function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
         $response = [
             'status' => 'success',
@@ -59,11 +61,14 @@ trait ResponseHelper
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 
@@ -83,7 +88,7 @@ trait ResponseHelper
         return true;
     }
 
-    private static function validateDate(string $date, string $format = 'Y-m-d'): bool 
+    private static function validateDate(string $date, string $format = 'Y-m-d'): bool
     {
         if (!is_string($date)) {
             return false;

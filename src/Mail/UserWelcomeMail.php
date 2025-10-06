@@ -7,8 +7,9 @@ use Fawaz\Services\SmtpMailer;
 
 class UserWelcomeMail implements EmailInterface
 {
-    public function __construct(public array $data){
-        
+    public function __construct(public array $data)
+    {
+
     }
 
     /**

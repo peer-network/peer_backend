@@ -17,7 +17,7 @@ class McapMapper
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
         $response = [
             'status' => 'success',
@@ -48,7 +48,7 @@ class McapMapper
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new Mcap($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+            $results = array_map(fn ($row) => new Mcap($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched capid successfully" : "No capid found",

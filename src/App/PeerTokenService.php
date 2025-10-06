@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -70,8 +71,8 @@ class PeerTokenService
 
     /**
      * Get transcation history with Filter
-     * 
-     * 
+     *
+     *
      */
     public function transactionsHistory(array $args): array
     {
@@ -85,7 +86,7 @@ class PeerTokenService
                 'ResponseCode' => $results['ResponseCode'],
                 'affectedRows' => $results['affectedRows']
             ];
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->logger->error("Error in PeerTokenService.transactionsHistory", ['exception' => $e->getMessage()]);
             throw new \RuntimeException("Database error while fetching transactions: " . $e->getMessage());
         }

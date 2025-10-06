@@ -2,9 +2,9 @@
 
 namespace Fawaz\App;
 
-const LIKE_=2;
-const COMMENT_=4;
-const POST_=5;
+const LIKE_ = 2;
+const COMMENT_ = 4;
+const POST_ = 5;
 
 use Fawaz\App\DailyFree;
 use Fawaz\Database\DailyFreeMapper;

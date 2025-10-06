@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Database;
 
 use DateTime;
@@ -45,7 +46,7 @@ class PostMapper
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new Post($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+            $results = array_map(fn ($row) => new Post($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched posts successfully" : "No posts found",
@@ -120,7 +121,7 @@ class PostMapper
 
         $results = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $results[] = new Post($row,[],false);
+            $results[] = new Post($row, [], false);
         }
 
         if (empty($results)) {
@@ -143,7 +144,7 @@ class PostMapper
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         if (!empty($data)) {
-            return array_map(fn($row) => new Post($row, [],false), $data);
+            return array_map(fn ($row) => new Post($row, [], false), $data);
         }
 
         $this->logger->warning("No posts found with title", ['title' => $title]);
@@ -160,7 +161,7 @@ class PostMapper
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($data !== false) {
-            return new Post($data,[],false);
+            return new Post($data, [], false);
         }
 
         $this->logger->warning("No post found with id", ['id' => $id]);
@@ -168,7 +169,7 @@ class PostMapper
     }
 
     public function fetchPostsByType(string $currentUserId, string $userid, int $limitPerType = 5, ?string $contentFilterBy = null): array
-    {        
+    {
         $whereClauses = ["sub.row_num <= :limit"];
         $whereClausesString = implode(" AND ", $whereClauses);
 
@@ -214,13 +215,14 @@ class PostMapper
         foreach ($unfidtered_result as $row) {
             $post_reports = (int)$row['post_reports'];
             $post_dismiss_moderation_amount = (int)$row['post_count_content_moderation_dismissed'];
-            
+
             if ($contentFilterService->getContentFilterAction(
                 ContentType::post,
                 ContentType::post,
                 $post_reports,
                 $post_dismiss_moderation_amount,
-                $currentUserId,$row['userid']
+                $currentUserId,
+                $row['userid']
             ) == ContentFilteringAction::replaceWithPlaceholder) {
                 $replacer = ContentReplacementPattern::flagged;
                 $row['title'] = $replacer->postTitle($row['title']);
@@ -578,7 +580,7 @@ class PostMapper
         $from     = $args['from']     ?? null;
         $to       = $args['to']       ?? null;
         $filterBy = $args['filterBy'] ?? [];
-        $Ignorlist= $args['IgnorList']?? 'NO';
+        $Ignorlist = $args['IgnorList'] ?? 'NO';
         $sortBy   = $args['sortBy']   ?? null;
         $title    = $args['title']    ?? null;
         $tag      = $args['tag']      ?? null;
@@ -701,7 +703,7 @@ class PostMapper
             }
 
             if (!empty($validTypes)) {
-                $placeholders = implode(", ", array_map(fn($k) => ":filter$k", array_keys($validTypes)));
+                $placeholders = implode(", ", array_map(fn ($k) => ":filter$k", array_keys($validTypes)));
                 $whereClauses[] = "p.contenttype IN ($placeholders)";
                 foreach ($validTypes as $key => $value) {
                     $params["filter$key"] = $value;
@@ -751,7 +753,7 @@ class PostMapper
             default    => "ORDER BY createdat DESC",
         };
 
-        // --- WICHTIG: KEINE aktiven Ads (NOT EXISTS) 
+        // --- WICHTIG: KEINE aktiven Ads (NOT EXISTS)
         $sql = "
             WITH base_posts AS (
                 SELECT 
@@ -844,7 +846,7 @@ class PostMapper
             foreach ($params as $k => $v) {
                 $stmt->bindValue(':' . ltrim($k, ':'), $v);
             }
-            $stmt->bindValue(':limit',  $limit,  \PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
@@ -866,7 +868,7 @@ class PostMapper
                     $row['userid']
                 ) === ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer       = ContentReplacementPattern::flagged;
-                    $row['username']= $replacer->username($row['username']);
+                    $row['username'] = $replacer->username($row['username']);
                     $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
                 }
 
@@ -922,17 +924,17 @@ class PostMapper
     /**
      * Move Uploaded File to Media Folder
      */
-    public function handelFileMoveToMedia(string $uploadedFiles): array 
+    public function handelFileMoveToMedia(string $uploadedFiles): array
     {
         $fileObjs = explode(',', $uploadedFiles);
 
         $uploadedFilesObj = [];
-        try{
-            if(is_array($fileObjs) && !empty($fileObjs)){
+        try {
+            if (is_array($fileObjs) && !empty($fileObjs)) {
                 $multipartPost = new MultipartPost(['media' => $fileObjs], [], false);
                 $uploadedFilesObj = $multipartPost->moveFileTmpToMedia();
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $this->logger->info("PostMapper.handelFileMoveToMedia Error". $e->getMessage());
         }
 
@@ -941,7 +943,7 @@ class PostMapper
 
     /**
      * Expire Token
-     * 
+     *
      */
     public function updateTokenStatus(string $userId): void
     {
@@ -953,13 +955,13 @@ class PostMapper
                     SET status = :status
                     WHERE userid = :userid AND status = 'FILE_UPLOADED'
                 ";
-                $updateStmt = $this->db->prepare($updateSql);
-                $updateStmt->bindValue(':status', 'POST_CREATED', \PDO::PARAM_STR);
-                $updateStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $updateStmt->execute();
+            $updateStmt = $this->db->prepare($updateSql);
+            $updateStmt->bindValue(':status', 'POST_CREATED', \PDO::PARAM_STR);
+            $updateStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+            $updateStmt->execute();
 
             $this->logger->info("PostMapper.updateTokenStatus updated successfully with POST_CREATED status");
-        
+
         } catch (\PDOException $e) {
             $this->logger->error("PostMapper.updateTokenStatus: Exception occurred while update token status", [
                 'error' => $e->getMessage(),
@@ -980,18 +982,18 @@ class PostMapper
     public function revertFileToTmp(string $uploadedFiles): void
     {
         $fileObjs = explode(',', $uploadedFiles);
-        try{
-            if(is_array($fileObjs) && !empty($fileObjs)){
+        try {
+            if (is_array($fileObjs) && !empty($fileObjs)) {
                 $multipartPost = new MultipartPost(['media' => $fileObjs], [], false);
                 $multipartPost->revertFileToTmp();
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $this->logger->info("PostMapper.revertFileToTmp Error". $e->getMessage());
         }
     }
-    
+
     /**
-     * Get Interactions based on Filter 
+     * Get Interactions based on Filter
      */
     public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit, ?string $contentFilterBy = null): array
     {
@@ -1003,13 +1005,13 @@ class PostMapper
             $needleTable = 'user_post_likes';
             $needleColumn = 'postid';
 
-            if($getOnly == 'VIEW'){
+            if ($getOnly == 'VIEW') {
                 $needleTable = 'user_post_views';
-            }elseif($getOnly == 'LIKE'){
+            } elseif ($getOnly == 'LIKE') {
                 $needleTable = 'user_post_likes';
-            }elseif($getOnly == 'DISLIKE'){
+            } elseif ($getOnly == 'DISLIKE') {
                 $needleTable = 'user_post_dislikes';
-            }elseif($getOnly == 'COMMENTLIKE'){
+            } elseif ($getOnly == 'COMMENTLIKE') {
                 $needleTable = 'user_comment_likes';
                 $needleColumn = 'commentid';
             }
@@ -1059,7 +1061,7 @@ class PostMapper
                 if ($contentFilterService !== null) {
                     $user_reports = (int)($prt['user_reports'] ?? 0);
                     $user_dismiss_moderation_amount = (int)($prt['user_count_content_moderation_dismissed'] ?? 0);
-                
+
                     $action = $contentFilterService->getContentFilterAction(
                         ContentType::post,
                         ContentType::user,
@@ -1077,8 +1079,8 @@ class PostMapper
                 $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
                 $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
                 $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
-            }  
-            
+            }
+
             return $userResultObj;
         } catch (\PDOException $e) {
             $this->logger->error("Error fetching posts from database", [
@@ -1095,7 +1097,7 @@ class PostMapper
     }
 
     /**
-     * Get GuestListPost based on Filter 
+     * Get GuestListPost based on Filter
      */
     public function getGuestListPost(array $args = []): array
     {
@@ -1116,7 +1118,7 @@ class PostMapper
         ";
 
         if ($postId !== null) {
-            $whereClauses[] = "p.postid = :postId"; 
+            $whereClauses[] = "p.postid = :postId";
             $params['postId'] = $postId;
         }
 
@@ -1204,7 +1206,7 @@ class PostMapper
                     'isfollowed' => false,
                     'isfollowing' => false,
                 ],
-            ],[],false);
+            ], [], false);
 
             return (!empty($results) ? $results : []);
         } catch (\PDOException $e) {
@@ -1234,7 +1236,7 @@ class PostMapper
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
             $stmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
             $stmt->execute();
-            
+
             $existingToken = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if ($existingToken) {
@@ -1249,7 +1251,7 @@ class PostMapper
                 $query = "INSERT INTO eligibility_token 
                         (userid, token, expiresat) 
                         VALUES (:userid, :token, :expiresat)";
-                
+
                 $stmt = $this->db->prepare($query);
                 $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
                 $stmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
@@ -1257,7 +1259,8 @@ class PostMapper
 
                 $stmt->execute();
             }
-            var_dump($existingToken); exit;
+            var_dump($existingToken);
+            exit;
 
             $this->logger->info("PostMapper.addOrUpdateEligibilityToken: Inserted new token into database", ['userid' => $userId]);
 

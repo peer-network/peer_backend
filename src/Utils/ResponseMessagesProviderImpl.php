@@ -5,7 +5,8 @@ namespace Fawaz\Utils;
 use InvalidArgumentException;
 use RuntimeException;
 
-class ResponseMessagesProviderImpl implements ResponseMessagesProvider {
+class ResponseMessagesProviderImpl implements ResponseMessagesProvider
+{
     /**
      * @var string
      */

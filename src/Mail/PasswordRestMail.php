@@ -7,8 +7,9 @@ use Fawaz\Services\SmtpMailer;
 
 class PasswordRestMail implements EmailInterface
 {
-    public function __construct(public $data) {
-        
+    public function __construct(public $data)
+    {
+
     }
 
     /**

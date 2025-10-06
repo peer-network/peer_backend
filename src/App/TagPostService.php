@@ -26,11 +26,14 @@ class TagPostService
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 
@@ -51,9 +54,9 @@ class TagPostService
     private function isValidTagName(?string $tagName): bool
     {
         $tagNameConfig = ConstantsConfig::post()['TAG'];
-        return $tagName && 
-            strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] && 
-            strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] && 
+        return $tagName &&
+            strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] &&
+            strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] &&
             preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName);
     }
 
@@ -93,7 +96,7 @@ class TagPostService
             }
 
             $tag = $this->tagMapper->loadByName($tagName);
-            if (!$tag){
+            if (!$tag) {
                 $tag = $this->createTag($tagName);
             }
             $tagPost = new TagPost([
@@ -154,7 +157,7 @@ class TagPostService
             $this->logger->debug('createTag function execution completed');
         }
     }
-    
+
     private function respondWithError(int $message): array
     {
         return ['status' => 'error', 'ResponseCode' => $message];
@@ -178,7 +181,7 @@ class TagPostService
 
         try {
             $TagPost = $this->tagPostMapper->fetchAll($offset, $limit);
-            $result = array_map(fn(TagPost $tag) => $tag->getArrayCopy(), $TagPost);
+            $result = array_map(fn (TagPost $tag) => $tag->getArrayCopy(), $TagPost);
 
             $this->logger->info('TagPost fetched successfully', ['count' => count($result)]);
             return $this->createSuccessResponse(11701, [$result]);

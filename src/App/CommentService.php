@@ -34,11 +34,14 @@ class CommentService
     {
         return sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
             mt_rand(0, 0xffff),
             mt_rand(0, 0x0fff) | 0x4000,
             mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
         );
     }
 
@@ -97,13 +100,13 @@ class CommentService
         $content = trim($args['content']);
         $postId = trim($args['postid']);
         $parentId = isset($args['parentid']) ? trim($args['parentid']) : null;
-        
+
         if (!$this->validateUUID($postId)) {
             return $this->respondWithError(30209, ['postid' => $postId]);
         }
 
         if ($parentId !== null && !$this->validateUUID($parentId)) {
-			return $this->respondWithError(31603, ['parentId' => $parentId]);
+            return $this->respondWithError(31603, ['parentId' => $parentId]);
         }
 
         if ($content === '') {
@@ -177,13 +180,13 @@ class CommentService
             $commentResponse['user'] = $this->userMapper->loadUserInfoById($this->currentUserId);
 
             $this->logger->info('Comment created successfully', ['commentResponse' => $commentResponse]);
-			$response = [$commentResponse];
+            $response = [$commentResponse];
 
             $this->transactionManager->commit();
             $this->logger->info('CommentService.createComment completed successfully');
             return [
                 'status' => 'success',
-				'counter' => count($response),
+                'counter' => count($response),
                 'ResponseCode' => 11608,
                 'affectedRows' => $response,
             ];
@@ -242,13 +245,13 @@ class CommentService
         return $results;
     }
 
-    public function fetchAllByPostIdetaild(string $postId, int $offset = 0, int $limit = 10,?string $contentFilterBy = null): array
+    public function fetchAllByPostIdetaild(string $postId, int $offset = 0, int $limit = 10, ?string $contentFilterBy = null): array
     {
-        return $this->commentMapper->fetchAllByPostIdetaild($postId, $this->currentUserId, $offset, $limit,$contentFilterBy);
+        return $this->commentMapper->fetchAllByPostIdetaild($postId, $this->currentUserId, $offset, $limit, $contentFilterBy);
     }
 
     /**
-     * Get Comments for Geust based on Filter 
+     * Get Comments for Geust based on Filter
      */
     public function fetchAllByGuestPostIdetaild(string $postId, int $offset = 0, int $limit = 10): array
     {

@@ -65,7 +65,7 @@ class RateLimiter
         $currentTime = time();
         $requests = $this->loadRequests();
 
-        $requests[$identifier] = array_filter($requests[$identifier] ?? [], fn(int $timestamp) => ($currentTime - $timestamp) < $this->timeWindow);
+        $requests[$identifier] = array_filter($requests[$identifier] ?? [], fn (int $timestamp) => ($currentTime - $timestamp) < $this->timeWindow);
 
         if (count($requests[$identifier]) >= $this->rateLimit) {
             error_log("Rate limit exceeded for identifier: $identifier");

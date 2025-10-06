@@ -61,7 +61,7 @@ class UserAdvanced
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
 
-        if($this->status == 6){
+        if ($this->status == 6) {
             $this->username = 'Deleted_Account';
             $this->img = '/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg';
             $this->biography = '/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt';
@@ -359,11 +359,11 @@ class UserAdvanced
     public function verifyPassword(string $password): bool
     {
         if (\password_verify($password, $this->password)) {
-            
+
             if (\password_needs_rehash($this->password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1])) {
-                
+
                 $newHash = \password_hash($password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1]);
-                
+
                 $this->password = $newHash;
             }
 
@@ -399,7 +399,7 @@ class UserAdvanced
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -454,7 +454,7 @@ class UserAdvanced
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => [
-                        'min' => $userConfig['SLUG']['MIN_LENGTH'], 
+                        'min' => $userConfig['SLUG']['MIN_LENGTH'],
                         'max' => $userConfig['SLUG']['MAX_LENGTH']
                         ]],
                 ],
@@ -537,7 +537,7 @@ class UserAdvanced
                 'filters' => [['name' => 'FloatSanitize']],
                 'validators' => [
                     ['name' => 'ValidateFloat', 'options' => [
-                        'min' => $userConfig['LIQUIDITY']['MIN_LENGTH'], 
+                        'min' => $userConfig['LIQUIDITY']['MIN_LENGTH'],
                         'max' => $userConfig['LIQUIDITY']['MAX_LENGTH']
                         ]],
                 ],
@@ -559,7 +559,7 @@ class UserAdvanced
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

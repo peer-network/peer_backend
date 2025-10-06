@@ -87,7 +87,7 @@ class ChatParticipants
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -110,7 +110,7 @@ class ChatParticipants
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => [
-                        'min' => $chatConfig['ACCESS_LEVEL']['MIN'], 
+                        'min' => $chatConfig['ACCESS_LEVEL']['MIN'],
                         'max' => $chatConfig['ACCESS_LEVEL']['MAX'],
                         ]],
                 ],
@@ -125,7 +125,7 @@ class ChatParticipants
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

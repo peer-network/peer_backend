@@ -21,7 +21,7 @@ class MultipartPostHandler implements RequestHandlerInterface
 
     /**
      * Handle Requests
-     * 
+     *
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -34,7 +34,7 @@ class MultipartPostHandler implements RequestHandlerInterface
         $responseBody = $this->multipartPostService->checkForBasicValidation(['contentType' => $contentType, 'contentLength' => $contentLength]);
 
         $bearerToken = null;
-        if(isset($responseBody['status']) && $responseBody['status'] != 'error'){
+        if (isset($responseBody['status']) && $responseBody['status'] != 'error') {
             if (!empty($authorizationHeader)) {
                 $parts = explode(' ', $authorizationHeader[0]);
                 if (count($parts) === 2 && strtolower($parts[0]) === 'bearer') {
@@ -50,7 +50,7 @@ class MultipartPostHandler implements RequestHandlerInterface
             if (isset($rawFiles['file'])) {
                 $filesArray = $this->normalizeFilesArray($rawFiles['file']);
             }
-            
+
             $requestObj = [
                 'eligibilityToken' => (!empty($rawBody['eligibilityToken']) && isset($rawBody['eligibilityToken'])) ? $rawBody['eligibilityToken'] : '',
                 'media' => !empty($filesArray) ? $filesArray : [],
@@ -60,7 +60,7 @@ class MultipartPostHandler implements RequestHandlerInterface
 
             $responseBody = $this->multipartPostService->handleFileUpload($requestObj);
         }
-        
+
 
         $response = new Response();
         $response->getBody()->write(json_encode($responseBody));
@@ -77,9 +77,9 @@ class MultipartPostHandler implements RequestHandlerInterface
     /**
      * Normalize PHP's $_FILES array into a per-file format
      */
-    function normalizeFilesArray(array $files): array
+    public function normalizeFilesArray(array $files): array
     {
-        try{
+        try {
 
             $normalized = [];
 
@@ -114,8 +114,7 @@ class MultipartPostHandler implements RequestHandlerInterface
             }
 
             return $uploadedFilesObj;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->logger->error("Error normalizing files array: " . $e->getMessage());
             return [];
         }

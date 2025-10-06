@@ -4,7 +4,8 @@ namespace Fawaz\config\constants;
 
 class ConstantsModeration
 {
-    public static function contentFiltering() {
+    public static function contentFiltering()
+    {
         return self::CONTENT_FILTERING;
     }
 

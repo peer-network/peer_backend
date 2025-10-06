@@ -34,7 +34,7 @@ class McapService
         return ['status' => 'error', 'ResponseCode' => $message];
     }
 
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
         $response = [
             'status' => 'success',
@@ -52,7 +52,7 @@ class McapService
 
         return $response;
     }
-    
+
     public function loadLastId(): array
     {
 
@@ -93,7 +93,7 @@ class McapService
             $limit = isset($args['limit']) ? (int) $args['limit'] : null;
 
             $users = $this->mcapMapper->fetchAll($offset, $limit);
-            $fetchAll = array_map(fn(User $user) => $user->getArrayCopy(), $users);
+            $fetchAll = array_map(fn (User $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {
                 $success = [

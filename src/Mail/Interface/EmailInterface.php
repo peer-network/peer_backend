@@ -2,8 +2,8 @@
 
 namespace Fawaz\Mail\Interface;
 
-interface EmailInterface {
-
+interface EmailInterface
+{
     public function send(string $email): array;
     public function content(): string;
 }

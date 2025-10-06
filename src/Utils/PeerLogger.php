@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Utils;
@@ -6,7 +7,8 @@ namespace Fawaz\Utils;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 
-class PeerLogger extends Logger implements PeerLoggerInterface {
+class PeerLogger extends Logger implements PeerLoggerInterface
+{
     public function __construct($o)
     {
         parent::__construct($o);
@@ -15,7 +17,8 @@ class PeerLogger extends Logger implements PeerLoggerInterface {
         $this->pushProcessor($processor);
     }
 
-    public function getRequestUid(): ?string {
+    public function getRequestUid(): ?string
+    {
         foreach ($this->getProcessors() as $processor) {
             if ($processor instanceof UidProcessor) {
                 return $processor->getUid();

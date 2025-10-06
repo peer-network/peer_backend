@@ -2,7 +2,6 @@
 
 namespace Fawaz\App\Models;
 
-
 use DateTime;
 use Fawaz\App\ValidationException;
 use Fawaz\config\constants\ConstantsConfig;
@@ -42,7 +41,7 @@ class Transaction
             $data = $this->validate($data, $elements);
         }
     }
-    
+
     /**
      * Get Values of current state
      */
@@ -64,7 +63,7 @@ class Transaction
 
     /**
      * Define Input filter
-     */    
+     */
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
         $tranConfig = ConstantsConfig::transaction();
@@ -133,7 +132,7 @@ class Transaction
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
@@ -141,7 +140,7 @@ class Transaction
 
     /**
      * Apply Input filter
-     */    
+     */
     public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
@@ -172,7 +171,7 @@ class Transaction
         return $this->transactionid;
     }
 
-    
+
     /**
      * Getter method for operationid
      */
@@ -210,7 +209,7 @@ class Transaction
     }
 
 
-    
+
     /**
      * Getter method for tokenamount
      */
@@ -219,8 +218,8 @@ class Transaction
         return $this->tokenamount;
     }
 
-    
-    
+
+
     /**
      * Getter method for transferaction
      */

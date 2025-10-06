@@ -25,7 +25,7 @@ class UserPreferences
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
 
         $raw = $data['onboardingsWereShown'] ?? [];
-        if (is_array($raw)){
+        if (is_array($raw)) {
             $this->onboardingsWereShown = $raw;
         } else {
             $this->onboardingsWereShown = JsonHelper::decode($raw) ?? [];
@@ -79,7 +79,7 @@ class UserPreferences
     {
         $this->onboardingsWereShown = $onboardings;
     }
-    
+
     // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array
     {
@@ -98,7 +98,7 @@ class UserPreferences
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return [];
@@ -131,7 +131,7 @@ class UserPreferences
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

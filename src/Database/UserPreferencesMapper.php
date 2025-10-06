@@ -28,7 +28,7 @@ class UserPreferencesMapper
             $stmt->execute();
 
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
+
             if ($data) {
                 $this->logger->info('User preferences loaded successfully', ['id' => $id, 'data' => $data]);
                 $data['contentFilteringSeverityLevel'] = $data['content_filtering_severity_level'];
@@ -91,7 +91,7 @@ class UserPreferencesMapper
 
         $userPreferences->setUpdatedAt();
         $data = $userPreferences->getArrayCopy();
-        
+
         try {
             $query = "UPDATE user_preferences 
                       SET content_filtering_severity_level = :content_filtering_severity_level, 

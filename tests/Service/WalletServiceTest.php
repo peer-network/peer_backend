@@ -207,7 +207,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals(['percent' => 20], $result);
     }
 
-    public function testFetchPoolReturnsExpectedData():void
+    public function testFetchPoolReturnsExpectedData(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('fetchPool')->willReturn(['some' => 'data']);

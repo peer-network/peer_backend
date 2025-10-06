@@ -109,7 +109,7 @@ class CommentInfo
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -144,7 +144,7 @@ class CommentInfo
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

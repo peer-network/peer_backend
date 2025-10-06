@@ -9,17 +9,18 @@ $password = $_ENV['DB_PASSWORD'] ?? '';
 $connect_timeout = $_ENV['DB_TIMEOUT'] ?? 10;
 $sslmode = $_ENV['DB_SSLMODE'] ?? 'prefer';
 
-set_exception_handler(function($e) {
+set_exception_handler(function ($e) {
     error_log($e->getMessage(), 0);
     exit;
 });
 
 if (!in_array($db_driver, ['postgres'])) {
-	error_log("Unsupported database driver: $db_driver. Supported drivers are 'postgres'.", 0);
+    error_log("Unsupported database driver: $db_driver. Supported drivers are 'postgres'.", 0);
 }
 
 if ($db_driver === 'postgres') {
-    function is_pg_server_running($host, $port) {
+    function is_pg_server_running($host, $port)
+    {
         $connection = @fsockopen($host, $port, $errno, $errstr, 5);
 
         if ($connection) {
@@ -60,12 +61,12 @@ if ($db_driver === 'postgres') {
 
                 $result = pg_query($conn, "SELECT 1 FROM users LIMIT 1");
                 if (!$result) {
-					error_log(pg_last_error($conn), 0);
+                    error_log(pg_last_error($conn), 0);
                 }
 
                 pg_free_result($result);
             } else {
-				error_log("Error executing query: " . pg_last_error($conn), 0);
+                error_log("Error executing query: " . pg_last_error($conn), 0);
             }
 
             pg_close($conn);
@@ -75,10 +76,10 @@ if ($db_driver === 'postgres') {
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
         } else {
-			error_log("Failed to connect to PostgreSQL: " . pg_last_error(), 0);
+            error_log("Failed to connect to PostgreSQL: " . pg_last_error(), 0);
         }
     } else {
-		error_log('Unable to reach the PostgreSQL server. Please ensure the server is running and accessible.', 0);
+        error_log('Unable to reach the PostgreSQL server. Please ensure the server is running and accessible.', 0);
         exit;
     }
 }

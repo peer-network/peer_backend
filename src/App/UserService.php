@@ -31,7 +31,7 @@ class UserService
         protected UserPreferencesMapper $userPreferencesMapper,
         protected PostMapper $postMapper,
         protected WalletMapper $walletMapper,
-		protected Mailer $mailer,
+        protected Mailer $mailer,
         protected TransactionManager $transactionManager
     ) {
         $this->base64filehandler = new Base64FileHandler();
@@ -108,22 +108,22 @@ class UserService
         $username = trim($username);
         $verificationCode = trim($verificationCode);
 
-		if (empty($email) || empty($username) || empty($verificationCode)){
-			return self::respondWithError(40701);
-		}
+        if (empty($email) || empty($username) || empty($verificationCode)) {
+            return self::respondWithError(40701);
+        }
 
-		$payload = [
-			"to" => [
-				[
-					"email" => $email,
-					"name" => $username
-				]
-			],
-			"templateId" => 1,
-			"params" => [
-				"verification_code" => $verificationCode
-			]
-		];
+        $payload = [
+            "to" => [
+                [
+                    "email" => $email,
+                    "name" => $username
+                ]
+            ],
+            "templateId" => 1,
+            "params" => [
+                "verification_code" => $verificationCode
+            ]
+        ];
 
         try {
             return $payload;
@@ -150,8 +150,8 @@ class UserService
         $isPrivate = (int)($args['isprivate'] ?? 0);
         $referralUuid = $args['referralUuid'] ?? null;
         $invited = null;
-		$bin2hex = bin2hex(random_bytes(32));
-		$expiresat = (int)\time()+1800;
+        $bin2hex = bin2hex(random_bytes(32));
+        $expiresat = (int)\time() + 1800;
 
         $biography = $args['biography'] ?? '/userData/' . $id . '.txt';
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
@@ -185,10 +185,10 @@ class UserService
             'userid' => $id,
             'attempt' => 1,
             'expiresat' => $expiresat,
-			'updatedat' => (new \DateTime())->format('Y-m-d H:i:s.u')
+            'updatedat' => (new \DateTime())->format('Y-m-d H:i:s.u')
         ];
 
-		$this->logger->debug('UserService.createUser.verificationData started', ['verificationData' => $verificationData]);
+        $this->logger->debug('UserService.createUser.verificationData started', ['verificationData' => $verificationData]);
 
         $userData = [
             'uid' => $id,
@@ -255,7 +255,7 @@ class UserService
 
         try {
             $toInsert = new Tokenize($verificationData);
-			$this->userMapper->insertoken($toInsert);
+            $this->userMapper->insertoken($toInsert);
             unset($verificationData, $toInsert);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
@@ -324,11 +324,11 @@ class UserService
             $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
         }
         $this->transactionManager->commit();
-		return [
-			'status' => 'success',
-			'ResponseCode' => 10601,
-			'userid' => $id,
-		];
+        return [
+            'status' => 'success',
+            'ResponseCode' => 10601,
+            'userid' => $id,
+        ];
     }
 
     public function verifyReferral(string $referralString): array
@@ -343,7 +343,7 @@ class UserService
         try {
             $users = $this->userMapper->getValidReferralInfoByLink($referralString);
 
-            if(!$users){
+            if (!$users) {
                 return self::respondWithError(31007); // No valid referral information found
             }
             $userObj = (new User($users, [], false))->getArrayCopy();
@@ -375,7 +375,7 @@ class UserService
             ],
         ];
     }
-    
+
     private function uploadMedia(string $mediaFile, string $userId, string $folder): array
     {
         try {
@@ -456,7 +456,8 @@ class UserService
     }
 
 
-    public function updateUserPreferences(?array $args = []): array {
+    public function updateUserPreferences(?array $args = []): array
+    {
 
         if (!$this->checkAuthentication()) {
             return self::respondWithError(60501);
@@ -472,7 +473,7 @@ class UserService
         $newUserPreferences = $args['userPreferences'];
         $contentFiltering = $newUserPreferences['contentFilteringSeverityLevel'] ?? null;
         $shownOnboardingsIn = $newUserPreferences['shownOnboardings'] ?? null;
-        
+
         try {
             $this->transactionManager->beginTransaction();
 
@@ -497,11 +498,11 @@ class UserService
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
             $contentFilteringSeverityLevelString = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
-            
+
             $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
             $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
-            
+
             $this->transactionManager->commit();
             return [
                 'status' => 'success',
@@ -620,12 +621,12 @@ class UserService
         $this->logger->debug('UserService.setEmail started');
 
         $email = $args['email'] ?? null;
-        $exPassword = $args['password'] ?? null;    
+        $exPassword = $args['password'] ?? null;
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->logger->warning('Invalid email format', ['email' => $email]);
             return self::respondWithError(30224);
         }
-        
+
         $user = $this->userMapper->loadById($this->currentUserId);
         if ($email === $user->getMail()) {
             return self::respondWithError(31005);
@@ -787,18 +788,18 @@ class UserService
         }
         if (!$this->userMapper->isUserExistById($userId)) {
             $this->logger->warning('User not found for Follows', ['userId' => $userId]);
-        return self::respondWithError(31007);
+            return self::respondWithError(31007);
         }
 
         try {
-            $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId,$contentFilterBy)->getArrayCopy();
+            $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId, $contentFilterBy)->getArrayCopy();
             $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
 
-            $posts = $this->postMapper->fetchPostsByType($this->currentUserId,$userId, $postLimit,$contentFilterBy);
+            $posts = $this->postMapper->fetchPostsByType($this->currentUserId, $userId, $postLimit, $contentFilterBy);
 
             $contentTypes = ['image', 'video', 'audio', 'text'];
             foreach ($contentTypes as $type) {
-                $profileData["{$type}posts"] = array_filter($posts, fn($post) => $post['contenttype'] === $type);
+                $profileData["{$type}posts"] = array_filter($posts, fn ($post) => $post['contenttype'] === $type);
             }
 
             $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
@@ -825,7 +826,7 @@ class UserService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
             return $this->respondWithError(30103);
         }
 
@@ -838,9 +839,9 @@ class UserService
             return self::respondWithError(31007);
         }
         try {
-            $followers = $this->userMapper->fetchFollowers($userId, $this->currentUserId, $offset, $limit,$contentFilterBy);
-            $following = $this->userMapper->fetchFollowing($userId, $this->currentUserId, $offset, $limit,$contentFilterBy);
-            
+            $followers = $this->userMapper->fetchFollowers($userId, $this->currentUserId, $offset, $limit, $contentFilterBy);
+            $following = $this->userMapper->fetchFollowing($userId, $this->currentUserId, $offset, $limit, $contentFilterBy);
+
             $counter = count($followers) + count($following);
 
             return [
@@ -849,11 +850,11 @@ class UserService
                 'ResponseCode' => 11101,
                 'affectedRows' => [
                     'followers' => array_map(
-                        fn(ProfilUser $follower) => $follower->getArrayCopy(),
+                        fn (ProfilUser $follower) => $follower->getArrayCopy(),
                         $followers
                     ),
                     'following' => array_map(
-                        fn(ProfilUser $followed) => $followed->getArrayCopy(),
+                        fn (ProfilUser $followed) => $followed->getArrayCopy(),
                         $following
                     )
                 ]
@@ -877,7 +878,7 @@ class UserService
         $this->logger->info('Fetching friends list', ['currentUserId' => $this->currentUserId, 'offset' => $offset, 'limit' => $limit]);
 
         try {
-            $users = $this->userMapper->fetchFriends($this->currentUserId, $offset, $limit,$contentFilterBy);
+            $users = $this->userMapper->fetchFriends($this->currentUserId, $offset, $limit, $contentFilterBy);
 
             if (!empty($users)) {
                 $this->logger->info('Friends list retrieved successfully', ['userCount' => count($users)]);
@@ -936,13 +937,13 @@ class UserService
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-        if($contentFilterService->validateContentFilter($contentFilterBy) == false){
+        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
             return $this->respondWithError(30103);
         }
 
         try {
-            $users = $this->userMapper->fetchAllAdvance($args, $this->currentUserId,$contentFilterBy);
-            $fetchAll = array_map(fn(UserAdvanced $user) => $user->getArrayCopy(), $users);
+            $users = $this->userMapper->fetchAllAdvance($args, $this->currentUserId, $contentFilterBy);
+            $fetchAll = array_map(fn (UserAdvanced $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {
                 return [
@@ -966,7 +967,7 @@ class UserService
 
         try {
             $users = $this->userMapper->fetchAll($this->currentUserId, $args);
-            $fetchAll = array_map(fn(User $user) => $user->getArrayCopy(), $users);
+            $fetchAll = array_map(fn (User $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {
                 return [
@@ -985,11 +986,11 @@ class UserService
 
     /**
      * Reset password token request for NON logged in user
-     * 
-     * Generate Token for reset password and store on 
-     * 
+     *
+     * Generate Token for reset password and store on
+     *
      * @param string $email
-     * 
+     *
      * @return array
      */
     public function requestPasswordReset(string $email): array
@@ -1008,7 +1009,7 @@ class UserService
             $this->transactionManager->beginTransaction();
 
             $user = $this->userMapper->loadByEmail($email);
-            
+
             if (!$user) {
                 $this->logger->warning('Invalid user', ['email' => $email]);
                 return $this->genericPasswordResetSuccessResponse();
@@ -1026,18 +1027,18 @@ class UserService
                     'code' => $token,
                 ];
                 $this->userMapper->sendPasswordResetEmail($email, $data);
-                
+
                 $this->transactionManager->commit();
                 return $this->genericPasswordResetSuccessResponse();
             }
 
-            // Check for rate limiting: 1st attempt 
+            // Check for rate limiting: 1st attempt
             if ($this->userMapper->isFirstAttemptTooSoon($passwordAttempt)) {
                 $this->transactionManager->rollback();
                 return $this->userMapper->rateLimitResponse(1);
             }
 
-            // 2nd attempt 
+            // 2nd attempt
             if ($this->userMapper->isSecondAttemptTooSoon($passwordAttempt)) {
                 $this->transactionManager->rollback();
                 return $this->userMapper->rateLimitResponse(10, $passwordAttempt['last_attempt']);
@@ -1051,7 +1052,7 @@ class UserService
 
             $this->userMapper->updateAttempt($passwordAttempt);
 
-            if(isset($passwordAttempt['token'])){
+            if (isset($passwordAttempt['token'])) {
                 $token = $passwordAttempt['token'];
                 $data = [
                     'code' => $token,
@@ -1077,7 +1078,7 @@ class UserService
 
     /**
      * Verify password reset token validity which was sent to user's email at the time of password reset request.
-     * 
+     *
      */
     public function resetPasswordTokenVerify(string $token): array
     {

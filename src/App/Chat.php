@@ -151,7 +151,7 @@ class Chat
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -196,7 +196,7 @@ class Chat
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => [
-                        'min' => $chatConfig['IS_PUBLIC']['MIN'], 
+                        'min' => $chatConfig['IS_PUBLIC']['MIN'],
                         'max' => $chatConfig['IS_PUBLIC']['MAX']]],
                 ],
             ],
@@ -235,7 +235,7 @@ class Chat
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

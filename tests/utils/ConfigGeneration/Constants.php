@@ -1,14 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\utils\ConfigGeneration;
 
-class Constants {
-    static string $pathToAssets = "./runtime-data/media/assets/"; 
-    static string $pathForEditing = "./src/config/backend-config-for-editing/";
-    static string $configUrlBase = "https://media.getpeer.eu/assets/";
+class Constants
+{
+    public static string $pathToAssets = "./runtime-data/media/assets/";
+    public static string $pathForEditing = "./src/config/backend-config-for-editing/";
+    public static string $configUrlBase = "https://media.getpeer.eu/assets/";
 
 
-    static string $inputFileNameSuffix = "-editable";
-    static string $extension = ".json";
+    public static string $inputFileNameSuffix = "-editable";
+    public static string $extension = ".json";
 }

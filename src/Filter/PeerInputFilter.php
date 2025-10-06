@@ -1,10 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Filter;
 
 use Exception;
 use DateTime;
+use Fawaz\config\constants\ConstantsConfig;
+
 use function trim;
 use function strip_tags;
 use function htmlspecialchars;
@@ -24,9 +27,10 @@ use function is_object;
 use function is_string;
 use function sprintf;
 use function method_exists;
-use Fawaz\config\constants\ConstantsConfig;
 
-class ValidationException extends Exception {}
+class ValidationException extends Exception
+{
+}
 
 const CUSTOM_FILTER_FLAG_ALLOW_INT = 1;
 const CUSTOM_FILTER_FLAG_ALLOW_ZERO = 2;
@@ -67,7 +71,7 @@ class PeerInputFilter
         }
 
         $result = $this->$filterName($value, $options);
-        
+
         return $result;
     }
 
@@ -90,7 +94,7 @@ class PeerInputFilter
         }
 
         $result = $this->$validatorName($value, $options);
-        
+
         return $result;
     }
 
@@ -132,10 +136,10 @@ class PeerInputFilter
                             if (isset($this->errors[$field])) {
                                 if (!empty($this->errors[$field][0])) {
                                     continue;
+                                }
+                            } elseif (!empty($this->errors[$field])) {
+                                continue;
                             }
-                        } elseif (!empty($this->errors[$field])) {
-                            continue;
-                        }
                             $this->errors[$field][] = $field;
                             if (!empty($validator['break_chain_on_failure'])) {
                                 break;
@@ -353,7 +357,7 @@ class PeerInputFilter
         $min =  (int)($options['min'] ?? 0);
         $max = (int)($options['max'] ?? PHP_INT_MAX);
         $errorCode = $options['errorCode'] ?? 40301;
-        $length = strlen($value);   
+        $length = strlen($value);
 
         $validationResult = ($length >= $min && $length <= $max);
 
@@ -695,7 +699,7 @@ class PeerInputFilter
 
     protected function validateUsername(string $value, array $options = []): bool
     {
-        $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
+        $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer'];
         $usernameConfig = ConstantsConfig::user()['USERNAME'];
 
         if ($value === '') {
@@ -870,7 +874,7 @@ class PeerInputFilter
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimeType = finfo_file($finfo, $imagePath);
         finfo_close($finfo);
-        
+
         if (!in_array($mimeType, $allowedMimeTypes, true)) {
             $this->errors['image'][] = 21519;
             return false;
@@ -882,7 +886,7 @@ class PeerInputFilter
                 $this->errors['image'][] = 25120;
                 return false;
             }
-            
+
             if (($maxWidth !== null && $width > $maxWidth) || ($maxHeight !== null && $height > $maxHeight)) {
                 $this->errors['image'][] = 21521;
                 return false;
