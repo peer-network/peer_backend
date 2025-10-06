@@ -18,6 +18,11 @@ const FREELIKE_=30;// whereby FREELIKE
 const FREECOMMENT_=31;// whereby FREECOMMENT
 const FREEPOST_=32;// whereby FREEPOST
 
+const BASIC=50;
+const PINNED=200;
+
+use Fawaz\App\Advertisements;
+use Fawaz\App\AdvertisementService;
 use Fawaz\App\AlphaMintService;
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
@@ -51,10 +56,11 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Psr\Log\LoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
-use ReflectionNamedType;
 use Fawaz\App\PeerTokenService;
 use Fawaz\config\constants\ConstantsConfig;
-
+use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Utils\ResponseMessagesProvider;
+use DateTimeImmutable;
 
 class GraphQLSchemaBuilder
 {
@@ -63,7 +69,7 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
         protected CommentMapper $commentMapper,
@@ -80,39 +86,68 @@ class GraphQLSchemaBuilder
         protected ChatService $chatService,
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
+        protected AdvertisementService $advertisementService,
         protected JWTService $tokenService,
-        protected AlphaMintService $alphaMintService
+        protected AlphaMintService $alphaMintService,
+        protected ResponseMessagesProvider $responseMessagesProvider,
     ) {
         $this->resolvers = $this->buildResolvers();
     }
 
-    public function build(): Schema|array
-    {
+    public function getQueriesDependingOnRole(): ?string {
+        $graphqlPath = "Graphql/schema/";
+
+        $baseQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schema.graphql.generated');
+        $guestOnlyQueries =  \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schemaguest.graphql.generated');
+        $adminOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'admin_schema.graphql.generated');
+        $bridgeOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql.generated');
+
+        $adminSchema = $baseQueries . $adminOnlyQueries;
+        $guestSchema = $guestOnlyQueries;
+        $userSchema = $baseQueries;
+        $bridgeSchema = $bridgeOnlyQueries;
+
         if ($this->currentUserId === null) {
-            $schema = 'schemaguest.graphql';
+            $schema = $guestSchema;
         } else {
-            $schema = 'schema.graphql';
+            $schema = $userSchema;
         }
 
         if ($this->userRoles <= 0) {
             $schema = $schema;
         } elseif ($this->userRoles === 8) {
-            $schema = 'bridge_schema.graphql';
+            $schema = $bridgeSchema;
         } elseif ($this->userRoles === 16) {
-            $schema = 'admin_schema.graphql';
+            $schema = $adminSchema;
         }
 
+        return $schema;
+    }
+
+    public function build(): Schema|array
+    {
+        $graphqlPath = "Graphql/schema/";
+        $typesPath   = "types/";
+
+        $scalars = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "scalars.graphql.generated");
+        $response = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "response.graphql.generated");
+        $inputs = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "inputs.graphql.generated");
+        $enum = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "enums.graphql.generated");
+        $types = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql.generated");
+
+        $schema = $this->getQueriesDependingOnRole();
         if (empty($schema)){
             $this->logger->error('Invalid schema', ['schema' => $schema]);
             return $this->respondWithError(40301);
         }
 
-        $contents = \file_get_contents(__DIR__ . '/' . $schema);
-        $schema = BuildSchema::build($contents);
+        $schemaSource = $scalars . $enum . $inputs . $types . $response . $schema;
+
+        $resultSchema = BuildSchema::build($schemaSource);
 
         Executor::setDefaultFieldResolver([$this, 'fieldResolver']);
 
-        return $schema;
+        return $resultSchema;
     }
 
     public function setCurrentUserId(?string $bearerToken): void
@@ -127,7 +162,7 @@ class GraphQLSchemaBuilder
                         $this->currentUserId = $decodedToken->uid;
                         $this->userRoles = $decodedToken->rol;
                         $this->setCurrentUserIdForServices($this->currentUserId);
-                        $this->logger->info('Query.setCurrentUserId started');
+                        $this->logger->debug('Query.setCurrentUserId started');
                     }
                 } else {
                     $this->currentUserId = null;
@@ -157,6 +192,7 @@ class GraphQLSchemaBuilder
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
+        $this->advertisementService->setCurrentUserId($userid);
     }
 
     protected function getStatusNameByID(int $status): ?string
@@ -178,6 +214,14 @@ class GraphQLSchemaBuilder
             'Mutation' => $this->buildMutationResolvers(),
             'Subscription' => $this->buildSubscriptionResolvers(),
             'UserPreferencesResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.DefaultResponse Resolvers');
                     return $root['status'] ?? '';
@@ -281,6 +325,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'RegisterResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.RegisterResponse Resolvers');
                     return $root['status'] ?? '';
@@ -293,6 +345,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'ReferralResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.ReferralResponse Resolvers');
                     return $root['status'] ?? '';
@@ -319,7 +379,6 @@ class GraphQLSchemaBuilder
                     return $root['img'] ?? '';
                 },
             ],
-
             'User' => [
                 'id' => function (array $root): string {
                     $this->logger->info('Query.User Resolvers');
@@ -370,6 +429,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'UserInfoResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.UserInfoResponse Resolvers');
                     return $root['status'] ?? '';
@@ -382,6 +449,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'UserListResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.UserListResponse Resolvers');
                     return $root['status'] ?? '';
@@ -458,6 +533,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'ProfileInfo' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.ProfileInfo Resolvers');
                     return $root['status'] ?? '';
@@ -507,6 +590,9 @@ class GraphQLSchemaBuilder
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
                 },
+                'isfriend' => function (array $root): bool {
+                    return $root['isfriend'] ?? false;
+                },
             ],
             'BasicUserInfo' => [
                 'userid' => function (array $root): string {
@@ -554,6 +640,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'BlockedUsersResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.BlockedUsersResponse Resolvers');
                     return $root['status'] ?? '';
@@ -578,6 +672,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'FollowRelationsResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.FollowRelationsResponse Resolvers');
                     return $root['status'] ?? '';
@@ -593,6 +695,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'UserFriendsResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.UserFriendsResponse Resolvers');
                     return $root['status'] ?? '';
@@ -608,6 +718,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'BasicUserInfoResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.BasicUserInfoResponse Resolvers');
                     return $root['status'] ?? '';
@@ -620,6 +738,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'FollowStatusResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.FollowStatusResponse Resolvers');
                     return $root['status'] ?? '';
@@ -698,6 +824,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'PostInfoResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.PostInfoResponse Resolvers');
                     return $root['status'] ?? '';
@@ -737,6 +871,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'PostListResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.PostListResponse Resolvers');
                     return $root['status'] ?? '';
@@ -752,6 +894,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'PostResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.PostResponse Resolvers');
                     return $root['status'] ?? '';
@@ -764,6 +914,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'AddPostResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.AddPostResponse Resolvers');
                     return $root['status'] ?? '';
@@ -775,9 +933,9 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'Postinfo' => [
+            'PostInfo' => [
                 'userid' => function (array $root): string {
-                    $this->logger->info('Query.Postinfo Resolvers');
+                    $this->logger->info('Query.PostInfo Resolvers');
                     return $root['userid'] ?? '';
                 },
                 'postid' => function (array $root): string {
@@ -830,6 +988,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'CommentInfoResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.CommentInfoResponse Resolvers');
                     return $root['status'] ?? '';
@@ -856,6 +1022,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'CommentResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.CommentResponse Resolvers');
                     return $root['status'] ?? '';
@@ -868,6 +1042,62 @@ class GraphQLSchemaBuilder
                 },
                 'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
+                },
+            ],
+            'AdvCreator' => [
+                'advertisementid' => function (array $root): string {
+                    $this->logger->info('Query.AdvCreator Resolvers');
+                    return $root['advertisementid'] ?? '';
+                },
+                'postid' => function (array $root): string {
+                    return $root['postid'] ?? '';
+                },
+                'advertisementtype' => function (array $root): string {
+                    return strtoupper($root['status']) ?? '';
+                },
+                'startdate' => function (array $root): string {
+                    return $root['timestart'] ?? '';
+                },
+                'enddate' => function (array $root): string {
+                    return $root['timeend'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'user' => function (array $root): array {
+                    return $root['user'] ?? [];
+                },
+            ],
+            'ListAdvertisementPostsResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ListAdvertisementPostsResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'counter' => function (array $root): int {
+                    return $root['counter'] ?? 0;
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'AdvertisementPost' => [
+                'post' => function (array $root): array {
+                    $this->logger->info('Query.AdvertisementPost Resolvers');
+                    return $root['post'] ?? [];
+                },
+                'advertisement' => function (array $root): array {
+                    return $root['advertisement'] ?? [];
                 },
             ],
             'Chat' => [
@@ -933,9 +1163,9 @@ class GraphQLSchemaBuilder
                     return $root['hasaccess'] ?? 0;
                 },
             ],
-            'Chatinfo' => [
+            'ChatInfo' => [
                 'chatid' => function (array $root): string {
-                    $this->logger->info('Query.Chatinfo Resolvers');
+                    $this->logger->info('Query.ChatInfo Resolvers');
                     return $root['chatid'] ?? '';
                 },
             ],
@@ -958,6 +1188,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'ChatResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.ChatResponse Resolvers');
                     return $root['status'] ?? '';
@@ -973,6 +1211,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'AddChatResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.AddChatResponse Resolvers');
                     return $root['status'] ?? '';
@@ -985,6 +1231,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'AddChatmessageResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.AddChatmessageResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1007,8 +1261,22 @@ class GraphQLSchemaBuilder
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
+                'ResponseMessage' => function (array $root): string {
+                    return $this->responseMessagesProvider->getMessage($root['ResponseCode']) ?? '';
+                },
+                'RequestId' => function (array $root): string {
+                    return $this->logger->getRequestUid();
+                },
             ],
             'AuthPayload' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.AuthPayload Resolvers');
                     return $root['status'] ?? '';
@@ -1024,6 +1292,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'TagSearchResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.TagSearchResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1048,6 +1324,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'GetDailyResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.GetDailyResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1072,6 +1356,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'CurrentLiquidity' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.CurrentLiquidity Resolvers');
                     return $root['status'] ?? '';
@@ -1124,6 +1416,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'StandardResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1136,6 +1436,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'ListTodaysInteractionsResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1148,6 +1456,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'PercentBeforeTransactionResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1172,6 +1488,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'GemsterResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.GemsterResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1184,6 +1508,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'DailyGemStatusResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.DailyGemStatusResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1196,6 +1528,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'DailyGemsResultsResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.DailyGemsResultsResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1259,6 +1599,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'ContactusResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1271,6 +1619,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'GenericResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.GenericResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1286,6 +1642,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'GemstersResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.GenericResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1367,6 +1731,14 @@ class GraphQLSchemaBuilder
                 }
             ],
             'LiquidityPoolResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.LiquidityPoolResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1409,6 +1781,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'TestingPoolResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.GenericResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1424,6 +1804,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'PostCommentsResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.PostCommentsResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1529,6 +1917,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'UserLogWins' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.UserLogWins Resolvers');
                     return $root['status'] ?? '';
@@ -1559,6 +1955,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'AllUserFriends' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.AllUserFriends Resolvers');
                     return $root['status'] ?? '';
@@ -1574,6 +1978,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'RefreshMarketCapResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.RefreshMarketCapResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1604,6 +2016,14 @@ class GraphQLSchemaBuilder
                 },  
             ],
             'ReferralInfoResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.ReferralInfoResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1619,6 +2039,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'ReferralListResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.ReferralListResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1640,8 +2068,16 @@ class GraphQLSchemaBuilder
                 'iInvited' => function (array $root): array {
                     return $root['iInvited'] ?? [];
                 },
-            ],      
+            ],
             'GetActionPricesResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.GetActionPricesResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1687,6 +2123,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'TokenomicsResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.TokenomicsResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1705,6 +2149,14 @@ class GraphQLSchemaBuilder
                 },
             ],    
             'ResetPasswordRequestResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.ResetPasswordRequestResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1717,6 +2169,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'PostEligibilityResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.PostEligibilityResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1729,6 +2189,14 @@ class GraphQLSchemaBuilder
                 }
             ],
              'TransactionResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.TransactionResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1741,6 +2209,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'TransferTokenResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.TransferTokenResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1793,6 +2269,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'PostInteractionResponse' => [
+                'meta' => function(array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'status' => function (array $root): string {
                     $this->logger->info('Query.PostInteractionResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1804,6 +2288,147 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'ListAdvertisementData' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ListAdvertisementData Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): ?array {
+                    return $root['affectedRows'] ?? null;
+                },
+            ],
+            'AdvertisementRow' => [
+                'id' => function (array $root): string {
+                    $this->logger->info('Query.AdvertisementRow Resolvers');
+                    return $root['advertisementid'] ?? '';
+                },
+                'createdAt' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'type' => function (array $root): string {
+                    return strtoupper($root['status']) ?? 'BASIC';
+                },
+                'timeframeStart' => function (array $root): string {
+                    return $root['timestart'] ?? '';
+                },
+                'timeframeEnd' => function (array $root): string {
+                    return $root['timeend'] ?? '';
+                },
+                'totalTokenCost' => function (array $root): float {
+                    return $root['tokencost'] ?? 0.0;
+                },
+                'totalEuroCost' => function (array $root): float {
+                    return $root['eurocost'] ?? 0.0;
+                },
+            ],
+            'ListedAdvertisementData' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ListedAdvertisementData Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): ?array {
+                    return $root['affectedRows'] ?? null;
+                },
+            ],
+            'Advertisement' => [
+                'id' => function (array $root): string {
+                    $this->logger->info('Query.Advertisement Resolvers');
+                    return $root['advertisementid'] ?? '';
+                },
+                'creatorId' => function (array $root): string {
+                    return $root['userid'] ?? '';
+                },
+                'postId' => function (array $root): string {
+                    return $root['postid'] ?? '';
+                },
+                'type' => function (array $root): string {
+                    return strtoupper($root['status']) ?? 'BASIC';
+                },
+                'timeframeStart' => function (array $root): string {
+                    return $root['timestart'] ?? '';
+                },
+                'timeframeEnd' => function (array $root): string {
+                    return $root['timeend'] ?? '';
+                },
+                'totalTokenCost' => function (array $root): float {
+                    return $root['tokencost'] ?? 0.0;
+                },
+                'totalEuroCost' => function (array $root): float {
+                    return $root['eurocost'] ?? 0.0;
+                },
+                'gemsEarned' => function (array $root): float {
+                    return $root['gemsearned'] ?? 0.0;
+                },
+                'amountLikes' => function (array $root): int {
+                    return $root['amountlikes'] ?? 0;
+                },
+                'amountViews' => function (array $root): int {
+                    return $root['amountviews'] ?? 0;
+                },
+                'amountComments' => function (array $root): int {
+                    return $root['amountcomments'] ?? 0;
+                },
+                'amountDislikes' => function (array $root): int {
+                    return $root['amountdislikes'] ?? 0;
+                },
+                'amountReports' => function (array $root): int {
+                    return $root['amountreports'] ?? 0;
+                },
+                'createdAt' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'user' => function (array $root): array { // neu
+                    return $root['user'] ?? [];
+                },
+                'post' => function (array $root): array { // neu
+                    return $root['post'] ?? [];
+                },
+            ],
+            'TotalAdvertisementHistoryStats' => [
+                'tokenSpent' => function (array $root): float {
+                    $this->logger->info('Query.TotalAdvertisementHistoryStats Resolvers');
+                    return $root['tokenSpent'] ?? 0.0;
+                },
+                'euroSpent' => function (array $root): float {
+                    return $root['euroSpent'] ?? 0.0;
+                },
+                'amountAds' => function (array $root): int {
+                    return $root['amountAds'] ?? 0;
+                },
+                'gemsEarned' => function (array $root): float {
+                    return $root['gemsEarned'] ?? 0.0;
+                },
+                'amountLikes' => function (array $root): int {
+                    return $root['amountLikes'] ?? 0;
+                },
+                'amountViews' => function (array $root): int {
+                    return $root['amountViews'] ?? 0;
+                },
+                'amountComments' => function (array $root): int {
+                    return $root['amountComments'] ?? 0;
+                },
+                'amountDislikes' => function (array $root): int {
+                    return $root['amountDislikes'] ?? 0;
+                },
+                'amountReports' => function (array $root): int {
+                    return $root['amountReports'] ?? 0;
+                },
+            ],
+            'AdvertisementHistoryResult' => [
+                'stats' => function (array $root): array {
+                    $this->logger->info('Query.AdvertisementHistoryResult Resolvers');
+                    return $root['stats'] ?? [];
+                },
+                'advertisements' => function (array $root): array {
+                    return $root['advertisements'] ?? [];
+                },
+            ],
         ];
     }
 
@@ -1813,12 +2438,14 @@ class GraphQLSchemaBuilder
         return [
             'hello' => fn(mixed $root, array $args, mixed $context) => $this->resolveHello($root, $args, $context),
             'searchUser' => fn(mixed $root, array $args) => $this->resolveSearchUser($args),
+            'searchUserAdmin' => fn(mixed $root, array $args) => $this->resolveSearchUser($args),
             'listUsers' => fn(mixed $root, array $args) => $this->resolveUsers($args),
             'getProfile' => fn(mixed $root, array $args) => $this->resolveProfile($args),
             'listFollowRelations' => fn(mixed $root, array $args) => $this->resolveFollows($args),
             'listFriends' => fn(mixed $root, array $args) => $this->resolveFriends($args),
             'listPosts' => fn(mixed $root, array $args) => $this->resolvePosts($args),
             'guestListPost' => fn(mixed $root, array $args) => $this->guestListPost($args),
+            'listAdvertisementPosts' => fn(mixed $root, array $args) => $this->resolveAdvertisementsPosts($args),
             'getPostInfo' => fn(mixed $root, array $args) => $this->resolvePostInfo($args['postid']),
             'getCommentInfo' => fn(mixed $root, array $args) => $this->resolveCommentInfo($args['commentId']),
             'listChildComments' => fn(mixed $root, array $args) => $this->resolveComments($args),
@@ -1830,9 +2457,7 @@ class GraphQLSchemaBuilder
             'getDailyFreeStatus' => fn(mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
             'getpercentbeforetransaction' => fn(mixed $root, array $args) => $this->resolveBeforeTransaction($args),
             'refreshmarketcap' => fn(mixed $root, array $args) => $this->resolveMcap(),
-            'globalwins' => fn(mixed $root, array $args) => $this->walletService->callGlobalWins(),
             'gemster' => fn(mixed $root, array $args) => $this->walletService->callGemster(),
-            'gemsters' => fn(mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
             'balance' => fn(mixed $root, array $args) => $this->resolveLiquidity(),
             'getUserInfo' => fn(mixed $root, array $args) => $this->resolveUserInfo(),
             'listWinLogs' => fn(mixed $root, array $args) => $this->resolveFetchWinsLog($args),
@@ -1851,6 +2476,7 @@ class GraphQLSchemaBuilder
             'postEligibility' => fn(mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn(mixed $root, array $args) => $this->transactionsHistory($args),
             'postInteractions' => fn(mixed $root, array $args) => $this->postInteractions($args),
+            'advertisementHistory' => fn(mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'getTokenomics' => fn(mixed $root, array $args) => $this->resolveTokenomics(),
         ];
@@ -1858,9 +2484,9 @@ class GraphQLSchemaBuilder
 
     protected function buildMutationResolvers(): array
     {
-
         return [
             'requestPasswordReset' => fn(mixed $root, array $args) => $this->userService->requestPasswordReset($args['email']),
+            'resetPasswordTokenVerify' => fn(mixed $root, array $args) => $this->userService->resetPasswordTokenVerify($args['token']),
             'resetPassword' => fn(mixed $root, array $args) => $this->userService->resetPassword($args),
             'register' => fn(mixed $root, array $args) => $this->createUser($args['input']),
             'verifyAccount' => fn(mixed $root, array $args) => $this->verifyAccount($args['userid']),
@@ -1894,6 +2520,11 @@ class GraphQLSchemaBuilder
             'resolvePostAction' => fn(mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveTransfer' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'resolveTransferV2' => fn(mixed $root, array $args) => $this->peerTokenService->transferToken($args),
+            'globalwins' => fn(mixed $root, array $args) => $this->walletService->callGlobalWins(),
+            'gemsters' => fn(mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
+            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
+            'advertisePostBasic' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
+            'advertisePostPinned' => fn(mixed $root, array $args) => $this->resolveAdvertisePost($args),
         ];
     }
 
@@ -1907,7 +2538,7 @@ class GraphQLSchemaBuilder
 
     protected function resolveHello(mixed $root, array $args, mixed $context): array
     {
-        $this->logger->info('Query.hello started', ['args' => $args]);
+        $this->logger->debug('Query.hello started', ['args' => $args]);
 
         $lastMergedPullRequestNumber = LastGithubPullRequestNumberProvider::getValue();
 
@@ -1919,9 +2550,247 @@ class GraphQLSchemaBuilder
         ];
     }
 
+    // Berechne den Basispreis des Beitrags
+    protected function advertisePostBasicResolver(?array $args = []): int
+    {
+        try {
+            $this->logger->debug('Query.advertisePostBasicResolver started');
+
+            $postId = $args['postid'];
+            $duration = $args['durationInDays'];
+
+            $price = $this->advertisementService::calculatePrice($this->advertisementService::PLAN_BASIC, $duration);
+
+            return $price;
+        } catch (\Throwable $e) {
+            $this->logger->warning('Invalid price provided.', ['Error' => $e]);
+            return 0;
+        }
+    }
+
+    // Berechne den Preis für angehefteten Beitrag
+    protected function advertisePostPinnedResolver(?array $args = []): int
+    {
+        try {
+            $this->logger->debug('Query.advertisePostPinnedResolver started');
+
+            $postId = $args['postid'];
+
+            $price = $this->advertisementService::calculatePrice($this->advertisementService::PLAN_PINNED);
+
+            return $price;
+        } catch (\Throwable $e) {
+            $this->logger->warning('Invalid price provided.', ['Error' => $e]);
+            return 0;
+        }
+    }
+
+    // Werbeanzeige prüfen, validieren und freigeben
+    protected function resolveAdvertisePost(?array $args = []): ?array
+    {
+        // Authentifizierung prüfen
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        //$this->logger->info('Query.resolveAdvertisePost gestartet');
+
+        $postId = $args['postid'] ?? null;
+        $durationInDays = $args['durationInDays'] ?? null;
+        $startdayInput = $args['startday'] ?? null;
+        $advertisePlan = $args['advertisePlan'] ?? null;
+        $reducePrice = false;
+        $CostPlan = 0;
+
+        // postId validieren
+        if ($postId !== null && !self::isValidUUID($postId)) {
+            return $this->respondWithError(30209);
+        }
+
+        if ($this->postService->postExistsById($postId) === false) 
+        {
+            return $this->respondWithError(31510);
+        }
+
+        $advertiseActions = ['BASIC', 'PINNED'];
+
+        // Werbeplan validieren
+        if (!in_array($advertisePlan, $advertiseActions, true)) {
+            $this->logger->warning('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
+            return $this->respondWithError(32006);
+        }
+
+        $actionPrices = [
+            'BASIC' => BASIC,
+            'PINNED' => PINNED,
+        ];
+
+        // Preisvalidierung
+        if (!isset($actionPrices[$advertisePlan])) {
+            $this->logger->warning('Ungültiger Preisplan', ['advertisePlan' => $advertisePlan]);
+            return $this->respondWithError(32005);
+        }
+
+        if ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
+            // Startdatum validieren
+            if (isset($startdayInput) && empty($startdayInput)) {
+                $this->logger->warning('Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
+                return $this->respondWithError(32007);
+            }
+
+            // Startdatum prüfen und Format validieren
+            $startday = DateTimeImmutable::createFromFormat('Y-m-d', $startdayInput);
+            $errors = DateTimeImmutable::getLastErrors();
+
+            if (!$startday) {
+                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
+                return $this->respondWithError(32008);
+            }
+
+            if (isset($errors['warning_count']) && $errors['warning_count'] > 0 || isset($errors['error_count']) && $errors['error_count'] > 0) {
+                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
+                return $this->respondWithError(42004);
+            }
+
+            // Prüfen, ob das Startdatum in der Vergangenheit liegt
+            $tomorrow = new DateTimeImmutable('tomorrow');
+            if ($startday < $tomorrow) {
+                $this->logger->warning('Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
+                return $this->respondWithError(32008);
+            }
+
+            $durationActions = ['ONE_DAY', 'TWO_DAYS', 'THREE_DAYS', 'FOUR_DAYS', 'FIVE_DAYS', 'SIX_DAYS', 'SEVEN_DAYS'];
+
+            // Laufzeit validieren
+            if ($durationInDays !== null && !in_array($durationInDays, $durationActions, true)) {
+                $this->logger->warning('Ungültige Laufzeit', ['durationInDays' => $durationInDays]);
+                return $this->respondWithError(32009);
+            }
+        }
+
+        if ($this->advertisementService->isAdvertisementDurationValid($postId) === true) 
+        {
+            $reducePrice = true;
+        }
+
+        if ($reducePrice === false) 
+        {
+            if ($this->advertisementService->hasShortActiveAdWithUpcomingAd($postId) === true) 
+            {
+                $reducePrice = true;
+            }
+        }
+
+        // Kosten berechnen je nach Plan (BASIC oder PINNED)
+        if ($advertisePlan === $this->advertisementService::PLAN_PINNED) {
+            $CostPlan = $this->advertisePostPinnedResolver($args); // PINNED Kosten berechnen
+
+            // 20% discount weil advertisement >= 24 stunde aktive noch
+            if ($reducePrice === true) 
+            {
+                $CostPlan = $CostPlan - ($CostPlan * 0.20); // 80% vom ursprünglichen Wert
+                //$CostPlan *= 0.80; // 80% vom ursprünglichen Wert
+                $this->logger->info('20% Discount Exestiert:', ['CostPlan' => $CostPlan]);
+            }
+
+            $this->logger->info('Werbeanzeige PINNED', ['CostPlan' => $CostPlan]);
+            $rescode = 12003;
+        } elseif ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
+            $CostPlan = $this->advertisePostBasicResolver($args); // BASIC Kosten berechnen
+            $this->logger->info('Werbeanzeige BASIC', ["Kosten für $durationInDays Tage: " => $CostPlan]);
+            $rescode = 12004;
+        } else {
+            $this->logger->warning('Ungültige Ads Plan', ['CostPlan' => $CostPlan]);
+            return $this->respondWithError(32005);
+        }
+
+        // Wenn Kosten leer oder 0 sind, Fehler zurückgeben
+        $args['eurocost'] = $CostPlan;
+        if (empty($CostPlan) || (int)$CostPlan === 0) {
+            $this->logger->warning('Kostenprüfung fehlgeschlagen', ['CostPlan' => $CostPlan]);
+            return $this->respondWithError(42005);
+        }
+
+        // Euro in PeerTokens umrechnen
+        $results = $this->advertisementService->convertEuroToTokens($CostPlan, $rescode);
+        if (isset($results['status']) && $results['status'] === 'error') {
+            $this->logger->warning('Fehler bei convertEuroToTokens', ['results' => $results]);
+            return $results;
+        }
+        if (isset($results['status']) && $results['status'] === 'success') {
+            $this->logger->info('Umrechnung erfolgreich', ["€$CostPlan in PeerTokens: " => $results['affectedRows']['TokenAmount']]);
+            $CostPlan = $results['affectedRows']['TokenAmount'];
+            $args['tokencost'] = $CostPlan;
+        }
+
+        try {
+            // Wallet prüfen
+            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
+            if ($balance < $CostPlan) {
+                $this->logger->warning('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
+                return $this->respondWithError(51301);
+            }
+
+            // Werbeanzeige erstellen
+            $response = $this->advertisementService->createAdvertisement($args);
+            if (isset($response['status']) && $response['status'] === 'success') {
+                $args['art'] = ($advertisePlan === $this->advertisementService::PLAN_BASIC) ? 6 : (($advertisePlan === $this->advertisementService::PLAN_PINNED) ? 7 : null);
+                $args['price'] = $CostPlan ?? null;
+
+                $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
+                if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    return $deducted;
+                }
+
+                if (!$deducted) {
+                    $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
+                    return $this->respondWithError($deducted['ResponseCode']);
+                }
+
+                return $response;
+            }
+
+            return $response;
+
+        } catch (\Throwable $e) {
+            return $this->respondWithError(40301);
+        }
+    }
+
+    // Werbeanzeige historie abrufen
+    protected function resolveAdvertisementHistory(?array $args = []): ?array
+    {
+        // Authentifizierung prüfen
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        $this->logger->info('Query.resolveAdvertisementHistory gestartet');
+
+        try {
+            // Werbeanzeige function abrufen
+            $response = $this->advertisementService->fetchAll($args);
+
+            if (isset($response['status']) && $response['status'] === 'success') {
+
+                return $response;
+            }
+
+            return $response;
+
+        } catch (\Throwable $e) {
+            return $this->respondWithError(40301);
+        }
+    }
+
     protected function createUser(array $args): ?array
     {
-        $this->logger->info('Query.createUser started');
+        $this->logger->debug('Query.createUser started');
 
         $response = $this->userService->createUser($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -1947,7 +2816,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveBlocklist started');
+        $this->logger->debug('Query.resolveBlocklist started');
 
         $response = $this->userInfoService->loadBlocklist($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -1981,7 +2850,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveFetchWinsLog started');
+        $this->logger->debug('Query.resolveFetchWinsLog started');
 
         $response = $this->walletService->callFetchWinsLog($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -2015,7 +2884,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveFetchPaysLog started');
+        $this->logger->debug('Query.resolveFetchPaysLog started');
 
         $response = $this->walletService->callFetchPaysLog($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -2040,7 +2909,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveReferralInfo started');
+        $this->logger->debug('Query.resolveReferralInfo started');
 
         try {
             $userId = $this->currentUserId;
@@ -2077,7 +2946,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveReferralList started');
+        $this->logger->debug('Query.resolveReferralList started');
 
         $userId = $this->currentUserId;
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -2134,7 +3003,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('PoolService.getActionPrices started');
+        $this->logger->debug('PoolService.getActionPrices started');
 
         try {
             $result = $this->poolService->getActionPrices();
@@ -2146,13 +3015,13 @@ class GraphQLSchemaBuilder
                 $this->logger->warning('resolveActionPrices: DB result missing/invalid, falling back to constants');
 
                 $tokenomics = ConstantsConfig::tokenomics();
-                $prices     = $tokenomics['ACTION_TOKEN_PRICES'] ?? [];
+                $prices     = $tokenomics['ACTION_TOKEN_PRICES'];
 
                 $affectedRows = [
-                    'postPrice'    => (float)($prices['post']    ?? 0.0),
-                    'likePrice'    => (float)($prices['like']    ?? 0.0),
-                    'dislikePrice' => (float)($prices['dislike'] ?? 0.0),
-                    'commentPrice' => (float)($prices['comment'] ?? 0.0),
+                    'postPrice'    => (float)$prices['post'],
+                    'likePrice'    => (float)$prices['like'],
+                    'dislikePrice' => (float)$prices['dislike'],
+                    'commentPrice' => (float)$prices['comment'],
                 ];
             } else {
                 $affectedRows = [
@@ -2181,29 +3050,29 @@ class GraphQLSchemaBuilder
 
     private function resolveTokenomics(): array
     {
-        $this->logger->info('Query.getTokenomics started');
+        $this->logger->debug('Query.getTokenomics started');
 
         $tokenomics = ConstantsConfig::tokenomics();
         $minting    = ConstantsConfig::minting();
 
-        $prices = $tokenomics['ACTION_TOKEN_PRICES'] ?? [];
-        $gems   = $tokenomics['ACTION_GEMS_RETURNS'] ?? [];
+        $prices = $tokenomics['ACTION_TOKEN_PRICES'];
+        $gems   = $tokenomics['ACTION_GEMS_RETURNS'];
 
         $actionTokenPrices = [
-            'postPrice'    => (float)($prices['post']    ?? 0.0),
-            'likePrice'    => (float)($prices['like']    ?? 0.0),
-            'dislikePrice' => (float)($prices['dislike'] ?? 0.0),
-            'commentPrice' => (float)($prices['comment'] ?? 0.0),
+            'postPrice'    => (float)$prices['post'],
+            'likePrice'    => (float)$prices['like'],
+            'dislikePrice' => (float)$prices['dislike'],
+            'commentPrice' => (float)$prices['comment'],
         ];
 
         $actionGemsReturns = [
-            'viewGemsReturn'    => (float)($gems['view']    ?? 0.0),
-            'likeGemsReturn'    => (float)($gems['like']    ?? 0.0),
-            'dislikeGemsReturn' => (float)($gems['dislike'] ?? 0.0),
-            'commentGemsReturn' => (float)($gems['comment'] ?? 0.0),
+            'viewGemsReturn'    => (float)$gems['view'],
+            'likeGemsReturn'    => (float)$gems['like'],
+            'dislikeGemsReturn' => (float)$gems['dislike'],
+            'commentGemsReturn' => (float)$gems['comment'],
         ];
 
-        $mintedYesterday = (float)($minting['DAILY_NUMBER_TOKEN'] ?? 0.0);
+        $mintedYesterday = (float)$minting['DAILY_NUMBER_TOKEN'];
 
         $payload = [
             'status'            => 'success',
@@ -2253,7 +3122,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveChatMessages started');
+        $this->logger->debug('Query.resolveChatMessages started');
 
         $response = $this->chatService->readChatMessages($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -2278,7 +3147,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolvePool started');
+        $this->logger->debug('Query.resolvePool started');
 
         $response = $this->walletService->fetchPool($args);
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -2304,7 +3173,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolvePool started');
+        $this->logger->debug('Query.resolvePool started');
 
         $response = $this->walletService->fetchPool($args);
 
@@ -2332,7 +3201,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveActionPost started');
+        $this->logger->debug('Query.resolveActionPost started');
 
         $postId = $args['postid'] ?? null;
         $action = $args['action'] = strtolower($args['action'] ?? 'LIKE');
@@ -2374,7 +3243,7 @@ class GraphQLSchemaBuilder
 
         // Validations
         if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
-            $this->logger->error('Invalid action parameter', ['action' => $action]);
+            $this->logger->warning('Invalid action parameter', ['action' => $action]);
             return $this->respondWithError(30105);
         }
 
@@ -2431,7 +3300,7 @@ class GraphQLSchemaBuilder
                         return $response;
                     }
 
-                    $this->logger->error("{$action}Post failed", ['response' => $response]);
+                        $this->logger->error("{$action}Post failed", ['response' => $response]);
                     $response['affectedRows'] = $args;
                     return $response;
                 }
@@ -2502,7 +3371,7 @@ class GraphQLSchemaBuilder
                 return $response;
             }
 
-            $this->logger->error("{$action}Post failed after wallet deduction", ['response' => $response]);
+                $this->logger->error("{$action}Post failed after wallet deduction", ['response' => $response]);
             $response['affectedRows'] = $args;
             return $response;
         } catch (\Throwable $e) {
@@ -2586,7 +3455,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveTags started');
+        $this->logger->debug('Query.resolveTags started');
 
         $tags = $this->tagService->fetchAll($args);
         if (isset($tags['status']) && $tags['status'] === 'success') {
@@ -2613,7 +3482,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveTagsearch started');
+        $this->logger->debug('Query.resolveTagsearch started');
         $data = $this->tagService->loadTag($args);
         if (isset($data['status']) && $data['status'] === 'success') {
             $this->logger->info('Query.resolveTagsearch successful');
@@ -2665,7 +3534,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveLiquidity started');
+        $this->logger->debug('Query.resolveLiquidity started');
 
         $results = $this->walletService->loadLiquidityById($this->currentUserId);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -2687,7 +3556,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveMcap started');
+        $this->logger->debug('Query.resolveMcap started');
 
         $results = $this->mcapService->loadLastId();
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -2710,7 +3579,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveUserInfo started');
+        $this->logger->debug('Query.resolveUserInfo started');
 
         $results = $this->userInfoService->loadInfoById();
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -2780,7 +3649,7 @@ class GraphQLSchemaBuilder
 
         $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
 
-        $this->logger->info('Query.resolveSearchUser started');
+        $this->logger->debug('Query.resolveSearchUser started');
 
         $data = $this->userService->fetchAllAdvance($args);
 
@@ -2804,7 +3673,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveFollows started');
+        $this->logger->debug('Query.resolveFollows started');
 
         $results = $this->userService->Follows($args);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -2831,7 +3700,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30201);
         }
 
-        $this->logger->info('Query.resolveProfile started');
+        $this->logger->debug('Query.resolveProfile started');
 
         $results = $this->userService->Profile($args);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -2865,7 +3734,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30103);
         }
 
-        $this->logger->info('Query.resolveFriends started');
+        $this->logger->debug('Query.resolveFriends started');
 
         $results = $this->userService->getFriends($args);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -2888,7 +3757,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('Query.resolveAllFriends started');
+        $this->logger->debug('Query.resolveAllFriends started');
 
         $results = $this->userService->getAllFriends($args);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -2916,7 +3785,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveUsers started');
+        $this->logger->debug('Query.resolveUsers started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
@@ -2957,7 +3826,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30218);
         }
 
-        $this->logger->info('Query.resolveChat started');
+        $this->logger->debug('Query.resolveChat started');
 
         $response = $this->chatService->loadChatById($args);
 
@@ -2986,7 +3855,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolveChats started');
+        $this->logger->debug('Query.resolveChats started');
         $chats = $this->chatService->findChatser($args);
         if ($chats) {
             $data = array_map(
@@ -3024,7 +3893,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30209);
         }
 
-        $this->logger->info('Query.resolvePostInfo started');
+        $this->logger->debug('Query.resolvePostInfo started');
 
         $postId = isset($postId) ? trim($postId) : '';
 
@@ -3054,7 +3923,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30217);
         }
 
-        $this->logger->info('Query.resolveCommentInfo started');
+        $this->logger->debug('Query.resolveCommentInfo started');
 
 
         $commentId = isset($commentId) ? trim($commentId) : '';
@@ -3080,7 +3949,7 @@ class GraphQLSchemaBuilder
      */
     public function transactionsHistory(array $args): array
     {
-        $this->logger->info('GraphQLSchemaBuilder.transactionsHistory started');
+        $this->logger->debug('GraphQLSchemaBuilder.transactionsHistory started');
 
         if (!$this->checkAuthentication()) {
             return self::respondWithError(60501);
@@ -3113,7 +3982,7 @@ class GraphQLSchemaBuilder
      */
     public function postInteractions(array $args): array
     {
-        $this->logger->info('GraphQLSchemaBuilder.postInteractions started');
+        $this->logger->debug('GraphQLSchemaBuilder.postInteractions started');
 
         if (!$this->checkAuthentication()) {
             $this->logger->info("GraphQLSchemaBuilder.postInteractions failed due to authentication");
@@ -3140,7 +4009,6 @@ class GraphQLSchemaBuilder
 
     }
 
-
     protected function resolvePosts(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
@@ -3152,7 +4020,7 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $this->logger->info('Query.resolvePosts started');
+        $this->logger->debug('Query.resolvePosts started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
@@ -3181,6 +4049,62 @@ class GraphQLSchemaBuilder
         ];
     }
 
+    protected function resolveAdvertisementsPosts(array $args): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        $this->logger->debug('Query.resolveAdvertisementsPosts started');
+
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+
+        $posts = $this->advertisementService->findAdvertiser($args);
+        if (isset($posts['status']) && $posts['status'] === 'error') {
+            return $posts;
+        }
+
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
+
+        $data = array_map(
+            function (array $row) use ($commentOffset, $commentLimit, $contentFilterBy) {
+                $postWithComments = $this->mapPostWithComments(
+                    $row['post'],
+                    $commentOffset,
+                    $commentLimit,
+                    $contentFilterBy
+                );
+
+                return [
+                    // PostAdvanced Objekt
+                    'post' => $postWithComments,
+                    // Advertisements Objekt
+                    'advertisement' => $this->mapPostWithAdvertisement($row['advertisement']),
+                ];
+            },
+            $posts
+        );
+
+        $this->logger->info('findAdvertiser', ['data' => $data]);
+        return [
+            'status' => 'success',
+            'counter' => count($data),
+            'ResponseCode' => empty($data) ? 21501 : 11501,
+            'affectedRows' => $data,
+        ];
+    }
+
+    protected function mapPostWithAdvertisement(Advertisements $advertise): ?array
+    {
+        return $advertise->getArrayCopy();
+    }
+
     protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit, ?string $contentFilterBy = null): array
     {
         $postArray = $post->getArrayCopy();
@@ -3193,7 +4117,7 @@ class GraphQLSchemaBuilder
         return $postArray;
     }
 
-    protected function fetchCommentWithoutReplies(CommentAdvanced $comment): array
+    protected function fetchCommentWithoutReplies(CommentAdvanced $comment): ?array
     {
         return $comment->getArrayCopy();
     }
@@ -3227,7 +4151,7 @@ class GraphQLSchemaBuilder
                 if (!empty($params)) {
                     $firstParamType = $params[0]->getType();
 
-                    if ($firstParamType instanceof ReflectionNamedType 
+                    if ($firstParamType instanceof \ReflectionNamedType 
                         && !$firstParamType->isBuiltin() 
                         && $firstParamType->getName() !== 'mixed' 
                         && !($source instanceof ($firstParamType->getName()))) {
@@ -3254,12 +4178,15 @@ class GraphQLSchemaBuilder
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
-    protected function respondWithError(int $message): array
+    private function respondWithError(int $responseCode): array
     {
-        return ['status' => 'error', 'ResponseCode' => $message];
+        return [
+            'status' => 'error', 
+            'ResponseCode' => $responseCode
+        ];
     }
 
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    private function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
     {
         $response = [
             'status' => 'success',
@@ -3357,7 +4284,7 @@ class GraphQLSchemaBuilder
 
     protected function ContactUs(?array $args = []): array
     {
-        $this->logger->info('Query.ContactUs started');
+        $this->logger->debug('Query.ContactUs started');
 
         $ip = filter_var($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', FILTER_VALIDATE_IP) ?: '0.0.0.0';
         if ($ip === '0.0.0.0') {
@@ -3369,7 +4296,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($args)) {
-            $this->logger->error('Mandatory args missing.');
+            $this->logger->warning('Mandatory args missing.');
             return $this->respondWithError(30101);
         }
 
@@ -3416,7 +4343,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => $insertedContact->getArrayCopy(),
             ];
         } catch (\Throwable $e) {
-            $this->logger->error('Unexpected error during contact creation', [
+            $this->logger->warning('Unexpected error during contact creation', [
                 'error' => $e->getMessage(),
                 'args' => $args,
             ]);
@@ -3434,7 +4361,7 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(30201);
         }
 
-        $this->logger->info('Query.verifyAccount started');
+        $this->logger->debug('Query.verifyAccount started');
 
         try {
             $user = $this->userMapper->loadById($userid);
@@ -3469,7 +4396,7 @@ class GraphQLSchemaBuilder
 
     protected function login(string $email, string $password): array
     {
-        $this->logger->info('Query.login started');
+        $this->logger->debug('Query.login started');
 
         try {
             if (empty($email) || empty($password)) {
@@ -3542,7 +4469,7 @@ class GraphQLSchemaBuilder
 
     protected function refreshToken(string $refreshToken): array
     {
-        $this->logger->info('Query.refreshToken started');
+        $this->logger->debug('Query.refreshToken started');
 
         try {
             if (empty($refreshToken)) {
@@ -3601,7 +4528,7 @@ class GraphQLSchemaBuilder
      */
     protected function guestListPost(array $args): ?array
     {
-        $this->logger->info('Query.guestListPost started');
+        $this->logger->debug('Query.guestListPost started');
 
         $posts = $this->postService->getGuestListPost($args);
 

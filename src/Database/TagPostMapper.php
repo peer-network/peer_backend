@@ -14,7 +14,7 @@ class TagPostMapper
 
     public function fetchAll(int $offset, int $limit): array
     {
-        $this->logger->info("TagPostMapper.fetchAll started");
+        $this->logger->debug("TagPostMapper.fetchAll started");
 
         $sql = "SELECT * FROM post_tags ORDER BY postid ASC LIMIT :limit OFFSET :offset";
 
@@ -43,7 +43,7 @@ class TagPostMapper
 
     public function loadByPostId(string $postid): array
     {
-        $this->logger->info("TagPostMapper.loadByPostId started");
+        $this->logger->debug("TagPostMapper.loadByPostId started");
 
         $sql = "SELECT * FROM post_tags WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -65,7 +65,7 @@ class TagPostMapper
 
     public function loadByTagId(string $tagid): array
     {
-        $this->logger->info("TagPostMapper.loadByTagId started");
+        $this->logger->debug("TagPostMapper.loadByTagId started");
 
         $sql = "SELECT * FROM post_tags WHERE tagid = :tagid";
         $stmt = $this->db->prepare($sql);
@@ -87,7 +87,7 @@ class TagPostMapper
 
     public function insert(TagPost $tagPost): TagPost
     {
-        $this->logger->info("TagPostMapper.insert started");
+        $this->logger->debug("TagPostMapper.insert started");
 
         $data = $tagPost->getArrayCopy();
 
@@ -102,7 +102,7 @@ class TagPostMapper
 
     public function deleteByPostId(string $postid): bool
     {
-        $this->logger->info("TagPostMapper.deleteByPostId started");
+        $this->logger->debug("TagPostMapper.deleteByPostId started");
 
         $query = "DELETE FROM post_tags WHERE postid = :postid";
         $stmt = $this->db->prepare($query);
@@ -120,7 +120,7 @@ class TagPostMapper
 
     public function deleteByTagId(string $tagid): bool
     {
-        $this->logger->info("TagPostMapper.deleteByTagId started");
+        $this->logger->debug("TagPostMapper.deleteByTagId started");
 
         $query = "DELETE FROM post_tags WHERE tagid = :tagid";
         $stmt = $this->db->prepare($query);

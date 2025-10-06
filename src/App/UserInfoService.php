@@ -75,7 +75,7 @@ class UserInfoService
     public function loadInfoById(): array|false
     {
 
-        $this->logger->info('UserInfoService.loadLastId started');
+        $this->logger->debug('UserInfoService.loadLastId started');
 
         try {
             $results = $this->userInfoMapper->loadInfoById($this->currentUserId);
@@ -132,7 +132,7 @@ class UserInfoService
             return $this->respondWithError(31102);
         }
 
-        $this->logger->info('UserInfoService.toggleUserFollow started');
+        $this->logger->debug('UserInfoService.toggleUserFollow started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
             return $this->createSuccessResponse(21001);
@@ -171,7 +171,7 @@ class UserInfoService
             return $this->respondWithError(31104);
         }
 
-        $this->logger->info('UserInfoService.toggleUserBlock started');
+        $this->logger->debug('UserInfoService.toggleUserBlock started');
 
         if (!$this->userInfoMapper->isUserExistById($this->currentUserId)) {
             return $this->createSuccessResponse(21001);
@@ -197,7 +197,7 @@ class UserInfoService
 
     public function loadBlocklist(?array $args = []): array
     {
-        $this->logger->info('UserInfoService.loadBlocklist started');
+        $this->logger->debug('UserInfoService.loadBlocklist started');
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -225,7 +225,7 @@ class UserInfoService
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('UserInfoService.toggleProfilePrivacy started');
+        $this->logger->debug('UserInfoService.toggleProfilePrivacy started');
 
         try {
             $this->transactionManager->beginTransaction();
@@ -269,7 +269,7 @@ class UserInfoService
             return $this->respondWithError(30228);
         }
 
-        $this->logger->info('UserInfoService.updateBio started');
+        $this->logger->debug('UserInfoService.updateBio started');
 
         try {
             $this->transactionManager->beginTransaction();
@@ -325,7 +325,7 @@ class UserInfoService
             return $this->respondWithError(31102);
         }
 
-        $this->logger->info('UserInfoService.setProfilePicture started');
+        $this->logger->debug('UserInfoService.setProfilePicture started');
 
         try {
             $user = $this->userInfoMapper->loadById($this->currentUserId);
@@ -371,7 +371,7 @@ class UserInfoService
 
     public function reportUser(string $reported_userid): array
     {
-        $this->logger->info('UserInfoService.reportUser started');
+        $this->logger->debug('UserInfoService.reportUser started');
 
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
@@ -382,7 +382,7 @@ class UserInfoService
         }
 
         if ($this->currentUserId === $reported_userid) {
-            $this->logger->error('UserInfoService.reportUser: Error: currentUserId == $reported_userid');
+            $this->logger->warning('UserInfoService.reportUser: Error: currentUserId == $reported_userid');
             return $this->respondWithError(31009); // you cant report on yourself
         }
 
@@ -390,7 +390,7 @@ class UserInfoService
             $user = $this->userMapper->loadById($reported_userid);
 
             if (!$user) {
-                $this->logger->error('UserInfoService.reportUser: User not found');
+                $this->logger->warning('UserInfoService.reportUser: User not found');
                 return $this->respondWithError(31007);
             }
 
@@ -429,7 +429,7 @@ class UserInfoService
             }
 
             if ($exists === true) {
-                $this->logger->error('UserInfoService.reportUser: User report already exists');
+                $this->logger->warning('UserInfoService.reportUser: User report already exists');
                 $this->transactionManager->rollback();
                 return $this->respondWithError(31008); // report already exists
             }

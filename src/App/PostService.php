@@ -26,7 +26,8 @@ use Fawaz\Database\Interfaces\TransactionManager;
 
 class PostService
 {
-	use ResponseHelper;
+    use ResponseHelper;
+
     protected ?string $currentUserId = null;
 
     public function __construct(
@@ -86,7 +87,6 @@ class PostService
     private function argsToString($args) {
         return serialize($args);
     }
-
 
     private function validateCoverCount(array $args, string $contenttype): array {
         if (!is_array($args['cover'])) {
@@ -165,13 +165,9 @@ class PostService
             }
         }
 
-        $this->logger->info('PostService.createPost started');
+        $this->logger->debug('PostService.createPost started');
 
         $postId = self::generateUUID();
-        if (empty($postId)) {
-            $this->logger->critical('Failed to generate post ID');
-            return $this->respondWithError(41511);
-        }
 
         $createdAt = (new \DateTime())->format('Y-m-d H:i:s.u');
 
@@ -502,7 +498,7 @@ class PostService
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info("PostService.fetchAll started");
+        $this->logger->debug("PostService.fetchAll started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -562,13 +558,13 @@ class PostService
 
         if ($tag !== null) {
             if (!preg_match('/' . $titleConfig['PATTERN'] . '/u', $tag)) {
-                $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
+                $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }
         }
 
         if (!empty($filterBy) && is_array($filterBy)) {
-            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED'];
+            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED', 'FRIENDS'];
 
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
@@ -584,7 +580,7 @@ class PostService
             }
         }
 
-        $this->logger->info("PostService.findPostser started");
+        $this->logger->debug("PostService.findPostser started");
 
         $results = $this->postMapper->findPostser($this->currentUserId, $args);
         if (empty($results) && $postId != null) {
@@ -600,7 +596,7 @@ class PostService
             return $this->respondWithError(30103);
         }
 
-        $this->logger->info("PostService.getChatFeedsByID started");
+        $this->logger->debug("PostService.getChatFeedsByID started");
 
         try {
             $posts = $this->postMapper->getChatFeedsByID($feedid);
@@ -654,7 +650,7 @@ class PostService
     //         return $this->respondWithError(30209);
     //     }
 
-    //     $this->logger->info('PostService.deletePost started');
+    //     $this->logger->debug('PostService.deletePost started');
 
     //     $posts = $this->postMapper->loadById($id);
     //     if (!$posts) {
@@ -696,7 +692,7 @@ class PostService
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('GraphQLSchemaBuilder.postEligibility started');
+        $this->logger->debug('GraphQLSchemaBuilder.postEligibility started');
 
         $dailyFree = ConstantsConfig::dailyFree()['DAILY_FREE_ACTIONS'];
         $prices    = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
@@ -783,7 +779,7 @@ class PostService
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info("PostService.postInteractions started");
+        $this->logger->debug("PostService.postInteractions started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -835,7 +831,7 @@ class PostService
             return $this->respondWithError(30209);
         }
 
-        $this->logger->info("PostService.getGuestListPost started");
+        $this->logger->debug("PostService.getGuestListPost started");
 
         $results = $this->postMapper->getGuestListPost($args);
 
@@ -845,5 +841,21 @@ class PostService
 
         return $results;
     }
-    
+
+    public function postExistsById(string $postId): bool
+    {
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->debug('PostService.postExistsById started');
+
+        try {
+            return $this->postMapper->postExistsById($postId);
+
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed fetch Post', ['postId' => $postId, 'exception' => $e]);
+            return false;
+        }
+    }
 }
