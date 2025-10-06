@@ -134,16 +134,6 @@ jobs:
                -d "{\"content\": \"$MESSAGE\"}" \
                "$DISCORD_WEBHOOK_URL"
 
-  php-cs-fixer:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-      - run: vendor/bin/php-cs-fixer fix --dry-run --diff
-        continue-on-error: false
-
   # phpstan:
   #   runs-on: ubuntu-latest
   #   steps:
@@ -152,7 +142,6 @@ jobs:
   #       with:
   #         php-version: '8.3'
   #     - run: vendor/bin/phpstan analyse
-  #       continue-on-error: false
 
   build_and_test:
     name: Build And Run Postman Tests
@@ -395,6 +384,9 @@ jobs:
             curlimages/curl:$TAG \
             curl -sf http://backend/graphql
  
+      - name: Linter check
+        run: docker compose exec backend /var/www/html/vendor/bin/php-cs-fixer fix --dry-run --diff
+
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
