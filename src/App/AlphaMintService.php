@@ -50,7 +50,7 @@ class AlphaMintService
             return self::respondWithError(60501);
         }
 
-        $this->logger->info('UserService.alphaMint started');
+        $this->logger->debug('UserService.alphaMint started');
 
         try {
 

@@ -88,13 +88,9 @@ class ChatService
             return $this->respondWithError(30103);
         }
 
-        $this->logger->info('ChatService.createChatWithRecipients started');
+        $this->logger->debug('ChatService.createChatWithRecipients started');
 
         $chatId = $this->generateUUID();
-        if (empty($chatId)) {
-            $this->logger->critical('Failed to generate chat ID');
-            return $this->respondWithError(41808);
-        }
 
         $creatorId = $this->currentUserId;
         $name = $args['name'] ?? null;
@@ -210,7 +206,7 @@ class ChatService
                 ];
                 $participant = new ChatParticipants($participantData);
                 $this->chatMapper->insertPart($participant);
-                $this->logger->info('ChatParticipants started');
+                $this->logger->debug('ChatParticipants started');
             }
 
             $recipientId = null;
@@ -249,7 +245,7 @@ class ChatService
             return $this->respondWithError(30103);
         }
 
-        $this->logger->info('ChatService.updateChat started');
+        $this->logger->debug('ChatService.updateChat started');
 
         // Validate required fields
         $requiredFields = ['chatid'];
@@ -340,7 +336,7 @@ class ChatService
             return $this->respondWithError(30201);
         }
 
-        $this->logger->info('ChatService.deleteChat started');
+        $this->logger->debug('ChatService.deleteChat started');
 
         $chats = $this->chatMapper->loadById($id);
         if (!$chats) {
@@ -385,7 +381,7 @@ class ChatService
             return $this->respondWithError(30103);
         }
 
-        $this->logger->info('ChatService.addParticipants started');
+        $this->logger->debug('ChatService.addParticipants started');
 
         $chatId = $args['chatid'] ?? null;
         $participants = $args['recipients'] ?? null;
@@ -475,7 +471,7 @@ class ChatService
             return $this->respondWithError(30103);
         }
 
-        $this->logger->info('ChatService.removeParticipants started');
+        $this->logger->debug('ChatService.removeParticipants started');
 
         $chatId = $args['chatid'] ?? null;
         $participants = $args['recipients'] ?? null;
@@ -537,7 +533,7 @@ class ChatService
     public function readChatMessages(?array $args = []): array
     {
 
-        $this->logger->info('ChatService.readChatMessages started');
+        $this->logger->debug('ChatService.readChatMessages started');
 
         $results = $this->chatMapper->getChatMessages($args);
 
@@ -566,7 +562,7 @@ class ChatService
             return $this->respondWithError(30201);
         }
 
-        $this->logger->info('ChatService.addMessage started', ['chatId' => $chatId]);
+        $this->logger->debug('ChatService.addMessage started', ['chatId' => $chatId]);
 
         $chat = $this->chatMapper->loadById($chatId);
         
@@ -622,7 +618,7 @@ class ChatService
             return $this->respondWithError(30201);
         }
 
-        $this->logger->info('ChatService.removeMessage started');
+        $this->logger->debug('ChatService.removeMessage started');
 
         $chat = $this->chatMapper->loadById($chatId);
 
@@ -664,7 +660,7 @@ class ChatService
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('ChatService.getFriends started');
+        $this->logger->debug('ChatService.getFriends started');
         $users = $this->chatMapper->fetchFriends($this->currentUserId);
 
         if ($users) {
@@ -687,7 +683,7 @@ class ChatService
                 throw new ValidationException('MissingChatId');
             }
 
-            $this->logger->info('ChatService.loadChatById started');
+            $this->logger->debug('ChatService.loadChatById started');
 
             $result = $this->chatMapper->loadChatById($this->currentUserId, $args);
 
@@ -734,7 +730,7 @@ class ChatService
             return $this->respondWithError(60501);
         }
 
-        $this->logger->info('ChatService.findChatser started');
+        $this->logger->debug('ChatService.findChatser started');
 
         $results = $this->chatMapper->findChatser($this->currentUserId, $args);
         $this->logger->info('ChatService.findChatser successfully', ['currentUserId' => $this->currentUserId]);

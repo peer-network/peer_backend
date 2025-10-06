@@ -23,7 +23,7 @@ class AdvertisementMapper
 
     public function fetchAllWithStats(?array $args = []): array
     {
-        $this->logger->info("AdvertisementMapper.fetchAllWithStats started");
+        $this->logger->debug("AdvertisementMapper.fetchAllWithStats started");
 
         $offset    = isset($args['offset']) ? (int)$args['offset'] : 0;
         $limit     = isset($args['limit'])  ? (int)$args['limit']  : 10;
@@ -447,7 +447,7 @@ class AdvertisementMapper
 
     public function isAdvertisementDurationValid(string $postId, string $userId): bool
     {
-        $this->logger->info("AdvertisementMapper.isAdvertisementDurationValid started");
+        $this->logger->debug("AdvertisementMapper.isAdvertisementDurationValid started");
 
         $sql = "
             SELECT EXTRACT(EPOCH FROM (timeend - timestart)) / 60 AS duration_minutes
@@ -487,7 +487,7 @@ class AdvertisementMapper
 
     public function hasShortActiveAdWithUpcomingAd(string $postId, string $userId): bool
     {
-        $this->logger->info("AdvertisementMapper.hasShortActiveAdWithUpcomingAd started", [
+        $this->logger->debug("AdvertisementMapper.hasShortActiveAdWithUpcomingAd started", [
             'postid' => $postId,
             'userid' => $userId
         ]);
@@ -533,7 +533,7 @@ class AdvertisementMapper
 
     public function fetchByAdvID(string $postId, string $status): array
     {
-        $this->logger->info("AdvertisementMapper.fetchByAdvID started", [
+        $this->logger->debug("AdvertisementMapper.fetchByAdvID started", [
             'postId' => $postId,
             'status' => $status
         ]);
@@ -566,7 +566,7 @@ class AdvertisementMapper
 
     public function advertisementExistsById(string $advertisementId): bool
     {
-        $this->logger->info("AdvertisementMapper.advertisementExistsById started");
+        $this->logger->debug("AdvertisementMapper.advertisementExistsById started");
 
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM advertisements WHERE advertisementId = :advertisementId");
         $stmt->bindValue(':advertisementId', $advertisementId, \PDO::PARAM_STR);
@@ -577,7 +577,7 @@ class AdvertisementMapper
 
     public function isAdvertisementIdExist(string $postId, string $status): bool
     {
-        $this->logger->info("AdvertisementMapper.isAdvertisementIdExist started");
+        $this->logger->debug("AdvertisementMapper.isAdvertisementIdExist started");
 
         $sql = "SELECT 1 FROM advertisements WHERE postid = :postId AND status = :status LIMIT 1";
         $stmt = $this->db->prepare($sql);
@@ -590,7 +590,7 @@ class AdvertisementMapper
 
     public function hasActiveAdvertisement(string $postId, string $status): bool
     {
-        $this->logger->info("AdvertisementMapper.hasActiveAdvertisement started", [
+        $this->logger->debug("AdvertisementMapper.hasActiveAdvertisement started", [
             'postId' => $postId,
             'status' => $status
         ]);
@@ -626,7 +626,7 @@ class AdvertisementMapper
 
     public function hasTimeConflict(string $postId, string $status, string $newStart, string $newEnd, $currentUserId): bool
     {
-        $this->logger->info("AdvertisementMapper.hasTimeConflict started", [
+        $this->logger->debug("AdvertisementMapper.hasTimeConflict started", [
             'postId' => $postId,
             'status' => $status,
             'newStart' => $newStart,
@@ -669,7 +669,7 @@ class AdvertisementMapper
     // Create a Post Advertisement with Loging
     public function insert(Advertisements $post): Advertisements
     {
-        $this->logger->info("AdvertisementMapper.insert started");
+        $this->logger->debug("AdvertisementMapper.insert started");
 
         $data = $post->getArrayCopy();
 
@@ -743,7 +743,7 @@ class AdvertisementMapper
     // Update a Post Advertisement with Logging
     public function update(Advertisements $post): Advertisements
     {
-        $this->logger->info("AdvertisementMapper.update started");
+        $this->logger->debug("AdvertisementMapper.update started");
 
         $data = $post->getArrayCopy();
 
@@ -787,7 +787,7 @@ class AdvertisementMapper
 
     public function convertEuroToTokens(float $euroAmount, int $rescode): array
     {
-        $this->logger->info('AdvertisementMapper.convertEuroToTokens started', ['euroAmount' => $euroAmount]);
+        $this->logger->debug('AdvertisementMapper.convertEuroToTokens started', ['euroAmount' => $euroAmount]);
 
         $tokenPrice = 0.10; // Fixed price: 10 cent
         $tokens = $euroAmount / $tokenPrice;
@@ -808,7 +808,7 @@ class AdvertisementMapper
 
     public function findAdvertiser(string $currentUserId, ?array $args = []): array
     {
-        $this->logger->info("AdvertisementMapper.findAdvertiser started");
+        $this->logger->debug("AdvertisementMapper.findAdvertiser started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit  = min(max((int)($args['limit'] ?? 10), 1), 20);

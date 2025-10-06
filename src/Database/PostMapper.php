@@ -35,7 +35,7 @@ class PostMapper
 
     public function fetchAll(int $offset, int $limit): array
     {
-        $this->logger->info("PostMapper.fetchAll started");
+        $this->logger->debug("PostMapper.fetchAll started");
 
         $sql = "SELECT * FROM posts WHERE feedid IS NULL ORDER BY createdat DESC LIMIT :limit OFFSET :offset";
 
@@ -69,7 +69,7 @@ class PostMapper
 
     public function isCreator(string $postid, string $currentUserId): bool
     {
-        $this->logger->info("PostMapper.isCreator started");
+        $this->logger->debug("PostMapper.isCreator started");
 
         $sql = "SELECT COUNT(*) FROM posts WHERE postid = :postid AND userid = :currentUserId";
         $stmt = $this->db->prepare($sql);
@@ -80,7 +80,7 @@ class PostMapper
 
     public function postExistsById(string $postId): bool
     {
-        $this->logger->info("PostMapper.postExistsById started");
+        $this->logger->debug("PostMapper.postExistsById started");
 
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM posts WHERE postid = :postId");
         $stmt->bindValue(':postId', $postId, \PDO::PARAM_STR);
@@ -91,7 +91,7 @@ class PostMapper
 
     public function isNewsFeedExist(string $feedid): bool
     {
-        $this->logger->info("PostMapper.isNewsFeedExist started");
+        $this->logger->debug("PostMapper.isNewsFeedExist started");
 
         $sql = "SELECT COUNT(*) FROM newsfeed WHERE feedid = :feedid";
         $stmt = $this->db->prepare($sql);
@@ -101,7 +101,7 @@ class PostMapper
 
     public function isHasAccessInNewsFeed(string $chatid, string $currentUserId): bool
     {
-        $this->logger->info("PostMapper.isHasAccessInNewsFeed started");
+        $this->logger->debug("PostMapper.isHasAccessInNewsFeed started");
 
         $sql = "SELECT COUNT(*) FROM chatparticipants WHERE chatid = :chatid AND userid = :currentUserId";
         $stmt = $this->db->prepare($sql);
@@ -112,7 +112,7 @@ class PostMapper
 
     public function getChatFeedsByID(string $feedid): array
     {
-        $this->logger->info("PostMapper.getChatFeedsByID started");
+        $this->logger->debug("PostMapper.getChatFeedsByID started");
 
         $sql = "SELECT * FROM posts WHERE feedid = :feedid";
         $stmt = $this->db->prepare($sql);
@@ -135,7 +135,7 @@ class PostMapper
 
     public function loadByTitle(string $title): array
     {
-        $this->logger->info("PostMapper.loadByTitle started");
+        $this->logger->debug("PostMapper.loadByTitle started");
 
         $sql = "SELECT * FROM posts WHERE title LIKE :title AND feedid IS NULL";
         $stmt = $this->db->prepare($sql);
@@ -152,7 +152,7 @@ class PostMapper
 
     public function loadById(string $id): Post|false
     {
-        $this->logger->info("PostMapper.loadById started");
+        $this->logger->debug("PostMapper.loadById started");
 
         $sql = "SELECT * FROM posts WHERE postid = :postid AND feedid IS NULL";
         $stmt = $this->db->prepare($sql);
@@ -233,7 +233,7 @@ class PostMapper
 
     public function fetchComments(string $postid): array
     {
-        $this->logger->info("PostMapper.fetchComments started");
+        $this->logger->debug("PostMapper.fetchComments started");
 
         $sql = "SELECT * FROM comments WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -244,7 +244,7 @@ class PostMapper
 
     public function fetchLikes(string $postid): array
     {
-        $this->logger->info("PostMapper.fetchLikes started");
+        $this->logger->debug("PostMapper.fetchLikes started");
 
         $sql = "SELECT * FROM user_post_likes WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -255,7 +255,7 @@ class PostMapper
 
     public function fetchDislikes(string $postid): array
     {
-        $this->logger->info("PostMapper.fetchDislikes started");
+        $this->logger->debug("PostMapper.fetchDislikes started");
 
         $sql = "SELECT * FROM user_post_dislikes WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -266,7 +266,7 @@ class PostMapper
 
     public function fetchSaves(string $postid): array
     {
-        $this->logger->info("PostMapper.fetchSaves started");
+        $this->logger->debug("PostMapper.fetchSaves started");
 
         $sql = "SELECT * FROM user_post_saves WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -277,7 +277,7 @@ class PostMapper
 
     public function fetchViews(string $postid): array
     {
-        $this->logger->info("PostMapper.fetchViews started");
+        $this->logger->debug("PostMapper.fetchViews started");
 
         $sql = "SELECT * FROM user_post_views WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -288,7 +288,7 @@ class PostMapper
 
     public function fetchReports(string $postid): array
     {
-        $this->logger->info("PostMapper.fetchReports started");
+        $this->logger->debug("PostMapper.fetchReports started");
 
         $sql = "SELECT * FROM user_post_reports WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -299,7 +299,7 @@ class PostMapper
 
     public function countLikes(string $postid): int
     {
-        $this->logger->info("PostMapper.countLikes started");
+        $this->logger->debug("PostMapper.countLikes started");
 
         $sql = "SELECT COUNT(*) FROM user_post_likes WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -309,7 +309,7 @@ class PostMapper
 
     public function countDisLikes(string $postid): int
     {
-        $this->logger->info("PostMapper.countLikes started");
+        $this->logger->debug("PostMapper.countLikes started");
 
         $sql = "SELECT COUNT(*) FROM user_post_dislikes WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -319,7 +319,7 @@ class PostMapper
 
     public function countViews(string $postid): int
     {
-        $this->logger->info("PostMapper.countViews started");
+        $this->logger->debug("PostMapper.countViews started");
 
         $sql = "SELECT COUNT(*) FROM user_post_views WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -329,7 +329,7 @@ class PostMapper
 
     public function countComments(string $postid): int
     {
-        $this->logger->info("PostMapper.countComments started");
+        $this->logger->debug("PostMapper.countComments started");
 
         $sql = "SELECT COUNT(*) FROM comments WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
@@ -339,7 +339,7 @@ class PostMapper
 
     public function isLiked(string $postid, string $userid): bool
     {
-        $this->logger->info("PostMapper.isLiked started");
+        $this->logger->debug("PostMapper.isLiked started");
 
         $sql = "SELECT COUNT(*) FROM user_post_likes WHERE postid = :postid AND userid = :userid";
         $stmt = $this->db->prepare($sql);
@@ -349,7 +349,7 @@ class PostMapper
 
     public function isViewed(string $postid, string $userid): bool
     {
-        $this->logger->info("PostMapper.isViewed started");
+        $this->logger->debug("PostMapper.isViewed started");
 
         $sql = "SELECT COUNT(*) FROM user_post_views WHERE postid = :postid AND userid = :userid";
         $stmt = $this->db->prepare($sql);
@@ -359,7 +359,7 @@ class PostMapper
 
     public function isReported(string $postid, string $userid): bool
     {
-        $this->logger->info("PostMapper.isReported started");
+        $this->logger->debug("PostMapper.isReported started");
 
         $sql = "SELECT COUNT(*) FROM user_post_reports WHERE postid = :postid AND userid = :userid";
         $stmt = $this->db->prepare($sql);
@@ -369,7 +369,7 @@ class PostMapper
 
     public function isDisliked(string $postid, string $userid): bool
     {
-        $this->logger->info("PostMapper.isDisliked started");
+        $this->logger->debug("PostMapper.isDisliked started");
 
         $sql = "SELECT COUNT(*) FROM user_post_dislikes WHERE postid = :postid AND userid = :userid";
         $stmt = $this->db->prepare($sql);
@@ -379,7 +379,7 @@ class PostMapper
 
     public function isSaved(string $postid, string $userid): bool
     {
-        $this->logger->info("PostMapper.isSaved started");
+        $this->logger->debug("PostMapper.isSaved started");
 
         $sql = "SELECT COUNT(*) FROM user_post_saves WHERE postid = :postid AND userid = :userid";
         $stmt = $this->db->prepare($sql);
@@ -389,7 +389,7 @@ class PostMapper
 
     public function isFollowing(string $userid, string $currentUserId): bool
     {
-        $this->logger->info("PostMapper.isFollowing started");
+        $this->logger->debug("PostMapper.isFollowing started");
 
         $sql = "SELECT COUNT(*) FROM follows WHERE followedId = :userid AND followerId = :currentUserId";
         $stmt = $this->db->prepare($sql);
@@ -400,7 +400,7 @@ class PostMapper
 
     public function userInfoForPosts(string $id): array
     {
-        $this->logger->info("PostMapper.userInfoForPosts started");
+        $this->logger->debug("PostMapper.userInfoForPosts started");
 
         $sql = "SELECT * FROM users WHERE uid = :id";
         $stmt = $this->db->prepare($sql);
@@ -418,7 +418,7 @@ class PostMapper
     // Create a post
     public function insert(Post $post): Post
     {
-        $this->logger->info("PostMapper.insert started");
+        $this->logger->debug("PostMapper.insert started");
 
         $data = $post->getArrayCopy();
 
@@ -477,7 +477,7 @@ class PostMapper
     // Create a post Media
     public function insertmed(PostMedia $post): PostMedia
     {
-        $this->logger->info("PostMapper.insertmed started");
+        $this->logger->debug("PostMapper.insertmed started");
 
         $data = $post->getArrayCopy();
 
@@ -526,7 +526,7 @@ class PostMapper
 
     // public function delete(string $postid): bool
     // {
-    //     $this->logger->info("PostMapper.delete started");
+    //     $this->logger->debug("PostMapper.delete started");
 
     //     try {
     //         $this->db->beginTransaction();
@@ -564,7 +564,7 @@ class PostMapper
 
     public function findPostser(string $currentUserId, ?array $args = []): array
     {
-        $this->logger->info("PostMapper.findPostser started");
+        $this->logger->debug("PostMapper.findPostser started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit  = min(max((int)($args['limit']  ?? 10), 1), 20);
@@ -617,7 +617,7 @@ class PostMapper
         }
         if ($tag !== null) {
             if (!preg_match('/^[a-zA-Z0-9_]+$/', $tag)) {
-                $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
+                $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
                 return [];
             }
             $whereClauses[] = "t.name ILIKE :tag";
@@ -945,7 +945,7 @@ class PostMapper
      */
     public function updateTokenStatus(string $userId): void
     {
-        $this->logger->info("PostMapper.updateTokenStatus started");
+        $this->logger->debug("PostMapper.updateTokenStatus started");
 
         try {
             $updateSql = "
@@ -995,10 +995,10 @@ class PostMapper
      */
     public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit, ?string $contentFilterBy = null): array
     {
-        $this->logger->info("PostMapper.getInteractions started");
+        $this->logger->debug("PostMapper.getInteractions started");
 
         try {
-            $this->logger->info("PostMapper.fetchViews started");
+            $this->logger->debug("PostMapper.fetchViews started");
 
             $needleTable = 'user_post_likes';
             $needleColumn = 'postid';
@@ -1099,7 +1099,7 @@ class PostMapper
      */
     public function getGuestListPost(array $args = []): array
     {
-        $this->logger->info("PostMapper.getGuestListPost started");
+        $this->logger->debug("PostMapper.getGuestListPost started");
 
         $offset = 0;
         $limit = 1;
@@ -1228,7 +1228,7 @@ class PostMapper
     {
 
         try {
-            $this->logger->info("PostMapper.addOrUpdateEligibilityToken started");
+            $this->logger->debug("PostMapper.addOrUpdateEligibilityToken started");
             $query = "SELECT COUNT(*) FROM eligibility_token WHERE userid = :userid AND token = :token";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
@@ -1278,7 +1278,7 @@ class PostMapper
     public function addOrUpdateEligibilityToken(string $userId, string $eligibilityToken, string $status): void
     {
         try {
-            $this->logger->info("PostMapper.addOrUpdateEligibilityToken started", [
+            $this->logger->debug("PostMapper.addOrUpdateEligibilityToken started", [
                 'userId' => $userId,
                 'token'  => $eligibilityToken,
                 'status' => $status,

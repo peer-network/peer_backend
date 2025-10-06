@@ -144,7 +144,7 @@ class ContactusService
             $value = (int)$value;
         }
 
-        $this->logger->info("ContactusService.loadById started", [
+        $this->logger->debug("ContactusService.loadById started", [
             'type' => $type,
             'value' => $value,
         ]);
@@ -187,7 +187,7 @@ class ContactusService
             return $this->respondWithError(30101);
         }
 
-        $this->logger->info("ContactusService.fetchAll started", [
+        $this->logger->debug("ContactusService.fetchAll started", [
             'args' => $args,
         ]);
 
