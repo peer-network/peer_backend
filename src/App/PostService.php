@@ -824,7 +824,6 @@ class PostService
             return $this->respondWithError(41513);
         }
     }
-// if post id is null then its not valid condition we need to show error
     /**
      * Get Guest List Post
      */
@@ -832,7 +831,7 @@ class PostService
     {
         $postId = $args['postid'] ?? null;
 
-        if ($postId == null || !self::isValidUUID($postId)) {
+        if (!self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
         }
 
