@@ -331,7 +331,7 @@ gen:
 linter:
 	@echo "Linter check"
 	vendor/bin/php-cs-fixer fix --dry-run --diff
-# 	vendor/bin/phpstan analyse
+	vendor/bin/phpstan analyse
 
 fix-linter:
 	vendor/bin/php-cs-fixer fix
