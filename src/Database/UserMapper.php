@@ -11,7 +11,7 @@ use Fawaz\App\Role;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
 use Fawaz\config\constants\ConstantsConfig;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
@@ -25,7 +25,7 @@ use Fawaz\App\Status;
 class UserMapper
 {
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 

@@ -7,7 +7,7 @@ use Fawaz\Database\AdvertisementMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use InvalidArgumentException;
 
 class AdvertisementService
@@ -29,7 +29,7 @@ class AdvertisementService
     public const DURATION_SEVEN_DAYS = 'SEVEN_DAYS';
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected AdvertisementMapper $advertisementMapper,
         protected UserMapper $userMapper,
         protected PostMapper $postMapper,

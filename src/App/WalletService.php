@@ -4,7 +4,7 @@ namespace Fawaz\App;
 
 use Fawaz\App\Wallet;
 use Fawaz\Database\WalletMapper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use \Exception;
 use Fawaz\Database\Interfaces\TransactionManager;
 
@@ -12,7 +12,7 @@ class WalletService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected WalletMapper $walletMapper, protected TransactionManager $transactionManager)
+    public function __construct(protected PeerLoggerInterface $logger, protected WalletMapper $walletMapper, protected TransactionManager $transactionManager)
     {
     }
 
