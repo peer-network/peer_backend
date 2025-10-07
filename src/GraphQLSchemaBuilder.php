@@ -2439,7 +2439,6 @@ class GraphQLSchemaBuilder
             'listChats' => fn(mixed $root, array $args) => $this->resolveChats($args),
             'listChatMessages' => fn(mixed $root, array $args) => $this->resolveChatMessages($args),
             'getDailyFreeStatus' => fn(mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
-            'getpercentbeforetransaction' => fn(mixed $root, array $args) => $this->resolveBeforeTransaction($args),
             'refreshmarketcap' => fn(mixed $root, array $args) => $this->resolveMcap(),
             'gemster' => fn(mixed $root, array $args) => $this->walletService->callGemster(),
             'balance' => fn(mixed $root, array $args) => $this->resolveLiquidity(),
@@ -2574,7 +2573,7 @@ class GraphQLSchemaBuilder
     {
         // Authentifizierung prüfen
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         //$this->logger->info('Query.resolveAdvertisePost gestartet');
@@ -2588,12 +2587,12 @@ class GraphQLSchemaBuilder
 
         // postId validieren
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(30209);
+            return $this::respondWithError(30209);
         }
 
         if ($this->postService->postExistsById($postId) === false) 
         {
-            return $this->respondWithError(31510);
+            return $this::respondWithError(31510);
         }
 
         $advertiseActions = ['BASIC', 'PINNED'];
@@ -2601,7 +2600,7 @@ class GraphQLSchemaBuilder
         // Werbeplan validieren
         if (!in_array($advertisePlan, $advertiseActions, true)) {
             $this->logger->warning('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
-            return $this->respondWithError(32006);
+            return $this::respondWithError(32006);
         }
 
         $actionPrices = [
@@ -2612,14 +2611,14 @@ class GraphQLSchemaBuilder
         // Preisvalidierung
         if (!isset($actionPrices[$advertisePlan])) {
             $this->logger->warning('Ungültiger Preisplan', ['advertisePlan' => $advertisePlan]);
-            return $this->respondWithError(32005);
+            return $this::respondWithError(32005);
         }
 
         if ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
             // Startdatum validieren
             if (isset($startdayInput) && empty($startdayInput)) {
                 $this->logger->warning('Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
-                return $this->respondWithError(32007);
+                return $this::respondWithError(32007);
             }
 
             // Startdatum prüfen und Format validieren
@@ -2628,19 +2627,19 @@ class GraphQLSchemaBuilder
 
             if (!$startday) {
                 $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
-                return $this->respondWithError(32008);
+                return $this::respondWithError(32008);
             }
 
             if (isset($errors['warning_count']) && $errors['warning_count'] > 0 || isset($errors['error_count']) && $errors['error_count'] > 0) {
                 $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
-                return $this->respondWithError(42004);
+                return $this::respondWithError(42004);
             }
 
             // Prüfen, ob das Startdatum in der Vergangenheit liegt
             $tomorrow = new DateTimeImmutable('tomorrow');
             if ($startday < $tomorrow) {
                 $this->logger->warning('Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
-                return $this->respondWithError(32008);
+                return $this::respondWithError(32008);
             }
 
             $durationActions = ['ONE_DAY', 'TWO_DAYS', 'THREE_DAYS', 'FOUR_DAYS', 'FIVE_DAYS', 'SIX_DAYS', 'SEVEN_DAYS'];
@@ -2648,7 +2647,7 @@ class GraphQLSchemaBuilder
             // Laufzeit validieren
             if ($durationInDays !== null && !in_array($durationInDays, $durationActions, true)) {
                 $this->logger->warning('Ungültige Laufzeit', ['durationInDays' => $durationInDays]);
-                return $this->respondWithError(32009);
+                return $this::respondWithError(32009);
             }
         }
 
@@ -2685,14 +2684,14 @@ class GraphQLSchemaBuilder
             $rescode = 12004;
         } else {
             $this->logger->warning('Ungültige Ads Plan', ['CostPlan' => $CostPlan]);
-            return $this->respondWithError(32005);
+            return $this::respondWithError(32005);
         }
 
         // Wenn Kosten leer oder 0 sind, Fehler zurückgeben
         $args['eurocost'] = $CostPlan;
         if (empty($CostPlan) || (int)$CostPlan === 0) {
             $this->logger->warning('Kostenprüfung fehlgeschlagen', ['CostPlan' => $CostPlan]);
-            return $this->respondWithError(42005);
+            return $this::respondWithError(42005);
         }
 
         // Euro in PeerTokens umrechnen
@@ -2712,7 +2711,7 @@ class GraphQLSchemaBuilder
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             if ($balance < $CostPlan) {
                 $this->logger->warning('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
-                return $this->respondWithError(51301);
+                return $this::respondWithError(51301);
             }
 
             // Werbeanzeige erstellen
@@ -2728,7 +2727,7 @@ class GraphQLSchemaBuilder
 
                 if (!$deducted) {
                     $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
-                    return $this->respondWithError($deducted['ResponseCode']);
+                    return $this::respondWithError($deducted['ResponseCode']);
                 }
 
                 return $response;
@@ -2737,7 +2736,7 @@ class GraphQLSchemaBuilder
             return $response;
 
         } catch (\Throwable $e) {
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 
@@ -2746,7 +2745,7 @@ class GraphQLSchemaBuilder
     {
         // Authentifizierung prüfen
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -2768,7 +2767,7 @@ class GraphQLSchemaBuilder
             return $response;
 
         } catch (\Throwable $e) {
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 
@@ -3222,7 +3221,7 @@ class GraphQLSchemaBuilder
         // Validations
         if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
             $this->logger->warning('Invalid action parameter', ['action' => $action]);
-            return $this->respondWithError(30105);
+            return $this::respondWithError(30105);
         }
 
         $limit = $dailyLimits[$action];
@@ -3473,37 +3472,6 @@ class GraphQLSchemaBuilder
         }
 
         return $this::createSuccessResponse(21701);
-    }
-
-    protected function resolveBeforeTransaction(?array $args = []): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        if (empty($args['tokenAmount'])) {
-            return $this::respondWithError(30242);
-        }
-
-        $tokenAmount = (int)$args['tokenAmount'];
-
-        if ($tokenAmount < 10) {
-            return $this::respondWithError(30243);
-        }
-
-        $results = $this->walletService->getPercentBeforeTransaction($this->currentUserId, $tokenAmount);
-        if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Query.resolveBeforeTransaction successful');
-
-            return $results;
-        }
-
-        if (isset($results['status']) && $results['status'] === 'error') {
-            return $results;
-        }
-
-        $this->logger->info('Query.resolveBeforeTransaction', $results);
-        return $this::respondWithError(40301);
     }
 
     protected function resolveLiquidity(): ?array
@@ -4021,7 +3989,7 @@ class GraphQLSchemaBuilder
     protected function resolveAdvertisementsPosts(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
@@ -4239,7 +4207,7 @@ class GraphQLSchemaBuilder
 
         if (empty($args)) {
             $this->logger->warning('Mandatory args missing.');
-            return $this->respondWithError(30101);
+            return $this::respondWithError(30101);
         }
 
         $email = isset($args['email']) ? trim($args['email']) : null;

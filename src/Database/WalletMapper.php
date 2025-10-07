@@ -1088,79 +1088,6 @@ class WalletMapper
             ];
     }
 
-    public function getPercentBeforeTransaction(string $userId, int $tokenAmount) : array
-    {
-        $this->logger->debug('WalletMapper.getPercentBeforeTransaction started');
-
-        $account = $this->walletBalanceRepository->getBalance($userId);
-        $createdat = (new \DateTime())->format('Y-m-d H:i:s.u');
-
-        if ($account <= $tokenAmount) {
-            $this->logger->warning('Insufficient funds for the transaction', ['userid' => $userId, 'accountBalance' => $account, 'tokenAmount' => $tokenAmount]);
-            return self::respondWithError(51401);
-        }
-
-        try {
-            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
-            $stmt = $this->db->prepare($query);
-            $stmt->execute(['userid' => $userId]);
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if (!$result || !$result['invited']) {
-                $this->logger->warning('No inviter found for the given user', ['userid' => $userId]);
-                return self::createSuccessResponse(21401);
-            }
-
-            $inviterId = $result['invited'];
-            $this->logger->info('Inviter found', ['inviterId' => $inviterId]);
-
-            $fees = ConstantsConfig::tokenomics()['FEES'];
-            $inviteFee = (float)$fees['INVITATION'];
-            $percent = round((float)$tokenAmount * $inviteFee, 2);
-            $tosend = round((float)$tokenAmount - $percent, 2);
-
-            $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'postid' => null,
-                    'fromid' => $inviterId,
-                    'numbers' => -abs($tokenAmount),
-                    'whereby' => INVITATION_,
-                    'createdat' => $createdat,
-                ];
-                $this->insertWinToLog($userId, $args);
-
-                $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'postid' => null,
-                    'fromid' => $userId,
-                    'numbers' => abs($percent),
-                    'whereby' => INVITATION_,
-                    'createdat' => $createdat,
-                ];
-
-                $this->insertWinToLog($inviterId, $args);
-
-            return $this::createSuccessResponse(
-                11402,
-                [
-                    'inviterId'          => $inviterId,
-                    'tosend'             => $tosend,
-                    'percentTransferred' => $percent,
-                ],
-                false // no counter needed for associative array
-            );
-
-
-        } catch (\Throwable $e) {
-            $this->logger->error('Throwable occurred during transaction', ['exception' => $e]);
-            return self::respondWithError(41401);
-        }
-    }
-
     public function deductFromWallets(string $userId, ?array $args = []): array
     {
         $this->logger->debug('WalletMapper.deductFromWallets started');
@@ -1265,19 +1192,13 @@ class WalletMapper
         }
     }
 
-    public function getUserWalletBalance(string $userId): float
-    {
-        return $this->walletBalanceRepository->getBalance($userId);
-    }
-
-    public function updateUserLiquidity(string $userId, float $liquidity): bool
-    {
-        return $this->walletBalanceRepository->setBalance($userId, $liquidity);
-    }
-
+    /**
+     * Add a delta to user's wallet balance and return the new balance.
+     * Delegates to WalletBalanceRepository which performs row-level locking.
+     */
     public function saveWalletEntry(string $userId, float $liquidity): float
     {
-        return $this->walletBalanceRepository->upsertAndReturn($userId, $liquidity);
+        return $this->walletBalanceRepository->addToBalance($userId, $liquidity);
     }
 
     public function callUserMove(string $userId): array

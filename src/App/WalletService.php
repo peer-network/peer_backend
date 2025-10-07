@@ -239,25 +239,6 @@ class WalletService
         ];     
     }
 
-    public function getPercentBeforeTransaction(string $userId, int $tokenAmount): array
-    {
-        $this->logger->debug('WalletService.getPercentBeforeTransaction started');
-
-        try {
-            $this->transactionManager->beginTransaction();
-            $response = $this->walletMapper->getPercentBeforeTransaction($userId, $tokenAmount);
-            if (($response['status'] ?? 'error') === 'error') {
-                $this->transactionManager->rollback();
-                return $response;
-            }
-            $this->transactionManager->commit();
-            return $response;
-        } catch (\Exception $e) {
-            $this->transactionManager->rollback();
-            return $this::respondWithError(41401);
-        }
-    }
-
     public function loadLiquidityById(string $userId): array
     {
         $this->logger->debug('WalletService.loadLiquidityById started');
@@ -336,27 +317,4 @@ class WalletService
             return $this::respondWithError(41205);
         }
     }
-
-    public function transferToken(array $args): array
-    {
-        $this->logger->debug('WalletService.transferToken started');
-
-        try {
-            $this->transactionManager->beginTransaction();
-            $response = $this->walletMapper->transferToken($this->currentUserId, $args);
-            if ($response['status'] === 'error') {
-                $this->transactionManager->rollback();
-                return $response;
-            } else {
-                $this->transactionManager->commit();
-                return $this::createSuccessResponse(11211, [], false);
-            }
-
-        } catch (\Exception $e) {
-            $this->transactionManager->rollback();
-            return $this::respondWithError(40601);//'Unknown Error.'
-        }
-    }
-
-    
 }
