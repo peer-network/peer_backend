@@ -22,10 +22,12 @@ try {
     $pathsConfig = new ConfigUrl();
     JSONHandler::generateJSONtoFile(Constants::$pathToAssets . "config.json", $pathsConfig->getData(), "config", false);
 
-    generateSchema();
+    // generateSchema();
     echo("ConfigGeneration: Done! \n");
+    exit(0);
 } catch (\Exception $e) {
     echo "ConfigGeneration: Error: " . $e->getMessage();
+    exit(1);
 }
 
 function generateSchema() {
