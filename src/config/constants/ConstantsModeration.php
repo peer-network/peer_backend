@@ -48,6 +48,17 @@ class ConstantsModeration
     ];
 
     /**
+     * Content Target Types
+     *
+     * @var array
+     */
+    public const CONTENT_MODERATION_TARGETS = [
+        'POST' => 'Post',
+        'COMMENT' => 'Comment',
+        'USER' => 'User',
+    ];
+    
+    /**
      * Moderation Tickets Status
      * 
      * @var string

@@ -77,66 +77,104 @@ class ModerationService {
         $page = max((int)($args['page'] ?? 1), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
-        $items = UserReport::query()
-            ->join('users', 'user_reports.reporter_userid', '=', 'users.uid')
+        $items = UserReport::query();
+
+        var_dump(array_keys(ConstantsModeration::contentModerationStatus())); exit;
+        // Apply Status filters
+        if(isset($args['status']) && in_array($args['status'], array_keys(ConstantsModeration::contentModerationStatus()))) {
+            $items = $items->where('user_reports.status', $args['status']);
+        }
+
+        // Apply Content Type filters
+        if(isset($args['contentType']) && in_array($args['contentType'], array_keys(ConstantsModeration::CONTENT_MODERATION_TARGETS))) {
+            $items = $items->where('user_reports.targettype', $args['contentType']);
+        }
+
+        $items = $items->join('users', 'user_reports.reporter_userid', '=', 'users.uid')
             ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
             ->join('post_info', 'posts.postid', '=', 'post_info.postid')
             ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
             ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
-            ->select('user_reports.*', 'users.username as reporter_username', 'users.email as reporter_email', 'posts.*', 'post_info.*', 'comments.*', 'target_user.*')
+            ->select('user_reports.*', 
+                    'users.uid', 
+                    'users.username', 
+                    'users.email', 
+                    'users.img', 
+                    'users.slug', 
+                    'users.status as userstatus', 
+                    'users.biography', 
+                    'users.updatedat', 
+                    'posts.postid',
+                    'posts.userid',
+                    'posts.contenttype',
+                    'posts.title',
+                    'posts.mediadescription',
+                    'posts.media',
+                    'posts.cover',
+                    'posts.options',  
+                    'post_info.*', 
+                    'comments.userid', 
+                    'comments.parentid', 
+                    'comments.content', 
+                    'target_user.uid as target_user_uid', 
+                    'target_user.username as target_user_username', 
+                    'target_user.email as target_user_email', 
+                    'target_user.img as target_user_img', 
+                    'target_user.slug as target_user_slug', 
+                    'target_user.status as target_user_status', 
+                    'target_user.biography as target_user_biography', 
+                    'target_user.updatedat as target_user_updatedat', 
+                    )
+            ->orderByValue('status', 'ASC', array_keys(ConstantsModeration::contentModerationStatus()))
             ->paginate($page, $limit);
 
         // Map records according to the target type
-        // $items['data'] = array_map(function($item) {
+        $items['data'] = array_map(function($item) {
+            $item = $this->mapTargetContent($item);
+            return $item;
+        }, $items['data']);
 
-        //     var_dump($item); exit;
-        //     if($item['targettype'] === 'post') {
-        //         $item['post'] = [  
-        //             'id' =>   
-        //             'contenttype' =>   
-        //             'title' =>   
-        //             'media' =>   
-        //             'cover' =>   
-        //             'mediadescription' =>   
-        //             'createdat' =>   
-        //             'amountreports' =>   
-        //             'amountlikes' =>   
-        //             'amountviews' =>   
-        //             'amountcomments' =>   
-        //             'amountdislikes' =>   
-        //             'amounttrending' =>   
-        //             'isliked' =>   
-        //             'isviewed' =>   
-        //             'isreported' =>   
-        //             'isdisliked' =>   
-        //             'issaved' =>   
-        //             'tags' =>   
-        //             'url' =>   
-        //         ];
-        //     } elseif($item['targettype'] === 'comment') {
-        //         return [
-        //             'reportId' => $item['reportid'],
-        //             'moderationTicketId' => $item['moderationticketid'],
-        //             'reporterUserId' => $item['reporter_userid'],
-        //             'reporterUsername' => $item['reporter_username'],
-        //             'reporterEmail' => $item['reporter_email'],
-        //             'targetType' => $item['targettype'],
-        //             'targetId' => $item['targetid'],
-        //             'reason' => $item['reason'],
-        //             'status' => $item['status'],
-        //             'createdAt' => $item['createdat'],
-        //             'commentId' => $item['commentid'],
-        //             'commentContent' => $item['content'] ?? null,
-        //             'commentCreatedAt' => $item['createdat'] ?? null,
-        //             'commentAuthorId' => $item['authorid'] ?? null,
-        //             'commentAuthorUsername' => $item['username'] ?? null,
-        //             'commentAuthorEmail' => $item['email'] ?? null,
-        //         ];
-        //     }
-        //     return $item;
-        // }, $items['data']);
-        // var_dump($items); exit;
-        return self::createSuccessResponse(20001,  $items['data'], false);
+        return self::createSuccessResponse(20001,  $items['data'], true);
+    }
+
+    /**
+     * Map Target Content based on Target Type
+     */
+    private function mapTargetContent(array $item): array
+    {
+        $item['targetcontent']['post'] = null;
+        $item['targetcontent']['comment'] = null;
+        $item['targetcontent']['user'] = null;
+
+        if($item['targettype'] === 'post') {
+            $item['targetcontent']['post'] = (new Post($item, [], false))->getArrayCopy();
+        } elseif($item['targettype'] === 'comment') {
+            $item['targetcontent']['comment'] = (new Comment($item, [], false))->getArrayCopy();
+        } elseif($item['targettype'] === 'user') {
+            $item['targetcontent']['user'] = (new User([
+                'uid' => $item['target_user_uid'],
+                'username' => $item['target_user_username'],
+                'email' => $item['target_user_email'],
+                'img' => $item['target_user_img'],
+                'slug' => $item['target_user_slug'],
+                'status' => $item['target_user_status'],
+                'biography' => $item['target_user_biography'],
+                'updatedat' => $item['target_user_updatedat'],
+            ], [], false))->getArrayCopy();
+        }
+
+        $userData = [
+                'uid' => $item['uid'],
+                'username' => $item['username'],
+                'email' => $item['email'],
+                'img' => $item['img'],
+                'slug' => $item['slug'],
+                'status' => $item['userstatus'],
+                'biography' => $item['biography'],
+                'updatedat' => $item['updatedat'],
+            ];
+        $item['reporter'] = (new User($userData, [], false))->getArrayCopy();
+        return $item;
     }
 
     /**

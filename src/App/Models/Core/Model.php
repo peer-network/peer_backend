@@ -218,6 +218,29 @@ abstract class Model
 
 
     /**
+     * Order results by values
+     */
+    public function orderByValue(string $column, string $direction = 'ASC', array $values = []): static
+    {
+        $direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+        $aliasColumn = str_contains($column, '.') ? $column : static::table() . '.' . $column;
+
+        if (!empty($values)) {
+            // Build CASE WHEN expression for custom ordering
+            $cases = [];
+            foreach ($values as $index => $value) {
+                $cases[] = "WHEN '{$value}' THEN {$index}";
+            }
+            // ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'pending' THEN 1 WHEN 'archived' THEN 2 ELSE 999 END ASC
+            static::$orderBy = "ORDER BY CASE {$aliasColumn} " . implode(' ', $cases) . " ELSE 999 END {$direction}";
+        } else {
+            static::$orderBy = "ORDER BY {$aliasColumn} {$direction}";
+        }
+        return $this;
+    }
+
+
+    /**
      * Add a JOIN clause to the query
      */
     public function join(string $table, string $firstColumn, string $operator, string $secondColumn, string $type = 'LEFT'): static

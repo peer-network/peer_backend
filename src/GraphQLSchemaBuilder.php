@@ -2507,28 +2507,42 @@ class GraphQLSchemaBuilder
                 'targetid' => function (array $root): string {
                     return $root['targetid'] ?? '';
                 },
-
-                
-                'targetype' => function (array $root): string {
-                    return $root['targetype'] ?? '';
+                'targettype' => function (array $root): string {
+                    return $root['targettype'] ?? '';
                 },
-                
                 'status' => function (array $root): string {
                     return $root['status'] ?? '';
                 },
-
                 'message' => function (array $root): string {
                     return $root['message'] ?? '';
                 },
-
-
+                'targettype' => function (array $root): string {
+                    return $root['targettype'] ?? '';
+                },
+                'targetcontent' => function (array $root): array {
+                    return $root['targetcontent'] ?? [];
+                },
+                'reporter' => function (array $root): array {
+                    return $root['reporter'] ?? [];
+                },
                 'message' => function (array $root): string {
                     return $root['message'] ?? '';
                 },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 },
-            ]
+            ],
+            'TargetContent' => [
+                'post' => function (array|null $root): ?array {
+                    return $root['post'] ?? null;
+                },
+                'comment' => function (array|null $root): ?array {
+                    return $root['comment'] ?? null;
+                },
+                'user' => function (array|null $root): ?array {
+                    return $root['user'] ?? null;
+                },
+            ],
         ];
     }
 

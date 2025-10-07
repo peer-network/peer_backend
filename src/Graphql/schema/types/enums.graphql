@@ -136,7 +136,7 @@ enum ModerationStatus {
 }
 
 enum ModerationContentType {
-  POST
-  COMMENT
-  USER
+  post
+  comment
+  user
 }

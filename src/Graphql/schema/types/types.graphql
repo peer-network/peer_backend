@@ -519,5 +519,5 @@ type ModerationItem {
 type TargetContent {
   post: Post
   comment: Comment
-  user: ProfileUser
+  user: BasicUserInfo
 }
