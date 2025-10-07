@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -11,7 +12,7 @@ use Fawaz\App\Role;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
 use Fawaz\config\constants\ConstantsConfig;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
@@ -25,7 +26,7 @@ use Fawaz\App\Status;
 class UserMapper
 {
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
@@ -191,7 +192,7 @@ class UserMapper
 
     public function fetchAll(string $currentUserId, array $args = []): array
     {
-        $this->logger->info("UserMapper.fetchAll started");
+        $this->logger->debug("UserMapper.fetchAll started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -273,7 +274,7 @@ class UserMapper
 
             $results = [];
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {    
-                $this->logger->info("UserMapper.fetchAll.row started");
+                $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
                     $user_reports = (int)$row['user_reports'];
                     $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
@@ -324,7 +325,7 @@ class UserMapper
 
     public function fetchAllAdvance(array $args = [], ?string $currentUserId = null,?string $contentFilterBy = null): array
     {
-        $this->logger->info("UserMapper.fetchAll started");
+        $this->logger->debug("UserMapper.fetchAll started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -442,7 +443,7 @@ class UserMapper
 
             $results = [];
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                $this->logger->info("UserMapper.fetchAll.row started");
+                $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
                     $user_reports = (int)$row['user_reports'];
                     $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
@@ -500,7 +501,7 @@ class UserMapper
 
     public function loadByName(string $username): array
     {
-        $this->logger->info("UserMapper.loadByName started");
+        $this->logger->debug("UserMapper.loadByName started");
 
         try {
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
@@ -534,7 +535,7 @@ class UserMapper
 
     public function loadByIdMAin(string $id, int $roles_mask = 0): User|false
     {
-        $this->logger->info("UserMapper.loadById started");
+        $this->logger->debug("UserMapper.loadById started");
 
         try {
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
@@ -564,7 +565,7 @@ class UserMapper
 
     public function loadById(string $id): User|false
     {
-        $this->logger->info("UserMapper.loadById started");
+        $this->logger->debug("UserMapper.loadById started");
 
         try {
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
@@ -594,7 +595,7 @@ class UserMapper
 
     public function loadByEmail(string $email): User|false
     {
-        $this->logger->info("UserMapper.loadByEmail started");
+        $this->logger->debug("UserMapper.loadByEmail started");
 
         try {
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat FROM users WHERE email = :email";
@@ -620,7 +621,7 @@ class UserMapper
 
     public function loadUserInfoById(string $id): array|false
     {
-        $this->logger->info("UserMapper.loadUserInfoById started", ['id' => $id]);
+        $this->logger->debug("UserMapper.loadUserInfoById started", ['id' => $id]);
 
         try {
             $sql = "SELECT uid, username, status, slug, img, biography, updatedat FROM users WHERE uid = :id";
@@ -644,7 +645,7 @@ class UserMapper
 
     public function isUserExistById(string $id): bool
     {
-        $this->logger->info("UserMapper.isUserExistById started", ['id' => $id]);
+        $this->logger->debug("UserMapper.isUserExistById started", ['id' => $id]);
 
         try {
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :id");
@@ -662,7 +663,7 @@ class UserMapper
 
     public function isEmailTaken(string $email): bool
     {
-        $this->logger->info("UserMapper.isEmailTaken started", ['email' => $email]);
+        $this->logger->debug("UserMapper.isEmailTaken started", ['email' => $email]);
 
         try {
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE email = :email");
@@ -679,7 +680,7 @@ class UserMapper
 
     public function checkIfNameAndSlugExist(string $username, int $slug): bool
     {
-        $this->logger->info("UserMapper.checkIfNameAndSlugExist started", ['username' => $username, 'slug' => $slug]);
+        $this->logger->debug("UserMapper.checkIfNameAndSlugExist started", ['username' => $username, 'slug' => $slug]);
 
         try {
             $sql = "SELECT 1 FROM users WHERE username = :username AND slug = :slug";
@@ -698,7 +699,7 @@ class UserMapper
     
     public function getUserByNameAndSlug(string $username, int $slug): User|bool
     {
-        $this->logger->info("UserMapper.checkIfNameAndSlugExist started", ['username' => $username, 'slug' => $slug]);
+        $this->logger->debug("UserMapper.checkIfNameAndSlugExist started", ['username' => $username, 'slug' => $slug]);
 
         try {
             $sql = "SELECT * FROM users WHERE username = :username AND slug = :slug";
@@ -721,7 +722,7 @@ class UserMapper
 
     public function verifyAccount(string $uid): bool
     {
-        $this->logger->info("UserMapper.verifyAccount started", ['uid' => $uid]);
+        $this->logger->debug("UserMapper.verifyAccount started", ['uid' => $uid]);
 
         try {
             if (!$this->isUserExistById($uid)) {
@@ -751,7 +752,7 @@ class UserMapper
 
     public function deactivateAccount(string $uid): bool
     {
-        $this->logger->info("UserMapper.deactivateAccount started", ['uid' => $uid]);
+        $this->logger->debug("UserMapper.deactivateAccount started", ['uid' => $uid]);
 
         try {
             if (!$this->isUserExistById($uid)) {
@@ -781,7 +782,7 @@ class UserMapper
 
     public function fetchCountPosts(string $userid): int
     {
-        $this->logger->info("UserMapper.fetchCountPosts started", ['userid' => $userid]);
+        $this->logger->debug("UserMapper.fetchCountPosts started", ['userid' => $userid]);
 
         try {
             $sql = "SELECT COUNT(*) FROM posts WHERE userid = :userid";
@@ -806,7 +807,7 @@ class UserMapper
         int $limit = 10,
         ?string $contentFilterBy = null
     ): ?array {
-        $this->logger->info("UserMapper.fetchFriends started", ['userId' => $userId]);
+        $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
             new GetProfileContentFilteringStrategy(),
@@ -890,7 +891,7 @@ class UserMapper
         int $limit = 10,
         ?string $contentFilterBy = null
     ): array {
-        $this->logger->info("UserMapper.fetchFollowers started", ['userId' => $userId]);
+        $this->logger->debug("UserMapper.fetchFollowers started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
             new GetProfileContentFilteringStrategy(),
@@ -977,7 +978,7 @@ class UserMapper
         int $limit = 10,
         ?string $contentFilterBy = null
     ): array {
-        $this->logger->info("UserMapper.fetchFollowing started", ['userId' => $userId]);
+        $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
             new GetProfileContentFilteringStrategy(),
@@ -1059,7 +1060,7 @@ class UserMapper
 
     public function isFollowing(string $userid, string $currentUserId): bool
     {
-        $this->logger->info("UserMapper.isFollowing started");
+        $this->logger->debug("UserMapper.isFollowing started");
 
         $sql = "SELECT COUNT(*) FROM follows WHERE followedid = :userid AND followerid = :currentUserId";
 
@@ -1078,7 +1079,7 @@ class UserMapper
 
     public function isFollowed(string $userid, string $currentUserId): bool
     {
-        $this->logger->info("UserMapper.isFollowed started");
+        $this->logger->debug("UserMapper.isFollowed started");
 
         $sql = "SELECT COUNT(*) FROM follows WHERE followedid = :currentUserId AND followerid = :userid";
 
@@ -1195,7 +1196,7 @@ class UserMapper
 
     private function setPassword(string $password): string
     {
-        $this->logger->info("UserMapper.setPassword started");
+        $this->logger->debug("UserMapper.setPassword started");
 
         if (defined('PASSWORD_ARGON2ID')) {
             $hash = \password_hash($password, PASSWORD_ARGON2ID, [
@@ -1218,7 +1219,7 @@ class UserMapper
 
     public function createUser(User $userData): ?string
     {
-        $this->logger->info("UserMapper.createUser started");
+        $this->logger->debug("UserMapper.createUser started");
 
         try {
             $userid = $userData->getUserId();
@@ -1246,7 +1247,7 @@ class UserMapper
 
     public function insert(User $user): User
     {
-        $this->logger->info("UserMapper.insert started");
+        $this->logger->debug("UserMapper.insert started");
 
         $data = $user->getArrayCopy();
         $this->logger->info('UserMapper.insert second', ['data' => $data]);
@@ -1289,7 +1290,7 @@ class UserMapper
     
     public function insertReferralInfo(string $userId, string $link): void
     {
-        $this->logger->info("UserMapper.insertReferralInfo started", [
+        $this->logger->debug("UserMapper.insertReferralInfo started", [
             'userId' => $userId,
             'link' => $link,
         ]);
@@ -1325,7 +1326,7 @@ class UserMapper
 
     public function getReferralInfoByUserId(string $userId): ?array
     {
-        $this->logger->info("UserMapper.getReferralInfoByUserId started", [
+        $this->logger->debug("UserMapper.getReferralInfoByUserId started", [
             'userId' => $userId,
         ]);
     
@@ -1359,7 +1360,7 @@ class UserMapper
 
     public function getInviterByInvitee(string $userId): ?array
     {
-        $this->logger->info("UserMapper.getInviterByInvitee started", [
+        $this->logger->debug("UserMapper.getInviterByInvitee started", [
             'invitee_uuid' => $userId,
         ]);
 
@@ -1409,7 +1410,7 @@ class UserMapper
 
     public function insertinfo(UserInfo $user): UserInfo
     {
-        $this->logger->info("UserMapper.insertinfo started");
+        $this->logger->debug("UserMapper.insertinfo started");
 
         $data = $user->getArrayCopy();
 
@@ -1449,7 +1450,7 @@ class UserMapper
 
     public function update(User $user): User
     {
-        $this->logger->info("UserMapper.update started");
+        $this->logger->debug("UserMapper.update started");
 
         $data = $user->getArrayCopy();
 
@@ -1497,7 +1498,7 @@ class UserMapper
 
     public function updatePass(User $user): User
     {
-        $this->logger->info("UserMapper.updatePass started");
+        $this->logger->debug("UserMapper.updatePass started");
 
         $data = $user->getArrayCopy(); 
         $passwordHash = $this->setPassword($data['password']); 
@@ -1532,7 +1533,7 @@ class UserMapper
 
     public function updateProfil(User $user): User
     {
-        $this->logger->info("UserMapper.updateProfil started");
+        $this->logger->debug("UserMapper.updateProfil started");
 
         $data = $user->getArrayCopy(); 
 
@@ -1591,7 +1592,7 @@ class UserMapper
      */
     public function delete(string $id): bool
     {
-        $this->logger->info("UserMapper.delete started");
+        $this->logger->debug("UserMapper.delete started");
 
         $query = "UPDATE users SET status = :status WHERE uid = :uid";
 
@@ -1617,7 +1618,7 @@ class UserMapper
 
     public function deleteUnverifiedUsers(): void
     {
-        $this->logger->info("UserMapper.deleteUnverifiedUsers started");
+        $this->logger->debug("UserMapper.deleteUnverifiedUsers started");
 
         try {
             $sql = "SELECT uid FROM users WHERE verified IS NULL";
@@ -1648,7 +1649,7 @@ class UserMapper
 
     public function saveOrUpdateAccessToken(string $userid, string $accessToken): void
     {
-        $this->logger->info("UserMapper.saveOrUpdateAccessToken started");
+        $this->logger->debug("UserMapper.saveOrUpdateAccessToken started");
 
         $accessTokenValidity = 604800; // 7 Tage
         $createdat = time();
@@ -1685,7 +1686,7 @@ class UserMapper
 
     public function saveOrUpdateRefreshToken(string $userid, string $refreshToken): void
     {
-        $this->logger->info("UserMapper.saveOrUpdateRefreshToken started");
+        $this->logger->debug("UserMapper.saveOrUpdateRefreshToken started");
 
         $refreshTokenValidity = 604800; // 7 Tage
         $createdat = time();
@@ -1722,7 +1723,7 @@ class UserMapper
 
     public function fetchAllFriends(int $offset = 0, int $limit = 20): ?array
     {
-        $this->logger->info("UserMapper.fetchAllFriends started");
+        $this->logger->debug("UserMapper.fetchAllFriends started");
 
         $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, u1.status as followerstatus, 
                                 u2.uid AS followed, u2.username AS followedname, u2.slug AS followedslug, u2.status as followedstatus
@@ -1823,7 +1824,7 @@ class UserMapper
      */
     public function checkForPasswordResetExpiry(string $userId): array|bool
     {
-        $this->logger->info("UserMapper.checkForPasswordResetExpiry started");
+        $this->logger->debug("UserMapper.checkForPasswordResetExpiry started");
 
         try {
             $sql = "
@@ -1845,7 +1846,7 @@ class UserMapper
     
     public function loadTokenById(string $id): bool
     {
-        $this->logger->info("UserMapper.loadTokenById started");
+        $this->logger->debug("UserMapper.loadTokenById started");
         $time = (int)\time();
 
         try {
@@ -1898,7 +1899,7 @@ class UserMapper
         
         return [
             'status' => 'error',
-            'ResponseCode' => 31901,
+            'ResponseCode' => "31901",
             'nextAttemptAt' => $nextAttemptAt
         ];
     }
@@ -1910,7 +1911,7 @@ class UserMapper
     {
         return [
             'status' => 'error',
-            'ResponseCode' => 31903
+            'ResponseCode' => "31903"
         ];
     }
 
@@ -1964,7 +1965,7 @@ class UserMapper
     // public function insertoken(array $args): void
     public function insertoken(Tokenize $data): ?Tokenize
     {
-        $this->logger->info("UserMapper.insertoken started");
+        $this->logger->debug("UserMapper.insertoken started");
 
         $data = $data->getArrayCopy();
         $this->logger->info('UserMapper.insertoken second', ['data' => $data]);
@@ -1997,7 +1998,7 @@ class UserMapper
 
     public function getValidReferralInfoByLink(string $referralLink): array|null
     {
-        $this->logger->info("UserMapper.getValidReferralInfoByLink started", [
+        $this->logger->debug("UserMapper.getValidReferralInfoByLink started", [
             'referralLink' => $referralLink,
         ]);
 

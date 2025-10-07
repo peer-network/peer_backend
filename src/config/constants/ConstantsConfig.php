@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\config\constants;
 use Fawaz\config\constants\ConstantsModeration;
@@ -150,17 +151,36 @@ class ConstantsConfig
 
     /**
      * @return array{
-     *     DAILY_FREE: array{ post: int, like: int, comment: int, dislike: int }
+     *     DAILY_FREE_ACTIONS: array{ post: int, like: int, comment: int, dislike: int }
      * }
      */
     public static function dailyFree(): array {
         return ConstantsConfig::DAILY_FREE;
     }
 
-    /**
+
+    /** 
      * @return array{
-     *     ACTION_TOKEN_PRICES: array{ post: float, like: float, dislike: float, comment: float },
-     *     ACTION_GEMS_RETURNS: array{ view: float, like: float, dislike: float, comment: float }
+     *     ACTION_TOKEN_PRICES: array{
+     *         post: float,
+     *         like: float,
+     *         dislike: float,
+     *         comment: float,
+     *         advertisementBasic: float,
+     *         advertisementPinned: float
+     *     },
+     *     ACTION_GEMS_RETURNS: array{
+     *         view: float,
+     *         like: float,
+     *         dislike: float,
+     *         comment: float
+     *     },
+     *     FEES: array{
+     *         INVITATION: float,
+     *         POOL: float,
+     *         PEER: float,
+     *         BURN: float
+     *     }
      * }
      */
     public static function tokenomics(): array {
@@ -195,7 +215,9 @@ class ConstantsConfig
             'post'    => 20.0,   
             'like'    => 3.0,    
             'dislike' => 3.0,    
-            'comment' => 1.0,    
+            'comment' => 1.0,
+            'advertisementBasic' => 500.0,
+            'advertisementPinned' => 2000.0,
         ],
         'ACTION_GEMS_RETURNS' => [
             'view'    => 0.25,  

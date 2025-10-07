@@ -1,16 +1,17 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Handler;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Slim\Psr7\Response;
 
 class NotFoundHandler
 {
     public function __construct(
-        private LoggerInterface $logger
+        private PeerLoggerInterface $logger
     ) {
     }
 

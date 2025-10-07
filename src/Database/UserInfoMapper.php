@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -6,11 +7,11 @@ use PDO;
 use Fawaz\App\User;
 use Fawaz\App\UserBlock;
 use Fawaz\App\UserInfo;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class UserInfoMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
@@ -21,7 +22,7 @@ class UserInfoMapper
 
     public function loadInfoById(string $id): UserInfo|false
     {
-        $this->logger->info('UserInfoMapper.loadInfoById started', ['id' => $id]);
+        $this->logger->debug('UserInfoMapper.loadInfoById started', ['id' => $id]);
 
         try {
             $stmt = $this->db->prepare(
@@ -61,7 +62,7 @@ class UserInfoMapper
     public function update(UserInfo $user): UserInfo
     {
         $userid = $user->getUserId();
-        $this->logger->info('UserInfoMapper.update started', ['userid' => $userid]);
+        $this->logger->debug('UserInfoMapper.update started', ['userid' => $userid]);
 
         try {
             $user->setUpdatedAt();
@@ -124,7 +125,7 @@ class UserInfoMapper
 
     public function loadById(string $id): User|false
     {
-        $this->logger->info('UserInfoMapper.loadById started', ['id' => $id]);
+        $this->logger->debug('UserInfoMapper.loadById started', ['id' => $id]);
 
         try {
             $stmt = $this->db->prepare(
@@ -162,7 +163,7 @@ class UserInfoMapper
 
     public function updateUsers(User $user): ?User
     {
-        $this->logger->info('UserInfoMapper.updateUsers started');
+        $this->logger->debug('UserInfoMapper.updateUsers started');
 
         try {
             $user->setUpdatedAt();
@@ -222,7 +223,7 @@ class UserInfoMapper
 
     private function fetchFriends(string $userid): array
     {
-        $this->logger->info("UserInfoMapper.fetchFriends started", ['userid' => $userid]);
+        $this->logger->debug("UserInfoMapper.fetchFriends started", ['userid' => $userid]);
 
         try {
             $sql = "SELECT u.uid, u.username, u.slug, u.updatedat, u.biography, u.img 
@@ -245,7 +246,7 @@ class UserInfoMapper
 
     private function getFriends(string $currentUserId): array|null
     {
-        $this->logger->info('UserInfoMapper.getFriends started');
+        $this->logger->debug('UserInfoMapper.getFriends started');
         $users = $this->fetchFriends($currentUserId);
 
         if ($users) {
@@ -356,7 +357,7 @@ class UserInfoMapper
 
     private function updateChatsStatus(string $followerid, string $followeduserid): void
     {
-        $this->logger->info('UserInfoMapper.fetchFriends started', ['userid' => $followerid]);
+        $this->logger->debug('UserInfoMapper.fetchFriends started', ['userid' => $followerid]);
 
         try {
             $friends = $this->getFriends($followerid);
@@ -399,7 +400,7 @@ class UserInfoMapper
             $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
             $stmt->execute();
 
-            $this->logger->info('Query.setFollowUserResponse Resolvers', ['uid' => $followerid]);
+            $this->logger->debug('Query.setFollowUserResponse Resolvers', ['uid' => $followerid]);
         } catch (\InvalidArgumentException $e) {
             $this->logger->error('Failed to toggle user follow', [
                 'exception' => $e->getMessage(),
@@ -415,7 +416,7 @@ class UserInfoMapper
 
     public function isUserExistById(string $userId): bool
     {
-        $this->logger->info('UserInfoMapper.isUserExistById started', ['userId' => $userId]);
+        $this->logger->debug('UserInfoMapper.isUserExistById started', ['userId' => $userId]);
 
         try {
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :userId");
@@ -444,7 +445,7 @@ class UserInfoMapper
 
     public function toggleUserBlock(string $blockerid, string $blockedid): array
     {
-        $this->logger->info('UserInfoMapper.toggleUserBlock started', [
+        $this->logger->debug('UserInfoMapper.toggleUserBlock started', [
             'blockerid' => $blockerid,
             'blockedid' => $blockedid
         ]);
@@ -471,7 +472,7 @@ class UserInfoMapper
                 $stmt->execute();
 
                 $action = false;
-                $response = 11106;
+                $response = "11106";
             } else {
                 // Block the user
                 $query = "INSERT INTO user_block_user (blockerid, blockedid) VALUES (:blockerid, :blockedid)";
@@ -486,7 +487,7 @@ class UserInfoMapper
                 $stmt->execute();
 
                 $action = true;
-                $response = 11105;
+                $response = "11105";
             }
 
             return ['status' => 'success', 'ResponseCode' => $response, 'isBlocked' => $action];
@@ -495,12 +496,12 @@ class UserInfoMapper
             $this->logger->error('Database error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'ResponseCode' => 41106];
+            return ['status' => 'error', 'ResponseCode' => "41106"];
         } catch (\Exception $e) {
             $this->logger->error('Unexpected error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'ResponseCode' => 41106];
+            return ['status' => 'error', 'ResponseCode' => "41106"];
         }
     }
 
@@ -558,7 +559,7 @@ class UserInfoMapper
             return [
                 'status' => 'success',
                 'counter' => $counter,
-                'ResponseCode' => 11107,
+                'ResponseCode' => "11107",
                 'affectedRows' => [
                     'blockedBy' => $blockedBy,
                     'iBlocked' => $iBlocked
@@ -568,7 +569,7 @@ class UserInfoMapper
             $this->logger->error("Database error while fetching block relationships", ['error' => $e->getMessage()]);
             return [
                 'status' => 'error',
-                'ResponseCode' => 41108,
+                'ResponseCode' => "41108",
                 'affectedRows' => []
             ];
         }
@@ -576,7 +577,7 @@ class UserInfoMapper
 
     public function updateUserInfoStats(string $userid): array
     {
-        $this->logger->info('UserInfoMapper.updateUserInfoStats started', ['userid' => $userid]);
+        $this->logger->debug('UserInfoMapper.updateUserInfoStats started', ['userid' => $userid]);
         $trenddays = 7;
 
         try {

@@ -1,10 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App\Repositories;
 
 use Fawaz\App\Models\Transaction;
 use PDO;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class TransactionRepository
 {
@@ -12,7 +13,7 @@ class TransactionRepository
     /**
      * Assign Transaction object while instantiated
      */
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
     
@@ -22,7 +23,7 @@ class TransactionRepository
      */
     public function saveTransaction(Transaction $transaction)
     {
-        $this->logger->info("TransactionRepository.saveTransaction started");
+        $this->logger->debug("TransactionRepository.saveTransaction started");
 
         $query = "INSERT INTO transactions 
                   (transactionid, operationid, transactiontype, senderid, recipientid, tokenamount, transferaction, message, createdat)

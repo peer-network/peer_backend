@@ -1,0 +1,40 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  "Return basic API metadata."
+  hello: HelloResponse
+
+  "Return a public post by ID (guest view)."
+  guestListPost(postid: ID!): PostResponse!
+}
+
+type Mutation {
+  "Register a new user."
+  register(input: RegistrationInput!): RegisterResponse!
+
+  "Verify a user account by user ID."
+  verifyAccount(userid: ID!): DefaultResponse!
+
+  "Login with email and password; returns access/refresh tokens."
+  login(email: String!, password: String!): AuthPayload!
+
+  "Sends a password reset link to a valid email address"
+  requestPasswordReset(email: String!): ResetPasswordRequestResponse!
+
+  resetPasswordTokenVerify(token: String!): DefaultResponse!
+  
+  "Resets password using token and new password ({USER.PASSWORD.MIN_LENGTH}–{USER.PASSWORD.MAX_LENGTH} chars; must match {USER.PASSWORD.PATTERN})."
+  resetPassword(token: String!, password: String!): DefaultResponse
+
+  "Refresh tokens using a valid refresh token."
+  refreshToken(refreshToken: String!): AuthPayload!
+
+  "Validate a referral string and return referral info."
+  verifyReferralString(referralString: String!): ReferralResponse!
+
+  "Send a 'Contact Us' message (name {CONTACT.NAME.MIN_LENGTH}–{CONTACT.NAME.MAX_LENGTH} chars; message {CONTACT.MESSAGE.MIN_LENGTH}–{CONTACT.MESSAGE.MAX_LENGTH} chars)."
+  contactus(name: String!, email: String!, message: String!): ContactusResponse!
+}

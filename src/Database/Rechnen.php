@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -90,7 +91,7 @@ class Rechnen {
             return 0;
         }
         $tax = (float)ConstantsConfig::tokenomics()['FEES']['PEER'];
-        return self::calculate_total_feesum($price, $sum, $tax);
+        return ($price * $sum) * $tax;
     }
 
     // @return float val

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Middleware;
 
@@ -8,14 +9,14 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Psr7\Response;
 use Fawaz\RateLimiter\RateLimiter;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class RateLimiterMiddleware implements MiddlewareInterface
 {
     private RateLimiter $rateLimiter;
-    private LoggerInterface $logger;
+    private PeerLoggerInterface $logger;
 
-    public function __construct(RateLimiter $rateLimiter, LoggerInterface $logger)
+    public function __construct(RateLimiter $rateLimiter, PeerLoggerInterface $logger)
     {
         $this->rateLimiter = $rateLimiter;
         $this->logger = $logger;

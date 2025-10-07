@@ -3,6 +3,8 @@ ifneq (,$(wildcard .env))
     $(warning Local .env detected. Docker Compose auto-loads this and it may override .env.ci. To avoid issues, either delete it or set COMPOSE_ENV_FILE=.env.ci)
 endif
 
+GITLEAKS_VERSION = 8.28.0
+
 IMAGE_TAG=local
 export IMAGE_TAG
 
@@ -76,7 +78,7 @@ restart-db: ## Restart only the database (fresh schema & data, keep backend as-i
 
 	@echo "Database restarted and ready. Backend container was untouched."
 
-dev: env-ci reset-db-and-backend init ## Full setup: env.ci, DB reset, vendors install, start DB+backend
+dev: env-ci reset-db-and-backend init check-hooks scan ## Full setup: env.ci, DB reset, vendors install, start DB+backend
 	@echo "Installing Composer dependencies on local host..."
 	composer install --no-dev --prefer-dist --no-interaction
 
@@ -91,6 +93,9 @@ dev: env-ci reset-db-and-backend init ## Full setup: env.ci, DB reset, vendors i
 	@echo "Setting local file permissions to 777/666 for local dev..."
 	find . -type d -exec chmod 777 {} \;
 	find . -type f -exec chmod 666 {} \;
+
+	@echo "Restoring executable bit on git hooks..."
+	chmod +x .githooks/*
 
 	@echo "Building images..."
 	docker-compose --env-file .env.ci -f docker-compose.yml -f docker-compose.override.local.yml build
@@ -199,6 +204,7 @@ clean-all: reset-db-and-backend  ## Remove containers, volumes, vendors, reports
 		true; \
 	}
 	@rm -f .env.ci
+	@rm -rf .gitleaks_out
 	@rm -f supervisord.pid
 	@rm -f runtime-data/logs/errorlog.txt
 	@rm -f tests/postman_collection/tmp_*.json
@@ -214,10 +220,14 @@ clean-ci: reset-db-and-backend ## Cleanup for CI but keep reports
 	@rm -f tests/postman_collection/tmp_*.json
 	@echo "Local CI cleanup complete (reports preserved)."
 
-ci: ## Run full local CI workflow (setup, tests, cleanup)
+ci: check-hooks ## Run full local CI workflow (setup, tests, cleanup)
 	$(MAKE) dev
 	$(MAKE) test
 	$(MAKE) clean-ci
+
+hot-ci: ## Run full local CI workflow (setup, tests, cleanup)
+	$(MAKE) restart-db
+	$(MAKE) test
 
 # ---- Developer Shortcuts ----
 .PHONY: logs db bash-backend
@@ -245,3 +255,82 @@ clean-prune: clean-all ## Remove ALL unused images, build cache, and volumes
 hot-ci:
 	$(MAKE) restart-db
 	$(MAKE) test
+ensure-gitleaks: ## Ensure Gitleaks is installed locally (auto-install if missing)
+	@if command -v gitleaks >/dev/null 2>&1; then \
+		echo "Gitleaks already installed: $$(gitleaks version)"; \
+	else \
+		echo "⚡ Installing Gitleaks v$(GITLEAKS_VERSION)..."; \
+		OS=$$(uname -s | tr '[:upper:]' '[:lower:]'); \
+		ARCH=$$(uname -m); \
+		case "$$OS-$$ARCH" in \
+			linux-x86_64)   URL="https://github.com/gitleaks/gitleaks/releases/download/v$(GITLEAKS_VERSION)/gitleaks_$(GITLEAKS_VERSION)_linux_x64.tar.gz" ;; \
+			linux-aarch64)  URL="https://github.com/gitleaks/gitleaks/releases/download/v$(GITLEAKS_VERSION)/gitleaks_$(GITLEAKS_VERSION)_linux_arm64.tar.gz" ;; \
+			darwin-arm64)   URL="https://github.com/gitleaks/gitleaks/releases/download/v$(GITLEAKS_VERSION)/gitleaks_$(GITLEAKS_VERSION)_darwin_arm64.tar.gz" ;; \
+			darwin-x86_64)  URL="https://github.com/gitleaks/gitleaks/releases/download/v$(GITLEAKS_VERSION)/gitleaks_$(GITLEAKS_VERSION)_darwin_x64.tar.gz" ;; \
+			*) echo "Unsupported OS/Arch ($$OS-$$ARCH). Please install manually." && exit 1 ;; \
+		esac; \
+		curl -sSL $$URL -o gitleaks.tar.gz; \
+		tar -xvzf gitleaks.tar.gz gitleaks; \
+		sudo mv gitleaks /usr/local/bin/; \
+		rm -f gitleaks.tar.gz; \
+		echo "Installed gitleaks v$(GITLEAKS_VERSION)"; \
+	fi
+
+install-hooks: ## Install Git hooks for pre-commit scanning
+	@echo "Installing Git hooks..."
+	git config core.hooksPath .githooks
+	chmod +x .githooks/*
+	@echo "Pre-commit hook installed. Gitleaks will now run on every commit."
+
+check-hooks: ## Verify that Git hooks are installed and executable
+	@if [ ! -f .githooks/pre-commit ]; then \
+		echo "Pre-commit hook missing in .githooks/. Run 'make install-hooks'"; \
+		exit 1; \
+	fi
+	@if [ ! -x .githooks/pre-commit ]; then \
+        echo "Fixing pre-commit hook permissions..."; \
+        chmod +x .githooks/pre-commit; \
+    fi
+	@echo "Git hooks are present and executable."
+
+scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
+	@echo "Running Gitleaks scan on staged changes..."
+	@mkdir -p .gitleaks_out
+	@if command -v gitleaks >/dev/null 2>&1; then \
+		echo "⚡ Using local gitleaks binary"; \
+		git diff --cached --unified=0 --no-color | \
+		  gitleaks detect \
+		    --pipe \
+		    --config=gitleaks.toml \
+		    --report-format=json \
+		    --report-path=.gitleaks_out/gitleaks-report.json \
+		    --no-banner | tee .gitleaks_out/gitleaks.log; \
+	else \
+		echo "Local gitleaks not found, using Docker fallback"; \
+		git diff --cached --unified=0 --no-color | \
+		  docker run --rm -i -v $$(pwd):/repo ghcr.io/gitleaks/gitleaks:v8.28.0 \
+		    detect \
+		      --pipe \
+		      --config=/repo/gitleaks.toml \
+		      --report-format=json \
+		      --report-path=/repo/.gitleaks_out/gitleaks-report.json \
+		      --no-banner | tee .gitleaks_out/gitleaks.log; \
+	fi
+	@echo ""
+	@if grep -q '"RuleID":' .gitleaks_out/gitleaks-report.json; then \
+		echo "Possible secrets detected! See .gitleaks_out/gitleaks-report.json"; \
+		echo ""; \
+		echo "Reminder: Do NOT bypass with 'git commit --no-verify'."; \
+		echo "CI will still block your PR even if you bypass locally."; \
+		echo ""; \
+		echo "If this secret is actually required in the repo (false positive or approved usage),"; \
+		echo "you MUST meet with the CTO / Team Lead / DevOps to approve"; \
+		echo "and add it to the gitleaks ignore list."; \
+		echo ""; \
+		exit 1; \
+	else \
+		echo "No secrets found in repository."; \
+	fi
+
+gen:
+	bash cd-generate-backend-config.sh

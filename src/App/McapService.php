@@ -1,16 +1,19 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
 use Fawaz\Database\McapMapper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\ResponseHelper;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class McapService
 {
+    use ResponseHelper;
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected McapMapper $mcapMapper
     ) {
     }
@@ -29,34 +32,10 @@ class McapService
         return true;
     }
 
-    private function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
-            }
-        }
-
-        return $response;
-    }
-    
     public function loadLastId(): array
     {
 
-        $this->logger->info('McapService.loadLastId started');
+        $this->logger->debug('McapService.loadLastId started');
 
         try {
             $fetchUpdate = $this->mcapMapper->fetchAndUpdateMarketPrices();
@@ -69,24 +48,23 @@ class McapService
             if ($results !== false) {
                 $affectedRows = $results->getArrayCopy();
                 $this->logger->info("McapService.loadLastId mcap found", ['affectedRows' => $affectedRows]);
-                $success = [
-                    'status' => 'success',
-                    'ResponseCode' => 11021,
-                    'affectedRows' => $affectedRows,
-                ];
-                return $success;
+                return $this::createSuccessResponse(
+                    11021,
+                    $affectedRows,
+                    false
+                );
             }
 
-            return $this->respondWithError(31201);
+            return $this::respondWithError(31201);
         } catch (\Exception $e) {
-            return $this->respondWithError(41206);
+            return $this::respondWithError(41206);
         }
     }
 
     public function fetchAll(?array $args = []): array
     {
 
-        $this->logger->info('McapService.fetchAll started');
+        $this->logger->debug('McapService.fetchAll started');
 
         try {
             $offset = isset($args['offset']) ? (int) $args['offset'] : 0;
@@ -99,15 +77,15 @@ class McapService
                 $success = [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 11009,
+                    'ResponseCode' => "11009",
                     'affectedRows' => $fetchAll,
                 ];
                 return $success;
             }
 
-            return $this->createSuccessResponse(21001);
+            return $this::createSuccessResponse(21001);
         } catch (\Exception $e) {
-            return $this->respondWithError(41207);
+            return $this::respondWithError(41207);
         }
     }
 }
