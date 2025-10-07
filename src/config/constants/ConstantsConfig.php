@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+declare(strict_types=1);
+
 namespace Fawaz\config\constants;
 use Fawaz\config\constants\ConstantsModeration;
 
@@ -8,18 +10,18 @@ class ConstantsConfig
 {
     public function getData() {
         return [
-            "POST" => $this::post(),
-            "COMMENT" => $this::comment(),
-            "USER" => $this::user(),
-            "CHAT" => $this::chat(),
-            "CONTACT" => $this::contact(),
-            "PAGING" => $this::paging(),
-            "WALLET" => $this::wallet(),
-            "WALLETT" => $this::wallett(),    
-            "ONBOARDING" => $this::onboarding(),
-            "DAILY_FREE" => $this::dailyFree(),
-            "TOKENOMICS" => $this::tokenomics(),
-            "MINTING" => $this::minting(),
+            "POST" => self::post(),
+            "COMMENT" => self::comment(),
+            "USER" => self::user(),
+            "CHAT" => self::chat(),
+            "CONTACT" => self::contact(),
+            "PAGING" => self::paging(),
+            "WALLET" => self::wallet(),
+            "WALLETT" => self::wallett(),    
+            "ONBOARDING" => self::onboarding(),
+            "DAILY_FREE" => self::dailyFree(),
+            "TOKENOMICS" => self::tokenomics(),
+            "MINTING" => self::minting(),
         ];
     }
     /**

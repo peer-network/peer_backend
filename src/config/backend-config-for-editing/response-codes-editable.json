@@ -592,8 +592,8 @@
         "userFriendlyComment": "Current password required to change email."
     },
     "30226": {
-        "comment": "The 'password' field (User new password) must be between {USER.PASSWORD.MIN_LENGTH} and {USER.PASSWORD.MAX_LENGTH} characters long and contain at least one lowercase letter, one uppercase letter, one number and one special character(except '\"\\)",
-        "userFriendlyComment": "Password must be {USER.PASSWORD.MIN_LENGTH}-{USER.PASSWORD.MAX_LENGTH} chars with uppercase, lowercase, numbers and special characters(except '\"\\)"
+        "comment": "The 'password' field (User new password) must be between {USER.PASSWORD.MIN_LENGTH} and {USER.PASSWORD.MAX_LENGTH} characters long and contain at least one lowercase letter, one uppercase letter, one number and one special character",
+        "userFriendlyComment": "Password must be {USER.PASSWORD.MIN_LENGTH}-{USER.PASSWORD.MAX_LENGTH} chars with uppercase, lowercase, numbers and special characters"
     },
     "30227": {
         "comment": "The 'expassword' field (User current password) is required to update the password",

@@ -14,7 +14,7 @@ input RegistrationInput {
   password: String!
   """Username: {USER.USERNAME.MIN_LENGTH}–{USER.USERNAME.MAX_LENGTH} chars; must match {USER.USERNAME.PATTERN}."""
   username: String!
-  """Optional Solana public key. {WALLET.SOLANA_PUBKEY.MIN_LENGTH}–{WALLET.SOLANA_PUBKEY.MAX_LENGTH} chars; must match {WALLET.SOLANA_PUBKEY.PATTERN}."""
+  """Optional Solana public key {WALLET.SOLANA_PUBKEY.MIN_LENGTH}–{WALLET.SOLANA_PUBKEY.MAX_LENGTH} chars, must match {WALLET.SOLANA_PUBKEY.PATTERN}."""
   pkey: String
   """Optional referral UUID (ties registration to a referrer)."""
   referralUuid: ID
