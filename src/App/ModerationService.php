@@ -9,7 +9,7 @@ use Fawaz\App\Models\UserReport;
 use Fawaz\config\constants\ConstantsModeration;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\App\Models\Moderation;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class ModerationService {
 
@@ -17,7 +17,7 @@ class ModerationService {
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger
+        protected PeerLoggerInterface $logger
     ){
         
     }
