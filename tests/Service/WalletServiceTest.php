@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Fawaz\App\WalletService;
 use Fawaz\Database\WalletMapper;
 use Fawaz\App\Wallet;
+use Fawaz\Database\Interfaces\TransactionManager;
 use Psr\Log\LoggerInterface;
 
 class WalletServiceTest extends TestCase
@@ -13,12 +14,18 @@ class WalletServiceTest extends TestCase
     private WalletService $walletService;
     private $walletMapperMock;
     private $loggerMock;
+    private $transactionManagerMock;
 
     protected function setUp(): void
     {
         $this->walletMapperMock = $this->createMock(WalletMapper::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
-        $this->walletService = new WalletService($this->loggerMock, $this->walletMapperMock);
+        $this->transactionManagerMock = $this->createMock(TransactionManager::class);
+        $this->walletService = new WalletService(
+            $this->loggerMock,
+            $this->walletMapperMock,
+            $this->transactionManagerMock
+        );
     }
 
     public function testAdjustCoinBalanceDeductsCoins(): void

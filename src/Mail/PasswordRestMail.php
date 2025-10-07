@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Mail;
 
 use Fawaz\Mail\Interface\EmailInterface;

@@ -1,15 +1,21 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\DailyFree;
+<<<<<<< HEAD
 use Psr\Log\LoggerInterface;
 use InvalidArgumentException;
+=======
+use Fawaz\Utils\PeerLoggerInterface;
+use \InvalidArgumentException;
+>>>>>>> development
 
 class DailyFreeMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 

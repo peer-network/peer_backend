@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App\Repositories;
 
 use Fawaz\App\Models\Transaction;
 use PDO;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class TransactionRepository
 {
     /**
      * Assign Transaction object while instantiated
      */
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Services\ContentFiltering\Strategies;
 
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;

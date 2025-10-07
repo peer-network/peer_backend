@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use Fawaz\config\constants\ConstantsConfig;
@@ -7,7 +9,7 @@ use Fawaz\Database\AdvertisementMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use InvalidArgumentException;
 
 class AdvertisementService
@@ -29,7 +31,7 @@ class AdvertisementService
     public const DURATION_SEVEN_DAYS = 'SEVEN_DAYS';
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected AdvertisementMapper $advertisementMapper,
         protected UserMapper $userMapper,
         protected PostMapper $postMapper,
@@ -158,7 +160,7 @@ class AdvertisementService
         try {
 
             if ($CostPlan !== null && $CostPlan === self::PLAN_BASIC) {
-                if ($postId && $date && $CostPlan && $startday) {
+                if ($startday) {
                     $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', $startday);
                     $timestamps = $this->formatStartAndEndTimestamps($startDate, $date);
 
@@ -211,7 +213,7 @@ class AdvertisementService
             } catch (\Throwable $e) {
                 $this->logger->error('Fehler beim Validieren des Advertisements', ['exception' => $e]);
                 // Die richtige errorCode.
-                return self::respondWithError($e->getMessage());
+                return self::respondWithError((int)$e->getMessage());
             }
 
             if ($CostPlan === self::PLAN_BASIC) {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Services;
 
 use getID3;
@@ -98,6 +100,20 @@ class Base64FileHandler
             if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
                 $width = $fileInfo['video']['resolution_x'];
                 $height = $fileInfo['video']['resolution_y'];
+
+                if (!is_numeric($width) || !is_numeric($height)) {
+                    \error_log(
+                        'Invalid video resolution values from getID3: ' .
+                        'resolution_x=' . $width .
+                        ', resolution_y=' . $height .
+                        ', file=' . $filePath
+                    );
+                    return null;
+                }
+
+                $width  = (int) $width;
+                $height = (int) $height;
+
                 // Check for Orientation
                 if (isset($fileInfo['jpg']['exif']['IFD0']['Orientation'])) {
                     $Orientation = $fileInfo['jpg']['exif']['IFD0']['Orientation'] ??= 1;

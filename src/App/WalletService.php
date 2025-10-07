@@ -1,19 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use Fawaz\App\Wallet;
 use Fawaz\Database\WalletMapper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Exception;
+use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;
 
 class WalletService
 {
+    use ResponseHelper;
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected WalletMapper $walletMapper, protected TransactionManager $transactionManager)
-    {
+    public function __construct(
+        protected PeerLoggerInterface $logger,
+        protected WalletMapper $walletMapper,
+        protected TransactionManager $transactionManager
+    ) {
     }
 
     public function setCurrentUserId(string $userId): void
@@ -24,30 +31,6 @@ class WalletService
     public static function isValidUUID(string $uuid): bool
     {
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
-    }
-
-    private function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
-            }
-        }
-
-        return $response;
     }
 
     private function checkAuthentication(): bool
@@ -62,7 +45,7 @@ class WalletService
     public function fetchPool(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $this->logger->debug("WalletService.fetchPool started");
@@ -74,7 +57,7 @@ class WalletService
     public function fetchAll(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $this->logger->debug("WalletService.fetchAll started");
@@ -93,7 +76,7 @@ class WalletService
     public function fetchWalletById(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $userId = $this->currentUserId;
@@ -101,15 +84,15 @@ class WalletService
         $fromId = $args['fromid'] ?? null;
 
         if ($postId === null && $fromId === null && !self::isValidUUID($userId)) {
-            return $this->respondWithError(30102);
+            return $this::respondWithError(30102);
         }
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(30209);
+            return $this::respondWithError(30209);
         }
 
         if ($fromId !== null && !self::isValidUUID($fromId)) {
-            return $this->respondWithError(30105);
+            return $this::respondWithError(30105);
         }
 
         $this->logger->debug("WalletService.fetchWalletById started");
@@ -118,7 +101,7 @@ class WalletService
             $wallets = $this->walletMapper->loadWalletById($this->currentUserId, $args);
 
             if ($wallets === false) {
-                return $this->respondWithError(41216);
+                return $this::respondWithError(41216);
             }
 
             $walletData = array_map(
@@ -135,7 +118,7 @@ class WalletService
             $success = [
                 'status' => 'success',
                 'counter' => count($walletData),
-                'ResponseCode' => 11209,
+                'ResponseCode' => "11209",
                 'affectedRows' => $walletData
             ];
 
@@ -146,14 +129,14 @@ class WalletService
                 'error' => $e->getMessage(),
                 'args' => $args,
             ]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 
     public function callFetchWinsLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -161,7 +144,7 @@ class WalletService
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
-            return $this->respondWithError(30105);
+            return $this::respondWithError(30105);
         }
 
         return $this->walletMapper->fetchWinsLog($this->currentUserId, 'win', $args);
@@ -170,7 +153,7 @@ class WalletService
     public function callFetchPaysLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
@@ -178,7 +161,7 @@ class WalletService
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
-            return $this->respondWithError(30105);
+            return $this::respondWithError(30105);
         }
 
         return $this->walletMapper->fetchWinsLog($this->currentUserId, 'pay', $args);
@@ -187,7 +170,7 @@ class WalletService
     public function callGlobalWins(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         return $this->walletMapper->callGlobalWins();
@@ -196,7 +179,7 @@ class WalletService
     public function callGemster(): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         return $this->walletMapper->getTimeSorted();
@@ -205,14 +188,14 @@ class WalletService
     public function callGemsters(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
-            return $this->respondWithError(30105);
+            return $this::respondWithError(30105);
         }
 
         $gemsters = $this->walletMapper->getTimeSortedMatch($day);
@@ -260,15 +243,15 @@ class WalletService
             if ($results !== false) {
                 $success = [
                     'status' => 'success',
-                    'ResponseCode' => 11204,
+                    'ResponseCode' => "11204",
                     'currentliquidity' => $results,
                 ];
                 return $success;
             }
 
-            return $this->createSuccessResponse(21203);
+            return $this::createSuccessResponse(21203);
         } catch (\Exception $e) {
-            return $this->respondWithError(41204);
+            return $this::respondWithError(41204);
         }
     }
 
@@ -300,7 +283,7 @@ class WalletService
 
         } catch (\Exception $e) {
             $this->transactionManager->rollBack();
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 
@@ -310,14 +293,15 @@ class WalletService
 
         try {
             $response = $this->walletMapper->callUserMove($this->currentUserId);
-            return [
-                'status' => 'success',
-                'ResponseCode' => $response['ResponseCode'],
-                'affectedRows' => $response['affectedRows'],
-            ];
+            return $this::createSuccessResponse(
+                $response['ResponseCode'],
+                $response['affectedRows'],
+                false // no counter needed for existing data
+            );
+
 
         } catch (\Exception $e) {
-            return $this->respondWithError(41205);
+            return $this::respondWithError(41205);
         }
     }
 
@@ -330,15 +314,11 @@ class WalletService
             if ($response['status'] === 'error') {
                 return $response;
             } else {
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => 11211,
-                    'affectedRows' => [],
-                ];
+                return $this::createSuccessResponse(11211, [], false);
             }
 
         } catch (\Exception $e) {
-            return $this->respondWithError('Unknown Error.');
+            return $this::respondWithError(40601);//'Unknown Error.'
         }
     }
 }

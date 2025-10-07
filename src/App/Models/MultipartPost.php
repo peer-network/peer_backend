@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App\Models;
 
@@ -68,7 +69,7 @@ class MultipartPost
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
@@ -154,7 +155,7 @@ class MultipartPost
         $videoCount = 0;
         $audioCount = 0;
         $textCount = 0;
-        foreach ($this->media as $key => $media) {
+        foreach ($this->media as $media) {
             $type = $this->detectMediaType($media);
             switch ($type) {
                 case 'image':
@@ -203,7 +204,7 @@ class MultipartPost
 
         // Detect the first media type
         $detectedTypes = [];
-        foreach ($this->media as $key => $media) {
+        foreach ($this->media as $media) {
             $extension = pathinfo($media, PATHINFO_EXTENSION);
 
             $fileType = $this->getSubfolder(strtolower($extension));
@@ -215,7 +216,7 @@ class MultipartPost
 
         // Check all media types are the same
         $firstType = $detectedTypes[0];
-        foreach ($detectedTypes as $index => $type) {
+        foreach ($detectedTypes as $type) {
             if ($type !== $firstType) {
                 return false;
             }
@@ -259,7 +260,7 @@ class MultipartPost
     {
         $isFileExists = true;
 
-        foreach ($this->getMedia() as $key => $media) {
+        foreach ($this->getMedia() as $media) {
 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/tmp";
 
@@ -282,7 +283,7 @@ class MultipartPost
     {
         $allMetadata = [];
 
-        foreach ($this->getMedia() as $key => $media) {
+        foreach ($this->getMedia() as $media) {
             $originalType = $media->getClientMediaType();
             $fileName = $media->getClientFilename();
             $extension = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -322,8 +323,8 @@ class MultipartPost
 
         $tmpFolder = __DIR__ . "/../../../runtime-data/media/tmp/";
 
-        foreach ($this->getMedia() as $key => $media) {
-            // Open the file stream
+        foreach ($this->getMedia() as $media) {
+             // Open the file stream
             $stream = new \Slim\Psr7\Stream(fopen($tmpFolder.$media, 'r'));
 
             // Create the UploadedFile object
@@ -462,7 +463,11 @@ class MultipartPost
     {
         $tmpFolder = __DIR__ . "/../../../runtime-data/media/tmp/";
 
+<<<<<<< HEAD
         foreach ($this->getMedia() as $key => $media) {
+=======
+        foreach ($this->getMedia() as $media) {        
+>>>>>>> development
 
             // Calculate Subfolder
             $extension = pathinfo($media, PATHINFO_EXTENSION);

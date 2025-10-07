@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\User;
 use Fawaz\App\UserBlock;
 use Fawaz\App\UserInfo;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class UserInfoMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
@@ -279,7 +281,7 @@ class UserInfoMapper
                 $this->updateFollowCounts($followeduserid, -1, "amountfollower");
 
                 $action = false;
-                $response = 11103;
+                $response = "11103";
             } else {
 
                 $query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
@@ -292,7 +294,7 @@ class UserInfoMapper
                 $this->updateFollowCounts($followeduserid, 1, "amountfollower");
 
                 $action = true;
-                $response = 11104;
+                $response = "11104";
             }
 
             // $this->updateChatsStatus($followerid, $followeduserid);
@@ -303,7 +305,7 @@ class UserInfoMapper
 
         } catch (\Exception $e) {
             $this->logger->error('Failed to toggle user follow', ['exception' => $e]);
-            return ['status' => 'error', 'ResponseCode' => 41103];
+            return ['status' => 'error', 'ResponseCode' => "41103"];
         }
     }
 
@@ -386,7 +388,7 @@ class UserInfoMapper
             $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
             $stmt->execute();
 
-            $this->logger->info('Query.setFollowUserResponse Resolvers', ['uid' => $followerid]);
+            $this->logger->debug('Query.setFollowUserResponse Resolvers', ['uid' => $followerid]);
         } catch (\InvalidArgumentException $e) {
             $this->logger->error('Failed to toggle user follow', [
                 'exception' => $e->getMessage(),
@@ -458,7 +460,7 @@ class UserInfoMapper
                 $stmt->execute();
 
                 $action = false;
-                $response = 11106;
+                $response = "11106";
             } else {
                 // Block the user
                 $query = "INSERT INTO user_block_user (blockerid, blockedid) VALUES (:blockerid, :blockedid)";
@@ -473,7 +475,7 @@ class UserInfoMapper
                 $stmt->execute();
 
                 $action = true;
-                $response = 11105;
+                $response = "11105";
             }
 
             return ['status' => 'success', 'ResponseCode' => $response, 'isBlocked' => $action];
@@ -482,12 +484,12 @@ class UserInfoMapper
             $this->logger->error('Database error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'ResponseCode' => 41106];
+            return ['status' => 'error', 'ResponseCode' => "41106"];
         } catch (\Exception $e) {
             $this->logger->error('Unexpected error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);
-            return ['status' => 'error', 'ResponseCode' => 41106];
+            return ['status' => 'error', 'ResponseCode' => "41106"];
         }
     }
 
@@ -545,7 +547,7 @@ class UserInfoMapper
             return [
                 'status' => 'success',
                 'counter' => $counter,
-                'ResponseCode' => 11107,
+                'ResponseCode' => "11107",
                 'affectedRows' => [
                     'blockedBy' => $blockedBy,
                     'iBlocked' => $iBlocked
@@ -555,7 +557,7 @@ class UserInfoMapper
             $this->logger->error("Database error while fetching block relationships", ['error' => $e->getMessage()]);
             return [
                 'status' => 'error',
-                'ResponseCode' => 41108,
+                'ResponseCode' => "41108",
                 'affectedRows' => []
             ];
         }

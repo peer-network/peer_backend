@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Handler;
 
 use Fawaz\App\MultipartPostService;
@@ -7,14 +9,14 @@ use Fawaz\App\PostService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Slim\Psr7\Response;
 use Slim\Psr7\UploadedFile;
 
 class MultipartPostHandler implements RequestHandlerInterface
 {
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected MultipartPostService $multipartPostService
     ) {
     }
@@ -103,7 +105,7 @@ class MultipartPostHandler implements RequestHandlerInterface
             }
 
             $uploadedFilesObj = [];
-            foreach ($normalized as $index => $fileObj) {
+            foreach ($normalized as $fileObj) {
                 $uploadedFilesObj[] = new UploadedFile(
                     $fileObj['tmp_name'],
                     $fileObj['name'],

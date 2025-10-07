@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\Services\JWTService;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
 use PDO;
 
@@ -16,7 +18,7 @@ class MultipartPostService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected PDO $db,
         protected PostService $postService,
         protected JWTService $tokenService
@@ -70,7 +72,7 @@ class MultipartPostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11515,
+                'ResponseCode' => "11515",
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
@@ -123,7 +125,7 @@ class MultipartPostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11515,
+                'ResponseCode' => "11515",
                 'uploadedFiles' => implode(',', $allMetadata),
             ];
         } catch (ValidationException $e) {

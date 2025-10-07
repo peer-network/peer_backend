@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 const LIKE_ = 2;
@@ -9,13 +11,15 @@ const POST_ = 5;
 use Fawaz\App\DailyFree;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\ResponseHelper;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class DailyFreeService
 {
+    use ResponseHelper;
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected DailyFreeMapper $dailyFreeMapper, protected TransactionManager $transactionManager)
+    public function __construct(protected PeerLoggerInterface $logger, protected DailyFreeMapper $dailyFreeMapper, protected TransactionManager $transactionManager)
     {
     }
 
@@ -27,11 +31,6 @@ class DailyFreeService
     public static function isValidUUID(string $uuid): bool
     {
         return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
-    }
-
-    private function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
     }
 
     private function checkAuthentication(): bool
@@ -52,18 +51,14 @@ class DailyFreeService
 
             if ($affectedRows === false) {
                 $this->logger->warning('DailyFree availability not found', ['userId' => $userId]);
-                return $this->respondWithError(40301);
+                return $this::respondWithError(40301);
             }
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11303,
-                'affectedRows' => $affectedRows,
-            ];
+            return $this::createSuccessResponse(11303, $affectedRows, false);
 
         } catch (\Throwable $e) {
             $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage(), 'userId' => $userId]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 
