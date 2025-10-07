@@ -9,7 +9,14 @@ use PDOException;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\Repositories\Interfaces\WalletBalanceRepositoryInterface;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
+use Fawaz\App\Repositories\Errors\RepositoryException;
 
+/**
+ * Wallet balance persistence adapter.
+ *
+ * Arithmetic for token amounts uses Rust-backed helpers via TokenHelper (FFI),
+ * ensuring consistent precision across the codebase.
+ */
 class WalletBalanceRepository implements WalletBalanceRepositoryInterface
 {
     public function __construct(private PeerLoggerInterface $logger, private PDO $db)
@@ -34,13 +41,18 @@ class WalletBalanceRepository implements WalletBalanceRepositoryInterface
 
             return (float) $balance;
         } catch (PDOException $e) {
-            $this->logger->error('Database error in getUserWalletBalance: ' . $e->getMessage());
-            throw new \RuntimeException('Unable to fetch wallet balance');
+            $this->logger->error('Database error in getBalance: ' . $e->getMessage());
+            throw new RepositoryException('Unable to fetch wallet balance');
         }
 
     }
 
-    public function setBalance(string $userId, float $liquidity): bool
+    /**
+     * Set absolute balance and persist Q64.96 mirror.
+     * Uses Rust-backed math (via TokenHelper) where arithmetic is required;
+     * Q64.96 conversion uses BCMath for big integer scaling.
+     */
+    public function setBalance(string $userId, float $liquidity): void
     {
         $this->logger->debug('WalletBalanceRepository.setBalance started');
 
@@ -65,15 +77,14 @@ class WalletBalanceRepository implements WalletBalanceRepositoryInterface
                 $stmt->bindValue(':createdat', $now, PDO::PARAM_STR);
                 $stmt->execute();
             }
-
-            return true;
         } catch (\Throwable $e) {
             $this->logger->error('Error setting liquidity', ['error' => $e->getMessage(), 'userid' => $userId]);
-            return false;
+            throw new RepositoryException('Unable to setBalance');
         }
     }
 
     /**
+     * Increment/decrement balance by delta using Rust-backed math for precision.
      * See WalletBalanceRepositoryInterface::addToBalance
      */
     public function addToBalance(string $userId, float $delta): float
@@ -120,13 +131,13 @@ class WalletBalanceRepository implements WalletBalanceRepositoryInterface
                 $stmt->execute();
             }
 
-            $this->logger->info('Wallet balance updated successfully', ['newLiquidity' => $newLiquidity]);
+            $this->logger->debug('Wallet balance updated successfully', ['newLiquidity' => $newLiquidity]);
             $this->setBalance($userId, $newLiquidity);
 
             return $newLiquidity;
         } catch (\Throwable $e) {
-            $this->logger->error('Database error in saveWalletEntry: ' . $e);
-            throw new \RuntimeException('Unable to save wallet entry');
+            $this->logger->error('Database error in addToBalancey: ' . $e);
+            throw new RepositoryException('Unable to addToBalance');
         }
     }
 
