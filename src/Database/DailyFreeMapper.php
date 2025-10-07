@@ -5,12 +5,12 @@ namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\DailyFree;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use \InvalidArgumentException;
 
 class DailyFreeMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 

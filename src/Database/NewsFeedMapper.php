@@ -5,12 +5,12 @@ namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\Post;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\NewsFeed;
 
 class NewsFeedMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 

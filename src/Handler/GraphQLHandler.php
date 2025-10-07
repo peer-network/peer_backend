@@ -11,14 +11,14 @@ use GraphQL\Validator\Rules\QueryComplexity;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Slim\Psr7\Response;
 use GraphQL\Error\DebugFlag;
 
 class GraphQLHandler implements RequestHandlerInterface
 {
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected GraphQLSchemaBuilder $schemaBuilder,
     ) {
     }

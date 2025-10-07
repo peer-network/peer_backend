@@ -5,14 +5,14 @@ namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\CommentInfo;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\Status;
 
 class CommentInfoMapper
 {
     const STATUS_DELETED = 6;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 

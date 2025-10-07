@@ -5,7 +5,7 @@ namespace Fawaz\App;
 
 use Fawaz\Database\McapMapper;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class McapService
 {
@@ -13,7 +13,7 @@ class McapService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected McapMapper $mcapMapper
     ) {
     }

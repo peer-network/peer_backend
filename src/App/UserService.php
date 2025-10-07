@@ -14,7 +14,7 @@ use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\UserPreferences;
@@ -26,7 +26,7 @@ class UserService
     private Base64FileHandler $base64filehandler;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected DailyFreeMapper $dailyFreeMapper,
         protected UserMapper $userMapper,
         protected UserPreferencesMapper $userPreferencesMapper,

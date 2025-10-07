@@ -6,7 +6,7 @@ namespace Fawaz\Services;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use DateTime;
 
 class JWTService
@@ -17,7 +17,7 @@ class JWTService
     private string $refreshPublicKey;
     private int $accessTokenValidity;
     private int $refreshTokenValidity;
-    private LoggerInterface $logger;
+    private PeerLoggerInterface $logger;
 
     public function __construct(
         string $privateKey,
@@ -26,7 +26,7 @@ class JWTService
         string $refreshPublicKey,
         int $accessTokenValidity,
         int $refreshTokenValidity,
-        LoggerInterface $logger
+        PeerLoggerInterface $logger
     ) {
         $this->privateKey = $privateKey;
         $this->publicKey = $publicKey;

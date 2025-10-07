@@ -6,13 +6,11 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\Mcap;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class McapMapper
 {
-    use ResponseHelper;
-    
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 

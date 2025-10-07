@@ -6,7 +6,7 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\Services\JWTService;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
 use PDO;
 
@@ -17,7 +17,7 @@ class MultipartPostService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected PDO $db,
         protected PostService $postService,
         protected JWTService $tokenService

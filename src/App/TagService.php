@@ -5,7 +5,7 @@ namespace Fawaz\App;
 
 use Fawaz\App\Tag;
 use Fawaz\Database\TagMapper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;
@@ -15,7 +15,7 @@ class TagService
     use ResponseHelper;
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected TagMapper $tagMapper, protected TransactionManager $transactionManager)
+    public function __construct(protected PeerLoggerInterface $logger, protected TagMapper $tagMapper, protected TransactionManager $transactionManager)
     {
     }
 

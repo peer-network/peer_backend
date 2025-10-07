@@ -5,7 +5,7 @@ namespace Fawaz\App;
 
 use Fawaz\App\Contactus;
 use Fawaz\Database\ContactusMapper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\ResponseHelper;
@@ -15,7 +15,7 @@ class ContactusService
     use ResponseHelper;
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected ContactusMapper $contactUsMapper, protected TransactionManager $transactionManager)
+    public function __construct(protected PeerLoggerInterface $logger, protected ContactusMapper $contactUsMapper, protected TransactionManager $transactionManager)
     {
     }
 

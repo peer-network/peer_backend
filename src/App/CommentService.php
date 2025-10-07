@@ -11,7 +11,7 @@ use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class CommentService
 {
@@ -19,7 +19,7 @@ class CommentService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected CommentMapper $commentMapper,
         protected CommentInfoMapper $commentInfoMapper,
         protected PostInfoMapper $postInfoMapper,

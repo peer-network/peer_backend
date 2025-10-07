@@ -7,7 +7,7 @@ use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class PoolMapper
 {
@@ -16,7 +16,7 @@ class PoolMapper
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 

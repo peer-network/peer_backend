@@ -8,7 +8,7 @@ use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\ReportTargetType;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Database\PostMapper;
 use Fawaz\Utils\ResponseHelper;
 
@@ -18,7 +18,7 @@ class PostInfoService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger, 
+        protected PeerLoggerInterface $logger, 
         protected PostInfoMapper $postInfoMapper, 
         protected CommentMapper $commentMapper, 
         protected ReportsMapper $reportMapper,

@@ -7,7 +7,7 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Database\PeerTokenMapper;
 
 class AlphaMintService
@@ -16,7 +16,7 @@ class AlphaMintService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected UserMapper $userMapper,
         protected UserService $userService,
         protected WalletMapper $walletMapper,

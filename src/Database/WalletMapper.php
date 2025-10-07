@@ -9,7 +9,7 @@ use Fawaz\App\Wallett;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 
 use function DI\string;
@@ -39,7 +39,7 @@ class WalletMapper
 
     const STATUS_DELETED = 6;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
     {
     }
 

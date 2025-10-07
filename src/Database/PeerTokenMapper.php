@@ -9,7 +9,7 @@ use PDO;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use RuntimeException;
 use Fawaz\App\Status;
 use Fawaz\config\constants\ConstantsConfig;
@@ -22,7 +22,7 @@ class PeerTokenMapper
     private string $peerWallet;
     private string $btcpool;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper) {}
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper) {}
 
     /**
      * Loads and validates the liquidity pool wallets.

@@ -7,7 +7,7 @@ use Fawaz\App\Wallet;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class PeerTokenService
 {
@@ -15,7 +15,7 @@ class PeerTokenService
 
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected PeerTokenMapper $peerTokenMapper, protected TransactionManager $transactionManager)
+    public function __construct(protected PeerLoggerInterface $logger, protected PeerTokenMapper $peerTokenMapper, protected TransactionManager $transactionManager)
     {
     }
 

@@ -5,7 +5,7 @@ namespace Fawaz\App;
 
 use Fawaz\App\Wallet;
 use Fawaz\Database\WalletMapper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use \Exception;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;

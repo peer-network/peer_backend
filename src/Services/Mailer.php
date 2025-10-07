@@ -3,16 +3,16 @@ declare(strict_types=1);
 
 namespace Fawaz\Services;
 
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class Mailer
 {
     private array $envi;
-    private LoggerInterface $logger;
+    private PeerLoggerInterface $logger;
 
     public function __construct(
 		array $envi,
-        LoggerInterface $logger
+        PeerLoggerInterface $logger
     ) {
         $this->envi = $envi;
         $this->logger = $logger;
