@@ -376,10 +376,6 @@ clean-prune: clean-all ## Remove ALL unused images, build cache, and volumes
 	@echo "WARNING: This will remove ALL unused images, build cache, and volumes on your system!"
 	docker system prune -af --volumes
 
-hot-ci:
-	$(MAKE) restart-db
-	$(MAKE) test
-
 ensure-gitleaks: ## Ensure Gitleaks is installed locally (auto-install if missing)
 	@if command -v gitleaks >/dev/null 2>&1; then \
 		echo "Gitleaks already installed: $$(gitleaks version)"; \
