@@ -353,6 +353,11 @@ hot-ci: ## Run full local CI workflow (setup, tests, cleanup)
 	$(MAKE) restart-db
 	$(MAKE) test
 
+phpstan-dev: ## Run PHPStan static analysis inside backend container
+	@echo "Running PHPStan analysis (level defined in phpstan.neon)..."
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) run --rm backend \
+		sh -c "composer install --prefer-dist --no-interaction && vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
+
 # ---- Developer Shortcuts ----
 .PHONY: logs db bash-backend
 
