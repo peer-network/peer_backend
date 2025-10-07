@@ -52,7 +52,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
     private function replacePlaceholders(string $text): string
     {
         return preg_replace_callback(
-            '/\{([A-Z0-9_.]+)\}/',
+            '/\{([a-zA-Z0-9_.]+)\}/',
             function ($matches) {
                 $path = explode('.', $matches[1]);
                 return $this->getValueFromPath($this->constants, $path);
