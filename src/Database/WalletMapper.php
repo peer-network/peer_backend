@@ -11,6 +11,7 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\App\Repositories\Interfaces\WalletBalanceRepositoryInterface;
 
 use function DI\string;
 
@@ -39,7 +40,12 @@ class WalletMapper
 
     const STATUS_DELETED = 6;
 
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
+    public function __construct(
+        protected PeerLoggerInterface $logger,
+        protected PDO $db,
+        protected LiquidityPool $pool,
+        protected WalletBalanceRepositoryInterface $walletBalanceRepository
+    )
     {
     }
 
@@ -70,7 +76,7 @@ class WalletMapper
 
         $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
 
-        $currentBalance = $this->getUserWalletBalance($userId);
+        $currentBalance = $this->walletBalanceRepository->getBalance($userId);
         if (empty($currentBalance)) {
             $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                 'Balance' => $currentBalance,
@@ -1086,7 +1092,7 @@ class WalletMapper
     {
         $this->logger->debug('WalletMapper.getPercentBeforeTransaction started');
 
-        $account = $this->getUserWalletBalance($userId);
+        $account = $this->walletBalanceRepository->getBalance($userId);
         $createdat = (new \DateTime())->format('Y-m-d H:i:s.u');
 
         if ($account <= $tokenAmount) {
@@ -1183,7 +1189,7 @@ class WalletMapper
         $whereby = $mapping[$art]['whereby'];
         $text = $mapping[$art]['text'];
 
-        $currentBalance = $this->getUserWalletBalance($userId);
+        $currentBalance = $this->walletBalanceRepository->getBalance($userId);
 
         if ($currentBalance < $price) {
             $this->logger->warning('Insufficient balance.', [
@@ -1261,98 +1267,17 @@ class WalletMapper
 
     public function getUserWalletBalance(string $userId): float
     {
-        $this->logger->debug('WalletMapper.getUserWalletBalance started');
-
-        $query = "SELECT COALESCE(liquidity, 0) AS balance 
-                  FROM wallett 
-                  WHERE userid = :userId";
-
-        try {
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
-            $stmt->execute();
-            $balance = $stmt->fetchColumn();
-
-            $this->logger->info('Fetched wallet balance', ['balance' => $balance]);
-
-            return (float) $balance;
-        } catch (\PDOException $e) {
-            $this->logger->error('Database error in getUserWalletBalance: ' . $e->getMessage());
-            throw new \RuntimeException('Unable to fetch wallet balance');
-        }
+        return $this->walletBalanceRepository->getBalance($userId);
     }
 
     public function updateUserLiquidity(string $userId, float $liquidity): bool
     {
-        try {
-
-            $sqlUpdate = "UPDATE users_info SET liquidity = :liquidity, updatedat = CURRENT_TIMESTAMP WHERE userid = :userid";
-            $stmt = $this->db->prepare($sqlUpdate);
-
-            $stmt->bindValue(':liquidity', $liquidity, \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-
-            $stmt->execute();
-
-            return true;
-        } catch (\Throwable $e) {
-            $this->logger->error('Error updating liquidity', ['exception' => $e->getMessage(), 'userid' => $userId]);
-            return false;
-        }
+        return $this->walletBalanceRepository->setBalance($userId, $liquidity);
     }
 
     public function saveWalletEntry(string $userId, float $liquidity): float
     {
-        \ignore_user_abort(true);
-        $this->logger->debug('WalletMapper.saveWalletEntry started');
-
-        try {
-            $stmt = $this->db->prepare("SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE");
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->execute();
-            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if (!$row) {
-                // User does not exist, insert new wallet entry
-                $newLiquidity = abs($liquidity);
-                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
-
-                $stmt = $this->db->prepare(
-                    "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
-                    VALUES (:userid, :liquidity, :liquiditq, :updatedat)"
-                );
-                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
-                $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
-                $stmt->execute();
-            } else {
-                // User exists, safely calculate new liquidity
-                $currentBalance = (float)$row['liquidity'];
-                $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
-                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
-
-                $stmt = $this->db->prepare(
-                    "UPDATE wallett
-                    SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
-                    WHERE userid = :userid"
-                );
-                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
-                $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
-
-                $stmt->execute();
-            }
-
-            $this->logger->info('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
-            $this->updateUserLiquidity($userId, $newLiquidity);
-
-            return $newLiquidity;
-        } catch (\Throwable $e) {
-            $this->logger->error('Database error in saveWalletEntry: ' . $e);
-            throw new \RuntimeException('Unable to save wallet entry');
-        }
+        return $this->walletBalanceRepository->upsertAndReturn($userId, $liquidity);
     }
 
     public function callUserMove(string $userId): array

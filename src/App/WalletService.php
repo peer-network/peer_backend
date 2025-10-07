@@ -9,6 +9,7 @@ use Fawaz\Utils\PeerLoggerInterface;
 use \Exception;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\App\Repositories\Interfaces\WalletBalanceRepositoryInterface;
 
 class WalletService
 {
@@ -18,7 +19,8 @@ class WalletService
     public function __construct(
         protected PeerLoggerInterface $logger, 
         protected WalletMapper $walletMapper, 
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected WalletBalanceRepositoryInterface $walletBalanceRepository
     ) {}
 
     public function setCurrentUserId(string $userId): void
@@ -283,8 +285,8 @@ class WalletService
         $this->logger->debug('WalletService.getUserWalletBalance started');
 
         try {
-            return $this->walletMapper->getUserWalletBalance($userId);
-        } catch (\Exception $e) {
+            return $this->walletBalanceRepository->getBalance($userId);
+        } catch (\Throwable $e) {
             return 0.0;
         }
     }

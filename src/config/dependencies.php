@@ -12,6 +12,8 @@ use Fawaz\Utils\ResponseMessagesProviderImpl;
 use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
 use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\App\Repositories\Interfaces\WalletBalanceRepositoryInterface;
+use Fawaz\App\Repositories\WalletBalanceRepository;
 
 return static function (ContainerBuilder $containerBuilder, array $settings) {
     $containerBuilder->addDefinitions([
@@ -75,6 +77,14 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         ResponseMessagesProvider::class => function(ContainerInterface $c) {
             $path = __DIR__ . "/../../runtime-data/media/assets/response-codes.json";
             return new ResponseMessagesProviderImpl($path);
-        }
+        },
+
+        // Repositories bindings
+        WalletBalanceRepositoryInterface::class => function (ContainerInterface $c) {
+            return new WalletBalanceRepository(
+                $c->get(PeerLoggerInterface::class),
+                $c->get(PDO::class)
+            );
+        },
     ]);
 };
