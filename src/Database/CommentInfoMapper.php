@@ -1,17 +1,18 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\CommentInfo;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\Status;
 
 class CommentInfoMapper
 {
     const STATUS_DELETED = 6;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
@@ -22,7 +23,7 @@ class CommentInfoMapper
 
     public function loadById(string $commentid): CommentInfo|false
     {
-        $this->logger->info("CommentInfoMapper.loadById started");
+        $this->logger->debug("CommentInfoMapper.loadById started");
 
         $sql = "SELECT * FROM comment_info WHERE commentid = :commentid";
         $stmt = $this->db->prepare($sql);
@@ -38,7 +39,7 @@ class CommentInfoMapper
 
     public function isUserExistById(string $id): bool
     {
-        $this->logger->info("CommentInfoMapper.isUserExistById started");
+        $this->logger->debug("CommentInfoMapper.isUserExistById started");
 
         $status = Status::DELETED;                        
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE status != :status AND uid = :id");
@@ -51,7 +52,7 @@ class CommentInfoMapper
 
     public function insert(CommentInfo $commentInfo): bool
     {
-        $this->logger->info("CommentInfoMapper.insert started");
+        $this->logger->debug("CommentInfoMapper.insert started");
 
         $data = $commentInfo->getArrayCopy();
         
@@ -71,7 +72,7 @@ class CommentInfoMapper
 
     public function update(CommentInfo $commentInfo): void
     {
-        $this->logger->info("CommentInfoMapper.update started");
+        $this->logger->debug("CommentInfoMapper.update started");
 
         $data = $commentInfo->getArrayCopy();
 
@@ -87,7 +88,7 @@ class CommentInfoMapper
 
     public function addUserActivity(string $action, string $userid, string $commentid): bool
     {
-        $this->logger->info("CommentInfoMapper.addUserActivity started");
+        $this->logger->debug("CommentInfoMapper.addUserActivity started");
 
         $table = match ($action) {
             'likeComment' => 'user_comment_likes',
@@ -96,7 +97,7 @@ class CommentInfoMapper
         };
 
         if (!$table) {
-            $this->logger->error("Invalid action provided", ['action' => $action]);
+            $this->logger->warning("Invalid action provided", ['action' => $action]);
             return false;
         }
 
@@ -116,7 +117,7 @@ class CommentInfoMapper
 
     public function countLikes(string $commentid): int
     {
-        $this->logger->info("CommentMapper.countLikes started");
+        $this->logger->debug("CommentMapper.countLikes started");
 
         $sql = "SELECT COUNT(*) FROM user_comment_likes WHERE commentid = :commentid";
         $stmt = $this->db->prepare($sql);
@@ -126,7 +127,7 @@ class CommentInfoMapper
 
     public function isLiked(string $commentid, string $userid): bool
     {
-        $this->logger->info("CommentMapper.isLiked started");
+        $this->logger->debug("CommentMapper.isLiked started");
 
         $sql = "SELECT COUNT(*) FROM user_comment_likes WHERE commentid = :commentid AND userid = :userid";
         $stmt = $this->db->prepare($sql);

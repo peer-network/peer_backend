@@ -9,7 +9,7 @@ use PDO;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use RuntimeException;
 use Fawaz\App\Status;
 use Fawaz\config\constants\ConstantsConfig;
@@ -22,7 +22,7 @@ class PeerTokenMapper
     private string $peerWallet;
     private string $btcpool;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper) {}
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper) {}
 
     /**
      * Loads and validates the liquidity pool wallets.
@@ -71,7 +71,7 @@ class PeerTokenMapper
     {
         \ignore_user_abort(true);
 
-        $this->logger->info('PeerTokenMapper.transferToken started');
+        $this->logger->debug('PeerTokenMapper.transferToken started');
 
         $recipient = (string) $args['recipient'];
 
@@ -205,10 +205,6 @@ class PeerTokenMapper
                 // ]);
 
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -235,10 +231,6 @@ class PeerTokenMapper
                 ]);
 
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -262,10 +254,6 @@ class PeerTokenMapper
                     'transferaction' => 'INVITER_FEE'
                 ]);
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -290,10 +278,6 @@ class PeerTokenMapper
                     'transferaction' => 'POOL_FEE'
                 ]);
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -318,10 +302,6 @@ class PeerTokenMapper
                     'transferaction' => 'PEER_FEE'
                 ]);
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -346,10 +326,6 @@ class PeerTokenMapper
                     'transferaction' => 'BURN_FEE'
                 ]);
                 $id = self::generateUUID();
-                if (empty($id)) {
-                    $this->logger->critical('Failed to generate logwins ID');
-                    return self::respondWithError(41401);
-                }
 
                 $args = [
                     'token' => $id,
@@ -365,7 +341,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11212,
+                'ResponseCode' => "11212",
                 'tokenSend' => $numberoftokens,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'createdat' => date('Y-m-d H:i:s.u')
@@ -409,7 +385,7 @@ class PeerTokenMapper
      */
     public function getUserWalletBalance(string $userId): string
     {
-        $this->logger->info('WalletMapper.getUserWalletBalance started');
+        $this->logger->debug('WalletMapper.getUserWalletBalance started');
 
         $query = "SELECT liquidity AS balance 
                   FROM wallett 
@@ -447,7 +423,7 @@ class PeerTokenMapper
     // DONE
     public function getTransactions(string $userId, array $args): ?array
     {
-        $this->logger->info("PeerTokenMapper.getTransactions started");
+        $this->logger->debug("PeerTokenMapper.getTransactions started");
 
         // Define FILTER mappings. 
         $typeMap = [
@@ -542,7 +518,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11215,
+                'ResponseCode' => "11215",
                 'affectedRows' => $data
             ];
         } catch (\Throwable $th) {
