@@ -599,7 +599,7 @@ class PostMapper
 
         // Show only Valid Content
         $whereClauses[] = "p.status = :postStatus";
-        $params['postStatus'] = 0;
+        $params['postStatus'] = ConstantsConfig::post()['STATUS']['PUBLISHED'];
 
         if ($postId !== null) {
             $whereClauses[] = "p.postid = :postId";

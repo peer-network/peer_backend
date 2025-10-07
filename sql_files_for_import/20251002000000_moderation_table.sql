@@ -29,7 +29,12 @@ BEGIN
 		ADD CONSTRAINT fk_userreport_moderationticketid FOREIGN KEY (moderationticketid) REFERENCES moderation_tickets(uid) ON DELETE SET NULL,
 		ADD CONSTRAINT fk_userreport_moderationid FOREIGN KEY (moderationid) REFERENCES moderations(uid) ON DELETE SET NULL;
 
-	-- Add Total Reports column to posts table
+	-- Add Total Reports column to post_info table
 	ALTER TABLE post_info
 		ADD COLUMN IF NOT EXISTS totalreports INT DEFAULT 0 NOT NULL;
+
+	-- Add Total Reports column to advertisements_info table
+	ALTER TABLE advertisements_info
+		ADD COLUMN IF NOT EXISTS totalreports INT DEFAULT 0 NOT NULL;
+		
 END$$;

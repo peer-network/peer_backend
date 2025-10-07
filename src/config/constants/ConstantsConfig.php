@@ -296,6 +296,11 @@ class ConstantsConfig
                 'SEARCH' => 5,
             ],
         ],
+        'STATUS' => [
+            'PUBLISHED' => 0,
+            'ADVERTISED' => 1,
+            'ILLEGAL' => 2,
+        ],
     ];
 
     private const WALLET = [

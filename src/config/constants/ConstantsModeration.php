@@ -67,4 +67,10 @@ class ConstantsModeration
     public const MODERATION_TICKETS_STATUS_OPEN = 'open';
     public const MODERATION_TICKETS_STATUS_CLOSED = 'closed';
 
+    /**
+     * Post Status
+     */
+    public const POST_STATUS_PUBLISHED = 0;
+    public const POST_STATUS_ADVERTISED = 1;
+    public const POST_STATUS_ILLEGAL = 2;
 }
