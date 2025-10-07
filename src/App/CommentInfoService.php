@@ -120,17 +120,8 @@ class CommentInfoService
 
             $this->transactionManager->commit();
 
-<<<<<<< HEAD
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11603,
-                'affectedRows' => $commentInfo->getLikes(),
-            ];
-        } catch (\Exception $e) {
-=======
             return $this::createSuccessResponse(11603);
         }catch (\Exception $e) {
->>>>>>> development
             $this->transactionManager->rollback();
             $this->logger->error('Error while fetching comment data', ['exception' => $e]);
             return $this::respondWithError(41601);

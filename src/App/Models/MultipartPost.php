@@ -463,11 +463,7 @@ class MultipartPost
     {
         $tmpFolder = __DIR__ . "/../../../runtime-data/media/tmp/";
 
-<<<<<<< HEAD
-        foreach ($this->getMedia() as $key => $media) {
-=======
         foreach ($this->getMedia() as $media) {        
->>>>>>> development
 
             // Calculate Subfolder
             $extension = pathinfo($media, PATHINFO_EXTENSION);
