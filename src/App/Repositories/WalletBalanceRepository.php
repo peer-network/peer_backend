@@ -8,6 +8,7 @@ use PDO;
 use PDOException;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\Repositories\Interfaces\WalletBalanceRepositoryInterface;
+use Fawaz\Utils\TokenCalculations\TokenHelper;
 
 class WalletBalanceRepository implements WalletBalanceRepositoryInterface
 {
@@ -19,19 +20,24 @@ class WalletBalanceRepository implements WalletBalanceRepositoryInterface
     {
         $this->logger->debug('WalletBalanceRepository.getBalance started');
 
-        $query = 'SELECT COALESCE(liquidity, 0) AS balance FROM wallett WHERE userid = :userId';
+        $query = "SELECT COALESCE(liquidity, 0) AS balance 
+                  FROM wallett 
+                  WHERE userid = :userId";
+
         try {
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
             $stmt->execute();
             $balance = $stmt->fetchColumn();
 
-            $this->logger->info('Fetched wallet balance', ['userId' => $userId, 'balance' => $balance]);
+            $this->logger->debug('Fetched wallet balance', ['balance' => $balance]);
+
             return (float) $balance;
         } catch (PDOException $e) {
-            $this->logger->error('DB error in getBalance', ['error' => $e->getMessage(), 'userId' => $userId]);
+            $this->logger->error('Database error in getUserWalletBalance: ' . $e->getMessage());
             throw new \RuntimeException('Unable to fetch wallet balance');
         }
+
     }
 
     public function setBalance(string $userId, float $liquidity): bool
@@ -67,50 +73,67 @@ class WalletBalanceRepository implements WalletBalanceRepositoryInterface
         }
     }
 
-    public function upsertAndReturn(string $userId, float $liquidity): float
+    /**
+     * See WalletBalanceRepositoryInterface::addToBalance
+     */
+    public function addToBalance(string $userId, float $delta): float
     {
-        $this->logger->debug('WalletBalanceRepository.upsertAndReturn started');
+        \ignore_user_abort(true);
+        $this->logger->debug('WalletBalanceRepository.addToBalance started');
 
         try {
-            // Lock row for update if exists
-            $stmt = $this->db->prepare('SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE');
-            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+            $stmt = $this->db->prepare("SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE");
+            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
             $stmt->execute();
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (!$row) {
-                // Insert new
-                $newLiquidity = abs($liquidity);
-                $stmt = $this->db->prepare('INSERT INTO wallett (userid, liquidity, liquiditq, updatedat) VALUES (:userid, :liquidity, :liquiditq, :updatedat)');
-                $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
-                $stmt->bindValue(':liquidity', $newLiquidity, PDO::PARAM_STR);
-                $stmt->bindValue(':liquiditq', $this->decimalToQ64_96($newLiquidity), PDO::PARAM_STR);
-                $stmt->bindValue(':updatedat', (new DateTime())->format('Y-m-d H:i:s.u'), PDO::PARAM_STR);
+                // User does not exist, insert new wallet entry
+                $newLiquidity = abs($delta);
+                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
+
+                $stmt = $this->db->prepare(
+                    "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
+                    VALUES (:userid, :liquidity, :liquiditq, :updatedat)"
+                );
+                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
+                $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
+                $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
                 $stmt->execute();
-                return $newLiquidity;
+            } else {
+                // User exists, safely calculate new liquidity
+                $currentBalance = (float)$row['liquidity'];
+                $newLiquidity = TokenHelper::addRc($currentBalance, $delta);
+                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
+
+                $stmt = $this->db->prepare(
+                    "UPDATE wallett
+                    SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
+                    WHERE userid = :userid"
+                );
+                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+                $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
+                $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
+                $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+
+                $stmt->execute();
             }
 
-            // Update existing
-            $newLiquidity = (float) $liquidity;
-            $stmt = $this->db->prepare('UPDATE wallett SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat WHERE userid = :userid');
-            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
-            $stmt->bindValue(':liquidity', $newLiquidity, PDO::PARAM_STR);
-            $stmt->bindValue(':liquiditq', $this->decimalToQ64_96($newLiquidity), PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', (new DateTime())->format('Y-m-d H:i:s.u'), PDO::PARAM_STR);
-            $stmt->execute();
+            $this->logger->info('Wallet balance updated successfully', ['newLiquidity' => $newLiquidity]);
+            $this->setBalance($userId, $newLiquidity);
 
             return $newLiquidity;
         } catch (\Throwable $e) {
-            $this->logger->error('Error upserting liquidity', ['error' => $e->getMessage(), 'userid' => $userId]);
-            throw new \RuntimeException('Unable to upsert wallet entry');
+            $this->logger->error('Database error in saveWalletEntry: ' . $e);
+            throw new \RuntimeException('Unable to save wallet entry');
         }
     }
 
     private function decimalToQ64_96(float $value): string
     {
-        $scaleFactor = \bcpow('2', '96');
+        $scaleFactor = \bcpow('2', '96');   
         $decimalString = \number_format($value, 30, '.', '');
         return \bcmul($decimalString, $scaleFactor, 0);
     }
 }
-
