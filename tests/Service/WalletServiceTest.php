@@ -7,7 +7,7 @@ use Fawaz\App\WalletService;
 use Fawaz\Database\WalletMapper;
 use Fawaz\App\Wallet;
 use Fawaz\Database\Interfaces\TransactionManager;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class WalletServiceTest extends TestCase
 {
@@ -19,7 +19,7 @@ class WalletServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->walletMapperMock = $this->createMock(WalletMapper::class);
-        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(PeerLoggerInterface::class);
         $this->transactionManagerMock = $this->createMock(TransactionManager::class);
         $this->walletService = new WalletService(
             $this->loggerMock, 
