@@ -787,7 +787,7 @@ class WalletMapper
 
             $stmt->execute();
 
-            $this->saveWalletEntry($userId, $numBers);
+            $this->walletBalanceRepository->addToBalance($userId, $numBers);
 
             $this->logger->info('Inserted into wallet successfully', [
                 'userId' => $userId,
@@ -1190,15 +1190,6 @@ class WalletMapper
             ]);
             return self::respondWithError(41205);
         }
-    }
-
-    /**
-     * Add a delta to user's wallet balance and return the new balance.
-     * Delegates to WalletBalanceRepository which performs row-level locking.
-     */
-    public function saveWalletEntry(string $userId, float $liquidity): float
-    {
-        return $this->walletBalanceRepository->addToBalance($userId, $liquidity);
     }
 
     public function callUserMove(string $userId): array
