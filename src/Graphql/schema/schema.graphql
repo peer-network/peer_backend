@@ -5,70 +5,182 @@ schema {
 }
 
 type Subscription {
+  """Not in use"""
   getChatMessages(chatid: ID!): AddChatmessageResponse!
+  """Not in use"""
   setChatMessages(chatid: ID!, content: String!): AddChatmessageResponse!
 }
 
 type Query {
+  """Returns basic service info (e.g., current user ID and version)"""
   hello: HelloResponse!
+
+  """Search for users (supports pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   searchUser(userid: ID,contentFilterBy: ContentFilterType, username: String, offset: Int, limit: Int): UserListResponse!
+
+  """List all users (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse!
+
+  """Retrieve a user's public profile and posts"""
   getProfile(userid: ID,contentFilterBy: ContentFilterType, postLimit: Int): ProfileInfo!
+
+  """List followers and followings (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   listFollowRelations(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
+
+  """List friends (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!
+
+  """Returns detailed user stats for the currently logged-in user"""
   getUserInfo: UserInfoResponse!
+
+  """List users blocked by or blocking the current user (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
+
+  """List posts with filters (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX}; commentOffset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, commentLimit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   listPosts(filterBy: [PostFilterType!], contentFilterBy: ContentFilterType, IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
+
   listAdvertisementPosts(filterBy: [ContentType!], userid: ID, postid: ID, tag: String, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): ListAdvertisementPostsResponse!
+  
+  """Get engagement summary of a specific post"""
   getPostInfo(postid: ID!): PostInfoResponse!
+
+  """Get engagement summary of a specific comment"""
   getCommentInfo(commentId: ID!): CommentInfoResponse!
+
+  """List child comments (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
+
+  """List all tags (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   listTags(offset: Int, limit: Int): TagSearchResponse!
+
+  """Search tags by name (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   searchTags(tagName: String!, offset: Int, limit: Int): TagSearchResponse!
+
+  """Not in use"""
   getChat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse!
+
+  """Not in use"""
   listChats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
+
+  """Not in use"""
   listChatMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
+
+  """Check daily free interaction quota (post {DAILY_FREE.DAILY_FREE_ACTIONS.post}, like {DAILY_FREE.DAILY_FREE_ACTIONS.like}, comment {DAILY_FREE.DAILY_FREE_ACTIONS.comment}, dislike {DAILY_FREE.DAILY_FREE_ACTIONS.dislike})."""
   getDailyFreeStatus: GetDailyResponse!
+
+  """Get current token liquidity balance"""
   balance: CurrentLiquidity!
+
+  """List the user's win logs (day filter; pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
+
+  """List the user's token transfer logs (day filter; pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
+
+  """Return referral program UUID and personal referral link."""
   getReferralInfo: ReferralInfoResponse!
+
+  """List referred users with pagination."""
   referralList(offset: Int, limit: Int): ReferralListResponse!
+
+  """Returns a summary of today's interactions"""
   listTodaysInteractions: ListTodaysInteractionsResponse!
+
+  """Return current action token prices (post {TOKENOMICS.ACTION_TOKEN_PRICES.post}, like {TOKENOMICS.ACTION_TOKEN_PRICES.like}, dislike {TOKENOMICS.ACTION_TOKEN_PRICES.dislike}, comment {TOKENOMICS.ACTION_TOKEN_PRICES.comment})."""
   getActionPrices: GetActionPricesResponse!
+
+  """Verify daily limits and wallet balance for post creation. If successful, returns a short-lived eligibilityToken required for uploading a post."""
   postEligibility: PostEligibilityResponse!
+
+  """Return filtered list of token transactions (by type, direction, date range; pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
+
+  """List users who interacted with a post/comment (pagination: offset {PAGING.OFFSET.MIN}–{PAGING.OFFSET.MAX}, limit {PAGING.LIMIT.MIN}–{PAGING.LIMIT.MAX})."""
   postInteractions(getOnly: GetOnly!, contentFilterBy: ContentFilterType, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
+
+  """Return global tokenomics configuration (prices: post {TOKENOMICS.ACTION_TOKEN_PRICES.post}, like {TOKENOMICS.ACTION_TOKEN_PRICES.like}, dislike {TOKENOMICS.ACTION_TOKEN_PRICES.dislike}, comment {TOKENOMICS.ACTION_TOKEN_PRICES.comment}; GEM returns: view {TOKENOMICS.ACTION_GEMS_RETURNS.view}, like {TOKENOMICS.ACTION_GEMS_RETURNS.like}, dislike {TOKENOMICS.ACTION_GEMS_RETURNS.dislike}, comment {TOKENOMICS.ACTION_GEMS_RETURNS.comment}; minting {MINTING.DAILY_NUMBER_TOKEN})."""
   getTokenomics: TokenomicsResponse!
+  
   advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
 }
 
 type Mutation {
+  """Update user preferences (content filter level, completed onboardings)."""
   updateUserPreferences(userPreferences: UserPreferencesInput): UserPreferencesResponse!
+
+  """Change the username (requires current password). Username must match {USER.USERNAME.PATTERN} and be {USER.USERNAME.MIN_LENGTH}–{USER.USERNAME.MAX_LENGTH} chars."""
   updateUsername(username: String!, password: String!): DefaultResponse!
+
+  """Change the email address (requires current password)"""
   updateEmail(email: String!, password: String!): DefaultResponse!
+
+  """Change the password (requires current password). New password must match {USER.PASSWORD.PATTERN} and be {USER.PASSWORD.MIN_LENGTH}–{USER.PASSWORD.MAX_LENGTH} chars."""
   updatePassword(password: String!, expassword: String!): DefaultResponse!
+
+  """Update biography text ({USER.BIOGRAPHY.MIN_LENGTH}–{USER.BIOGRAPHY.MAX_LENGTH} chars)."""
   updateBio(biography: String!): DefaultResponse!
+
+  """Upload or update profile image (base64). Length {USER.IMAGE.MIN_LENGTH}–{USER.IMAGE.MAX_LENGTH}; recommended size ≤ {USER.AVATAR.MAX_SIZE_MB} MB."""
   updateProfileImage(img: String!): DefaultResponse!
+
+  """Follow or unfollow a user"""
   toggleUserFollowStatus(userid: ID!): FollowStatusResponse!
+
+  """Block or unblock a user"""
   toggleBlockUserStatus(userid: ID!): DefaultResponse!
+
+  """Permanently delete the current account (requires password)"""
   deleteAccount(password: String!): DefaultResponse!
+
+  """Not in use"""
   createChat(input: ChatInput!): AddChatResponse!
+
+  """Not in use"""
   updateChatInformations(input: UpdateChatInput!): AddChatResponse!
+
+  """Not in use"""
   addChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
+
+  """Not in use"""
   removeChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
+
+  """Not in use"""
   sendChatMessage(chatid: ID!, content: String!): AddChatmessageResponse!
+
+  """Not in use"""
   deleteChatMessage(chatid: ID!, messid: Int!): DefaultResponse!
+
+  """Not in use"""
   deleteChat(id: ID!): DefaultResponse!
+
+  """Not in use"""
   createChatFeed(input: FeedInput!): AddPostResponse!
+
+  """Like a comment"""
   likeComment(commentid: ID!): DefaultResponse!
+
+  """Report a comment for moderation"""
   reportComment(commentid: ID!): DefaultResponse!
+
+  """Report a user for moderation."""
   reportUser(userid: ID!): DefaultResponse!
+
+  """Delete a post created by the user"""
   deletePost(id: ID!): DefaultResponse!
+
+  """Create a new post (image, text, video, or audio)"""
   createPost(action: PostType!, input: PostInput!): PostResponse!
+
+  """Create a comment or reply (content {COMMENT.CONTENT.MIN_LENGTH}–{COMMENT.CONTENT.MAX_LENGTH} chars)."""
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
+
+  """Perform an action on a post (e.g., like, dislike, report, view, etc.)"""
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
-  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: "Use `resolveTransferV2`.")
+
+  """Transfer tokens to another user"""
+  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: """Use `resolveTransferV2`.""")
+
+  """Transfer tokens to another user with decimal precision and optional message."""
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
   advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): ListAdvertisementData!
   advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!, forceUpdate: Boolean): ListAdvertisementData!

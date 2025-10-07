@@ -1,15 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
 use PDO;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ReportTargetType;
 use DateTime;
 
 class ReportsMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
@@ -37,7 +38,7 @@ class ReportsMapper
         ?string $message = NULL
     ): ?bool {
 
-        $this->logger->info("ReportsMapper.addReports started");
+        $this->logger->debug("ReportsMapper.addReports started");
 
         $reportId = $this->generateUUID();
 

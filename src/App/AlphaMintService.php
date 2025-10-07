@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -6,7 +7,7 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Database\PeerTokenMapper;
 
 class AlphaMintService
@@ -15,7 +16,7 @@ class AlphaMintService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected UserMapper $userMapper,
         protected UserService $userService,
         protected WalletMapper $walletMapper,
@@ -50,7 +51,7 @@ class AlphaMintService
             return self::respondWithError(60501);
         }
 
-        $this->logger->info('UserService.alphaMint started');
+        $this->logger->debug('UserService.alphaMint started');
 
         try {
 
@@ -83,7 +84,7 @@ class AlphaMintService
                 }
                 $userCounts = 0;
                 $excluedUsers = [];
-                foreach ($alphaUsers as $key => $usr) {
+                foreach ($alphaUsers as $usr) {
                     $userData = $this->userMapper->checkIfNameAndSlugExist($usr['peer_username'], $usr['peer_app_slug']);
                     if($userData){
                         $userCounts++;
@@ -94,7 +95,7 @@ class AlphaMintService
 
                 if(count($alphaUsers) == $userCounts){
                     $totalAlphaUserMinted = 0;
-                    foreach ($alphaUsers as $key => $usr) {
+                    foreach ($alphaUsers as $usr) {
                         $userData = $this->userMapper->getUserByNameAndSlug($usr['peer_username'], $usr['peer_app_slug']);
 
                         if($userData){

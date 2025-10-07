@@ -8,13 +8,10 @@ use Fawaz\Services\Mailer;
 use Fawaz\Services\LiquidityPool;
 use DI\ContainerBuilder;
 use Fawaz\Utils\PeerLogger;
-use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProviderImpl;
 use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
-use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 return static function (ContainerBuilder $containerBuilder, array $settings) {
     $containerBuilder->addDefinitions([
@@ -32,20 +29,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 
             return $logger;
         },
-        LoggerInterface::class => function (ContainerInterface $c) {
-            $settings = $c->get('settings')['logger'];
-
-            $logger = new Logger($settings['name']);
-
-            $processor = new UidProcessor();
-            $logger->pushProcessor($processor);
-
-            $handler = new StreamHandler($settings['path'], $settings['level']);
-            $logger->pushHandler($handler);
-
-            return $logger;
-        },
-
+        
         JWTService::class => function (ContainerInterface $c) {
             $settings = $c->get('settings');
             return new JWTService(
@@ -55,7 +39,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
                 file_get_contents($settings['refreshPublicKeyPath']),
                 (int)$settings['accessTokenValidity'],
                 (int)$settings['refreshTokenValidity'],
-                $c->get(LoggerInterface::class)
+                $c->get(PeerLoggerInterface::class)
             );
         },
 
@@ -65,7 +49,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 			$Envi = ['mailapilink' => (string)$settings['mailapilink'], 'mailapikey' => (string)$settings['mailapikey']];
             return new Mailer(
                 $Envi,
-                $c->get(LoggerInterface::class)
+                $c->get(PeerLoggerInterface::class)
             );
         },
 
