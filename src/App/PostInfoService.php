@@ -263,6 +263,7 @@ class PostInfoService
             }
 
             $postInfo->setReports($postInfo->getReports() + 1);
+            $postInfo->setTotalReports($postInfo->getTotalReports() + 1);
             $this->postInfoMapper->update($postInfo);
 
             $this->transactionManager->commit();

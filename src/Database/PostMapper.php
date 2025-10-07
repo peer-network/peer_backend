@@ -595,6 +595,10 @@ class PostMapper
         $params = ['currentUserId' => $currentUserId];
         $whereClauses = ["p.feedid IS NULL"];
 
+        // Show only Valid Content
+        $whereClauses[] = "p.status = :postStatus";
+        $params['postStatus'] = 0;
+
         if ($postId !== null) {
             $whereClauses[] = "p.postid = :postId";
             $params['postId'] = $postId;
