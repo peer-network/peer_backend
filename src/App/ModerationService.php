@@ -76,12 +76,12 @@ class ModerationService {
 
         $page = max((int)($args['page'] ?? 1), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $statuses = array_keys(ConstantsModeration::contentModerationStatus());
 
         $items = UserReport::query();
 
-        var_dump(array_keys(ConstantsModeration::contentModerationStatus())); exit;
         // Apply Status filters
-        if(isset($args['status']) && in_array($args['status'], array_keys(ConstantsModeration::contentModerationStatus()))) {
+        if(isset($args['status']) && in_array($args['status'], $statuses)) {
             $items = $items->where('user_reports.status', $args['status']);
         }
 
@@ -112,7 +112,6 @@ class ModerationService {
                     'posts.media',
                     'posts.cover',
                     'posts.options',  
-                    'post_info.*', 
                     'comments.userid', 
                     'comments.parentid', 
                     'comments.content', 
@@ -125,7 +124,9 @@ class ModerationService {
                     'target_user.biography as target_user_biography', 
                     'target_user.updatedat as target_user_updatedat', 
                     )
-            ->orderByValue('status', 'ASC', array_keys(ConstantsModeration::contentModerationStatus()))
+            ->orderByValue('status', 'ASC', $statuses)
+            // ->orderBy('createdat', 'DESC')
+            ->latest()
             ->paginate($page, $limit);
 
         // Map records according to the target type
@@ -209,7 +210,7 @@ class ModerationService {
             'status' => $moderationAction,
         ]); 
 
-        $createdat = (string)(new DateTime())->format('Y-m-d H:i:s.u');
+        $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
 
         // var_dump($report[0]); exit;
         Moderation::insert([

@@ -8,11 +8,12 @@ use PDO;
 abstract class Model
 {
     protected static $db;
-    protected static string $orderBy = 'createdat';
+    protected static string $orderBy = 'ORDER BY createdat DESC';
     protected static string $limit = '';
     protected array $wheres = [];
     protected array $joins = [];
     protected array $selects = [];
+    protected array $orderBys = [];
 
     abstract protected static function table(): string;
 
@@ -59,10 +60,10 @@ abstract class Model
 
         $joinsSql = $this->buildJoins();
         $whereSql = $this->buildWhere($params);
+        $orderSql = $this->buildOrderBy();
 
-        $this->latest();
 
-        $sql = "SELECT * FROM " . static::table() . " {$joinsSql} {$whereSql} " . static::$orderBy . " LIMIT 1";
+        $sql = "SELECT * FROM " . static::table() . " {$joinsSql} {$whereSql} {$orderSql} LIMIT 1";
 
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
@@ -84,7 +85,6 @@ abstract class Model
         $whereSql = $this->buildWhere($params);
 
         $sql = "SELECT COUNT(*) as count FROM " . static::table() . " {$joinsSql} {$whereSql}";
-
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
 
@@ -123,8 +123,9 @@ abstract class Model
 
         $joinsSql = $this->buildJoins();
         $whereSql = $this->buildWhere($params);
+        $orderSql = $this->buildOrderBy();
 
-        $sql = "SELECT * FROM " . static::table() . " {$joinsSql} {$whereSql} " . static::$orderBy . " " . static::$limit;
+        $sql = "SELECT * FROM " . static::table() . " {$joinsSql} {$whereSql} {$orderSql} " . static::$limit;
 
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
@@ -149,7 +150,8 @@ abstract class Model
         $joinsSql = $this->buildJoins();
         $whereSql = $this->buildWhere($params);
 
-        $this->latest();
+        $orderSql = $this->buildOrderBy();
+
         // Calculate offset
         $offset = ($page - 1) * $perPage;
 
@@ -159,7 +161,9 @@ abstract class Model
         : static::table() . '.*';
 
         // Fetch data with limit and offset
-        $sql = "SELECT {$selectColumns} FROM " . static::table() . " {$joinsSql} {$whereSql} " . static::$orderBy . " LIMIT :limit OFFSET :offset";
+        $sql = "SELECT {$selectColumns} FROM " . static::table() . " {$joinsSql} {$whereSql} {$orderSql} LIMIT :limit OFFSET :offset";
+
+        // var_dump($sql); exit;
         $stmt = $db->prepare($sql);
 
         // Bind limit and offset
@@ -205,20 +209,22 @@ abstract class Model
 
 
 
+
     /**
-     * Order results by a specific column
+     * Order results by a specific column.
      */
     public function orderBy(string $column, string $direction = 'ASC'): static
     {
         $direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
         $aliasColumn = str_contains($column, '.') ? $column : static::table() . '.' . $column;
-        static::$orderBy = "ORDER BY {$aliasColumn} {$direction}";
+
+        $this->orderBys[] = "{$aliasColumn} {$direction}";
+
         return $this;
     }
 
-
     /**
-     * Order results by values
+     * Order results by specific values using CASE WHEN for custom ordering.
      */
     public function orderByValue(string $column, string $direction = 'ASC', array $values = []): static
     {
@@ -226,18 +232,18 @@ abstract class Model
         $aliasColumn = str_contains($column, '.') ? $column : static::table() . '.' . $column;
 
         if (!empty($values)) {
-            // Build CASE WHEN expression for custom ordering
             $cases = [];
             foreach ($values as $index => $value) {
                 $cases[] = "WHEN '{$value}' THEN {$index}";
             }
-            // ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'pending' THEN 1 WHEN 'archived' THEN 2 ELSE 999 END ASC
-            static::$orderBy = "ORDER BY CASE {$aliasColumn} " . implode(' ', $cases) . " ELSE 999 END {$direction}";
+            $this->orderBys[] = "CASE {$aliasColumn} " . implode(' ', $cases) . " ELSE 999 END {$direction}";
         } else {
-            static::$orderBy = "ORDER BY {$aliasColumn} {$direction}";
+            $this->orderBys[] = "{$aliasColumn} {$direction}";
         }
+
         return $this;
     }
+
 
 
     /**
@@ -288,6 +294,23 @@ abstract class Model
     protected function buildJoins(): string
     {
         return $this->joins ? implode(' ', $this->joins) : '';
+    }
+
+    /**
+     * Build the ORDER BY clause for the query.
+     */
+    protected function buildOrderBy(): string
+    {
+        if (empty($this->orderBys)) {
+            return static::$orderBy ?: ''; // fallback if none defined
+        }
+
+        // Support multiple orders, including CASE expressions
+        $clauses = array_map(function ($order) {
+            return str_starts_with(trim($order), 'CASE') ? $order : $order;
+        }, $this->orderBys);
+
+        return 'ORDER BY ' . implode(', ', $clauses);
     }
 
 
@@ -425,30 +448,27 @@ abstract class Model
 
     /**
      * Order results by the latest entries based on a specified column
-     * 
+     *
      * @param string $column The column to order by (default is 'createdat')
-     * 
-     * @return static The current instance for method chaining
+     * @return static
      */
     public function latest(string $column = 'createdat'): static
     {
         $aliasColumn = str_contains($column, '.') ? $column : static::table() . '.' . $column;
-        static::$orderBy = "ORDER BY {$aliasColumn} DESC";
+        $this->orderBys[] = "{$aliasColumn} DESC";
         return $this;
     }
 
     /**
      * Order results by the oldest entries based on a specified column
-     * 
+     *
      * @param string $column The column to order by (default is 'createdat')
-     * 
-     * @return static The current instance for method chaining
+     * @return static
      */
     public function oldest(string $column = 'createdat'): static
     {
         $aliasColumn = str_contains($column, '.') ? $column : static::table() . '.' . $column;
-
-        static::$orderBy = "ORDER BY {$aliasColumn} ASC";
+        $this->orderBys[] = "{$aliasColumn} ASC";
         return $this;
     }
 
