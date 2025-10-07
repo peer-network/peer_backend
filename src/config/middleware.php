@@ -6,7 +6,7 @@ use Psr\Container\ContainerInterface;
 use Fawaz\Middleware\RateLimiterMiddleware;
 use Fawaz\Middleware\SecurityHeadersMiddleware;
 use Fawaz\RateLimiter\RateLimiter;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 return static function (App $app, ContainerInterface $container, array $settings) {
     $app->addBodyParsingMiddleware();
@@ -18,7 +18,7 @@ return static function (App $app, ContainerInterface $container, array $settings
     $path = (string)$settings['rateLimiterpath'];
     $rateLimiter = new RateLimiter($rate, $time, $path);
 
-    $logger = $container->get(LoggerInterface::class);
+    $logger = $container->get(PeerLoggerInterface::class);
 
     $app->add(new RateLimiterMiddleware($rateLimiter, $logger));
 

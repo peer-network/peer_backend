@@ -1,11 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\Services\JWTService;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
 use PDO;
 
@@ -16,7 +17,7 @@ class MultipartPostService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected PDO $db,
         protected PostService $postService,
         protected JWTService $tokenService
@@ -34,7 +35,7 @@ class MultipartPostService
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
                 if ($decodedToken) {
                     $this->currentUserId = $decodedToken->uid;
-                    $this->logger->info('Query.setCurrentUserId started');
+                    $this->logger->debug('Query.setCurrentUserId started');
                 } else {
                     $this->currentUserId = null;
                 }
@@ -71,7 +72,7 @@ class MultipartPostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11515,
+                'ResponseCode' => "11515",
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
@@ -124,7 +125,7 @@ class MultipartPostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11515,
+                'ResponseCode' => "11515",
                 'uploadedFiles' => implode(',', $allMetadata),
             ];
         } catch (ValidationException $e) {
@@ -143,7 +144,7 @@ class MultipartPostService
      */
     public function updateTokenStatus($eligibilityToken): void
     {
-        $this->logger->info("MultipartPostService.updateTokenStatus started");
+        $this->logger->debug("MultipartPostService.updateTokenStatus started");
 
         try {
             $updateSql = "
@@ -171,7 +172,7 @@ class MultipartPostService
      */
     public function checkTokenExpiry($requestObj): void
     {
-        $this->logger->info("MultipartPostService.checkTokenExpiry started");
+        $this->logger->debug("MultipartPostService.checkTokenExpiry started");
 
         if(empty($requestObj['token'])){
             throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty

@@ -349,6 +349,10 @@ ci2: check-hooks env-ci init ## Run full isolated local CI2 workflow (setup, tes
 
 	@echo "CI2 run complete — Dev containers preserved and ports 5432 & 8888 restored."
 
+hot-ci: ## Run full local CI workflow (setup, tests, cleanup)
+	$(MAKE) restart-db
+	$(MAKE) test
+
 # ---- Developer Shortcuts ----
 .PHONY: logs db bash-backend
 
@@ -452,3 +456,6 @@ scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
 	else \
 		echo "No secrets found in repository."; \
 	fi
+
+gen:
+	bash cd-generate-backend-config.sh

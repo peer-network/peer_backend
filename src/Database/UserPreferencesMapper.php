@@ -1,21 +1,22 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\UserPreferences;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\JsonHelper;
 
 class UserPreferencesMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
     public function loadPreferencesById(string $id): UserPreferences|false
     {
-        $this->logger->info('UserPreferencesMapper.loadPreferencesById started', ['id' => $id]);
+        $this->logger->debug('UserPreferencesMapper.loadPreferencesById started', ['id' => $id]);
 
         try {
             $stmt = $this->db->prepare(
@@ -55,7 +56,7 @@ class UserPreferencesMapper
 
     public function insert(UserPreferences $user): UserPreferences
     {
-        $this->logger->info("UserPreferencesMapper.insert started");
+        $this->logger->debug("UserPreferencesMapper.insert started");
 
         $data = $user->getArrayCopy();
 
@@ -87,7 +88,7 @@ class UserPreferencesMapper
 
     public function update(UserPreferences $userPreferences): UserPreferences
     {
-        $this->logger->info('UserPreferences.update started', ['userid' => $userPreferences->getUserId()]);
+        $this->logger->debug('UserPreferences.update started', ['userid' => $userPreferences->getUserId()]);
 
         $userPreferences->setUpdatedAt();
         $data = $userPreferences->getArrayCopy();

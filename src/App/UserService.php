@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -13,7 +14,7 @@ use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\UserPreferences;
@@ -25,7 +26,7 @@ class UserService
     private Base64FileHandler $base64filehandler;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected DailyFreeMapper $dailyFreeMapper,
         protected UserMapper $userMapper,
         protected UserPreferencesMapper $userPreferencesMapper,
@@ -92,7 +93,15 @@ class UserService
         $attempts = 0;
         do {
             $slug = $this->createNumbersAsString(1, 9, 5);
-            if (!$this->userMapper->checkIfNameAndSlugExist($username, $slug)) {
+            if (!ctype_digit($slug)) {
+                $this->logger->error('Slug generation failed: not numeric', [
+                    'username' => $username,
+                    'slug' => $slug,
+                ]);
+                return null;
+            }
+
+            if (!$this->userMapper->checkIfNameAndSlugExist($username, (int) $slug)) {
                 return (int) $slug;
             }
             $attempts++;
@@ -129,13 +138,13 @@ class UserService
             return $payload;
         } catch (\Throwable $e) {
             $this->logger->error('Error create payload.', ['exception' => $e]);
-            return self::respondWithError('Error create payload.');
+            return self::respondWithError(00000);//'Error create payload.'
         }
     }
 
     public function createUser(array $args): array
     {
-        $this->logger->info('UserService.createUser started');
+        $this->logger->debug('UserService.createUser started');
 
         $requiredFields = ['username', 'email', 'password'];
         $validationErrors = self::validateRequiredFields($args, $requiredFields);
@@ -144,10 +153,6 @@ class UserService
         }
 
         $id = self::generateUUID();
-        if (empty($id)) {
-            $this->logger->critical('Failed to generate user ID');
-            return $this->respondWithError(40602);
-        }
 
         $pkey = $args['pkey'] ?? null;
         $mediaFile = isset($args['img']) ? trim($args['img']) : '';
@@ -192,7 +197,7 @@ class UserService
 			'updatedat' => (new \DateTime())->format('Y-m-d H:i:s.u')
         ];
 
-		$this->logger->info('UserService.createUser.verificationData started', ['verificationData' => $verificationData]);
+		$this->logger->debug('UserService.createUser.verificationData started', ['verificationData' => $verificationData]);
 
         $userData = [
             'uid' => $id,
@@ -254,7 +259,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::User.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         try {
@@ -264,7 +269,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::Tokenize.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         try {
@@ -274,7 +279,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::UserInfo.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         try {
@@ -284,7 +289,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::UserPreferences.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         try {
@@ -303,7 +308,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::Wallett.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         try {
@@ -313,7 +318,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->warning('Error registering User::DailyFree.', ['exception' => $e]);
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
 
         $this->userMapper->logLoginDaten($id);
@@ -330,7 +335,7 @@ class UserService
         $this->transactionManager->commit();
 		return [
 			'status' => 'success',
-			'ResponseCode' => 10601,
+			'ResponseCode' => "10601",
 			'userid' => $id,
 		];
     }
@@ -352,11 +357,12 @@ class UserService
             }
             $userObj = (new User($users, [], false))->getArrayCopy();
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11011, // Referral Info retrived
-                'affectedRows' => $userObj
-            ];
+            return $this::createSuccessResponse(
+                11011,
+                $userObj,
+                false // no counter needed for object/associative array
+            );
+
 
         } catch (\Throwable $e) {
             $this->logger->error('Error verifying referral info.', ['exception' => $e]);
@@ -371,7 +377,7 @@ class UserService
 
         return [
             'status' => 'success',
-            'ResponseCode' => 11011,
+            'ResponseCode' => "11011",
             'counter' => count($data['iInvited']),
             'affectedRows' => [
                 'invitedBy' => $data['invitedBy'],
@@ -428,7 +434,7 @@ class UserService
             $this->transactionManager->commit();
             return [
                 'status' => 'success',
-                'ResponseCode' => 10701,
+                'ResponseCode' => "10701",
             ];
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
@@ -471,7 +477,7 @@ class UserService
         }
         $contentFilterService = new ContentFilterServiceImpl();
 
-        $this->logger->info('UserService.updateUserPreferences started');
+        $this->logger->debug('UserService.updateUserPreferences started');
 
         $newUserPreferences = $args['userPreferences'];
         $contentFiltering = $newUserPreferences['contentFilteringSeverityLevel'] ?? null;
@@ -483,12 +489,11 @@ class UserService
             $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
             if (!$userPreferences) {
                 $this->logger->error('UserService.updateUserPreferences: failed to load user preferences for updating');
-                return $this->respondWithError(40301); // 402xx
+                return $this::respondWithError(40301); // 402xx
             }
 
             if ($contentFiltering && !empty($contentFiltering)) {
                 $contentFilteringSeverityLevel = $contentFilterService->getContentFilteringSeverityLevel($contentFiltering);
-
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
                 $userPreferences->setUpdatedAt();
             }
@@ -507,11 +512,12 @@ class UserService
             $this->logger->info('User preferences updated successfully', ['userId' => $this->currentUserId]);
             
             $this->transactionManager->commit();
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11014,  // 102xx
-                'affectedRows' => $resultPreferences,
-            ];
+            return $this::createSuccessResponse(
+                11014,
+                $resultPreferences,
+                false // no counter needed for simple data
+            );
+
         } catch (\Throwable $e) {
             $this->logger->error('Failed to update user preferences', ['exception' => $e]);
             $this->transactionManager->rollback();
@@ -568,7 +574,7 @@ class UserService
             return self::respondWithError(30101);
         }
 
-        $this->logger->info('UserService.setPassword started');
+        $this->logger->debug('UserService.setPassword started');
 
         $newPassword = $args['password'] ?? null;
         $currentPassword = $args['expassword'] ?? null;
@@ -602,7 +608,7 @@ class UserService
             $this->transactionManager->commit();
             return [
                 'status' => 'success',
-                'ResponseCode' => 11005,
+                'ResponseCode' => "11005",
             ];
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
@@ -621,7 +627,7 @@ class UserService
             return self::respondWithError(30101);
         }
 
-        $this->logger->info('UserService.setEmail started');
+        $this->logger->debug('UserService.setEmail started');
 
         $email = $args['email'] ?? null;
         $exPassword = $args['password'] ?? null;    
@@ -662,11 +668,7 @@ class UserService
 
             $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId, 'email' => $email]);
             $this->transactionManager->commit();
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11006,
-                'affectedRows' => $affectedRows,
-            ];
+            return $this::createSuccessResponse(11006, $affectedRows, false);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->error('Failed to update user email', ['exception' => $e]);
@@ -684,7 +686,7 @@ class UserService
             return self::respondWithError(30101);
         }
 
-        $this->logger->info('UserService.setUsername started');
+        $this->logger->debug('UserService.setUsername started');
 
         $username = trim($args['username']);
         $password = $args['password'] ?? null;
@@ -721,14 +723,10 @@ class UserService
             $this->logger->info('Username updated successfully', ['id' => $this->currentUserId, 'username' => $username, 'slug' => $slug]);
 
             $this->transactionManager->commit();
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11007,
-                'affectedRows' => $affectedRows,
-            ];
+            return $this::createSuccessResponse(11007, $affectedRows, false);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
-            $this->logger->error('Failed to update username', ['exception' => $e]);
+            $this->logger->warning('Failed to update username', ['exception' => $e]);
             return self::respondWithError(30202);
         }
     }
@@ -743,7 +741,7 @@ class UserService
             return self::respondWithError(30101);
         }
 
-        $this->logger->info('UserService.deleteAccount started');
+        $this->logger->debug('UserService.deleteAccount started');
 
         $userId = $this->currentUserId;
 
@@ -764,7 +762,7 @@ class UserService
             $this->transactionManager->commit();
             return [
                 'status' => 'success',
-                'ResponseCode' => 11012,
+                'ResponseCode' => "11012",
             ];
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
@@ -783,7 +781,7 @@ class UserService
         $postLimit = min(max((int)($args['postLimit'] ?? 4), 1), 10);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-        $this->logger->info('UserService.Profile started');
+        $this->logger->debug('UserService.Profile started');
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID for profile', ['userId' => $userId]);
@@ -806,23 +804,19 @@ class UserService
             }
 
             $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11008,
-                'affectedRows' => $profileData,
-            ];
+            return $this::createSuccessResponse(11008, $profileData, false);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch profile data', [
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return $this->createSuccessResponse(21001, []);
+            return $this::createSuccessResponse(21001, []);
         }
     }
 
     public function Follows(?array $args = []): array
     {
-        $this->logger->info('UserService.Follows started');
+        $this->logger->debug('UserService.Follows started');
 
         $userId = $args['userid'] ?? $this->currentUserId;
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -830,7 +824,7 @@ class UserService
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
         if($contentFilterService->validateContentFilter($contentFilterBy) == false){
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
         if (!self::isValidUUID($userId)) {
@@ -850,7 +844,7 @@ class UserService
             return [
                 'status' => 'success',
                 'counter' => $counter,
-                'ResponseCode' => 11101,
+                'ResponseCode' => "11101",
                 'affectedRows' => [
                     'followers' => array_map(
                         fn(ProfilUser $follower) => $follower->getArrayCopy(),
@@ -888,7 +882,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($users),
-                    'ResponseCode' => 11102,
+                    'ResponseCode' => "11102",
                     'affectedRows' => $users,
                 ];
             }
@@ -920,7 +914,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($users),
-                    'ResponseCode' => 11102,
+                    'ResponseCode' => "11102",
                     'affectedRows' => $users,
                 ];
             }
@@ -936,12 +930,12 @@ class UserService
     public function fetchAllAdvance(?array $args = []): array
     {
 
-        $this->logger->info('UserService.fetchAllAdvance started');
+        $this->logger->debug('UserService.fetchAllAdvance started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
         if($contentFilterService->validateContentFilter($contentFilterBy) == false){
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
         try {
@@ -952,12 +946,12 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 11009,
+                    'ResponseCode' => "11009",
                     'affectedRows' => $fetchAll,
                 ];
             }
 
-            return $this->respondWithError(31007);
+            return $this::respondWithError(31007);
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
         }
@@ -966,7 +960,7 @@ class UserService
     public function fetchAll(?array $args = []): array
     {
 
-        $this->logger->info('UserService.fetchAll started');
+        $this->logger->debug('UserService.fetchAll started');
 
         try {
             $users = $this->userMapper->fetchAll($this->currentUserId, $args);
@@ -976,7 +970,7 @@ class UserService
                 return [
                     'status' => 'success',
                     'counter' => count($fetchAll),
-                    'ResponseCode' => 11009,
+                    'ResponseCode' => "11009",
                     'affectedRows' => $fetchAll,
                 ];
             }
@@ -998,7 +992,7 @@ class UserService
      */
     public function requestPasswordReset(string $email): array
     {
-        $this->logger->info('UserService.requestPasswordReset started');
+        $this->logger->debug('UserService.requestPasswordReset started');
 
         $updatedAt = $this->getCurrentTimestamp();
         $expiresAt = $this->getFutureTimestamp('+1 hour');
@@ -1085,9 +1079,9 @@ class UserService
      */
     public function resetPasswordTokenVerify(string $token): array
     {
-        $this->logger->info('UserService.resetPasswordTokenVerify started');
+        $this->logger->debug('UserService.resetPasswordTokenVerify started');
 
-        if (empty($token) || !is_string($token)) {
+        if (empty($token)) {
             $this->logger->warning('Invalid reset token', ['token' => $token]);
             return self::respondWithError(31904);
         }
@@ -1118,7 +1112,7 @@ class UserService
     {
         return [
             'status' => 'success',
-            'ResponseCode' => 11901
+            'ResponseCode' => "11901"
         ];
     }
 
@@ -1165,7 +1159,7 @@ class UserService
      */
     public function resetPassword(?array $args): array
     {
-        $this->logger->info('UserService.resetPassword started');
+        $this->logger->debug('UserService.resetPassword started');
 
         $newPassword = $args['password'] ?? null;
 
@@ -1187,10 +1181,7 @@ class UserService
             if (!$request) {
                 $this->userMapper->deletePasswordResetToken($args['token']);
                 $this->transactionManager->rollback();
-                return [
-                    'status' => 'error',
-                    'ResponseCode' => 31904
-                ];
+                return self::respondWithError(31904);
             }
             $user = $this->userMapper->loadById($request['user_id']);
 
@@ -1207,10 +1198,7 @@ class UserService
 
             $this->logger->info('User password updated successfully', ['userId' => $this->currentUserId]);
             $this->transactionManager->commit();
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11005,
-            ];
+            return self::createSuccessResponse(11005);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
             $this->logger->error('Failed to update user password', ['exception' => $e]);

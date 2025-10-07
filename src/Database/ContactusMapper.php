@@ -1,14 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\Contactus;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class ContactusMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
@@ -51,7 +52,7 @@ class ContactusMapper
 
     public function checkRateLimit(string $ip): bool
     {
-        $this->logger->info("ContactusMapper.Rate limit check started for IP: {$ip}");
+        $this->logger->debug("ContactusMapper.Rate limit check started for IP: {$ip}");
 
         try {
             $query = "SELECT request_count, last_request FROM contactus_rate_limit WHERE ip = :ip";
@@ -96,7 +97,7 @@ class ContactusMapper
 
     public function fetchAll(?array $args = []): array
     {
-        $this->logger->info("ContactusMapper.fetchAll started");
+        $this->logger->debug("ContactusMapper.fetchAll started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -130,7 +131,7 @@ class ContactusMapper
 
     public function loadById(int $id): ?Contactus
     {
-        $this->logger->info("ContactusMapper.loadById started", ['id' => $id]);
+        $this->logger->debug("ContactusMapper.loadById started", ['id' => $id]);
 
         try {
             $sql = "SELECT * FROM contactus WHERE msgid = :id";
@@ -158,7 +159,7 @@ class ContactusMapper
 
     public function loadByName(string $name): ?Contactus
     {
-        $this->logger->info("ContactusMapper.loadByName started", ['name' => $name]);
+        $this->logger->debug("ContactusMapper.loadByName started", ['name' => $name]);
 
         try {
             $sql = "SELECT * FROM contactus WHERE name = :name";
@@ -186,7 +187,7 @@ class ContactusMapper
 
     public function insert(Contactus $contact): ?Contactus
     {
-        $this->logger->info("ContactusMapper.insert started");
+        $this->logger->debug("ContactusMapper.insert started");
 
         try {
             $data = $contact->getArrayCopy();
@@ -223,7 +224,7 @@ class ContactusMapper
 
     public function update(Contactus $contact): ?Contactus
     {
-        $this->logger->info("ContactusMapper.update started", ['contact' => $contact]);
+        $this->logger->debug("ContactusMapper.update started", ['contact' => $contact]);
 
         try {
             $data = $contact->getArrayCopy();
@@ -256,7 +257,7 @@ class ContactusMapper
 
     public function delete(int $id): bool
     {
-        $this->logger->info("ContactusMapper.delete started", ['id' => $id]);
+        $this->logger->debug("ContactusMapper.delete started", ['id' => $id]);
 
         try {
             $query = "DELETE FROM contactus WHERE msgid = :id";
