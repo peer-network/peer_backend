@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App\Models;
@@ -324,7 +325,7 @@ class MultipartPost
         $tmpFolder = __DIR__ . "/../../../runtime-data/media/tmp/";
 
         foreach ($this->getMedia() as $media) {
-             // Open the file stream
+            // Open the file stream
             $stream = new \Slim\Psr7\Stream(fopen($tmpFolder.$media, 'r'));
 
             // Create the UploadedFile object
@@ -463,7 +464,7 @@ class MultipartPost
     {
         $tmpFolder = __DIR__ . "/../../../runtime-data/media/tmp/";
 
-        foreach ($this->getMedia() as $media) {        
+        foreach ($this->getMedia() as $media) {
 
             // Calculate Subfolder
             $extension = pathinfo($media, PATHINFO_EXTENSION);

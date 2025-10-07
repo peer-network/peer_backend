@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -17,8 +18,8 @@ class CommentInfoService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected PeerLoggerInterface $logger, 
-        protected CommentInfoMapper $commentInfoMapper, 
+        protected PeerLoggerInterface $logger,
+        protected CommentInfoMapper $commentInfoMapper,
         protected ReportsMapper $reportsMapper,
         protected CommentMapper $commentMapper,
         protected TransactionManager $transactionManager
@@ -121,7 +122,7 @@ class CommentInfoService
             $this->transactionManager->commit();
 
             return $this::createSuccessResponse(11603);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('Error while fetching comment data', ['exception' => $e]);
             return $this::respondWithError(41601);

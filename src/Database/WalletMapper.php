@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -104,10 +105,10 @@ class WalletMapper
             $stmt->execute();
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
-             $this->logger->error('WalletMapper.transferToken exception during recipient validation query', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-             ]);
+            $this->logger->error('WalletMapper.transferToken exception during recipient validation query', [
+               'message' => $e->getMessage(),
+               'trace' => $e->getTraceAsString()
+            ]);
             return self::respondWithError(40301);
         }
 
@@ -285,7 +286,7 @@ class WalletMapper
             return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
 
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
     }
 
@@ -699,7 +700,8 @@ class WalletMapper
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return self::respondWithError(40301);        }
+            return self::respondWithError(40301);
+        }
     }
 
     public function insertWinToLog(string $userId, array $args): array|bool
@@ -1071,12 +1073,17 @@ class WalletMapper
 
             $this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
 
-            return [
-                'status' => 'success',
-                'counter' => count($args) -1,
-                'ResponseCode' => "11208",
-                'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
-            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
+            return self::respondWithError(41212);
+        }
+
+        return [
+            'status' => 'success',
+            'counter' => count($args) - 1,
+            'ResponseCode' => "11208",
+            'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
+        ];
     }
 
     public function getPercentBeforeTransaction(string $userId, int $tokenAmount): array
