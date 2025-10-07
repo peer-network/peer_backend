@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -14,17 +15,16 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\User;
+use Fawaz\Utils\ResponseHelper;
 
 class CommentMapper
 {
+    use ResponseHelper;
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
-    protected function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
+
 
     public function isSameUser(string $userid, string $currentUserId): bool
     {
@@ -389,7 +389,7 @@ class CommentMapper
 			$parentExists = $parentStmt->fetchColumn();
 
 			if (!$parentExists) {
-				return $this->respondWithError(31601);
+				return $this::respondWithError(31601);
 			}
 
 			// Fetch child comments
@@ -490,7 +490,7 @@ class CommentMapper
 			return $comments;
 		} catch (\Throwable $e) {
 			$this->logger->error("Error in fetchByParentId", ['message' => $e->getMessage()]);
-			return $this->respondWithError(41606);
+			return $this::respondWithError(41606);
 		}
 	}
 

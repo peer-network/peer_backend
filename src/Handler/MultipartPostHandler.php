@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Handler;
 
@@ -103,7 +104,7 @@ class MultipartPostHandler implements RequestHandlerInterface
             }
 
             $uploadedFilesObj = [];
-            foreach ($normalized as $index => $fileObj) {
+            foreach ($normalized as $fileObj) {
                 $uploadedFilesObj[] = new UploadedFile(
                     $fileObj['tmp_name'],
                     $fileObj['name'],

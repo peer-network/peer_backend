@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -83,7 +84,7 @@ class AlphaMintService
                 }
                 $userCounts = 0;
                 $excluedUsers = [];
-                foreach ($alphaUsers as $key => $usr) {
+                foreach ($alphaUsers as $usr) {
                     $userData = $this->userMapper->checkIfNameAndSlugExist($usr['peer_username'], $usr['peer_app_slug']);
                     if($userData){
                         $userCounts++;
@@ -94,7 +95,7 @@ class AlphaMintService
 
                 if(count($alphaUsers) == $userCounts){
                     $totalAlphaUserMinted = 0;
-                    foreach ($alphaUsers as $key => $usr) {
+                    foreach ($alphaUsers as $usr) {
                         $userData = $this->userMapper->getUserByNameAndSlug($usr['peer_username'], $usr['peer_app_slug']);
 
                         if($userData){

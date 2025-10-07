@@ -341,7 +341,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11212,
+                'ResponseCode' => "11212",
                 'tokenSend' => $numberoftokens,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'createdat' => date('Y-m-d H:i:s.u')
@@ -518,7 +518,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11215,
+                'ResponseCode' => "11215",
                 'affectedRows' => $data
             ];
         } catch (\Throwable $th) {

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -6,10 +7,12 @@ use Fawaz\App\Tag;
 use Fawaz\Database\TagMapper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;
 
 class TagService
 {
+    use ResponseHelper;
     protected ?string $currentUserId = null;
 
     public function __construct(protected PeerLoggerInterface $logger, protected TagMapper $tagMapper, protected TransactionManager $transactionManager)
@@ -62,20 +65,10 @@ class TagService
             && preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName);
     }
 
-    private function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    private function createSuccessResponse(int $message, array $data = []): array
-    {
-        return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
-    }
-
     public function createTag(string $tagName): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $this->logger->debug('TagService.createTag started');
@@ -88,7 +81,7 @@ class TagService
 
             if ($tag) {
                 $this->transactionManager->rollback();
-                return $this->respondWithError('Tag already exists.');
+                return $this::respondWithError(21702);//'Tag already exists.'
             }
 
             $tagId = $this->generateUUID();
@@ -126,10 +119,10 @@ class TagService
             $tags = $this->tagMapper->fetchAll($offset, $limit);
             $result = array_map(fn(Tag $tag) => $tag->getArrayCopy(), $tags);
 
-            return $this->createSuccessResponse(11701, $result);
+            return $this::createSuccessResponse(11701, $result);
 
         } catch (\Throwable $e) {
-            return $this->respondWithError(41702);
+            return $this::respondWithError(41702);
         }
     }
 
@@ -143,13 +136,13 @@ class TagService
                 $tagData = ['name' => $args['tagName']];
                 $tag = new Tag($tagData, ['name']);
             } else {
-                return $this->respondWithError(30101);
+                return $this::respondWithError(30101);
             }
 
             $tags = $this->tagMapper->searchByName($args);
 
             if ($tags === false) {
-                return $this->createSuccessResponse(21701, []);
+                return $this::createSuccessResponse(21701, []);
             }
 
             $this->logger->info("TagService.loadTag successfully fetched tags", [
@@ -158,13 +151,13 @@ class TagService
 
             $result = array_map(fn(Tag $tag) => $tag->getArrayCopy(), $tags);
 
-            return $this->createSuccessResponse(11701, $result);
+            return $this::createSuccessResponse(11701, $result);
 
         } catch (\Throwable $e) {
             $this->logger->error("Error occurred in TagService.loadTag", [
                 'error' => $e->getMessage(),
             ]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 }

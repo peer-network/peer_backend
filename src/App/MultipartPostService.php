@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -71,7 +72,7 @@ class MultipartPostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11515,
+                'ResponseCode' => "11515",
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
@@ -124,7 +125,7 @@ class MultipartPostService
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11515,
+                'ResponseCode' => "11515",
                 'uploadedFiles' => implode(',', $allMetadata),
             ];
         } catch (ValidationException $e) {

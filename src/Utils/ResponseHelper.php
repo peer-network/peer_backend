@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Utils;
 
@@ -26,29 +27,52 @@ trait ResponseHelper
         return [];
     }
 
-    private function respondWithError(int $responseCode): array
+    private function createSuccessResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
-        return [
-            'status' => 'error', 
-            'ResponseCode' => $responseCode, 
-            // 'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$responseCode)
-        ];
+        return $this->createResponse(
+            $responseCode,
+            $data,
+            $countEnabled,
+            $countKey,
+            false
+        );
     }
 
-    private function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    private function respondWithError(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
+        return $this->createResponse(
+            $responseCode,
+            $data,
+            $countEnabled,
+            $countKey,
+            true
+        );
+    }
+    
+    private function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?bool $isError = null): array
+    {
+        // Determine if it is success (codes starting with 1 or 2) or error (3,4,5,6)
+        $firstDigit = (int)substr((string)$responseCode, 0, 1);
+        $isSuccess = $firstDigit === 1 || $firstDigit === 2;
+
+        if ($isError !== null) {
+            $isSuccess = !$isError;
+        }
+
         $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            // 'ResponseMessage' => $this->responseMessagesProvider->getMessage((string)$message),
-            'affectedRows' => $data,
+            'status' => $isSuccess ? 'success' : 'error',
+            'ResponseCode' => (string)$responseCode
         ];
 
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
+        if ($isSuccess) {
+            $response['affectedRows'] = $data;
+
+            if ($countEnabled && is_array($data)) {
+                if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                    $response['counter'] = count($data[$countKey]);
+                } else {
+                    $response['counter'] = count($data);
+                }
             }
         }
 
@@ -85,10 +109,6 @@ trait ResponseHelper
 
     private static function validateDate(string $date, string $format = 'Y-m-d'): bool 
     {
-        if (!is_string($date)) {
-            return false;
-        }
-
         $d = \DateTime::createFromFormat($format, $date);
         return $d && $d->format($format) === $date;
     }

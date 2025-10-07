@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -10,6 +11,8 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+
+use function DI\string;
 
 const TABLESTOGEMS = true;
 const VIEW_=1;
@@ -101,7 +104,11 @@ class WalletMapper
             $stmt->execute();
             $row = $stmt->fetchColumn();
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+             $this->logger->error('WalletMapper.transferToken exception during recipient validation query', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+             ]);
+            return self::respondWithError(40301);
         }
 
         if (empty($row)) {
@@ -152,7 +159,11 @@ class WalletMapper
 
 
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            $this->logger->error('WalletMapper.transferToken unexpected exception during token transfer execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);
         }
 
         if ($currentBalance < $requiredAmount) {
@@ -590,7 +601,7 @@ class WalletMapper
         $filter = (int)(1 << $bits) - 1;
         do {
             $rnd = \hexdec(\bin2hex(\openssl_random_pseudo_bytes($bytes)));
-            $rnd = $rnd & $filter;
+            $rnd &= $filter;
         } while ($rnd >= $range);
         return $min + $rnd;
     }
@@ -682,8 +693,11 @@ class WalletMapper
 
             return $result;
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
-        }
+            $this->logger->error('WalletMapper.fetchWinsLog exception during logwins query execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);        }
     }
 
     public function insertWinToLog(string $userId, array $args): array|bool
@@ -821,11 +835,11 @@ class WalletMapper
 
         if ($totalInserts > 0) {
             $sourceList = implode(', ', $winSources);
-            $success = ['status' => 'success', 'ResponseCode' => 11206];
+            $success = ['status' => 'success', 'ResponseCode' => "11206"];
             return $success;
         }
 
-        $success = ['status' => 'success', 'ResponseCode' => 21205];
+        $success = ['status' => 'success', 'ResponseCode' => "21205"];
         return $success;
     }
 
@@ -928,13 +942,7 @@ class WalletMapper
             return self::respondWithError(41208);
         }
 
-        $success = [
-            'status' => 'success',
-            'ResponseCode' => 11207,
-            'affectedRows' => $entries
-        ];
-
-        return $success;
+        return $this::createSuccessResponse(11207, $entries, false);
 
     }
 
@@ -1013,7 +1021,6 @@ class WalletMapper
         $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
 
         $bestatigungInitial = TokenHelper::mulRc((float) $totalGems, (float) $gemsintoken);
-        // $bestatigung = bcadd(bcmul($totalGems, $gemsintoken, 10), '0.00005', 4);
 
         $args = [
             'winstatus' => [
@@ -1031,9 +1038,9 @@ class WalletMapper
                 $totalTokenNumber = TokenHelper::mulRc((float) $row['total_numbers'], (float) $gemsintoken);
                 $args[$userId] = [
                     'userid' => $userId,
-                    'gems' => $row['total_numbers'],
+                    'gems' => (float)$row['total_numbers'],
                     'tokens' => $totalTokenNumber,
-                    'percentage' => $row['percentage'],
+                    'percentage' => (float)$row['percentage'],
                     'details' => []
                 ];
             }
@@ -1041,13 +1048,13 @@ class WalletMapper
             $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
 
             $args[$userId]['details'][] = [
-                'gemid' => $row['gemid'],
-                'userid' => $row['userid'],
-                'postid' => $row['postid'],
-                'fromid' => $row['fromid'],
-                'gems' => $row['gems'],
-                'numbers' => $rowgems2token,
-                'whereby' => $row['whereby'],
+                'gemid' => (string)$row['gemid'],
+                'userid' => (string)$row['userid'],
+                'postid' => (string)$row['postid'],
+                'fromid' => (string)$row['fromid'],
+                'gems' => (float)$row['gems'],
+                'numbers' => (float)$rowgems2token,
+                'whereby' => (int)$row['whereby'],
                 'createdat' => $row['createdat']
             ];
 
@@ -1070,7 +1077,7 @@ class WalletMapper
             return [
                 'status' => 'success',
                 'counter' => count($args) -1,
-                'ResponseCode' => 11208,
+                'ResponseCode' => "11208",
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
     }
@@ -1131,15 +1138,16 @@ class WalletMapper
 
                 $this->insertWinToLog($inviterId, $args);
 
-            return [
-                'status' => 'success', 
-                'ResponseCode' => 11402,
-                'affectedRows' => [
-                    'inviterId' => $inviterId,
-                    'tosend' => $tosend,
-                    'percentTransferred' => $percent
-                ]
-            ];
+            return $this::createSuccessResponse(
+                11402,
+                [
+                    'inviterId'          => $inviterId,
+                    'tosend'             => $tosend,
+                    'percentTransferred' => $percent,
+                ],
+                false // no counter needed for associative array
+            );
+
 
         } catch (\Throwable $e) {
             $this->logger->error('Throwable occurred during transaction', ['exception' => $e]);
@@ -1222,16 +1230,17 @@ class WalletMapper
                 'whereby' => $whereby,
             ]);
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11209,
-                'affectedRows' => [
-                    'userId' => $userId,
-                    'postId' => $postId,
-                    'numbers' => -abs($price),
-                    'whereby' => $whereby,
+            return $this::createSuccessResponse(
+                11209,
+                [
+                    'userId'   => $userId,
+                    'postId'   => $postId,
+                    'numbers'  => -abs($price),
+                    'whereby'  => $whereby,
                 ],
-            ];
+                false // no counter needed for associative array
+            );
+
         } catch (\Throwable $e) {
             $this->logger->error('Failed to deduct from wallet.', [
                 'exception' => $e->getMessage(),
@@ -1406,7 +1415,7 @@ class WalletMapper
 
             return [
                 'status' => 'error',
-                'ResponseCode' => 41205,
+                'ResponseCode' => "41205",
                 'affectedRows' => []
             ];
         }

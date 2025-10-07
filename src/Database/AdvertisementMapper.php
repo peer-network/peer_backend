@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\Database;
 
@@ -376,7 +377,7 @@ class AdvertisementMapper
         }
     }
 
-    private static function mapRowToAdvertisementt(array $row): ?array
+    private static function mapRowToAdvertisementt(array $row): array
     {
         $tags = is_string($row['tags'] ?? null) ? json_decode($row['tags'], true) : ($row['tags'] ?? []);
         if (!is_array($tags)) $tags = [];
@@ -1024,7 +1025,7 @@ class AdvertisementMapper
             'user' => [
                 'uid' => (string)$row['tuserid'],
                 'username' => (string)$row['tusername'],
-                'slug' => (string)$row['tslug'],
+                'slug' => (int)$row['tslug'],
                 'img' => (string)$row['timg'],
                 'isfollowed' => (bool)$row['tisfollowed'],
                 'isfollowing' => (bool)$row['tisfollowing'],

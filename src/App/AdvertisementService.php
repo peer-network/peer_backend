@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -158,7 +159,7 @@ class AdvertisementService
 
             if ($CostPlan !== null && $CostPlan === self::PLAN_BASIC) 
             {
-                if ($postId && $date && $CostPlan && $startday) {
+                if ($startday) {
                     $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', $startday);
                     $timestamps = $this->formatStartAndEndTimestamps($startDate, $date);
 
@@ -216,7 +217,7 @@ class AdvertisementService
             } catch (\Throwable $e) {
                 $this->logger->error('Fehler beim Validieren des Advertisements', ['exception' => $e]);
                 // Die richtige errorCode.
-                return self::respondWithError($e->getMessage());
+                return self::respondWithError((int)$e->getMessage());
             }
 
             if ($CostPlan === self::PLAN_BASIC) 

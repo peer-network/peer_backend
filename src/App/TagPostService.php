@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fawaz\App;
 
@@ -7,10 +8,12 @@ use Fawaz\Database\TagPostMapper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Database\TagMapper;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;
 
 class TagPostService
 {
+    use ResponseHelper;
     protected ?string $currentUserId = null;
 
     public function __construct(protected PeerLoggerInterface $logger, protected TagPostMapper $tagPostMapper, protected TagMapper $tagMapper, protected TransactionManager $transactionManager)
@@ -60,7 +63,7 @@ class TagPostService
     private function validateTagName(string $tagName): array|bool
     {
         if ($tagName === '') {
-            return $this->respondWithError(30101);
+            return $this::respondWithError(30101);
         }
 
         $tagNameConfig = ConstantsConfig::post()['TAG'];
@@ -68,7 +71,7 @@ class TagPostService
         if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] ||
             strlen($tagName) > $tagNameConfig['MAX_LENGTH'] ||
             !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
-            return $this->respondWithError(30255);
+            return $this::respondWithError(30255);
         }
 
         return true;
@@ -77,19 +80,19 @@ class TagPostService
     public function handleTags(array $tags, string $postId, int $maxTags = 10): ?array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $maxTags = min(max($maxTags, 1), 10);
         if (count($tags) > $maxTags) {
-            return $this->respondWithError(30211);
+            return $this::respondWithError(30211);
         }
 
         foreach ($tags as $tagName) {
             $tagName = trim($tagName);
             // Validate tagName
             if (!$this->isValidTagName($tagName)) {
-                return $this->respondWithError(30255);
+                return $this::respondWithError(30255);
             }
 
             $tag = $this->tagMapper->loadByName($tagName);
@@ -110,21 +113,21 @@ class TagPostService
     public function createTag(string $tagName): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $this->logger->debug('TagService.createTag started');
 
         $tagName = trim($tagName);
         if (!$this->isValidTagName($tagName)) {
-            return $this->respondWithError(30255);
+            return $this::respondWithError(30255);
         }
 
         try {
             $tag = $this->tagMapper->loadByName($tagName);
 
             if ($tag) {
-                return $this->createSuccessResponse(21702);
+                return $this::createSuccessResponse(21702);
             }
             $this->transactionManager->beginTransaction();
 
@@ -136,12 +139,12 @@ class TagPostService
             if (!$this->tagMapper->insert($tag)) {
                 $this->transactionManager->rollback();
                 $this->logger->error('Failed to insert tag into database', ['tagName' => $tagName]);
-                return $this->respondWithError(41703);
+                return $this::respondWithError(41703);
             }
 
             $this->transactionManager->commit();
             $this->logger->info('Tag created successfully', ['tagName' => $tagName]);
-            return $this->createSuccessResponse(11702, [$tagData]);
+            return $this::createSuccessResponse(11702, [$tagData]);
 
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
@@ -149,26 +152,16 @@ class TagPostService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError(41701);
+            return $this::respondWithError(41701);
         } finally {
             $this->logger->debug('createTag function execution completed');
         }
-    }
-    
-    private function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    private function createSuccessResponse(int $message, array $data = []): array
-    {
-        return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
     }
 
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         $this->logger->debug('TagPostService.fetchAll started');
@@ -181,14 +174,14 @@ class TagPostService
             $result = array_map(fn(TagPost $tag) => $tag->getArrayCopy(), $TagPost);
 
             $this->logger->info('TagPost fetched successfully', ['count' => count($result)]);
-            return $this->createSuccessResponse(11701, [$result]);
+            return $this::createSuccessResponse(11701, [$result]);
 
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching TagPost', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $this->respondWithError(41702);
+            return $this::respondWithError(41702);
         }
     }
 }
