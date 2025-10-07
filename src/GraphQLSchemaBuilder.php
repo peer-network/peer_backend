@@ -55,7 +55,6 @@ use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
-use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use Fawaz\App\PeerTokenService;
 use Fawaz\config\constants\ConstantsConfig;
@@ -222,7 +221,7 @@ class GraphQLSchemaBuilder
                         'status' => $root['status'] ?? '',
                         'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
                         'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                        'RequestId' => $this->logger->getRequestUid(),
+                        'RequestId' => $this->logger->getRequestUid()
                     ];
                 },
                 'status' => function (array $root): string {

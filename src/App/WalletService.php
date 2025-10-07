@@ -16,7 +16,7 @@ class WalletService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger, 
+        protected PeerLoggerInterface $logger, 
         protected WalletMapper $walletMapper, 
         protected TransactionManager $transactionManager
     ) {}

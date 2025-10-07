@@ -10,6 +10,8 @@ use Fawaz\Utils\PeerLoggerInterface;
 
 class McapMapper
 {
+    use ResponseHelper;
+    
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
