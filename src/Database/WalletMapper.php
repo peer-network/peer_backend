@@ -285,7 +285,7 @@ class WalletMapper
             return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
 
         } catch (\Throwable $e) {
-            return self::respondWithError($e->getMessage());
+            return self::respondWithError((int)$e->getMessage());
         }
     }
 
@@ -872,7 +872,7 @@ class WalletMapper
             $entry_ids = array_map(fn($row) => isset($row['userid']) && is_string($row['userid']) ? $row['userid'] : null, $entries);
             $entry_ids = array_filter($entry_ids);
 
-            $this->db->beginTransaction();
+            // transaction management moved to service layer
             
             $sql = "INSERT INTO gems (gemid, userid, postid, fromid, gems, whereby, createdat) 
                     VALUES (:gemid, :userid, :postid, :fromid, :gems, :whereby, :createdat)";
@@ -901,10 +901,10 @@ class WalletMapper
                     $stmt = $this->db->prepare($sql);
                     $stmt->execute($entry_ids);
                 }
-                $this->db->commit();
+                // commit handled by service layer
 
             } catch (\Throwable $e) {
-                $this->db->rollback();
+                // rollback handled by service layer
                 $this->logger->error('Error inserting into gems for ' . $tableName, ['exception' => $e]);
                 return self::respondWithError(41210);
             }

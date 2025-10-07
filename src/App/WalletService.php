@@ -196,7 +196,20 @@ class WalletService
             return $this::respondWithError(30105);
         }
 
-        $gemsters = $this->walletMapper->getTimeSortedMatch($day);
+        try {
+            $this->transactionManager->beginTransaction();
+            $gemsters = $this->walletMapper->getTimeSortedMatch($day);
+
+            if (($gemsters['status'] ?? 'error') === 'error') {
+                $this->transactionManager->rollback();
+                return $gemsters;
+            }
+
+            $this->transactionManager->commit();
+        } catch (\Exception $e) {
+            $this->transactionManager->rollback();
+            return $this::respondWithError(41205);
+        }
 
         if (isset($gemsters['affectedRows']['data'])) {
             $winstatus = $gemsters['affectedRows']['data'][0];
@@ -215,7 +228,7 @@ class WalletService
                 'ResponseCode' => $gemsters['ResponseCode'],        
                 'affectedRows' => $affectedRows
             ];
-        } 
+        }
         return [
             'status' => $gemsters['status'],
             'counter' => 0,
@@ -228,7 +241,19 @@ class WalletService
     {
         $this->logger->debug('WalletService.getPercentBeforeTransaction started');
 
-        return $this->walletMapper->getPercentBeforeTransaction($userId, $tokenAmount);
+        try {
+            $this->transactionManager->beginTransaction();
+            $response = $this->walletMapper->getPercentBeforeTransaction($userId, $tokenAmount);
+            if (($response['status'] ?? 'error') === 'error') {
+                $this->transactionManager->rollback();
+                return $response;
+            }
+            $this->transactionManager->commit();
+            return $response;
+        } catch (\Exception $e) {
+            $this->transactionManager->rollback();
+            return $this::respondWithError(41401);
+        }
     }
 
     public function loadLiquidityById(string $userId): array
@@ -290,7 +315,13 @@ class WalletService
         $this->logger->debug('WalletService.callUserMove started');
 
         try {
+            $this->transactionManager->beginTransaction();
             $response = $this->walletMapper->callUserMove($this->currentUserId);
+            if (($response['status'] ?? 'error') === 'error') {
+                $this->transactionManager->rollback();
+                return $response;
+            }
+            $this->transactionManager->commit();
             return $this::createSuccessResponse(
                 $response['ResponseCode'],
                 $response['affectedRows'],
@@ -299,6 +330,7 @@ class WalletService
 
 
         } catch (\Exception $e) {
+            $this->transactionManager->rollback();
             return $this::respondWithError(41205);
         }
     }
@@ -308,15 +340,21 @@ class WalletService
         $this->logger->debug('WalletService.transferToken started');
 
         try {
+            $this->transactionManager->beginTransaction();
             $response = $this->walletMapper->transferToken($this->currentUserId, $args);
             if ($response['status'] === 'error') {
+                $this->transactionManager->rollback();
                 return $response;
             } else {
+                $this->transactionManager->commit();
                 return $this::createSuccessResponse(11211, [], false);
             }
 
         } catch (\Exception $e) {
+            $this->transactionManager->rollback();
             return $this::respondWithError(40601);//'Unknown Error.'
         }
     }
+
+    
 }
