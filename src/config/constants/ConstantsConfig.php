@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-declare(strict_types=1);
-
 namespace Fawaz\config\constants;
 use Fawaz\config\constants\ConstantsModeration;
 
