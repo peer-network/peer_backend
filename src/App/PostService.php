@@ -820,7 +820,7 @@ class PostService
         $postId = $args['postid'] ?? null;
 
         if (!self::isValidUUID($postId)) {
-            return $this->respondWithError(30209);
+            return $this::respondWithError(30209);
         }
 
         $this->logger->debug("PostService.getGuestListPost started");
