@@ -455,3 +455,6 @@ scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
 
 gen:
 	bash cd-generate-backend-config.sh
+
+i-tests:
+	TEST_LOGS=1 TEST_LOG_LEVEL=DEBUG ./vendor/bin/phpunit ./tests/Integration/Repositories/WalletBalanceRepositoryTest.php

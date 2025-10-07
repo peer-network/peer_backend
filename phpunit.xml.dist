@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="vendor/autoload.php" colors="true">
+  <testsuites>
+    <testsuite name="All Tests">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+  <php>
+    <env name="TEST_DB_DSN" value="pgsql:host=127.0.0.1;port=5432;dbname=peer-docker"/>
+    <env name="TEST_DB_USER" value="postgres"/>
+    <env name="TEST_DB_PASSWORD" value="test"/>
+  </php>
+</phpunit>
+

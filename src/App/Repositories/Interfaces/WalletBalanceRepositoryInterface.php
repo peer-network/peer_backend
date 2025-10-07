@@ -11,10 +11,10 @@ interface WalletBalanceRepositoryInterface
     public function getBalance(string $userId): float;
 
     /**
-     * Set the absolute wallet balance for a user (upsert semantics allowed).
-     * Returns true on success. Intended for administrative or reconciliation flows.
+     * Set the absolute wallet balance for a user (upsert semantics allowed) and return the stored balance.
+     * Intended for administrative or reconciliation flows.
      */
-    public function setBalance(string $userId, float $liquidity): void;
+    public function setBalance(string $userId, float $liquidity): float;
 
     /**
      * Atomically add a delta to the user's wallet balance and return the new balance.

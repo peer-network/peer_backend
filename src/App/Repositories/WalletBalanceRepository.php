@@ -52,31 +52,28 @@ class WalletBalanceRepository implements WalletBalanceRepositoryInterface
      * Uses Rust-backed math (via TokenHelper) where arithmetic is required;
      * Q64.96 conversion uses BCMath for big integer scaling.
      */
-    public function setBalance(string $userId, float $liquidity): void
+    public function setBalance(string $userId, float $liquidity): float
     {
         $this->logger->debug('WalletBalanceRepository.setBalance started');
 
         try {
-            // Try update first
-            $sqlUpdate = 'UPDATE wallett SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = CURRENT_TIMESTAMP WHERE userid = :userid';
-            $stmt = $this->db->prepare($sqlUpdate);
-            $stmt->bindValue(':liquidity', $liquidity, PDO::PARAM_STR);
-            $stmt->bindValue(':liquiditq', $this->decimalToQ64_96($liquidity), PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
-            $stmt->execute();
-
-            if ($stmt->rowCount() === 0) {
-                // Insert if not exists
-                $sqlInsert = 'INSERT INTO wallett (userid, liquidity, liquiditq, updatedat, createdat) VALUES (:userid, :liquidity, :liquiditq, :updatedat, :createdat)';
-                $stmt = $this->db->prepare($sqlInsert);
-                $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
-                $stmt->bindValue(':liquidity', $liquidity, PDO::PARAM_STR);
-                $stmt->bindValue(':liquiditq', $this->decimalToQ64_96($liquidity), PDO::PARAM_STR);
-                $now = (new DateTime())->format('Y-m-d H:i:s.u');
-                $stmt->bindValue(':updatedat', $now, PDO::PARAM_STR);
-                $stmt->bindValue(':createdat', $now, PDO::PARAM_STR);
-                $stmt->execute();
-            }
+            $sql = "
+                INSERT INTO wallett (userid, liquidity, liquiditq, updatedat, createdat)
+                VALUES (:userid, :liquidity, :liquiditq, NOW(), NOW())
+                ON CONFLICT (userid)
+                DO UPDATE SET
+                    liquidity = EXCLUDED.liquidity,
+                    liquiditq = EXCLUDED.liquiditq,
+                    updatedat = EXCLUDED.updatedat
+                RETURNING liquidity
+            ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':userid'    => $userId,
+                ':liquidity' => $liquidity,
+                ':liquiditq' => $this->decimalToQ64_96($liquidity),
+            ]);
+            return (float)$stmt->fetchColumn();
         } catch (\Throwable $e) {
             $this->logger->error('Error setting liquidity', ['error' => $e->getMessage(), 'userid' => $userId]);
             throw new RepositoryException('Unable to setBalance');
@@ -94,49 +91,40 @@ class WalletBalanceRepository implements WalletBalanceRepositoryInterface
 
         try {
             $stmt = $this->db->prepare("SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE");
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->execute();
+            $stmt->execute([':userid' => $userId]);
             $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (!$row) {
-                // User does not exist, insert new wallet entry
                 $newLiquidity = abs($delta);
-                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
-
                 $stmt = $this->db->prepare(
-                    "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
-                    VALUES (:userid, :liquidity, :liquiditq, :updatedat)"
+                    "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat, createdat)
+                     VALUES (:userid, :liquidity, :liquiditq, NOW(), NOW())
+                     RETURNING liquidity"
                 );
-                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
-                $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
-                $stmt->execute();
-            } else {
-                // User exists, safely calculate new liquidity
-                $currentBalance = (float)$row['liquidity'];
-                $newLiquidity = TokenHelper::addRc($currentBalance, $delta);
-                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
-
-                $stmt = $this->db->prepare(
-                    "UPDATE wallett
-                    SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
-                    WHERE userid = :userid"
-                );
-                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
-                $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
-
-                $stmt->execute();
+                $stmt->execute([
+                    ':userid'    => $userId,
+                    ':liquidity' => $newLiquidity,
+                    ':liquiditq' => $this->decimalToQ64_96($newLiquidity),
+                ]);
+                return (float)$stmt->fetchColumn();
             }
 
-            $this->logger->debug('Wallet balance updated successfully', ['newLiquidity' => $newLiquidity]);
-            $this->setBalance($userId, $newLiquidity);
-
-            return $newLiquidity;
+            $currentBalance = (float)$row['liquidity'];
+            $newLiquidity = TokenHelper::addRc($currentBalance, $delta);
+            $stmt = $this->db->prepare(
+                "UPDATE wallett
+                 SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = NOW()
+                 WHERE userid = :userid
+                 RETURNING liquidity"
+            );
+            $stmt->execute([
+                ':userid'    => $userId,
+                ':liquidity' => $newLiquidity,
+                ':liquiditq' => $this->decimalToQ64_96($newLiquidity),
+            ]);
+            return (float)$stmt->fetchColumn();
         } catch (\Throwable $e) {
-            $this->logger->error('Database error in addToBalancey: ' . $e);
+            $this->logger->error('Database error in addToBalance: ' . $e);
             throw new RepositoryException('Unable to addToBalance');
         }
     }
