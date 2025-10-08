@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -16,7 +17,7 @@ use Fawaz\Utils\PeerLoggerInterface;
 class ChatMapper
 {
     use ResponseHelper;
-    const STATUS_DELETED = 6;
+    public const STATUS_DELETED = 6;
 
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
@@ -167,7 +168,7 @@ class ChatMapper
 
             $this->logger->warning("No chat found with id", ['id' => $id]);
             return $this::createSuccessResponse(21802);
-        } catch (\Throwable $e) {  
+        } catch (\Throwable $e) {
             $this->logger->error("Database error: " . $e->getMessage(), ['id' => $id]);
             return $this::respondWithError(40302);
         }
@@ -314,7 +315,7 @@ class ChatMapper
 
 
             $chatParticipantObj = [];
-            foreach($chatParticipants as $key => $prt){
+            foreach ($chatParticipants as $key => $prt) {
                 $userObj = [
                         'uid' => $prt['userid'],
                         'status' => $prt['status'],
@@ -328,7 +329,7 @@ class ChatMapper
                 $chatParticipantObj[$key] = $userObj;
                 $chatParticipantObj[$key]['userid'] = $userObj['uid'];
                 $chatParticipantObj[$key]['hasaccess'] = $prt['hasaccess'];
-            }   
+            }
 
             return [
                 'status' => 'success',
@@ -393,8 +394,8 @@ class ChatMapper
             $stmt->bindValue(':image', $data['image'], \PDO::PARAM_STR);
             $stmt->bindValue(':name', $data['name'], \PDO::PARAM_STR);
             $stmt->bindValue(':ispublic', $data['ispublic'], \PDO::PARAM_INT);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR); 
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -426,8 +427,8 @@ class ChatMapper
             $stmt->bindValue(':creatorid', $data['creatorid'], \PDO::PARAM_STR);
             $stmt->bindValue(':image', $data['image'], \PDO::PARAM_STR);
             $stmt->bindValue(':name', $data['name'], \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR); 
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -579,8 +580,8 @@ class ChatMapper
             $stmt->bindValue(':name', $data['name'], \PDO::PARAM_STR);
             $stmt->bindValue(':creatorid', $data['creatorid'], \PDO::PARAM_STR);
             $stmt->bindValue(':ispublic', $data['ispublic'], \PDO::PARAM_INT);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR); 
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':chatid', $data['chatid'], \PDO::PARAM_STR);
 
             $stmt->execute();
@@ -622,7 +623,7 @@ class ChatMapper
             $this->logger->error("Error deleting chat from database", [
                 'exception' => $e->getMessage()
             ]);
-            
+
             throw new \RuntimeException("Failed to delete chat: " . $e->getMessage());
         }
     }
@@ -809,8 +810,8 @@ class ChatMapper
                     'ispublic' => (bool)$chatRow['ispublic'],
                     'createdat' => $chatRow['createdat'],
                     'updatedat' => $chatRow['updatedat'],
-                    'chatmessages' => $chatMessages, 
-                    'chatparticipants' => $chatParticipantObj, 
+                    'chatmessages' => $chatMessages,
+                    'chatparticipants' => $chatParticipantObj,
                 ]);
             }
 
@@ -925,7 +926,7 @@ class ChatMapper
 
             $this->logger->warning("No chat message found with id", ['id' => $id]);
             return false;
-        } catch (\Throwable $e) {  
+        } catch (\Throwable $e) {
             $this->logger->error("Database error: " . $e->getMessage(), ['id' => $id]);
             return false;
         }

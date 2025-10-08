@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Services;
@@ -96,16 +97,16 @@ class JWTService
 
     /**
      * generate UUID
-     * 
+     *
      * @param $expiryAfter in seconds
-     * 
+     *
      * @returns JWR decoded token with provided expiry time
      */
     public function createAccessTokenWithCustomExpriy(string $userId, int $expiryAfter): string
     {
         $issuedAt = time();
         $expirationTime = $issuedAt + $expiryAfter;
-        
+
         $payload = [
             'iss' => 'peerapp.de',
             'aud' => 'peerapp.de',

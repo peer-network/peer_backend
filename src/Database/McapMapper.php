@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -11,7 +12,7 @@ use Fawaz\Utils\PeerLoggerInterface;
 class McapMapper
 {
     use ResponseHelper;
-    
+
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
@@ -28,7 +29,7 @@ class McapMapper
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new Mcap($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+            $results = array_map(fn ($row) => new Mcap($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched capid successfully" : "No capid found",

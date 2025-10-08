@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Utils\TokenCalculations;
@@ -62,7 +63,7 @@ class TokenHelper
 
         $result = $runtIns->add_decimal((string) $q96Value1, (string) $q96Value2);
 
-        if(is_numeric($result) === false){
+        if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
         }
         return (float) $result;
@@ -81,13 +82,13 @@ class TokenHelper
 
         $result = $runtIns->multiply_decimal((string) $q96Value1, (string) $q96Value2);
 
-        if(is_numeric($result) === false){
+        if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
         }
         return (float) $result;
 
     }
-    
+
     /**
      * divide two values.
      *
@@ -101,7 +102,7 @@ class TokenHelper
 
         $result = $runtIns->divide_decimal((string) $q96Value1, (string) $q96Value2);
 
-        if(is_numeric($result) === false){
+        if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
         }
         return (float) $result;
@@ -120,7 +121,7 @@ class TokenHelper
 
         $result = $runtIns->subtract_decimal((string) $q96Value1, (string) $q96Value2);
 
-        if(is_numeric($result) === false){
+        if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
         }
         return (float) $result;
@@ -129,7 +130,8 @@ class TokenHelper
     /**
      * initialise Rust Module Helper.
      */
-    public static function initRc(){
+    public static function initRc()
+    {
 
         if (PHP_OS_FAMILY === 'Windows') {
             $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/tokencalculation.dll';
@@ -138,7 +140,7 @@ class TokenHelper
         } else {
             $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.so';
         }
-        
+
         // Load FFI bindings
         $ffi = FFI::cdef("
             const char* add_decimal(const char* a, const char* b);

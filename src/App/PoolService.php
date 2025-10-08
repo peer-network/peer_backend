@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -71,7 +72,7 @@ class PoolService
 
         return $this->poolMapper->getTimeSortedMatch($day);
     }
-    
+
     public function getActionPrices(): ?array
     {
         $this->logger->info('PoolService.getActionPrices: Calling fetchCurrentActionPrices');

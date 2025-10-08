@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -30,7 +31,7 @@ class TagMapper
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new Tag($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+            $results = array_map(fn ($row) => new Tag($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched tags successfully" : "No tags found",
@@ -97,7 +98,7 @@ class TagMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            
+
             $searchTerm = '%' . $name . '%';
             $stmt->bindValue(':name', $searchTerm, \PDO::PARAM_STR);
             $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);

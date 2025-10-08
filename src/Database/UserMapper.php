@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -25,7 +26,6 @@ use Fawaz\App\Status;
 
 class UserMapper
 {
-
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
@@ -197,7 +197,7 @@ class UserMapper
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        
+
         $whereClauses = ["verified = :verified"];
         $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
         $whereClausesString = implode(" AND ", $whereClauses);
@@ -208,7 +208,8 @@ class UserMapper
             $contentFilterBy
         );
 
-        $sql = sprintf("
+        $sql = sprintf(
+            "
             SELECT 
                 u.uid,
                 u.email,
@@ -273,7 +274,7 @@ class UserMapper
             $stmt->execute();
 
             $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {    
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
                     $user_reports = (int)$row['user_reports'];
@@ -281,8 +282,10 @@ class UserMapper
                     if ($contentFilterService->getContentFilterAction(
                         ContentType::user,
                         ContentType::user,
-                        $user_reports,$user_dismiss_moderation_amount,
-                        $currentUserId,$row['uid']
+                        $user_reports,
+                        $user_dismiss_moderation_amount,
+                        $currentUserId,
+                        $row['uid']
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
                         $replacer = ContentReplacementPattern::flagged;
                         $row['username'] = $replacer->username($row['username']);
@@ -323,7 +326,7 @@ class UserMapper
         }
     }
 
-    public function fetchAllAdvance(array $args = [], ?string $currentUserId = null,?string $contentFilterBy = null): array
+    public function fetchAllAdvance(array $args = [], ?string $currentUserId = null, ?string $contentFilterBy = null): array
     {
         $this->logger->debug("UserMapper.fetchAll started");
 
@@ -331,7 +334,7 @@ class UserMapper
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $trendlimit = 4;
         $trenddays = 7;
-        
+
         $contentFilterService = new ContentFilterServiceImpl(
             new GetProfileContentFilteringStrategy(),
             null,
@@ -341,8 +344,9 @@ class UserMapper
         $whereClauses = ["verified = :verified"];
         // $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
         $whereClausesString = implode(" AND ", $whereClauses);
-        
-        $sql = sprintf("
+
+        $sql = sprintf(
+            "
             SELECT 
                 u.uid,
                 u.email,
@@ -428,7 +432,7 @@ class UserMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            
+
             foreach ($queryParams as $key => $value) {
                 if (is_int($value)) {
                     $stmt->bindValue($key, $value, \PDO::PARAM_INT);
@@ -450,8 +454,10 @@ class UserMapper
                     if ($contentFilterService->getContentFilterAction(
                         ContentType::user,
                         ContentType::user,
-                        $user_reports,$user_dismiss_moderation_amount,
-                        $currentUserId,$row['uid']
+                        $user_reports,
+                        $user_dismiss_moderation_amount,
+                        $currentUserId,
+                        $row['uid']
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
                         $replacer = ContentReplacementPattern::flagged;
                         $row['username'] = $replacer->username($row['username']);
@@ -507,11 +513,11 @@ class UserMapper
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
                     FROM users 
                     WHERE username = :username";
-            
+
             $stmt = $this->db->prepare($sql);
-            
+
             $stmt->bindValue(':username', $username, \PDO::PARAM_STR);
-            
+
             $stmt->execute();
 
             $results = [];
@@ -541,12 +547,12 @@ class UserMapper
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
                     FROM users 
                     WHERE uid = :id AND roles_mask = :roles_mask AND status = 0";
-            
+
             $stmt = $this->db->prepare($sql);
-            
+
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
             $stmt->bindValue(':roles_mask', $roles_mask, \PDO::PARAM_INT);
-            
+
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -571,12 +577,12 @@ class UserMapper
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
                     FROM users 
                     WHERE uid = :id AND status != :status";
-            
+
             $stmt = $this->db->prepare($sql);
-            
+
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
             $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
-            
+
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -600,9 +606,9 @@ class UserMapper
         try {
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat FROM users WHERE email = :email";
             $stmt = $this->db->prepare($sql);
-            
+
             $stmt->bindValue(':email', $email, \PDO::PARAM_STR);
-            
+
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -696,7 +702,7 @@ class UserMapper
         }
     }
 
-    
+
     public function getUserByNameAndSlug(string $username, int $slug): User|bool
     {
         $this->logger->debug("UserMapper.checkIfNameAndSlugExist started", ['username' => $username, 'slug' => $slug]);
@@ -762,7 +768,7 @@ class UserMapper
 
             $sql = "UPDATE users SET verified = 0 WHERE uid = :uid";
             $stmt = $this->db->prepare($sql);
-            
+
             $stmt->execute(['uid' => $uid]);
 
             $isDeactivated = $stmt->rowCount() > 0;
@@ -787,7 +793,7 @@ class UserMapper
         try {
             $sql = "SELECT COUNT(*) FROM posts WHERE userid = :userid";
             $stmt = $this->db->prepare($sql);
-            
+
             $stmt->execute(['userid' => $userid]);
 
             $postCount = (int) $stmt->fetchColumn();
@@ -802,8 +808,8 @@ class UserMapper
     }
 
     public function fetchFriends(
-        string $userId, 
-        int $offset = 0, 
+        string $userId,
+        int $offset = 0,
         int $limit = 10,
         ?string $contentFilterBy = null
     ): ?array {
@@ -862,7 +868,8 @@ class UserMapper
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
-                    $user_reports,$user_dismiss_moderation_amount
+                    $user_reports,
+                    $user_dismiss_moderation_amount
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $row['username'] = $replacer->username($row['username']);
@@ -885,9 +892,9 @@ class UserMapper
     }
 
     public function fetchFollowers(
-        string $userId, 
-        string $currentUserId, 
-        int $offset = 0, 
+        string $userId,
+        string $currentUserId,
+        int $offset = 0,
         int $limit = 10,
         ?string $contentFilterBy = null
     ): array {
@@ -939,16 +946,18 @@ class UserMapper
 
             $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
             $filtered_results = [];
-            
+
             foreach ($uniqueResults as $row) {
                 $user_reports = (int)$row['user_reports'];
                 $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
-                
+
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
-                    $user_reports,$user_dismiss_moderation_amount,
-                    $currentUserId,$row['uid']
+                    $user_reports,
+                    $user_dismiss_moderation_amount,
+                    $currentUserId,
+                    $row['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $row['username'] = $replacer->username($row['username']);
@@ -957,7 +966,7 @@ class UserMapper
                 $filtered_results[] = $row;
             }
 
-            $users = array_map(fn($row) => new ProfilUser($row), $filtered_results);
+            $users = array_map(fn ($row) => new ProfilUser($row), $filtered_results);
 
             $this->logger->info(
                 count($users) > 0 ? "fetchFollowers retrieved users" : "No users found",
@@ -972,9 +981,9 @@ class UserMapper
     }
 
     public function fetchFollowing(
-        string $userId, 
-        string $currentUserId, 
-        int $offset = 0, 
+        string $userId,
+        string $currentUserId,
+        int $offset = 0,
         int $limit = 10,
         ?string $contentFilterBy = null
     ): array {
@@ -1026,16 +1035,18 @@ class UserMapper
 
             $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
             $filtered_results = [];
-            
+
             foreach ($uniqueResults as $row) {
                 $user_reports = (int)$row['user_reports'];
                 $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
-                
+
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
-                    $user_reports,$user_dismiss_moderation_amount,
-                    $currentUserId,$row['uid']
+                    $user_reports,
+                    $user_dismiss_moderation_amount,
+                    $currentUserId,
+                    $row['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $row['username'] = $replacer->username($row['username']);
@@ -1044,7 +1055,7 @@ class UserMapper
                 $filtered_results[] = $row;
             }
 
-            $users = array_map(fn($row) => new ProfilUser($row), $filtered_results);
+            $users = array_map(fn ($row) => new ProfilUser($row), $filtered_results);
 
             $this->logger->info(
                 count($users) > 0 ? "fetchFollowing retrieved users" : "No users found",
@@ -1068,7 +1079,7 @@ class UserMapper
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
             $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            
+
             $stmt->execute();
             return (bool) $stmt->fetchColumn();
         } catch (\Throwable $e) {
@@ -1087,7 +1098,7 @@ class UserMapper
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
             $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            
+
             $stmt->execute();
             return (bool) $stmt->fetchColumn();
         } catch (\Throwable $e) {
@@ -1111,7 +1122,7 @@ class UserMapper
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
             $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            
+
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -1122,7 +1133,7 @@ class UserMapper
         }
     }
 
-    public function fetchProfileData(string $userid, string $currentUserId, ?string $contentFilterBy): Profile|false 
+    public function fetchProfileData(string $userid, string $currentUserId, ?string $contentFilterBy): Profile|false
     {
         $whereClauses = ["u.uid = :userid AND u.verified = :verified"];
         // $whereClauses[] = 'u.status = 0';
@@ -1134,7 +1145,8 @@ class UserMapper
             $contentFilterBy
         );
 
-        $sql = sprintf("
+        $sql = sprintf(
+            "
             SELECT 
                 u.uid,
                 u.username,
@@ -1156,7 +1168,7 @@ class UserMapper
             LEFT JOIN users_info ui ON ui.userid = u.uid
             WHERE %s",
             $whereClausesString
-         );
+        );
 
         try {
             $stmt = $this->db->prepare($sql);
@@ -1175,8 +1187,10 @@ class UserMapper
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
-                    $user_reports,$user_dismiss_moderation_amount,
-                    $currentUserId,$data['uid']
+                    $user_reports,
+                    $user_dismiss_moderation_amount,
+                    $currentUserId,
+                    $data['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $data['username'] = $replacer->username($data['username']);
@@ -1287,27 +1301,27 @@ class UserMapper
             throw new \RuntimeException("Failed to insert user into database: " . $e->getMessage());
         }
     }
-    
+
     public function insertReferralInfo(string $userId, string $link): void
     {
         $this->logger->debug("UserMapper.insertReferralInfo started", [
             'userId' => $userId,
             'link' => $link,
         ]);
-    
+
         try {
             $query = "SELECT 1 FROM user_referral_info WHERE uid = :uid";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
             $stmt->execute();
-    
+
             if ($stmt->fetch()) {
                 $this->logger->info("Referral link already exists, skipping insert.", ['userId' => $userId]);
                 return;
             }
-    
+
             $referralUuid = $userId;
-    
+
             $query = "INSERT INTO user_referral_info (uid, referral_link, referral_uuid)
                       VALUES (:uid, :referral_link, :referral_uuid)";
             $stmt = $this->db->prepare($query);
@@ -1315,7 +1329,7 @@ class UserMapper
             $stmt->bindValue(':referral_link', $link, \PDO::PARAM_STR);
             $stmt->bindValue(':referral_uuid', $referralUuid, \PDO::PARAM_STR);
             $stmt->execute();
-    
+
             $this->logger->info("Referral link inserted successfully.", ['userId' => $userId]);
         } catch (\PDOException $e) {
             $this->logger->error("UserMapper.insertReferralInfo: PDOException", ['error' => $e->getMessage()]);
@@ -1329,32 +1343,32 @@ class UserMapper
         $this->logger->debug("UserMapper.getReferralInfoByUserId started", [
             'userId' => $userId,
         ]);
-    
+
         $query = "SELECT referral_uuid, referral_link FROM user_referral_info WHERE uid = :uid";
-    
+
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
         $stmt->execute();
-    
+
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-    
+
         if (!$result || empty($result['referral_uuid']) || empty($result['referral_link'])) {
             $this->logger->info("No referral info found. Generating new referral for user.", [
                 'userId' => $userId,
             ]);
-    
+
             $referralLink = $this->generateReferralLink($userId);
             $this->insertReferralInfo($userId, $referralLink);
-    
+
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
             $stmt->execute();
-    
+
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
         }
-    
+
         $this->logger->info("Referral info query result", ['result' => $result]);
-    
+
         return $result ?: null;
     }
 
@@ -1380,7 +1394,7 @@ class UserMapper
         return $result ? ((new User($result, [], false))->getArrayCopy()) : null;
     }
 
-    public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array 
+    public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array
     {
         $query = "
             SELECT u.uid, u.status, u.username, u.slug, u.img
@@ -1399,7 +1413,7 @@ class UserMapper
 
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         return [
-            'iInvited' => array_map(fn($user) => (new User($user, [], false))->getArrayCopy(), $data)
+            'iInvited' => array_map(fn ($user) => (new User($user, [], false))->getArrayCopy(), $data)
         ];
     }
 
@@ -1427,12 +1441,12 @@ class UserMapper
             $stmt->bindValue(':amountposts', $data['amountposts'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountfollower', $data['amountfollower'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountfollowed', $data['amountfollowed'], \PDO::PARAM_INT);
-            $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT); 
-            $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT); 
+            $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT);
+            $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
             $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
             $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
             $stmt->bindValue(':pkey', $data['pkey'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -1471,7 +1485,7 @@ class UserMapper
             $stmt = $this->db->prepare($query);
 
             $stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
-            $stmt->bindValue(':password', $data['password'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':password', $data['password'], \PDO::PARAM_STR);
             $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
             $stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
             $stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
@@ -1479,7 +1493,7 @@ class UserMapper
             $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
             $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
             $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
 
             $stmt->execute();
@@ -1500,8 +1514,8 @@ class UserMapper
     {
         $this->logger->debug("UserMapper.updatePass started");
 
-        $data = $user->getArrayCopy(); 
-        $passwordHash = $this->setPassword($data['password']); 
+        $data = $user->getArrayCopy();
+        $passwordHash = $this->setPassword($data['password']);
 
         $query = "UPDATE users
                   SET password = :password,
@@ -1514,14 +1528,14 @@ class UserMapper
 
             $stmt->bindValue(':password', $passwordHash, \PDO::PARAM_STR);
             $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
             $this->logger->info("Updated password in database", ['uid' => $data['uid']]);
 
-            return new User($data); 
+            return new User($data);
         } catch (\Throwable $e) {
             $this->logger->error("UserMapper.updatePass: Exception occurred while updating password", [
                 'error' => $e->getMessage(),
@@ -1535,7 +1549,7 @@ class UserMapper
     {
         $this->logger->debug("UserMapper.updateProfil started");
 
-        $data = $user->getArrayCopy(); 
+        $data = $user->getArrayCopy();
 
         $query = "UPDATE users
                   SET username = :username,
@@ -1562,7 +1576,7 @@ class UserMapper
             $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
             $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
             $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
 
             $stmt->execute();
@@ -1606,7 +1620,7 @@ class UserMapper
 
             $this->logger->info("Deleted user in database", ['id' => $id]);
 
-            return (bool)$stmt->rowCount(); 
+            return (bool)$stmt->rowCount();
         } catch (\Throwable $e) {
             $this->logger->error("UserMapper.delete: Exception occurred while deleting user", [
                 'error' => $e->getMessage(),
@@ -1744,7 +1758,7 @@ class UserMapper
             $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $userResultObj = [];
-            foreach($userResults as $key => $prt){
+            foreach ($userResults as $key => $prt) {
                 $userObj = [
                         'status' => $prt['followerstatus'],
                         'username' => $prt['followername'],
@@ -1761,8 +1775,8 @@ class UserMapper
                 $userObj = (new User($userObj, [], false))->getArrayCopy();
                 $userResultObj[$key]['followedname'] = $userObj['username'];
 
-            }   
-            
+            }
+
             return $userResultObj;
         } catch (\Throwable $e) {
             $this->logger->error('Database error in fetchFriends: ', ['exception' => $e->getMessage()]);
@@ -1774,7 +1788,8 @@ class UserMapper
     /**
      * Send Actual email to Email.
     */
-    public function sendPasswordResetEmail(string $email, array $data): void {
+    public function sendPasswordResetEmail(string $email, array $data): void
+    {
         (new PasswordRestMail($data))->send($email);
     }
 
@@ -1787,7 +1802,7 @@ class UserMapper
             INSERT INTO password_reset_requests 
             (user_id, token, attempt_count, updatedat, last_attempt, expires_at)  
             VALUES (:user_id, :token, :attempt_count, :updatedat, :last_attempt, :expires_at)";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':user_id', $userId);
         $stmt->bindValue(':token', $token);
@@ -1843,7 +1858,7 @@ class UserMapper
         }
         return [];
     }
-    
+
     public function loadTokenById(string $id): bool
     {
         $this->logger->debug("UserMapper.loadTokenById started");
@@ -1869,8 +1884,8 @@ class UserMapper
      */
     public function isFirstAttemptTooSoon(array $attempt): bool
     {
-        return $attempt['attempt_count'] === 1 
-            && !$attempt['collected'] 
+        return $attempt['attempt_count'] === 1
+            && !$attempt['collected']
             && time() < strtotime($attempt['updatedat'] . ' +1 minute');
     }
 
@@ -1879,11 +1894,11 @@ class UserMapper
      */
     public function isSecondAttemptTooSoon(array $attempt): bool
     {
-        return $attempt['attempt_count'] === 2 
-            && !$attempt['collected'] 
+        return $attempt['attempt_count'] === 2
+            && !$attempt['collected']
             && time() < strtotime($attempt['last_attempt'] . ' +10 minutes');
     }
-    
+
     /**
      * Returns a response indicating the user should retry after a delay.
      */
@@ -1896,7 +1911,7 @@ class UserMapper
         }
 
         $nextAttemptAt = DateService::nowPlusMinutes($remaining);
-        
+
         return [
             'status' => 'error',
             'ResponseCode' => "31901",
@@ -2010,9 +2025,9 @@ class UserMapper
         $stmt->bindValue(':role2', Role::ADMIN, \PDO::PARAM_INT);
         $stmt->bindValue(':role3', Role::COMPANY_ACCOUNT, \PDO::PARAM_INT);
         $stmt->execute();
-    
+
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-    
+
         $this->logger->info("Referral info query result", ['result' => $result]);
 
 

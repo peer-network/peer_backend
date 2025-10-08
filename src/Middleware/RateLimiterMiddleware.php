@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Middleware;
@@ -40,7 +41,7 @@ class RateLimiterMiddleware implements MiddlewareInterface
             $response->getBody()->write(json_encode([
                 'errors' => 'Rate limit exceeded',
                 'message' => 'You have exceeded the allowed number of requests.',
-                'retry_after' => 60 
+                'retry_after' => 60
             ]));
             return $response
                 ->withStatus(429)
