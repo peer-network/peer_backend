@@ -97,6 +97,7 @@ jobs:
       - name: Create minimal .env.ci for static analysis
         run: |
           cat <<EOF > .env.ci
+          IMAGE_TAG=local
           DB_DRIVER=pgsql
           DB_HOST=db
           DB_PORT=5432
@@ -107,6 +108,10 @@ jobs:
           APP_URL=http://backend
           EOF
           echo ".env.ci created (minimal for PHPStan)"
+
+      - name: Log in to GHCR (for base image access)
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Run PHPStan inside backend container
         run: |
