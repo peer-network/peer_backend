@@ -4,9 +4,10 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 
-class PostInfo
+class PostInfo extends Model
 {
     protected string $postid;
     protected string $userid;
@@ -235,5 +236,12 @@ class PostInfo
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+
+    // Table name
+    public static function table(): string
+    {
+        return 'post_info';
     }
 }

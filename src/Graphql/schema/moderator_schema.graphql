@@ -4,5 +4,5 @@ extend type Query {
 }
 
 extend type Mutation {
-  performModeration(targetContentId: ID!, moderationAction: ModerationStatus!): DefaultResponse!
+  performModeration(reportid: ID!, moderationAction: ModerationStatus!): DefaultResponse!
 }

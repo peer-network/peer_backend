@@ -194,32 +194,71 @@ class ModerationService {
             return self::respondWithError(0000);
         }
 
-        $targetContentId = $args['targetContentId'] ?? null;
+        $reportid = $args['reportid'] ?? null;
         $moderationAction = $args['moderationAction'] ?? null;
 
-        if(!$targetContentId || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
+        if(!$reportid || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
             return self::respondWithError(0000); // Invalid input
         }
 
-        $report = UserReport::query()->where('reportid', $targetContentId)->first();
+        $report = UserReport::query()->where('reportid', $reportid)->first();
         if(!$report) {
             return self::respondWithError(0000); // Report not found
         }
 
-        UserReport::query()->where('reportid', $targetContentId)->updateColumns([
-            'status' => $moderationAction,
-        ]); 
 
         $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
 
-        // var_dump($report[0]); exit;
+        $moderationId = self::generateUUID();
         Moderation::insert([
-            'uid' => self::generateUUID(),
+            'uid' => $moderationId,
             'moderationticketid' => $report[0]['moderationticketid'],
             'moderatorid' => $this->currentUserId,
             'status' => $moderationAction,
             'createdat' => $createdat,
         ]);
+
+        UserReport::query()->where('reportid', $reportid)->updateColumns([
+            'status' => $moderationAction,
+            'moderationid' => $moderationId
+        ]); 
+
+        /**
+         * Apply Content Action based on Moderation Action
+         * 
+         * For Post Content Type Only
+         *  1. illegal: Set post status to '2' (illegal) in posts table
+         *  2. restored: Set post status to '0' (published) in posts table and update REPORTS counts to ZERO
+         *  3. hidden: Nothing can be applied to posts as of now because hiding post is already handled by the listPosts logic
+         */
+        if($report[0]['targettype'] === 'post') {
+
+            /**
+             * Moderation Status: illegal
+             */
+            if($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
+                Post::query()->where('postid', $report[0]['targetid'])->updateColumns([
+                    'status' => ConstantsModeration::POST_STATUS_ILLEGAL
+                ]);
+            }
+
+            /**
+             * Moderation Status: restored
+             */
+            if($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
+                $postInfo = PostInfo::query()->where('postid', $report[0]['targetid'])->first();
+                if($postInfo) {
+                    PostInfo::query()->where('postid', $report[0]['targetid'])->updateColumns([
+                        'reports' => 0
+                    ]);
+                }
+            }
+
+            /**
+             * hidden: Nothing can be applied to posts as of now because hiding post is already handled by the listPosts logic
+             */
+            
+        }
 
         return self::createSuccessResponse(20001, [], false); // Moderation action performed successfully
     }

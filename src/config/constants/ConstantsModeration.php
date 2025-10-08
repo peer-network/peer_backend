@@ -68,9 +68,23 @@ class ConstantsModeration
     public const MODERATION_TICKETS_STATUS_CLOSED = 'closed';
 
     /**
-     * Post Status
+     * Post Statuses
+     */
+    /**
+     * Post Status: published
+     * Applies same as in ConstantsConfig::post()['STATUS']['PUBLISHED']
      */
     public const POST_STATUS_PUBLISHED = 0;
+
+    /**
+     * Post Status: advertised
+     * Applies same as in ConstantsConfig::post()['STATUS']['ADVERTISED']
+     */
     public const POST_STATUS_ADVERTISED = 1;
+
+    /**
+     * Post Status: illegal
+     * Applies same as in ConstantsConfig::post()['STATUS']['ILLEGAL']
+     */
     public const POST_STATUS_ILLEGAL = 2;
 }
