@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -54,7 +55,7 @@ class Profile
         $this->videoposts = isset($data['videoposts']) && is_array($data['videoposts']) ? $data['videoposts'] : [];
         $this->audioposts = isset($data['audioposts']) && is_array($data['audioposts']) ? $data['audioposts'] : [];
 
-        if(($this->status == 6 )){
+        if (($this->status == 6)) {
             $this->username = 'Deleted_Account';
             $this->img = '/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg';
             $this->biography = '/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt';
@@ -126,7 +127,7 @@ class Profile
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -159,7 +160,7 @@ class Profile
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => [
-                        'min' => $userConfig['SLUG']['MIN_LENGTH'], 
+                        'min' => $userConfig['SLUG']['MIN_LENGTH'],
                         'max' => $userConfig['SLUG']['MAX_LENGTH']
                         ]],
                 ],
@@ -243,7 +244,7 @@ class Profile
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Mail;
@@ -8,8 +9,9 @@ use Fawaz\Services\SmtpMailer;
 
 class UserWelcomeMail implements EmailInterface
 {
-    public function __construct(public array $data){
-        
+    public function __construct(public array $data)
+    {
+
     }
 
     /**

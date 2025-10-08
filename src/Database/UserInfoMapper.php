@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -251,7 +252,7 @@ class UserInfoMapper
 
         if ($users) {
             return $users;
-        } 
+        }
 
         return null;
     }
@@ -275,7 +276,7 @@ class UserInfoMapper
 
                 $action = true;
                 $response = "11104";
-                
+
                 $this->logger->info('Follow relationship created', [
                     'followerid' => $followerid,
                     'followeduserid' => $followeduserid
@@ -293,7 +294,7 @@ class UserInfoMapper
 
                     $action = false;
                     $response = "11103";
-                    
+
                     $this->logger->info('Follow relationship removed', [
                         'followerid' => $followerid,
                         'followeduserid' => $followeduserid
@@ -303,7 +304,7 @@ class UserInfoMapper
                         'followerid' => $followerid,
                         'followeduserid' => $followeduserid
                     ]);
-                    
+
                     $action = false;
                     $response = "11103";
                 }
@@ -319,9 +320,9 @@ class UserInfoMapper
         } catch (\Exception $e) {
             $this->logger->error('Failed to toggle user follow', ['exception' => $e]);
             return ['status' => 'error', 'ResponseCode' => "41103"];
-        }               
+        }
     }
-                             
+
     private function updateFollowCounts(string $userId, int $change, string $column): void
     {
         $allowedColumns = ['amountfollowed', 'amountfollower'];
@@ -452,7 +453,7 @@ class UserInfoMapper
         ]);
 
         try {
-            
+
             $query = "SELECT COUNT(*) FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
@@ -528,8 +529,8 @@ class UserInfoMapper
             $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $blockedBy = []; 
-            $iBlocked = []; 
+            $blockedBy = [];
+            $iBlocked = [];
 
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 if ($row['blockedid'] === $myUserId) {
@@ -549,7 +550,7 @@ class UserInfoMapper
                 }
             }
 
-            $counter = count($blockedBy) + count($iBlocked); 
+            $counter = count($blockedBy) + count($iBlocked);
 
             $this->logger->info("Fetched block relationships", [
                 'blockedByCount' => count($blockedBy),

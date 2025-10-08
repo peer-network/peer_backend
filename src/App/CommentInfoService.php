@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -17,12 +18,13 @@ class CommentInfoService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected PeerLoggerInterface $logger, 
-        protected CommentInfoMapper $commentInfoMapper, 
+        protected PeerLoggerInterface $logger,
+        protected CommentInfoMapper $commentInfoMapper,
         protected ReportsMapper $reportsMapper,
         protected CommentMapper $commentMapper,
-        protected TransactionManager $transactionManager 
-    ){}
+        protected TransactionManager $transactionManager
+    ) {
+    }
 
     public function setCurrentUserId(string $userId): void
     {
@@ -105,7 +107,7 @@ class CommentInfoService
             return $this::respondWithError(31606);
         }
 
-        try{
+        try {
             $this->transactionManager->beginTransaction();
 
             $exists = $this->commentInfoMapper->addUserActivity('likeComment', $this->currentUserId, $commentId);
@@ -120,7 +122,7 @@ class CommentInfoService
             $this->transactionManager->commit();
 
             return $this::createSuccessResponse(11603);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('Error while fetching comment data', ['exception' => $e]);
             return $this::respondWithError(41601);
@@ -138,7 +140,7 @@ class CommentInfoService
         if (!self::isValidUUID($commentId)) {
             return $this::respondWithError(30201);
         }
-        
+
         try {
             $comment = $this->commentMapper->loadById($commentId);
             if (!$comment) {
@@ -156,12 +158,12 @@ class CommentInfoService
             $this->logger->error('Error while fetching data for report generation ', ['exception' => $e]);
             return $this::respondWithError(41601);
         }
-        
+
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
             $this->logger->warning("User tries to report on his own comment");
             return $this::respondWithError(31607);
         }
-        
+
         $contentHash = $comment->hashValue();
         if (empty($contentHash)) {
             $this->logger->error('Failed to generate content hash of content');
@@ -173,7 +175,7 @@ class CommentInfoService
 
             $exists = $this->reportsMapper->addReport(
                 $this->currentUserId,
-                ReportTargetType::COMMENT, 
+                ReportTargetType::COMMENT,
                 $commentId,
                 $contentHash
             );

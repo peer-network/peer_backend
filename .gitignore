@@ -34,3 +34,4 @@ changelog
 .idea
 .gitleaks_out/
 *.generated
+*.cache

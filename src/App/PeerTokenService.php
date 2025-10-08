@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -55,7 +56,7 @@ class PeerTokenService
                     11211,
                     [
                         'tokenSend'                  => $response['tokenSend'],
-                        'tokensSubstractedFromWallet'=> $response['tokensSubstractedFromWallet'],
+                        'tokensSubstractedFromWallet' => $response['tokensSubstractedFromWallet'],
                         'createdat'                  => $response['createdat'] ?? '',
                     ],
                     false // no counter needed for associative array
@@ -71,8 +72,8 @@ class PeerTokenService
 
     /**
      * Get transcation history with Filter
-     * 
-     * 
+     *
+     *
      */
     public function transactionsHistory(array $args): array
     {
@@ -87,7 +88,7 @@ class PeerTokenService
                 false // no counter needed for existing data
             );
 
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->logger->error("Error in PeerTokenService.transactionsHistory", ['exception' => $e->getMessage()]);
             throw new \RuntimeException("Database error while fetching transactions: " . $e->getMessage());
         }

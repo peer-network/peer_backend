@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -110,7 +111,7 @@ class PoolMapper
                 COUNT(CASE WHEN EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE) THEN 1 END) AS y0
                 FROM gems
             ";
-            
+
             $stmt = $this->db->query($sql);
             $entries = $stmt->fetch(\PDO::FETCH_ASSOC);
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
@@ -223,21 +224,21 @@ class PoolMapper
         if (!empty($data)) {
             return [
                 'status' => 'success',
-                'counter' => count($args) -1,
+                'counter' => count($args) - 1,
                 'ResponseCode' => "11208",
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
         }
-        
+
         return $this::respondWithError(40301);
     }
 
     private function decimalToQ64_96(float $value): string
     {
         $scaleFactor = bcpow('2', '96');
-        
+
         $scaledValue = bcmul((string)$value, $scaleFactor, 0);
-        
+
         return $scaledValue;
     }
     public function fetchCurrentActionPrices(): ?array

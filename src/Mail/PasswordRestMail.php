@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Mail;
@@ -8,8 +9,9 @@ use Fawaz\Services\SmtpMailer;
 
 class PasswordRestMail implements EmailInterface
 {
-    public function __construct(public $data) {
-        
+    public function __construct(public $data)
+    {
+
     }
 
     /**

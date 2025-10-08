@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -6,7 +7,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\DailyFree;
 use Fawaz\Utils\PeerLoggerInterface;
-use \InvalidArgumentException;
+use InvalidArgumentException;
 
 class DailyFreeMapper
 {
@@ -123,11 +124,11 @@ class DailyFreeMapper
 
         } catch (\PDOException $e) {
             $this->logger->error('Database error in getUserDailyUsage', ['exception' => $e->getMessage()]);
-            
+
             return 0;
         } catch (\Throwable $e) {
             $this->logger->error('Unexpected error in getUserDailyUsage', ['exception' => $e->getMessage()]);
-            return 0; 
+            return 0;
         }
     }
 
@@ -160,14 +161,14 @@ class DailyFreeMapper
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (!$result) {
-                return array_map(fn($column, $label) => [
+                return array_map(fn ($column, $label) => [
                     'name' => $label,
                     'used' => 0,
                     'available' => $dailyLimits[$column],
                 ], array_keys($columnMap), $columnMap);
             }
 
-            return array_map(fn($column, $label) => [
+            return array_map(fn ($column, $label) => [
                 'name' => $label,
                 'used' => (int)($result[$column] ?? 0),
                 'available' => max($dailyLimits[$column] - (int)($result[$column] ?? 0), 0),
