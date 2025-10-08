@@ -156,7 +156,7 @@ class ReportsMapper
                 $moderationTicketId = $existingTicket['moderationticketid'];
 
                 // Update the reports count
-                $reportsCount = UserReport::query()->where('moderationticketid', $moderationTicketId)->count();
+                $reportsCount = UserReport::query()->where('moderationticketid', $moderationTicketId)->count() + 1;
                 ModerationTicket::query()->where('uid', $moderationTicketId)->updateColumns(['reportscount' => $reportsCount]);
             }
         } else {
@@ -166,6 +166,8 @@ class ReportsMapper
             $data = [
                 'uid' => $moderationTicketId,
                 'status' => $status,
+                'reportscount' => 1,
+                'contenttype' => $targettype,
                 'createdat' => $createdat
             ];
 

@@ -239,7 +239,7 @@ class ModerationService
         ]);
 
         ModerationTicket::query()->where('uid', $report['moderationticketid'])->updateColumns([
-            'status' => ConstantsModeration::MODERATION_TICKETS_STATUS_CLOSED,
+            'status' => $moderationAction,
             'updatedat' => $createdat
         ]);
 
