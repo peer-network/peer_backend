@@ -229,6 +229,10 @@ class ModerationService
                 return self::respondWithError(0000); // Report not found
             }
 
+            if($report['moderationid']) {
+                return self::respondWithError(0000); // Moderation action already performed
+            }
+
             $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
 
             $moderationId = self::generateUUID();
