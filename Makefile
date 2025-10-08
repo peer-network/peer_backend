@@ -456,7 +456,6 @@ scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
 gen:
 	bash cd-generate-backend-config.sh
 
-<<<<<<< HEAD
 linter:
 	@echo "Linter check"
 	vendor/bin/php-cs-fixer fix --dry-run --diff
