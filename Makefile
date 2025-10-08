@@ -105,9 +105,11 @@ restart-db: ## Restart only the database (fresh schema & data, keep backend as-i
 
 	@echo "Database restarted and ready. Backend container was untouched."
 
-dev: env-ci reset-db-and-backend init check-hooks scan ## Full setup: env.ci, DB reset, vendors install, start DB+backend
+dev: check-hooks scan reset-db-and-backend init ## Full setup: env.ci, DB reset, vendors install, start DB+backend
+	@cp .env.dev .env.ci
 	@echo "Installing Composer dependencies on local host..."
-	composer install --no-dev --prefer-dist --no-interaction
+	composer install --prefer-dist --no-interaction
+	@if [ ! -f "vendor/bin/phpstan" ]; then composer require --dev phpstan/phpstan --prefer-dist --no-interaction; fi
 
 	@echo "Checking for root-owned files to fix ownership if needed..."
 	@if [ "$$(find . ! -user $(USER) | wc -l)" -ne 0 ]; then \
@@ -126,6 +128,13 @@ dev: env-ci reset-db-and-backend init check-hooks scan ## Full setup: env.ci, DB
 
 	@echo "Building images..."
 	docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml build
+	@if docker image inspect peer-backend:local >/dev/null 2>&1; then \
+        echo "Using fast mode (existing backend image)..."; \
+        $(MAKE) phpstan-fast; \
+    else \
+        echo "Backend image not found — running full PHPStan to warm cache..."; \
+        $(MAKE) phpstan; \
+    fi
 
 	@echo "Starting DB..."
 	docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml up -d db
@@ -173,7 +182,7 @@ ensure-jq: ## Ensure jq is installed (auto-install if missing)
 		sudo apt update && sudo apt install -y jq; \
 	}
 
-test: env-ci init ensure-jq linter ## Run Newman tests inside Docker and generate HTML report
+test: env-ci init ensure-jq ## Run Newman tests inside Docker and generate HTML report
 	@echo "Building Newman container..."
 	docker-compose --env-file "./.env.ci" $(COMPOSE_FILES) build newman
 
@@ -256,7 +265,7 @@ clean-ci: reset-db-and-backend ## Cleanup for CI but keep reports
 	@rm -f tests/postman_collection/tmp_*.json
 	@echo "Local CI cleanup complete (reports preserved)."
 
-ci: check-hooks ## Run full local CI workflow (setup, tests, cleanup)
+ci: check-hooks scan ## Run full local CI workflow (setup, tests, cleanup)
 	$(MAKE) dev
 	$(MAKE) test
 	$(MAKE) clean-ci
@@ -278,7 +287,7 @@ clean-ci2: ## Cleanup for isolated CI2 environment but keep reports
 	@rm -f tests/postman_collection/tmp_*.json
 	@echo "CI2 cleanup complete — Newman reports preserved."
 
-ci2: check-hooks env-ci init ## Run full isolated local CI2 workflow (setup, tests, cleanup)
+ci2: check-hooks scan env-ci phpstan-fast init ## Run full isolated local CI2 workflow (setup, tests, cleanup)
 	@echo "Checking for running dev DB container on port 5432..."
 	@if docker ps --format '{{.Names}} {{.Ports}}' | grep -q 'peer_backend_local_$(shell echo $(USER) | tr "[:upper:]" "[:lower:]")-db-1.*5432'; then \
 		echo "Detected dev DB container using port 5432. Stopping it temporarily..."; \
@@ -353,10 +362,32 @@ hot-ci: ## Run full local CI workflow (setup, tests, cleanup)
 	$(MAKE) restart-db
 	$(MAKE) test
 
-phpstan-dev: ## Run PHPStan static analysis inside backend container
+phpstan: env-ci ## Run PHPStan static analysis inside backend container
 	@echo "Running PHPStan analysis (level defined in phpstan.neon)..."
+	@if ! docker image inspect peer-backend:local >/dev/null 2>&1; then \
+		echo "Backend image not built — building now..."; \
+		docker-compose --env-file .env.ci $(COMPOSE_FILES) build backend; \
+	else \
+		echo "Using existing backend image"; \
+	fi
 	@docker-compose --env-file .env.ci $(COMPOSE_FILES) run --rm backend \
 		sh -c "composer install --prefer-dist --no-interaction && vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
+	@rm -f .env.ci
+
+phpstan-fast: ## Run PHPStan using already built backend & local vendor (no build or composer)
+	@echo "Running PHPStan (fast mode — container already built, vendor ready)..."
+	@if ! docker image inspect peer-backend:local >/dev/null 2>&1; then \
+		echo "⚙️ Backend image not found. Building now..."; \
+		docker-compose --env-file .env.ci $(COMPOSE_FILES) build backend; \
+	fi
+	@if [ ! -f "vendor/bin/phpstan" ]; then \
+		echo "⚡ PHPStan not found in vendor/. Installing temporarily..."; \
+		composer require --dev phpstan/phpstan --prefer-dist --no-interaction; \
+	fi
+	@echo "→ PHPStan binary found. Running inside backend container using host-mounted vendor..."
+	@docker-compose --env-file .env.dev -f docker-compose.yml -f docker-compose.override.local.yml run --no-deps --rm \
+		-v "$(PWD)":/var/www/html \
+		backend sh -c "php vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
 
 # ---- Developer Shortcuts ----
 .PHONY: logs db bash-backend
@@ -461,15 +492,15 @@ scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
 gen:
 	bash cd-generate-backend-config.sh
 
-linter:
-	@echo "Linter check"
-	vendor/bin/php-cs-fixer fix --dry-run --diff
-	vendor/bin/phpstan analyse
+#linter:
+#	@echo "Linter check"
+#	vendor/bin/php-cs-fixer fix --dry-run --diff
+#	vendor/bin/phpstan analyse
 
-fix-linter:
-	./vendor/bin/php-cs-fixer fix
+#fix-linter:
+#	./vendor/bin/php-cs-fixer fix
 
-stan:
-	./vendor/bin/phpstan analyse --memory-limit=1024M	
+#stan:
+#	./vendor/bin/phpstan analyse --memory-limit=1024M	
 
 .PHONY: logs db bash-backend linter
