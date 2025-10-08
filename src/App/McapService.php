@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -71,7 +72,7 @@ class McapService
             $limit = isset($args['limit']) ? (int) $args['limit'] : null;
 
             $users = $this->mcapMapper->fetchAll($offset, $limit);
-            $fetchAll = array_map(fn(User $user) => $user->getArrayCopy(), $users);
+            $fetchAll = array_map(fn (User $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {
                 $success = [

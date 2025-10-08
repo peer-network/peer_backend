@@ -12,15 +12,15 @@ use Fawaz\App\Models\Moderation;
 use Fawaz\App\Models\ModerationTicket;
 use Fawaz\Utils\PeerLoggerInterface;
 
-class ModerationService {
-
+class ModerationService
+{
     use ResponseHelper;
     protected ?string $currentUserId = null;
 
     public function __construct(
         protected PeerLoggerInterface $logger
-    ){
-        
+    ) {
+
     }
 
     /**
@@ -28,7 +28,7 @@ class ModerationService {
      */
     public function isAuthorized(): bool
     {
-        if(!User::query()->where('uid', $this->currentUserId)->where('roles_mask', Role::SUPER_MODERATOR)->exists()) {
+        if (!User::query()->where('uid', $this->currentUserId)->where('roles_mask', Role::SUPER_MODERATOR)->exists()) {
             return false;
         }
         return true;
@@ -47,7 +47,7 @@ class ModerationService {
      */
     public function getModerationStats(): array
     {
-        if(!$this->isAuthorized()) {
+        if (!$this->isAuthorized()) {
             $this->logger->warning("Unauthorized access attempt to get moderation stats by user ID: {$this->currentUserId}");
             return self::respondWithError(0000);
         }
@@ -70,7 +70,7 @@ class ModerationService {
      */
     public function getModerationItems(array $args): array
     {
-        if(!$this->isAuthorized()) {
+        if (!$this->isAuthorized()) {
             $this->logger->warning("Unauthorized access attempt to get moderation items by user ID: {$this->currentUserId}");
             return self::respondWithError(0000);
         }
@@ -82,12 +82,12 @@ class ModerationService {
         $items = UserReport::query();
 
         // Apply Status filters
-        if(isset($args['status']) && in_array($args['status'], $statuses)) {
+        if (isset($args['status']) && in_array($args['status'], $statuses)) {
             $items = $items->where('user_reports.status', $args['status']);
         }
 
         // Apply Content Type filters
-        if(isset($args['contentType']) && in_array($args['contentType'], array_keys(ConstantsModeration::CONTENT_MODERATION_TARGETS))) {
+        if (isset($args['contentType']) && in_array($args['contentType'], array_keys(ConstantsModeration::CONTENT_MODERATION_TARGETS))) {
             $items = $items->where('user_reports.targettype', $args['contentType']);
         }
 
@@ -96,47 +96,48 @@ class ModerationService {
             ->join('post_info', 'posts.postid', '=', 'post_info.postid')
             ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
             ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
-            ->select('user_reports.*', 
-                    'users.uid', 
-                    'users.username', 
-                    'users.email', 
-                    'users.img', 
-                    'users.slug', 
-                    'users.status as userstatus', 
-                    'users.biography', 
-                    'users.updatedat', 
-                    'posts.postid',
-                    'posts.userid',
-                    'posts.contenttype',
-                    'posts.title',
-                    'posts.mediadescription',
-                    'posts.media',
-                    'posts.cover',
-                    'posts.options',  
-                    'comments.userid', 
-                    'comments.parentid', 
-                    'comments.content', 
-                    'target_user.uid as target_user_uid', 
-                    'target_user.username as target_user_username', 
-                    'target_user.email as target_user_email', 
-                    'target_user.img as target_user_img', 
-                    'target_user.slug as target_user_slug', 
-                    'target_user.status as target_user_status', 
-                    'target_user.biography as target_user_biography', 
-                    'target_user.updatedat as target_user_updatedat', 
-                    )
+            ->select(
+                'user_reports.*',
+                'users.uid',
+                'users.username',
+                'users.email',
+                'users.img',
+                'users.slug',
+                'users.status as userstatus',
+                'users.biography',
+                'users.updatedat',
+                'posts.postid',
+                'posts.userid',
+                'posts.contenttype',
+                'posts.title',
+                'posts.mediadescription',
+                'posts.media',
+                'posts.cover',
+                'posts.options',
+                'comments.userid',
+                'comments.parentid',
+                'comments.content',
+                'target_user.uid as target_user_uid',
+                'target_user.username as target_user_username',
+                'target_user.email as target_user_email',
+                'target_user.img as target_user_img',
+                'target_user.slug as target_user_slug',
+                'target_user.status as target_user_status',
+                'target_user.biography as target_user_biography',
+                'target_user.updatedat as target_user_updatedat',
+            )
             ->orderByValue('status', 'ASC', $statuses)
             // ->orderBy('createdat', 'DESC')
             ->latest()
             ->paginate($page, $limit);
 
         // Map records according to the target type
-        $items['data'] = array_map(function($item) {
+        $items['data'] = array_map(function ($item) {
             $item = $this->mapTargetContent($item);
             return $item;
         }, $items['data']);
 
-        return self::createSuccessResponse(20001,  $items['data'], true);
+        return self::createSuccessResponse(20001, $items['data'], true);
     }
 
     /**
@@ -148,11 +149,11 @@ class ModerationService {
         $item['targetcontent']['comment'] = null;
         $item['targetcontent']['user'] = null;
 
-        if($item['targettype'] === 'post') {
+        if ($item['targettype'] === 'post') {
             $item['targetcontent']['post'] = (new Post($item, [], false))->getArrayCopy();
-        } elseif($item['targettype'] === 'comment') {
+        } elseif ($item['targettype'] === 'comment') {
             $item['targetcontent']['comment'] = (new Comment($item, [], false))->getArrayCopy();
-        } elseif($item['targettype'] === 'user') {
+        } elseif ($item['targettype'] === 'user') {
             $item['targetcontent']['user'] = (new User([
                 'uid' => $item['target_user_uid'],
                 'username' => $item['target_user_username'],
@@ -181,7 +182,7 @@ class ModerationService {
 
     /**
      * Perform Moderation Action
-     * 
+     *
      * Update status of a moderation item
      *  1. waiting_for_review
      *  2. hidden
@@ -190,7 +191,7 @@ class ModerationService {
      */
     public function performModerationAction(array $args): array
     {
-        if(!$this->isAuthorized()) {
+        if (!$this->isAuthorized()) {
             $this->logger->warning("Unauthorized access attempt to perform moderation action by user ID: {$this->currentUserId}");
             return self::respondWithError(0000);
         }
@@ -198,12 +199,12 @@ class ModerationService {
         $reportid = $args['reportid'] ?? null;
         $moderationAction = $args['moderationAction'] ?? null;
 
-        if(!$reportid || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
+        if (!$reportid || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
             return self::respondWithError(0000); // Invalid input
         }
 
         $report = UserReport::query()->where('reportid', $reportid)->first();
-        if(!$report) {
+        if (!$report) {
             return self::respondWithError(0000); // Report not found
         }
 
@@ -222,7 +223,7 @@ class ModerationService {
         UserReport::query()->where('targetid', $report['targetid'])->where('targettype', $report['targettype'])->updateColumns([
             'status' => $moderationAction,
             'moderationid' => $moderationId
-        ]); 
+        ]);
 
         ModerationTicket::query()->where('uid', $report['moderationticketid'])->updateColumns([
             'status' => ConstantsModeration::MODERATION_TICKETS_STATUS_CLOSED,
@@ -231,18 +232,18 @@ class ModerationService {
 
         /**
          * Apply Content Action based on Moderation Action
-         * 
+         *
          * For Post Content Type Only
          *  1. illegal: Set post status to '2' (illegal) in posts table
          *  2. restored: Set post status to '0' (published) in posts table and update REPORTS counts to ZERO
          *  3. hidden: Nothing can be applied to posts as of now because hiding post is already handled by the listPosts logic
          */
-        if($report['targettype'] === 'post') {
+        if ($report['targettype'] === 'post') {
 
             /**
              * Moderation Status: illegal
              */
-            if($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
+            if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
                 Post::query()->where('postid', $report['targetid'])->updateColumns([
                     'status' => ConstantsModeration::POST_STATUS_ILLEGAL
                 ]);
@@ -251,9 +252,9 @@ class ModerationService {
             /**
              * Moderation Status: restored
              */
-            if($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
+            if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
                 $postInfo = PostInfo::query()->where('postid', $report['targetid'])->first();
-                if($postInfo) {
+                if ($postInfo) {
                     PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
                         'reports' => 0
                     ]);
@@ -263,7 +264,7 @@ class ModerationService {
             /**
              * hidden: Nothing can be applied to posts as of now because hiding post is already handled by the listPosts logic
              */
-            
+
         }
 
         return self::createSuccessResponse(20001, [], false); // Moderation action performed successfully

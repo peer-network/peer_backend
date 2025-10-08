@@ -7,7 +7,7 @@ use Fawaz\App\WalletService;
 use Fawaz\Database\WalletMapper;
 use Fawaz\App\Wallet;
 use Fawaz\Database\Interfaces\TransactionManager;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class WalletServiceTest extends TestCase
 {
@@ -19,10 +19,10 @@ class WalletServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->walletMapperMock = $this->createMock(WalletMapper::class);
-        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->loggerMock = $this->createMock(PeerLoggerInterface::class);
         $this->transactionManagerMock = $this->createMock(TransactionManager::class);
         $this->walletService = new WalletService(
-            $this->loggerMock, 
+            $this->loggerMock,
             $this->walletMapperMock,
             $this->transactionManagerMock
         );
@@ -214,7 +214,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals(['percent' => 20], $result);
     }
 
-    public function testFetchPoolReturnsExpectedData():void
+    public function testFetchPoolReturnsExpectedData(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('fetchPool')->willReturn(['some' => 'data']);

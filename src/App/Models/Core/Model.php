@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App\Models\Core;
@@ -36,11 +37,11 @@ abstract class Model
     /**
      * Find a record by its ID
      * protected static string static::table() must be defined in the child class
-     * 
+     *
      * @param mixed $id
-     * 
+     *
      * @return array|false The record as an associative array, or false if not found
-     * 
+     *
      */
     public static function find($id): array|false
     {
@@ -113,7 +114,7 @@ abstract class Model
     /**
      * Get all records from the table
      * protected static string $table must be defined in the child class
-     * 
+     *
      * @return array An array of associative arrays representing all records
      */
     public function all(): array
@@ -137,10 +138,10 @@ abstract class Model
 
     /**
      * Paginate results
-     * 
+     *
      * @param int $page The current page (1-based)
      * @param int $perPage Number of records per page
-     * 
+     *
      * @return array An array containing 'data', 'total', 'per_page', 'current_page', 'last_page'
      */
     public function paginate(int $page = 1, int $perPage = 10): array
@@ -194,7 +195,7 @@ abstract class Model
 
     /**
      * Specify which columns to select
-     * 
+     *
      * @param string ...$columns One or more column names
      * @return static
      */
@@ -321,7 +322,7 @@ abstract class Model
      * @param string $column The column name
      * @param string $operatorOrValue The operator or value to compare against
      * @param mixed $value The value to compare against (optional)
-     * 
+     *
      * Examples:
      * Model::where('status', 'active') // 2 args, defaults to '=' operator
      */
@@ -362,7 +363,7 @@ abstract class Model
         $db = static::getDB();
 
         $columns = array_keys($data);
-        $placeholders = array_map(fn($col) => ":{$col}", $columns);
+        $placeholders = array_map(fn ($col) => ":{$col}", $columns);
 
         $sql = "INSERT INTO " . static::table() . " (" . implode(", ", $columns) . ") VALUES (" . implode(", ", $placeholders) . ")";
 
@@ -397,10 +398,10 @@ abstract class Model
 
     /**
      * Add a WHERE IN condition to the query
-     * 
+     *
      * @param string $column The column name
      * @param array $values The array of values for the IN clause
-     * 
+     *
      * @return static The current instance for method chaining
      */
     public function whereIn(string $column, array $values): static
@@ -417,10 +418,10 @@ abstract class Model
 
     /**
      * Add an OR WHERE IN condition to the query
-     * 
+     *
      * @param string $column The column name
      * @param array $values The array of values for the IN clause
-     * 
+     *
      * @return static The current instance for method chaining
      */
     public function orWhereIn(string $column, array $values): static
@@ -436,9 +437,9 @@ abstract class Model
 
     /**
      * Add a WHERE NULL condition to the query
-     * 
+     *
      * @param string $column The column name
-     * 
+     *
      * @return static The current instance for method chaining
      */
     public function whereNull(string $column): static

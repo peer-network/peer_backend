@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -75,7 +76,7 @@ class UserInfoService
                 $resultPreferences['onboardingsWereShown'] = $onboardings;
 
                 $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
-                
+
                 $contentFilterService = new ContentFilterServiceImpl();
 
                 $resultPreferences['contentFilteringSeverityLevel'] = $contentFilterService->getContentFilteringStringFromSeverityLevel($contentFiltering);
@@ -117,7 +118,7 @@ class UserInfoService
         }
 
         $this->transactionManager->beginTransaction();
-        
+
         $response = $this->userInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
 
         if (isset($response['status']) && $response['status'] === 'error') {
@@ -189,7 +190,7 @@ class UserInfoService
 
         } catch (\Exception $e) {
             $this->logger->error("Error in UserInfoService.loadBlocklist", ['exception' => $e->getMessage()]);
-            return $this::respondWithError(41008);  
+            return $this::respondWithError(41008);
         }
     }
 
@@ -212,9 +213,9 @@ class UserInfoService
 
             $newIsPrivate = !$user->getIsPrivate();
             $user->setIsPrivate((int) $newIsPrivate);
-            
+
             $updatedUser = $this->userInfoMapper->update($user);
-            
+
             $responseMessage = $newIsPrivate ? 'Profile privacy set to private' : 'Profile privacy set to public';
 
             $this->logger->info('Profile privacy toggled', ['userId' => $this->currentUserId, 'newPrivacy' => $newIsPrivate]);
@@ -222,8 +223,8 @@ class UserInfoService
             $this->transactionManager->commit();
 
             return [
-                'status' => 'success', 
-                'ResponseCode' => $responseMessage, 
+                'status' => 'success',
+                'ResponseCode' => $responseMessage,
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
@@ -279,8 +280,8 @@ class UserInfoService
             $this->transactionManager->commit();
 
             return [
-                'status' => 'success', 
-                'ResponseCode' => $responseMessage, 
+                'status' => 'success',
+                'ResponseCode' => $responseMessage,
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
@@ -333,8 +334,8 @@ class UserInfoService
 
             $this->transactionManager->commit();
             return [
-                'status' => 'success', 
-                'ResponseCode' => $responseMessage, 
+                'status' => 'success',
+                'ResponseCode' => $responseMessage,
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
@@ -349,7 +350,7 @@ class UserInfoService
 
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
-        }   
+        }
 
         if (!self::isValidUUID($reported_userid)) {
             return $this::respondWithError(30201);
@@ -372,7 +373,7 @@ class UserInfoService
 
             if (!$userInfo) {
                 $this->logger->error('UserInfoService.reportUser: Error while fetching user data from db');
-                return $this::respondWithError(41001); 
+                return $this::respondWithError(41001);
             }
         } catch (\Exception $e) {
             $this->logger->error('UserInfoService.reportUser: Error while fetching data for report generation ', ['exception' => $e]);
@@ -391,8 +392,8 @@ class UserInfoService
 
             $exists = $this->reportsMapper->addReport(
                 $this->currentUserId,
-                ReportTargetType::USER, 
-                $reported_userid, 
+                ReportTargetType::USER,
+                $reported_userid,
                 $contentHash
             );
 
@@ -407,7 +408,7 @@ class UserInfoService
                 $this->transactionManager->rollback();
                 return $this::respondWithError(31008); // report already exists
             }
-            
+
             $userInfo->setReports($userInfo->getReports() + 1);
             $this->userInfoMapper->update($userInfo);
 

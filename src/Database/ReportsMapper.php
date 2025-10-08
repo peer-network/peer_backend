@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -22,24 +23,28 @@ class ReportsMapper
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 
-    public function loadReportById(string $id) {
+    public function loadReportById(string $id)
+    {
         // To be implemented
     }
 
     public function addReport(
-        string $reporter_userid, 
-        ReportTargetType $targettype, 
-        string $targetid, 
-        string $hash_content_sha256, 
-        ?string $message = NULL
+        string $reporter_userid,
+        ReportTargetType $targettype,
+        string $targetid,
+        string $hash_content_sha256,
+        ?string $message = null
     ): ?bool {
 
         $this->logger->debug("ReportsMapper.addReports started");
@@ -48,11 +53,11 @@ class ReportsMapper
 
         $targetTypeString = $targettype->value;
         $debugData = [
-            'reporter_userid' => $reporter_userid, 
+            'reporter_userid' => $reporter_userid,
             'targetid' => $targetid,
             'targettype' => $targetTypeString
         ];
-        
+
         try {
 
             // Check if the record already exists
@@ -130,26 +135,27 @@ class ReportsMapper
 
     /**
      * Get TicketId by TargetId and TargetType
-     * 
+     *
      * Check if a ticket already exists for the target (post, comment, user)
      * If exists, use the existing ticket ID
      * If not, create a new ticket
      */
-    private function getTicketId(string $targetid, string $targettype, string $createdat): string {
+    private function getTicketId(string $targetid, string $targettype, string $createdat): string
+    {
         $moderationTicketId = $this->generateUUID();
 
         $existingTicket = UserReport::query()->where('targetid', $targetid)->where('targettype', $targettype)->first();
 
 
-        if($existingTicket && isset($existingTicket['moderationticketid']) && $existingTicket['moderationticketid']) {
+        if ($existingTicket && isset($existingTicket['moderationticketid']) && $existingTicket['moderationticketid']) {
             $ticketStatus = ModerationTicket::query()->where('uid', $existingTicket['moderationticketid'])->where('status', ConstantsModeration::MODERATION_TICKETS_STATUS_OPEN)->first();
 
-            if($ticketStatus) {
+            if ($ticketStatus) {
                 // Ticket is already open and awaiting review
                 $this->logger->info("ReportsMapper: addReport: Ticket already exists and is awaiting review");
                 $moderationTicketId = $existingTicket['moderationticketid'];
             }
-        }else{
+        } else {
 
             $status = ConstantsModeration::MODERATION_TICKETS_STATUS_OPEN;
 

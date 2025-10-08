@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -51,7 +52,7 @@ class User extends Model implements Hashable
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
 
-        if($this->status == 6){
+        if ($this->status == 6) {
             $this->username = 'Deleted_Account';
             $this->img = '/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg';
             $this->biography = '/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt';
@@ -144,7 +145,7 @@ class User extends Model implements Hashable
     {
         $this->referral_uuid = $referral_uuid;
     }
-    
+
     public function getSlug(): int
     {
         return $this->slug;
@@ -279,11 +280,11 @@ class User extends Model implements Hashable
     public function verifyPassword(string $password): bool
     {
         if (\password_verify($password, $this->password)) {
-            
+
             if (\password_needs_rehash($this->password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1])) {
-                
+
                 $newHash = \password_hash($password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1]);
-                
+
                 $this->password = $newHash;
             }
 
@@ -319,7 +320,7 @@ class User extends Model implements Hashable
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -373,7 +374,7 @@ class User extends Model implements Hashable
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => [
-                        'min' => $userConfig['SLUG']['MIN_LENGTH'], 
+                        'min' => $userConfig['SLUG']['MIN_LENGTH'],
                         'max' => $userConfig['SLUG']['MAX_LENGTH']
                         ]],
                 ],
@@ -428,13 +429,14 @@ class User extends Model implements Hashable
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
     }
 
-    public function getHashableContent(): string {
+    public function getHashableContent(): string
+    {
         $content = implode('|', [
             $this->email,
             $this->img,
@@ -444,7 +446,8 @@ class User extends Model implements Hashable
         return $content;
     }
 
-    public function hashValue(): string {
+    public function hashValue(): string
+    {
         return $this->hashObject($this);
     }
 

@@ -1,11 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\config\constants;
 
 class ConstantsModeration
 {
-    public static function contentFiltering() {
+    public static function contentFiltering()
+    {
         return self::CONTENT_FILTERING;
     }
 
@@ -58,10 +60,10 @@ class ConstantsModeration
         'COMMENT' => 'Comment',
         'USER' => 'User',
     ];
-    
+
     /**
      * Moderation Tickets Status
-     * 
+     *
      * @var string
      */
     public const MODERATION_TICKETS_STATUS_OPEN = 'open';
