@@ -162,10 +162,8 @@ class ModerationService
             $item['targetcontent'] = $targetContent['targetcontent'];
             $item['targettype'] = $targetContent['targettype'];
 
-            // var_dump($targetContent); exit;
             return $item;
         }, $items['data']);
-            // var_dump($items['data']); exit;
 
         return self::createSuccessResponse(0000, $items['data'], true);
     }
@@ -186,14 +184,14 @@ class ModerationService
             $item['targetcontent']['comment'] = (new Comment($item, [], false))->getArrayCopy();
         } elseif ($item['targettype'] === 'user') {
             $item['targetcontent']['user'] = (new User([
-                'uid' => $item['target_user_uid'],
-                'username' => $item['target_user_username'],
-                'email' => $item['target_user_email'],
-                'img' => $item['target_user_img'],
-                'slug' => $item['target_user_slug'],
-                'status' => $item['target_user_status'],
-                'biography' => $item['target_user_biography'],
-                'updatedat' => $item['target_user_updatedat'],
+                'uid' => $item['uid'],
+                'username' => $item['username'],
+                'email' => $item['email'],
+                'img' => $item['img'],
+                'slug' => $item['slug'],
+                'status' => $item['status'],
+                'biography' => $item['biography'],
+                'updatedat' => $item['updatedat'],
             ], [], false))->getArrayCopy();
         }
 
