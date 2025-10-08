@@ -1,29 +1,46 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\config\constants;
+
 use Fawaz\config\constants\ConstantsModeration;
 
 class ConstantsConfig
 {
-    public function getData() {
+    public function getData()
+    {
         return [
-            "POST" => $this::post(),
-            "COMMENT" => $this::comment(),
-            "USER" => $this::user(),
-            "CHAT" => $this::chat(),
-            "CONTACT" => $this::contact(),
-            "PAGING" => $this::paging(),
-            "WALLET" => $this::wallet(),
-            "WALLETT" => $this::wallett(),        
+            "POST" => self::post(),
+            "COMMENT" => self::comment(),
+            "USER" => self::user(),
+            "CHAT" => self::chat(),
+            "CONTACT" => self::contact(),
+            "PAGING" => self::paging(),
+            "WALLET" => self::wallet(),
+            "WALLETT" => self::wallett(),
+            "ONBOARDING" => self::onboarding(),
+            "DAILY_FREE" => self::dailyFree(),
+            "TOKENOMICS" => self::tokenomics(),
+            "MINTING" => self::minting(),
         ];
     }
-
+    /**
+     * @return array{
+     *     AVAILABLE_ONBOARDINGS: string[]
+     * }
+     */
+    public static function onboarding(): array
+    {
+        return ConstantsConfig::ONBOARDING;
+    }
     /**
      * @return array{
      *     CONTENT: array{MIN_LENGTH: int, MAX_LENGTH: int}
      * }
      */
-    public static function comment() {
+    public static function comment()
+    {
         return ConstantsConfig::COMMENT;
     }
     /**
@@ -46,7 +63,8 @@ class ConstantsConfig
      *     }
      * }
      */
-    public static function post(): array {
+    public static function post(): array
+    {
         return ConstantsConfig::POST;
     }
 
@@ -59,7 +77,8 @@ class ConstantsConfig
      *     WHEREBY: array{MIN: int, MAX: int}
      * }
      */
-    public static function wallet() {
+    public static function wallet()
+    {
         return ConstantsConfig::WALLET;
     }
 
@@ -69,7 +88,8 @@ class ConstantsConfig
      *     LIQUIDITQ: array{MIN: int, MAX: float}
      * }
      */
-    public static function wallett() {
+    public static function wallett()
+    {
         return ConstantsConfig::WALLETT;
     }
 
@@ -86,7 +106,8 @@ class ConstantsConfig
      *     TRANSACTION: array{MIN_TOKENS: int}
      * }
      */
-    public static function user() {
+    public static function user()
+    {
         return ConstantsConfig::USER;
     }
 
@@ -99,7 +120,8 @@ class ConstantsConfig
      *     ACCESS_LEVEL: array{MIN: int, MAX: int, USER: int, ADMIN: int}
      * }
      */
-    public static function chat() {
+    public static function chat()
+    {
         return ConstantsConfig::CHAT;
     }
 
@@ -109,7 +131,8 @@ class ConstantsConfig
      *     MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int}
      * }
      */
-    public static function contact() {
+    public static function contact()
+    {
         return ConstantsConfig::CONTACT;
     }
 
@@ -119,7 +142,8 @@ class ConstantsConfig
      *     LIMIT: array{MIN: int, MAX: int}
      * }
      */
-    public static function paging() {
+    public static function paging()
+    {
         return ConstantsConfig::PAGING;
     }
 
@@ -129,33 +153,122 @@ class ConstantsConfig
      *     TYPE: array{MIN_LENGTH: int, MAX_LENGTH: int}
      * }
      */
-    public static function transaction() {
+    public static function transaction()
+    {
         return ConstantsConfig::TRANSACTION;
     }
 
-    public static function contentFiltering() {
+    public static function contentFiltering()
+    {
         return ConstantsModeration::contentFiltering();
     }
+
+    /**
+     * @return array{
+     *     DAILY_FREE_ACTIONS: array{ post: int, like: int, comment: int, dislike: int }
+     * }
+     */
+    public static function dailyFree(): array
+    {
+        return ConstantsConfig::DAILY_FREE;
+    }
+
+
+    /**
+     * @return array{
+     *     ACTION_TOKEN_PRICES: array{
+     *         post: float,
+     *         like: float,
+     *         dislike: float,
+     *         comment: float,
+     *         advertisementBasic: float,
+     *         advertisementPinned: float
+     *     },
+     *     ACTION_GEMS_RETURNS: array{
+     *         view: float,
+     *         like: float,
+     *         dislike: float,
+     *         comment: float
+     *     },
+     *     FEES: array{
+     *         INVITATION: float,
+     *         POOL: float,
+     *         PEER: float,
+     *         BURN: float
+     *     }
+     * }
+     */
+    public static function tokenomics(): array
+    {
+        return ConstantsConfig::TOKENOMICS;
+    }
+    /**
+     * @return array{ DAILY_NUMBER_TOKEN: float }
+     */
+    public static function minting(): array
+    {
+        return ConstantsConfig::MINTING;
+    }
+
+    private const ONBOARDING = [
+        'AVAILABLE_ONBOARDINGS' => [
+            'INTROONBOARDING',
+        ],
+    ];
+    private const DAILY_FREE = [
+        'DAILY_FREE_ACTIONS' => [
+            'post'    => 1,
+            'like'    => 3,
+            'comment' => 4,
+            'dislike' => 0,
+        ],
+    ];
+    private const MINTING = [
+        'DAILY_NUMBER_TOKEN' => 5000.0,
+    ];
+
+    private const TOKENOMICS = [
+        'ACTION_TOKEN_PRICES' => [
+            'post'    => 20.0,
+            'like'    => 3.0,
+            'dislike' => 3.0,
+            'comment' => 1.0,
+            'advertisementBasic' => 500.0,
+            'advertisementPinned' => 2000.0,
+        ],
+        'ACTION_GEMS_RETURNS' => [
+            'view'    => 0.25,
+            'like'    => 5.0,
+            'dislike' => -3.0,
+            'comment' => 2.0,
+        ],
+        'FEES' => [
+            'INVITATION' => 0.01,
+            'POOL'       => 0.01,
+            'PEER'       => 0.02,
+            'BURN'       => 0.01,
+        ],
+    ];
 
     private const COMMENT = [
         'CONTENT' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 200,
-        ], 
+        ],
     ];
 
     private const TRANSACTION = [
         'ACTIONTYPE' => [
             'MIN_LENGTH' => 0,
             'MAX_LENGTH' => 200,
-        ], 
+        ],
         'TYPE' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 63,
-        ], 
+        ],
     ];
-    
-    
+
+
     private const POST = [
         'TITLE' => [
             'MIN_LENGTH' => 2,
@@ -173,7 +286,7 @@ class ConstantsConfig
         ],
         'MEDIA' => [
             'MIN_LENGTH' => 30,
-            'MAX_LENGTH' => 1000,
+            'MAX_LENGTH' => 3000, // because we are now allow 20 images files
         ],
         'OPTIONS' => [
             'MIN_LENGTH' => 0,
@@ -283,19 +396,19 @@ class ConstantsConfig
             'MIN' => 1,
             'MAX' => 20,
         ],
-    ];  
- 
+    ];
+
     private const USER = [
         'PASSWORD' => [
             'MIN_LENGTH' => 8,
             'MAX_LENGTH' => 128,
-            'PATTERN' => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$',
+            "PATTERN" => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'
         ],
         'USERNAME' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 23,
             'PATTERN' => '^[a-zA-Z0-9_-]+$',
-        ],  
+        ],
         'BIOGRAPHY' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 5000,

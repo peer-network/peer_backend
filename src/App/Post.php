@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -18,17 +20,17 @@ class Post implements Hashable
     protected string $title;
     protected string $contenttype;
     protected string $media;
+    protected string $url;
     protected ?string $cover;
     protected string $mediadescription;
     protected string $createdat;
 
     // Constructor
     public function __construct(
-        array $data = [], 
-        array $elements = [], 
+        array $data = [],
+        array $elements = [],
         bool $validate = true
-    )
-    {
+    ) {
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
         }
@@ -40,6 +42,7 @@ class Post implements Hashable
         $this->contenttype = $data['contenttype'] ?? 'text';
         $this->media = $data['media'] ?? '';
         $this->cover = $data['cover'] ?? null;
+        $this->url = $this->getPostUrl();
         $this->mediadescription = $data['mediadescription'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
     }
@@ -55,6 +58,7 @@ class Post implements Hashable
             'contenttype' => $this->contenttype,
             'media' => $this->media,
             'cover' => $this->cover,
+            'url' => $this->url,
             'mediadescription' => $this->mediadescription,
             'createdat' => $this->createdat,
         ];
@@ -104,7 +108,7 @@ class Post implements Hashable
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
@@ -153,7 +157,7 @@ class Post implements Hashable
                 ],
             ],
             'media' => [
-                'required' => true,
+                'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $postConst['MEDIA']['MIN_LENGTH'],
@@ -194,13 +198,14 @@ class Post implements Hashable
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
     }
 
-    public function getHashableContent(): string {
+    public function getHashableContent(): string
+    {
         return implode('|', [
             $this->title,
             $this->contenttype,
@@ -210,7 +215,16 @@ class Post implements Hashable
         ]);
     }
 
-    public function hashValue(): string {
+    public function hashValue(): string
+    {
         return $this->hashObject($this);
+    }
+
+    public function getPostUrl(): string
+    {
+        if (empty($this->postid)) {
+            return '';
+        }
+        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
     }
 }

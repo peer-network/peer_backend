@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use Monolog\Logger;
@@ -11,7 +12,7 @@ if (file_exists(__DIR__.'/../../.env')) {
 
 require __DIR__ . '/checker.php';
 
-return static function(string $appEnv) {
+return static function (string $appEnv) {
 
     $settings =  [
         'base_url' => $_ENV['BASE_URL'] ?? '',
@@ -47,6 +48,7 @@ return static function(string $appEnv) {
             'peer' => $_ENV['PEER_BANK'] ?? '',
             'pool' => $_ENV['LIQUIDITY_POOL'] ?? '',
             'burn' => $_ENV['BURN_ACCOUNT'] ?? '',
+            'btcpool' => $_ENV['BTC_POOL'] ?? '',
         ],
         'privateKeyPath' => __DIR__ . '/../../' . $_ENV['PRIVATE_KEY_PATH'],
         'publicKeyPath' => __DIR__ . '/../../' . $_ENV['PUBLIC_KEY_PATH'],
@@ -57,8 +59,8 @@ return static function(string $appEnv) {
         'rateLimiter' => $_ENV['LIMITER_RATE'],
         'timeLimiter' => $_ENV['LIMITER_TIME'],
         'rateLimiterpath' => __DIR__ . '/../../' . $_ENV['RATE_LIMITER'],
-		'mailapilink' => $_ENV['MAIL_API_LINK'],
-		'mailapikey' => $_ENV['MAIL_API_KEY']
+        'mailapilink' => $_ENV['MAIL_API_LINK'],
+        'mailapikey' => $_ENV['MAIL_API_KEY']
     ];
 
     if ($appEnv === 'DEVELOPMENT') {

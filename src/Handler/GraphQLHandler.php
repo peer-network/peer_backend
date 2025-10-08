@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Handler;
 
 use Fawaz\GraphQLSchemaBuilder;
@@ -10,13 +12,14 @@ use GraphQL\Validator\Rules\QueryComplexity;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Slim\Psr7\Response;
+use GraphQL\Error\DebugFlag;
 
 class GraphQLHandler implements RequestHandlerInterface
 {
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected GraphQLSchemaBuilder $schemaBuilder,
     ) {
     }
@@ -65,9 +68,9 @@ class GraphQLHandler implements RequestHandlerInterface
         $config = ServerConfig::create()
             ->setSchema($schema)
             ->setContext($context)
-            ->setErrorFormatter(fn($error) => FormattedError::createFromException($error))
+            ->setErrorFormatter(fn ($error) => FormattedError::createFromException($error))
             ->setQueryBatching(true)
-            ->setDebugFlag(true);
+            ->setDebugFlag();
 
         $server = new StandardServer($config);
         $response = new Response();

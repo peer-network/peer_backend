@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Database;
 
 use PDO;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ReportTargetType;
 use DateTime;
 
 class ReportsMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
@@ -17,39 +19,42 @@ class ReportsMapper
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 
-    public function loadReportById(string $id) {
+    public function loadReportById(string $id)
+    {
         // To be implemented
     }
 
     public function addReport(
-        string $reporter_userid, 
-        ReportTargetType $targettype, 
-        string $targetid, 
-        string $hash_content_sha256, 
-        ?string $message = NULL
+        string $reporter_userid,
+        ReportTargetType $targettype,
+        string $targetid,
+        string $hash_content_sha256,
+        ?string $message = null
     ): ?bool {
 
-        $this->logger->info("ReportsMapper.addReports started");
+        $this->logger->debug("ReportsMapper.addReports started");
 
         $reportId = $this->generateUUID();
 
         $targetTypeString = $targettype->value;
         $debugData = [
-            'reporter_userid' => $reporter_userid, 
+            'reporter_userid' => $reporter_userid,
             'targetid' => $targetid,
             'targettype' => $targetTypeString
         ];
-        
+
         try {
-            $this->db->beginTransaction();
 
             // Check if the record already exists
             $sqlCheck = "SELECT COUNT(*) 
@@ -68,7 +73,6 @@ class ReportsMapper
 
             $exists = $stmtCheck->fetchColumn() > 0;
             if ($exists > 0) {
-                $this->db->rollBack();
                 $this->logger->warning("User activity already exists", $debugData);
                 return true;
             }
@@ -105,16 +109,13 @@ class ReportsMapper
             $success = $stmt->execute();
 
             if ($success) {
-                $this->db->commit();
                 $this->logger->info("ReportsMapper: addReport: Report added successfully", $debugData);
                 return false;
             }
 
-            $this->db->rollBack();
             $this->logger->warning("ReportsMapper: addReport: Failed to add report", $debugData);
             return null;
         } catch (\Exception $e) {
-            $this->db->rollBack();
             $this->logger->error("ReportsMapper.addReport: Exception occurred", ['exception' => $e->getMessage()]);
             return null;
         }

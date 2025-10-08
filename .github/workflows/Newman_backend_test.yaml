@@ -18,7 +18,7 @@ jobs:
       is_behind: ${{ steps.check.outputs.is_behind }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
  
@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
  
@@ -134,16 +134,26 @@ jobs:
                -d "{\"content\": \"$MESSAGE\"}" \
                "$DISCORD_WEBHOOK_URL"
 
+  # phpstan:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: shivammathur/setup-php@v2
+  #       with:
+  #         php-version: '8.3'
+  #     - run: vendor/bin/phpstan analyse
+
   build_and_test:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
     needs: [
       check_branch_sync,
-      validate_sql_files
+      # gitleaks_scan_staged
+      validate_sql_files 
     ]
     if: 
-      needs.check_branch_sync.outputs.is_behind == 'false' &&
-      needs.validate_sql_files.result == 'success'
+      needs.check_branch_sync.outputs.is_behind == 'false'
+      # needs.validate_sql_files.result == 'success'
     strategy:
       matrix:
         php-version: ['8.2', '8.3']
@@ -151,11 +161,7 @@ jobs:
       outcome: ${{ steps.outcome.outputs.outcome }}
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v4
-
-      - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
- 
+        uses: actions/checkout@v5
       - name: Fix log directory permissions
         run: sudo chown -R 33:33 runtime-data/logs
  
@@ -274,7 +280,21 @@ jobs:
  
       - name: Force DB init by removing the volume
         run: docker volume rm peer_backend_ci-cd_db-data || true
- 
+
+      - name: Log in to GHCR (with retry)
+        run: |
+          for i in 1 2 3 4 5; do
+            echo "Attempt $i to login to GHCR..."
+            if echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin; then
+              echo "Login successful!"
+              exit 0
+            fi
+            echo "Login failed, retrying in 20s..."
+            sleep 20
+          done
+          echo "All login attempts failed."
+          exit 1
+
       - name: Build And Start Docker Containers
         run: |
           docker compose -f ./docker-compose.yml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}
@@ -284,7 +304,7 @@ jobs:
         run: |
           docker compose exec backend bash -c "echo 'upload_max_filesize = 510M' >> /usr/local/etc/php/conf.d/uploads.ini"
           docker compose exec backend bash -c "echo 'post_max_size = 510M' >> /usr/local/etc/php/conf.d/uploads.ini"
-          docker compose exec backend bash -c "echo 'max_file_uploads = 21' >> /usr/local/etc/php/conf.d/uploads.ini"
+          docker compose exec backend bash -c "echo 'max_file_uploads = 100' >> /usr/local/etc/php/conf.d/uploads.ini"
           docker compose exec backend bash -c "php -i | grep upload_max_filesize"
           docker compose exec backend bash -c "php -i | grep post_max_size"
           docker compose exec backend bash -c "php -i | grep max_file_uploads"
@@ -363,26 +383,37 @@ jobs:
             --network my-network \
             curlimages/curl:$TAG \
             curl -sf http://backend/graphql
- 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
-       
-      - name: Replace Hardcoded URL in Postman Collection (using jq)
+
+      - name: Rewrite GraphQL and Upload-post Endpoints in Postman Collections (using jq)
         run: |
-          for file in tests/postman_collection/001_graphql_postman_collection.json \
-                tests/postman_collection/002_graphql_postman_collection.json \
-                tests/postman_collection/003_graphql_postman_collection.json; do
+          files=$(ls tests/postman_collection/*_graphql_postman_collection.json | sort)
+
+          for file in $files; do
+            echo "Processing $file ..."
+
+            # Replace GraphQL endpoints
             jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {
               raw: "{{BACKEND_URL}}/graphql",
               protocol: "http",
               host: ["backend"],
               path: ["graphql"]
-            }' "$file" > temp.json && mv temp.json "$file"
+            }' "$file" > tmp1.json && mv tmp1.json "$file"
+
+            # Replace upload-post endpoints
+            jq '(.item[] | select(.request.body?.mode == "formdata") | .request.url) |= {
+              raw: "{{BACKEND_URL}}/upload-post",
+              protocol: "http",
+              host: ["backend"],
+              path: ["upload-post"]
+            }' "$file" > tmp2.json && mv tmp2.json "$file"
           done
- 
-      - name: Inject BACKEND_URL into Postman Environment
+
+      - name: Inject BACKEND_URL into Postman Environment (overwrite existing)
         run: |
-          jq '.values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
+          jq 'del(.values[] | select(.key == "BACKEND_URL"))
+              | .values += [{"key": "BACKEND_URL", "value": "http://backend", "type": "default", "enabled": true}]' \
             tests/postman_collection/graphql_postman_environment.json > temp_env.json
           mv temp_env.json tests/postman_collection/graphql_postman_environment.json
  
@@ -520,9 +551,9 @@ jobs:
         php-version: ['8.2', '8.3']
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
  
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: docker-image-${{ matrix.php-version }}
           path: .
@@ -561,17 +592,12 @@ jobs:
             echo "other_failure" > outcome.txt
           fi
  
-      - name: Save Trivy outcome to file
-        if: always()
-        run: echo "${{ steps.trivy_outcome.outputs.outcome }}" > outcome.txt
- 
       - name: Upload Trivy build outcome marker
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: outcome-${{ matrix.php-version }}
+          name: outcome-${{ matrix.php-version }}-${{ github.run_attempt }}
           path: outcome.txt
-          overwrite: true
  
       - name: Upload Scan Reports
         if: always()
@@ -584,7 +610,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: trivy-security-reports-${{ matrix.php-version }}
+          name: trivy-security-reports-${{ matrix.php-version }}-${{ github.run_attempt }}
           path: trivy_reports
  
   aggregate_outcome:
@@ -596,7 +622,7 @@ jobs:
     outputs:
       final_outcome: ${{ steps.aggregate.outputs.final_outcome }}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           pattern: outcome-*
           path: outcomes
@@ -626,7 +652,7 @@ jobs:
       newman_failed_any: ${{ steps.setflag.outputs.newman_failed_any }}
     steps:
       - name: Download All Newman Failure Markers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: newman_flags
  
@@ -684,7 +710,7 @@ jobs:
               echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
               ;;
           esac
- 
+
   send_newman_discord_notification:
     name: Send Discord Notification for Newman Failures
     runs-on: ubuntu-latest
@@ -756,20 +782,57 @@ jobs:
                -d "{\"content\": \"${MESSAGE}\"}" \
                "$DISCORD_WEBHOOK_URL"
 
+  # notify_gitleaks_failure:
+  #   name: Notify on Gitleaks Failure
+  #   runs-on: ubuntu-latest
+  #   needs: [gitleaks_scan_staged, map_pr_to_discord]
+  #   if: always() && needs.gitleaks_scan_staged.result == 'failure'
+  #   steps:
+  #     - name: Send Discord Notification for Gitleaks Failure
+  #       env:
+  #         DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  #         PR_TITLE: ${{ github.event.pull_request.title }}
+  #         PR_URL: ${{ github.event.pull_request.html_url }}
+  #         PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+  #         DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+  #         RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  #       run: |
+  #         MESSAGE=":x: **Gitleaks Scan Failed!**\n"
+  #         MESSAGE+="**PR:** $PR_TITLE\n"
+  #         MESSAGE+="PR Link: <$PR_URL>\n"
+  #         MESSAGE+="CI Run: <$RUN_URL>\n"
+  #         MESSAGE+="Author: $DISCORD_MENTION\n\n"
+  #         MESSAGE+=":warning: **Secrets were detected by Gitleaks**\n"
+  #         MESSAGE+="You can:\n"
+  #         MESSAGE+="- [Click here to view workflow artifacts](<$RUN_URL>) (download the **gitleaks-report** artifact)\n"
+  #         MESSAGE+="- Check the **Actions → Artifacts** tab to view/download the report\n"
+  #         MESSAGE+="- Or run \`make scan\` locally to reproduce.\n\n"
+  #         MESSAGE+=":no_entry: **Reminder:** Do NOT bypass with \`git commit --no-verify\`. CI will still block your PR.\n"
+  #         MESSAGE+="If this secret is actually required in the repo (false positive or approved usage),\n"
+  #         MESSAGE+="you MUST meet with the **CTO / Team Lead / DevOps** to approve and add it to the gitleaks ignore list."
+          
+  #         curl -H "Content-Type: application/json" \
+  #              -X POST \
+  #              -d "{\"content\": \"$MESSAGE\"}" \
+  #              "$DISCORD_WEBHOOK_URL"
+
   deploy_html_reports_to_peer_backend_reports:
     name: Deploy HTMLExtra Reports to peer_backend_reports
     runs-on: ubuntu-latest
     needs: [aggregate_outcome, build_and_test]
     if: always()
+    concurrency:
+      group: reports-deploy
+      cancel-in-progress: false
     steps:
       - name: Download PHP 8.2 HTMLExtra report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: docker_newman_report-8.2
           path: reports/php-8.2
  
       - name: Download PHP 8.3 HTMLExtra report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: docker_newman_report-8.3
           path: reports/php-8.3
@@ -799,7 +862,24 @@ jobs:
           git config user.name "GitHub Actions"
           git add reports
           git commit -m "Deploy reports for run $GITHUB_RUN_ID (keep last 10)" || echo "No changes to commit"
-          git push origin gh-pages
+
+          n=0
+          until [ $n -ge 5 ]
+          do
+            if git push origin gh-pages --force; then
+              echo "Push succeeded on attempt $((n+1))"
+              break
+            else
+              n=$((n+1))
+              echo "Push failed (attempt $n), retrying in 5s..."
+              sleep 5
+            fi
+          done
+
+          if [ $n -eq 5 ]; then
+            echo "Push failed after 5 attempts, giving up."
+            exit 1
+          fi
           
   send_success_discord_notification:
     name: Send Discord Notification for Successful CI

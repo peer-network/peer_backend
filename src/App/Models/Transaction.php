@@ -1,7 +1,8 @@
 <?php
 
-namespace Fawaz\App\Models;
+declare(strict_types=1);
 
+namespace Fawaz\App\Models;
 
 use DateTime;
 use Fawaz\App\ValidationException;
@@ -14,12 +15,12 @@ class Transaction
     use ResponseHelper;
 
     protected string $transactionid;
-    protected string $transuniqueid;
+    protected string $operationid;
     protected string $senderid;
-    protected string|null $recipientid;
+    protected string $recipientid;
     protected string $transactiontype;
-    protected string $tokenamount;
-    protected $transferaction;
+    protected float $tokenamount;
+    protected string $transferaction;
     protected ?string $message;
     protected ?string $createdat;
 
@@ -29,11 +30,11 @@ class Transaction
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
         $this->transactionid = $data['transactionid'] ?? self::generateUUID();
-        $this->transuniqueid = $data['transuniqueid'] ?? null;
+        $this->operationid = $data['operationid'] ?? null;
         $this->senderid = $data['senderid'] ?? null;
         $this->recipientid = $data['recipientid'] ?? null;
         $this->transactiontype = $data['transactiontype'] ?? null;
-        $this->tokenamount = $data['tokenamount'] ?? null;
+        $this->tokenamount = (float)$data['tokenamount'];
         $this->transferaction = $data['transferaction'] ?? 'DEDUCT';
         $this->message = $data['message'] ?? null;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -42,11 +43,29 @@ class Transaction
             $data = $this->validate($data, $elements);
         }
     }
-    
+
+    /**
+     * Get Values of current state
+     */
+    public function getArrayCopy(): array
+    {
+        $att = [
+            'transactionid' => $this->transactionid,
+            'operationid' => $this->operationid,
+            'transactiontype' => $this->transactiontype,
+            'senderid' => $this->senderid,
+            'recipientid' => $this->recipientid,
+            'tokenamount' => $this->tokenamount,
+            'transferaction' => $this->transferaction,
+            'message' => $this->message,
+            'createdat' => $this->createdat,
+        ];
+        return $att;
+    }
 
     /**
      * Define Input filter
-     */    
+     */
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
         $tranConfig = ConstantsConfig::transaction();
@@ -56,7 +75,7 @@ class Transaction
                 'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'transuniqueid' => [
+            'operationid' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
@@ -65,11 +84,11 @@ class Transaction
                 'validators' => [['name' => 'Uuid']],
             ],
             'recipientid' => [
-                'required' => false,
+                'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'transactiontype' => [
-                'required' => true,
+                'required' => false,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
@@ -115,7 +134,7 @@ class Transaction
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
@@ -123,7 +142,7 @@ class Transaction
 
     /**
      * Apply Input filter
-     */    
+     */
     public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
@@ -135,7 +154,7 @@ class Transaction
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
@@ -154,13 +173,13 @@ class Transaction
         return $this->transactionid;
     }
 
-    
+
     /**
-     * Getter method for transuniqueid
+     * Getter method for operationid
      */
-    public function getTransUniqueId(): string
+    public function getOperationId(): string
     {
-        return $this->transuniqueid;
+        return $this->operationid;
     }
 
 
@@ -192,17 +211,17 @@ class Transaction
     }
 
 
-    
+
     /**
      * Getter method for tokenamount
      */
-    public function getTokenAmount(): string
+    public function getTokenAmount(): float
     {
         return $this->tokenamount;
     }
 
-    
-    
+
+
     /**
      * Getter method for transferaction
      */

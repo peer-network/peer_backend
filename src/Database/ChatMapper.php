@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Database;
 
 use PDO;
@@ -9,13 +11,15 @@ use Fawaz\App\ChatMessages;
 use Fawaz\App\NewsFeed;
 use Fawaz\App\Status;
 use Fawaz\App\User;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\ResponseHelper;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class ChatMapper
 {
-    const STATUS_DELETED = 6;
+    use ResponseHelper;
+    public const STATUS_DELETED = 6;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
@@ -24,33 +28,9 @@ class ChatMapper
         return $userid === $currentUserId;
     }
 
-    private function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
-            }
-        }
-
-        return $response;
-    }
-
     public function isCreator(string $chatid, string $currentUserId): bool
     {
-        $this->logger->info("ChatMapper.isCreator started", [
+        $this->logger->debug("ChatMapper.isCreator started", [
             'chatid' => $chatid,
             'currentUserId' => $currentUserId
         ]);
@@ -74,7 +54,7 @@ class ChatMapper
 
     public function isParticipantExist(string $chatid, string $currentUserId): bool
     {
-        $this->logger->info("ChatMapper.isParticipantExist started", [
+        $this->logger->debug("ChatMapper.isParticipantExist started", [
             'chatid' => $chatid,
             'currentUserId' => $currentUserId
         ]);
@@ -98,7 +78,7 @@ class ChatMapper
 
     public function isPrivate(string $chatid): bool
     {
-        $this->logger->info("ChatMapper.isPrivate started", ['chatid' => $chatid]);
+        $this->logger->debug("ChatMapper.isPrivate started", ['chatid' => $chatid]);
 
         try {
             $sql = "SELECT COUNT(*) FROM chats WHERE chatid = :chatid AND ispublic = 0";
@@ -115,7 +95,7 @@ class ChatMapper
 
     public function fetchFriends(string $userid): array
     {
-        $this->logger->info("ChatMapper.fetchFriends started", ['userid' => $userid]);
+        $this->logger->debug("ChatMapper.fetchFriends started", ['userid' => $userid]);
 
         try {
             $sql = "SELECT u.uid, u.username, u.slug, u.updatedat, u.biography, u.img 
@@ -140,7 +120,7 @@ class ChatMapper
 
     public function getPrivateChatBetweenUsers(string $userId1, string $userId2): bool
     {
-        $this->logger->info("ChatMapper.getPrivateChatBetweenUsers started", [
+        $this->logger->debug("ChatMapper.getPrivateChatBetweenUsers started", [
             'userId1' => $userId1,
             'userId2' => $userId2
         ]);
@@ -173,7 +153,7 @@ class ChatMapper
 
     public function loadById(string $id): Chat|array
     {
-        $this->logger->info("ChatMapper.loadById started", ['id' => $id]);
+        $this->logger->debug("ChatMapper.loadById started", ['id' => $id]);
 
         try {
             $sql = "SELECT * FROM chats WHERE chatid = :id";
@@ -187,16 +167,16 @@ class ChatMapper
             }
 
             $this->logger->warning("No chat found with id", ['id' => $id]);
-            return $this->createSuccessResponse(21802);
-        } catch (\Throwable $e) {  
+            return $this::createSuccessResponse(21802);
+        } catch (\Throwable $e) {
             $this->logger->error("Database error: " . $e->getMessage(), ['id' => $id]);
-            return $this->respondWithError(40302);
+            return $this::respondWithError(40302);
         }
     }
 
     public function loadChatById(string $currentUserId, ?array $args = []): array
     {
-        $this->logger->info("ChatMapper.loadChatById started");
+        $this->logger->debug("ChatMapper.loadChatById started");
 
         $chatId = $args['chatid'] ?? null;
 
@@ -208,7 +188,7 @@ class ChatMapper
 
             if (!$chatExists) {
                 $this->logger->warning("Chat ID not found", ['chatid' => $chatId]);
-                return $this->createSuccessResponse(21802);
+                return $this::createSuccessResponse(21802);
             }
 
             $isParticipantSql = "
@@ -230,7 +210,7 @@ class ChatMapper
                     'chatid' => $chatId,
                     'currentUserId' => $currentUserId,
                 ]);
-                return $this->respondWithError(31801);
+                return $this::respondWithError(31801);
             }
 
             $sql = "
@@ -251,7 +231,7 @@ class ChatMapper
             $chatRow = $stmt->fetch(\PDO::FETCH_ASSOC);
             if (!$chatRow) {
                 $this->logger->warning("No chat details found for chatid", ['chatid' => $chatId]);
-                return $this->createSuccessResponse(21802);
+                return $this::createSuccessResponse(21802);
             }
 
             $messageLimit = min(max((int)($args['messageLimit'] ?? 10), 1), 20);
@@ -335,7 +315,7 @@ class ChatMapper
 
 
             $chatParticipantObj = [];
-            foreach($chatParticipants as $key => $prt){
+            foreach ($chatParticipants as $key => $prt) {
                 $userObj = [
                         'uid' => $prt['userid'],
                         'status' => $prt['status'],
@@ -349,11 +329,11 @@ class ChatMapper
                 $chatParticipantObj[$key] = $userObj;
                 $chatParticipantObj[$key]['userid'] = $userObj['uid'];
                 $chatParticipantObj[$key]['hasaccess'] = $prt['hasaccess'];
-            }   
+            }
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11810,
+                'ResponseCode' => "11810",
                 'data' => [
                     'chat' => $chatRow,
                     'messages' => $chatMessages,
@@ -365,13 +345,13 @@ class ChatMapper
             $this->logger->error("Database error occurred in loadChatById", [
                 'error' => $e->getMessage(),
             ]);
-            return $this->respondWithError(40302);
+            return $this::respondWithError(40302);
         }
     }
 
     public function getChatMessages(array $args): array
     {
-        $this->logger->info("ChatMapper.getChatMessages started");
+        $this->logger->debug("ChatMapper.getChatMessages started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -393,13 +373,13 @@ class ChatMapper
             $this->logger->error("General error in getChatMessages", [
                 'error' => $e->getMessage(),
             ]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 
     public function insert(Chat $chat): Chat
     {
-        $this->logger->info("ChatMapper.insert started");
+        $this->logger->debug("ChatMapper.insert started");
 
         $data = $chat->getArrayCopy();
 
@@ -414,8 +394,8 @@ class ChatMapper
             $stmt->bindValue(':image', $data['image'], \PDO::PARAM_STR);
             $stmt->bindValue(':name', $data['name'], \PDO::PARAM_STR);
             $stmt->bindValue(':ispublic', $data['ispublic'], \PDO::PARAM_INT);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR); 
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -433,7 +413,7 @@ class ChatMapper
 
     public function insertFeed(NewsFeed $feed): NewsFeed
     {
-        $this->logger->info("ChatMapper.insertFeed started");
+        $this->logger->debug("ChatMapper.insertFeed started");
 
         $data = $feed->getArrayCopy();
 
@@ -447,8 +427,8 @@ class ChatMapper
             $stmt->bindValue(':creatorid', $data['creatorid'], \PDO::PARAM_STR);
             $stmt->bindValue(':image', $data['image'], \PDO::PARAM_STR);
             $stmt->bindValue(':name', $data['name'], \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR); 
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -466,7 +446,7 @@ class ChatMapper
 
     public function insertPart(ChatParticipants $participant): array
     {
-        $this->logger->info("ChatMapper.insertPart started");
+        $this->logger->debug("ChatMapper.insertPart started");
 
         $data = $participant->getArrayCopy();
 
@@ -482,7 +462,7 @@ class ChatMapper
 
             if (!$userExists) {
                 $this->logger->warning("User does not exist in users", ['userid' => $userid]);
-                return $this->createSuccessResponse(21001);
+                return $this::createSuccessResponse(21001);
             }
 
             $participantExistsQuery = "SELECT COUNT(*) FROM chatparticipants WHERE chatid = :chatid AND userid = :userid";
@@ -494,7 +474,7 @@ class ChatMapper
 
             if ($participantExists) {
                 $this->logger->warning("Participant already exists", ['userid' => $userid]);
-                return $this->respondWithError(31813);
+                return $this::respondWithError(31813);
             }
 
             $query = "INSERT INTO chatparticipants (chatid, userid, hasaccess, createdat) 
@@ -510,20 +490,16 @@ class ChatMapper
 
             $this->logger->info("Inserted new participant into database", ['participant' => $data]);
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11802,
-                'affectedRows' => new ChatParticipants($data)
-            ];
+            return $this::createSuccessResponse(11802, new ChatParticipants($data), false);
         } catch (\Throwable $e) {
             $this->logger->error("Error inserting participant", ['exception' => $e->getMessage()]);
-            return $this->respondWithError(41804);
+            return $this::respondWithError(41804);
         }
     }
 
     public function insertMess(ChatMessages $chatmessage): array
     {
-        $this->logger->info("ChatMapper.insertMess started");
+        $this->logger->debug("ChatMapper.insertMess started");
 
         $data = $chatmessage->getArrayCopy();
 
@@ -539,7 +515,7 @@ class ChatMapper
 
             if (!$userExists) {
                 $this->logger->warning("User did not exist in users", ['userid' => $userid]);
-                return $this->createSuccessResponse(21001);
+                return $this::createSuccessResponse(21001);
             }
 
             $participantExistsQuery = "SELECT COUNT(*) FROM chatparticipants WHERE chatid = :chatid AND userid = :userid";
@@ -551,7 +527,7 @@ class ChatMapper
 
             if (!$participantExists) {
                 $this->logger->warning("User is not a participant of the chat", ['userid' => $userid]);
-                return $this->respondWithError(31814);
+                return $this::respondWithError(31814);
             }
 
             $query = "INSERT INTO chatmessages (chatid, userid, content, createdat) 
@@ -574,22 +550,18 @@ class ChatMapper
 
             $this->updateLastSeenMessage($userid, $data['chatid'], $lastInsertedId);
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11803,
-                'affectedRows' => [$data]
-            ];
+            return $this::createSuccessResponse(11803, [$data], false);
         } catch (\Throwable $e) {
             $this->logger->error("Error inserting message", [
                 'exception' => $e->getMessage()
             ]);
-            return $this->respondWithError(41801);
+            return $this::respondWithError(41801);
         }
     }
 
     public function update(Chat $chat): Chat
     {
-        $this->logger->info("ChatMapper.update started");
+        $this->logger->debug("ChatMapper.update started");
 
         $data = $chat->getArrayCopy();
         $query = "UPDATE chats
@@ -608,8 +580,8 @@ class ChatMapper
             $stmt->bindValue(':name', $data['name'], \PDO::PARAM_STR);
             $stmt->bindValue(':creatorid', $data['creatorid'], \PDO::PARAM_STR);
             $stmt->bindValue(':ispublic', $data['ispublic'], \PDO::PARAM_INT);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR); 
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':chatid', $data['chatid'], \PDO::PARAM_STR);
 
             $stmt->execute();
@@ -628,7 +600,7 @@ class ChatMapper
 
     public function delete(string $id): bool
     {
-        $this->logger->info("ChatMapper.delete started");
+        $this->logger->debug("ChatMapper.delete started");
 
         $query = "DELETE FROM chats WHERE chatid = :id";
 
@@ -651,14 +623,14 @@ class ChatMapper
             $this->logger->error("Error deleting chat from database", [
                 'exception' => $e->getMessage()
             ]);
-            
+
             throw new \RuntimeException("Failed to delete chat: " . $e->getMessage());
         }
     }
 
     public function deleteParticipant(string $chatid, string $participantId): bool
     {
-        $this->logger->info("ChatMapper.deleteParticipant started");
+        $this->logger->debug("ChatMapper.deleteParticipant started");
 
         $query = "DELETE FROM chatparticipants WHERE chatid = :chatid AND userid = :participantId";
 
@@ -689,7 +661,7 @@ class ChatMapper
 
     public function deleteMessage(string $chatid, int $messid): bool
     {
-        $this->logger->info("ChatMapper.deleteMessage started");
+        $this->logger->debug("ChatMapper.deleteMessage started");
 
         $query = "DELETE FROM chatmessages WHERE chatid = :chatid AND messid = :messid";
 
@@ -720,7 +692,7 @@ class ChatMapper
 
     public function findChatser(string $currentUserId, ?array $args = []): array
     {
-        $this->logger->info("ChatMapper.findChatser started");
+        $this->logger->debug("ChatMapper.findChatser started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -838,8 +810,8 @@ class ChatMapper
                     'ispublic' => (bool)$chatRow['ispublic'],
                     'createdat' => $chatRow['createdat'],
                     'updatedat' => $chatRow['updatedat'],
-                    'chatmessages' => $chatMessages, 
-                    'chatparticipants' => $chatParticipantObj, 
+                    'chatmessages' => $chatMessages,
+                    'chatparticipants' => $chatParticipantObj,
                 ]);
             }
 
@@ -859,7 +831,7 @@ class ChatMapper
 
     public function updateLastSeenMessage(string $user_id, string $chat_id, int $last_seen_message_id): void
     {
-        $this->logger->info("ChatMapper.updateLastSeenMessage started");
+        $this->logger->debug("ChatMapper.updateLastSeenMessage started");
 
         $query = "
             INSERT INTO user_chat_status (userid, chatid, last_seen_message_id)
@@ -892,7 +864,7 @@ class ChatMapper
 
     public function getUnseenMessages(string $user_id, string $chat_id): array|false
     {
-        $this->logger->info("ChatMapper.getUnseenMessages started");
+        $this->logger->debug("ChatMapper.getUnseenMessages started");
 
         $query = "
             SELECT * FROM chatmessages 
@@ -939,7 +911,7 @@ class ChatMapper
 
     public function loadMessageById(int $id): array|false
     {
-        $this->logger->info("ChatMapper.loadMessageById started", ['id' => $id]);
+        $this->logger->debug("ChatMapper.loadMessageById started", ['id' => $id]);
 
         try {
             $sql = "SELECT * FROM chatmessages WHERE messid = :id";
@@ -954,7 +926,7 @@ class ChatMapper
 
             $this->logger->warning("No chat message found with id", ['id' => $id]);
             return false;
-        } catch (\Throwable $e) {  
+        } catch (\Throwable $e) {
             $this->logger->error("Database error: " . $e->getMessage(), ['id' => $id]);
             return false;
         }

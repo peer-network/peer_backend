@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use Fawaz\App\Chat;
@@ -7,17 +9,21 @@ use Fawaz\App\ChatParticipants;
 use Fawaz\App\ChatMessages;
 use Fawaz\Database\ChatMapper;
 use Fawaz\Services\Base64FileHandler;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Ratchet\Client\Connector;
-use React\EventLoop\Factory as EventLoopFactory;
+use React\EventLoop\Loop;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Utils\ResponseHelper;
 
 class ChatService
 {
+    use ResponseHelper;
+
     protected ?string $currentUserId = null;
     private Base64FileHandler $base64filehandler;
 
-    public function __construct(protected LoggerInterface $logger, protected ChatMapper $chatMapper)
+    public function __construct(protected PeerLoggerInterface $logger, protected ChatMapper $chatMapper, protected TransactionManager $transactionManager)
     {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -31,41 +37,20 @@ class ChatService
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
-    }
-
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
-            }
-        }
-
-        return $response;
     }
 
     public static function isValidUUID(string $uuid): bool
     {
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
-    }
-
-    private function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
     }
 
     private function checkAuthentication(): bool
@@ -80,20 +65,16 @@ class ChatService
     public function createChatWithRecipients(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
-        $this->logger->info('ChatService.createChatWithRecipients started');
+        $this->logger->debug('ChatService.createChatWithRecipients started');
 
         $chatId = $this->generateUUID();
-        if (empty($chatId)) {
-            $this->logger->critical('Failed to generate chat ID');
-            return $this->respondWithError(41808);
-        }
 
         $creatorId = $this->currentUserId;
         $name = $args['name'] ?? null;
@@ -103,24 +84,24 @@ class ChatService
         $public = 1;
 
         if (!is_array($recipients) || empty($recipients)) {
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
         if (count($recipients) < $maxUsers) {
-            return $this->respondWithError(31808);
+            return $this::respondWithError(31808);
         }
 
         $friends = $this->getFriends();
 
         if (!is_array($friends) || empty($friends)) {
-            return $this->respondWithError(31101);
+            return $this::respondWithError(31101);
         }
 
         $friendIds = array_column($friends, 'uid');
 
         foreach ($recipients as $recipientId) {
             if (!in_array($recipientId, $friendIds)) {
-                return $this->respondWithError(31101);
+                return $this::respondWithError(31101);
             }
         }
 
@@ -133,7 +114,7 @@ class ChatService
 
             $recipientId = $recipients[0];
             if ($this->chatMapper->getPrivateChatBetweenUsers($creatorId, $recipientId)) {
-                return $this->respondWithError(31812);
+                return $this::respondWithError(31812);
             }
         }
 
@@ -147,26 +128,27 @@ class ChatService
                     $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                     if (empty($mediaPath)) {
-                        return $this->respondWithError(40304);
+                        return $this::respondWithError(40304);
                     }
 
                     if (isset($mediaPath['path'])) {
                         $image = $mediaPath['path'];
                     } else {
-                        return $this->respondWithError(31006);
+                        return $this::respondWithError(31006);
                     }
 
                 } else {
-                    return $this->respondWithError(31007); 
+                    return $this::respondWithError(31007);
                 }
 
             }
         } catch (\Throwable $e) {
             $this->logger->error('Failed to upload media files', ['exception' => $e]);
-            return $this->respondWithError(40304);
+            return $this::respondWithError(40304);
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             // Create the chat
             $chatData = [
                 'chatid' => $chatId,
@@ -208,7 +190,7 @@ class ChatService
                 ];
                 $participant = new ChatParticipants($participantData);
                 $this->chatMapper->insertPart($participant);
-                $this->logger->info('ChatParticipants started');
+                $this->logger->debug('ChatParticipants started');
             }
 
             $recipientId = null;
@@ -224,35 +206,37 @@ class ChatService
             $this->chatMapper->insertPart($creatorParticipant);
 
             $this->logger->info('Chat and participants created successfully', ['chatId' => $chatId]);
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11804,
-                'affectedRows' => ['chatid' => $chatId],
-            ];
+            $this->transactionManager->commit();
+            return $this::createSuccessResponse(
+                11804,
+                ['chatid' => $chatId],
+                false
+            );
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to create chat and participants', ['exception' => $e]);
-            return $this->respondWithError(41802);
+            return $this::respondWithError(41802);
         }
     }
 
     public function updateChat(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
-        $this->logger->info('ChatService.updateChat started');
+        $this->logger->debug('ChatService.updateChat started');
 
         // Validate required fields
         $requiredFields = ['chatid'];
         foreach ($requiredFields as $field) {
             if (!isset($args[$field]) || empty($args[$field])) {
                 $this->logger->warning("$field is required", ['args' => $args]);
-                return $this->respondWithError(30101);
+                return $this::respondWithError(30101);
             }
         }
 
@@ -262,23 +246,23 @@ class ChatService
 
         // Validate args parameters
         if ($chatId === null) {
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
         if (empty($name) && empty($image)) {
-            return $this->respondWithError(31809);
+            return $this::respondWithError(31809);
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError(30201);
+            return $this::respondWithError(30201);
         }
 
         if (!$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
-            return $this->respondWithError(31802);
+            return $this::respondWithError(31802);
         }
 
         if ($this->chatMapper->isPrivate($chatId)) {
-            return $this->respondWithError(31803);
+            return $this::respondWithError(31803);
         }
 
         try {
@@ -292,13 +276,15 @@ class ChatService
             }
         } catch (\Throwable $e) {
             $this->logger->error('Failed to upload media files', ['exception' => $e]);
-            return $this->respondWithError(40304);
+            return $this::respondWithError(40304);
         }
 
         try {
+            $this->transactionManager->beginTransaction();
+
             $chat = $this->chatMapper->loadById($chatId);
             if (!$chat) {
-                return $this->respondWithError(30218);
+                return $this::respondWithError(30218);
             }
 
             $chat->setName($name);
@@ -307,115 +293,122 @@ class ChatService
             $this->chatMapper->update($chat);
 
             $this->logger->info('Chat updated successfully', ['chatid' => $chatId]);
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11805,
-                'affectedRows' => $chat->getArrayCopy()
-            ];
+            $this->transactionManager->commit();
+            return $this::createSuccessResponse(
+                11805,
+                $chat->getArrayCopy(),
+                false // no counter needed for a single chat array
+            );
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to update chat', ['args' => $args, 'exception' => $e]);
-            return $this->respondWithError(41803);
+            return $this::respondWithError(41803);
         }
     }
 
     public function deleteChat(string $id): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         if (empty($id)) {
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
         if (!self::isValidUUID($id)) {
-            return $this->respondWithError(30201);
+            return $this::respondWithError(30201);
         }
 
-        $this->logger->info('ChatService.deleteChat started');
+        $this->logger->debug('ChatService.deleteChat started');
 
         $chats = $this->chatMapper->loadById($id);
         if (!$chats) {
-            return $this->respondWithError(30218);
+            return $this::respondWithError(30218);
         }
 
         $chat = $chats->getArrayCopy();
 
         if ($chat['creatorid'] !== $this->currentUserId && !$this->chatMapper->isCreator($id, $this->currentUserId)) {
-            return $this->respondWithError(31804);
+            return $this::respondWithError(31804);
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             $chatId = $this->chatMapper->delete($id);
 
             if ($chatId) {
                 $this->logger->info('Chat deleted successfully', ['chatId' => $chatId]);
+                $this->transactionManager->commit();
                 return [
                     'status' => 'success',
-                    'ResponseCode' => 11809
+                    'ResponseCode' => "11809"
                 ];
             }
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to delete chat', ['id' => $id, 'error' => $e->getMessage()]);
-            return $this->respondWithError(41809);
+            return $this::respondWithError(41809);
         }
+        $this->transactionManager->rollBack();
 
-        return $this->respondWithError(41809);
+        return $this::respondWithError(41809);
     }
 
     public function addParticipants(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
-        $this->logger->info('ChatService.addParticipants started');
+        $this->logger->debug('ChatService.addParticipants started');
 
         $chatId = $args['chatid'] ?? null;
         $participants = $args['recipients'] ?? null;
 
         // Validate input parameters
         if ($chatId === null || !is_array($participants) || empty($participants)) {
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError(30201);
+            return $this::respondWithError(30201);
         }
 
         if (!$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
-            return $this->respondWithError(31804);
+            return $this::respondWithError(31804);
         }
 
         if ($this->chatMapper->isPrivate($chatId)) {
-            return $this->respondWithError(31805);
+            return $this::respondWithError(31805);
         }
 
         $friends = $this->getFriends();
 
         // Check if $friends is an array and has follow
         if (!is_array($friends) || empty($friends)) {
-            return $this->createSuccessResponse(21101);
+            return $this::createSuccessResponse(21101);
         }
 
         $friendIds = array_column($friends, 'uid');
 
         foreach ($participants as $recipientId) {
             if (!in_array($recipientId, $friendIds)) {
-                return $this->respondWithError(31101);
+                return $this::respondWithError(31101);
             }
         }
 
         $chat = $this->chatMapper->loadById($chatId);
         if (!$chat) {
-            return $this->respondWithError(30218);
+            return $this::respondWithError(30218);
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             foreach ($participants as $participantId) {
 
                 if (!self::isValidUUID($participantId)) {
@@ -431,90 +424,92 @@ class ChatService
                 $participant = new ChatParticipants($participantData);
                 $response = $this->chatMapper->insertPart($participant);
 
-                if ($response['status'] === 'error') {
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->logger->error('Failed to add participant', ['chatId' => $chatId, 'participantId' => $participantId, 'error' => $response]);
+                    $this->transactionManager->rollBack();
                     return $response;
                 }
             }
 
             $this->logger->info('Participants added successfully', ['chatId' => $chatId]);
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11802,
-                'affectedRows' => $participants,
-            ];
+            $this->transactionManager->commit();
+            return $this::createSuccessResponse(11802, $participants, false);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to add participants', ['chatId' => $chatId, 'exception' => $e]);
-            return $this->respondWithError(41804);
+            return $this::respondWithError(41804);
         }
     }
 
     public function removeParticipants(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
-        $this->logger->info('ChatService.removeParticipants started');
+        $this->logger->debug('ChatService.removeParticipants started');
 
         $chatId = $args['chatid'] ?? null;
         $participants = $args['recipients'] ?? null;
 
         // Validate input parameters
         if ($chatId === null || !is_array($participants) || empty($participants)) {
-            return $this->respondWithError(30103);
+            return $this::respondWithError(30103);
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError(30201);
+            return $this::respondWithError(30201);
         }
 
         if (!$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
-            return $this->respondWithError(31806);
+            return $this::respondWithError(31806);
         }
 
         if ($this->chatMapper->isPrivate($chatId)) {
-            return $this->respondWithError(31807);
+            return $this::respondWithError(31807);
         }
 
         $chat = $this->chatMapper->loadById($chatId);
         if (!$chat) {
-            return $this->respondWithError(30218);
+            return $this::respondWithError(30218);
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             foreach ($participants as $participantId) {
 
                 if (!self::isValidUUID($participantId)) {
-                    return $this->respondWithError(30201);
+                    $this->transactionManager->rollback();
+                    return $this::respondWithError(30201);
                 }
 
                 if (!$this->chatMapper->isParticipantExist($chatId, $participantId)) {
-                    return $this->respondWithError(31811);
+                    $this->logger->warning('Participant not found', ['chatId' => $chatId, 'participantId' => $participantId]);
+                    $this->transactionManager->rollback();
+                    return $this::respondWithError(31811);
                 }
 
                 $this->chatMapper->deleteParticipant($chatId, $participantId);
             }
 
             $this->logger->info('Participants removed successfully', ['chatId' => $chatId]);
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11806,
-                'affectedRows' => $participants,
-            ];
+            $this->transactionManager->commit();
+            return $this::createSuccessResponse(11806, $participants, false);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to remove participants', ['chatId' => $chatId, 'exception' => $e]);
-            return $this->respondWithError(41805);
+            return $this::respondWithError(41805);
         }
     }
 
     public function readChatMessages(?array $args = []): array
     {
 
-        $this->logger->info('ChatService.readChatMessages started');
+        $this->logger->debug('ChatService.readChatMessages started');
 
         $results = $this->chatMapper->getChatMessages($args);
 
@@ -525,37 +520,39 @@ class ChatService
     {
         if (!$this->checkAuthentication()) {
             $this->logger->warning('Unauthorized access attempt in addMessage', ['chatId' => $chatId]);
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         if (empty($chatId) || empty($content)) {
-            return $this->respondWithError(30252);
+            return $this::respondWithError(30252);
         }
         $chatConfig = ConstantsConfig::chat();
         $minLength = $chatConfig['MESSAGE']['MIN_LENGTH'];
         $maxLength = $chatConfig['MESSAGE']['MAX_LENGTH'];
 
         if (strlen($content) < $minLength || strlen($content) > $maxLength) {
-            return $this->respondWithError(30252);
+            return $this::respondWithError(30252);
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError(30201);
+            return $this::respondWithError(30201);
         }
 
-        $this->logger->info('ChatService.addMessage started', ['chatId' => $chatId]);
+        $this->logger->debug('ChatService.addMessage started', ['chatId' => $chatId]);
 
         $chat = $this->chatMapper->loadById($chatId);
-        
+
         if (is_array($chat) && isset($chat['status']) && $chat['status'] === 'error') {
             return $chat; // Immediately return if chat is invalid
         }
 
         if ($chat->getIsPublic() === $chatConfig['IS_PUBLIC']['SUSPENDED']) {
-            return $this->respondWithError(41809);
+            return $this::respondWithError(41809);
         }
 
         try {
+            $this->transactionManager->beginTransaction();
+
             $messageData = [
                 'messid' => 0,
                 'chatid'    => $chatId,
@@ -568,77 +565,79 @@ class ChatService
             $result = $this->chatMapper->insertMess($message);
 
             if ($result['status'] === 'error') {
+                $this->transactionManager->rollBack();
                 $this->logger->error('Failed to insert message', ['chatId' => $chatId, 'error' => $result]);
                 return $result;
             }
 
+            $this->transactionManager->commit();
             $this->logger->info('Message added successfully', ['chatId' => $chatId, 'content' => $content]);
             return $result;
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to add message', ['chatId' => $chatId, 'exception' => $e->getMessage()]);
-            return $this->respondWithError(41806);
+            return $this::respondWithError(41806);
         }
     }
 
     public function removeMessage(string $chatId, int $messageId): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         if (empty($chatId) || empty($messageId)) {
-            return $this->respondWithError(30102);
+            return $this::respondWithError(30102);
         }
 
         if (!self::isValidUUID($chatId)) {
-            return $this->respondWithError(30201);
+            return $this::respondWithError(30201);
         }
 
-        $this->logger->info('ChatService.removeMessage started');
+        $this->logger->debug('ChatService.removeMessage started');
 
         $chat = $this->chatMapper->loadById($chatId);
 
         if (!$chat) {
-            return $this->respondWithError(30218);
+            return $this::respondWithError(30218);
         }
 
         $message = $this->chatMapper->loadMessageById($messageId);
 
         if ($message === false) {
-            return $this->createSuccessResponse(21001);
+            return $this::createSuccessResponse(21001);
         }
 
         if ($message['userid'] !== $this->currentUserId && !$this->chatMapper->isCreator($chatId, $this->currentUserId)) {
-            return $this->respondWithError(31806);
+            return $this::respondWithError(31806);
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             $this->chatMapper->deleteMessage($chatId, $messageId);
 
             $this->logger->info('Message removed successfully', ['chatId' => $chatId, 'messageId' => $messageId]);
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11809,
-                'affectedRows' => $message,
-            ];
+            $this->transactionManager->commit();
+            return $this::createSuccessResponse(11809, $message, false);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             $this->logger->error('Failed to remove message', ['chatId' => $chatId, 'exception' => $e]);
-            return $this->respondWithError(41810);
+            return $this::respondWithError(41810);
         }
     }
 
     public function getFriends(): array|null
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
-        $this->logger->info('ChatService.getFriends started');
+        $this->logger->debug('ChatService.getFriends started');
         $users = $this->chatMapper->fetchFriends($this->currentUserId);
 
         if ($users) {
             return $users;
-        } 
+        }
 
         return null;
     }
@@ -656,26 +655,26 @@ class ChatService
                 throw new ValidationException('MissingChatId');
             }
 
-            $this->logger->info('ChatService.loadChatById started');
+            $this->logger->debug('ChatService.loadChatById started');
 
             $result = $this->chatMapper->loadChatById($this->currentUserId, $args);
 
             if ($result['status'] !== 'success') {
-            throw new ValidationException($result['ResponseCode']);
-    } 
+                throw new ValidationException($result['ResponseCode']);
+            }
             if (empty($result['data']) || empty($result['data']['chat'])) {
-            return [
-                'status' => 'success',
-                'ResponseCode' => 21801,
-                'data' => null,
-            ];
-    }
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => "21801",
+                    'data' => null,
+                ];
+            }
 
             $chatData = $result['data'];
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11810,
+                'ResponseCode' => "11810",
                 'data' => new Chat([
                     'chatid' => $chatData['chat']['chatid'],
                     'creatorid' => $chatData['chat']['creatorid'],
@@ -690,20 +689,20 @@ class ChatService
             ];
         } catch (ValidationException $e) {
             $this->logger->warning("Validation error in loadChatById", ['error' => $e->getMessage()]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         } catch (\Throwable $e) {
             $this->logger->error("Unexpected error in loadChatById", ['error' => $e->getMessage()]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 
     public function findChatser(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
-        $this->logger->info('ChatService.findChatser started');
+        $this->logger->debug('ChatService.findChatser started');
 
         $results = $this->chatMapper->findChatser($this->currentUserId, $args);
         $this->logger->info('ChatService.findChatser successfully', ['currentUserId' => $this->currentUserId]);
@@ -714,9 +713,10 @@ class ChatService
     public function setChatMessages(string $chatId, string $content): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
+        $this->transactionManager->beginTransaction();
         $messageData = [
             'type' => 'message',
             'chatId' => $chatId,
@@ -729,43 +729,50 @@ class ChatService
         if ($result['status'] === 'success') {
             $this->sendToWebSocket($messageData);
         }
+        if (isset($result['status']) && $result['status'] === 'error') {
+            $this->transactionManager->rollBack();
+            $this->logger->error('Failed to insert message', ['chatId' => $chatId, 'error' => $result]);
+            return $result;
+        }
+        $this->transactionManager->commit();
 
         return $result;
     }
 
     public function getChatMessages(string $chatId): array
     {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
-        }
+        //        if (!$this->checkAuthentication()) {
+        //            return $this::respondWithError(60501);
+        //        }
+        //
+        //        $results = $this->chatMapper->getChatMessages(['chatId' => $chatId]);
+        //        $requestData = [
+        //            'type' => 'getMessages',
+        //            'chatId' => $chatId,
+        //            'requesterId' => $this->currentUserId,
+        //        ];
 
-        $results = $this->chatMapper->getChatMessages(['chatId' => $chatId]);
-        $requestData = [
-            'type' => 'getMessages',
-            'chatId' => $chatId,
-            'requesterId' => $this->currentUserId,
-        ];
-
-        $this->sendToWebSocket($requestData);
+        //        $this->sendToWebSocket($requestData);
 
         return [
-            'status' => 'success',
-            'ResponseCode' => 11807,
-            'affectedRows' => $results,
+            'status' => 'error',
+            'ResponseCode' => "00000",
+            'affectedRows' => [],
         ];
+
     }
 
-    private function sendToWebSocket(array $data): void
-    {
-        $loop = EventLoopFactory::create();
-        $connector = new Connector($loop);
-        $connector('ws://127.0.0.1:8080')
-            ->then(function ($connection) use ($data) {
-                $connection->send(json_encode($data));
-                $connection->close();
-            }, function (\Throwable $e) {
-                $this->logger->error("WebSocket connection error", ['exception' => $e->getMessage()]);
-            });
-        $loop->run();
-    }
+    //    private function sendToWebSocket(array $data): void
+    //    {
+    //        $loop = Loop::get();
+    //        $connector = new Connector($loop);
+    //        $connector('ws://127.0.0.1:8080')
+    //            ->then(function ($connection) use ($data) {
+    //                $connection->send(json_encode($data));
+    //                $connection->close();
+    //            }, function (\Throwable $e) {
+    //                $this->logger->error("WebSocket connection error", ['exception' => $e->getMessage()]);
+    //            });
+    //        $loop->run();
+    //    }
 }

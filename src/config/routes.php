@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 use Fawaz\Handler\GraphQLHandler;
 use Fawaz\Handler\NotFoundHandler;
+use Fawaz\Handler\MultipartPostHandler;
 use Slim\App;
 
 return static function (App $app) {
@@ -17,7 +19,7 @@ return static function (App $app) {
             ->withHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
             ->withHeader('Referrer-Policy', 'no-referrer')
             ->withHeader('Permissions-Policy', "geolocation=(), microphone=(), camera=()")
-            
+
             // CORS & Cache Headers
             ->withHeader('Access-Control-Allow-Origin', '*')
             ->withHeader('Access-Control-Allow-Methods', 'POST')
@@ -30,5 +32,6 @@ return static function (App $app) {
 
     // Routes
     $app->post('/graphql', GraphQLHandler::class);
+    $app->post('/upload-post', MultipartPostHandler::class);
     $app->any('/{routes:.*}', NotFoundHandler::class);
 };
