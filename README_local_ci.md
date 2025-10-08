@@ -212,7 +212,27 @@ This will:
 - Skip interactive steps so it can run unattended
 - Run make clean-ci at the end (removes containers, volumes, vendors, tmp files, etc. but preserves reports so you can view them)
 
-⚠️ Important: After reviewing your report, run:
+---
+### 8b. Run Isolated Local CI2 Environment (Preserve Dev Containers & Volumes)
+If you want to run a full CI-like test without affecting your local development stack, use:
+
+```bash
+make ci2
+```
+This will:
+
+- Detect if your local make dev stack (backend + Postgres) is running
+- Temporarily stop the dev containers (to free ports 5432 and 8888)
+- Spin up an isolated CI2 environment with its own containers, networks, and volumes
+- These are automatically prefixed with _ci2 (e.g. peer_backend_local_<user>_ci2-db-1)
+- Run the full Newman test suite inside that isolated CI2 stack
+- Clean up only CI2 containers, networks, and volumes after the tests
+- Automatically restart your original dev containers once CI2 finishes
+- Preserve your dev database volume and data
+
+This allows you to test a clean CI setup locally without wiping or touching your dev data.
+
+⚠️ Important: After reviewing your report from Ci or Ci2, run:
 
 ```bash
 make clean-all
@@ -264,9 +284,11 @@ Example output:
 
 Available targets:
 bash-backend : Open interactive shell in backend container
-check-hooks               Verify that Git hooks are installed and executable
+check-hooks : Verify that Git hooks are installed and executable
+ci2 : Run full isolated local CI2 workflow (setup, tests, cleanup)
 ci : Run full local CI workflow (setup, tests, cleanup)
 clean-all : Remove containers, volumes, vendors, reports, logs
+clean-ci2 : Cleanup for isolated CI2 environment but keep reports
 clean-ci : Cleanup for CI but keep reports
 clean-prune : Remove ALL unused images, build cache, and volumes
 db : Open psql shell into Postgres

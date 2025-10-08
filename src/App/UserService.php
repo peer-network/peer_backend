@@ -167,6 +167,11 @@ class UserService
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
         if (!empty($referralUuid)) {
+            if(!self::isValidUUID($referralUuid)) {
+                $this->logger->warning('Invalid referral UUID format.', ['referralUuid' => $referralUuid]);
+                return self::respondWithError(31007);
+            }
+
             $inviter = $this->userMapper->loadById($referralUuid);
 
             if (empty($inviter)) {

@@ -6,9 +6,6 @@ namespace Fawaz\Utils;
 
 trait ResponseHelper
 {
-    // public function __construct(
-    //     private ResponseMessagesProvider $responseMessagesProvider
-    // ) {}
 
     private function argsToJsString($args)
     {
@@ -30,9 +27,9 @@ trait ResponseHelper
         return [];
     }
 
-    private function createSuccessResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
+    private static function createSuccessResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
-        return $this->createResponse(
+        return self::createResponse(
             $responseCode,
             $data,
             $countEnabled,
@@ -41,9 +38,9 @@ trait ResponseHelper
         );
     }
 
-    private function respondWithError(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
+    private static function respondWithError(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
-        return $this->createResponse(
+        return self::createResponse(
             $responseCode,
             $data,
             $countEnabled,
@@ -51,8 +48,8 @@ trait ResponseHelper
             true
         );
     }
-
-    private function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?bool $isError = null): array
+    
+    private static function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?bool $isError = null): array
     {
         // Determine if it is success (codes starting with 1 or 2) or error (3,4,5,6)
         $firstDigit = (int)substr((string)$responseCode, 0, 1);

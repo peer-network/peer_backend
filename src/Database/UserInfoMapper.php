@@ -259,56 +259,70 @@ class UserInfoMapper
 
     public function toggleUserFollow(string $followerid, string $followeduserid): array
     {
-        $this->logger->debug('UserInfoMapper.toggleUserFollow started');
+        $this->logger->info('UserInfoMapper.toggleUserFollow started', ['follower_id' => $followerid,
+        'followed_user_id' => $followeduserid]);
 
         try {
 
-            $query = "SELECT COUNT(*) FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-            $stmt = $this->db->prepare($query);
+            $insertQuery = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid) ON CONFLICT (followerid, followedid) DO NOTHING";
+            $stmt = $this->db->prepare($insertQuery);
             $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
             $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
             $stmt->execute();
 
-            if ($stmt->fetchColumn() > 0) {
-
-                $query = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-                $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-                $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
-                $stmt->execute();
-
-                $this->updateFollowCounts($followerid, -1, "amountfollowed");
-                $this->updateFollowCounts($followeduserid, -1, "amountfollower");
-
-                $action = false;
-                $response = "11103";
-            } else {
-
-                $query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
-                $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-                $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
-                $stmt->execute();
-
+            if ($stmt->rowCount() > 0) {
                 $this->updateFollowCounts($followerid, 1, "amountfollowed");
                 $this->updateFollowCounts($followeduserid, 1, "amountfollower");
 
                 $action = true;
                 $response = "11104";
+                
+                $this->logger->info('Follow relationship created', [
+                    'followerid' => $followerid,
+                    'followeduserid' => $followeduserid
+                ]);
+            } else {
+                $deleteQuery = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
+                $stmt = $this->db->prepare($deleteQuery);
+                $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
+                $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
+                $stmt->execute();
+
+                if ($stmt->rowCount() > 0) {
+                    $this->updateFollowCounts($followerid, -1, "amountfollowed");
+                    $this->updateFollowCounts($followeduserid, -1, "amountfollower");
+
+                    $action = false;
+                    $response = "11103";
+                    
+                    $this->logger->info('Follow relationship removed', [
+                        'followerid' => $followerid,
+                        'followeduserid' => $followeduserid
+                    ]);
+                } else {
+                    $this->logger->warning('Follow relationship disappeared during toggle', [
+                        'followerid' => $followerid,
+                        'followeduserid' => $followeduserid
+                    ]);
+                    
+                    $action = false;
+                    $response = "11103";
+                }
             }
 
             // $this->updateChatsStatus($followerid, $followeduserid);
             $this->updateFriendsCount($followerid);
             $this->updateFriendsCount($followeduserid);
 
+
             return ['status' => 'success', 'ResponseCode' => $response, 'isfollowing' => $action];
 
         } catch (\Exception $e) {
             $this->logger->error('Failed to toggle user follow', ['exception' => $e]);
             return ['status' => 'error', 'ResponseCode' => "41103"];
-        }
+        }               
     }
-
+                             
     private function updateFollowCounts(string $userId, int $change, string $column): void
     {
         $allowedColumns = ['amountfollowed', 'amountfollower'];

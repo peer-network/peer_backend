@@ -7,6 +7,8 @@ namespace Tests\utils\ConstantsInjection;
 use Exception;
 use Fawaz\config\constants\ConstantsConfig;
 
+use function DI\string;
+
 require __DIR__ . '../../../../vendor/autoload.php';
 
 class ConstantValuesInjectorImpl implements ConstantValuesInjector
@@ -25,15 +27,13 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
      * @param array<string, mixed> $data
      * @return array<string, mixed>
     */
-    public function injectConstants(array $data): array
-    {
+    public function injectConstants(array|string $data): array|string {
         echo("ConfigGeneration: ConstantValuesInjectorImpl: injectConstants: start \n");
 
         return $this->processValue($data);
     }
 
-    private function processValue($value)
-    {
+    private function processValue(array|string $value): array|string {
         if (is_string($value)) {
             return $this->replacePlaceholders($value);
         }
@@ -46,13 +46,6 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
             return $processed;
         }
 
-        if (is_object($value)) {
-            foreach ($value as $field => $subValue) {
-                $value->$field = $this->processValue($subValue);
-            }
-            return $value;
-        }
-
         // Non-string scalars (int, float, bool, null) stay untouched
         return $value;
     }
@@ -60,7 +53,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
     private function replacePlaceholders(string $text): string
     {
         return preg_replace_callback(
-            '/\{([A-Z0-9_.]+)\}/',
+            '/\{([a-zA-Z0-9_.]+)\}/',
             function ($matches) {
                 $path = explode('.', $matches[1]);
                 return $this->getValueFromPath($this->constants, $path);
@@ -69,7 +62,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
         );
     }
 
-    private function getValueFromPath(array $constants, array $path): string|int
+    private function getValueFromPath(array $constants, array $path): string|int|float
     {
         if (empty($constants) || empty($path)) {
             throw new Exception("Error: ConstantValuesInjectorImpl: getValueFromPath: invalid input arguments ");
@@ -90,8 +83,9 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
         return $constants;
     }
 
-    public static function injectSchemaPlaceholders(array $schemaFiles, ?string $suffix = '.generated.graphql'): array
+    public static function injectSchemaPlaceholders(array $schemaFiles): array
     {
+        $suffix = '.graphql.generated';
         $constants = (new ConstantsConfig())->getData();
         $map = self::flattenConstantsMap($constants);
 
@@ -107,12 +101,25 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
             }
 
             $patched = preg_replace_callback(
-                '/\{([A-Z0-9_.]+)\}/',
-                static fn (array $m) => $map[$m[1]] ?? $m[0],
+                '/"""(.*?)"""/s',
+                static function (array $m) use ($map) {
+                    $inner = preg_replace_callback(
+                        '/\{(.*)\}/',
+                        static fn(array $mm) => $map[$mm[1]] ?? $mm[0],
+                        $m[1]
+                    );
+                    return '"""' . $inner . '"""';
+                },
                 $sdl
             );
 
-            $out = $suffix ? ($in . $suffix) : $in;
+            
+
+            if (preg_match('/\{[A-Z0-9_.]+\}/', $patched)) {
+                throw new \RuntimeException("Schema injection failed: unresolved placeholder(s) in {$in}");
+            }
+
+            $out = $in . $suffix;
             if (file_put_contents($out, $patched) === false) {
                 throw new \RuntimeException("Cannot write schema: {$out}");
             }

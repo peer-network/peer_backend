@@ -818,7 +818,6 @@ class PostService
             return $this::respondWithError(41513);
         }
     }
-
     /**
      * Get Guest List Post
      */
@@ -826,7 +825,7 @@ class PostService
     {
         $postId = $args['postid'] ?? null;
 
-        if ($postId == null && !self::isValidUUID($postId)) {
+        if (!self::isValidUUID($postId)) {
             return $this::respondWithError(30209);
         }
 
