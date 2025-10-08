@@ -4,37 +4,18 @@ schema {
 }
 
 type Query {
-  
   hello: HelloResponse
-
-  
   guestListPost(postid: ID!): PostResponse!
 }
 
 type Mutation {
-  
   register(input: RegistrationInput!): RegisterResponse!
-
-  
   verifyAccount(userid: ID!): DefaultResponse!
-
-  
   login(email: String!, password: String!): AuthPayload!
-
-  
   requestPasswordReset(email: String!): ResetPasswordRequestResponse!
-
   resetPasswordTokenVerify(token: String!): DefaultResponse!
-  
-  
   resetPassword(token: String!, password: String!): DefaultResponse
-
-  
   refreshToken(refreshToken: String!): AuthPayload!
-
-  
   verifyReferralString(referralString: String!): ReferralResponse!
-
-  
   contactus(name: String!, email: String!, message: String!): ContactusResponse!
 }

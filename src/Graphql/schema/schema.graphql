@@ -5,182 +5,70 @@ schema {
 }
 
 type Subscription {
-  
   getChatMessages(chatid: ID!): AddChatmessageResponse!
-  
   setChatMessages(chatid: ID!, content: String!): AddChatmessageResponse!
 }
 
 type Query {
-  
   hello: HelloResponse!
-
-  
   searchUser(userid: ID,contentFilterBy: ContentFilterType, username: String, offset: Int, limit: Int): UserListResponse!
-
-  
   listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse!
-
-  
   getProfile(userid: ID,contentFilterBy: ContentFilterType, postLimit: Int): ProfileInfo!
-
-  
   listFollowRelations(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
-
-  
   listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!
-
-  
   getUserInfo: UserInfoResponse!
-
-  
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
-
-  
   listPosts(filterBy: [PostFilterType!], contentFilterBy: ContentFilterType, IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
-
   listAdvertisementPosts(filterBy: [ContentType!], userid: ID, postid: ID, tag: String, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): ListAdvertisementPostsResponse!
-  
-  
   getPostInfo(postid: ID!): PostInfoResponse!
-
-  
   getCommentInfo(commentId: ID!): CommentInfoResponse!
-
-  
   listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
-
-  
   listTags(offset: Int, limit: Int): TagSearchResponse!
-
-  
   searchTags(tagName: String!, offset: Int, limit: Int): TagSearchResponse!
-
-  
   getChat(chatid: ID!, messageOffset: Int, messageLimit: Int): ChatResponse!
-
-  
   listChats(sortBy: String, from: Date, to: Date, offset: Int, limit: Int, messageOffset: Int, messageLimit: Int): ChatResponse!
-
-  
   listChatMessages(chatid: ID!, offset: Int, limit: Int): AddChatmessageResponse!
-
-  
   getDailyFreeStatus: GetDailyResponse!
-
-  
   balance: CurrentLiquidity!
-
-  
   listWinLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
-
-  
   listPaymentLogs(day: DayFilterType!, offset: Int, limit: Int): UserLogWins!
-
-  
   getReferralInfo: ReferralInfoResponse!
-
-  
   referralList(offset: Int, limit: Int): ReferralListResponse!
-
-  
   listTodaysInteractions: ListTodaysInteractionsResponse!
-
-  
   getActionPrices: GetActionPricesResponse!
-
-  
   postEligibility: PostEligibilityResponse!
-
-  
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
-
-  
   postInteractions(getOnly: GetOnly!, contentFilterBy: ContentFilterType, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
-
-  
   getTokenomics: TokenomicsResponse!
-  
   advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
 }
 
 type Mutation {
-  
   updateUserPreferences(userPreferences: UserPreferencesInput): UserPreferencesResponse!
-
-  
   updateUsername(username: String!, password: String!): DefaultResponse!
-
-  
   updateEmail(email: String!, password: String!): DefaultResponse!
-
-  
   updatePassword(password: String!, expassword: String!): DefaultResponse!
-
-  
   updateBio(biography: String!): DefaultResponse!
-
-  
   updateProfileImage(img: String!): DefaultResponse!
-
-  
   toggleUserFollowStatus(userid: ID!): FollowStatusResponse!
-
-  
   toggleBlockUserStatus(userid: ID!): DefaultResponse!
-
-  
   deleteAccount(password: String!): DefaultResponse!
-
-  
   createChat(input: ChatInput!): AddChatResponse!
-
-  
   updateChatInformations(input: UpdateChatInput!): AddChatResponse!
-
-  
   addChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
-
-  
   removeChatParticipants(input: ChatParticipantsInput!): AddChatResponse!
-
-  
   sendChatMessage(chatid: ID!, content: String!): AddChatmessageResponse!
-
-  
   deleteChatMessage(chatid: ID!, messid: Int!): DefaultResponse!
-
-  
   deleteChat(id: ID!): DefaultResponse!
-
-  
   createChatFeed(input: FeedInput!): AddPostResponse!
-
-  
   likeComment(commentid: ID!): DefaultResponse!
-
-  
   reportComment(commentid: ID!): DefaultResponse!
-
-  
   reportUser(userid: ID!): DefaultResponse!
-
-  
   deletePost(id: ID!): DefaultResponse!
-
-  
   createPost(action: PostType!, input: PostInput!): PostResponse!
-
-  
   createComment(action: CommentType!, postid: ID!, parentid: ID, content: String!): CommentResponse!
-
-  
   resolvePostAction(action: PostActionType!, postid: ID!): DefaultResponse!
-
-  
-  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: )
-
-  
+  resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: "Use `resolveTransferV2`.")
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
   advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): ListAdvertisementData!
   advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!, forceUpdate: Boolean): ListAdvertisementData!

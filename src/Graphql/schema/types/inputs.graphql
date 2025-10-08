@@ -8,76 +8,49 @@ input AdvertisementHistoryFilter {
 }
 
 input RegistrationInput {
-  
   email: String!
-  
   password: String!
-  
   username: String!
-  
   pkey: String
-  
   referralUuid: ID
 }
 
 input PostInput {
-  
   title: String!
-  
   mediadescription: String
-  
   contenttype: ContentType!
-
   media: [String!]
-
   cover: [String!]
-  
   tags: [String!]
-  
   uploadedFiles: String
 }
 
 input ChatInput {
-  
   name: String!
-  
   image: String
-  
   recipients: [String!]!
 }
 
 input UpdateChatInput {
-  
   chatid: ID!
-  
   name: String
-  
   image: String
 }
 
 input ChatParticipantsInput {
-  
   chatid: ID!
-  
   recipients: [String!]!
 }
 
 input FeedInput {
-  
   feedid: ID!
-  
   title: String!
-  
   media: String!
-  
   mediadescription: String
-  
   contenttype: String!
 }
 
 input UserPreferencesInput {
-  
   contentFilteringSeverityLevel: ContentFilterType
-  
   shownOnboardings: [OnboardingType!]
 }
