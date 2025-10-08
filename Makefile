@@ -455,3 +455,6 @@ scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
 
 gen:
 	bash cd-generate-backend-config.sh
+
+stan:
+	./vendor/bin/phpstan analyse --memory-limit=1024M	
