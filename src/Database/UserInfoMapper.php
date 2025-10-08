@@ -276,7 +276,7 @@ class UserInfoMapper
 
                 $action = true;
                 $response = "11104";
-                
+
                 $this->logger->info('Follow relationship created', [
                     'followerid' => $followerid,
                     'followeduserid' => $followeduserid
@@ -294,7 +294,7 @@ class UserInfoMapper
 
                     $action = false;
                     $response = "11103";
-                    
+
                     $this->logger->info('Follow relationship removed', [
                         'followerid' => $followerid,
                         'followeduserid' => $followeduserid
@@ -304,7 +304,7 @@ class UserInfoMapper
                         'followerid' => $followerid,
                         'followeduserid' => $followeduserid
                     ]);
-                    
+
                     $action = false;
                     $response = "11103";
                 }
@@ -320,9 +320,9 @@ class UserInfoMapper
         } catch (\Exception $e) {
             $this->logger->error('Failed to toggle user follow', ['exception' => $e]);
             return ['status' => 'error', 'ResponseCode' => "41103"];
-        }               
+        }
     }
-                             
+
     private function updateFollowCounts(string $userId, int $change, string $column): void
     {
         $allowedColumns = ['amountfollowed', 'amountfollower'];

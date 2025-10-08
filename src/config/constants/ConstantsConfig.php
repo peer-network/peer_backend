@@ -18,7 +18,7 @@ class ConstantsConfig
             "CONTACT" => self::contact(),
             "PAGING" => self::paging(),
             "WALLET" => self::wallet(),
-            "WALLETT" => self::wallett(),    
+            "WALLETT" => self::wallett(),
             "ONBOARDING" => self::onboarding(),
             "DAILY_FREE" => self::dailyFree(),
             "TOKENOMICS" => self::tokenomics(),

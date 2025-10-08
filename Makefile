@@ -462,7 +462,7 @@ linter:
 	vendor/bin/phpstan analyse
 
 fix-linter:
-	vendor/bin/php-cs-fixer fix
+	./vendor/bin/php-cs-fixer fix
 
 # ---- Developer Shortcuts ----
 .PHONY: logs db bash-backend linter

@@ -6,6 +6,7 @@ namespace Tests\utils\ConstantsInjection;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
-interface ConstantValuesInjector {
+interface ConstantValuesInjector
+{
     public function injectConstants(array|string $data): array|string;
 }

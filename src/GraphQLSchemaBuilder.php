@@ -140,7 +140,7 @@ class GraphQLSchemaBuilder
         $types = \file_get_contents(__DIR__ . '/' . $graphqlPath . $typesPath . "types.graphql");
 
         $schema = $this->getQueriesDependingOnRole();
-        if (empty($schema)){
+        if (empty($schema)) {
             $this->logger->critical('Invalid schema', ['schema' => $schema]);
             return $this::respondWithError(40301);
         }

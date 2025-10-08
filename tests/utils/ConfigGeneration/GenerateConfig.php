@@ -31,7 +31,8 @@ try {
     exit(1);
 }
 
-function generateSchema() {
+function generateSchema()
+{
     $schemaDir = __DIR__ . '/../../../src/Graphql/schema/';
 
     // Recursively find all `.graphql` files in the directory and its subfolders
@@ -46,8 +47,8 @@ function generateSchema() {
         }
     }
     if (!empty($schemaFiles)) {
-        $injector = new ConstantValuesInjectorImpl;
-        
+        $injector = new ConstantValuesInjectorImpl();
+
 
         foreach ($schemaFiles as $in) {
             if (!is_file($in)) {
@@ -82,7 +83,7 @@ function generateSchema() {
                     echo "- $err\n";
                 }
                 throw new \RuntimeException("Unresolved placeholders");
-            } 
+            }
 
             $out = $in . ".generated";
             if (file_put_contents($out, $patched) === false) {
@@ -91,6 +92,4 @@ function generateSchema() {
         }
     }
     echo("ConfigGeneration: Done! \n");
-} catch (\Exception $e) {
-    echo "ConfigGeneration: Error: " . $e->getMessage();
 }
