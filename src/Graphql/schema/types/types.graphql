@@ -505,15 +505,12 @@ type ModerationItemListResponse {
   meta: DefaultResponse
 }
 type ModerationItem {
-  reportid: ID!
-  reporterid: ID!
-  targetid:  ID!
+  targetContentId: ID!
   targettype: String!
   status: String!
-  message: String!
   createdat: String!
   targetcontent: TargetContent!
-  reporter: BasicUserInfo!
+  reporters: [BasicUserInfo!]!
 }
 
 type TargetContent {

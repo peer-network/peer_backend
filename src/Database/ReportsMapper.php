@@ -154,10 +154,14 @@ class ReportsMapper
                 // Ticket is already open and awaiting review
                 $this->logger->info("ReportsMapper: addReport: Ticket already exists and is awaiting review");
                 $moderationTicketId = $existingTicket['moderationticketid'];
+
+                // Update the reports count
+                $reportsCount = UserReport::query()->where('moderationticketid', $moderationTicketId)->count();
+                ModerationTicket::query()->where('uid', $moderationTicketId)->updateColumns(['reportscount' => $reportsCount]);
             }
         } else {
 
-            $status = ConstantsModeration::MODERATION_TICKETS_STATUS_OPEN;
+            $status = array_keys(ConstantsModeration::contentModerationStatus())[0];
 
             $data = [
                 'uid' => $moderationTicketId,

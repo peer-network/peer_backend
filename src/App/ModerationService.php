@@ -52,10 +52,10 @@ class ModerationService
             return self::respondWithError(0000);
         }
 
-        $amountAwaitingReview = UserReport::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[0])->count();
-        $amountHidden = UserReport::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[1])->count();
-        $amountRestored = UserReport::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[2])->count();
-        $amountIllegal = UserReport::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[3])->count();
+        $amountAwaitingReview = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[0])->count();
+        $amountHidden = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[1])->count();
+        $amountRestored = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[2])->count();
+        $amountIllegal = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[3])->count();
 
         return self::createSuccessResponse(20001, [
             'AmountAwaitingReview' => $amountAwaitingReview,
@@ -79,63 +79,86 @@ class ModerationService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $statuses = array_keys(ConstantsModeration::contentModerationStatus());
 
-        $items = UserReport::query();
+        $items = ModerationTicket::query();
 
         // Apply Status filters
         if (isset($args['status']) && in_array($args['status'], $statuses)) {
-            $items = $items->where('user_reports.status', $args['status']);
+            $items = $items->where('moderation_tickets.status', $args['status']);
         }
 
-        // Apply Content Type filters
-        if (isset($args['contentType']) && in_array($args['contentType'], array_keys(ConstantsModeration::CONTENT_MODERATION_TARGETS))) {
-            $items = $items->where('user_reports.targettype', $args['contentType']);
-        }
+        $items = $items->orderByValue('status', 'ASC', $statuses)
+                        ->orderBy('createdat', 'DESC')
+                        ->latest()
+                        ->paginate($page, $limit);
 
-        $items = $items->join('users', 'user_reports.reporter_userid', '=', 'users.uid')
-            ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
-            ->join('post_info', 'posts.postid', '=', 'post_info.postid')
-            ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
-            ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
-            ->select(
-                'user_reports.*',
-                'users.uid',
-                'users.username',
-                'users.email',
-                'users.img',
-                'users.slug',
-                'users.status as userstatus',
-                'users.biography',
-                'users.updatedat',
-                'posts.postid',
-                'posts.userid',
-                'posts.contenttype',
-                'posts.title',
-                'posts.mediadescription',
-                'posts.media',
-                'posts.cover',
-                'posts.options',
-                'comments.userid',
-                'comments.parentid',
-                'comments.content',
-                'target_user.uid as target_user_uid',
-                'target_user.username as target_user_username',
-                'target_user.email as target_user_email',
-                'target_user.img as target_user_img',
-                'target_user.slug as target_user_slug',
-                'target_user.status as target_user_status',
-                'target_user.biography as target_user_biography',
-                'target_user.updatedat as target_user_updatedat',
-            )
-            ->orderByValue('status', 'ASC', $statuses)
-            // ->orderBy('createdat', 'DESC')
-            ->latest()
-            ->paginate($page, $limit);
-
-        // Map records according to the target type
         $items['data'] = array_map(function ($item) {
-            $item = $this->mapTargetContent($item);
+            $userReport = UserReport::query()
+                                    ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
+                                    // ->join('post_info', 'posts.postid', '=', 'post_info.postid')
+                                    ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
+                                    ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
+                                    ->select(
+                                        'user_reports.reportid',
+                                        'user_reports.reporter_userid',
+                                        'user_reports.targetid',
+                                        'user_reports.targettype',
+                                        'user_reports.message',
+                                        'user_reports.moderationid',
+                                        'posts.postid as post_postid', // Need to refactor this later
+                                        'posts.userid',
+                                        'posts.contenttype',
+                                        'posts.title',
+                                        'posts.mediadescription',
+                                        'posts.media',
+                                        'posts.cover',
+                                        'posts.options',
+                                        'comments.userid',
+                                        'comments.parentid',
+                                        'comments.content',
+                                        'target_user.uid as target_user_uid',
+                                        'target_user.username as target_user_username',
+                                        'target_user.email as target_user_email',
+                                        'target_user.img as target_user_img',
+                                        'target_user.slug as target_user_slug',
+                                        'target_user.status as target_user_status',
+                                        'target_user.biography as target_user_biography',
+                                        'target_user.updatedat as target_user_updatedat',
+                                    )
+                                    ->where('moderationticketid', $item['uid'])
+                                    ->latest()
+                                    ->first();
+
+
+            $targetContent = $this->mapTargetContent($userReport);
+
+            // Get all reporters for the ModerationTicket
+            $reporters = UserReport::query()
+                                    ->join('users', 'user_reports.reporter_userid', '=', 'users.uid')
+                                    ->select(
+                                        'users.uid',
+                                        'users.username',
+                                        'users.email',
+                                        'users.img',
+                                        'users.slug',
+                                        'users.status as userstatus',
+                                        'users.biography',
+                                        'users.updatedat',
+                                    )
+                                    ->where('moderationticketid', $item['uid'])
+                                    ->latest()
+                                    ->all();
+
+            $item['reporters'] = array_map(function ($reporter) {
+                return (new User($reporter, [], false))->getArrayCopy();
+            }, $reporters);
+
+            $item['targetcontent'] = $targetContent['targetcontent'];
+            $item['targettype'] = $targetContent['targettype'];
+
+            // var_dump($targetContent); exit;
             return $item;
         }, $items['data']);
+            // var_dump($items['data']); exit;
 
         return self::createSuccessResponse(20001, $items['data'], true);
     }
@@ -150,6 +173,7 @@ class ModerationService
         $item['targetcontent']['user'] = null;
 
         if ($item['targettype'] === 'post') {
+            $item['postid'] = $item['targetid']; // Temporary fix, need to refactor this later
             $item['targetcontent']['post'] = (new Post($item, [], false))->getArrayCopy();
         } elseif ($item['targettype'] === 'comment') {
             $item['targetcontent']['comment'] = (new Comment($item, [], false))->getArrayCopy();
@@ -166,17 +190,6 @@ class ModerationService
             ], [], false))->getArrayCopy();
         }
 
-        $userData = [
-                'uid' => $item['uid'],
-                'username' => $item['username'],
-                'email' => $item['email'],
-                'img' => $item['img'],
-                'slug' => $item['slug'],
-                'status' => $item['userstatus'],
-                'biography' => $item['biography'],
-                'updatedat' => $item['updatedat'],
-            ];
-        $item['reporter'] = (new User($userData, [], false))->getArrayCopy();
         return $item;
     }
 

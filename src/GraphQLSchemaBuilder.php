@@ -2481,16 +2481,8 @@ class GraphQLSchemaBuilder
                 },
             ],
             'ModerationItem' => [
-                'reportid' => function (array $root): string {
-                    $this->logger->info('Query.ModerationItem Resolvers');
-                    return $root['reportid'] ?? '';
-                },
-                'reporterid' => function (array $root): string {
-                    return $root['reporter_userid'] ?? '';
-                },
-
-                'targetid' => function (array $root): string {
-                    return $root['targetid'] ?? '';
+                'targetContentId' => function (array $root): string {
+                    return $root['uid'] ?? '';
                 },
                 'targettype' => function (array $root): string {
                     return $root['targettype'] ?? '';
@@ -2498,20 +2490,11 @@ class GraphQLSchemaBuilder
                 'status' => function (array $root): string {
                     return $root['status'] ?? '';
                 },
-                'message' => function (array $root): string {
-                    return $root['message'] ?? '';
-                },
-                'targettype' => function (array $root): string {
-                    return $root['targettype'] ?? '';
-                },
                 'targetcontent' => function (array $root): array {
                     return $root['targetcontent'] ?? [];
                 },
-                'reporter' => function (array $root): array {
-                    return $root['reporter'] ?? [];
-                },
-                'message' => function (array $root): string {
-                    return $root['message'] ?? '';
+                'reporters' => function (array $root): array {
+                    return $root['reporters'] ?? [];
                 },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';

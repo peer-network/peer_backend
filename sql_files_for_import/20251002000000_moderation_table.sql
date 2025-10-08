@@ -3,7 +3,9 @@ BEGIN
 	-- Table: moderation_tickets
 	CREATE TABLE IF NOT EXISTS moderation_tickets (
 		uid UUID PRIMARY KEY,
-		status VARCHAR(25) DEFAULT 'open' NOT NULL,
+		status VARCHAR(25) DEFAULT 'waiting_for_review' NOT NULL,
+		reportscount INT DEFAULT 0 NOT NULL,
+		contenttype VARCHAR(25) NULL,
 		createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 		updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 	);
@@ -22,8 +24,7 @@ BEGIN
 	-- Add columns to user_reports
 	ALTER TABLE user_reports
 		ADD COLUMN IF NOT EXISTS moderationticketid UUID DEFAULT NULL,
-		ADD COLUMN IF NOT EXISTS moderationid UUID DEFAULT NULL,
-		ADD COLUMN IF NOT EXISTS status VARCHAR(25) DEFAULT 'waiting_for_review' NOT NULL;
+		ADD COLUMN IF NOT EXISTS moderationid UUID DEFAULT NULL;
 
 	-- Add constraints
 	ALTER TABLE user_reports
