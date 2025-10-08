@@ -507,6 +507,7 @@ type ModerationItemListResponse {
 type ModerationItem {
   targetContentId: ID!
   targettype: String!
+  reportscount: Int!
   status: String!
   createdat: String!
   targetcontent: TargetContent!

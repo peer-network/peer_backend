@@ -86,7 +86,13 @@ class ModerationService
             $items = $items->where('moderation_tickets.status', $args['status']);
         }
 
+        // Apply Target Type filters
+        if (isset($args['contentType']) && in_array($args['contentType'], array_keys(ConstantsModeration::CONTENT_MODERATION_TARGETS))) {
+            $items = $items->where('moderation_tickets.contenttype', $args['contentType']);
+        }
+
         $items = $items->orderByValue('status', 'ASC', $statuses)
+                        ->orderBy('reportscount', 'DESC')
                         ->orderBy('createdat', 'DESC')
                         ->latest()
                         ->paginate($page, $limit);
@@ -94,7 +100,6 @@ class ModerationService
         $items['data'] = array_map(function ($item) {
             $userReport = UserReport::query()
                                     ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
-                                    // ->join('post_info', 'posts.postid', '=', 'post_info.postid')
                                     ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
                                     ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
                                     ->select(
@@ -160,7 +165,7 @@ class ModerationService
         }, $items['data']);
             // var_dump($items['data']); exit;
 
-        return self::createSuccessResponse(20001, $items['data'], true);
+        return self::createSuccessResponse(0000, $items['data'], true);
     }
 
     /**

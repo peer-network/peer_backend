@@ -56,9 +56,9 @@ class ConstantsModeration
      * @var array
      */
     public const CONTENT_MODERATION_TARGETS = [
-        'POST' => 'Post',
-        'COMMENT' => 'Comment',
-        'USER' => 'User',
+        'post' => 'Post',
+        'comment' => 'Comment',
+        'user' => 'User',
     ];
 
     /**

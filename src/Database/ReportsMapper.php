@@ -146,9 +146,10 @@ class ReportsMapper
 
         $existingTicket = UserReport::query()->where('targetid', $targetid)->where('targettype', $targettype)->first();
 
+        $status = array_keys(ConstantsModeration::contentModerationStatus())[0];
 
         if ($existingTicket && isset($existingTicket['moderationticketid']) && $existingTicket['moderationticketid']) {
-            $ticketStatus = ModerationTicket::query()->where('uid', $existingTicket['moderationticketid'])->where('status', ConstantsModeration::MODERATION_TICKETS_STATUS_OPEN)->first();
+            $ticketStatus = ModerationTicket::query()->where('uid', $existingTicket['moderationticketid'])->where('status', $status)->first();
 
             if ($ticketStatus) {
                 // Ticket is already open and awaiting review
@@ -161,7 +162,6 @@ class ReportsMapper
             }
         } else {
 
-            $status = array_keys(ConstantsModeration::contentModerationStatus())[0];
 
             $data = [
                 'uid' => $moderationTicketId,

@@ -2490,6 +2490,9 @@ class GraphQLSchemaBuilder
                 'status' => function (array $root): string {
                     return $root['status'] ?? '';
                 },
+                'reportscount' => function (array $root): int {
+                    return $root['reportscount'] ?? 1;
+                },
                 'targetcontent' => function (array $root): array {
                     return $root['targetcontent'] ?? [];
                 },
