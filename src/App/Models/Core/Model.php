@@ -68,8 +68,9 @@ abstract class Model
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        return $result[0] ?: [];
     }
 
     /**

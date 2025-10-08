@@ -141,13 +141,13 @@ class ReportsMapper
         $existingTicket = UserReport::query()->where('targetid', $targetid)->where('targettype', $targettype)->first();
 
 
-        if($existingTicket && isset($existingTicket[0]['moderationticketid']) && $existingTicket[0]['moderationticketid']) {
-            $ticketStatus = ModerationTicket::query()->where('uid', $existingTicket[0]['moderationticketid'])->where('status', ConstantsModeration::MODERATION_TICKETS_STATUS_OPEN)->first();
+        if($existingTicket && isset($existingTicket['moderationticketid']) && $existingTicket['moderationticketid']) {
+            $ticketStatus = ModerationTicket::query()->where('uid', $existingTicket['moderationticketid'])->where('status', ConstantsModeration::MODERATION_TICKETS_STATUS_OPEN)->first();
 
             if($ticketStatus) {
                 // Ticket is already open and awaiting review
                 $this->logger->info("ReportsMapper: addReport: Ticket already exists and is awaiting review");
-                $moderationTicketId = $existingTicket[0]['moderationticketid'];
+                $moderationTicketId = $existingTicket['moderationticketid'];
             }
         }else{
 
@@ -163,6 +163,16 @@ class ReportsMapper
         }
 
         return $moderationTicketId;
+    }
+
+    /**
+     * Check if the target (post, comment, user) is already moderated
+     */
+    public function isModerated(string $targetid, string $targettype): bool
+    {
+        $reports = UserReport::query()->where('targetid', $targetid)->where('targettype', $targettype)->first();
+
+        return !empty($reports) && isset($reports['status']) && $reports['status'] !== array_keys(ConstantsModeration::contentModerationStatus())[0];
     }
 
 }
