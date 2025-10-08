@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\utils\ConfigGeneration;
@@ -15,7 +16,7 @@ use Tests\utils\ConstantsInjection\ConstantValuesInjectorImpl;
 try {
     $files = ConfigGenerationConstants::cases();
 
-    foreach($files as $file) {
+    foreach ($files as $file) {
         JSONHandler::generateJSONtoFile(Constants::$pathToAssets . $file->outputFileName(), $file->getData(), $file->getName());
     }
 
@@ -30,7 +31,8 @@ try {
     exit(1);
 }
 
-function generateSchema() {
+function generateSchema()
+{
     $schemaDir = __DIR__ . '/../../../src/Graphql/schema/';
 
     // Recursively find all `.graphql` files in the directory and its subfolders
@@ -45,8 +47,8 @@ function generateSchema() {
         }
     }
     if (!empty($schemaFiles)) {
-        $injector = new ConstantValuesInjectorImpl;
-        
+        $injector = new ConstantValuesInjectorImpl();
+
 
         foreach ($schemaFiles as $in) {
             if (!is_file($in)) {
@@ -81,7 +83,7 @@ function generateSchema() {
                     echo "- $err\n";
                 }
                 throw new \RuntimeException("Unresolved placeholders");
-            } 
+            }
 
             $out = $in . ".generated";
             if (file_put_contents($out, $patched) === false) {
@@ -89,4 +91,5 @@ function generateSchema() {
             }
         }
     }
+    echo("ConfigGeneration: Done! \n");
 }

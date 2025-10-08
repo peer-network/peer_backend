@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -18,13 +19,14 @@ class PostInfoService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected PeerLoggerInterface $logger, 
-        protected PostInfoMapper $postInfoMapper, 
-        protected CommentMapper $commentMapper, 
+        protected PeerLoggerInterface $logger,
+        protected PostInfoMapper $postInfoMapper,
+        protected CommentMapper $commentMapper,
         protected ReportsMapper $reportMapper,
         protected PostMapper $postMapper,
         protected TransactionManager $transactionManager
-    ){}
+    ) {
+    }
 
     public function setCurrentUserId(string $userId): void
     {
@@ -108,9 +110,9 @@ class PostInfoService
             return $this::respondWithError(31506);
         }
 
-        try{
+        try {
             $this->transactionManager->beginTransaction();
-        
+
             $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
 
             if (!$exists) {
@@ -128,7 +130,7 @@ class PostInfoService
                 'ResponseCode' => "11514",
 
             ];
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: likePost: Error while fetching post data', ['exception' => $e]);
             return $this::respondWithError(41505);
@@ -156,7 +158,7 @@ class PostInfoService
             return $this::respondWithError(31507);
         }
 
-        try{
+        try {
             $this->transactionManager->beginTransaction();
 
             $exists = $this->postInfoMapper->addUserActivity('dislikePost', $this->currentUserId, $postId);
@@ -174,7 +176,7 @@ class PostInfoService
                 'status' => 'success',
                 'ResponseCode' => "11504",
             ];
-         }catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: dislikePost: Error while fetching post data', ['exception' => $e]);
             return $this::respondWithError(41505);
@@ -214,7 +216,7 @@ class PostInfoService
             $this->logger->warning("PostInfoService: reportPost: User tries to report on his own post");
             return $this::respondWithError(31508);
         }
-        
+
         $contentHash = $post->hashValue();
         if (empty($contentHash)) {
             $this->logger->error('PostInfoService: reportPost: Failed to generate content hash of content');
@@ -232,8 +234,8 @@ class PostInfoService
 
             $exists = $this->reportMapper->addReport(
                 $this->currentUserId,
-                ReportTargetType::POST, 
-                $postId, 
+                ReportTargetType::POST,
+                $postId,
                 $contentHash
             );
 
@@ -256,7 +258,7 @@ class PostInfoService
             $this->transactionManager->commit();
             return [
                 'status' => 'success',
-                'ResponseCode' => "11505",    
+                'ResponseCode' => "11505",
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
@@ -285,7 +287,7 @@ class PostInfoService
         if ($postInfo->getOwnerId() === $this->currentUserId) {
             return $this::respondWithError(31509);
         }
-        try{
+        try {
             $this->transactionManager->beginTransaction();
 
             $exists = $this->postInfoMapper->addUserActivity('viewPost', $this->currentUserId, $postId);
@@ -303,7 +305,7 @@ class PostInfoService
                 'status' => 'success',
                 'ResponseCode' => "11506",
             ];
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: viewPost: Error while fetching post data', ['exception' => $e]);
             return $this::respondWithError(41505);
@@ -327,7 +329,7 @@ class PostInfoService
             return $this::respondWithError(31602);
         }
 
-        try{
+        try {
             $this->transactionManager->beginTransaction();
 
             $exists = $this->postInfoMapper->addUserActivity('sharePost', $this->currentUserId, $postId);
@@ -345,7 +347,7 @@ class PostInfoService
                 'status' => 'success',
                 'ResponseCode' => "11507",
             ];
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: sharePost: Error while fetching post data', ['exception' => $e]);
             return $this::respondWithError(41505);
@@ -398,7 +400,7 @@ class PostInfoService
         $this->transactionManager->beginTransaction();
 
         $response = $this->postInfoMapper->togglePostSaved($this->currentUserId, $postId);
-        
+
         if (isset($response['status']) && $response['status'] === 'error') {
             $this->logger->error('PostInfoService.savePost Error save post', ['error' => $response]);
             $this->transactionManager->rollback();

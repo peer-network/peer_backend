@@ -1,15 +1,18 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Utils;
 
 trait ResponseHelper
 {
-    private function argsToJsString($args) {
+    private function argsToJsString($args)
+    {
         return json_encode($args);
     }
 
-    private function argsToString($args) {
+    private function argsToString($args)
+    {
         return serialize($args);
     }
 
@@ -23,9 +26,9 @@ trait ResponseHelper
         return [];
     }
 
-    private function createSuccessResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
+    private static function createSuccessResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
-        return $this->createResponse(
+        return self::createResponse(
             $responseCode,
             $data,
             $countEnabled,
@@ -34,9 +37,9 @@ trait ResponseHelper
         );
     }
 
-    private function respondWithError(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
+    private static function respondWithError(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
-        return $this->createResponse(
+        return self::createResponse(
             $responseCode,
             $data,
             $countEnabled,
@@ -44,8 +47,8 @@ trait ResponseHelper
             true
         );
     }
-    
-    private function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?bool $isError = null): array
+
+    private static function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?bool $isError = null): array
     {
         // Determine if it is success (codes starting with 1 or 2) or error (3,4,5,6)
         $firstDigit = (int)substr((string)$responseCode, 0, 1);
@@ -79,11 +82,14 @@ trait ResponseHelper
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 
@@ -103,7 +109,7 @@ trait ResponseHelper
         return true;
     }
 
-    private static function validateDate(string $date, string $format = 'Y-m-d'): bool 
+    private static function validateDate(string $date, string $format = 'Y-m-d'): bool
     {
         $d = \DateTime::createFromFormat($format, $date);
         return $d && $d->format($format) === $date;

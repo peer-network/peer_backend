@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -251,54 +252,68 @@ class UserInfoMapper
 
         if ($users) {
             return $users;
-        } 
+        }
 
         return null;
     }
 
     public function toggleUserFollow(string $followerid, string $followeduserid): array
     {
-        $this->logger->debug('UserInfoMapper.toggleUserFollow started');
+        $this->logger->info('UserInfoMapper.toggleUserFollow started', ['follower_id' => $followerid,
+        'followed_user_id' => $followeduserid]);
 
         try {
 
-            $query = "SELECT COUNT(*) FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-            $stmt = $this->db->prepare($query);
+            $insertQuery = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid) ON CONFLICT (followerid, followedid) DO NOTHING";
+            $stmt = $this->db->prepare($insertQuery);
             $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
             $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
             $stmt->execute();
 
-            if ($stmt->fetchColumn() > 0) {
-
-                $query = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-                $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-                $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
-                $stmt->execute();
-
-                $this->updateFollowCounts($followerid, -1, "amountfollowed");
-                $this->updateFollowCounts($followeduserid, -1, "amountfollower");
-
-                $action = false;
-                $response = "11103";
-            } else {
-
-                $query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
-                $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-                $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
-                $stmt->execute();
-
+            if ($stmt->rowCount() > 0) {
                 $this->updateFollowCounts($followerid, 1, "amountfollowed");
                 $this->updateFollowCounts($followeduserid, 1, "amountfollower");
 
                 $action = true;
                 $response = "11104";
+
+                $this->logger->info('Follow relationship created', [
+                    'followerid' => $followerid,
+                    'followeduserid' => $followeduserid
+                ]);
+            } else {
+                $deleteQuery = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
+                $stmt = $this->db->prepare($deleteQuery);
+                $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
+                $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
+                $stmt->execute();
+
+                if ($stmt->rowCount() > 0) {
+                    $this->updateFollowCounts($followerid, -1, "amountfollowed");
+                    $this->updateFollowCounts($followeduserid, -1, "amountfollower");
+
+                    $action = false;
+                    $response = "11103";
+
+                    $this->logger->info('Follow relationship removed', [
+                        'followerid' => $followerid,
+                        'followeduserid' => $followeduserid
+                    ]);
+                } else {
+                    $this->logger->warning('Follow relationship disappeared during toggle', [
+                        'followerid' => $followerid,
+                        'followeduserid' => $followeduserid
+                    ]);
+
+                    $action = false;
+                    $response = "11103";
+                }
             }
 
             // $this->updateChatsStatus($followerid, $followeduserid);
             $this->updateFriendsCount($followerid);
             $this->updateFriendsCount($followeduserid);
+
 
             return ['status' => 'success', 'ResponseCode' => $response, 'isfollowing' => $action];
 
@@ -438,7 +453,7 @@ class UserInfoMapper
         ]);
 
         try {
-            
+
             $query = "SELECT COUNT(*) FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
@@ -514,8 +529,8 @@ class UserInfoMapper
             $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $blockedBy = []; 
-            $iBlocked = []; 
+            $blockedBy = [];
+            $iBlocked = [];
 
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 if ($row['blockedid'] === $myUserId) {
@@ -535,7 +550,7 @@ class UserInfoMapper
                 }
             }
 
-            $counter = count($blockedBy) + count($iBlocked); 
+            $counter = count($blockedBy) + count($iBlocked);
 
             $this->logger->info("Fetched block relationships", [
                 'blockedByCount' => count($blockedBy),

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -31,7 +32,7 @@ class ProfilUser
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
 
-        if(isset($data['status']) && $data['status'] == 6){
+        if (isset($data['status']) && $data['status'] == 6) {
             $this->username = 'Deleted_Account';
             $this->img = '/profile/14ce7fba-2bee-4607-86a7-b098a3d62a78.jpg'; // NEEDs to replace with Delete User Image on Production
         }
@@ -105,7 +106,7 @@ class ProfilUser
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -131,7 +132,7 @@ class ProfilUser
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => [
-                        'min' => $userConfig['SLUG']['MIN_LENGTH'], 
+                        'min' => $userConfig['SLUG']['MIN_LENGTH'],
                         'max' => $userConfig['SLUG']['MAX_LENGTH']
                         ]],
                 ],
@@ -158,7 +159,7 @@ class ProfilUser
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

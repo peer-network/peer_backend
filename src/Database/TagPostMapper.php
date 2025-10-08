@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -25,7 +26,7 @@ class TagPostMapper
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new TagPost($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+            $results = array_map(fn ($row) => new TagPost($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched postags successfully" : "No postags found",

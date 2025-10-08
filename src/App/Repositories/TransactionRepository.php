@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App\Repositories;
@@ -9,14 +10,13 @@ use Fawaz\Utils\PeerLoggerInterface;
 
 class TransactionRepository
 {
-
     /**
      * Assign Transaction object while instantiated
      */
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
-    
+
 
     /**
      * Save transaction data
@@ -67,5 +67,5 @@ class TransactionRepository
         }
     }
 
-    
+
 }
