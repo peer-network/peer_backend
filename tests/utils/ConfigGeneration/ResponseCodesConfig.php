@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\utils\ConfigGeneration;
@@ -10,11 +11,13 @@ use Tests\utils\ConstantsInjection\ConstantValuesInjectorImpl;
 
 require __DIR__ . '../../../../vendor/autoload.php';
 
-class ResponseCodesConfig implements DataGeneratable {
+class ResponseCodesConfig implements DataGeneratable
+{
     private array $data = [];
 
 
-    public function __construct(string $filePath) {
+    public function __construct(string $filePath)
+    {
         $decoded = JSONHandler::parseInputJson($filePath, true);
 
         $injector = new ConstantValuesInjectorImpl();
@@ -28,7 +31,8 @@ class ResponseCodesConfig implements DataGeneratable {
         ConstantsInjectionValidator::validate($injectedData);
     }
 
-    public function getData(): array {
+    public function getData(): array
+    {
         return $this->data;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -10,7 +11,7 @@ use Fawaz\App\Status;
 
 class CommentInfoMapper
 {
-    const STATUS_DELETED = 6;
+    public const STATUS_DELETED = 6;
 
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
@@ -41,10 +42,10 @@ class CommentInfoMapper
     {
         $this->logger->debug("CommentInfoMapper.isUserExistById started");
 
-        $status = Status::DELETED;                        
+        $status = Status::DELETED;
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE status != :status AND uid = :id");
         $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':status', $status, \PDO::PARAM_INT );
+        $stmt->bindParam(':status', $status, \PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchColumn() > 0;
@@ -55,12 +56,12 @@ class CommentInfoMapper
         $this->logger->debug("CommentInfoMapper.insert started");
 
         $data = $commentInfo->getArrayCopy();
-        
+
         $query = "INSERT INTO comment_info (commentid, userid, likes, reports, comments) 
                   VALUES (:commentid, :userid, :likes, :reports, :comments)";
-        
+
         $stmt = $this->db->prepare($query);
-        
+
         if ($stmt->execute($data)) {
             $this->logger->info("Inserted new comment info into database", ['commentid' => $data['commentid']]);
             return true;

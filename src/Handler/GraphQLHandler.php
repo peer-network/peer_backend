@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Handler;
@@ -67,7 +68,7 @@ class GraphQLHandler implements RequestHandlerInterface
         $config = ServerConfig::create()
             ->setSchema($schema)
             ->setContext($context)
-            ->setErrorFormatter(fn($error) => FormattedError::createFromException($error))
+            ->setErrorFormatter(fn ($error) => FormattedError::createFromException($error))
             ->setQueryBatching(true)
             ->setDebugFlag();
 

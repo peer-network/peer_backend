@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -113,7 +114,7 @@ class PostInfoMapper
             $stmtSel->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
             $stmtSel->execute();
             $old = $stmtSel->fetch(\PDO::FETCH_ASSOC) ?: [
-                'likes'=>0,'dislikes'=>0,'reports'=>0,'views'=>0,'saves'=>0,'shares'=>0,'comments'=>0
+                'likes' => 0,'dislikes' => 0,'reports' => 0,'views' => 0,'saves' => 0,'shares' => 0,'comments' => 0
             ];
 
             // Bereit (positiv clampen Logik erweitern)
@@ -133,23 +134,30 @@ class PostInfoMapper
                 WHERE postid=:postid
             ");
             // Jeden Wert explizit binden
-            $stmtUpd->bindValue(':likes',    (int)$data['likes'],    \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':likes', (int)$data['likes'], \PDO::PARAM_INT);
             $stmtUpd->bindValue(':dislikes', (int)$data['dislikes'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':reports',  (int)$data['reports'],  \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':views',    (int)$data['views'],    \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':saves',    (int)$data['saves'],    \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':shares',   (int)$data['shares'],   \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':reports', (int)$data['reports'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':views', (int)$data['views'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':saves', (int)$data['saves'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':shares', (int)$data['shares'], \PDO::PARAM_INT);
             $stmtUpd->bindValue(':comments', (int)$data['comments'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':postid',   $data['postid'],        \PDO::PARAM_STR);
+            $stmtUpd->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
 
             if (!$stmtUpd->execute()) {
                 throw new \RuntimeException("post_info update failed");
             }
 
             // Bereit auf eine aktive Anzeige buchen
-            if (($dLikes+$dDislikes+$dReports+$dViews+$dSaves+$dShares+$dComments) > 0) {
+            if (($dLikes + $dDislikes + $dReports + $dViews + $dSaves + $dShares + $dComments) > 0) {
                 $affected = $this->mapRowToActiveAdsInfo(
-                    $data['postid'], $dLikes, $dDislikes, $dReports, $dViews, $dSaves, $dShares, $dComments
+                    $data['postid'],
+                    $dLikes,
+                    $dDislikes,
+                    $dReports,
+                    $dViews,
+                    $dSaves,
+                    $dShares,
+                    $dComments
                 );
                 $this->logger->info("Ad info bumped (one active ad)", [
                     'postid' => $data['postid'], 'affected_rows' => $affected
@@ -322,13 +330,14 @@ class PostInfoMapper
 
     private function mapRowToActiveAdsInfo(
         string $postId,
-        int $dLikes, 
-        int $dDislikes, 
-        int $dReports, 
+        int $dLikes,
+        int $dDislikes,
+        int $dReports,
         int $dViews,
-        int $dSaves, 
-        int $dShares, 
-        int $dComments): int {
+        int $dSaves,
+        int $dShares,
+        int $dComments
+    ): int {
         $sql = "
             WITH one_ad AS (
               SELECT a.advertisementid
@@ -354,13 +363,13 @@ class PostInfoMapper
         $stmt = $this->db->prepare($sql);
         $updatedat = (new \DateTime())->format('Y-m-d H:i:s.u');
         // Jeden Wert explizit binden
-        $stmt->bindValue(':postid',    $postId,    \PDO::PARAM_STR);
-        $stmt->bindValue(':dLikes',    $dLikes,    \PDO::PARAM_INT);
+        $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
+        $stmt->bindValue(':dLikes', $dLikes, \PDO::PARAM_INT);
         $stmt->bindValue(':dDislikes', $dDislikes, \PDO::PARAM_INT);
-        $stmt->bindValue(':dReports',  $dReports,  \PDO::PARAM_INT);
-        $stmt->bindValue(':dViews',    $dViews,    \PDO::PARAM_INT);
-        $stmt->bindValue(':dSaves',    $dSaves,    \PDO::PARAM_INT);
-        $stmt->bindValue(':dShares',   $dShares,   \PDO::PARAM_INT);
+        $stmt->bindValue(':dReports', $dReports, \PDO::PARAM_INT);
+        $stmt->bindValue(':dViews', $dViews, \PDO::PARAM_INT);
+        $stmt->bindValue(':dSaves', $dSaves, \PDO::PARAM_INT);
+        $stmt->bindValue(':dShares', $dShares, \PDO::PARAM_INT);
         $stmt->bindValue(':dComments', $dComments, \PDO::PARAM_INT);
         $stmt->bindValue(':updatedat', $updatedat, \PDO::PARAM_STR);
         $stmt->execute();

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -106,13 +107,13 @@ class Tokenize
 
         foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
-			$errorMessages[] = "Validation errors for $field";
+            $errorMessages[] = "Validation errors for $field";
             foreach ($errors as $error) {
                 //$errorMessages[] = $error;
-				$errorMessages[] = ": $error";
+                $errorMessages[] = ": $error";
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -141,7 +142,7 @@ class Tokenize
                 'required' => true,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => \time(), 'max' => \time()+1800]],
+                    ['name' => 'validateIntRange', 'options' => ['min' => \time(), 'max' => \time() + 1800]],
                 ],
             ],
             'updatedat' => [
@@ -153,7 +154,7 @@ class Tokenize
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

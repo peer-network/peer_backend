@@ -173,7 +173,7 @@ ensure-jq: ## Ensure jq is installed (auto-install if missing)
 		sudo apt update && sudo apt install -y jq; \
 	}
 
-test: env-ci init ensure-jq ## Run Newman tests inside Docker and generate HTML report
+test: env-ci init ensure-jq linter ## Run Newman tests inside Docker and generate HTML report
 	@echo "Building Newman container..."
 	docker-compose --env-file "./.env.ci" $(COMPOSE_FILES) build newman
 
@@ -461,5 +461,15 @@ scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
 gen:
 	bash cd-generate-backend-config.sh
 
+linter:
+	@echo "Linter check"
+	vendor/bin/php-cs-fixer fix --dry-run --diff
+	vendor/bin/phpstan analyse
+
+fix-linter:
+	./vendor/bin/php-cs-fixer fix
+
 stan:
 	./vendor/bin/phpstan analyse --memory-limit=1024M	
+
+.PHONY: logs db bash-backend linter

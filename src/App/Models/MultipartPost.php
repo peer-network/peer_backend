@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App\Models;
@@ -75,25 +76,25 @@ class MultipartPost
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString, [30102]);
         }
         return [];
     }
 
-    
-    
+
+
     /**
      * Apply Additional Validation on provided request object
      */
     public function validateRequiredFields(): void
     {
 
-        if(empty($this->eligibilityToken)){
+        if (empty($this->eligibilityToken)) {
             throw new ValidationException("Token Should not be empty.", [930102]); // Token Should not be empty
         }
 
-        if(empty($this->media) || !is_array($this->media)){
+        if (empty($this->media) || !is_array($this->media)) {
             throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
         }
     }
@@ -105,7 +106,7 @@ class MultipartPost
      */
     public function validateMediaContentTypes(): void
     {
-        if(empty($this->media) && !is_array($this->media)){
+        if (empty($this->media) && !is_array($this->media)) {
             throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
         }
 
@@ -115,7 +116,7 @@ class MultipartPost
         $currentMediaSize = 0;
         foreach ($this->media as $key => $media) {
             $currentMediaSize += $media->getSize();
-            
+
             $type = $this->detectMediaType($media);
             if (!$type) {
                 throw new ValidationException("Unknown media type detected at index $key.", [30259]); // Unknown media type detected at index
@@ -146,7 +147,7 @@ class MultipartPost
      */
     public function validateMediaAllow(): void
     {
-        if(empty($this->media) && !is_array($this->media)){
+        if (empty($this->media) && !is_array($this->media)) {
             throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
         }
 
@@ -173,7 +174,7 @@ class MultipartPost
                 default:
                     break;
             }
-            
+
         }
         if ($imageCount > (ContentLimitsPerPost::from('image')->mediaLimit())) {
             throw new ValidationException("Image should not be more than 20", [30267]); // Image should not be more than 20
@@ -186,7 +187,7 @@ class MultipartPost
         }
         if ($textCount > (ContentLimitsPerPost::from('text')->mediaLimit())) {
             throw new ValidationException("Text should not be more than 1", [30267]); // Text should not be more than 1
-        }     
+        }
 
     }
 
@@ -198,7 +199,7 @@ class MultipartPost
      */
     public function validateSameContentTypes(): string|bool
     {
-        if(empty($this->media) && !is_array($this->media)){
+        if (empty($this->media) && !is_array($this->media)) {
             return false;
         }
 
@@ -206,7 +207,7 @@ class MultipartPost
         $detectedTypes = [];
         foreach ($this->media as $media) {
             $extension = pathinfo($media, PATHINFO_EXTENSION);
-          
+
             $fileType = $this->getSubfolder(strtolower($extension));
             if (!$fileType) {
                 return false;
@@ -256,16 +257,17 @@ class MultipartPost
     /**
      * Check if file exists
      */
-    public function isFilesExists(){
+    public function isFilesExists()
+    {
         $isFileExists = true;
 
         foreach ($this->getMedia() as $media) {
 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/tmp";
-            
+
             $filePath = "$directoryPath/$media";
 
-            if(!file_exists($filePath)){
+            if (!file_exists($filePath)) {
                 $isFileExists = false;
                 break;
             }
@@ -278,30 +280,31 @@ class MultipartPost
     /**
      * Move Uploaded File to Tmp Folder
      */
-    public function moveFileToTmp(){
+    public function moveFileToTmp()
+    {
         $allMetadata = [];
 
         foreach ($this->getMedia() as $media) {
             $originalType = $media->getClientMediaType();
             $fileName = $media->getClientFilename();
             $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-            
-            $tmpFilename = self::generateUUID(); 
+
+            $tmpFilename = self::generateUUID();
             $directoryPath = __DIR__ . "/../../../runtime-data/media/tmp";
-            
+
             if (!is_dir($directoryPath)) {
-                try{
+                try {
                     mkdir($directoryPath, 0777, true);
-                }catch(\RuntimeException $e){
+                } catch (\RuntimeException $e) {
                     throw new \Exception("Directory does not exist: $directoryPath"); // Directory does not exist
                 }
             }
 
             $filePath = "$directoryPath/$tmpFilename.$extension";
 
-            try{
+            try {
                 $media->moveTo($filePath);
-            }catch(\RuntimeException $e){
+            } catch (\RuntimeException $e) {
                 throw new \Exception("Failed to move file: $directoryPath"); // Failed to move file
             }
 
@@ -311,23 +314,24 @@ class MultipartPost
         return $allMetadata ;
     }
 
-    
+
     /**
      * Move Uploaded File to Tmp Folder
      */
-    public function moveFileTmpToMedia(): array {
+    public function moveFileTmpToMedia(): array
+    {
         $allMetadata = [];
 
         $tmpFolder = __DIR__ . "/../../../runtime-data/media/tmp/";
 
         foreach ($this->getMedia() as $media) {
-             // Open the file stream
+            // Open the file stream
             $stream = new \Slim\Psr7\Stream(fopen($tmpFolder.$media, 'r'));
 
             // Create the UploadedFile object
             $uploadedFile = new \Slim\Psr7\UploadedFile(
-                $stream, 
-                null, 
+                $stream,
+                null,
                 null
             );
             // Calculate Subfolder
@@ -381,16 +385,16 @@ class MultipartPost
 
 
     private function formatDuration(float $durationInSeconds): string
-	{
-		$hours = (int) \floor($durationInSeconds / 3600);
-		$minutes = (int) \floor(fmod($durationInSeconds, 3600) / 60);
-		$seconds = (int) \floor(fmod($durationInSeconds, 60));
-		$milliseconds = (int) \round(($durationInSeconds - \floor($durationInSeconds)) * 100);
+    {
+        $hours = (int) \floor($durationInSeconds / 3600);
+        $minutes = (int) \floor(fmod($durationInSeconds, 3600) / 60);
+        $seconds = (int) \floor(fmod($durationInSeconds, 60));
+        $milliseconds = (int) \round(($durationInSeconds - \floor($durationInSeconds)) * 100);
 
-		return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
-	}
+        return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+    }
 
-    
+
     private function formatBytes(int $bytes): string
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
@@ -403,7 +407,7 @@ class MultipartPost
 
         return \sprintf('%.2f %s', $bytes, $units[$index]);
     }
-    
+
     private function getMediaDuration(string $filePath): ?array
     {
         if (!\file_exists($filePath)) {
@@ -416,18 +420,18 @@ class MultipartPost
             $information = [];
 
             if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
-              $width = $fileInfo['video']['resolution_x'];
-              $height = $fileInfo['video']['resolution_y'];
+                $width = $fileInfo['video']['resolution_x'];
+                $height = $fileInfo['video']['resolution_y'];
 
                 // Check for Orientation
-                if(isset($fileInfo['jpg']['exif']['IFD0']['Orientation'])){
+                if (isset($fileInfo['jpg']['exif']['IFD0']['Orientation'])) {
                     $Orientation = $fileInfo['jpg']['exif']['IFD0']['Orientation'] ??= 1;
                     // Handle image rotation based on EXIF Orientation
                     if ($Orientation == 6 || $Orientation == 8) {
                         $width = $fileInfo['video']['resolution_y'];
                         $height = $fileInfo['video']['resolution_x'];
                     }
-                }elseif(isset($fileInfo['video']['rotate'])){
+                } elseif (isset($fileInfo['video']['rotate'])) {
                     $Orientation = $fileInfo['video']['rotate'] ??= 0;
                     // Handle video rotation
                     if ($Orientation == 90 || $Orientation == 270) {
@@ -436,9 +440,9 @@ class MultipartPost
                     }
                 }
 
-              $gcd = gmp_intval(gmp_gcd($width, $height));
-              $ratio = ($width / $gcd) . ':' . ($height / $gcd);
-              $auflg = "{$width}x{$height}";
+                $gcd = gmp_intval(gmp_gcd($width, $height));
+                $ratio = ($width / $gcd) . ':' . ($height / $gcd);
+                $auflg = "{$width}x{$height}";
             }
 
             $information['duration'] = isset($fileInfo['playtime_seconds']) ? (float)$fileInfo['playtime_seconds'] : null;
@@ -446,21 +450,21 @@ class MultipartPost
             $information['resolution'] = isset($auflg) ? $auflg : null;
 
             return isset($information) ? (array)$information : null;
-            
+
         } catch (\Exception $e) {
             \error_log("getID3 Error: " . $e->getMessage());
             return null;
         }
     }
-        
+
     /**
      * Move Uploaded File to Tmp Folder
      */
-    public function revertFileToTmp(): void 
+    public function revertFileToTmp(): void
     {
         $tmpFolder = __DIR__ . "/../../../runtime-data/media/tmp/";
 
-        foreach ($this->getMedia() as $media) {        
+        foreach ($this->getMedia() as $media) {
 
             // Calculate Subfolder
             $extension = pathinfo($media, PATHINFO_EXTENSION);
@@ -470,14 +474,14 @@ class MultipartPost
 
             $filePath = "$directoryPath/$media";
 
-            if(file_exists($filePath)){
-               // Open the file stream
+            if (file_exists($filePath)) {
+                // Open the file stream
                 $stream = new \Slim\Psr7\Stream(fopen($filePath, 'r'));
 
                 // Create the UploadedFile object
                 $uploadedFile = new \Slim\Psr7\UploadedFile(
-                    $stream, 
-                    null, 
+                    $stream,
+                    null,
                     null
                 );
 
@@ -485,7 +489,7 @@ class MultipartPost
                     $uploadedFile->moveTo($tmpFolder.$media);
                 } catch (\RuntimeException $e) {
                     throw new \Exception("Failed to move file: $filePath");
-                } 
+                }
             }
 
         }
@@ -526,24 +530,24 @@ class MultipartPost
      */
     private function getSubfolder(string $fileType): string
     {
-        if(in_array($fileType, ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'])){
+        if (in_array($fileType, ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'])) {
             return 'image';
-        }elseif(in_array($fileType, ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'quicktime'])){
+        } elseif (in_array($fileType, ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'quicktime'])) {
             return 'video';
-        }elseif(in_array($fileType, ['mp3', 'wav'])){
+        } elseif (in_array($fileType, ['mp3', 'wav'])) {
             return 'audio';
-        }elseif(in_array($fileType, ['txt'])){
+        } elseif (in_array($fileType, ['txt'])) {
             return 'text';
-        }else{
+        } else {
             throw new \Exception("Cannot accept more file extension: $fileType"); // Cannot accept more file extension
         }
 
     }
 
     /** UNUSED Method
-     * 
+     *
      * Subfolder options for Audio and Video only for webm file format
-     * 
+     *
      * Keeping it for future use
      */
     private function checkForWebmFormat(string $media): string
@@ -554,18 +558,18 @@ class MultipartPost
         $VideoDirectoryPath = __DIR__ . "/../../../runtime-data/media/video/";
 
 
-        if(file_exists($tempDirectoryPath.$media)){
+        if (file_exists($tempDirectoryPath.$media)) {
             $filePath = $tempDirectoryPath.$media;
-        }elseif(file_exists($audioDirectoryPath.$media)){
+        } elseif (file_exists($audioDirectoryPath.$media)) {
             $filePath = $audioDirectoryPath.$media;
-        }elseif(file_exists($VideoDirectoryPath.$media)){
+        } elseif (file_exists($VideoDirectoryPath.$media)) {
             $filePath = $VideoDirectoryPath.$media;
-        }else{
+        } else {
             throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
         }
 
-        if(file_exists($filePath)){
-             $ffprobe = FFProbe::create();
+        if (file_exists($filePath)) {
+            $ffprobe = FFProbe::create();
             $streams = $ffprobe->streams($filePath);
 
             $videoStrim = [];
@@ -573,11 +577,11 @@ class MultipartPost
                 $videoStrim[] = $stream->get('codec_type');
             }
 
-            if(in_array('video', $videoStrim)){
+            if (in_array('video', $videoStrim)) {
                 return 'video';
-            }elseif(in_array('audio', $videoStrim)){
+            } elseif (in_array('audio', $videoStrim)) {
                 return 'audio';
-            }else{
+            } else {
                 throw new ValidationException("Invalid file type", [30102]); // Media should not be empty
             }
         }
@@ -607,11 +611,11 @@ class MultipartPost
                     ['name' => 'IsArray'],
                 ],
             ],
-            
+
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

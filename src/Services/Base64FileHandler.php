@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Services;
@@ -62,15 +63,15 @@ class Base64FileHandler
         };
     }
 
-	private function formatDuration(float $durationInSeconds): string
-	{
-		$hours = (int) \floor($durationInSeconds / 3600);
-		$minutes = (int) \floor(fmod($durationInSeconds, 3600) / 60);
-		$seconds = (int) \floor(fmod($durationInSeconds, 60));
-		$milliseconds = (int) \round(($durationInSeconds - \floor($durationInSeconds)) * 100);
+    private function formatDuration(float $durationInSeconds): string
+    {
+        $hours = (int) \floor($durationInSeconds / 3600);
+        $minutes = (int) \floor(fmod($durationInSeconds, 3600) / 60);
+        $seconds = (int) \floor(fmod($durationInSeconds, 60));
+        $milliseconds = (int) \round(($durationInSeconds - \floor($durationInSeconds)) * 100);
 
-		return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
-	}
+        return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+    }
 
     private function formatBytes(int $bytes): string
     {
@@ -97,8 +98,8 @@ class Base64FileHandler
             $information = [];
 
             if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
-              $width = $fileInfo['video']['resolution_x'];
-              $height = $fileInfo['video']['resolution_y'];
+                $width = $fileInfo['video']['resolution_x'];
+                $height = $fileInfo['video']['resolution_y'];
 
                 if (!is_numeric($width) || !is_numeric($height)) {
                     \error_log(
@@ -112,16 +113,16 @@ class Base64FileHandler
 
                 $width  = (int) $width;
                 $height = (int) $height;
-                
+
                 // Check for Orientation
-                if(isset($fileInfo['jpg']['exif']['IFD0']['Orientation'])){
+                if (isset($fileInfo['jpg']['exif']['IFD0']['Orientation'])) {
                     $Orientation = $fileInfo['jpg']['exif']['IFD0']['Orientation'] ??= 1;
                     // Handle image rotation based on EXIF Orientation
                     if ($Orientation == 6 || $Orientation == 8) {
                         $width = $fileInfo['video']['resolution_y'];
                         $height = $fileInfo['video']['resolution_x'];
                     }
-                }elseif(isset($fileInfo['video']['rotate'])){
+                } elseif (isset($fileInfo['video']['rotate'])) {
                     $Orientation = $fileInfo['video']['rotate'] ??= 0;
                     // Handle video rotation
                     if ($Orientation == 90 || $Orientation == 270) {
@@ -129,16 +130,16 @@ class Base64FileHandler
                         $height = $fileInfo['video']['resolution_x'];
                     }
                 }
-              $gcd = gmp_intval(gmp_gcd($width, $height));
-              $ratio = ($width / $gcd) . ':' . ($height / $gcd);
-              $auflg = "{$width}x{$height}";
+                $gcd = gmp_intval(gmp_gcd($width, $height));
+                $ratio = ($width / $gcd) . ':' . ($height / $gcd);
+                $auflg = "{$width}x{$height}";
             }
 
             $information['duration'] = isset($fileInfo['playtime_seconds']) ? (float)$fileInfo['playtime_seconds'] : null;
             $information['ratiofrm'] = isset($ratio) ? $ratio : null;
             $information['resolution'] = isset($auflg) ? $auflg : null;
 
-            return $information;            
+            return $information;
         } catch (\Exception $e) {
             \error_log("getID3 Error: " . $e->getMessage());
             return null;
@@ -155,7 +156,8 @@ class Base64FileHandler
         return $input;
     }
 
-    private function sanitizeBase64Data(string $inputs): array {
+    private function sanitizeBase64Data(string $inputs): array
+    {
         $sanitizedBase64Array = [];
 
         foreach ((array) $inputs as $input) {
