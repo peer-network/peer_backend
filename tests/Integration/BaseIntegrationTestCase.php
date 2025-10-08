@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Integration;
@@ -91,7 +92,9 @@ abstract class BaseIntegrationTestCase extends TestCase
         sort($files, SORT_STRING);
         foreach ($files as $file) {
             $sql = file_get_contents($file);
-            if ($sql === false) { continue; }
+            if ($sql === false) {
+                continue;
+            }
             // Execute as-is; Postgres PDO can handle multi-statement strings
             $pdo->exec($sql);
         }

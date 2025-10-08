@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App\Repositories;
@@ -131,7 +132,7 @@ class WalletBalanceRepository implements WalletBalanceRepositoryInterface
 
     private function decimalToQ64_96(float $value): string
     {
-        $scaleFactor = \bcpow('2', '96');   
+        $scaleFactor = \bcpow('2', '96');
         $decimalString = \number_format($value, 30, '.', '');
         return \bcmul($decimalString, $scaleFactor, 0);
     }

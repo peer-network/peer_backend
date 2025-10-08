@@ -18,11 +18,12 @@ class WalletService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected PeerLoggerInterface $logger, 
-        protected WalletMapper $walletMapper, 
+        protected PeerLoggerInterface $logger,
+        protected WalletMapper $walletMapper,
         protected TransactionManager $transactionManager,
         protected WalletBalanceRepositoryInterface $walletBalanceRepository
-    ) {}
+    ) {
+    }
 
     public function setCurrentUserId(string $userId): void
     {

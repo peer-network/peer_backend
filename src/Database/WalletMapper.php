@@ -46,8 +46,7 @@ class WalletMapper
         protected PDO $db,
         protected LiquidityPool $pool,
         protected WalletBalanceRepositoryInterface $walletBalanceRepository
-    )
-    {
+    ) {
     }
 
     // Transfer Token From Wallet To Wallets
@@ -883,7 +882,7 @@ class WalletMapper
             $entry_ids = array_filter($entry_ids);
 
             // transaction management moved to service layer
-            
+
             $sql = "INSERT INTO gems (gemid, userid, postid, fromid, gems, whereby, createdat) 
                     VALUES (:gemid, :userid, :postid, :fromid, :gems, :whereby, :createdat)";
             $stmt = $this->db->prepare($sql);

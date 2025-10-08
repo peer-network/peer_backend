@@ -75,9 +75,9 @@ class MultipartPostService
                 'ResponseCode' => "11515",
             ];
         } catch (ValidationException $e) {
-            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
+            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError((int)$e->getErrors()[0]);
-        } catch(\Exception $e){
+        } catch (\Exception $e) {
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
             return self::respondWithError(41514);
         }
@@ -129,9 +129,9 @@ class MultipartPostService
                 'uploadedFiles' => implode(',', $allMetadata),
             ];
         } catch (ValidationException $e) {
-            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess'=> $e->getErrors()]);
+            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError((int)$e->getErrors()[0]);
-        } catch(\Exception $e){
+        } catch (\Exception $e) {
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
             return self::respondWithError(41514);
         }

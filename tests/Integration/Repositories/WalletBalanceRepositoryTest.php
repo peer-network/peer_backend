@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Integration;
@@ -42,4 +43,3 @@ class WalletBalanceRepositoryTest extends BaseIntegrationTestCase
         $this->assertSame(6.5, $new);
     }
 }
-

@@ -118,7 +118,7 @@ class GraphQLSchemaBuilder
         }
 
         if ($this->userRoles <= 0) {
-            $schema = $schema;
+            $schema = $userSchema;
         } elseif ($this->userRoles === 8) {
             $schema = $bridgeSchema;
         } elseif ($this->userRoles === 16) {
@@ -2441,7 +2441,6 @@ class GraphQLSchemaBuilder
             'listChats' => fn (mixed $root, array $args) => $this->resolveChats($args),
             'listChatMessages' => fn (mixed $root, array $args) => $this->resolveChatMessages($args),
             'getDailyFreeStatus' => fn (mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
-            'getpercentbeforetransaction' => fn (mixed $root, array $args) => $this->resolveBeforeTransaction($args),
             'refreshmarketcap' => fn (mixed $root, array $args) => $this->resolveMcap(),
             'gemster' => fn (mixed $root, array $args) => $this->walletService->callGemster(),
             'balance' => fn (mixed $root, array $args) => $this->resolveLiquidity(),
@@ -3728,9 +3727,6 @@ class GraphQLSchemaBuilder
         }
 
         return $results;
-
-        $this->logger->warning('Query.resolveUsers No users found');
-        return $this::createSuccessResponse(21001);
     }
 
     protected function resolveChat(array $args): ?array
