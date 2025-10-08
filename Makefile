@@ -456,6 +456,7 @@ scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
 gen:
 	bash cd-generate-backend-config.sh
 
+<<<<<<< HEAD
 linter:
 	@echo "Linter check"
 	vendor/bin/php-cs-fixer fix --dry-run --diff
@@ -464,5 +465,7 @@ linter:
 fix-linter:
 	./vendor/bin/php-cs-fixer fix
 
-# ---- Developer Shortcuts ----
+stan:
+	./vendor/bin/phpstan analyse --memory-limit=1024M	
+
 .PHONY: logs db bash-backend linter
