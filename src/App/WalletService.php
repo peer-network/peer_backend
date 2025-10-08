@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -6,7 +7,7 @@ namespace Fawaz\App;
 use Fawaz\App\Wallet;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Utils\PeerLoggerInterface;
-use \Exception;
+use Exception;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\Repositories\Interfaces\WalletBalanceRepositoryInterface;
@@ -217,17 +218,17 @@ class WalletService
             $winstatus = $gemsters['affectedRows']['data'][0];
             unset($gemsters['affectedRows']['data'][0]);
 
-            $userStatus= array_values($gemsters['affectedRows']['data']);
-                    
+            $userStatus = array_values($gemsters['affectedRows']['data']);
+
             $affectedRows = [
                 'winStatus' => $winstatus ?? [],
                 'userStatus' => $userStatus,
-            ];  
-            
+            ];
+
             return [
                 'status' => $gemsters['status'],
                 'counter' => $gemsters['counter'] ?? 0,
-                'ResponseCode' => $gemsters['ResponseCode'],        
+                'ResponseCode' => $gemsters['ResponseCode'],
                 'affectedRows' => $affectedRows
             ];
         }
@@ -236,7 +237,7 @@ class WalletService
             'counter' => 0,
             'ResponseCode' => $gemsters['ResponseCode'],
             'affectedRows' => []
-        ];     
+        ];
     }
 
     public function loadLiquidityById(string $userId): array
@@ -246,7 +247,7 @@ class WalletService
         try {
             $results = $this->walletMapper->loadLiquidityById($userId);
 
-            if ($results !== false ) {
+            if ($results !== false) {
                 $success = [
                     'status' => 'success',
                     'ResponseCode' => "11204",

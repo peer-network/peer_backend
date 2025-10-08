@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -28,11 +29,14 @@ class ContactusService
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 
@@ -54,8 +58,8 @@ class ContactusService
     {
         $contactConfig = ConstantsConfig::contact();
         return $Name &&
-            strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] && 
-            strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] && 
+            strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] &&
+            strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] &&
             preg_match('/' . $contactConfig['NAME']['PATTERN'] . '/u', $Name);
     }
 
@@ -79,7 +83,7 @@ class ContactusService
             $this->transactionManager->commit();
 
             return $response;
-        }catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->transactionManager->rollBack();
             $this->logger->error("Error occurred in ContactusService.insert", [
                 'error' => $e->getMessage(),
@@ -91,12 +95,12 @@ class ContactusService
 
     public function checkRateLimit(string $ip): bool
     {
-        try{
+        try {
             $this->transactionManager->beginTransaction();
 
             $response = $this->contactUsMapper->checkRateLimit($ip);
 
-            if(!$response) {
+            if (!$response) {
                 $this->logger->info("Rate limit check failed for IP: $ip");
                 $this->transactionManager->rollBack();
                 return false;
@@ -104,7 +108,7 @@ class ContactusService
             $this->transactionManager->commit();
 
             return $response;
-        }catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->transactionManager->rollBack();
 
             $this->logger->error("Error occurred in ContactusService.checkRateLimit", [
@@ -191,7 +195,7 @@ class ContactusService
                 return $this::respondWithError(40401);
             }
 
-            $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $exist);
+            $existData = array_map(fn (Contactus $contact) => $contact->getArrayCopy(), $exist);
 
             $this->logger->info("ContactusService.loadById successfully fetched contact", [
                 'args' => $args,

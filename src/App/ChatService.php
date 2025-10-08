@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\App;
@@ -36,11 +37,14 @@ class ChatService
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 
@@ -134,7 +138,7 @@ class ChatService
                     }
 
                 } else {
-                    return $this::respondWithError(31007); 
+                    return $this::respondWithError(31007);
                 }
 
             }
@@ -537,7 +541,7 @@ class ChatService
         $this->logger->debug('ChatService.addMessage started', ['chatId' => $chatId]);
 
         $chat = $this->chatMapper->loadById($chatId);
-        
+
         if (is_array($chat) && isset($chat['status']) && $chat['status'] === 'error') {
             return $chat; // Immediately return if chat is invalid
         }
@@ -633,7 +637,7 @@ class ChatService
 
         if ($users) {
             return $users;
-        } 
+        }
 
         return null;
     }
@@ -656,15 +660,15 @@ class ChatService
             $result = $this->chatMapper->loadChatById($this->currentUserId, $args);
 
             if ($result['status'] !== 'success') {
-            throw new ValidationException($result['ResponseCode']);
-    } 
+                throw new ValidationException($result['ResponseCode']);
+            }
             if (empty($result['data']) || empty($result['data']['chat'])) {
-            return [
-                'status' => 'success',
-                'ResponseCode' => "21801",
-                'data' => null,
-            ];
-    }
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => "21801",
+                    'data' => null,
+                ];
+            }
 
             $chatData = $result['data'];
 
@@ -737,18 +741,18 @@ class ChatService
 
     public function getChatMessages(string $chatId): array
     {
-//        if (!$this->checkAuthentication()) {
-//            return $this::respondWithError(60501);
-//        }
-//
-//        $results = $this->chatMapper->getChatMessages(['chatId' => $chatId]);
-//        $requestData = [
-//            'type' => 'getMessages',
-//            'chatId' => $chatId,
-//            'requesterId' => $this->currentUserId,
-//        ];
+        //        if (!$this->checkAuthentication()) {
+        //            return $this::respondWithError(60501);
+        //        }
+        //
+        //        $results = $this->chatMapper->getChatMessages(['chatId' => $chatId]);
+        //        $requestData = [
+        //            'type' => 'getMessages',
+        //            'chatId' => $chatId,
+        //            'requesterId' => $this->currentUserId,
+        //        ];
 
-//        $this->sendToWebSocket($requestData);
+        //        $this->sendToWebSocket($requestData);
 
         return [
             'status' => 'error',
@@ -758,17 +762,17 @@ class ChatService
 
     }
 
-//    private function sendToWebSocket(array $data): void
-//    {
-//        $loop = Loop::get();
-//        $connector = new Connector($loop);
-//        $connector('ws://127.0.0.1:8080')
-//            ->then(function ($connection) use ($data) {
-//                $connection->send(json_encode($data));
-//                $connection->close();
-//            }, function (\Throwable $e) {
-//                $this->logger->error("WebSocket connection error", ['exception' => $e->getMessage()]);
-//            });
-//        $loop->run();
-//    }
+    //    private function sendToWebSocket(array $data): void
+    //    {
+    //        $loop = Loop::get();
+    //        $connector = new Connector($loop);
+    //        $connector('ws://127.0.0.1:8080')
+    //            ->then(function ($connection) use ($data) {
+    //                $connection->send(json_encode($data));
+    //                $connection->close();
+    //            }, function (\Throwable $e) {
+    //                $this->logger->error("WebSocket connection error", ['exception' => $e->getMessage()]);
+    //            });
+    //        $loop->run();
+    //    }
 }

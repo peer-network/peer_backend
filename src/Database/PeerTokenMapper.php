@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -22,7 +23,9 @@ class PeerTokenMapper
     private string $peerWallet;
     private string $btcpool;
 
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper) {}
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper)
+    {
+    }
 
     /**
      * Loads and validates the liquidity pool wallets.
@@ -52,7 +55,7 @@ class PeerTokenMapper
      *
      * @param $inputPassword string
      * @param $hashedPassword string
-     * 
+     *
      * @return bool value
      */
     private function validateFeesWalletUUIDs(): bool
@@ -65,7 +68,7 @@ class PeerTokenMapper
 
     /**
      * Make peer token transfer to recipient.
-     * 
+     *
      */
     public function transferToken(string $userId, array $args = []): ?array
     {
@@ -368,7 +371,7 @@ class PeerTokenMapper
             if (isset($result['invited']) && !empty($result['invited'])) {
                 return $result["invited"];
             }
-            return NULL;
+            return null;
         } catch (\Throwable $e) {
             throw new RuntimeException($e->getMessage());
         }
@@ -380,7 +383,7 @@ class PeerTokenMapper
      *
      * @param $userId string
      * @param $hashedPassword string
-     * 
+     *
      * @return string value
      */
     public function getUserWalletBalance(string $userId): string
@@ -416,16 +419,16 @@ class PeerTokenMapper
     }
 
     /**
-     * 
+     *
      * get transcations history of current user.
-     * 
+     *
      */
     // DONE
     public function getTransactions(string $userId, array $args): ?array
     {
         $this->logger->debug("PeerTokenMapper.getTransactions started");
 
-        // Define FILTER mappings. 
+        // Define FILTER mappings.
         $typeMap = [
             'TRANSACTION' => ['transferSenderToRecipient', 'transferDeductSenderToRecipient'],
             'AIRDROP' => ['airdrop'],
@@ -512,7 +515,7 @@ class PeerTokenMapper
             $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $data = array_map(
-                fn($trans) => (new Transaction($trans, [], false))->getArrayCopy(),
+                fn ($trans) => (new Transaction($trans, [], false))->getArrayCopy(),
                 $transactions
             );
 

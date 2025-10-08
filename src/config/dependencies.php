@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use Fawaz\BaseURL;
@@ -31,7 +32,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 
             return $logger;
         },
-        
+
         JWTService::class => function (ContainerInterface $c) {
             $settings = $c->get('settings');
             return new JWTService(
@@ -47,8 +48,8 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 
         Mailer::class => function (ContainerInterface $c) {
             $settings = $c->get('settings');
-			$Envi = [];
-			$Envi = ['mailapilink' => (string)$settings['mailapilink'], 'mailapikey' => (string)$settings['mailapikey']];
+            $Envi = [];
+            $Envi = ['mailapilink' => (string)$settings['mailapilink'], 'mailapikey' => (string)$settings['mailapikey']];
             return new Mailer(
                 $Envi,
                 $c->get(PeerLoggerInterface::class)
@@ -57,14 +58,14 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 
         LiquidityPool::class => function (ContainerInterface $c) {
             $settings = $c->get('settings')['liquidity'];
-			$Envi = [];
-			$Envi = ['peer' => (string)$settings['peer'], 'pool' => (string)$settings['pool'], 'burn' => (string)$settings['burn'], 'btcpool' => (string)$settings['btcpool']];
+            $Envi = [];
+            $Envi = ['peer' => (string)$settings['peer'], 'pool' => (string)$settings['pool'], 'burn' => (string)$settings['burn'], 'btcpool' => (string)$settings['btcpool']];
             return new LiquidityPool(
                 $Envi
             );
         },
 
-        PDO::class => function(ContainerInterface $c) {
+        PDO::class => function (ContainerInterface $c) {
             $settings = $c->get('settings')['db'];
 
             $pdo = new PDO($settings['dsn'], $settings['username'], $settings['password']);
@@ -74,7 +75,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
             return $pdo;
         },
 
-        ResponseMessagesProvider::class => function(ContainerInterface $c) {
+        ResponseMessagesProvider::class => function (ContainerInterface $c) {
             $path = __DIR__ . "/../../runtime-data/media/assets/response-codes.json";
             return new ResponseMessagesProviderImpl($path);
         },
