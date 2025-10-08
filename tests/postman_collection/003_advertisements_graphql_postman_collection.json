@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "f877e9d2-abfa-4804-b254-ac346f3f57fc",
+		"_postman_id": "3b526bad-6527-4492-b229-fa0abbc599f3",
 		"name": "003_advertisements_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-f877e9d2-abfa-4804-b254-ac346f3f57fc?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-3b526bad-6527-4492-b229-fa0abbc599f3?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -1292,7 +1292,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1302,7 +1303,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1322,7 +1324,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postid}}\"\n        startday: \"{{startday}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BSIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        startday: \"{{startday}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BSIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -1356,7 +1358,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1366,7 +1369,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1386,7 +1390,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postid}}\"\n        startday: \"2025-06-22\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        startday: \"2025-06-22\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -1420,7 +1424,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1430,7 +1435,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1450,7 +1456,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postid}}\"\n        startday: \"2025-0622\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        startday: \"2025-0622\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1481,7 +1487,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1491,7 +1498,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1511,7 +1519,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postid}}\"\n        startday: \"2030-07-23\"\n        durationInDays: DAY\n        advertisePlan: BASIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        startday: \"2030-07-23\"\n        durationInDays: DAY\n        advertisePlan: BASIC\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1670,7 +1678,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1680,7 +1689,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1700,7 +1710,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postid}}\"\n        advertisePlan: PINED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd1}}\"\n        advertisePlan: PINED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
