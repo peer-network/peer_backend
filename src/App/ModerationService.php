@@ -10,6 +10,7 @@ use Fawaz\config\constants\ConstantsModeration;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\App\Models\Moderation;
 use Fawaz\App\Models\ModerationTicket;
+use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\PeerLoggerInterface;
 
 class ModerationService
@@ -18,7 +19,8 @@ class ModerationService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected PeerLoggerInterface $logger
+        protected PeerLoggerInterface $logger,
+        protected TransactionManager $transactionManager
     ) {
 
     }
@@ -209,82 +211,89 @@ class ModerationService
      */
     public function performModerationAction(array $args): array
     {
-        if (!$this->isAuthorized()) {
-            $this->logger->warning("Unauthorized access attempt to perform moderation action by user ID: {$this->currentUserId}");
-            return self::respondWithError(0000);
-        }
-
-        $reportid = $args['reportid'] ?? null;
-        $moderationAction = $args['moderationAction'] ?? null;
-
-        if (!$reportid || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
-            return self::respondWithError(0000); // Invalid input
-        }
-
-        $report = UserReport::query()->where('reportid', $reportid)->first();
-        if (!$report) {
-            return self::respondWithError(0000); // Report not found
-        }
-
-
-        $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
-
-        $moderationId = self::generateUUID();
-        Moderation::insert([
-            'uid' => $moderationId,
-            'moderationticketid' => $report['moderationticketid'],
-            'moderatorid' => $this->currentUserId,
-            'status' => $moderationAction,
-            'createdat' => $createdat,
-        ]);
-
-        UserReport::query()->where('targetid', $report['targetid'])->where('targettype', $report['targettype'])->updateColumns([
-            'status' => $moderationAction,
-            'moderationid' => $moderationId
-        ]);
-
-        ModerationTicket::query()->where('uid', $report['moderationticketid'])->updateColumns([
-            'status' => $moderationAction,
-            'updatedat' => $createdat
-        ]);
-
-        /**
-         * Apply Content Action based on Moderation Action
-         *
-         * For Post Content Type Only
-         *  1. illegal: Set post status to '2' (illegal) in posts table
-         *  2. restored: Set post status to '0' (published) in posts table and update REPORTS counts to ZERO
-         *  3. hidden: Nothing can be applied to posts as of now because hiding post is already handled by the listPosts logic
-         */
-        if ($report['targettype'] === 'post') {
-
-            /**
-             * Moderation Status: illegal
-             */
-            if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
-                Post::query()->where('postid', $report['targetid'])->updateColumns([
-                    'status' => ConstantsModeration::POST_STATUS_ILLEGAL
-                ]);
+        try{
+            if (!$this->isAuthorized()) {
+                $this->logger->warning("Unauthorized access attempt to perform moderation action by user ID: {$this->currentUserId}");
+                return self::respondWithError(0000);
             }
 
+            $targetContentId = $args['targetContentId'] ?? null;
+            $moderationAction = $args['moderationAction'] ?? null;
+
+            if (!$targetContentId || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
+                return self::respondWithError(0000); // Invalid input
+            }
+
+            $report = UserReport::query()->where('moderationticketid', $targetContentId)->first();
+            if (!$report) {
+                return self::respondWithError(0000); // Report not found
+            }
+
+            $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
+
+            $moderationId = self::generateUUID();
+
+            $this->transactionManager->beginTransaction();
+            Moderation::insert([
+                'uid' => $moderationId,
+                'moderationticketid' => $targetContentId,
+                'moderatorid' => $this->currentUserId,
+                'status' => $moderationAction,
+                'createdat' => $createdat,
+            ]);
+
+            UserReport::query()->where('targetid', $report['targetid'])->where('targettype', $report['targettype'])->updateColumns([
+                'moderationid' => $moderationId
+            ]);
+
+            ModerationTicket::query()->where('uid', $targetContentId)->updateColumns([
+                'status' => $moderationAction,
+                'updatedat' => $createdat
+            ]);
+
             /**
-             * Moderation Status: restored
+             * Apply Content Action based on Moderation Action
+             *
+             * For Post Content Type Only
+             *  1. illegal: Set post status to '2' (illegal) in posts table
+             *  2. restored: Set post status to '0' (published) in posts table and update REPORTS counts to ZERO
+             *  3. hidden: Nothing can be applied to posts as of now because hiding post is already handled by the listPosts logic
              */
-            if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
-                $postInfo = PostInfo::query()->where('postid', $report['targetid'])->first();
-                if ($postInfo) {
-                    PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
-                        'reports' => 0
+            if ($report['targettype'] === 'post') {
+
+                /**
+                 * Moderation Status: illegal
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
+                    Post::query()->where('postid', $report['targetid'])->updateColumns([
+                        'status' => ConstantsModeration::POST_STATUS_ILLEGAL
                     ]);
                 }
+
+                /**
+                 * Moderation Status: restored
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
+                    $postInfo = PostInfo::query()->where('postid', $report['targetid'])->first();
+                    if ($postInfo) {
+                        PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
+                            'reports' => 0
+                        ]);
+                    }
+                }
+
+                /**
+                 * hidden: Nothing can be applied to posts as of now because hiding post is already handled by the listPosts logic
+                 */
+
             }
+            $this->transactionManager->commit();
 
-            /**
-             * hidden: Nothing can be applied to posts as of now because hiding post is already handled by the listPosts logic
-             */
-
+            return self::createSuccessResponse(20001, [], false); // Moderation action performed successfully
+        }catch(\Exception $e){
+            $this->transactionManager->rollBack();
+            $this->logger->error("Error performing moderation action: " . $e->getMessage());
+            return self::respondWithError(0000);
         }
-
-        return self::createSuccessResponse(20001, [], false); // Moderation action performed successfully
     }
 }

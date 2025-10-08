@@ -179,12 +179,15 @@ class ReportsMapper
 
     /**
      * Check if the target (post, comment, user) is already moderated
+     * 
+     * if it has a moderationid, it means it has been moderated: return true
+     * if not, return false
      */
     public function isModerated(string $targetid, string $targettype): bool
     {
         $reports = UserReport::query()->where('targetid', $targetid)->where('targettype', $targettype)->first();
 
-        return !empty($reports) && isset($reports['status']) && $reports['status'] !== array_keys(ConstantsModeration::contentModerationStatus())[0];
+        return !empty($reports) && isset($reports['moderationid']) && $reports['moderationid'] != null;
     }
 
 }
