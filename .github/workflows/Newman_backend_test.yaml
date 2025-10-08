@@ -94,30 +94,21 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Create minimal .env.ci for static analysis
-        run: |
-          cat <<EOF > .env.ci
-          IMAGE_TAG=local
-          DB_DRIVER=pgsql
-          DB_HOST=db
-          DB_PORT=5432
-          DB_DATABASE=peer_backend
-          DB_USERNAME=postgres
-          DB_PASSWORD=postgres
-          APP_ENV=ci
-          APP_URL=http://backend
-          EOF
-          echo ".env.ci created (minimal for PHPStan)"
-
       - name: Log in to GHCR (for base image access)
         run: |
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+      - name: Generate backend config before PHPStan
+        run: |
+          docker compose --env-file .env.dev run --rm backend \
+            sh -c "bash /var/www/html/cd-generate-backend-config.sh"
+
       - name: Run PHPStan inside backend container
         run: |
-          docker compose --env-file .env.ci run --rm backend \
-            sh -c "composer install --prefer-dist --no-interaction && \
-                   vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
+          docker compose --env-file .env.dev run --rm backend \
+            sh -c "cd /var/www/html && \
+                   composer install --prefer-dist --no-interaction && \
+                   vendor/bin/phpstan analyse --configuration=/var/www/html/phpstan.neon --memory-limit=1G"
 
   validate_sql_files:
     name: Ensure Only Valid SQL Files Are Changed
