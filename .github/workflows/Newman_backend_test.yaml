@@ -77,9 +77,45 @@ jobs:
           echo " PR branch is behind the base branch."
           exit 1
 
+  # gitleaks_scan_staged:
+  #   name: Gitleaks PR Scan
+  #   uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
+  #   with:
+  #     config: "gitleaks.toml"
+  #   secrets: inherit
+
+  phpstan_analysis:
+    name: Early Static Analysis (PHPStan)
+    runs-on: ubuntu-latest
+    needs: [check_branch_sync]
+    if: needs.check_branch_sync.outputs.is_behind == 'false'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Create minimal .env.ci for static analysis
+        run: |
+          cat <<EOF > .env.ci
+          DB_DRIVER=pgsql
+          DB_HOST=db
+          DB_PORT=5432
+          DB_DATABASE=peer_backend
+          DB_USERNAME=postgres
+          DB_PASSWORD=postgres
+          APP_ENV=ci
+          APP_URL=http://backend
+          EOF
+          echo ".env.ci created (minimal for PHPStan)"
+
+      - name: Run PHPStan inside backend container
+        run: |
+          docker compose --env-file .env.ci run --rm backend \
+            sh -c "composer install --prefer-dist --no-interaction && \
+                   vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
+
   validate_sql_files:
     name: Ensure Only Valid SQL Files Are Changed
     runs-on: ubuntu-latest
+    needs: [phpstan_analysis]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -140,7 +176,7 @@ jobs:
     needs: [
       check_branch_sync,
       # gitleaks_scan_staged
-      validate_sql_files 
+      validate_sql_files, phpstan_analysis 
     ]
     if: 
       needs.check_branch_sync.outputs.is_behind == 'false'
@@ -906,6 +942,29 @@ jobs:
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{\"content\": \"${MESSAGE}\"}" \
+               "$DISCORD_WEBHOOK_URL"
+
+  notify_phpstan_failure:
+    name: Notify on PHPStan Failure
+    runs-on: ubuntu-latest
+    needs: [phpstan_analysis, map_pr_to_discord]
+    if: failure() && needs.phpstan_analysis.result == 'failure'
+    steps:
+      - name: Send Discord Notification for PHPStan Failure
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+        run: |
+          MESSAGE=":x: **PHPStan Static Analysis Failed**\n"
+          MESSAGE+="**PR:** $PR_TITLE\n"
+          MESSAGE+="Link: <$PR_URL>\n"
+          MESSAGE+="Author: $DISCORD_MENTION\n"
+          MESSAGE+="Please fix PHP static analysis errors before proceeding."
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"$MESSAGE\"}" \
                "$DISCORD_WEBHOOK_URL"
  
   final_check:
