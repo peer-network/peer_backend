@@ -389,6 +389,24 @@ phpstan-fast: ## Run PHPStan using already built backend & local vendor (no buil
 		-v "$(PWD)":/var/www/html \
 		backend sh -c "php vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
 
+php-cs-fix: env-ci ## Run PHP-CS-Fixer in dry-run mode (show issues only)
+	@echo "Checking PHP code style with PHP-CS-Fixer..."
+	@if [ ! -f "vendor/bin/php-cs-fixer" ]; then \
+		echo "Installing PHP-CS-Fixer..."; \
+		composer require --dev friendsofphp/php-cs-fixer --prefer-dist --no-interaction; \
+	fi
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) run --no-deps --rm \
+		-v "$(PWD)":/var/www/html \
+		backend sh -c "ls -la vendor/bin && vendor/bin/php-cs-fixer fix --dry-run --diff"
+	@rm -f .env.ci
+
+php-cs-fixer: env-ci## Automatically fix PHP-CS-Fixer issues (use with caution)
+	@echo "Fixing PHP code style issues with PHP-CS-Fixer..."
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) run --no-deps --rm \
+		-v "$(PWD)/vendor":/var/www/html/vendor \
+		backend sh -c "vendor/bin/php-cs-fixer fix"
+	@rm -f .env.ci
+
 # ---- Developer Shortcuts ----
 .PHONY: logs db bash-backend
 
