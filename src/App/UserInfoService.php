@@ -389,8 +389,8 @@ class UserInfoService
         try {
             // Moderated items should not be reported again
             if ($this->reportsMapper->isModerated($reported_userid, ReportTargetType::USER->value)) {
-                $this->logger->warning("PostInfoService: reportPost: User tries to report a moderated post");
-                return $this::respondWithError(31503);
+                $this->logger->warning("UserInfoService.reportUser: User report already exists");
+                return $this::respondWithError(31008);
             }
 
             $this->transactionManager->beginTransaction();
