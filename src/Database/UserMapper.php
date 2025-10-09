@@ -1746,7 +1746,7 @@ class UserMapper
             $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
             $stmt->execute();
 
-            $this->logger->info('Access tokens deleted', ['userId' => $userId]);
+            $this->logger->debug('Access tokens deleted', ['userId' => $userId]);
         } catch (\Throwable $e) {
             $this->logger->error('UserMapper.deleteAccessTokensByUserId failed', [
                 'userId' => $userId,
@@ -1767,7 +1767,7 @@ class UserMapper
             $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
             $stmt->execute();
 
-            $this->logger->info('Refresh tokens deleted', ['userId' => $userId]);
+            $this->logger->debug('Refresh tokens deleted', ['userId' => $userId]);
         } catch (\Throwable $e) {
             $this->logger->error('UserMapper.deleteRefreshTokensByUserId failed', [
                 'userId' => $userId,
