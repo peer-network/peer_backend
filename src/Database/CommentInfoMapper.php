@@ -57,8 +57,8 @@ class CommentInfoMapper
 
         $data = $commentInfo->getArrayCopy();
 
-        $query = "INSERT INTO comment_info (commentid, userid, likes, reports, comments) 
-                  VALUES (:commentid, :userid, :likes, :reports, :comments)";
+        $query = "INSERT INTO comment_info (commentid, userid, likes, reports, totalreports, comments) 
+                  VALUES (:commentid, :userid, :likes, :reports, :totalreports, :comments)";
 
         $stmt = $this->db->prepare($query);
 

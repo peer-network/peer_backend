@@ -114,6 +114,7 @@ type Comment {
   createdat: Date!
   amountlikes: Int!
   amountreplies: Int!
+  amountreports: Int!
   isliked: Boolean!
   user: ProfileUser!
 }
@@ -253,6 +254,7 @@ type Profile {
   amountfollower: Int
   amountfriends: Int
   amountblocked: Int
+  amountreports: Int
   imageposts: [ProfilePostMedia!]
   textposts: [ProfilePostMedia!]
   videoposts: [ProfilePostMedia!]

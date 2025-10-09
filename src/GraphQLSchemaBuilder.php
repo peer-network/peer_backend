@@ -528,6 +528,9 @@ class GraphQLSchemaBuilder
                 'amountblocked' => function (array $root): int {
                     return $root['amountblocked'] ?? 0;
                 },
+                'amountreports' => function (array $root): int {
+                    return $root['amountreports'] ?? 0;
+                },
                 'isfollowed' => function (array $root): bool {
                     return $root['isfollowed'] ?? false;
                 },
@@ -976,6 +979,9 @@ class GraphQLSchemaBuilder
                 },
                 'amountreplies' => function (array $root): int {
                     return $root['amountreplies'] ?? 0;
+                },
+                'amountreports' => function (array $root): int {
+                    return $root['amountreports'] ?? 0;
                 },
                 'isliked' => function (array $root): bool {
                     return $root['isliked'] ?? false;
