@@ -39,4 +39,7 @@ BEGIN
 	ALTER TABLE advertisements_info
 		ADD COLUMN IF NOT EXISTS totalreports INT DEFAULT 0 NOT NULL;
 		
+	-- Add Total Reports column to post_info table
+	ALTER TABLE users_info
+		ADD COLUMN IF NOT EXISTS totalreports INT DEFAULT 0 NOT NULL;
 END$$;

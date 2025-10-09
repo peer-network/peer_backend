@@ -410,6 +410,7 @@ class UserInfoService
             }
 
             $userInfo->setReports($userInfo->getReports() + 1);
+            $userInfo->setTotalReports($userInfo->getTotalReports() + 1);
             $this->userInfoMapper->update($userInfo);
 
             $this->transactionManager->commit();

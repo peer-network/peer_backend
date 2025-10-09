@@ -19,6 +19,7 @@ class UserInfo
     protected int $amountblocked;
     protected int $isprivate;
     protected int $reports;
+    protected int $totalreports;
     protected ?string $invited;
     protected ?string $phone;
     protected ?string $pkey;
@@ -40,6 +41,7 @@ class UserInfo
         $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->isprivate = $data['isprivate'] ?? 0;
         $this->reports = $data['reports'] ?? 0;
+        $this->totalreports = $data['totalreports'] ?? 0;
         $this->invited = $data['invited'] ?? null;
         $this->phone = $data['phone'] ?? null;
         $this->pkey = $data['pkey'] ?? null;
@@ -59,6 +61,7 @@ class UserInfo
             'amountblocked' => $this->amountblocked,
             'isprivate' => $this->isprivate,
             'reports' => $this->reports,
+            'totalreports' => $this->totalreports,
             'invited' => $this->invited,
             'phone' => $this->phone,
             'pkey' => $this->pkey,
@@ -190,6 +193,15 @@ class UserInfo
     public function setReports(int $reports): void
     {
         $this->reports = $reports;
+    }
+
+    public function getTotalReports(): int
+    {
+        return $this->totalreports;
+    }
+    public function setTotalReports(int $totalreports): void
+    {
+        $this->totalreports = $totalreports;
     }
 
     // Validation and Array Filtering methods

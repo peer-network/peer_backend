@@ -12,6 +12,7 @@ use Fawaz\App\Models\Moderation;
 use Fawaz\App\Models\ModerationTicket;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\PeerLoggerInterface;
+use Tests\utils\ConfigGeneration\Constants;
 
 class ModerationService
 {
@@ -285,8 +286,14 @@ class ModerationService
                 }
 
                 /**
-                 * hidden: Nothing can be applied to posts as of now because hiding post is already handled by the listPosts logic
+                 * hidden: Update REPORTS counts to FIVE or more
+                 * This will ensure that the post remains hidden in the listPosts logic
                  */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
+                    PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
+                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST']
+                    ]);
+                }
 
             }
             $this->transactionManager->commit();
