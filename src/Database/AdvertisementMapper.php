@@ -824,12 +824,25 @@ class AdvertisementMapper
         $limit  = min(max((int)($args['limit'] ?? 10), 1), 20);
         $trenddays = 7;
 
+        /**
+         * Includes Content Filtering for Reports Advertisements
+         */
+        $post_report_amount_to_hide     = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
+        $post_dismiss_moderation_amount = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['POST'];
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+
         $from   = $args['from']   ?? null;
         $to     = $args['to']     ?? null;
         $filterBy = $args['filterBy'] ?? [];
         $tag    = $args['tag']    ?? null;
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
+
+        $contentFilterService = new ContentFilterServiceImpl(
+            new ListPostsContentFilteringStrategy(),
+            null,
+            $contentFilterBy
+        );
 
         $whereClauses = ["p.feedid IS NULL"];
         $params = ['currentUserId' => $currentUserId];
@@ -854,12 +867,31 @@ class AdvertisementMapper
             $whereClauses[] = "t.name = :tag";
             $params['tag'] = $tag;
         }
+        // Show only Valid Content
+        $whereClauses[] = "p.status = :postStatus";
+        $params['postStatus'] = ConstantsConfig::post()['STATUS']['ADVERTISED'];
 
         // Allow Only (Normal Status) Plus (User's & Admin's Mode) Posts
         $whereClauses[] = 'u.status = :stNormal AND u.roles_mask IN (:roleUser, :roleAdmin)';
         $params['stNormal']  = Status::NORMAL;
         $params['roleUser']  = Role::USER;
         $params['roleAdmin'] = Role::ADMIN;
+
+        // Content Filtering
+        if ($contentFilterService->getContentFilterAction(
+            ContentType::post,
+            ContentType::post
+        ) === ContentFilteringAction::hideContent) {
+            $params['post_report_amount_to_hide']     = $post_report_amount_to_hide;
+            $params['post_dismiss_moderation_amount'] = $post_dismiss_moderation_amount;
+            $whereClauses[] = '(
+                p.userid = :currentUserId
+                OR (
+                    pi.reports < :post_report_amount_to_hide
+                    OR pi.count_content_moderation_dismissed > :post_dismiss_moderation_amount
+                )
+            )';
+        }
 
         // FilterBy Content Types
         if (!empty($filterBy) && is_array($filterBy)) {
@@ -904,13 +936,19 @@ class AdvertisementMapper
                 EXISTS (SELECT 1 FROM follows WHERE followedid = a.userid AND followerid = :currentUserId) AS tisfollowed,
                 EXISTS (SELECT 1 FROM follows WHERE followerid = a.userid AND followedid = :currentUserId) AS tisfollowing,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = p.userid AND followerid = :currentUserId) AS isfollowed,
-                EXISTS (SELECT 1 FROM follows WHERE followerid = p.userid AND followedid = :currentUserId) AS isfollowing
+                EXISTS (SELECT 1 FROM follows WHERE followerid = p.userid AND followedid = :currentUserId) AS isfollowing,
+                MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
+                MAX(pi.count_content_moderation_dismissed) AS post_count_content_moderation_dismissed,
+                MAX(ui.reports) AS user_reports,
+                MAX(pi.reports) AS post_reports
             FROM posts p
             JOIN users u ON p.userid = u.uid
             LEFT JOIN post_tags pt ON p.postid = pt.postid
             LEFT JOIN tags t ON pt.tagid = t.tagid
             LEFT JOIN advertisements a ON p.postid = a.postid
             LEFT JOIN users ut ON a.userid = ut.uid
+            LEFT JOIN post_info pi ON pi.postid = p.postid AND pi.userid = p.userid
+            LEFT JOIN users_info ui ON ui.userid = p.userid
             WHERE " . implode(" AND ", $whereClauses) . "
             GROUP BY p.postid, a.advertisementid,
                      tuserid, ad_type, ad_order, end_order,
@@ -970,8 +1008,25 @@ class AdvertisementMapper
                 $finalPosts = array_merge($finalPosts, $basic);
             }
 
-            return array_map(function ($row) {
+            return array_map(function ($row) use ($contentFilterService, $currentUserId) {
                 $row['tags'] = json_decode($row['tags'], true) ?? [];
+
+                // User-Placeholder anwenden, falls nötig
+                $user_reports = (int)$row['user_reports'];
+                $user_dismiss = (int)$row['user_count_content_moderation_dismissed'];
+
+                if ($contentFilterService->getContentFilterAction(
+                    ContentType::post,
+                    ContentType::user,
+                    $user_reports,
+                    $user_dismiss,
+                    $currentUserId,
+                    $row['userid']
+                ) === ContentFilteringAction::replaceWithPlaceholder) {
+                    $replacer       = ContentReplacementPattern::flagged;
+                    $row['username'] = $replacer->username($row['username']);
+                    $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
+                }
 
                 return [
                     'post' => self::mapRowToPost($row),

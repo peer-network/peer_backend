@@ -4115,6 +4115,12 @@ class GraphQLSchemaBuilder
         $this->logger->debug('Query.resolveAdvertisementsPosts started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
+        
+        // For Content Filtering
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
+            return $this::respondWithError(30103);
+        }
 
         $posts = $this->advertisementService->findAdvertiser($args);
         if (isset($posts['status']) && $posts['status'] === 'error') {
