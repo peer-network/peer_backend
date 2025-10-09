@@ -316,10 +316,9 @@ class ModerationService
                  */
                 // TBC
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
-                    // User::query()->where('uid', $report['targetid'])->updateColumns([
-                    //     'status' => ConstantsModeration::USER_STATUS_BANNED,
-                    //     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
-                    // ]);
+                    User::query()->where('uid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
+                    ]);
                 }
 
                 /**
@@ -361,10 +360,9 @@ class ModerationService
                  * Moderation Status: illegal
                  */
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
-                    // Comment::query()->where('commentid', $report['targetid'])->updateColumns([
-                    //     'status' => ConstantsModeration::COMMENT_STATUS_ILLEGAL,
-                    //     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
-                    // ]);
+                    Comment::query()->where('commentid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
+                    ]);
                 }
 
                 /**
