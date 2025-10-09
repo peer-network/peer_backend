@@ -1,10 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Filter;
 
 use Exception;
 use DateTime;
+use Fawaz\config\constants\ConstantsConfig;
+
 use function trim;
 use function strip_tags;
 use function htmlspecialchars;
@@ -24,9 +27,10 @@ use function is_object;
 use function is_string;
 use function sprintf;
 use function method_exists;
-use Fawaz\config\constants\ConstantsConfig;
 
-class ValidationException extends Exception {}
+class ValidationException extends Exception
+{
+}
 
 const CUSTOM_FILTER_FLAG_ALLOW_INT = 1;
 const CUSTOM_FILTER_FLAG_ALLOW_ZERO = 2;
@@ -67,7 +71,7 @@ class PeerInputFilter
         }
 
         $result = $this->$filterName($value, $options);
-        
+
         return $result;
     }
 
@@ -90,7 +94,7 @@ class PeerInputFilter
         }
 
         $result = $this->$validatorName($value, $options);
-        
+
         return $result;
     }
 
@@ -132,10 +136,10 @@ class PeerInputFilter
                             if (isset($this->errors[$field])) {
                                 if (!empty($this->errors[$field][0])) {
                                     continue;
+                                }
+                            } elseif (!empty($this->errors[$field])) {
+                                continue;
                             }
-                        } elseif (!empty($this->errors[$field])) {
-                            continue;
-                        }
                             $this->errors[$field][] = $field;
                             if (!empty($validator['break_chain_on_failure'])) {
                                 break;
@@ -213,7 +217,7 @@ class PeerInputFilter
     protected function FloatSanitize(mixed $value, array $options = []): float
     {
         if (!is_numeric($value)) {
-            $this->errors['value'][] = 30247;
+            $this->errors['value'][] = "30247";
         }
 
         return (float)$value;
@@ -257,7 +261,7 @@ class PeerInputFilter
             }
         }
 
-        $this->errors['Date'][] = 30258;
+        $this->errors['Date'][] = "30258";
         return false;
     }
 
@@ -267,7 +271,7 @@ class PeerInputFilter
         $inclusive = $options['inclusive'] ?? false;
 
         if ($max === null) {
-            $this->errors['Max'][] = 30248;
+            $this->errors['Max'][] = "30248";
             return false;
         }
 
@@ -275,12 +279,12 @@ class PeerInputFilter
         $maxDateTime = DateTime::createFromFormat('Y-m-d H:i:s.u', $max);
 
         if ($valueDateTime === false) {
-            $this->errors['valueDateTime'][] = 30249;
+            $this->errors['valueDateTime'][] = "30249";
             return false;
         }
 
         if ($maxDateTime === false) {
-            $this->errors['maxDateTime'][] = 30250;
+            $this->errors['maxDateTime'][] = "30250";
             return false;
         }
 
@@ -313,7 +317,7 @@ class PeerInputFilter
     protected function validateIntRange(mixed $value, array $options = []): bool
     {
         if (!is_numeric($value) || (int)$value != $value) {
-            $this->errors['int_range'][] = 30244;
+            $this->errors['int_range'][] = "30244";
             return false;
         }
 
@@ -322,12 +326,12 @@ class PeerInputFilter
         $max = $options['max'] ?? PHP_INT_MAX;
 
         if ($value < $min) {
-            $this->errors['int_range'][] = 30245;
+            $this->errors['int_range'][] = "30245";
             return false;
         }
 
         if ($value > $max) {
-            $this->errors['int_range'][] = 30246;
+            $this->errors['int_range'][] = "30246";
             return false;
         }
 
@@ -337,7 +341,7 @@ class PeerInputFilter
     protected function EmailAddress(string $value, array $options = []): bool
     {
         if (filter_var($value, FILTER_VALIDATE_EMAIL) == false) {
-            $this->errors['email'][] = 30224;
+            $this->errors['email'][] = "30224";
             return false;
         }
         return true;
@@ -353,7 +357,7 @@ class PeerInputFilter
         $min =  (int)($options['min'] ?? 0);
         $max = (int)($options['max'] ?? PHP_INT_MAX);
         $errorCode = $options['errorCode'] ?? 40301;
-        $length = strlen($value);   
+        $length = strlen($value);
 
         $validationResult = ($length >= $min && $length <= $max);
 
@@ -372,7 +376,7 @@ class PeerInputFilter
 
         $validator = $options['validator'] ?? null;
         if (!$validator || !isset($validator['name'])) {
-            $this->errors['ArrayValues'][] = 40301;
+            $this->errors['ArrayValues'][] = "40301";
             return false;
         }
 
@@ -676,17 +680,17 @@ class PeerInputFilter
         $passwordConfig = ConstantsConfig::user()['PASSWORD'];
 
         if ($value === '') {
-            $this->errors['password'][] = 30101;
+            $this->errors['password'][] = "30101";
             return false;
         }
 
         if (strlen($value) < $passwordConfig['MIN_LENGTH'] || strlen($value) > $passwordConfig['MAX_LENGTH']) {
-            $this->errors['password'][] = 30226;
+            $this->errors['password'][] = "30226";
             return false;
         }
 
         if (!preg_match('/' . $passwordConfig['PATTERN'] . '/u', $value)) {
-            $this->errors['password'][] = 30226;
+            $this->errors['password'][] = "30226";
             return false;
         }
 
@@ -695,31 +699,31 @@ class PeerInputFilter
 
     protected function validateUsername(string $value, array $options = []): bool
     {
-        $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer']; 
+        $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer'];
         $usernameConfig = ConstantsConfig::user()['USERNAME'];
 
         if ($value === '') {
-            $this->errors['username'][] = 30202;
+            $this->errors['username'][] = "30202";
             return false;
         }
 
         if (strlen($value) < $usernameConfig['MIN_LENGTH'] || strlen($value) > $usernameConfig['MAX_LENGTH']) {
-            $this->errors['username'][] = 30202;
+            $this->errors['username'][] = "30202";
             return false;
         }
 
         if (!preg_match('/' . $usernameConfig['PATTERN'] . '/u', $value)) {
-            $this->errors['username'][] = 30202;
+            $this->errors['username'][] = "30202";
             return false;
         }
 
         if (!preg_match('/[a-zA-Z]/', $value)) {
-            $this->errors['username'][] = 30202;
+            $this->errors['username'][] = "30202";
             return false;
         }
 
         if (in_array(strtolower($value), $forbiddenUsernames, true)) {
-            $this->errors['username'][] = 31002;
+            $this->errors['username'][] = "31002";
             return false;
         }
 
@@ -731,7 +735,7 @@ class PeerInputFilter
         $tagConfig = ConstantsConfig::post()['TAG'];
 
         if ($value === '') {
-            $this->errors['tag'][] = 30101;
+            $this->errors['tag'][] = "30101";
             return false;
         }
 
@@ -739,12 +743,12 @@ class PeerInputFilter
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
         if (strlen($value) < $tagConfig['MIN_LENGTH'] || strlen($value) > $tagConfig['MAX_LENGTH']) {
-            $this->errors['tag'][] = 30103;
+            $this->errors['tag'][] = "30103";
             return false;
         }
 
         if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $value)) {
-            $this->errors['tag'][] = 30103;
+            $this->errors['tag'][] = "30103";
             return false;
         }
 
@@ -754,7 +758,7 @@ class PeerInputFilter
     protected function validatePkey(string $value, array $options = []): bool
     {
         if ($value === '') {
-            $this->errors['pkey'][] = 30103;
+            $this->errors['pkey'][] = "30103";
             return false;
         }
 
@@ -763,12 +767,12 @@ class PeerInputFilter
         $walletConst = ConstantsConfig::wallet();
 
         if (strlen($value) < $walletConst['SOLANA_PUBKEY']['MIN_LENGTH'] || strlen($value) > $walletConst['SOLANA_PUBKEY']['MAX_LENGTH']) {
-            $this->errors['pkey'][] = 30254;
+            $this->errors['pkey'][] = "30254";
             return false;
         }
 
         if (!preg_match('/' . $walletConst['SOLANA_PUBKEY']['PATTERN'] . '/u', $value)) {
-            $this->errors['pkey'][] = 30254;
+            $this->errors['pkey'][] = "30254";
             return false;
         }
 
@@ -780,7 +784,7 @@ class PeerInputFilter
         $phoneConfig = ConstantsConfig::user()['PHONENUMBER'];
 
         if ($value === '') {
-            $this->errors['phone'][] = 30103;
+            $this->errors['phone'][] = "30103";
             return false;
         }
 
@@ -789,7 +793,7 @@ class PeerInputFilter
 
 
         if (!preg_match('/' . $phoneConfig['PATTERN'] . '/u', $value)) {
-            $this->errors['phone'][] = 30253;
+            $this->errors['phone'][] = "30253";
             return false;
         }
 
@@ -852,39 +856,39 @@ class PeerInputFilter
         $imagePath = __DIR__ . '/../../runtime-data/media' . $imagePath;
 
         if (!is_readable($imagePath)) {
-            $this->errors['image'][] = 30263;
+            $this->errors['image'][] = "30263";
             return false;
         }
 
         if (filesize($imagePath) > $maxFileSize) {
-            $this->errors['image'][] = 21517;
+            $this->errors['image'][] = "21517";
             return false;
         }
 
         $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
         if (!in_array($extension, $allowedExtensions, true)) {
-            $this->errors['image'][] = 21518;
+            $this->errors['image'][] = "21518";
             return false;
         }
 
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimeType = finfo_file($finfo, $imagePath);
         finfo_close($finfo);
-        
+
         if (!in_array($mimeType, $allowedMimeTypes, true)) {
-            $this->errors['image'][] = 21519;
+            $this->errors['image'][] = "21519";
             return false;
         }
 
         if ($maxWidth !== null || $maxHeight !== null) {
             [$width, $height] = getimagesize($imagePath);
             if (!$width || !$height) {
-                $this->errors['image'][] = 25120;
+                $this->errors['image'][] = "25120";
                 return false;
             }
-            
+
             if (($maxWidth !== null && $width > $maxWidth) || ($maxHeight !== null && $height > $maxHeight)) {
-                $this->errors['image'][] = 21521;
+                $this->errors['image'][] = "21521";
                 return false;
             }
         }

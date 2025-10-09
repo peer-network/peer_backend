@@ -76,13 +76,6 @@ jobs:
       - run: |
           echo " PR branch is behind the base branch."
           exit 1
-  # gitleaks_scan_staged:
-  #   name: Gitleaks PR Scan
-  #   uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
-  #   with:
-  #     config: "gitleaks.toml"
-  #   secrets: inherit
-
 
   validate_sql_files:
     name: Ensure Only Valid SQL Files Are Changed
@@ -140,6 +133,15 @@ jobs:
                -X POST \
                -d "{\"content\": \"$MESSAGE\"}" \
                "$DISCORD_WEBHOOK_URL"
+
+  # phpstan:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: shivammathur/setup-php@v2
+  #       with:
+  #         php-version: '8.3'
+  #     - run: vendor/bin/phpstan analyse
 
   build_and_test:
     name: Build And Run Postman Tests
@@ -381,7 +383,6 @@ jobs:
             --network my-network \
             curlimages/curl:$TAG \
             curl -sf http://backend/graphql
- 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 

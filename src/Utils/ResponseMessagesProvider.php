@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Utils;
 
-interface ResponseMessagesProvider {
+interface ResponseMessagesProvider
+{
     /**
      * Get a specific message by code
      */

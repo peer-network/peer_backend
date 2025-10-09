@@ -8,78 +8,49 @@ input AdvertisementHistoryFilter {
 }
 
 input RegistrationInput {
-  """User’s email address. Must be in valid email format."""
   email: String!
-  """Password: {USER.PASSWORD.MIN_LENGTH}–{USER.PASSWORD.MAX_LENGTH} chars; must match {USER.PASSWORD.PATTERN}."""
   password: String!
-  """Username: {USER.USERNAME.MIN_LENGTH}–{USER.USERNAME.MAX_LENGTH} chars; must match {USER.USERNAME.PATTERN}."""
   username: String!
-  """Optional Solana public key. {WALLET.SOLANA_PUBKEY.MIN_LENGTH}–{WALLET.SOLANA_PUBKEY.MAX_LENGTH} chars; must match {WALLET.SOLANA_PUBKEY.PATTERN}."""
   pkey: String
-  """Optional referral UUID (ties registration to a referrer)."""
   referralUuid: ID
 }
 
 input PostInput {
-  """Title ({POST.TITLE.MIN_LENGTH}–{POST.TITLE.MAX_LENGTH} chars); must match {POST.TITLE.PATTERN}."""
   title: String!
-  """Media description ({POST.MEDIADESCRIPTION.MIN_LENGTH}–{POST.MEDIADESCRIPTION.MAX_LENGTH} chars)."""
   mediadescription: String
-  """Content type (ENUM: image, audio, video, text)."""
   contenttype: ContentType!
-  """Media files (base64-encoded strings). Each item length {POST.MEDIA.MIN_LENGTH}–{POST.MEDIA.MAX_LENGTH}.
-     Max per content type: {POST.MEDIALIMIT.AUDIO} audio, {POST.MEDIALIMIT.IMAGE} images, {POST.MEDIALIMIT.TEXT} text, {POST.MEDIALIMIT.VIDEO} videos."""
   media: [String!]
-  """Cover images (base64-encoded strings). Each item length {POST.COVER.MIN_LENGTH}–{POST.COVER.MAX_LENGTH}.
-     Max per content type: {POST.COVERLIMIT.AUDIO}/{POST.COVERLIMIT.IMAGE}/{POST.COVERLIMIT.TEXT}/{POST.COVERLIMIT.VIDEO}."""
   cover: [String!]
-  """Tags (max {POST.TAG.MAX_COUNT.CREATE}; each {POST.TAG.MIN_LENGTH}–{POST.TAG.MAX_LENGTH} chars; must match {POST.TAG.PATTERN})."""
   tags: [String!]
-  """Reference to files uploaded via multipart flow."""
   uploadedFiles: String
 }
 
 input ChatInput {
-  """Chat name ({CHAT.NAME.MIN_LENGTH}–{CHAT.NAME.MAX_LENGTH} chars)."""
   name: String!
-  """Chat image (base64). Length {CHAT.IMAGE.MIN_LENGTH}–{CHAT.IMAGE.MAX_LENGTH}."""
   image: String
-  """List of recipient user IDs."""
   recipients: [String!]!
 }
 
 input UpdateChatInput {
-  """Chat ID (UUID)."""
   chatid: ID!
-  """New chat name ({CHAT.NAME.MIN_LENGTH}–{CHAT.NAME.MAX_LENGTH} chars)."""
   name: String
-  """New image (base64). Length {CHAT.IMAGE.MIN_LENGTH}–{CHAT.IMAGE.MAX_LENGTH}."""
   image: String
 }
 
 input ChatParticipantsInput {
-  """Chat ID (UUID)."""
   chatid: ID!
-  """List of recipient user IDs."""
   recipients: [String!]!
 }
 
 input FeedInput {
-  """Feed ID."""
   feedid: ID!
-  """Title (2–30 characters)."""
   title: String!
-  """Media (base64, must be valid image/audio/video/text)."""
   media: String!
-  """Media description (3–500 characters)."""
   mediadescription: String
-  """Content type (ENUM: image, audio, video, text)."""
   contenttype: String!
 }
 
 input UserPreferencesInput {
-  """User’s sensitive content filter level (ENUM: MYGRANDMALIKES, MYGRANDMAHATES)."""
   contentFilteringSeverityLevel: ContentFilterType
-  """List of onboarding screens already shown to the user."""
   shownOnboardings: [OnboardingType!]
 }

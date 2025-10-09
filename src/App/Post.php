@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -25,11 +27,10 @@ class Post implements Hashable
 
     // Constructor
     public function __construct(
-        array $data = [], 
-        array $elements = [], 
+        array $data = [],
+        array $elements = [],
         bool $validate = true
-    )
-    {
+    ) {
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
         }
@@ -107,7 +108,7 @@ class Post implements Hashable
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
@@ -197,13 +198,14 @@ class Post implements Hashable
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
     }
 
-    public function getHashableContent(): string {
+    public function getHashableContent(): string
+    {
         return implode('|', [
             $this->title,
             $this->contenttype,
@@ -213,13 +215,14 @@ class Post implements Hashable
         ]);
     }
 
-    public function hashValue(): string {
+    public function hashValue(): string
+    {
         return $this->hashObject($this);
     }
 
     public function getPostUrl(): string
     {
-        if(empty($this->postid)) {
+        if (empty($this->postid)) {
             return '';
         }
         return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;

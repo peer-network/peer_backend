@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use Fawaz\Handler\GraphQLHandler;
@@ -18,7 +19,7 @@ return static function (App $app) {
             ->withHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
             ->withHeader('Referrer-Policy', 'no-referrer')
             ->withHeader('Permissions-Policy', "geolocation=(), microphone=(), camera=()")
-            
+
             // CORS & Cache Headers
             ->withHeader('Access-Control-Allow-Origin', '*')
             ->withHeader('Access-Control-Allow-Methods', 'POST')

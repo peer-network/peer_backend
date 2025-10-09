@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Services;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use DateTime;
 
 class JWTService
@@ -16,7 +18,7 @@ class JWTService
     private string $refreshPublicKey;
     private int $accessTokenValidity;
     private int $refreshTokenValidity;
-    private LoggerInterface $logger;
+    private PeerLoggerInterface $logger;
 
     public function __construct(
         string $privateKey,
@@ -25,7 +27,7 @@ class JWTService
         string $refreshPublicKey,
         int $accessTokenValidity,
         int $refreshTokenValidity,
-        LoggerInterface $logger
+        PeerLoggerInterface $logger
     ) {
         $this->privateKey = $privateKey;
         $this->publicKey = $publicKey;
@@ -95,16 +97,16 @@ class JWTService
 
     /**
      * generate UUID
-     * 
+     *
      * @param $expiryAfter in seconds
-     * 
+     *
      * @returns JWR decoded token with provided expiry time
      */
     public function createAccessTokenWithCustomExpriy(string $userId, int $expiryAfter): string
     {
         $issuedAt = time();
         $expirationTime = $issuedAt + $expiryAfter;
-        
+
         $payload = [
             'iss' => 'peerapp.de',
             'aud' => 'peerapp.de',

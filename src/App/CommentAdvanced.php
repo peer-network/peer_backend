@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -19,7 +21,7 @@ class CommentAdvanced
     protected ?bool $isliked;
     protected ?int $userstatus;
     protected ?array $user = [];
-    
+
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -40,7 +42,7 @@ class CommentAdvanced
         $this->userstatus = $data['userstatus'] ?? 0;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
 
-        if($this->userstatus == 6){
+        if ($this->userstatus == 6) {
             $this->content = "Comment by deleted Account";
         }
     }
@@ -131,13 +133,13 @@ class CommentAdvanced
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -202,7 +204,7 @@ class CommentAdvanced
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

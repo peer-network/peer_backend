@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -148,28 +150,28 @@ class Advertisements
     }
 
     // Validation and Array Filtering methods
-	public function validate(array $data, array $elements = []): array
-	{
-		$inputFilter = $this->createInputFilter($elements);
-		$inputFilter->setData($data);
+    public function validate(array $data, array $elements = []): array
+    {
+        $inputFilter = $this->createInputFilter($elements);
+        $inputFilter->setData($data);
 
-		if ($inputFilter->isValid()) {
-			return $inputFilter->getValues();
-		}
+        if ($inputFilter->isValid()) {
+            return $inputFilter->getValues();
+        }
 
-		$validationErrors = $inputFilter->getMessages();
-		$errorMessages = [];
+        $validationErrors = $inputFilter->getMessages();
+        $errorMessages = [];
 
-		foreach ($validationErrors as $field => $errors) {
-			foreach ($errors as $error) {
-				$errorMessages[] = $error;
-			}
-		}
+        foreach ($validationErrors as $field => $errors) {
+            foreach ($errors as $error) {
+                $errorMessages[] = $error;
+            }
+        }
 
-		throw new ValidationException(implode("", $errorMessages));
+        throw new ValidationException(implode("", $errorMessages));
 
-		return [];
-	}
+        return [];
+    }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
@@ -296,7 +298,7 @@ class Advertisements
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
