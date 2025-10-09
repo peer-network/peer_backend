@@ -252,10 +252,10 @@ type Profile {
   amountfollower: Int
   amountfriends: Int
   amountblocked: Int
-  imageposts: [ProfilePostMedia!]
-  textposts: [ProfilePostMedia!]
-  videoposts: [ProfilePostMedia!]
-  audioposts: [ProfilePostMedia!]
+  imageposts: [ProfilePostMedia!] @deprecated(reason: "Use `listPosts query with userid filter`.")
+  textposts: [ProfilePostMedia!] @deprecated(reason: "Use `listPosts query with userid filter`.")
+  videoposts: [ProfilePostMedia!] @deprecated(reason: "Use `listPosts query with userid filter`.")
+  audioposts: [ProfilePostMedia!] @deprecated(reason: "Use `listPosts query with userid filter`.")
 }
 
 type ProfileInfo {
