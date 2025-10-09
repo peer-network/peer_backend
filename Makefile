@@ -374,10 +374,10 @@ phpstan: env-ci ## Run PHPStan static analysis inside backend container
 		sh -c "composer install --prefer-dist --no-interaction && vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
 	@rm -f .env.ci
 
-phpstan-fast: ## Run PHPStan using already built backend & local vendor (no build or composer)
+phpstan-fast: env-ci ## Run PHPStan using already built backend & local vendor (no build or composer)
 	@echo "Running PHPStan (fast mode — container already built, vendor ready)..."
 	@if ! docker image inspect peer-backend:local >/dev/null 2>&1; then \
-		echo "⚙️ Backend image not found. Building now..."; \
+		echo "Backend image not found. Building now..."; \
 		docker-compose --env-file .env.ci $(COMPOSE_FILES) build backend; \
 	fi
 	@if [ ! -f "vendor/bin/phpstan" ]; then \
@@ -388,6 +388,7 @@ phpstan-fast: ## Run PHPStan using already built backend & local vendor (no buil
 	@docker-compose --env-file .env.dev -f docker-compose.yml -f docker-compose.override.local.yml run --no-deps --rm \
 		-v "$(PWD)":/var/www/html \
 		backend sh -c "php vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
+	@rm -f .env.ci
 
 # ---- Developer Shortcuts ----
 .PHONY: logs db bash-backend
