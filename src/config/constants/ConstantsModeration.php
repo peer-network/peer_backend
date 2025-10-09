@@ -96,7 +96,7 @@ class ConstantsModeration
      */
     public const VISIBILITY_STATUS = [
         'normal',
-        'hidden', // Hidden logic is not Handled through this Status flag, 
-        'illegal'
+        'hidden', // Hidden logic of entity (post/user/comment) is not Handled/Defined through this Status flag, 
+        'illegal' // It will apply the `illegal` status of the entity (post/user/comment) through Moderation.
     ];
 }
