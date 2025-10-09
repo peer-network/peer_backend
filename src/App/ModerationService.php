@@ -260,7 +260,7 @@ class ModerationService
              * For Post Content Type Only
              *  1. illegal: Set post status to '2' (illegal) in posts table
              *  2. restored: Set post status to '0' (published) in posts table and update REPORTS counts to ZERO
-             *  3. hidden: Nothing can be applied to posts as of now because hiding post is already handled by the listPosts logic
+             *  3. hidden: Update REPORTS counts to FIVE or more
              */
             if ($report['targettype'] === 'post') {
 
@@ -294,8 +294,48 @@ class ModerationService
                         'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST']
                     ]);
                 }
+            }
+
+            /**
+             * For User Content Type Only
+             *  1. illegal: Set user status to '2' (banned) in users table
+             *  2. restored: Set user status to '0' (active) in users table and update REPORTS counts to ZERO
+             *  3. hidden: Update REPORTS counts to FIVE or more
+             */
+            if ($report['targettype'] === 'user') {
+
+                /**
+                 * Moderation Status: illegal
+                 */
+                // TBC
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
+                    User::query()->where('uid', $report['targetid'])->updateColumns([
+                        'status' => ConstantsModeration::USER_STATUS_BANNED
+                    ]);
+                }
+
+                /**
+                 * Moderation Status: restored
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
+                    UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
+                        'reports' => 0
+                    ]);
+                }
+
+                /**
+                 * hidden: Update REPORTS counts to FIVE or more
+                 * This will ensure that the user remains hidden in the listPosts logic
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
+                    UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
+                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER']
+                    ]);
+                }
 
             }
+
+
             $this->transactionManager->commit();
 
             return self::createSuccessResponse(20001, [], false); // Moderation action performed successfully

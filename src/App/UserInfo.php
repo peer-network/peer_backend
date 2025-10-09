@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 
-class UserInfo
+class UserInfo extends Model
 {
     protected string $userid;
     protected float $liquidity;
@@ -314,5 +315,13 @@ class UserInfo
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+    /**
+     * Table Name
+     */
+    public static function table(): string
+    {
+        return 'users_info';
     }
 }
