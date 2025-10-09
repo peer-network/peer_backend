@@ -46,4 +46,16 @@ BEGIN
 	-- Add Total Reports column to comment_info table
 	ALTER TABLE comment_info
 		ADD COLUMN IF NOT EXISTS totalreports INT DEFAULT 0 NOT NULL;
+
+	-- Add Total Reports column to posts table
+	ALTER TABLE posts
+		ADD COLUMN IF NOT EXISTS visibility_status VARCHAR(25) DEFAULT 'normal' NULL;
+
+	-- Add Total Reports column to users table
+	ALTER TABLE users
+		ADD COLUMN IF NOT EXISTS visibility_status VARCHAR(25) DEFAULT 'normal' NULL;
+
+	-- Add Total Reports column to comments table
+	ALTER TABLE comments
+		ADD COLUMN IF NOT EXISTS visibility_status VARCHAR(25) DEFAULT 'normal' NULL;
 END$$;

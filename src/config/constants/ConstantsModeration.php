@@ -89,4 +89,14 @@ class ConstantsModeration
      * Applies same as in ConstantsConfig::post()['STATUS']['ILLEGAL']
      */
     public const POST_STATUS_ILLEGAL = 2;
+
+
+    /**
+     * Entity VisibilityStatuses
+     */
+    public const VISIBILITY_STATUS = [
+        'normal',
+        'hidden', // Hidden logic is not Handled through this Status flag, 
+        'illegal'
+    ];
 }

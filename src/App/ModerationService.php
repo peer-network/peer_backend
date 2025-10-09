@@ -269,7 +269,8 @@ class ModerationService
                  */
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
                     Post::query()->where('postid', $report['targetid'])->updateColumns([
-                        'status' => ConstantsModeration::POST_STATUS_ILLEGAL
+                        'status' => ConstantsModeration::POST_STATUS_ILLEGAL,
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
                     ]);
                 }
 
@@ -282,6 +283,9 @@ class ModerationService
                         PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
                             'reports' => 0
                         ]);
+                        Post::query()->where('postid', $report['targetid'])->updateColumns([
+                            'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
+                        ]);
                     }
                 }
 
@@ -293,12 +297,15 @@ class ModerationService
                     PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
                         'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST']
                     ]);
+                    Post::query()->where('postid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
+                    ]);
                 }
             }
 
             /**
              * For User Content Type Only
-             *  1. illegal: Set user status to '2' (banned) in users table // TBC
+             *  1. illegal:  // TBC
              *  2. restored: Set user status to '0' (active) in users table and update REPORTS counts to ZERO
              *  3. hidden: Update REPORTS counts to FIVE or more
              */
@@ -310,7 +317,8 @@ class ModerationService
                 // TBC
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
                     // User::query()->where('uid', $report['targetid'])->updateColumns([
-                    //     'status' => ConstantsModeration::USER_STATUS_BANNED
+                    //     'status' => ConstantsModeration::USER_STATUS_BANNED,
+                    //     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
                     // ]);
                 }
 
@@ -320,6 +328,9 @@ class ModerationService
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
                     UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
                         'reports' => 0
+                    ]);
+                    User::query()->where('uid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
                     ]);
                 }
 
@@ -331,13 +342,16 @@ class ModerationService
                     UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
                         'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER']
                     ]);
+                    User::query()->where('uid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
+                    ]);
                 }
 
             }
 
             /**
              * For Comment Content Type Only
-             *  1. illegal: Set comment status to '2' (illegal) in comments table // TBC
+             *  1. illegal: // TBC
              *  2. restored: Set comment status to '0' (published) in comments table and update REPORTS counts to ZERO
              *  3. hidden: Update REPORTS counts to FIVE or more
              */
@@ -348,7 +362,8 @@ class ModerationService
                  */
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
                     // Comment::query()->where('commentid', $report['targetid'])->updateColumns([
-                    //     'status' => ConstantsModeration::COMMENT_STATUS_ILLEGAL
+                    //     'status' => ConstantsModeration::COMMENT_STATUS_ILLEGAL,
+                    //     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
                     // ]);
                 }
 
@@ -359,6 +374,9 @@ class ModerationService
                     CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
                         'reports' => 0
                     ]);
+                    Comment::query()->where('commentid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
+                    ]);
                 }
 
                 /**
@@ -368,6 +386,9 @@ class ModerationService
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
                     CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
                         'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['COMMENT']
+                    ]);
+                    Comment::query()->where('commentid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
                     ]);
                 }
             }
