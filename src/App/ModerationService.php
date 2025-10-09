@@ -309,9 +309,9 @@ class ModerationService
                  */
                 // TBC
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
-                    User::query()->where('uid', $report['targetid'])->updateColumns([
-                        'status' => ConstantsModeration::USER_STATUS_BANNED
-                    ]);
+                    // User::query()->where('uid', $report['targetid'])->updateColumns([
+                    //     'status' => ConstantsModeration::USER_STATUS_BANNED
+                    // ]);
                 }
 
                 /**
