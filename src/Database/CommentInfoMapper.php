@@ -77,7 +77,7 @@ class CommentInfoMapper
 
         $data = $commentInfo->getArrayCopy();
 
-        $sql = "UPDATE comment_info SET likes = :likes, reports = :reports, comments = :comments WHERE commentid = :commentid AND userid = :userid";
+        $sql = "UPDATE comment_info SET likes = :likes, reports = :reports, totalreports = :totalreports, comments = :comments WHERE commentid = :commentid AND userid = :userid";
         $stmt = $this->db->prepare($sql);
 
         if ($stmt->execute($data)) {

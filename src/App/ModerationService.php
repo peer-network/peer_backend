@@ -298,7 +298,7 @@ class ModerationService
 
             /**
              * For User Content Type Only
-             *  1. illegal: Set user status to '2' (banned) in users table
+             *  1. illegal: Set user status to '2' (banned) in users table // TBC
              *  2. restored: Set user status to '0' (active) in users table and update REPORTS counts to ZERO
              *  3. hidden: Update REPORTS counts to FIVE or more
              */
@@ -335,6 +335,42 @@ class ModerationService
 
             }
 
+            /**
+             * For Comment Content Type Only
+             *  1. illegal: Set comment status to '2' (illegal) in comments table // TBC
+             *  2. restored: Set comment status to '0' (published) in comments table and update REPORTS counts to ZERO
+             *  3. hidden: Update REPORTS counts to FIVE or more
+             */
+            if ($report['targettype'] === 'comment') {
+
+                /**
+                 * Moderation Status: illegal
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
+                    // Comment::query()->where('commentid', $report['targetid'])->updateColumns([
+                    //     'status' => ConstantsModeration::COMMENT_STATUS_ILLEGAL
+                    // ]);
+                }
+
+                /**
+                 * Moderation Status: restored
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
+                    CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
+                        'reports' => 0
+                    ]);
+                }
+
+                /**
+                 * hidden: Update REPORTS counts to FIVE or more
+                 * This will ensure that the comment remains hidden in the listPosts logic
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
+                    CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
+                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['COMMENT']
+                    ]);
+                }
+            }
 
             $this->transactionManager->commit();
 

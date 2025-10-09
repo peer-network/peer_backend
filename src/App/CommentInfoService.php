@@ -191,6 +191,7 @@ class CommentInfoService
             }
 
             $commentInfo->setReports($commentInfo->getReports() + 1);
+            $commentInfo->setTotalReports($commentInfo->getTotalReports() + 1);
             $this->commentInfoMapper->update($commentInfo);
 
             $this->transactionManager->commit();
