@@ -174,7 +174,7 @@ class CommentInfoService
             // Moderator Should NOT be possible to report the same
             if ($this->reportsMapper->isModerated($commentId, ReportTargetType::COMMENT->value)) {
                 $this->logger->warning("PostInfoService: reportComment: User tries to report a moderated comment");
-                return $this::respondWithError(31605);
+                return $this::respondWithError(0000); // This content has already been reviewed and restored by our team.
             }
 
             $this->transactionManager->beginTransaction();
