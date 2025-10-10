@@ -60,7 +60,8 @@ class ConstantsConfig
      *             CREATE: int,
      *             SEARCH: int
      *         }
-     *     }
+     *     },
+     *     STATUS: array{PUBLISHED: int, ADVERTISED: int, ILLEGAL: int}
      * }
      */
     public static function post(): array
