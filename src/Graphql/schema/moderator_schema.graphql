@@ -1,6 +1,6 @@
 extend type Query {
   moderationStats: ModerationStatsResponse!
-  moderationItems(status: ModerationStatus, contentType: ModerationContentType, page: Int, limit: Int): ModerationItemListResponse!
+  moderationItems(status: ModerationStatus, contentType: ModerationContentType, offset: Int, limit: Int): ModerationItemListResponse!
 }
 
 extend type Mutation {

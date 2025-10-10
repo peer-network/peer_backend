@@ -198,6 +198,7 @@ type UserInfo {
   userid: ID!
   liquidity: Decimal!
   amountposts: Int!
+  amountreports: Int!
   amountblocked: Int!
   amountfollower: Int!
   amountfollowed: Int!

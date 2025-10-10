@@ -78,7 +78,7 @@ class ModerationService
             return self::respondWithError(0000);
         }
 
-        $page = max((int)($args['page'] ?? 1), 0);
+        $page = max((int)($args['offset'] ?? 1), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $statuses = array_keys(ConstantsModeration::contentModerationStatus());
 

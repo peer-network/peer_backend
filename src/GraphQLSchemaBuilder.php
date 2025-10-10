@@ -1396,6 +1396,9 @@ class GraphQLSchemaBuilder
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
                 },
+                'amountreports' => function (array $root): int {
+                    return $root['reports'] ?? 0;
+                },
                 'amountposts' => function (array $root): int {
                     return $root['amountposts'] ?? 0;
                 },
