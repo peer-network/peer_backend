@@ -537,6 +537,9 @@ class GraphQLSchemaBuilder
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
                 },
+                'role' => function (array $root): string {
+                    return (string)($root['role'] ?? '');
+                },
                 'imageposts' => function (array $root): array {
                     return $root['imageposts'] ?? [];
                 },

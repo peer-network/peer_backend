@@ -1154,6 +1154,7 @@ class UserMapper
                 u.status,
                 u.img,
                 u.biography,
+                u.roles_mask,
                 ui.amountposts,
                 ui.amountfollower,
                 ui.amountfollowed,
