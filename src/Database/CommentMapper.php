@@ -410,6 +410,7 @@ class CommentMapper
 					c.createdat,
 					COALESCE(like_counts.like_count, 0) AS amountlikes,
 					COALESCE(comment_counts.comment_count, 0) AS amountreplies,
+                    ci.reports AS amountreports,
 					(ul.userid IS NOT NULL) AS isliked,
 					u.uid,
 					u.username,
@@ -422,6 +423,9 @@ class CommentMapper
 					comments c
 				LEFT JOIN 
 					users u ON c.userid = u.uid
+                LEFT JOIN 
+                    comment_info ci
+                    ON c.commentid = ci.commentid
 				LEFT JOIN 
 					(SELECT commentid, COUNT(*) AS like_count FROM user_comment_likes GROUP BY commentid) like_counts 
 					ON c.commentid = like_counts.commentid
