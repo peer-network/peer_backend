@@ -868,8 +868,8 @@ class AdvertisementMapper
             $params['tag'] = $tag;
         }
         // Show only Valid Content
-        $whereClauses[] = "p.status = :postStatus";
-        $params['postStatus'] = ConstantsConfig::post()['STATUS']['ADVERTISED'];
+        // $whereClauses[] = "p.status = :postStatus";
+        // $params['postStatus'] = ConstantsConfig::post()['STATUS']['ADVERTISED'];
 
         // Allow Only (Normal Status) Plus (User's & Admin's Mode) Posts
         $whereClauses[] = 'u.status = :stNormal AND u.roles_mask IN (:roleUser, :roleAdmin)';
