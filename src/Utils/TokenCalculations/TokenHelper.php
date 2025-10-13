@@ -6,154 +6,166 @@ namespace Fawaz\Utils\TokenCalculations;
 
 use FFI;
 
+/**
+ * Note:
+ * All calculations are done using a Rust module via FFI for precision and performance.
+ * 
+ * We have chosen to use `strings` for all numerical values to avoid floating-point precision issues.
+ * This ensures that we can handle very large or very small numbers accurately, which is crucial for financial calculations.
+ */
 class TokenHelper
 {
     /**
      * Calculates the Peer Token price in EUR based on BTC-EUR and PeerToken-BTC prices.
      *
-     * @param float $btcEURPrice Current BTC to EUR price.
-     * @param float $peerTokenBTCPrice Current PeerToken to BTC price.
-     * @return float Calculated PeerToken price in EUR.
+     * @param string $btcEURPrice Current BTC to EUR price.
+     * @param string $peerTokenBTCPrice Current PeerToken to BTC price.
+     * @return string Calculated PeerToken price in EUR.
      */
-    public static function calculatePeerTokenEURPrice(float $btcEURPrice, float $peerTokenBTCPrice): float
+    public static function calculatePeerTokenEURPrice(string $btcEURPrice, string $peerTokenBTCPrice): string
     {
-        $peerValue = self::mulRc((float) $btcEURPrice, (float) $peerTokenBTCPrice);
+        $peerValue = self::mulRc($btcEURPrice, $peerTokenBTCPrice);
 
-        return (float) $peerValue;
+        return (string) $peerValue;
     }
 
     /**
      * Calculates the price of one Peer Token in BTC based on liquidity pool data.
      *
-     * @param float $btcPoolBTCAmount Total BTC in the liquidity pool.
-     * @param float $liqPoolTokenAmount Total Peer Tokens in the liquidity pool.
-     * @return float|null Peer Token price in BTC with 10-digit precision.
+     * @param string $btcPoolBTCAmount Total BTC in the liquidity pool.
+     * @param string $liqPoolTokenAmount Total Peer Tokens in the liquidity pool.
+     * @return string Peer Token price in BTC with 10-digit precision.
      */
-    public static function calculatePeerTokenPriceValue(float $btcPoolBTCAmount, float $liqPoolTokenAmount): ?float
+    public static function calculatePeerTokenPriceValue(string $btcPoolBTCAmount, string $liqPoolTokenAmount): string
     {
-        $beforeToken = self::divRc((float) $btcPoolBTCAmount, (float) $liqPoolTokenAmount);
+        $beforeToken = self::divRc($btcPoolBTCAmount, $liqPoolTokenAmount);
         
-        return (float) ($beforeToken);
+        return (string) ($beforeToken);
     }
 
 
     /**
      * Calculates the total number of Peer Tokens required including all applicable fees.
      *
-     * @param float $numberOfTokens Base amount of tokens.
-     * @param float $peerFee Percentage fee for Peer.
-     * @param float $poolFee Percentage fee for liquidity pool.
-     * @param float $burnFee Percentage of tokens to be burned.
-     * @param float $inviterFee Optional percentage for inviter reward.
-     * @return float Total required tokens including all fees.
+     * @param string $numberOfTokens Base amount of tokens.
+     * @param string $peerFee Percentage fee for Peer.
+     * @param string $poolFee Percentage fee for liquidity pool.
+     * @param string $burnFee Percentage of tokens to be burned.
+     * @param string $inviterFee Optional percentage for inviter reward.
+     * @return string Total required tokens including all fees.
      */
     public static function calculateTokenRequiredAmount(
-        float $numberOfTokens,
-        float $peerFee,
-        float $poolFee,
-        float $burnFee,
-        float $inviterFee = 0
-    ): float {
-        $allFees = (1 + $peerFee + $poolFee + $burnFee + $inviterFee);
+        string $numberOfTokens,
+        string $peerFee,
+        string $poolFee,
+        string $burnFee,
+        string $inviterFee = '0'
+    ): string {
+        $allFees1 = self::addRc('1', $peerFee);
+        $allFees1 = self::addRc($allFees1, $poolFee);
+        $allFees1 = self::addRc($allFees1, $burnFee);
+        $allFees = self::addRc($allFees1, $inviterFee);
 
         $requiredAmount = self::mulRc($numberOfTokens, $allFees);
 
-        return (float) $requiredAmount;
+        return $requiredAmount;
     }
 
     /**
      * Sums up all the fee-related amounts to calculate the total amount a sender must provide in a swap.
      *
-     * @param float $feeAmount Network or service fee.
-     * @param float $peerAmount Actual token amount.
-     * @param float $burnAmount Burned token amount.
-     * @param float $inviterAmount Optional amount for inviter reward.
-     * @return float Total required from sender including all parts.
+     * @param string $feeAmount Network or service fee.
+     * @param string $peerAmount Actual token amount.
+     * @param string $burnAmount Burned token amount.
+     * @param string $inviterAmount Optional amount for inviter reward.
+     * @return string Total required from sender including all parts.
      */
     public static function calculateSwapTokenSenderRequiredAmountIncludingFees(
-        float $feeAmount,
-        float $peerAmount,
-        float $burnAmount,
-        float $inviterAmount = 0
-    ): float {
-        return  (float) ($feeAmount + $peerAmount + $burnAmount + $inviterAmount);
+        string $feeAmount,
+        string $peerAmount,
+        string $burnAmount,
+        string $inviterAmount = '0'
+    ): string {
+        $cal1 =  self::addRc($feeAmount, $peerAmount);
+        $cal2 =  self::addRc($burnAmount, $inviterAmount);
+        return self::addRc($cal1, $cal2);
     }
 
     /**
      * Adds two values.
      *
-     * @param float $q96Value1 First  value.
-     * @param float $q96Value2 Second  value.
-     * @return float Sum of the two  values, as a  string.
+     * @param string $q96Value1 First  value.
+     * @param string $q96Value2 Second  value.
+     * @return string Sum of the two  values, as a  string.
      */
-    public static function addRc(float $q96Value1, float $q96Value2): float
+    public static function addRc(string $q96Value1, string $q96Value2): string
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->add_decimal((string) $q96Value1, (string) $q96Value2);
+        $result = $runtIns->add_decimal($q96Value1, $q96Value2);
 
         if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
         }
-        return (float) $result;
+        return $result;
     }
 
     /**
      * Multiply two values.
      *
-     * @param float $q96Value1 First value.
-     * @param float $q96Value2 Second value.
-     * @return float Sum of the two values, as a float.
+     * @param string $q96Value1 First value.
+     * @param string $q96Value2 Second value.
+     * @return string Sum of the two values, as a string.
      */
-    public static function mulRc(float $q96Value1, float $q96Value2): float
+    public static function mulRc(string $q96Value1, string $q96Value2): string
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->multiply_decimal((string) $q96Value1, (string) $q96Value2);
+        $result = $runtIns->multiply_decimal($q96Value1, $q96Value2);
 
         if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
         }
-        return (float) $result;
+        return $result;
 
     }
 
     /**
      * divide two values.
      *
-     * @param float $q96Value1 First  value.
-     * @param float $q96Value2 Second  value.
-     * @return float Sum of the two  values, as a  float.
+     * @param string $q96Value1 First  value.
+     * @param string $q96Value2 Second  value.
+     * @return string Sum of the two  values, as a  string.
      */
-    public static function divRc(float $q96Value1, float $q96Value2): float
+    public static function divRc(string $q96Value1, string $q96Value2): string
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->divide_decimal((string) $q96Value1, (string) $q96Value2);
+        $result = $runtIns->divide_decimal($q96Value1, $q96Value2);
 
         if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
         }
-        return (float) $result;
+        return $result;
     }
 
     /**
      * Substract two  values.
      *
-     * @param float $q96Value1 First  value.
-     * @param float $q96Value2 Second  value.
-     * @return float Sum of the two  values, as a  float.
+     * @param string $q96Value1 First  value.
+     * @param string $q96Value2 Second  value.
+     * @return string Sum of the two  values, as a  string.
      */
-    public static function subRc(float $q96Value1, float $q96Value2): float
+    public static function subRc(string $q96Value1, string $q96Value2): string
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->subtract_decimal((string) $q96Value1, (string) $q96Value2);
+        $result = $runtIns->subtract_decimal($q96Value1, $q96Value2);
 
         if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
         }
-        return (float) $result;
+        return $result;
     }
 
     /**

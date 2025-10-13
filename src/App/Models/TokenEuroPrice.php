@@ -16,7 +16,7 @@ use Fawaz\Filter\PeerInputFilter;
 class TokenEuroPrice
 {
     protected string $token;
-    protected float $europrice;
+    protected string $europrice;
     protected ?string $updatedat;
 
     /**
@@ -25,7 +25,7 @@ class TokenEuroPrice
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
         $this->token = $data['token'] ?? '';
-        $this->europrice = $data['europrice'] ?? 0.0;
+        $this->europrice = $data['europrice'] ?? '0.0';
         $this->updatedat = $data['updatedat'] ?? date('Y-m-d H:i:s.u');
 
         if ($validate && !empty($data)) {
@@ -113,11 +113,11 @@ class TokenEuroPrice
     /**
      * Getter and Setter methods for europrice
      */
-    public function getEuroPrice(): float
+    public function getEuroPrice(): string
     {
         return $this->europrice;
     }
-    public function setTokenAmount(float $europrice): void
+    public function setTokenAmount(string $europrice): void
     {
         $this->europrice = $europrice;
     }

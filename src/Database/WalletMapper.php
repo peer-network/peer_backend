@@ -343,11 +343,11 @@ class WalletMapper
             try {
                 if ($results['overall_total_numbers'] === 0) {
                     $results['overall_total_numbers'] = (float)($row['overall_total_numbers'] ?? 0);
-                    $results['overall_total_numbersq'] = (int)$this->decimalToQ64_96($results['overall_total_numbers']);
+                    $results['overall_total_numbersq'] = (int)$this->decimalToQ64_96((string) $results['overall_total_numbers']);
                 }
 
                 $totalNumbers = (float)$row['total_numbers'];
-                $totalNumbersQ = (int)$this->decimalToQ64_96($totalNumbers);
+                $totalNumbersQ = (int)$this->decimalToQ64_96((string) $totalNumbers);
 
                 $results['posts'][] = [
                     'postid' => $row['postid'],
@@ -769,7 +769,7 @@ class WalletMapper
 
         $postId = $args['postid'] ?? null;
         $fromId = $args['fromid'] ?? null;
-        $numBers = $args['numbers'] ?? 0;
+        $numBers = $args['numbers'] ?? '0';
         $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
 
         $sql = "INSERT INTO wallet 
@@ -1024,13 +1024,13 @@ class WalletMapper
             return self::createSuccessResponse(21206);
         }
 
-        $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
-        $dailyToken = (float)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
+        $totalGems = isset($data[0]['overall_total']) ? (string) $data[0]['overall_total'] : '0';
+        $dailyToken = (string)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
         // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
-        $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
+        $gemsintoken = TokenHelper::divRc($dailyToken, $totalGems);
 
-        $bestatigungInitial = TokenHelper::mulRc((float) $totalGems, (float) $gemsintoken);
+        $bestatigungInitial = TokenHelper::mulRc($totalGems, $gemsintoken);
 
         $args = [
             'winstatus' => [
@@ -1045,7 +1045,7 @@ class WalletMapper
 
             if (!isset($args[$userId])) {
 
-                $totalTokenNumber = TokenHelper::mulRc((float) $row['total_numbers'], (float) $gemsintoken);
+                $totalTokenNumber = TokenHelper::mulRc((string) $row['total_numbers'], $gemsintoken);
                 $args[$userId] = [
                     'userid' => $userId,
                     'gems' => (float)$row['total_numbers'],
@@ -1055,7 +1055,7 @@ class WalletMapper
                 ];
             }
 
-            $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
+            $rowgems2token = TokenHelper::mulRc((string) $row['gems'], (string) $gemsintoken);
 
             $args[$userId]['details'][] = [
                 'gemid' => (string)$row['gemid'],
@@ -1069,14 +1069,14 @@ class WalletMapper
             ];
 
             // Also needs to add records in log_gems in FUTURE
-            $transUniqueId = self::generateUUID();
+            $operationid = self::generateUUID();
             $this->saveWalletEntry($userId, $rowgems2token);
             $transObj = [
-                'transUniqueId' => $transUniqueId,
-                'transactionType' => 'mint',
-                'senderId' => $userId,
-                'recipientId' => null,
-                'tokenAmount' => $rowgems2token,
+                'operationid' => $operationid,
+                'transactiontype' => 'mint',
+                'senderid' => $userId,
+                'recipientid' => null,
+                'tokenamount' => $rowgems2token,
                 'message' => 'Airdrop',
             ];
             $transactions = new Transaction($transObj);
@@ -1310,7 +1310,7 @@ class WalletMapper
         }
     }
 
-    public function updateUserLiquidity(string $userId, float $liquidity): bool
+    public function updateUserLiquidity(string $userId, string $liquidity): bool
     {
         try {
 
@@ -1329,7 +1329,7 @@ class WalletMapper
         }
     }
 
-    public function saveWalletEntry(string $userId, float $liquidity): float
+    public function saveWalletEntry(string $userId, string $liquidity, string $type = 'CREDIT'): string
     {
         \ignore_user_abort(true);
         $this->logger->debug('WalletMapper.saveWalletEntry started');
@@ -1342,7 +1342,7 @@ class WalletMapper
 
             if (!$row) {
                 // User does not exist, insert new wallet entry
-                $newLiquidity = abs($liquidity);
+                $newLiquidity = ($liquidity);
                 $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
 
                 $stmt = $this->db->prepare(
@@ -1356,8 +1356,13 @@ class WalletMapper
                 $stmt->execute();
             } else {
                 // User exists, safely calculate new liquidity
-                $currentBalance = (float)$row['liquidity'];
-                $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
+                $currentBalance = (string)$row['liquidity'];
+
+                if($type === 'CREDIT'){
+                    $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
+                } else {
+                    $newLiquidity = TokenHelper::subRc($currentBalance, $liquidity);
+                }
                 $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
 
                 $stmt = $this->db->prepare(
@@ -1503,12 +1508,12 @@ class WalletMapper
         ];
     }
 
-    private function decimalToQ64_96(float $value): string
+    private function decimalToQ64_96(string $value): string
     {
         $scaleFactor = \bcpow('2', '96');
 
         // Convert float to plain decimal string
-        $decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
+        $decimalString = \number_format((float) $value, 30, '.', ''); // 30 decimal places should be enough
 
         $scaledValue = \bcmul($decimalString, $scaleFactor, 0);
 

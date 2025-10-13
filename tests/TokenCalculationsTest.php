@@ -137,7 +137,7 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateSwapTokenSenderRequiredAmountWithInviter()
     {
         $total = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
-            1.0, 2.0, 1.0, 1.0
+            '1.0', '2.0', '1.0', '1.0'
         );
         $this->assertSame('5', $total);
     }
@@ -146,9 +146,9 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateSwapTokenSenderRequiredAmountWithoutInviter()
     {
         $total = TokenHelper::calculateSwapTokenSenderRequiredAmountIncludingFees(
-            2.0,
-            3.0,
-            4.0
+            '2.0',
+            '3.0',
+            '4.0'
         );
         $this->assertSame('9', $total);
     }

@@ -10,13 +10,13 @@ class SwapTokenHelper
     /**
      * Calculate the amount of BTC a user will receive when swapping a given amount of tokens.
      *
-     * @param float $btcLpTokenReserve Initial BTC reserve in the liquidity pool.
-     * @param float $lpTokenReserve Initial token reserve in the liquidity pool.
-     * @param float $tokensToSwap Amount of tokens the user wants to swap for BTC.
-     * @param float $POOLFEE Liquidity Pool fee.
-     * @return float Amount of BTC the user will receive after fees and pool adjustment.
+     * @param string $btcLpTokenReserve Initial BTC reserve in the liquidity pool.
+     * @param string $lpTokenReserve Initial token reserve in the liquidity pool.
+     * @param string $tokensToSwap Amount of tokens the user wants to swap for BTC.
+     * @param string $POOLFEE Liquidity Pool fee.
+     * @return string Amount of BTC the user will receive after fees and pool adjustment.
      */
-    public static function calculateBtc(float $btcLpTokenReserve, float $lpTokenReserve, float $tokensToSwap, float $POOLFEE = 0.01): float
+    public static function calculateBtc(string $btcLpTokenReserve, string $lpTokenReserve, string $tokensToSwap, string $POOLFEE = '0.01'): string
     {
         // Convert inputs to Q96 fixed-point format
         $tokensToSwapQ96 = $tokensToSwap;

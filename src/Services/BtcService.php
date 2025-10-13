@@ -12,7 +12,7 @@ class BtcService
      /**
      * Returns the current BTC/EUR price, updating the DB if needed.
      */
-    public static function getOrUpdateBitcoinPrice(LoggerInterface $logger, PDO $db): float
+    public static function getOrUpdateBitcoinPrice(LoggerInterface $logger, PDO $db): string
     {
         $tokenPriceRepo = new TokenEuroPriceRepository($logger, $db);
         $btcTokenObj = new TokenEuroPrice(['token' => 'BTC']);
@@ -41,14 +41,14 @@ class BtcService
             $btcPrice = $tokenPrice->getEuroPrice();
         }
 
-        return (float) $btcPrice;
+        return $btcPrice;
     }
     /**
      * Fetches the current Bitcoin price in EUR from the CoinGecko API.
      *
      * @return float|NULL Returns the price in EUR, or NULL if the request fails.
      */
-    public static function getBitcoinPriceWithPeer(): ?float
+    public static function getBitcoinPriceWithPeer(): string
     {
         $url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur";
 
@@ -65,7 +65,7 @@ class BtcService
         if (curl_errno($ch)) {
             error_log("Fehler beim Abrufen des Bitcoin-Kurses: " . curl_error($ch));
             curl_close($ch);
-            return NULL;
+            return '0';
         }
 
         // Get HTTP status code
@@ -75,7 +75,7 @@ class BtcService
         // Check if the request was successful
         if ($httpStatus !== 200) {
             error_log("HTTP-Fehler beim Abrufen des Bitcoin-Kurses: $httpStatus");
-            return NULL;
+            return '0';
         }
 
         // Decode the JSON response into an associative array
@@ -90,6 +90,6 @@ class BtcService
 
         // Log unexpected format
         error_log("Unerwartetes Antwortformat vom CoinGecko API.");
-        return NULL;
+        return '0';
     }
 }

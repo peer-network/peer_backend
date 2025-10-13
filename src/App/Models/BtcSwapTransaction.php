@@ -9,11 +9,11 @@ use Fawaz\Filter\PeerInputFilter;
 class BtcSwapTransaction
 {
     protected string $swapId;
-    protected string $transUniqueId;
+    protected string $operationid;
     protected string $userId;
     protected string $btcAddress;
-    protected string $transactionType;
-    protected string $tokenAmount;
+    protected string $transactiontype;
+    protected string $tokenamount;
     protected ?string $btcAmount;
     protected ?string $message;
     protected ?string $status;
@@ -25,12 +25,12 @@ class BtcSwapTransaction
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
         $this->swapId = $data['swapId'] ?? self::generateUUID();
-        $this->transUniqueId = $data['transUniqueId'] ?? null;
+        $this->operationid = $data['operationid'] ?? null;
         $this->userId = $data['userId'] ?? null;
         $this->btcAddress = $data['btcAddress'] ?? null;
-        $this->transactionType = $data['transactionType'] ?? null;
-        $this->tokenAmount = $data['tokenAmount'] ?? null;
-        $this->btcAmount = $data['btcAmount'] ?? 0.0;
+        $this->transactiontype = $data['transactiontype'] ?? null;
+        $this->tokenamount = $data['tokenamount'] ?? '0';
+        $this->btcAmount = $data['btcAmount'] ?? '0.0';
         $this->status = $data['status'] ?? 'PENDING';
         $this->message = $data['message'] ?? null;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -51,7 +51,7 @@ class BtcSwapTransaction
                 'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'transUniqueId' => [
+            'operationid' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
@@ -70,7 +70,7 @@ class BtcSwapTransaction
                     ['name' => 'isString'],
                 ],
             ],
-            'transactionType' => [
+            'transactiontype' => [
                 'required' => true,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
@@ -82,7 +82,7 @@ class BtcSwapTransaction
                     ['name' => 'isString'],
                 ],
             ],
-            'tokenAmount' => [
+            'tokenamount' => [
                 'required' => true,
             ],
             'btcAmount' => [
@@ -180,15 +180,15 @@ class BtcSwapTransaction
 
     
     /**
-     * Getter and Setter methods for transUniqueId
+     * Getter and Setter methods for operationid
      */
     public function getTransUniqueId(): string
     {
-        return $this->transUniqueId;
+        return $this->operationid;
     }
-    public function setTransUniqueId(string $transUniqueId): void
+    public function setTransUniqueId(string $operationid): void
     {
-        $this->transUniqueId = $transUniqueId;
+        $this->operationid = $operationid;
     }
 
 
@@ -233,28 +233,28 @@ class BtcSwapTransaction
 
 
     /**
-     * Getter and Setter methods for transactionType
+     * Getter and Setter methods for transactiontype
      */
     public function getTransactionType(): string|null
     {
-        return $this->transactionType;
+        return $this->transactiontype;
     }
-    public function setTransactionType(string $transactionType): void
+    public function setTransactionType(string $transactiontype): void
     {
-        $this->transactionType = $transactionType;
+        $this->transactiontype = $transactiontype;
     }
 
     
     /**
-     * Getter and Setter methods for tokenAmount
+     * Getter and Setter methods for tokenamount
      */
     public function getTokenAmount(): string
     {
-        return $this->tokenAmount;
+        return $this->tokenamount;
     }
-    public function setTokenAmount(string $tokenAmount): void
+    public function setTokenAmount(string $tokenamount): void
     {
-        $this->tokenAmount = $tokenAmount;
+        $this->tokenamount = $tokenamount;
     }
     
         

@@ -243,10 +243,10 @@ class ConstantsConfig
             'comment' => 2.0,
         ],
         'FEES' => [
-            'INVITATION' => 0.01,
-            'POOL'       => 0.01,
-            'PEER'       => 0.02,
-            'BURN'       => 0.01,
+            'INVITATION' => '0.01',
+            'POOL'       => '0.01',
+            'PEER'       => '0.02',
+            'BURN'       => '0.01',
         ],
     ];
 

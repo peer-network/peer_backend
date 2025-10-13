@@ -27,14 +27,14 @@ class BtcSwapTransactionRepository
         $query = "INSERT INTO btc_swap_transactions 
                   (swapid, transuniqueid, transactiontype, userid, btcaddress,  tokenamount, btcamount, status, message, createdat)
                   VALUES 
-                  (:swapId, :transUniqueId, :transactionType, :userId, :btcAddress, :tokenAmount, :btcAmount, :status, :message, :createdat)";
+                  (:swapId, :operationid, :transactiontype, :userId, :btcAddress, :tokenAmount, :btcAmount, :status, :message, :createdat)";
 
         try {
             $stmt = $this->db->prepare($query);
 
             $stmt->bindValue(':swapId', $transaction->getSwapId(), \PDO::PARAM_STR);
-            $stmt->bindValue(':transUniqueId', $transaction->getTransUniqueId(), \PDO::PARAM_STR);
-            $stmt->bindValue(':transactionType', $transaction->getTransactionType(), \PDO::PARAM_STR);
+            $stmt->bindValue(':operationid', $transaction->getTransUniqueId(), \PDO::PARAM_STR);
+            $stmt->bindValue(':transactiontype', $transaction->getTransactionType(), \PDO::PARAM_STR);
             $stmt->bindValue(':userId', $transaction->getUserId(), \PDO::PARAM_STR);
             $stmt->bindValue(':btcAddress', $transaction->getBtcAddress(), \PDO::PARAM_STR);
             $stmt->bindValue(':tokenAmount', $transaction->getTokenAmount(), \PDO::PARAM_STR);
