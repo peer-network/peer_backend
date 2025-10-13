@@ -726,7 +726,7 @@ class WalletMapper
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
             $stmt->bindValue(':gems', $gems, \PDO::PARAM_STR);
             $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':numbersq', $this->decimalToQ64_96((string) $numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
@@ -773,13 +773,13 @@ class WalletMapper
             $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
             $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':numbersq', $this->decimalToQ64_96((string) $numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
             $stmt->execute();
 
-            $this->saveWalletEntry($userId, $numBers);
+            $this->saveWalletEntry($userId, (string) $numBers);
 
             $this->logger->info('Inserted into wallet successfully', [
                 'userId' => $userId,
@@ -1349,12 +1349,18 @@ class WalletMapper
                 // User exists, safely calculate new liquidity
                 $currentBalance = (string)$row['liquidity'];
 
+                if($liquidity < 0){
+                    $liquidity = (string) (abs((float)$liquidity));
+                    $type = 'DEBIT';
+                }
+
                 if($type === 'CREDIT'){
                     $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
                 } else {
                     $newLiquidity = TokenHelper::subRc($currentBalance, $liquidity);
                 }
-                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
+
+                $liquiditq = (float)$this->decimalToQ64_96((string)$newLiquidity);
 
                 $stmt = $this->db->prepare(
                     "UPDATE wallett

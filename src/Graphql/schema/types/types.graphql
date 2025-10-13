@@ -152,8 +152,8 @@ type Transaction {
 }
 
 type TransferToken {
-  tokenSend: Decimal
-  tokensSubstractedFromWallet: Decimal
+  tokenSend: String
+  tokensSubstractedFromWallet: String
   createdat: String
 }
 
@@ -523,9 +523,9 @@ type LiquidityPoolTransaction {
 }
 
 type SwapToken {
-  tokenSend: Decimal
-  tokensSubstractedFromWallet: Decimal
-  expectedBtcReturn: Decimal
+  tokenSend: String
+  tokensSubstractedFromWallet: String
+  expectedBtcReturn: String
 }
 
 type SwapTokenResponse {
