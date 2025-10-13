@@ -35,7 +35,7 @@ class Mailer
         $ch = curl_init($mailApiLink);
 
         curl_setopt_array($ch, [
-            CURLOPT_POST => 1,
+            CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($payload),
             CURLOPT_HTTPHEADER => [
                 'api-key: ' . $mailApiKey,

@@ -404,9 +404,9 @@ class PeerTokenMapper
     /**
      * get transcation history of current user.
      * 
-     * @param userId string
-     * @param offset int
-     * @param limit int
+     * @param $userId string
+     * @param $offset int
+     * @param $limit int
      * 
      */
     // DONE
@@ -825,8 +825,8 @@ class PeerTokenMapper
     /**
      * get transcation history of current user.
      * 
-     * @param userId string
-     * @param args array
+     * @params userId string
+     * @params args array
      * 
      */
     /// DONE
@@ -878,7 +878,7 @@ class PeerTokenMapper
         if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
             return self::respondWithError(30264);
         }
-        $numberoftokensToSwap = (float) $args['numberoftokens'] ?? 0.0;
+        $numberoftokensToSwap = (float) $args['numberoftokens'];
 
         // Get EUR/BTC price
         $btcPrice = BtcService::getOrUpdateBitcoinPrice($this->logger, $this->db);
@@ -919,7 +919,6 @@ class PeerTokenMapper
         $inviteFee = (float)$fees['INVITATION'];
         $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokensToSwap, $peerFee, $poolFee, $burnFee);
 
-        var_dump($requiredAmount); exit;
         $inviterId = $this->getInviterID($userId);
         try {
             if ($inviterId && !empty($inviterId)) {
@@ -1128,7 +1127,7 @@ class PeerTokenMapper
     /**
      * get BTC LP.
      * 
-     * @return float BTC Liquidity in account
+     * @returns float BTC Liquidity in account
      */
     // DONE
     public function getLpTokenBtcLP(): float
@@ -1182,9 +1181,9 @@ class PeerTokenMapper
     /**
      * Add New Liquidity
      * 
-     * @param string $userId
-     * @param array $args
-     * @return array
+     * @params string $userId
+     * @params array $args
+     * @returns array
      */
     public function addLiquidity(string $userId, array $args): array
     {
@@ -1284,11 +1283,11 @@ class PeerTokenMapper
     /**
      * Save wallet entry and log transaction.
      *
-     * @param int|string $userId
-     * @param string $recipientWallet
-     * @param float $amount
-     * @param string $transactionType
-     * @param string $transferAction
+     * @params int|string $userId
+     * @params string $recipientWallet
+     * @params float $amount
+     * @params string $transactionType
+     * @params string $transferAction
      */
     private function saveLiquidity(string $userId, string $recipientWallet, string $amount, string $transactionType, string $transferAction): void
     {
@@ -1315,10 +1314,10 @@ class PeerTokenMapper
     /**
      * Save wallet entry.
      *
-     * @param $inputPassword string
-     * @param $hashedPassword string
+     * @params $inputPassword string
+     * @params $hashedPassword string
      * 
-     * @return bool value
+     * @returns bool value
      */
     // public function saveWalletEntry(string $userId, string $liquidity, $direction = 'CREDIT'): float
     // {

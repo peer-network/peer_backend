@@ -11,11 +11,11 @@ class TokenHelper
     /**
      * Calculates the Peer Token price in EUR based on BTC-EUR and PeerToken-BTC prices.
      *
-     * @param string $btcEURPrice Current BTC to EUR price.
-     * @param string $peerTokenBTCPrice Current PeerToken to BTC price.
-     * @return float|null Calculated PeerToken price in EUR.
+     * @param float $btcEURPrice Current BTC to EUR price.
+     * @param float $peerTokenBTCPrice Current PeerToken to BTC price.
+     * @return float Calculated PeerToken price in EUR.
      */
-    public static function calculatePeerTokenEURPrice(float $btcEURPrice, float $peerTokenBTCPrice): ?float
+    public static function calculatePeerTokenEURPrice(float $btcEURPrice, float $peerTokenBTCPrice): float
     {
         $peerValue = self::mulRc((float) $btcEURPrice, (float) $peerTokenBTCPrice);
 

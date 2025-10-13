@@ -59,7 +59,6 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use ReflectionNamedType;
-use Fawaz\App\PeerTokenService;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;

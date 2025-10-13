@@ -75,7 +75,7 @@ class TokenEuroPrice
     /**
      * Apply Input filter
      */    
-    public function validate(array $data, array $elements = []): array
+    public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
         $inputFilter->setData($data);
@@ -94,6 +94,7 @@ class TokenEuroPrice
             $errorMessageString = implode("", $errorMessages);
             throw new ValidationException($errorMessageString);
         }
+        return false;
     }
 
     /**

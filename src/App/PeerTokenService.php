@@ -30,29 +30,6 @@ class PeerTokenService
         return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
-    private function respondWithError(string $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    protected function createSuccessResponse(string $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
-            }
-        }
-
-        return $response;
-    }
 
     private function checkAuthentication(): bool
     {
@@ -66,9 +43,6 @@ class PeerTokenService
     /**
      * Validation for Offset and Limit values
      * 
-     * @param args array
-     * 
-     * @return array with Response Object
      */
     protected function validateOffsetAndLimit(array $args = []): ?array
     {
@@ -92,7 +66,6 @@ class PeerTokenService
 
     /**
      * Make Transfer token to receipients
-     * 
      * 
      */
 
@@ -133,7 +106,6 @@ class PeerTokenService
 
     /**
      * Get transcation history with Filter
-     *
      *
      */
     public function transactionsHistory(array $args): array
@@ -238,9 +210,6 @@ class PeerTokenService
     /**
      * Swap Peer Token to BTC of Current User
      * 
-     * @param args array
-     * 
-     * @return array with Response Object
      */
     public function swapTokens(array $args): array
     {
@@ -277,9 +246,6 @@ class PeerTokenService
     /**
      * Add New Liquidity
      * 
-     * @param args array
-     * 
-     * @return array with Response Object
      */
     public function addLiquidity(array $args): array
     {
