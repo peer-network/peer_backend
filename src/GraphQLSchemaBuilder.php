@@ -37,7 +37,6 @@ use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\SearchUserContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -3865,9 +3864,6 @@ class GraphQLSchemaBuilder
         }
 
         return $results;
-
-        $this->logger->warning('Query.resolveUsers No users found');
-        return $this::createSuccessResponse(21001);
     }
 
     protected function resolveChat(array $args): ?array
