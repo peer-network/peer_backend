@@ -374,7 +374,6 @@ class UserService
             $this->logger->error('Error verifying referral info.', ['exception' => $e]);
             return self::respondWithError(41013); // Error while retriving Referral Info
         }
-        return self::respondWithError(31010); // Error while retriving Referral Info
     }
 
     public function referralList(string $userId, int $offset = 0, int $limit = 20): array

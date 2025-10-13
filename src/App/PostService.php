@@ -22,7 +22,6 @@ use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 
-const DISLIKE_ = 3;// whereby DISLIKE
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 
@@ -694,6 +693,7 @@ class PostService
 
         $dailyFree = ConstantsConfig::dailyFree()['DAILY_FREE_ACTIONS'];
         $prices    = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
 
         try {
             $dailyLimits = [
@@ -711,10 +711,10 @@ class PostService
             ];
 
             $actionMaps = [
-                'like' => LIKE_,
-                'comment' => COMMENT_,
-                'post' => POST_,
-                'dislike' => DISLIKE_,
+                'like' => $actions['LIKE'],
+                'comment' => $actions['COMMENT'],
+                'post' => $actions['POST'],
+                'dislike' => $actions['DISLIKE'],
             ];
 
             $limit = $dailyLimits['post'];

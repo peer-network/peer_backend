@@ -156,6 +156,7 @@ class PeerTokenMapper
         }
 
         $fees = ConstantsConfig::tokenomics()['FEES'];
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
         $peerFee = (float) $fees['PEER'];
         $poolFee = (float) $fees['POOL'];
         $burnFee = (float) $fees['BURN'];
@@ -213,7 +214,7 @@ class PeerTokenMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => -abs($requiredAmount),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
 
                 $this->walletMapper->insertWinToLog($userId, $args);
@@ -239,7 +240,7 @@ class PeerTokenMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => abs($numberoftokens),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
 
                 $this->walletMapper->insertWinToLog($recipient, $args);
@@ -262,7 +263,7 @@ class PeerTokenMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => abs($inviterWin),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
 
                 $this->walletMapper->insertWinToLog($inviterId, $args);
@@ -286,7 +287,7 @@ class PeerTokenMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => abs($feeAmount),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
 
                 $this->walletMapper->insertWinToLog($this->poolWallet, $args);
@@ -310,7 +311,7 @@ class PeerTokenMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => abs($peerAmount),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
 
                 $this->walletMapper->insertWinToLog($this->peerWallet, $args);
@@ -334,7 +335,7 @@ class PeerTokenMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => abs($burnAmount),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
                 $this->walletMapper->insertWinToLog($this->burnWallet, $args);
                 $this->walletMapper->insertWinToPool($this->burnWallet, $args);
