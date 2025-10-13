@@ -1198,12 +1198,18 @@ class UserService
                 return self::createSuccessResponse(21001);
             }
 
+            $userId = $user->getUserId();
             $user->validatePass($args);
             $this->userMapper->updatePass($user);
 
+            $this->userMapper->deleteAccessTokensByUserId($userId);
+            $this->userMapper->deleteRefreshTokensByUserId($userId);
+
             $this->userMapper->deletePasswordResetToken($args['token']);
 
-            $this->logger->info('User password updated successfully', ['userId' => $this->currentUserId]);
+            $this->logger->info('User password updated and tokens invalidated', [
+                'userId' => $userId
+            ]);
             $this->transactionManager->commit();
             return self::createSuccessResponse(11005);
         } catch (\Throwable $e) {
