@@ -381,7 +381,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11213, // Liquidity Pool History retrived
+                'ResponseCode' => '11213', // Liquidity Pool History retrived
                 'affectedRows' => $transactions
             ];
         } catch (\PDOException $e) {
@@ -389,7 +389,7 @@ class PeerTokenMapper
         }
         return [
             'status' => 'error',
-            'ResponseCode' => 41223, // Error while retriveing Liquidity Pool History
+            'ResponseCode' => '41223', // Error while retriveing Liquidity Pool History
             'affectedRows' => []
         ];
     }
@@ -412,7 +412,7 @@ class PeerTokenMapper
                 $this->logger->critical('Failed to start database transaction', ['swapId' => $swapId]);
                 return [
                     'status' => 'error',
-                    'ResponseCode' => 40302,
+                    'ResponseCode' => '40302',
                     'message' => 'Unable to start database transaction.',
                 ];
             }
@@ -429,7 +429,7 @@ class PeerTokenMapper
                 $this->logger->warning('No matching PENDING transaction found for swapId.', ['swapId' => $swapId]);
                 return [
                     'status' => 'error',
-                    'ResponseCode' => 41224, // No Transaction Found with Pending Status
+                    'ResponseCode' => '41224', // No Transaction Found with Pending Status
                 ];
             }
 
@@ -452,7 +452,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11214,  // SWAP Transaction has been marked as PAID
+                'ResponseCode' => '11214',  // SWAP Transaction has been marked as PAID
                 'affectedRows' => $swapTnx
             ];
         } catch (\PDOException $e) {
@@ -465,7 +465,7 @@ class PeerTokenMapper
             );
             return [
                 'status' => 'error',
-                'ResponseCode' => 40302,
+                'ResponseCode' => '40302',
             ];
         } catch (\Throwable $e) {
             if ($this->db->inTransaction()) {
@@ -480,7 +480,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'error',
-                'ResponseCode' => 41225, // Failed to update transaction status
+                'ResponseCode' => '41225', // Failed to update transaction status
             ];
         }
     }
@@ -691,7 +691,7 @@ class PeerTokenMapper
             if ($liquidity == 0) {
                 return [
                     'status' => 'success',
-                    'ResponseCode' => 11202, // Successfully retrieved Peer token price
+                    'ResponseCode' => '11202', // Successfully retrieved Peer token price
                     'currentTokenPrice' => 0,
                     'updatedAt' => $getLpToken['updatedat'] ?? '',
                 ];
@@ -701,7 +701,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11202, // Successfully retrieved Peer token price
+                'ResponseCode' => '11202', // Successfully retrieved Peer token price
                 'currentTokenPrice' => $tokenPrice,
                 'updatedAt' => $getLpToken['updatedat'] ?? '',
             ];
@@ -709,7 +709,7 @@ class PeerTokenMapper
             $this->logger->error("Database error while fetching transactions - PeerTokenMapper.transactionsHistory", ['error' => $e->getMessage()]);
             return [
                 'status' => 'error',
-                'ResponseCode' => 40302,
+                'ResponseCode' => '40302',
             ];
         } catch (\Throwable $e) {
             $this->logger->error(
@@ -721,7 +721,7 @@ class PeerTokenMapper
             );
             return [
                 'status' => 'error',
-                'ResponseCode' => 41203, // Failed to retrieve Peer token price
+                'ResponseCode' => '41203', // Failed to retrieve Peer token price
             ];
         }
     }
@@ -780,18 +780,18 @@ class PeerTokenMapper
 
         $this->logger->info('PeerTokenMapper.swapTokens started');
 
-        // if (empty($args['btcAddress'])) {
-        //     $this->logger->warning('BTC Address required');
-        //     return self::respondWithError(31204);
-        // }
+        if (empty($args['btcAddress'])) {
+            $this->logger->warning('BTC Address required');
+            return self::respondWithError(31204);
+        }
         $btcAddress = $args['btcAddress'];
 
-        // if (!PeerTokenMapper::isValidBTCAddress($btcAddress)) {
-        //     $this->logger->warning('Invalid btcAddress .', [
-        //         'btcAddress' => $btcAddress,
-        //     ]);
-        //     return self::respondWithError(31204); // Invalid BTC Address
-        // }
+        if (!PeerTokenMapper::isValidBTCAddress($btcAddress)) {
+            $this->logger->warning('Invalid btcAddress .', [
+                'btcAddress' => $btcAddress,
+            ]);
+            return self::respondWithError(31204); // Invalid BTC Address
+        }
 
         if (!isset($args['password']) && empty($args['password'])) {
             $this->logger->warning('Password required');
@@ -900,15 +900,15 @@ class PeerTokenMapper
             // 1. SENDER: Debit Token and Fees From Account
             if ($requiredAmount) {
                 $transactionid = self::generateUUID();
-                $this->createAndSaveTransaction($transRepo, [
-                    'transactionid' => $transactionid,
-                    'operationid' => $operationid,
-                    'transactiontype' => 'btcSwap',
-                    'senderid' => $userId,
-                    'recipientid' => $recipient,
-                    'tokenamount' => 0 - (float) $requiredAmount,
-                    'message' => $message,
-                ]);
+                // $this->createAndSaveTransaction($transRepo, [
+                //     'transactionid' => $transactionid,
+                //     'operationid' => $operationid,
+                //     'transactiontype' => 'btcSwap',
+                //     'senderid' => $userId,
+                //     'recipientid' => $recipient,
+                //     'tokenamount' => 0 - (float) $requiredAmount,
+                //     'message' => $message,
+                // ]);
                 $this->walletMapper->saveWalletEntry($userId, $requiredAmount, 'DEDUCT');
             }
 
@@ -1009,7 +1009,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11217, // Successfully Swap Peer Token to BTC. Your BTC address will be paid soon.
+                'ResponseCode' => '11217', // Successfully Swap Peer Token to BTC. Your BTC address will be paid soon.
                 'tokenSend' => $numberoftokensToSwap,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'expectedBtcReturn' => $btcAmountToUser
@@ -1203,7 +1203,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11218, // Successfully update with Liquidity into Pool
+                'ResponseCode' => '11218', // Successfully update with Liquidity into Pool
                 'newTokenAmount' => $newTokenAmount,
                 'newBtcAmount' => $newBtcAmount,
                 'newTokenPrice' => $tokenPrice

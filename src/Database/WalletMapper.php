@@ -1063,8 +1063,8 @@ class WalletMapper
             $transObj = [
                 'operationid' => $operationid,
                 'transactiontype' => 'mint',
-                'senderid' => $userId,
-                'recipientid' => null,
+                'senderid' => $row['fromid'],
+                'recipientid' => $userId,
                 'tokenamount' => $rowgems2token,
                 'message' => 'Airdrop',
             ];

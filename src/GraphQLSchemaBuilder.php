@@ -2077,25 +2077,25 @@ class GraphQLSchemaBuilder
                 },
             ],   
             'AddLiquidity' => [
-                'newTokenAmount' => function (array $root): string {
-                    return $root['newTokenAmount'] ?? '0.0';
+                'newTokenAmount' => function (array $root): float {
+                    return (float) ($root['newTokenAmount'] ?? 0.0);
                 },
-                'newBtcAmount' => function (array $root): string {
-                    return $root['newBtcAmount'] ?? '0.0';
+                'newBtcAmount' => function (array $root): float {
+                    return (float) ($root['newBtcAmount'] ?? 0.0);
                 },
-                'newTokenPrice' => function (array $root): string {
-                    return $root['newTokenPrice'] ?? '0.0';
+                'newTokenPrice' => function (array $root): float {
+                    return (float) ($root['newTokenPrice'] ?? 0.0);
                 },
             ],
             'SwapToken' => [
-                'tokenSend' => function (array $root): string {
-                    return $root['tokenSend'] ?? '0.0';
+                'tokenSend' => function (array $root): float {
+                    return (float) ($root['tokenSend'] ?? 0.0);
                 },
-                'tokensSubstractedFromWallet' => function (array $root): string {
-                    return $root['tokensSubstractedFromWallet'] ?? '0.0';
+                'tokensSubstractedFromWallet' => function (array $root): float {
+                    return (float) ($root['tokensSubstractedFromWallet'] ?? 0.0);
                 },
-                'expectedBtcReturn' => function (array $root): string {
-                    return $root['expectedBtcReturn'] ?? '0.0';
+                'expectedBtcReturn' => function (array $root): float {
+                    return (float) ($root['expectedBtcReturn'] ?? 0.0);
                 },
             ],
             'LiquidityPoolHistoryResponse' => [
@@ -2119,7 +2119,7 @@ class GraphQLSchemaBuilder
                     return $root['ResponseCode'] ?? '';
                 },
                  'currentTokenPrice' => function (array $root): float {
-                    return $root['currentTokenPrice'] ?? 0.0;
+                    return (float) ($root['currentTokenPrice'] ?? 0);
                 },
                 'updatedAt' => function (array $root): string {
                     return $root['updatedAt'] ?? '';
@@ -2340,8 +2340,8 @@ class GraphQLSchemaBuilder
                 'recipientid' => function (array $root): string {
                     return $root['recipientid'] ?? '';
                 },
-                'tokenamount' => function (array $root): string {
-                    return $root['tokenamount'] ?? '0.0';
+                'tokenamount' => function (array $root): float {
+                    return (float) ($root['tokenamount'] ?? 0.0);
                 },
                 'transferaction' => function (array $root): string {
                     return $root['transferaction'] ?? '';
