@@ -84,10 +84,12 @@ make dev
 
 This will:
 
-- Create `.env.ci` from `.env.dev`  
+- Create `.env.ci` from `.env.dev` 
+- Runs check-hooks and scan before anything else — this ensures Gitleaks is installed and active.
 - Reset Docker containers, images and volumes (full clean)  
 - Copy SQL files and Postman test files  
-- Install PHP dependencies via composer on your host  
+- Install PHP dependencies via composer on your host
+- Run PHPStan static analysis automatically 
 - Set permissions (777/666 for local dev)  
 - Start DB and backend containers, wait for health checks  
 
