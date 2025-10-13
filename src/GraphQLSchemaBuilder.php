@@ -6,20 +6,6 @@ namespace Fawaz;
 
 const INT32_MAX = 2147483647;
 
-// whereby
-const VIEW_ = 1;// whereby VIEW
-const LIKE_ = 2;// whereby LIKE
-const DISLIKE_ = 3;// whereby DISLIKE
-const COMMENT_ = 4;// whereby COMMENT
-const POST_ = 5;// whereby POST
-const REPORT_ = 6;// whereby MELDEN
-const INVITATION_ = 11;// whereby EINLADEN
-const OWNSHARED_ = 12;// whereby SHAREN SENDER
-const OTHERSHARED_ = 13;// whereby SHAREN POSTER
-const FREELIKE_ = 30;// whereby FREELIKE
-const FREECOMMENT_ = 31;// whereby FREECOMMENT
-const FREEPOST_ = 32;// whereby FREEPOST
-
 const BASIC = 50;
 const PINNED = 200;
 
@@ -112,18 +98,16 @@ class GraphQLSchemaBuilder
         $userSchema = $baseQueries;
         $bridgeSchema = $bridgeOnlyQueries;
 
-        if ($this->currentUserId === null) {
-            $schema = $guestSchema;
-        } else {
-            $schema = $userSchema;
-        }
+        $schema = $guestSchema;
 
-        if ($this->userRoles <= 0) {
-            $schema = $schema;
-        } elseif ($this->userRoles === 8) {
-            $schema = $bridgeSchema;
-        } elseif ($this->userRoles === 16) {
-            $schema = $adminSchema;
+        if ($this->currentUserId !== null) {
+            if ($this->userRoles <= 0) {
+                $schema = $userSchema;
+            } elseif ($this->userRoles === 8) {
+                $schema = $bridgeSchema;
+            } elseif ($this->userRoles === 16) {
+                $schema = $adminSchema;
+            }
         }
 
         return $schema;
@@ -142,7 +126,7 @@ class GraphQLSchemaBuilder
 
         $schema = $this->getQueriesDependingOnRole();
         if (empty($schema)) {
-            $this->logger->critical('Invalid schema', ['schema' => $schema]);
+            // $this->logger->critical('Invalid schema', ['schema' => $schema]);
             return $this::respondWithError(40301);
         }
 
@@ -3293,6 +3277,7 @@ class GraphQLSchemaBuilder
     {
         $tokenomicsConfig = ConstantsConfig::tokenomics();
         $dailyfreeConfig = ConstantsConfig::dailyFree();
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
@@ -3331,10 +3316,10 @@ class GraphQLSchemaBuilder
         ];
 
         $actionMaps = [
-            'like' => LIKE_,
-            'comment' => COMMENT_,
-            'post' => POST_,
-            'dislike' => DISLIKE_,
+            'like' => $actions['LIKE'],
+            'comment' => $actions['COMMENT'],
+            'post' => $actions['POST'],
+            'dislike' => $actions['DISLIKE'],
         ];
 
         // Validations

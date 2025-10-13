@@ -533,3 +533,11 @@ type SwapTokenResponse {
   ResponseCode: Int!
   affectedRows: SwapToken!
 }
+
+type TokenPriceResponse {
+  status: String!
+  ResponseCode: Int!
+  currentTokenPrice: String!
+  updatedAt: String
+}
+

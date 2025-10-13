@@ -191,10 +191,10 @@ class ConstantsConfig
      *         comment: float
      *     },
      *     FEES: array{
-     *         INVITATION: float,
-     *         POOL: float,
-     *         PEER: float,
-     *         BURN: float
+     *         INVITATION: string,
+     *         POOL: string,
+     *         PEER: string,
+     *         BURN: string
      *     }
      * }
      */

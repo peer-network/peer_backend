@@ -906,7 +906,7 @@ class PeerTokenMapper
                     'transactiontype' => 'btcSwap',
                     'senderid' => $userId,
                     'recipientid' => $recipient,
-                    'tokenamount' => -$requiredAmount,
+                    'tokenamount' => 0 - (float) $requiredAmount,
                     'message' => $message,
                 ]);
                 $this->walletMapper->saveWalletEntry($userId, $requiredAmount, 'DEDUCT');
@@ -984,9 +984,7 @@ class PeerTokenMapper
 
 
             // Should be placed at last because it should include 1% LP Fees
-            if ($numberoftokensToSwap && $transactionid) {
-                // Store BTC Swap transactions in btc_swap_transactions
-                // count BTC amount3
+            if ($numberoftokensToSwap && isset($transactionid)) {
                 $transObj = [
                     'operationid' => $transactionid,
                     'transactiontype' => 'btcSwapToPool',
@@ -1014,7 +1012,7 @@ class PeerTokenMapper
                 'ResponseCode' => 11217, // Successfully Swap Peer Token to BTC. Your BTC address will be paid soon.
                 'tokenSend' => $numberoftokensToSwap,
                 'tokensSubstractedFromWallet' => $requiredAmount,
-                'expectedBtcReturn' => $btcAmountToUser ?? 0.0
+                'expectedBtcReturn' => $btcAmountToUser
             ];
         } catch (\Throwable $e) {
             // $this->db->rollBack();

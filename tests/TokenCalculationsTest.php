@@ -12,9 +12,9 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateBtc100Swap()
     {
         $btcOut = SwapTokenHelper::calculateBtc(
-            (10000.0),
-            (100000.0),
-            (1000.0)
+            '10000',
+            '100000',
+            '1000'
         );
         $this->assertSame('99.000099000099000099000099', $btcOut);
     }
@@ -23,9 +23,9 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateBtcZeroSwap()
     {
         $btcOut = SwapTokenHelper::calculateBtc(
-            (50.0),
-            (100.0),
-            (0.0)
+            '50',
+            '100',
+            '0'
         );
         $this->assertSame('0', $btcOut);
     }
@@ -36,9 +36,9 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateBtcSimpleCase()
     {
         $btcOut = SwapTokenHelper::calculateBtc(
-            (50.0),
-            (100.0),
-            (1.0)
+            '50',
+            '100',
+            '1'
         );
         $this->assertSame('0.495000495000495000495000495', $btcOut);
     }
@@ -48,9 +48,9 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateBtcLargeSwap()
     {
         $btcOut = SwapTokenHelper::calculateBtc(
-            (100.0),
-            (10000.0),
-            (1000.0)
+            '100',
+            '10000',
+            '1000'
         );
         $this->assertSame('9.08265213442325158946412352', $btcOut);
     }
@@ -60,7 +60,7 @@ class TokenCalculationsTest extends TestCase
     // BTC price = 30,000 EUR; 1 Peer = 0.0001 BTC => Peer = 3 EUR
     public function testCalculatePeerTokenEURPrice()
     {
-        $price = TokenHelper::calculatePeerTokenEURPrice(30000.0, 0.0001);
+        $price = TokenHelper::calculatePeerTokenEURPrice('30000', '0.0001');
         $this->assertSame('3.0000', $price);
     }
 
@@ -69,7 +69,7 @@ class TokenCalculationsTest extends TestCase
 
     public function testCalculatePeerTokenEURPriceZero()
     {
-        $price = TokenHelper::calculatePeerTokenEURPrice(0.0, 0.0001);
+        $price = TokenHelper::calculatePeerTokenEURPrice('0', '0.0001');
         $this->assertSame('0', $price);
     }
 
@@ -80,8 +80,8 @@ class TokenCalculationsTest extends TestCase
     public function testCalculatePeerTokenPriceValueExact()
     {
         $price = TokenHelper::calculatePeerTokenPriceValue(
-            (2.0),
-            (8.0)
+            '2',
+            '8'
         );
         $this->assertSame('0.25', $price);
     }
@@ -91,8 +91,8 @@ class TokenCalculationsTest extends TestCase
     public function testCalculatePeerTokenPriceValueRepeating()
     {
         $price = TokenHelper::calculatePeerTokenPriceValue(
-            (1.0),
-            (3.0)
+            '1',
+            '3'
         );
         $this->assertSame('0.3333333333333333333333333333', $price);
     }
@@ -104,8 +104,8 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateTokenRequiredAmountAllFees()
     {
         $result = TokenHelper::calculateTokenRequiredAmount(
-            (100.0),
-            0.02, 0.01, 0.01, 0.01
+            '100',
+            '0.02', '0.01', '0.01', '0.01'
         );
         $this->assertSame('105.00', $result);
     }
@@ -114,8 +114,8 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateTokenRequiredAmountDefaultInviter()
     {
         $result = TokenHelper::calculateTokenRequiredAmount(
-            (100.0),
-            0.02, 0.01, 0.01
+            '100',
+            '0.02', '0.01', '0.01'
         );
         $this->assertSame('104.00', $result);
     }
@@ -124,8 +124,8 @@ class TokenCalculationsTest extends TestCase
     public function testCalculateTokenRequiredAmountOldExampleStrict()
     {
         $result = TokenHelper::calculateTokenRequiredAmount(
-            (100.0),
-            0.05, 0.01, 0.02, 0.03
+            '100',
+            '0.05', '0.01', '0.02', '0.03'
         );
         $this->assertSame('111.00', $result);
     }

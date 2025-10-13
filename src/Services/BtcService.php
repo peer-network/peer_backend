@@ -46,7 +46,7 @@ class BtcService
     /**
      * Fetches the current Bitcoin price in EUR from the CoinGecko API.
      *
-     * @return float|NULL Returns the price in EUR, or NULL if the request fails.
+     * @return string Returns the price in EUR as string, or '0' on failure.
      */
     public static function getBitcoinPriceWithPeer(): string
     {
@@ -85,7 +85,7 @@ class BtcService
 
         if (isset($data['bitcoin']['eur']) && is_numeric($data['bitcoin']['eur'])) {
             $btcPrice = (float) $data['bitcoin']['eur'];
-            return $btcPrice;
+            return (string) $btcPrice;
         }
 
         // Log unexpected format
