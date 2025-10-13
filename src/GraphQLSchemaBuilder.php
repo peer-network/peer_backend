@@ -36,7 +36,6 @@ use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\SearchUserContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -100,15 +99,13 @@ class GraphQLSchemaBuilder
         if ($this->currentUserId === null) {
             $schema = $guestSchema;
         } else {
-            $schema = $userSchema;
-        }
-
-        if ($this->userRoles <= 0) {
-            $schema = $userSchema;
-        } elseif ($this->userRoles === 8) {
-            $schema = $bridgeSchema;
-        } elseif ($this->userRoles === 16) {
-            $schema = $adminSchema;
+            if ($this->userRoles <= 0) {
+                $schema = $userSchema;
+            } elseif ($this->userRoles === 8) {
+                $schema = $bridgeSchema;
+            } elseif ($this->userRoles === 16) {
+                $schema = $adminSchema;
+            }
         }
 
         return $schema;
