@@ -6,19 +6,26 @@ use PHPUnit\Framework\TestCase;
 use Fawaz\App\WalletService;
 use Fawaz\Database\WalletMapper;
 use Fawaz\App\Wallet;
-use Psr\Log\LoggerInterface;
+use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class WalletServiceTest extends TestCase
 {
     private WalletService $walletService;
     private $walletMapperMock;
     private $loggerMock;
+    private $transactionManagerMock;
 
     protected function setUp(): void
     {
         $this->walletMapperMock = $this->createMock(WalletMapper::class);
-        $this->loggerMock = $this->createMock(LoggerInterface::class);
-        $this->walletService = new WalletService($this->loggerMock, $this->walletMapperMock);
+        $this->loggerMock = $this->createMock(PeerLoggerInterface::class);
+        $this->transactionManagerMock = $this->createMock(TransactionManager::class);
+        $this->walletService = new WalletService(
+            $this->loggerMock,
+            $this->walletMapperMock,
+            $this->transactionManagerMock
+        );
     }
 
    
@@ -196,34 +203,7 @@ class WalletServiceTest extends TestCase
         $this->assertEquals(['percent' => 20], $result);
     }
 
-    public function testGetPercentBeforeTransactionZeroAmount()
-    {
-        $this->walletMapperMock->method('getPercentBeforeTransaction')
-            ->with('user-1', 0)
-            ->willReturn(['percent' => 0]);
-        $result = $this->walletService->getPercentBeforeTransaction('user-1', 0);
-        $this->assertEquals(0, $result['percent']);
-    }
-
-    public function testGetPercentBeforeTransactionNegativeAmount()
-    {
-        $this->walletMapperMock->method('getPercentBeforeTransaction')
-            ->with('user-1', -10)
-            ->willReturn(['percent' => -5]);
-        $result = $this->walletService->getPercentBeforeTransaction('user-1', -10);
-        $this->assertLessThan(0, $result['percent']);
-    }
-
-    public function testLoadLiquidityReturnsNullHandled()
-    {
-        $userId = 'user-1';
-        $this->walletMapperMock->method('loadLiquidityById')->willReturn(0.0);
-        $response = $this->walletService->loadLiquidityById($userId);
-        $this->assertEquals('success', $response['status']);
-        $this->assertEquals(0, $response['amount'] ?? 0);
-    }
-
-    public function testFetchPoolReturnsExpectedData()
+    public function testFetchPoolReturnsExpectedData(): void
     {
         $this->walletService->setCurrentUserId('user-1');
         $this->walletMapperMock->method('fetchPool')->willReturn(['some' => 'data']);

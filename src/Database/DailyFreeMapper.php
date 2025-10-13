@@ -1,21 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\DailyFree;
-use Psr\Log\LoggerInterface;
-use \InvalidArgumentException;
+use Fawaz\Utils\PeerLoggerInterface;
+use InvalidArgumentException;
 
 class DailyFreeMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
     public function insert(DailyFree $user): DailyFree|false
     {
-        $this->logger->info("DailyFree.insert started");
+        $this->logger->debug("DailyFree.insert started");
 
         try {
             $data = $user->getArrayCopy();
@@ -58,7 +60,7 @@ class DailyFreeMapper
 
     public function update(DailyFree $user): DailyFree|false
     {
-        $this->logger->info("DailyFree.update started");
+        $this->logger->debug("DailyFree.update started");
 
         try {
             $data = $user->getArrayCopy();
@@ -122,17 +124,17 @@ class DailyFreeMapper
 
         } catch (\PDOException $e) {
             $this->logger->error('Database error in getUserDailyUsage', ['exception' => $e->getMessage()]);
-            
+
             return 0;
         } catch (\Throwable $e) {
             $this->logger->error('Unexpected error in getUserDailyUsage', ['exception' => $e->getMessage()]);
-            return 0; 
+            return 0;
         }
     }
 
     public function getUserDailyAvailability(string $userId): array
     {
-        $this->logger->info('DailyFreeMapper.getUserDailyAvailability started', ['userId' => $userId]);
+        $this->logger->debug('DailyFreeMapper.getUserDailyAvailability started', ['userId' => $userId]);
 
         $dailyLimits = [
             'liken' => 3,
@@ -159,14 +161,14 @@ class DailyFreeMapper
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (!$result) {
-                return array_map(fn($column, $label) => [
+                return array_map(fn ($column, $label) => [
                     'name' => $label,
                     'used' => 0,
                     'available' => $dailyLimits[$column],
                 ], array_keys($columnMap), $columnMap);
             }
 
-            return array_map(fn($column, $label) => [
+            return array_map(fn ($column, $label) => [
                 'name' => $label,
                 'used' => (int)($result[$column] ?? 0),
                 'available' => max($dailyLimits[$column] - (int)($result[$column] ?? 0), 0),
@@ -188,7 +190,7 @@ class DailyFreeMapper
 
     public function incrementUserDailyUsage(string $userId, int $artType): bool
     {
-        $this->logger->info('DailyFreeMapper.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
+        $this->logger->debug('DailyFreeMapper.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
 
         $columnMap = [
             LIKE_ => 'liken',

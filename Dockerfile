@@ -51,5 +51,8 @@ COPY docker/nginx/default.conf /etc/nginx/sites-available/default
 COPY docker/supervisord.conf /etc/supervisord.conf
  
 RUN chmod 777 /tmp
+
+# generate backend config files
+RUN bash /var/www/html/cd-generate-backend-config.sh
  
 EXPOSE 80

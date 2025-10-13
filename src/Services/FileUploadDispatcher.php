@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Services;
 
 class FileUploadDispatcher
@@ -19,7 +21,8 @@ class FileUploadDispatcher
         $this->notesPostService = new NotesPostService();
     }
 
-    private function argsToJsString($args) {
+    private function argsToJsString($args)
+    {
         return json_encode($args);
     }
 
@@ -32,7 +35,9 @@ class FileUploadDispatcher
         }
 
         foreach ($files as $index => $file) {
-            if (!$file) continue;
+            if (!$file) {
+                continue;
+            }
 
             $identifier = count($files) > 1 ? "{$identifiers}_{$index}" : $identifiers;
 

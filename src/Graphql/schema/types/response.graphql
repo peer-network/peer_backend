@@ -1,0 +1,339 @@
+type DefaultResponse {
+  status: String!
+  RequestId: String
+  ResponseCode: String
+  ResponseMessage: String
+}
+
+type ListAdvertisementPostsResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  counter: Int!
+  affectedRows: [AdvertisementPost!]
+}
+
+type HelloResponse {
+  currentuserid: ID
+  currentVersion: String
+  wikiLink: String
+  lastMergedPullRequestNumber: String
+  companyAccountId: ID
+}
+
+type ReferralResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: ReferralInfo
+}
+
+type ContactusResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: ContactusResponsePayload
+}
+
+type RegisterResponse {
+  meta: DefaultResponse
+  status: String!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  userid: ID
+}
+
+type ResetPasswordRequestResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  nextAttemptAt: String
+}
+
+type AuthPayload {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  accessToken: String
+  refreshToken: String
+}
+
+type TransactionResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [Transaction!]
+}
+
+type TransferTokenResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: TransferToken!
+}
+
+type ListTodaysInteractionsResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: TodaysInteractionsData
+}
+
+type PostInteractionResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [ProfileUser!]
+}
+
+type GetDailyResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [DailyFreeResponse]
+}
+
+type DailyFreeResponse {
+  name: String!
+  used: Int!
+  available: Int!
+}
+
+type PostEligibilityResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  eligibilityToken: String!
+}
+
+type UserInfoResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: UserInfo
+}
+
+type PostInfoResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: PostInfo
+}
+
+type CommentInfoResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: CommentInfo
+}
+
+type ChatResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [Chat!]
+}
+
+type FollowStatusResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  isfollowing: Boolean
+}
+
+type UserPreferencesResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: UserPreferences
+}
+
+type AddPostResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: PostInfo
+}
+
+type AddChatResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: ChatInfo
+}
+
+type AddChatmessageResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [ChatMessageInfo]
+}
+
+type BasicUserInfoResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: BasicUserInfo
+}
+
+type UserFriendsResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [BasicUserInfo]
+}
+
+type FollowRelationsResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: FollowRelations
+}
+
+type BlockedUsersResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: BlockedUsers
+}
+
+type UserListResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [User]
+}
+
+type TagSearchResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [Tag]
+}
+
+type PostResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: Post
+}
+
+type PostListResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [Post!]
+}
+
+type CommentResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [Comment]
+}
+
+type ReferralInfoResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  referralUuid: ID
+  referralLink: String
+}
+type ReferralListResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: ReferralUsers!
+}
+
+type GetActionPricesResponse {
+  meta: DefaultResponse
+    status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+    ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+    affectedRows: ActionPriceResult!
+}
+
+type TokenomicsResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: Int!                         
+  actionTokenPrices: ActionPriceResult!
+  actionGemsReturns: ActionGemsReturns!
+  mintingData: MintingData!
+}
+
+type DailyGemStatusResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: DailyGemStatusData
+}
+
+type DailyGemsResultsResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: DailyGemsResultsData
+}
+
+type GemstersResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: GemstersData
+}
+
+type GemsterResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: DailyGemStatusData
+}
+
+type LiquidityPoolResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: LiquidityPoolData
+}
+
+type TestingPoolResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: LiquidityPoolData
+}
+
+type PostCommentsResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  counter: Int!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [PostCommentsData]
+}
+
+type PercentBeforeTransactionResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: PercentBeforeTransactionData
+}
+
+type RefreshMarketCapResponse {
+  meta: DefaultResponse
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: RefreshMarketCapData
+}
