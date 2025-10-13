@@ -4,14 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\utils\ConfigGeneration;
 
-class EndpointsConfigConstants
-{
-    public static string $testBackendServerEndpoint = "https://peer-network.eu/graphql";
-    public static string $testProductionServerEndpoint = "https://getpeer.eu/graphql";
-    public static string $productionServerEndpoint = "https://peernetwork.eu/graphql";
-    public static array $requiredPlatforms = ["ios","android","web"];
-}
-
 class EndpointsConfig implements DataGeneratable
 {
     /** @var array<string, TargetEntry> */

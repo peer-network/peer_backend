@@ -1038,13 +1038,13 @@ class UserService
             // Check for rate limiting: 1st attempt
             if ($this->userMapper->isFirstAttemptTooSoon($passwordAttempt)) {
                 $this->transactionManager->rollback();
-                return $this->userMapper->rateLimitResponse(1);
+                return $this->userMapper->rateLimitResponse(60);
             }
 
             // 2nd attempt
             if ($this->userMapper->isSecondAttemptTooSoon($passwordAttempt)) {
                 $this->transactionManager->rollback();
-                return $this->userMapper->rateLimitResponse(10, $passwordAttempt['last_attempt']);
+                return $this->userMapper->rateLimitResponse(600, $passwordAttempt['last_attempt']);
             }
 
             // Too many attempts made without using the token
@@ -1102,10 +1102,7 @@ class UserService
 
             $this->logger->info('Token verified successfully', ['token' => $token]);
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11902,
-            ];
+            return self::createSuccessResponse(11902);
         } catch (\Throwable $e) {
             $this->logger->error('Unexpected error during token verification', ['error' => $e->getMessage(), 'token' => $token]);
             return self::respondWithError(41004);
@@ -1116,10 +1113,7 @@ class UserService
      */
     public function genericPasswordResetSuccessResponse(): array
     {
-        return [
-            'status' => 'success',
-            'ResponseCode' => "11901"
-        ];
+        return self::createSuccessResponse(11901);
     }
 
 
