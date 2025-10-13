@@ -96,9 +96,9 @@ class GraphQLSchemaBuilder
         $userSchema = $baseQueries;
         $bridgeSchema = $bridgeOnlyQueries;
 
-        if ($this->currentUserId === null) {
-            $schema = $guestSchema;
-        } else {
+        $schema = $guestSchema;
+
+        if ($this->currentUserId !== null) {
             if ($this->userRoles <= 0) {
                 $schema = $userSchema;
             } elseif ($this->userRoles === 8) {
