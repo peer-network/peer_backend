@@ -6,20 +6,6 @@ namespace Fawaz;
 
 const INT32_MAX = 2147483647;
 
-// whereby
-const VIEW_ = 1;// whereby VIEW
-const LIKE_ = 2;// whereby LIKE
-const DISLIKE_ = 3;// whereby DISLIKE
-const COMMENT_ = 4;// whereby COMMENT
-const POST_ = 5;// whereby POST
-const REPORT_ = 6;// whereby MELDEN
-const INVITATION_ = 11;// whereby EINLADEN
-const OWNSHARED_ = 12;// whereby SHAREN SENDER
-const OTHERSHARED_ = 13;// whereby SHAREN POSTER
-const FREELIKE_ = 30;// whereby FREELIKE
-const FREECOMMENT_ = 31;// whereby FREECOMMENT
-const FREEPOST_ = 32;// whereby FREEPOST
-
 const BASIC = 50;
 const PINNED = 200;
 
@@ -50,7 +36,6 @@ use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\SearchUserContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -65,6 +50,7 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
 use DateTimeImmutable;
 use Fawaz\App\ModerationService;
+use Fawaz\App\Status;
 
 class GraphQLSchemaBuilder
 {
@@ -116,20 +102,16 @@ class GraphQLSchemaBuilder
         $userSchema = $baseQueries;
         $bridgeSchema = $bridgeOnlyQueries;
 
-        if ($this->currentUserId === null) {
-            $schema = $guestSchema;
-        } else {
-            $schema = $userSchema;
-        }
+        $schema = $guestSchema;
 
-        if ($this->userRoles <= 0) {
-            $schema = $schema;
-        } elseif ($this->userRoles === 8) {
-            $schema = $bridgeSchema;
-        } elseif ($this->userRoles === 16) {
-            $schema = $adminSchema;
-        } elseif ($this->userRoles === Role::SUPER_MODERATOR) { // Role::SUPER_MODERATOR
-            $schema = $moderatorSchema;
+        if ($this->currentUserId !== null) {
+            if ($this->userRoles <= 0) {
+                $schema = $userSchema;
+            } elseif ($this->userRoles === 8) {
+                $schema = $bridgeSchema;
+            } elseif ($this->userRoles === 16) {
+                $schema = $adminSchema;
+            }
         }
 
         return $schema;
@@ -170,8 +152,16 @@ class GraphQLSchemaBuilder
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
                 if ($decodedToken) {
+                    // Validate that the provided bearer access token exists in DB and is not expired
+                    if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
+                        $this->logger->warning('Access token not found or expired for user', [
+                            'userId' => $decodedToken->uid,
+                        ]);
+                        $this->currentUserId = null;
+                        return;
+                    }
+
                     $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
-                    //$user = $this->userMapper->loadTokenById($decodedToken->uid);
                     if ($user) {
                         $this->currentUserId = $decodedToken->uid;
                         $this->userRoles = $decodedToken->rol;
@@ -213,7 +203,7 @@ class GraphQLSchemaBuilder
     protected function getStatusNameByID(int $status): ?string
     {
         $statusCode = $status;
-        $statusMap = \Fawaz\App\Status::getMap();
+        $statusMap = Status::getMap();
 
         if (isset($statusMap[$statusCode])) {
             return $statusMap[$statusCode];
@@ -3286,6 +3276,7 @@ class GraphQLSchemaBuilder
     {
         $tokenomicsConfig = ConstantsConfig::tokenomics();
         $dailyfreeConfig = ConstantsConfig::dailyFree();
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
@@ -3324,10 +3315,10 @@ class GraphQLSchemaBuilder
         ];
 
         $actionMaps = [
-            'like' => LIKE_,
-            'comment' => COMMENT_,
-            'post' => POST_,
-            'dislike' => DISLIKE_,
+            'like' => $actions['LIKE'],
+            'comment' => $actions['COMMENT'],
+            'post' => $actions['POST'],
+            'dislike' => $actions['DISLIKE'],
         ];
 
         // Validations
@@ -3873,9 +3864,6 @@ class GraphQLSchemaBuilder
         }
 
         return $results;
-
-        $this->logger->warning('Query.resolveUsers No users found');
-        return $this::createSuccessResponse(21001);
     }
 
     protected function resolveChat(array $args): ?array
@@ -4518,6 +4506,14 @@ class GraphQLSchemaBuilder
             $decodedToken = $this->tokenService->validateToken($refreshToken, true);
 
             if (!$decodedToken) {
+                return $this::respondWithError(30901);
+            }
+
+            // Validate that the provided refresh token exists in DB and is not expired
+            if (!$this->userMapper->refreshTokenValidForUser($decodedToken->uid, $refreshToken)) {
+                $this->logger->warning('Refresh token not found or expired for user', [
+                    'userId' => $decodedToken->uid,
+                ]);
                 return $this::respondWithError(30901);
             }
 

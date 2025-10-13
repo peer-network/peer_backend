@@ -13,20 +13,7 @@ use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 
-use function DI\string;
-
 const TABLESTOGEMS = true;
-const VIEW_ = 1;
-const LIKE_ = 2;
-const DISLIKE_ = 3;
-const COMMENT_ = 4;
-const POST_ = 5;
-const POSTINVESTBASIC_ = 6;
-const POSTINVESTPREMIUM_ = 7;
-const INVITATION_ = 11;
-const DIRECTDEBIT_ = 14;
-const CREDIT_ = 15;
-const TRANSFER_ = 18;
 
 class WalletMapper
 {
@@ -122,6 +109,7 @@ class WalletMapper
             return self::respondWithError(31202);
         }
         $fees = ConstantsConfig::tokenomics()['FEES'];
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
         $peerFee = (float)$fees['PEER'];
         $poolFee = (float)$fees['POOL'];
         $burnFee = (float)$fees['BURN'];
@@ -185,7 +173,7 @@ class WalletMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => -abs($numberoftokens),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
 
                 $this->insertWinToLog($userId, $args);
@@ -200,7 +188,7 @@ class WalletMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => abs($numberoftokens),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
 
                 $this->insertWinToLog($row, $args);
@@ -216,7 +204,7 @@ class WalletMapper
                         'token' => $id,
                         'fromid' => $userId,
                         'numbers' => abs($inviterWin),
-                        'whereby' => TRANSFER_,
+                        'whereby' => $actions['TRANSFER'],
                     ];
 
                     $this->insertWinToLog($inviterId, $args);
@@ -232,7 +220,7 @@ class WalletMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => -abs($countAmount),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
 
                 $this->insertWinToLog($userId, $args);
@@ -247,7 +235,7 @@ class WalletMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => abs($feeAmount),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
 
                 $this->insertWinToLog($this->poolWallet, $args);
@@ -262,7 +250,7 @@ class WalletMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => abs($peerAmount),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
 
                 $this->insertWinToLog($this->peerWallet, $args);
@@ -277,7 +265,7 @@ class WalletMapper
                     'token' => $id,
                     'fromid' => $userId,
                     'numbers' => abs($burnAmount),
-                    'whereby' => TRANSFER_,
+                    'whereby' => $actions['TRANSFER'],
                 ];
 
                 $this->insertWinToLog($this->burnWallet, $args);
@@ -810,13 +798,14 @@ class WalletMapper
         }
 
         $tokenomics = ConstantsConfig::tokenomics();
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
         $actionGemsReturns = $tokenomics['ACTION_GEMS_RETURNS'];
 
         $wins = [
-            ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)$actionGemsReturns['view']],
-            ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)$actionGemsReturns['like']],
-            ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => (float)$actionGemsReturns['dislike']],
-            ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)$actionGemsReturns['comment']]
+            ['table' => 'user_post_views', 'winType' => (int)$actions['VIEW'], 'factor' => (float)$actionGemsReturns['view']],
+            ['table' => 'user_post_likes', 'winType' => (int)$actions['LIKE'], 'factor' => (float)$actionGemsReturns['like']],
+            ['table' => 'user_post_dislikes', 'winType' => (int)$actions['DISLIKE'], 'factor' => (float)$actionGemsReturns['dislike']],
+            ['table' => 'user_post_comments', 'winType' => (int)$actions['COMMENT'], 'factor' => (float)$actionGemsReturns['comment']]
         ];
 
         $totalInserts = 0;
@@ -1113,6 +1102,7 @@ class WalletMapper
             $this->logger->info('Inviter found', ['inviterId' => $inviterId]);
 
             $fees = ConstantsConfig::tokenomics()['FEES'];
+            $actions = ConstantsConfig::wallet()['ACTIONS'];
             $inviteFee = (float)$fees['INVITATION'];
             $percent = round((float)$tokenAmount * $inviteFee, 2);
             $tosend = round((float)$tokenAmount - $percent, 2);
@@ -1124,7 +1114,7 @@ class WalletMapper
                 'postid' => null,
                 'fromid' => $inviterId,
                 'numbers' => -abs($tokenAmount),
-                'whereby' => INVITATION_,
+                'whereby' => $actions['INVITATION'],
                 'createdat' => $createdat,
             ];
             $this->insertWinToLog($userId, $args);
@@ -1136,7 +1126,7 @@ class WalletMapper
                 'postid' => null,
                 'fromid' => $userId,
                 'numbers' => abs($percent),
-                'whereby' => INVITATION_,
+                'whereby' => $actions['INVITATION'],
                 'createdat' => $createdat,
             ];
 
@@ -1168,14 +1158,15 @@ class WalletMapper
         $art = $args['art'] ?? null;
         $fromId = $args['fromid'] ?? null;
         $prices = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
 
         $mapping = [
-            2 => ['price' => $prices['like'], 'whereby' => LIKE_, 'text' => 'Buy like'],
-            3 => ['price' => $prices['dislike'], 'whereby' => DISLIKE_, 'text' => 'Buy dislike'],
-            4 => ['price' => $prices['comment'], 'whereby' => COMMENT_, 'text' => 'Buy comment'],
-            5 => ['price' => $prices['post'], 'whereby' => POST_, 'text' => 'Buy post'],
-            6 => ['price' => $prices['advertisementBasic'], 'whereby' => POSTINVESTBASIC_, 'text' => 'Buy advertise basic'],
-            7 => ['price' => $prices['advertisementPinned'], 'whereby' => POSTINVESTPREMIUM_, 'text' => 'Buy advertise pinned'],
+            2 => ['price' => $prices['like'], 'whereby' => $actions['LIKE'], 'text' => 'Buy like'],
+            3 => ['price' => $prices['dislike'], 'whereby' => $actions['DISLIKE'], 'text' => 'Buy dislike'],
+            4 => ['price' => $prices['comment'], 'whereby' => $actions['COMMENT'], 'text' => 'Buy comment'],
+            5 => ['price' => $prices['post'], 'whereby' => $actions['POST'], 'text' => 'Buy post'],
+            6 => ['price' => $prices['advertisementBasic'], 'whereby' => $actions['POSTINVESTBASIC'], 'text' => 'Buy advertise basic'],
+            7 => ['price' => $prices['advertisementPinned'], 'whereby' => $actions['POSTINVESTPREMIUM'], 'text' => 'Buy advertise pinned'],
         ];
 
         if (!isset($mapping[$art])) {
@@ -1362,14 +1353,15 @@ class WalletMapper
     public function callUserMove(string $userId): array
     {
         $tokenomics = ConstantsConfig::tokenomics();
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
         $actionGemsReturns = $tokenomics['ACTION_GEMS_RETURNS'];
 
         try {
             $wins = [
-                ['table' => 'user_post_views', 'winType' => (int)VIEW_, 'factor' => (float)$actionGemsReturns['view'], 'key' => 'views'],
-                ['table' => 'user_post_likes', 'winType' => (int)LIKE_, 'factor' => (float)$actionGemsReturns['like'], 'key' => 'likes'],
-                ['table' => 'user_post_dislikes', 'winType' => (int)DISLIKE_, 'factor' => -(float)$actionGemsReturns['dislike'], 'key' => 'dislikes'],
-                ['table' => 'user_post_comments', 'winType' => (int)COMMENT_, 'factor' => (float)$actionGemsReturns['comment'], 'key' => 'comments']
+                ['table' => 'user_post_views', 'winType' => (int)$actions['VIEW'], 'factor' => (float)$actionGemsReturns['view'], 'key' => 'views'],
+                ['table' => 'user_post_likes', 'winType' => (int)$actions['LIKE'], 'factor' => (float)$actionGemsReturns['like'], 'key' => 'likes'],
+                ['table' => 'user_post_dislikes', 'winType' => (int)$actions['DISLIKE'], 'factor' => -(float)$actionGemsReturns['dislike'], 'key' => 'dislikes'],
+                ['table' => 'user_post_comments', 'winType' => (int)$actions['COMMENT'], 'factor' => (float)$actionGemsReturns['comment'], 'key' => 'comments']
             ];
 
             $totalInteractions = 0;
