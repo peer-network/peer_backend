@@ -2581,6 +2581,8 @@ class GraphQLSchemaBuilder
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'alphaMint' => fn (mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
+            'getLiquidityPoolHistory' => fn(mixed $root, array $args) => $this->peerTokenService->getLiquidityPoolHistory($args),
+            'getTokenPrice' => fn(mixed $root, array $args) => $this->peerTokenService->getTokenPrice(),
         ];
     }
 
@@ -2624,6 +2626,7 @@ class GraphQLSchemaBuilder
             'resolveTransferV2' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'swapTokens' => fn(mixed $root, array $args) => $this->peerTokenService->swapTokens($args),
             'addLiquidity' => fn(mixed $root, array $args) => $this->peerTokenService->addLiquidity($args),
+            'updateSwapTranStatus' => fn(mixed $root, array $args) => $this->peerTokenService->updateSwapTranStatus($args),
             'globalwins' => fn (mixed $root, array $args) => $this->walletService->callGlobalWins(),
             'gemsters' => fn (mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
             'alphaMint' => fn (mixed $root, array $args) => $this->alphaMintService->alphaMint($args),

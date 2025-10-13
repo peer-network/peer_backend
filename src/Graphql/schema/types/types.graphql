@@ -484,3 +484,52 @@ type AllUserFriends {
   ResponseCode: String
   affectedRows: [AllUserInfo]
 }
+
+type AddLiquidity {
+  newTokenAmount: Decimal
+  newBtcAmount: Decimal
+  newTokenPrice: Decimal
+}
+
+type AddLiquidityResponse {
+  status: String!
+  ResponseCode: Int!
+  affectedRows: AddLiquidity!
+}
+
+
+type UpdateSwapResponse {
+  status: String!
+  ResponseCode: Int!
+  affectedRows: LiquidityPoolTransaction
+}
+
+type LiquidityPoolHistoryResponse {
+  status: String!
+  ResponseCode: Int!
+  affectedRows: [LiquidityPoolTransaction!]
+}
+
+type LiquidityPoolTransaction {
+  swapid: String!
+  transactionid: String!
+  transactiontype: String!
+  senderid: String!
+  tokenamount: Decimal!
+  btcamount: Decimal!
+  status: String!
+  message: String!
+  createdat: String!
+}
+
+type SwapToken {
+  tokenSend: Decimal
+  tokensSubstractedFromWallet: Decimal
+  expectedBtcReturn: Decimal
+}
+
+type SwapTokenResponse {
+  status: String!
+  ResponseCode: Int!
+  affectedRows: SwapToken!
+}

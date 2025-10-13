@@ -8,6 +8,8 @@ extend type Query {
   postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
   dailygemstatus: DailyGemStatusResponse!
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
+  getLiquidityPoolHistory(offset: Int, limit: Int): LiquidityPoolHistoryResponse!
+  getTokenPrice: TokenPriceResponse!
 }
 
 extend type Mutation {
@@ -15,6 +17,8 @@ extend type Mutation {
   globalwins: DefaultResponse!
   gemsters(day: DayFilterType!): GemstersResponse!
   alphaMint: DefaultResponse
+  addLiquidity(amountToken: Decimal!, amountBtc: Decimal!): AddLiquidityResponse!
+  updateSwapTranStatus(transactionId: ID!): UpdateSwapResponse!
 }
 
 extend type HelloResponse {
