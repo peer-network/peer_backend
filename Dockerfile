@@ -4,7 +4,8 @@ FROM ghcr.io/peer-network/php-backend-base:latest
 WORKDIR /var/www/html
 
 # Copy only composer files first (this helps Docker cache dependencies)
-COPY composer.json composer.lock ./
+COPY composer.json ./
+COPY composer.lock* ./
 
 # Install Composer and dependencies (this will run only if lock file changes)
 RUN curl -sS https://getcomposer.org/installer | php && \
