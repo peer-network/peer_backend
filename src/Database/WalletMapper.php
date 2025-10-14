@@ -4,14 +4,9 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use Fawaz\App\Models\BtcSwapTransaction;
-use Fawaz\App\Models\Transaction;
-use Fawaz\App\Repositories\BtcSwapTransactionRepository;
-use Fawaz\App\Repositories\TransactionRepository;
 use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
-use Fawaz\Services\BtcService;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
@@ -29,7 +24,6 @@ class WalletMapper
     private string $poolWallet;
     private string $burnWallet;
     private string $peerWallet;
-    private string $btcpool;
 
     public const STATUS_DELETED = 6;
 
@@ -1057,24 +1051,8 @@ class WalletMapper
                 'createdat' => $row['createdat']
             ];
 
-            // Also needs to add records in log_gems in FUTURE
-            $operationid = self::generateUUID();
-            $this->saveWalletEntry($userId, $rowgems2token);
-            $transObj = [
-                'operationid' => $operationid,
-                'transactiontype' => 'mint',
-                'senderid' => $row['fromid'],
-                'recipientid' => $userId,
-                'tokenamount' => $rowgems2token,
-                'message' => 'Airdrop',
-            ];
-            $transactions = new Transaction($transObj, [], false);
-            $transRepo = new TransactionRepository($this->logger, $this->db);
-            $transRepo->saveTransaction($transactions);
-
-            
-            // $this->insertWinToLog($userId, end($args[$userId]['details']));
-            // $this->insertWinToPool($userId, end($args[$userId]['details']));
+            $this->insertWinToLog($userId, end($args[$userId]['details']));
+            $this->insertWinToPool($userId, end($args[$userId]['details']));
         }
 
 
@@ -1221,7 +1199,6 @@ class WalletMapper
         ];
 
         try {
-            // TRANSACTION TABLE: MAY BE
             $results = $this->insertWinToLog($userId, $args);
             if ($results === false) {
                 $this->logger->warning("Error occurred in deductFromWallets.insertWinToLog", [
@@ -1231,7 +1208,6 @@ class WalletMapper
                 return self::respondWithError(41205);
             }
 
-            // TRANSACTION TABLE: MAY BE
             $results = $this->insertWinToPool($userId, $args);
             if ($results === false) {
                 $this->logger->warning("Error occurred in deductFromWallets.insertWinToPool", [
