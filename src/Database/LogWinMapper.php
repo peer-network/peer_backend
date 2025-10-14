@@ -8,6 +8,7 @@ use Fawaz\App\Repositories\TransactionRepository;
 use Fawaz\Database\Interfaces\TransactionManager;
 use PDO;
 use Fawaz\Services\LiquidityPool;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Psr\Log\LoggerInterface;
@@ -20,7 +21,7 @@ class LogWinMapper
     private string $burnWallet;
     private string $companyWallet;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected TransactionManager $transactionManager) {}
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected TransactionManager $transactionManager) {}
 
     /**
      * Initialize and validates the liquidity pool wallets.
@@ -868,7 +869,10 @@ class LogWinMapper
 
                 } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
-                    $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
+                    // Guard: $tokenId may not be set if failure happened before generation
+                    if (isset($tokenId) && $tokenId !== '') {
+                        $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
+                    }
                     continue;
                 }
             }
@@ -1149,7 +1153,9 @@ class LogWinMapper
                     $tokenIds[] = $tokenId;
                 } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
-                    $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
+                    if (isset($tokenId) && $tokenId !== '') {
+                        $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
+                    }
                     continue;
                 }
             }
@@ -1256,7 +1262,9 @@ class LogWinMapper
                     $tokenIds[] = $tokenId;
                 } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
-                    $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
+                    if (isset($tokenId) && $tokenId !== '') {
+                        $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
+                    }
                     continue;
                 }
             }
@@ -1363,7 +1371,9 @@ class LogWinMapper
                     $tokenIds[] = $tokenId;
                 } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
-                    $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
+                    if (isset($tokenId) && $tokenId !== '') {
+                        $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
+                    }
                     continue;
                 }
             }
@@ -1479,7 +1489,7 @@ class LogWinMapper
 
                 
                 $totalGems = isset($gemAllDays[0]['overall_total']) ? (string)$gemAllDays[0]['overall_total'] : '0';
-                $dailyToken = DAILY_NUMBER_TOKEN;
+                $dailyToken = (float) (\Fawaz\config\constants\ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
                 $gemsintoken = TokenHelper::divRc((float)$dailyToken, (float)$totalGems);
                 $bestatigungInitial = TokenHelper::mulRc((float)$totalGems, (float)$gemsintoken);
@@ -1522,8 +1532,8 @@ class LogWinMapper
 
                         $postId = $args['postid'] ?? null;
                         $fromId = $args['fromid'] ?? null;
-                        $gems = $args['gems'] ?? 0.0;
-                        $numBers = $rowgems2token ?? 0;
+                        $gems = $args['gems'];
+                        $numBers = $rowgems2token;
                         $createdat =  $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
 
                         try {

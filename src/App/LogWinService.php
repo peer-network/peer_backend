@@ -5,12 +5,13 @@ namespace Fawaz\App;
 use Psr\Log\LoggerInterface;
 use \Exception;
 use Fawaz\Database\LogWinMapper;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class LogWinService
 {
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected LogWinMapper $logWinMapper)
+    public function __construct(protected PeerLoggerInterface $logger, protected LogWinMapper $logWinMapper)
     {
     }
 
