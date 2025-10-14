@@ -23,7 +23,6 @@ runtime-data/media/video/*
 runtime-data/media/tmp/*
 runtime-data/logs/*
 runtime-data/ratelimiter/*
-runtime-data/media/tmp/*
 !/**/placeholder.txt
 *_rate_limiter_storage.json
 tests/postman_collection/tmp_*.json
@@ -35,3 +34,4 @@ changelog
 .gitleaks_out/
 *.generated
 *.cache
+.gitleaksignore

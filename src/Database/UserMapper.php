@@ -154,7 +154,7 @@ class UserMapper
 
     private function getLocationFromIP(string $ip): ?string
     {
-        $url = "http://ip-api.com/json/{$ip}";
+        $url = "https://ip-api.com/json/{$ip}";
 
         try {
             $ch = curl_init();
@@ -1785,6 +1785,27 @@ class UserMapper
         }
     }
 
+    /**
+     * Check whether a refresh token exists for a specific user and is not expired
+     */
+    public function refreshTokenValidForUser(string $userId, string $refreshToken): bool
+    {
+        $this->logger->debug('UserMapper.refreshTokenValidForUser started', ['userId' => $userId]);
+        $now = (int) \time();
+        try {
+            $sql = 'SELECT COUNT(*) FROM refresh_tokens WHERE userid = :userid AND refresh_token = :token AND expiresat > :now';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':token', $refreshToken, \PDO::PARAM_STR);
+            $stmt->bindValue(':now', $now, \PDO::PARAM_INT);
+            $stmt->execute();
+            return ((int)$stmt->fetchColumn()) > 0;
+        } catch (\Throwable $e) {
+            $this->logger->error('Error in refreshTokenValidForUser', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
     public function fetchAllFriends(int $offset = 0, int $limit = 20): ?array
     {
         $this->logger->debug("UserMapper.fetchAllFriends started");
@@ -1930,6 +1951,27 @@ class UserMapper
     }
 
     /**
+     * Check whether an access token exists for a specific user and is not expired
+     */
+    public function accessTokenValidForUser(string $userId, string $accessToken): bool
+    {
+        $this->logger->debug('UserMapper.accessTokenValidForUser started', ['userId' => $userId]);
+        $now = (int) \time();
+        try {
+            $sql = 'SELECT COUNT(*) FROM access_tokens WHERE userid = :userid AND access_token = :token AND expiresat > :now';
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':token', $accessToken, \PDO::PARAM_STR);
+            $stmt->bindValue(':now', $now, \PDO::PARAM_INT);
+            $stmt->execute();
+            return ((int)$stmt->fetchColumn()) > 0;
+        } catch (\Throwable $e) {
+            $this->logger->error('Error in accessTokenValidForUser', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
      * Determines if the first request is being retried too soon.
      */
     public function isFirstAttemptTooSoon(array $attempt): bool
@@ -1946,21 +1988,21 @@ class UserMapper
     {
         return $attempt['attempt_count'] === 2
             && !$attempt['collected']
-            && time() < strtotime($attempt['last_attempt'] . ' +10 minutes');
+            && time() < strtotime($attempt['last_attempt'] . ' +5 minutes');
     }
 
     /**
      * Returns a response indicating the user should retry after a delay.
      */
-    public function rateLimitResponse(int $waitMinutes, ?string $lastAttempt = null): array
+    public function rateLimitResponse(int $waitSeconds, ?string $lastAttempt = null): array
     {
-        $remaining = $waitMinutes;
+        $remaining = $waitSeconds;
 
         if ($lastAttempt) {
-            $remaining = ceil((strtotime($lastAttempt . " +{$waitMinutes} minutes") - time()) / 60);
+            $remaining = ceil((strtotime($lastAttempt . " +{$waitSeconds} seconds") - time()));
         }
 
-        $nextAttemptAt = DateService::nowPlusMinutes($remaining);
+        $nextAttemptAt = DateService::nowPlusSeconds((int)$remaining);
 
         return [
             'status' => 'error',
