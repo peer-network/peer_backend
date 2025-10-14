@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Services;
 
+use Fawaz\App\ValidationException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
@@ -86,11 +87,11 @@ class JWTService
 
         } catch (ExpiredException $e) {
             $this->logger->info('Token has expired', ['exception' => $e->getMessage(), 'token' => $token]);
-            throw new \Exception('Token validation failed');
+            throw new ValidationException('Token validation failed');
 
         } catch (\Exception $e) {
             $this->logger->error('Token validation failed', ['exception' => $e->getMessage(), 'token' => $token]);
-            throw new \Exception('Token validation failed');
+            throw new ValidationException('Token validation failed');
         }
     }
 
