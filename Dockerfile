@@ -3,6 +3,16 @@ FROM ghcr.io/peer-network/php-backend-base:latest
 
 WORKDIR /var/www/html
 
+# Copy only composer files first (this helps Docker cache dependencies)
+COPY composer.json composer.lock ./
+
+# Install Composer and dependencies (this will run only if lock file changes)
+RUN curl -sS https://getcomposer.org/installer | php && \
+    mv composer.phar /usr/local/bin/composer && \
+    composer config --global process-timeout 600 && \
+    composer install --no-dev --prefer-dist --no-interaction --no-scripts && \
+    composer clear-cache
+
 # Copy app code
 COPY . .
 
@@ -12,9 +22,6 @@ RUN rm -f /usr/local/etc/php/conf.d/ffi.ini \
 RUN php -m | grep -qi '^ffi$' || (echo "FFI NOT FOUND after install" && exit 1)
  
 RUN which supervisord
- 
-RUN curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer
 
 RUN if [ -f tokencalculation/Cargo.toml ]; then cd tokencalculation && . /root/.cargo/env && cargo build --release; fi
 
@@ -33,10 +40,6 @@ RUN mkdir -p /var/www/html/runtime-data/logs \
 && chown -R www-data:www-data /var/www/html/runtime-data
 
 RUN composer require --no-update php-ffmpeg/php-ffmpeg
- 
-RUN composer config --global process-timeout 600 \
- && composer install --no-dev --prefer-dist --no-interaction \
- && composer dump-autoload -o
  
 RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
 && echo "display_errors = Off" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
