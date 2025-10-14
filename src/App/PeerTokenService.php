@@ -236,7 +236,7 @@ class PeerTokenService
             }
 
         } catch (\Exception $e) {
-            return $this->respondWithError(41231); // Failed to swap tokens
+            return $this->respondWithError(41231);
         }
     }
 

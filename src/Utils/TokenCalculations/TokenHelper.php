@@ -94,15 +94,15 @@ class TokenHelper
     /**
      * Adds two values.
      *
-     * @param string $q96Value1 First  value.
-     * @param string $q96Value2 Second  value.
+     * @param string $value1 First  value.
+     * @param string $value2 Second  value.
      * @return string Sum of the two  values, as a  string.
      */
-    public static function addRc(string $q96Value1, string $q96Value2): string
+    public static function addRc(string $value1, string $value2): string
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->add_decimal($q96Value1, $q96Value2);
+        $result = $runtIns->add_decimal($value1, $value2);
 
         if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
@@ -113,15 +113,15 @@ class TokenHelper
     /**
      * Multiply two values.
      *
-     * @param string $q96Value1 First value.
-     * @param string $q96Value2 Second value.
+     * @param string $value1 First value.
+     * @param string $value2 Second value.
      * @return string Sum of the two values, as a string.
      */
-    public static function mulRc(string $q96Value1, string $q96Value2): string
+    public static function mulRc(string $value1, string $value2): string
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->multiply_decimal($q96Value1, $q96Value2);
+        $result = $runtIns->multiply_decimal($value1, $value2);
 
         if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
@@ -133,15 +133,15 @@ class TokenHelper
     /**
      * divide two values.
      *
-     * @param string $q96Value1 First  value.
-     * @param string $q96Value2 Second  value.
+     * @param string $value1 First  value.
+     * @param string $value2 Second  value.
      * @return string Sum of the two  values, as a  string.
      */
-    public static function divRc(string $q96Value1, string $q96Value2): string
+    public static function divRc(string $value1, string $value2): string
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->divide_decimal($q96Value1, $q96Value2);
+        $result = $runtIns->divide_decimal($value1, $value2);
 
         if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");
@@ -152,15 +152,15 @@ class TokenHelper
     /**
      * Substract two  values.
      *
-     * @param string $q96Value1 First  value.
-     * @param string $q96Value2 Second  value.
+     * @param string $value1 First  value.
+     * @param string $value2 Second  value.
      * @return string Sum of the two  values, as a  string.
      */
-    public static function subRc(string $q96Value1, string $q96Value2): string
+    public static function subRc(string $value1, string $value2): string
     {
         $runtIns = self::initRc();
 
-        $result = $runtIns->subtract_decimal($q96Value1, $q96Value2);
+        $result = $runtIns->subtract_decimal($value1, $value2);
 
         if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in addition operation, result is not numeric.");

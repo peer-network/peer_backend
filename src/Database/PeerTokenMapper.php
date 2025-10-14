@@ -147,14 +147,22 @@ class PeerTokenMapper
         }
 
         $currentBalance = $this->getUserWalletBalance($userId);
+        $numberoftokens = (string) $args['numberoftokens'];
 
-        if (empty($currentBalance)) {
+        if (empty($currentBalance) || $currentBalance < $numberoftokens) {
             $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                 'Balance' => $currentBalance,
             ]);
             return self::respondWithError(51301);
         }
-
+        
+        if ($numberoftokens <= 0) {
+            $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
+                'numberoftokens' => $numberoftokens,
+                'Balance' => $currentBalance,
+            ]);
+            return self::respondWithError(30264);
+        }
         if ($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient) {
             $this->logger->warning('Unauthorized to send token');
             return self::respondWithError(31203);
@@ -164,14 +172,7 @@ class PeerTokenMapper
             return self::respondWithError(30264);
         }
 
-        $numberoftokens = (string) $args['numberoftokens'];
-        if ($numberoftokens <= 0) {
-            $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
-                'numberoftokens' => $numberoftokens,
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(30264);
-        }
+        
         $message = isset($args['message']) ? (string) $args['message'] : null;
 
 
@@ -814,8 +815,9 @@ class PeerTokenMapper
             return self::respondWithError(41227);
         }
         $currentBalance = $this->getUserWalletBalance($userId);
+        $numberoftokensToSwap = (string) $args['numberoftokens'];
 
-        if (empty($currentBalance)) {
+        if (empty($currentBalance) || $currentBalance < $numberoftokensToSwap) {
             $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                 'Balance' => $currentBalance,
             ]);
@@ -1261,11 +1263,6 @@ class PeerTokenMapper
         $repo = new TransactionRepository($this->logger, $this->db);
         $repo->saveTransaction($transaction);
     }
-
-
-
-
-
 
     /**
      * Save wallet entry.

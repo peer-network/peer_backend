@@ -1028,11 +1028,12 @@ class WalletMapper
 
             if (!isset($args[$userId])) {
 
-                $totalTokenNumber = TokenHelper::mulRc((string) $row['total_numbers'], $gemsintoken);
+                $total_numbers = (string) $row['total_numbers'];
+                $totalTokenNumber = TokenHelper::mulRc($total_numbers, $gemsintoken);
                 $args[$userId] = [
                     'userid' => $userId,
-                    'gems' => (float)$row['total_numbers'],
-                    'tokens' => $totalTokenNumber,
+                    'gems' => (float) $row['total_numbers'],
+                    'tokens' => (float) $totalTokenNumber,
                     'percentage' => (float)$row['percentage'],
                     'details' => []
                 ];
