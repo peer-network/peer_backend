@@ -28,7 +28,9 @@ regexes = [
   '''(?i)print\(|logger\.info\(|console\.log''',
   '''(?i)file_(path|name|id)''',
   '''(?i)test(user|post|wallet|transaction|comment)''',
-  '''(?i)temporary|sample|mock|fixture'''
+  '''(?i)temporary|sample|mock|fixture''',
+  '''(?i)(Service|Mapper|Builder|Provider|Injector|Query)\.[A-Za-z0-9_]+''',
+  '''(?i)(fetch|check|get|load|add|update|convert|insert|toggle|handle|post|transactions|eligibility|privacy|token)'''
 ]
 
 # --- Global Allowlist (approved exceptions ONLY) ---
