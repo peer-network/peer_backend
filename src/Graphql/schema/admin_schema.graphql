@@ -1,5 +1,6 @@
 extend type Query {
-  searchUserAdmin(userid: ID,contentFilterBy: ContentFilterType,email: String,username: String,status: Int,verified: Int,ip: String,offset: Int,limit: Int): UserListResponse!
+  searchUserAdmin(userid: ID,contentFilterBy: ContentFilterType,email: String,username: String,status: Int,verified: Int,ip: String,offset: Int,limit: Int): UserListResponse! @deprecated(reason: "Use listUsersAdminV2.")
+  listUsersAdminV2(contentFilterBy: ContentFilterType,userid: ID,email: String,username: String,status: Int,verified: Int,ip: String,offset: Int,limit: Int): UserListResponse!
   allfriends(offset: Int, limit: Int): AllUserFriends!
   refreshmarketcap: RefreshMarketCapResponse!
   gemster: GemsterResponse!
