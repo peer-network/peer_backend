@@ -1,0 +1,124 @@
+name: Trivy Security Scan (Weekdays 9:30 AM Berlin)
+
+on:
+  schedule:
+    - cron: "30 7 * * 1-5"  # Mon–Fri at 7:30 AM UTC ≈ 9:30 AM Berlin
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trivy_scan:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']
+    outputs:
+      outcome: ${{ steps.trivy_outcome.outputs.outcome }}
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: docker-image-${{ matrix.php-version }}
+          path: .
+
+      - name: Load Docker image
+        run: docker load -i peer-backend.tar
+
+      - name: Set image name
+        run: echo "IMAGE_NAME=peer-backend:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: ${{ runner.os }}-trivy-db
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release apt-transport-https
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Generate composer.lock (not committed)
+        run: composer install --no-dev --prefer-dist --no-interaction
+
+      - name: Set Trivy Scan Outcome
+        id: trivy_outcome
+        run: |
+          result=0
+          trivy image --exit-code 1 --severity CRITICAL,HIGH --ignore-unfixed $IMAGE_NAME || result=1
+          trivy fs . --scanners vuln --exit-code 1 --severity CRITICAL,HIGH || result=1
+          trivy fs . --scanners secret --exit-code 1 || result=1
+
+          if [ "$result" -eq 0 ]; then
+            echo "outcome=success" >> $GITHUB_OUTPUT
+            echo "success" > outcome.txt
+          else
+            echo "outcome=other_failure" >> $GITHUB_OUTPUT
+            echo "other_failure" > outcome.txt
+          fi
+
+      - name: Upload Trivy build outcome marker
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: outcome-${{ matrix.php-version }}-${{ github.run_attempt }}
+          path: outcome.txt
+
+      - name: Upload Scan Reports
+        if: always()
+        run: |
+          mkdir -p trivy_reports
+          trivy image --format table --ignore-unfixed --output trivy_reports/image.txt $IMAGE_NAME
+          trivy fs . --format table --scanners vuln --output trivy_reports/filesystem_vuln.txt
+          trivy fs . --format table --scanners secret --output trivy_reports/secrets.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-security-reports-${{ matrix.php-version }}-${{ github.run_attempt }}
+          path: trivy_reports
+
+  send_discord_alert:
+    name: Send Discord Trivy Report Notification
+    runs-on: ubuntu-latest
+    needs: [trivy_scan]
+    if: always()
+    steps:
+      - name: Send Discord Alert
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          OUTCOME: ${{ needs.trivy_scan.outputs.outcome }}
+        run: |
+          MAINTAINER="<@1362087975906967736>"
+          VIDIKZAN="<@1355093873323671742>"
+
+          if [ "$OUTCOME" = "success" ]; then
+            STATUS="✅ **Trivy Security Scan Passed Successfully**"
+            COLOR="00FF00"
+          else
+            STATUS="⚠️ **Trivy Security Scan Found Vulnerabilities**"
+            COLOR="FF0000"
+          fi
+
+          MESSAGE="$STATUS\n"
+          MESSAGE+="Repository: **${{ github.repository }}**\n"
+          MESSAGE+="Run Link: <$RUN_URL>\n"
+          MESSAGE+="Maintainer: $MAINTAINER\n"
+          MESSAGE+="Developer: $VIDIKZAN\n"
+          MESSAGE+="Time: $(TZ='Europe/Berlin' date '+%Y-%m-%d %H:%M %Z (Berlin)')"
+
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"$MESSAGE\"}" \
+               "$DISCORD_WEBHOOK_URL"
