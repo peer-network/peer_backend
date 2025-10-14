@@ -3,13 +3,13 @@
 namespace Fawaz\App\Repositories;
 
 use Fawaz\App\Models\TokenEuroPrice;
+use Fawaz\Utils\PeerLoggerInterface;
 use PDO;
-use Psr\Log\LoggerInterface;
 
 class TokenEuroPriceRepository
 {
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected PDO $db
     ) {}
 
@@ -18,7 +18,7 @@ class TokenEuroPriceRepository
      */
     public function getTokenEuroPrice(TokenEuroPrice $tokenPrice): ?TokenEuroPrice
     {
-        $this->logger->info("Fetching token price for token: {$tokenPrice->getToken()}");
+        $this->logger->debug("Fetching token price for token: {$tokenPrice->getToken()}");
 
         try {
             $stmt = $this->db->prepare("SELECT * FROM token_euro_price WHERE token = :token");
@@ -39,7 +39,7 @@ class TokenEuroPriceRepository
      */
     public function updateTokenEuroPrice(TokenEuroPrice $tokenPrice): TokenEuroPrice
     {
-        $this->logger->info("Updating token price for token: {$tokenPrice->getToken()}");
+        $this->logger->debug("Updating token price for token: {$tokenPrice->getToken()}");
 
         try {
             $stmt = $this->db->prepare("
@@ -65,7 +65,7 @@ class TokenEuroPriceRepository
      */
     public function saveTokenEuroPrice(TokenEuroPrice $tokenPrice): TokenEuroPrice
     {
-        $this->logger->info("Saving new token price for token: {$tokenPrice->getToken()}");
+        $this->logger->debug("Saving new token price for token: {$tokenPrice->getToken()}");
 
         try {
             $stmt = $this->db->prepare("

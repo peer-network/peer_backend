@@ -22,7 +22,7 @@ class BtcSwapTransactionRepository
      */
     public function saveTransaction(BtcSwapTransaction $transaction)
     {
-        $this->logger->info("TransactionRepository.saveTransaction started");
+        $this->logger->debug("TransactionRepository.saveTransaction started");
 
         $query = "INSERT INTO btc_swap_transactions 
                   (swapid, operationid, transactiontype, userid, btcaddress,  tokenamount, btcamount, status, message, createdat)
@@ -44,7 +44,7 @@ class BtcSwapTransactionRepository
             $stmt->bindValue(':createdat', $transaction->getCreatedat(), \PDO::PARAM_STR);
             $stmt->execute();
 
-            $this->logger->info("Inserted new transaction into database");
+            $this->logger->debug("Inserted new transaction into database");
 
             return $transaction;
         } catch (\PDOException $e) {
