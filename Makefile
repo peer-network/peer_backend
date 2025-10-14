@@ -388,7 +388,6 @@ phpstan-fast: env-ci ## Run PHPStan using already built backend & local vendor (
 	@docker-compose --env-file .env.dev -f docker-compose.yml -f docker-compose.override.local.yml run --no-deps --rm \
 		-v "$(PWD)":/var/www/html \
 		backend sh -c "php vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
-	@rm -f .env.ci
 
 # ---- Developer Shortcuts ----
 .PHONY: logs db bash-backend

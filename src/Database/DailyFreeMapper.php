@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\config\constants\ConstantsConfig;
 use PDO;
 use Fawaz\App\DailyFree;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -96,10 +97,12 @@ class DailyFreeMapper
 
     public function getUserDailyUsage(string $userId, int $artType): int
     {
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
+
         $columnMap = [
-            LIKE_ => 'liken',
-            COMMENT_ => 'comments',
-            POST_ => 'posten',
+            $actions['LIKE'] => 'liken',
+            $actions['COMMENT'] => 'comments',
+            $actions['POST'] => 'posten',
         ];
 
         $column = $columnMap[$artType] ?? null;
@@ -191,11 +194,12 @@ class DailyFreeMapper
     public function incrementUserDailyUsage(string $userId, int $artType): bool
     {
         $this->logger->debug('DailyFreeMapper.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
-
+        
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
         $columnMap = [
-            LIKE_ => 'liken',
-            COMMENT_ => 'comments',
-            POST_ => 'posten',
+            $actions['LIKE'] => 'liken',
+            $actions['COMMENT'] => 'comments',
+            $actions['POST'] => 'posten',
         ];
 
         if (!isset($columnMap[$artType])) {
@@ -221,9 +225,9 @@ class DailyFreeMapper
 
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':liken', $artType === LIKE_ ? 1 : 0, \PDO::PARAM_INT);
-            $stmt->bindValue(':comments', $artType === COMMENT_ ? 1 : 0, \PDO::PARAM_INT);
-            $stmt->bindValue(':posten', $artType === POST_ ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':liken', $artType === $actions['LIKE'] ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':comments', $artType === $actions['COMMENT'] ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':posten', $artType === $actions['POST'] ? 1 : 0, \PDO::PARAM_INT);
 
             $success = $stmt->execute();
 
@@ -239,10 +243,11 @@ class DailyFreeMapper
 
     public function incrementUserDailyUsagee(string $userId, int $artType): bool
     {
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
         $columnMap = [
-            LIKE_ => 'liken',
-            COMMENT_ => 'comments',
-            POST_ => 'posten',
+            $actions['LIKE'] => 'liken',
+            $actions['COMMENT'] => 'comments',
+            $actions['POST'] => 'posten',
         ];
 
         $column = $columnMap[$artType] ?? null;
@@ -266,9 +271,9 @@ class DailyFreeMapper
 
             $stmt = $this->db->prepare($updateQuery);
             $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':liken', $artType === LIKE_ ? 1 : 0, \PDO::PARAM_INT);
-            $stmt->bindValue(':comments', $artType === COMMENT_ ? 1 : 0, \PDO::PARAM_INT);
-            $stmt->bindValue(':posten', $artType === POST_ ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':liken', $artType === $actions['LIKE'] ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':comments', $artType === $actions['COMMENT'] ? 1 : 0, \PDO::PARAM_INT);
+            $stmt->bindValue(':posten', $artType === $actions['POST'] ? 1 : 0, \PDO::PARAM_INT);
 
             return $stmt->execute();
         } catch (\Exception $e) {
