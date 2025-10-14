@@ -45,7 +45,7 @@ class GraphQLHandler implements RequestHandlerInterface
             return $this->errorResponse("Invalid GraphQL query. Expected a valid query string.", 400);
         }
 
-        $this->logger->info("GraphQLHandler processing request.");
+        $this->logger->debug("GraphQLHandler processing request.");
 
         //$this->logger->info("Received raw body: " . json_encode($rawBody));
         $authorizationHeader = $request->getHeader('Authorization');
