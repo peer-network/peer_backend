@@ -140,37 +140,40 @@ class GraphQLSchemaBuilder
         }
     }
 
-    public function setCurrentUserId(?string $bearerToken): void
+    // true - if token is empty or valid
+    // false - if not-empty and invalid
+    public function setCurrentUserId(?string $bearerToken): bool
     {
         if ($bearerToken !== null && $bearerToken !== '') {
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
-                if ($decodedToken) {
-                    // Validate that the provided bearer access token exists in DB and is not expired
-                    if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
-                        $this->logger->warning('Access token not found or expired for user', [
-                            'userId' => $decodedToken->uid,
-                        ]);
-                        $this->currentUserId = null;
-                        return;
-                    }
-
-                    $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
-                    if ($user) {
-                        $this->currentUserId = $decodedToken->uid;
-                        $this->userRoles = $decodedToken->rol;
-                        $this->setCurrentUserIdForServices($this->currentUserId);
-                        $this->logger->debug('Query.setCurrentUserId started');
-                    }
-                } else {
+                // Validate that the provided bearer access token exists in DB and is not expired
+                if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
+                    $this->logger->warning('Access token not found or expired for user', [
+                        'userId' => $decodedToken->uid,
+                    ]);
                     $this->currentUserId = null;
+                    return false;
                 }
+
+                $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
+                if ($user) {
+                    $this->currentUserId = $decodedToken->uid;
+                    $this->userRoles = $decodedToken->rol;
+                    $this->setCurrentUserIdForServices($this->currentUserId);
+                    $this->logger->debug('Query.setCurrentUserId started');
+                    return true;
+                }
+                $this->logger->error('Query.setCurrentUserId: user not found');
+                return false;
             } catch (\Throwable $e) {
                 $this->logger->error('Invalid token', ['exception' => $e]);
                 $this->currentUserId = null;
+                return false;
             }
         } else {
             $this->currentUserId = null;
+            return true;
         }
     }
 

@@ -26,8 +26,8 @@ return static function (App $app) {
             ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization')
             ->withHeader('Access-Control-Allow-Credentials', 'true')
             ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-            ->withHeader('Pragma', 'no-cache')
-            ->withStatus(200);
+            ->withHeader('Pragma', 'no-cache');
+//            ->withStatus(200);
     });
 
     // Routes

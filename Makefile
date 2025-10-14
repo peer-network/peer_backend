@@ -105,7 +105,7 @@ restart-db: ## Restart only the database (fresh schema & data, keep backend as-i
 
 	@echo "Database restarted and ready. Backend container was untouched."
 
-dev: check-hooks scan reset-db-and-backend init ## Full setup: env.ci, DB reset, vendors install, start DB+backend
+dev: check-hooks reset-db-and-backend init ## Full setup: env.ci, DB reset, vendors install, start DB+backend
 	@cp .env.dev .env.ci
 	@echo "Installing Composer dependencies on local host..."
 	composer install --prefer-dist --no-interaction
