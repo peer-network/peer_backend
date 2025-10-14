@@ -60,6 +60,14 @@ gitleaks version
 WSL (Ubuntu on Windows):
 Use the Linux (x86_64) instructions above.
 
+# Local Gitleaks Ignore File
+
+For local development, you can use a `.gitleaksignore` file to ignore known false positives  
+(e.g. mock data, UUIDs, test fixtures).  
+
+This file is respected by both the **pre-commit hook** and manual `make scan` runs,  
+but is **excluded from Git tracking** — it only affects your local environment.
+
 ---
 
 ## 🚀 Getting Started
@@ -84,10 +92,12 @@ make dev
 
 This will:
 
-- Create `.env.ci` from `.env.dev`  
+- Create `.env.ci` from `.env.dev` 
+- Runs check-hooks and scan before anything else — this ensures Gitleaks is installed and active.
 - Reset Docker containers, images and volumes (full clean)  
 - Copy SQL files and Postman test files  
-- Install PHP dependencies via composer on your host  
+- Install PHP dependencies via composer on your host
+- Run PHPStan static analysis automatically 
 - Set permissions (777/666 for local dev)  
 - Start DB and backend containers, wait for health checks  
 
@@ -212,7 +222,27 @@ This will:
 - Skip interactive steps so it can run unattended
 - Run make clean-ci at the end (removes containers, volumes, vendors, tmp files, etc. but preserves reports so you can view them)
 
-⚠️ Important: After reviewing your report, run:
+---
+### 8b. Run Isolated Local CI2 Environment (Preserve Dev Containers & Volumes)
+If you want to run a full CI-like test without affecting your local development stack, use:
+
+```bash
+make ci2
+```
+This will:
+
+- Detect if your local make dev stack (backend + Postgres) is running
+- Temporarily stop the dev containers (to free ports 5432 and 8888)
+- Spin up an isolated CI2 environment with its own containers, networks, and volumes
+- These are automatically prefixed with _ci2 (e.g. peer_backend_local_<user>_ci2-db-1)
+- Run the full Newman test suite inside that isolated CI2 stack
+- Clean up only CI2 containers, networks, and volumes after the tests
+- Automatically restart your original dev containers once CI2 finishes
+- Preserve your dev database volume and data
+
+This allows you to test a clean CI setup locally without wiping or touching your dev data.
+
+⚠️ Important: After reviewing your report from Ci or Ci2, run:
 
 ```bash
 make clean-all
@@ -264,9 +294,11 @@ Example output:
 
 Available targets:
 bash-backend : Open interactive shell in backend container
-check-hooks               Verify that Git hooks are installed and executable
+check-hooks : Verify that Git hooks are installed and executable
+ci2 : Run full isolated local CI2 workflow (setup, tests, cleanup)
 ci : Run full local CI workflow (setup, tests, cleanup)
 clean-all : Remove containers, volumes, vendors, reports, logs
+clean-ci2 : Cleanup for isolated CI2 environment but keep reports
 clean-ci : Cleanup for CI but keep reports
 clean-prune : Remove ALL unused images, build cache, and volumes
 db : Open psql shell into Postgres

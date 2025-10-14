@@ -43,31 +43,6 @@ jobs:
             echo "is_behind=false" >> $GITHUB_OUTPUT
           fi
  
-  notify_if_behind:
-    name: Notify on Outdated PR
-    runs-on: ubuntu-latest
-    needs: [check_branch_sync, map_pr_to_discord]
-    if: needs.check_branch_sync.outputs.is_behind == 'true'
-    steps:
-      - name: Send Discord Notification for Outdated PR
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
-        run: |
-          MESSAGE=":warning: **PR Branch is Behind the Base Branch**\n"
-          MESSAGE+="**PR:** $PR_TITLE\n"
-          MESSAGE+="Link: <$PR_URL>\n"
-          MESSAGE+="Author: $DISCORD_MENTION\n"
-          MESSAGE+="Please update your branch with the latest changes from \`${{ github.event.pull_request.base.ref }}\`."
- 
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\": \"$MESSAGE\"}" \
-               "$DISCORD_WEBHOOK_URL"
- 
   fail_outdated_branch:
     name: Block CI Due to Outdated Branch
     runs-on: ubuntu-latest
@@ -77,77 +52,81 @@ jobs:
       - run: |
           echo " PR branch is behind the base branch."
           exit 1
-  gitleaks_scan_staged:
-    name: Gitleaks PR Scan
-    uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
-    with:
-      config: "gitleaks.toml"
-    secrets: inherit
 
+  # gitleaks_scan_staged:
+  #   name: Gitleaks PR Scan
+  #   uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
+  #   with:
+  #     config: "gitleaks.toml"
+  #   secrets: inherit
 
-  # validate_sql_files:
-  #   name: Ensure Only Valid SQL Files Are Changed
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v5
-  #       with:
-  #         fetch-depth: 0
+  phpstan_analysis:
+    name: Early Static Analysis (PHPStan)
+    runs-on: ubuntu-latest
+    needs: [check_branch_sync]
+    if: needs.check_branch_sync.outputs.is_behind == 'false'
+    env:
+      IMAGE_TAG: local
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Log in to GHCR (for base image access)
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Generate backend config before PHPStan
+        run: |
+          docker compose --env-file .env.dev run --rm backend \
+            sh -c "bash /var/www/html/cd-generate-backend-config.sh"
+
+      - name: Run PHPStan inside backend container
+        run: |
+          docker compose --env-file .env.dev run --rm backend \
+            sh -c "cd /var/www/html && \
+                   composer install --prefer-dist --no-interaction && \
+                   vendor/bin/phpstan analyse --configuration=/var/www/html/phpstan.neon --memory-limit=1G"
+
+  validate_sql_files:
+    name: Ensure Only Valid SQL Files Are Changed
+    runs-on: ubuntu-latest
+    needs: [phpstan_analysis]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
  
-  #     - name: Fetch Base Branch
-  #       run: |
-  #         git fetch origin ${{ github.base_ref }}
+      - name: Fetch Base Branch
+        run: |
+          git fetch origin ${{ github.base_ref }}
  
-  #     - name: Check for Unauthorized Changes in sql_files_for_import
-  #       run: |
-  #         echo "Checking SQL file changes..."
-  #         changed_files=$(git diff --name-only origin/${{ github.base_ref }} HEAD -- sql_files_for_import)
-  #         echo "Changed files:"
-  #         echo "$changed_files"
+      - name: Check for Unauthorized Changes in sql_files_for_import
+        run: |
+          echo "Checking SQL file changes..."
+          changed_files=$(git diff --name-only origin/${{ github.base_ref }} HEAD -- sql_files_for_import)
+          echo "Changed files:"
+          echo "$changed_files"
  
-  #         for file in $changed_files; do
-  #           if [[ "$file" != "sql_files_for_import/additional_data.sql" ]]; then
-  #             if git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- "$file" | grep -q "$file"; then
-  #               echo "New file allowed: $file"
-  #             else
-  #               echo "Unauthorized modification detected: $file"
-  #               echo "Only additional_data.sql may be modified. Others can only be added, not edited."
-  #               exit 1
-  #             fi
-  #           fi
-  #         done
-  #         echo "SQL file check passed."
- 
-  # notify_invalid_sql_change:
-  #   name: Notify on Invalid SQL File Change
-  #   runs-on: ubuntu-latest
-  #   needs: [validate_sql_files, map_pr_to_discord]
-  #   if: failure() && needs.validate_sql_files.result == 'failure'
-  #   steps:
-  #     - name: Send Discord Notification for Invalid SQL File Change
-  #       env:
-  #         DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-  #         PR_TITLE: ${{ github.event.pull_request.title }}
-  #         PR_URL: ${{ github.event.pull_request.html_url }}
-  #         DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
-  #       run: |
-  #         MESSAGE=":x: **CI Failed invalid SQL File Change Detected**\n"
-  #         MESSAGE+="**PR:** $PR_TITLE\n"
-  #         MESSAGE+="Link: <$PR_URL>\n"
-  #         MESSAGE+="Author: $DISCORD_MENTION\n"
-  #         MESSAGE+="Only \`additional_data.sql\` may be modified in \`sql_files_for_import/\`. Other existing files cannot be changed. New files are allowed."
- 
-  #         curl -H "Content-Type: application/json" \
-  #              -X POST \
-  #              -d "{\"content\": \"$MESSAGE\"}" \
-  #              "$DISCORD_WEBHOOK_URL"
+          for file in $changed_files; do
+            if [[ "$file" != "sql_files_for_import/additional_data.sql" ]]; then
+              if git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- "$file" | grep -q "$file"; then
+                echo "New file allowed: $file"
+              else
+                echo "Unauthorized modification detected: $file"
+                echo "Only additional_data.sql may be modified. Others can only be added, not edited."
+                exit 1
+              fi
+            fi
+          done
+          echo "SQL file check passed."
 
   build_and_test:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
     needs: [
-      check_branch_sync, gitleaks_scan_staged
-      # validate_sql_files 
+      check_branch_sync,
+      # gitleaks_scan_staged
+      validate_sql_files, phpstan_analysis 
     ]
     if: 
       needs.check_branch_sync.outputs.is_behind == 'false'
@@ -381,15 +360,15 @@ jobs:
             --network my-network \
             curlimages/curl:$TAG \
             curl -sf http://backend/graphql
- 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Rewrite GraphQL and Upload-post Endpoints in Postman Collections (using jq)
         run: |
-          for file in tests/postman_collection/001_graphql_postman_collection.json \
-                     tests/postman_collection/002_graphql_postman_collection.json \
-                     tests/postman_collection/003_graphql_postman_collection.json; do
+          files=$(ls tests/postman_collection/*_graphql_postman_collection.json | sort)
+
+          for file in $files; do
+            echo "Processing $file ..."
 
             # Replace GraphQL endpoints
             jq '(.item[] | select(.request.url.raw != null) | .request.url) |= {
@@ -709,111 +688,6 @@ jobs:
               ;;
           esac
 
-  send_newman_discord_notification:
-    name: Send Discord Notification for Newman Failures
-    runs-on: ubuntu-latest
-    needs: [aggregate_outcome, aggregate_results, map_pr_to_discord]
-    if: needs.aggregate_outcome.outputs.final_outcome == 'newman_failed'
-    steps:
-      - name: Construct HTMLExtra report URLs
-        id: urls
-        run: |
-          BASE_URL="https://peer-network.github.io/peer-backend-reports"
-          echo "php82_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.2/report.html" >> $GITHUB_OUTPUT
-          echo "php83_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.3/report.html" >> $GITHUB_OUTPUT
- 
-      - name: Send Discord Notification
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
-          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          PHP82_URL="${{ steps.urls.outputs.php82_url }}"
-          PHP83_URL="${{ steps.urls.outputs.php83_url }}"
-          MESSAGE=":x: **Newman Tests Failed!**\n"
-          MESSAGE+="**PR:** $PR_TITLE\n"
-          MESSAGE+="PR Link: <$PR_URL>\n"
-          MESSAGE+="CI Run: <$RUN_URL>\n"
-          MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
-          MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
-          MESSAGE+="Maintainer: <@1362087975906967736>\n"
-          MESSAGE+="Author: $DISCORD_MENTION"
-          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
- 
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\": \"${MESSAGE}\"}" \
-               "$DISCORD_WEBHOOK_URL"
- 
-  send_other_failure_discord_notification:
-    name: Send Discord Notification for Non-Newman Failures
-    runs-on: ubuntu-latest
-    needs: [aggregate_outcome, map_pr_to_discord]
-    if: always()
-    steps:
-      - name: Log aggregated outcome
-        run: echo "Outcome was ${{ needs.aggregate_outcome.outputs.final_outcome }}"
- 
-      - name: Send Discord Notification (if other_failure)
-        if: needs.aggregate_outcome.outputs.final_outcome == 'other_failure'
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          PR_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
-          MAINTAINER_MENTION: <@1362087975906967736>
-        run: |
-          MESSAGE=":x: **CI Failed (non-Newman error)**\n"
-          MESSAGE+="**PR:** $PR_TITLE\n"
-          MESSAGE+="PR Link: <$PR_URL>\n"
-          MESSAGE+="CI Run: <$RUN_URL>\n"
-          MESSAGE+="Maintainer: $MAINTAINER_MENTION\n"
-          MESSAGE+="Author: $PR_MENTION"
-          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
- 
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\": \"${MESSAGE}\"}" \
-               "$DISCORD_WEBHOOK_URL"
-
-  notify_gitleaks_failure:
-    name: Notify on Gitleaks Failure
-    runs-on: ubuntu-latest
-    needs: [gitleaks_scan_staged, map_pr_to_discord]
-    if: always() && needs.gitleaks_scan_staged.result == 'failure'
-    steps:
-      - name: Send Discord Notification for Gitleaks Failure
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
-          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          MESSAGE=":x: **Gitleaks Scan Failed!**\n"
-          MESSAGE+="**PR:** $PR_TITLE\n"
-          MESSAGE+="PR Link: <$PR_URL>\n"
-          MESSAGE+="CI Run: <$RUN_URL>\n"
-          MESSAGE+="Author: $DISCORD_MENTION\n\n"
-          MESSAGE+=":warning: **Secrets were detected by Gitleaks**\n"
-          MESSAGE+="You can:\n"
-          MESSAGE+="- [Click here to view workflow artifacts](<$RUN_URL>) (download the **gitleaks-report** artifact)\n"
-          MESSAGE+="- Check the **Actions → Artifacts** tab to view/download the report\n"
-          MESSAGE+="- Or run \`make scan\` locally to reproduce.\n\n"
-          MESSAGE+=":no_entry: **Reminder:** Do NOT bypass with \`git commit --no-verify\`. CI will still block your PR.\n"
-          MESSAGE+="If this secret is actually required in the repo (false positive or approved usage),\n"
-          MESSAGE+="you MUST meet with the **CTO / Team Lead / DevOps** to approve and add it to the gitleaks ignore list."
-          
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\": \"$MESSAGE\"}" \
-               "$DISCORD_WEBHOOK_URL"
-
   deploy_html_reports_to_peer_backend_reports:
     name: Deploy HTMLExtra Reports to peer_backend_reports
     runs-on: ubuntu-latest
@@ -878,42 +752,136 @@ jobs:
             echo "Push failed after 5 attempts, giving up."
             exit 1
           fi
-          
-  send_success_discord_notification:
-    name: Send Discord Notification for Successful CI
+
+  send_discord_notification:
+    name: Unified Discord Notification
     runs-on: ubuntu-latest
-    needs: [aggregate_outcome, trivy_scan]
-    if: needs.aggregate_outcome.outputs.final_outcome == 'success'
+    needs: [
+      check_branch_sync,
+      phpstan_analysis,
+      validate_sql_files,
+      build_and_test,
+      aggregate_outcome,
+      #gitleaks_scan_staged,
+      trivy_scan,
+      map_pr_to_discord
+    ]
+    if: always()
     steps:
-      - name: Construct HTMLExtra report URLs
-        id: urls
+      - name: Determine message type
+        id: decide
         run: |
-          BASE_URL="https://peer-network.github.io/peer-backend-reports"
-          echo "php82_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.2/report.html" >> $GITHUB_OUTPUT
-          echo "php83_url=${BASE_URL}/reports/${{ github.run_id }}/php-8.3/report.html" >> $GITHUB_OUTPUT
- 
-      - name: Send Discord Notification to Team Lead
+          outcome="${{ needs.aggregate_outcome.outputs.final_outcome }}"
+          is_behind="${{ needs.check_branch_sync.outputs.is_behind }}"
+          phpstan_result="${{ needs.phpstan_analysis.result }}"
+          sql_result="${{ needs.validate_sql_files.result }}"
+          # gitleaks_result="${{ needs.gitleaks_scan_staged.result }}" # uncomment when re-enabling Gitleaks
+
+          type="none"
+          if [ "$is_behind" == "true" ]; then
+            type="behind"
+          elif [ "$sql_result" == "failure" ]; then
+            type="invalid_sql"
+          elif [ "$phpstan_result" == "failure" ]; then
+            type="phpstan"
+          # elif [ "$gitleaks_result" == "failure" ]; then
+          #   type="gitleaks_failed"
+          elif [ "$outcome" == "newman_failed" ]; then
+            type="newman_failed"
+          elif [ "$outcome" == "other_failure" ]; then
+            type="other_failure"
+          elif [ "$outcome" == "success" ]; then
+            type="success"
+          fi
+
+          echo "type=$type" >> $GITHUB_OUTPUT
+
+      - name: Send Discord Notification
+        if: steps.decide.outputs.type != 'none'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_URL: ${{ github.event.pull_request.html_url }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          PHP82_URL="${{ steps.urls.outputs.php82_url }}"
-          PHP83_URL="${{ steps.urls.outputs.php83_url }}"
-          MESSAGE=":white_check_mark: **CI Passed Successfully**\n"
-          MESSAGE+="**PR:** $PR_TITLE\n"
-          MESSAGE+="PR Link: <$PR_URL>\n"
-          MESSAGE+="CI Run: <$RUN_URL>\n"
-          MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
-          MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
-          MESSAGE+="<@1355093873323671742>"  # vidkazan
-          MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
- 
+          case "${{ steps.decide.outputs.type }}" in
+            behind)
+              MESSAGE=":warning: **PR Branch is Behind the Base Branch**\n"
+              MESSAGE+="**PR:** $PR_TITLE\n"
+              MESSAGE+="Link: <$PR_URL>\n"
+              MESSAGE+="Author: $DISCORD_MENTION\n"
+              MESSAGE+="Please update your branch with the latest changes from \`${{ github.event.pull_request.base.ref }}\`."
+              ;;
+            invalid_sql)
+              MESSAGE=":x: **CI Failed invalid SQL File Change Detected**\n"
+              MESSAGE+="**PR:** $PR_TITLE\n"
+              MESSAGE+="Link: <$PR_URL>\n"
+              MESSAGE+="Author: $DISCORD_MENTION\n"
+              MESSAGE+="Only \`additional_data.sql\` may be modified in \`sql_files_for_import/\`. Other existing files cannot be changed. New files are allowed."
+              ;;
+            phpstan)
+              MESSAGE=":x: **PHPStan Static Analysis Failed**\n"
+              MESSAGE+="**PR:** $PR_TITLE\n"
+              MESSAGE+="Link: <$PR_URL>\n"
+              MESSAGE+="Author: $DISCORD_MENTION\n"
+              MESSAGE+="Please fix PHP static analysis errors before proceeding."
+              ;;
+            # gitleaks_failed)
+            #   MESSAGE=":x: **Gitleaks Scan Failed!**\n"
+            #   MESSAGE+="**PR:** $PR_TITLE\n<$PR_URL>\n"
+            #   MESSAGE+="CI Run: <$RUN_URL>\n"
+            #   MESSAGE+="Author: $DISCORD_MENTION\n\n"
+            #   MESSAGE+=":warning: **Secrets were detected by Gitleaks**\n"
+            #   MESSAGE+="You can:\n"
+            #   MESSAGE+="- [Click here to view workflow artifacts](<$RUN_URL>) (download the **gitleaks-report** artifact)\n"
+            #   MESSAGE+="- Check the **Actions → Artifacts** tab to view/download the report\n"
+            #   MESSAGE+="- Or run \`make scan\` locally to reproduce.\n\n"
+            #   MESSAGE+=":no_entry: **Reminder:** Do NOT bypass with \`git commit --no-verify\`. CI will still block your PR.\n"
+            #   MESSAGE+="If this secret is actually required in the repo (false positive or approved usage),\n"
+            #   MESSAGE+="you MUST meet with the **CTO / Team Lead / DevOps** to approve and add it to the gitleaks ignore list."
+            #   ;;
+            newman_failed)
+              PHP82_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.2/report.html"
+              PHP83_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.3/report.html"
+              MESSAGE=":x: **Newman Tests Failed!**\n"
+              MESSAGE+="**PR:** $PR_TITLE\n"
+              MESSAGE+="PR Link: <$PR_URL>\n"
+              MESSAGE+="CI Run: <$RUN_URL>\n"
+              MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
+              MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
+              MESSAGE+="Maintainer: <@1362087975906967736>\n"
+              MESSAGE+="Author: $DISCORD_MENTION"
+              MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
+              ;;
+            other_failure)
+              MESSAGE=":x: **CI Failed (non-Newman error)**\n"
+              MESSAGE+="**PR:** $PR_TITLE\n"
+              MESSAGE+="PR Link: <$PR_URL>\n"
+              MESSAGE+="CI Run: <$RUN_URL>\n"
+              MESSAGE+="Maintainer: <@1362087975906967736>\n"
+              MESSAGE+="Author: $DISCORD_MENTION"
+              MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
+              ;;
+            success)
+              PHP82_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.2/report.html"
+              PHP83_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.3/report.html"
+              MESSAGE=":white_check_mark: **CI Passed Successfully**\n"
+              MESSAGE+="**PR:** $PR_TITLE\n"
+              MESSAGE+="PR Link: <$PR_URL>\n"
+              MESSAGE+="CI Run: <$RUN_URL>\n"
+              MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
+              MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
+              MESSAGE+="<@1355093873323671742>\n"
+              MESSAGE+=" **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
+              ;;
+          esac
+
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d "{\"content\": \"${MESSAGE}\"}" \
+               -d "{\"content\": \"$MESSAGE\"}" \
                "$DISCORD_WEBHOOK_URL"
+
  
   final_check:
     name: Fail workflow if needed

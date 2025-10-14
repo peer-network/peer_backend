@@ -1,44 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\Mcap;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\ResponseHelper;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class McapMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    use ResponseHelper;
+
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
-    }
-
-    protected function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
-            }
-        }
-
-        return $response;
     }
 
     public function fetchAll(int $offset, int $limit): array
     {
-        $this->logger->info("McapMapper.fetchAll started");
+        $this->logger->debug("McapMapper.fetchAll started");
 
         $sql = "SELECT * FROM mcap ORDER BY capid DESC LIMIT :limit OFFSET :offset";
 
@@ -48,7 +29,7 @@ class McapMapper
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn($row) => new Mcap($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+            $results = array_map(fn ($row) => new Mcap($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched capid successfully" : "No capid found",
@@ -67,7 +48,7 @@ class McapMapper
 
     public function loadLastId(): Mcap|false
     {
-        $this->logger->info("McapMapper.loadLastId started");
+        $this->logger->debug("McapMapper.loadLastId started");
 
         try {
             $sql = "SELECT * FROM mcap ORDER BY createdat DESC LIMIT 1";
@@ -90,7 +71,7 @@ class McapMapper
 
     public function insert(Mcap $mcap): Mcap
     {
-        $this->logger->info("McapMapper.insert started");
+        $this->logger->debug("McapMapper.insert started");
 
         $send = $data = $mcap->getArrayCopy();
         unset($data['capid']);
@@ -106,7 +87,7 @@ class McapMapper
 
     public function update(Mcap $mcap): Mcap
     {
-        $this->logger->info("McapMapper.update started");
+        $this->logger->debug("McapMapper.update started");
 
         $data = $mcap->getArrayCopy();
 
@@ -122,7 +103,7 @@ class McapMapper
 
     public function delete(int $capid): bool
     {
-        $this->logger->info("McapMapper.delete started");
+        $this->logger->debug("McapMapper.delete started");
 
         $query = "DELETE FROM mcap WHERE capid = :capid";
         $stmt = $this->db->prepare($query);
@@ -140,7 +121,7 @@ class McapMapper
 
     protected function getLastPrice(): ?array
     {
-        $this->logger->info('McapMapper.getLastPrice started');
+        $this->logger->debug('McapMapper.getLastPrice started');
 
         try {
             $sql = "SELECT coverage, daytokens, createdat FROM mcap ORDER BY createdat DESC LIMIT 1";
@@ -154,7 +135,7 @@ class McapMapper
 
     public function fetchAndUpdateMarketPrices(): array
     {
-        $this->logger->info('McapMapper.fetchAndUpdateMarketPrices started');
+        $this->logger->debug('McapMapper.fetchAndUpdateMarketPrices started');
 
         try {
             $numberoftokens = (float) $this->db->query('SELECT SUM(liquidity) FROM wallett')->fetchColumn() ?: 0;
@@ -162,13 +143,13 @@ class McapMapper
 
             if ($numberoftokens === 0 || $numberofgems === 0) {
                 $this->logger->info("numberoftokens or numberofgems is empty.", ['numberoftokens' => $numberoftokens, 'numberofgems' => $numberofgems]);
-                return $this->createSuccessResponse(21207);
+                return $this::createSuccessResponse(21207);
             }
 
             $resultLastData = $this->refreshMarketData();
             if ($resultLastData['status'] !== 'success') {
                 $this->logger->info($resultLastData['ResponseCode'], ['resultLastData' => $resultLastData]);
-                return $this->respondWithError(41217);
+                return $this::respondWithError(41217);
             }
 
             $insertedId = $resultLastData['affectedRows']['insertedId'] ?? null;
@@ -177,7 +158,7 @@ class McapMapper
 
             if ($insertedId === null) {
                 $this->logger->info("Inserted ID is missing from refreshMarketData response.", ['insertedId' => $insertedId]);
-                return $this->respondWithError(41218);
+                return $this::respondWithError(41218);
             }
 
             $numberoftokens += $daytokens;
@@ -197,7 +178,7 @@ class McapMapper
                     ':capid' => $insertedId
                 ]);
             } catch (\PDOException $e) {
-                return $this->respondWithError(40301);
+                return $this::respondWithError(40301);
             }
 
             $result = [
@@ -214,29 +195,29 @@ class McapMapper
                 'affectedRows' => $result
             ];
         } catch (\PDOException $e) {
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 
     public function refreshMarketData(): array
     {
-        $this->logger->info('McapMapper.refreshMarketData started.');
+        $this->logger->debug('McapMapper.refreshMarketData started.');
 
         try {
             $url = 'https://exchange-api.lcx.com/market/tickers';
             $priceInfo = @file_get_contents($url);
 
             if ($priceInfo === false) {
-                return $this->respondWithError(41219);
+                return $this::respondWithError(41219);
             }
 
             $array = json_decode($priceInfo, true);
             if (json_last_error() !== JSON_ERROR_NONE || $array === null) {
-                return $this->respondWithError(41220);
+                return $this::respondWithError(41220);
             }
 
             if (empty($array['data']['ETH/EUR']['bestAsk'])) {
-                return $this->createSuccessResponse(21208);
+                return $this::createSuccessResponse(21208);
             }
 
             $coverage = (float) $array['data']['ETH/EUR']['bestAsk'];
@@ -253,17 +234,13 @@ class McapMapper
             } catch (\PDOException $e) {
                 $this->db->rollBack();
                 $this->logger->error('Database Exception.', ['exception' => $e]);
-                return $this->respondWithError(40302);
+                return $this::respondWithError(40302);
             }
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11210,
-                'affectedRows' => ['coverage' => $coverage, 'daytokens' => $daytokens, 'insertedId' => $insertedId]
-            ];
+            return $this::createSuccessResponse(11210, ['coverage' => $coverage, 'daytokens' => $daytokens, 'insertedId' => $insertedId], false);
         } catch (\Exception $e) {
             $this->logger->error('Connection Exception.', ['exception' => $e]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 }

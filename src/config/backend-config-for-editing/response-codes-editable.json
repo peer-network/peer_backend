@@ -319,6 +319,26 @@
         "comment": "Success: An email will be sent to your mail address if an account associated with it exists",
         "userFriendlyComment": "If an account exists, you'll receive an email with instructions."
     },
+    "12001": {
+        "comment": "Advertisement post created successfully.",
+        "userFriendlyComment": "Success: Advertisement post created successfully."
+    },
+    "12002": {
+        "comment": "Advertisements fetched successfully.",
+        "userFriendlyComment": "Success: Advertisements fetched successfully."
+    },
+    "12003": {
+        "comment": "Pinned advertisement cost calculated.",
+        "userFriendlyComment": "Success: Pinned advertisement cost calculated successfully."
+    },
+    "12004": {
+        "comment": "Basic advertisement cost calculated.",
+        "userFriendlyComment": "Success: Basic advertisement cost calculated successfully."
+    },
+    "12005": {
+        "comment": "Advertisement post updated successfully.",
+        "userFriendlyComment": "Success: Advertisement post updated successfully."
+    },
     "21001": {
         "comment": "Information Not Found: No users found. Please refine your search or try a different query",
         "userFriendlyComment": "No users found. Try different search terms."
@@ -443,6 +463,14 @@
         "comment": "Information Not Found: No messages found",
         "userFriendlyComment": "No messages in this chat yet."
     },
+    "22001": {
+        "comment": "Advertisement is still active. Proceeding in forced mode.",
+        "userFriendlyComment": "This advertisement is still active. Proceeding will override the existing schedule."
+    },
+    "22002": {
+        "comment": "Information Not Found: No advertisements found. Please try again later or create an advertisement",
+        "userFriendlyComment": "No advertisements available. Try again later or create one!"
+    },
     "30101": {
         "comment": "All required fields must be provided",
         "userFriendlyComment": "Please fill in all required fields."
@@ -564,8 +592,8 @@
         "userFriendlyComment": "Current password required to change email."
     },
     "30226": {
-        "comment": "The 'password' field (User new password) must be between {USER.PASSWORD.MIN_LENGTH} and {USER.PASSWORD.MAX_LENGTH} characters long and contain at least one lowercase letter, one uppercase letter, one number and one special character(except '\"\\)",
-        "userFriendlyComment": "Password must be {USER.PASSWORD.MIN_LENGTH}-{USER.PASSWORD.MAX_LENGTH} chars with uppercase, lowercase, numbers and special characters(except '\"\\)"
+        "comment": "The 'password' field (User new password) must be between {USER.PASSWORD.MIN_LENGTH} and {USER.PASSWORD.MAX_LENGTH} characters long and contain at least one lowercase letter, one uppercase letter, one number and one special character",
+        "userFriendlyComment": "Password must be {USER.PASSWORD.MIN_LENGTH}-{USER.PASSWORD.MAX_LENGTH} chars with uppercase, lowercase, numbers and special characters"
     },
     "30227": {
         "comment": "The 'expassword' field (User current password) is required to update the password",
@@ -730,6 +758,10 @@
     "30268": {
         "comment": "The cover field must contain at most only {POST.COVER.MAX_COUNT} image",
         "userFriendlyComment": "Only {POST.COVER.MAX_COUNT} cover image allowed."
+    },
+    "30269": {
+        "comment": "The 'advertisementId' field must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
+        "userFriendlyComment": "Advertisement ID format. Please check and try again."
     },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
@@ -994,6 +1026,82 @@
     "31904": {
         "comment": "Failure: Invalid or expired reset token. Please try again",
         "userFriendlyComment": "This password reset link isn't valid anymore. Please request a new one."
+    },
+    "32001": {
+        "comment": "Invalid advertisement duration.",
+        "userFriendlyComment": "The advertisement duration you entered is not valid."
+    },
+    "32002": {
+        "comment": "Empty postId.",
+        "userFriendlyComment": "Advertisment ID field can not be empty."
+    },
+    "32003": {
+        "comment": "Empty date.",
+        "userFriendlyComment": "Date field can not be empty."
+    },
+    "32004": {
+        "comment": "Cost plan is empty.",
+        "userFriendlyComment": "You must select a cost plan."
+    },
+    "32005": {
+        "comment": "Validation Error: Invalid CostPlan provided. Verify the value and resubmit.",
+        "userFriendlyComment": "The cost plan entered isn't valid. Please check and try again."
+    },
+    "32006": {
+        "comment": "Invalid advertising plan.",
+        "userFriendlyComment": "Invalid advertising plan."
+    },
+    "32007": {
+        "comment": "Start date invalid or empty.",
+        "userFriendlyComment": "Start date invalid or empty."
+    },
+    "32008": {
+        "comment": "Invalid date. Date cannot be in past and must follow YY-MM-DD format.",
+        "userFriendlyComment": "Invalid date. Date cannot be in past and must follow YY-MM-DD format."
+    },
+    "32009": {
+        "comment": "Invalid duration specified.",
+        "userFriendlyComment": "Invalid duration specified."
+    },
+    "32010": {
+        "comment": "Invalid advertisement plan specified.",
+        "userFriendlyComment": "Invalid advertisement plan specified."
+    },
+    "32011": {
+        "comment": "Invalid string value.",
+        "userFriendlyComment": "The input must be a valid text string (e.g., 'Hello World')."
+    },
+    "32012": {
+        "comment": "Invalid integer value.",
+        "userFriendlyComment": "The input must be a whole number without decimals (e.g., 10)."
+    },
+    "32013": {
+        "comment": "Invalid float value.",
+        "userFriendlyComment": "The input must be a decimal number (e.g., 0.2 or 3.14)."
+    },
+    "32014": {
+        "comment": "Invalid boolean value.",
+        "userFriendlyComment": "The input must be either true or false (e.g., true)."
+    },
+    "32015": {
+        "comment": "Filter method not found.",
+        "userFriendlyComment": "The specified filter method does not exist. Please check your filter name (e.g., 'filterByDate')."
+    },
+    "32016": {
+        "comment": "Validator method not found.",
+        "userFriendlyComment": "The specified validator method does not exist. Please check your validator name (e.g., 'validateEmail')."
+    },
+    "32017": {
+        "comment": "Missing one or more required fields: postId, date, or costPlan.",
+        "userFriendlyComment": "Please fill in all required fields: post ID, date, and cost plan."
+    },
+    "32018": {
+        "comment": "This post is already advertised during the selected timespan.",
+        "userFriendlyComment": "This post is already scheduled for advertisement in that time period. Please adjust the date to continue."
+    },
+    "32019": {
+        "comment": "Information Not Found: No advertisement found for the provided ID. Please check the ID and try again.",
+        "userFriendlyComment": "Advertisement not found. Check the ID and try again."
     },
     "40301": {
         "comment": "Unexpected Error: An unexpected error occurred. Please try again later or contact support",
@@ -1382,6 +1490,34 @@
     "41811": {
         "comment": "Failed to delete chat ID (Admin only func)",
         "userFriendlyComment": "Administrators: We couldn't delete this chat. Please try again."
+    },
+    "42001": {
+        "comment": "Error while fetching advertisements.",
+        "userFriendlyComment": "Error while fetching advertisements."
+    },
+    "42002": {
+        "comment": "Failed to convert Euros to Tokens.",
+        "userFriendlyComment": "Failed to convert Euros to Tokens."
+    },
+    "42003": {
+        "comment": "Failed to convert Tokens to Euros.",
+        "userFriendlyComment": "Failed to convert Tokens to Euros."
+    },
+    "42004": {
+        "comment": "Unexpected system error: Failed to process date/time operation",
+        "userFriendlyComment": "Unexpected system error: Failed to process date/time operation."
+    },
+    "42005": {
+        "comment": "Cost calculation failed.",
+        "userFriendlyComment": "Unexpected Error: Cost calculation failed."
+    },
+    "42006": {
+        "comment": "Failed to generate advertisement ID.",
+        "userFriendlyComment": "Unexpected Error: Unable to generate advertisement ID."
+    },
+    "42007": {
+        "comment": "Failed to create advertisement post.",
+        "userFriendlyComment": "An error occurred while creating the advertisement post. Please try again."
     },
     "51301": {
         "comment": "Failure: Your liquidity is too low to perform this action",

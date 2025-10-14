@@ -1,0 +1,9 @@
+schema {
+  query: Query
+}
+
+type Query {
+  hello: HelloResponse!
+  dailygemstatus: DailyGemStatusResponse!
+  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
+}
