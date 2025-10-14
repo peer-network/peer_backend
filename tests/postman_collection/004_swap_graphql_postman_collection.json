@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "c410eaab-e65a-40cd-8b02-24b035167514",
+		"_postman_id": "3d98b972-e0e3-4cb8-89b8-2a5215903741",
 		"name": "004_swap_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-c410eaab-e65a-40cd-8b02-24b035167514?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-3d98b972-e0e3-4cb8-89b8-2a5215903741?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -1256,7 +1256,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"30269\");",
+							"    pm.expect(pm.response.text()).to.include(\"30271\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -1311,7 +1311,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"30269\");",
+							"    pm.expect(pm.response.text()).to.include(\"30271\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -1366,7 +1366,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"30269\");",
+							"    pm.expect(pm.response.text()).to.include(\"30271\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
@@ -1660,25 +1660,25 @@
 							"try {",
 							"    response = pm.response.json();",
 							"} catch (e) {",
-							"    console.error(\"Failed to parse JSON:\", e);",
+							"    console.error(\"Failed to parse response JSON:\", e);",
 							"}",
 							"",
 							"let transactions = response?.data?.getTransactionHistory?.affectedRows || [];",
 							"",
-							"let creditTx = transactions.find(tx =>",
-							"    tx.transferaction === \"CREDIT\" &&",
-							"    tx.tokenamount === 5",
+							"let inviterFeeTx = transactions.find(tx =>",
+							"    tx.transferaction === \"INVITER_FEE\" &&",
+							"    tx.tokenamount === 1.5",
 							");",
 							"",
-							"pm.test(\"CREDIT transaction with amount 5 exists and has no message\", function () {",
-							"    pm.expect(creditTx).to.not.be.undefined;",
-							"    pm.expect(creditTx.tokenamount).to.eql(5);",
-							"    pm.expect(creditTx.transferaction).to.eql(\"CREDIT\");",
-							"    pm.expect(creditTx.message).to.satisfy(msg => msg === \"\" || msg === null || msg === undefined);",
+							"pm.test(\"Inviter fee transaction of 1.5 token exists\", function () {",
+							"    pm.expect(inviterFeeTx).to.not.be.undefined;",
+							"    pm.expect(inviterFeeTx.tokenamount).to.eql(1.5);",
+							"    pm.expect(inviterFeeTx.transferaction).to.eql(\"INVITER_FEE\");",
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1688,7 +1688,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2146,7 +2147,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 15) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 4) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
