@@ -32,7 +32,7 @@ class PeerTokenMapper
     }
 
     /**
-     * Loads and validates the liquidity pool wallets.
+     * Loads and validates the liquidity pool and FEE's wallets.
      *
      * @throws \RuntimeException if accounts are missing or invalid
      */
@@ -55,12 +55,12 @@ class PeerTokenMapper
     }
 
     /**
-     * get LP account tokens.
+     * get LP account tokens amount.
      * 
      */
     public function getLpToken(): string
     {
-        $this->logger->info("PeerTokenMapper.getLpToken started");
+        $this->logger->debug("PeerTokenMapper.getLpToken started");
 
         $query = "SELECT * from wallett WHERE userid = :userId";
 
@@ -113,7 +113,11 @@ class PeerTokenMapper
     }
 
     /**
-     * Make peer token transfer to recipient.
+     * Make PEER to PEER Token Transfer.
+     * 
+     * This function handles the transfer of tokens between users, applying necessary fees and ensuring all validations.
+     * It also stores the transaction details.
+     * Different fees are stored individually for transparency.
      *
      */
     public function transferToken(string $userId, array $args = []): ?array
@@ -215,7 +219,7 @@ class PeerTokenMapper
 
                 $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, $peerFee, $poolFee, $burnFee, $inviteFee);
 
-                $this->logger->info('Invited By', [
+                $this->logger->debug('Invited By', [
                     'invited' => $inviterId,
                 ]);
             }
@@ -330,7 +334,7 @@ class PeerTokenMapper
                 $this->walletMapper->saveWalletEntry($this->burnWallet, ($burnAmount));
             }
 
-            $this->logger->info('Token transfer completed successfully');
+            $this->logger->debug('Token transfer completed successfully');
 
             return [
                 'status' => 'success',
@@ -346,17 +350,21 @@ class PeerTokenMapper
 
 
     /**
-     * get transcation history of current user.
+     * Admin Function Only
+     * Get Transactions of Cash-Out Requests (BTC SWAP).
+     * In this function we are fetching all the transactions where user has swapped their PEER tokens for BTC.
+     * 
+     * Admin will get all the transactions where transaction type is 'btcSwap'.
+     * They can see all the details of the transaction and can process the BTC payment manually.
      * 
      * @param $userId string
      * @param $offset int
      * @param $limit int
      * 
      */
-    // DONE
     public function getLiquidityPoolHistory(string $userId, int $offset, int $limit): ?array
     {
-        $this->logger->info('Fetching transaction history - PeerTokenMapper.getLiquidityPoolHistory', ['userId' => $userId]);
+        $this->logger->debug('Fetching transaction history - PeerTokenMapper.getLiquidityPoolHistory', ['userId' => $userId]);
 
         $query = "
                     SELECT 
@@ -396,16 +404,16 @@ class PeerTokenMapper
 
 
     /**
-     * Update transaction status to PAID.
+     * Admin Function Only
+     * Update BTC swap transaction status to PAID.
      * 
      * @param string $swapId
      * @return array|null
      */
-    // DONE
     public function updateSwapTranStatus(string $swapId): ?array
     {
         \ignore_user_abort(true);
-        $this->logger->info('PeerTokenMapper.updateSwapTranStatus started', ['swapId' => $swapId]);
+        $this->logger->debug('PeerTokenMapper.updateSwapTranStatus started', ['swapId' => $swapId]);
 
         try {
             if (!$this->db->beginTransaction()) {
@@ -442,7 +450,7 @@ class PeerTokenMapper
 
             $this->db->commit();
 
-            $this->logger->info('Transaction marked as PAID', ['swapId' => $swapId]);
+            $this->logger->debug('Transaction marked as PAID', ['swapId' => $swapId]);
 
             $query = "SELECT BTC_T.swapid, TNX.transactionid, BTC_T.transactiontype, TNX.senderid, BTC_T.tokenamount, BTC_T.btcamount, BTC_T.status, BTC_T.message, BTC_T.createdat FROM btc_swap_transactions AS BTC_T LEFT JOIN transactions AS TNX ON TNX.transactionid = BTC_T.operationid WHERE BTC_T.swapid = :swapid";
             $stmt = $this->db->prepare($query);
@@ -452,7 +460,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => '11214',  // SWAP Transaction has been marked as PAID
+                'ResponseCode' => '11214',
                 'affectedRows' => $swapTnx
             ];
         } catch (\PDOException $e) {
@@ -485,16 +493,9 @@ class PeerTokenMapper
         }
     }
 
-    //         $this->logger->error('Error during token transfer', [
-    //             'error' => $e->getMessage(),
-    //             'userId' => $userId,
-    //             'recipient' => $recipient,
-    //             'numberoftokens' => $numberoftokens
-    //         ]);
-    //         return self::respondWithError(40301);
-    //     }
-    // }
-
+    /**
+     * Get Inviter ID of a user.
+     */
     private function getInviterID(string $userId): ?string
     {
         try {
@@ -514,7 +515,7 @@ class PeerTokenMapper
 
 
     /**
-     * get Liquidity in Q96.
+     * Get User balance
      *
      * @param $userId string
      * @param $hashedPassword string
@@ -535,7 +536,7 @@ class PeerTokenMapper
             $stmt->execute();
             $balance = $stmt->fetchColumn();
 
-            $this->logger->info('Fetched wallet balance', ['balance' => $balance]);
+            $this->logger->debug('Fetched wallet balance', ['balance' => $balance]);
 
             return $balance;
         } catch (\PDOException $e) {
@@ -558,7 +559,6 @@ class PeerTokenMapper
      * get transcations history of current user.
      *
      */
-    // DONE
     public function getTransactions(string $userId, array $args): ?array
     {
         $this->logger->debug("PeerTokenMapper.getTransactions started");
@@ -672,10 +672,9 @@ class PeerTokenMapper
      * 
      * @return array|null
      */
-    // DONE
     public function getTokenPrice(): ?array
     {
-        $this->logger->info('PeerTokenMapper.getTokenPrice');
+        $this->logger->debug('PeerTokenMapper.getTokenPrice');
 
         try {
             $getLpToken = $this->getLpInfo();
@@ -726,10 +725,12 @@ class PeerTokenMapper
         }
     }
 
-    // DONE
+    /**
+     * Get Token Price Value.
+     */
     public function getTokenPriceValue(): string
     {
-        $this->logger->info('PeerTokenMapper.getTokenPriceValue');
+        $this->logger->debug('PeerTokenMapper.getTokenPriceValue');
 
         try {
             $liqPool = $this->getLpInfo();
@@ -767,18 +768,22 @@ class PeerTokenMapper
     }
 
     /**
-     * get transcation history of current user.
+     * Swap Peer Tokens for BTC.
      * 
-     * @params userId string
-     * @params args array
+     * This will counts applicable fees and ensure user has enough balance.
+     * With Peer Tokens, user will receive BTC in their provided BTC address.
+     * 
+     * Transactions are stored with all fee details for transparency.
+     * One more Transaction will be created in btc_swap_transactions table to track BTC swap requests to Admin.
+     * 
+     * After Admin marks the request as PAID, user will receive BTC in their provided BTC address.
      * 
      */
-    /// DONE
     public function swapTokens(string $userId, array $args = []): ?array
     {
         \ignore_user_abort(true);
 
-        $this->logger->info('PeerTokenMapper.swapTokens started');
+        $this->logger->debug('PeerTokenMapper.swapTokens started');
 
         if (empty($args['btcAddress'])) {
             $this->logger->warning('BTC Address required');
@@ -790,14 +795,14 @@ class PeerTokenMapper
             $this->logger->warning('Invalid btcAddress .', [
                 'btcAddress' => $btcAddress,
             ]);
-            return self::respondWithError(31204); // Invalid BTC Address
+            return self::respondWithError(31204);
         }
 
         if (!isset($args['password']) && empty($args['password'])) {
             $this->logger->warning('Password required');
             return self::respondWithError(30237);
         }
-        // validate password
+
         $user = (new UserMapper($this->logger, $this->db))->loadById($userId);
         $password = $args['password'];
         if (!$this->validatePasswordMatch($password, $user->getPassword())) {
@@ -841,7 +846,6 @@ class PeerTokenMapper
 
         $peerTokenEURPrice = TokenHelper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
 
-        // var_dump($peerTokenEURPrice); exit;
         if (TokenHelper::mulRc($peerTokenEURPrice, $numberoftokensToSwap) < 10) {
             $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
                 'btcPrice' => $btcPrice,
@@ -870,7 +874,7 @@ class PeerTokenMapper
 
                 $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokensToSwap, $peerFee, $poolFee, $burnFee, $inviteFee);
 
-                $this->logger->info('Invited By', [
+                $this->logger->debug('Invited By', [
                     'invited' => $inviterId,
                 ]);
             }
@@ -1010,14 +1014,12 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => '11217', // Successfully Swap Peer Token to BTC. Your BTC address will be paid soon.
+                'ResponseCode' => '11217',
                 'tokenSend' => $numberoftokensToSwap,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'expectedBtcReturn' => $btcAmountToUser
             ];
         } catch (\Throwable $e) {
-            // $this->db->rollBack();
-
             $this->logger->error('Error during token swap', [
                 'error' => $e->getMessage(),
                 'userId' => $userId,
@@ -1037,7 +1039,7 @@ class PeerTokenMapper
     public function getLpInfo()
     {
 
-        $this->logger->info("PeerTokenMapper.getLpToken started");
+        $this->logger->debug("PeerTokenMapper.getLpToken started");
 
         $query = "SELECT * from wallett WHERE userid = :userId";
 
@@ -1078,11 +1080,10 @@ class PeerTokenMapper
      * 
      * @returns float BTC Liquidity in account
      */
-    // DONE
     public function getLpTokenBtcLP(): string
     {
 
-        $this->logger->info("PeerTokenMapper.getLpToken started");
+        $this->logger->debug("PeerTokenMapper.getLpToken started");
 
         $query = "SELECT * from wallett WHERE userid = :userId";
 
@@ -1098,7 +1099,7 @@ class PeerTokenMapper
             $stmt->execute();
             $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            $this->logger->info("Fetched btcPool data");
+            $this->logger->debug("Fetched btcPool data");
 
             if (!isset($walletInfo['liquidity']) || empty($walletInfo['liquidity'])) {
                 throw new \RuntimeException("Failed to get accounts: " . "btcPool liquidity amount is invalid");
@@ -1128,23 +1129,26 @@ class PeerTokenMapper
 
 
     /**
-     * Add New Liquidity
+     * Admin Function Only
      * 
-     * @params string $userId
-     * @params array $args
-     * @returns array
+     * Add Liquidity to Pool with respect to Liquidity and BTC.
+     * 
+     * Admin should be careful while adding liquidity as it will impact token price.
+     * 
+     * Liquidity and BTC both should be added in the same proportion as they exist in the pool. 
+     * For example, 100000 PeerTokens and 1 BTC.
      */
     public function addLiquidity(string $userId, array $args): array
     {
-        $this->logger->info("addLiquidity started");
+        $this->logger->debug("addLiquidity started");
 
         try {
             // Validate inputs
             if (!isset($args['amountToken']) || !is_numeric($args['amountToken']) || (float) $args['amountToken'] != $args['amountToken'] || (float) $args['amountToken'] <= 0) {
-                return self::respondWithError(30241); // Invalid PeerToken amount provided. It is should be Integer or with decimal numbers
+                return self::respondWithError(30241);
             }
             if (!isset($args['amountBtc']) || !is_numeric($args['amountBtc']) || (float) $args['amountBtc'] != $args['amountBtc'] || (float) $args['amountBtc'] <= 0) {
-                return self::respondWithError(30270); // Invalid BTC amount provided. It is should be Integer or with decimal numbers
+                return self::respondWithError(30270); 
             }
 
             // Fetch pool wallets
@@ -1168,13 +1172,13 @@ class PeerTokenMapper
                 $this->logger->warning('Incorrect poolWallet Exception.', [
                     'poolWallet' => $this->poolWallet,
                 ]);
-                return self::respondWithError(41214); // Invalid Pool Wallet ID
+                return self::respondWithError(41214);
             }
             if (!self::isValidUUID($this->btcpool)) {
                 $this->logger->warning('Incorrect BTC Pool Exception.', [
                     'btcpool' => $this->btcpool,
                 ]);
-                return self::respondWithError(41214); // Invalid BTC Wallet ID
+                return self::respondWithError(41214);
             }
 
             $amountPeerToken =  $args['amountToken'];
@@ -1204,7 +1208,7 @@ class PeerTokenMapper
 
             return [
                 'status' => 'success',
-                'ResponseCode' => '11218', // Successfully update with Liquidity into Pool
+                'ResponseCode' => '11218',
                 'newTokenAmount' => $newTokenAmount,
                 'newBtcAmount' => $newBtcAmount,
                 'newTokenPrice' => $tokenPrice
@@ -1215,6 +1219,10 @@ class PeerTokenMapper
         }
     }
 
+    /**
+     * Validate BTC address format (basic check).
+     * 
+     */
     static function isValidBTCAddress($address)
     {
         // Legacy and P2SH addresses
@@ -1271,7 +1279,7 @@ class PeerTokenMapper
     // public function saveWalletEntry(string $userId, string $liquidity, $direction = 'CREDIT'): float
     // {
     //     \ignore_user_abort(true);
-    //     $this->logger->info('PeerTokenMapper.saveWalletEntry started');
+    //     $this->logger->debug('PeerTokenMapper.saveWalletEntry started');
 
     //     try {
     //         $this->db->beginTransaction();
@@ -1309,7 +1317,7 @@ class PeerTokenMapper
     //         }
 
     //         $this->db->commit();
-    //         $this->logger->info('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
+    //         $this->logger->debug('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
     //         $this->walletMapper->updateUserLiquidity($userId, $newLiquidity);
 
     //         return $newLiquidity;

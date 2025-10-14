@@ -44,7 +44,7 @@ class TransactionRepository
             $stmt->bindValue(':createdat', $transaction->getCreatedat(), \PDO::PARAM_STR);
             $stmt->execute();
 
-            $this->logger->info("Inserted new transaction into database");
+            $this->logger->debug("Inserted new transaction into database");
 
             return $transaction;
         } catch (\PDOException $e) {
