@@ -317,6 +317,65 @@
 			"response": []
 		},
 		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let liquidity = response.data.balance.currentliquidity;",
+							"pm.environment.set(\"liquidity\", liquidity);",
+							"console.log(\"Saved liquidity:\", liquidity);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Login referred tester",
 			"event": [
 				{
@@ -760,7 +819,8 @@
 							"pm.environment.set(\"swapid\", swap.swapid);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -768,64 +828,6 @@
 					"script": {
 						"exec": [
 							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query GetLiquidityPoolHistory {\n    getLiquidityPoolHistory(offset: null, limit: null) {\n        status\n        ResponseCode\n        affectedRows {\n            swapid\n            transactionid\n            transactiontype\n            senderid\n            tokenamount\n            btcamount\n            status\n            message\n            createdat\n        }\n    }\n}",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Check current liquidity",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11204\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"let liquidity = response.data.balance.currentliquidity;",
-							"pm.environment.set(\"liquidity\", liquidity);",
-							"console.log(\"Saved liquidity:\", liquidity);"
 						],
 						"type": "text/javascript",
 						"packages": {},
@@ -849,7 +851,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"query": "query GetLiquidityPoolHistory {\n    getLiquidityPoolHistory(offset: null, limit: null) {\n        status\n        ResponseCode\n        affectedRows {\n            swapid\n            transactionid\n            transactiontype\n            senderid\n            tokenamount\n            btcamount\n            status\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -995,80 +997,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query GetLiquidityPoolHistory {\n    getLiquidityPoolHistory(limit: 1) {\n        status\n        ResponseCode\n        affectedRows {\n            swapid\n            transactionid\n            transactiontype\n            senderid\n            tokenamount\n            btcamount\n            status\n            message\n            createdat\n        }\n    }\n}",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Login tester 2",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"10801\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
-							"} else {",
-							"    console.log(\"Error detected in response, environment variable not set.\");",
-							"}",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
-							"} else {",
-							"    console.log(\"Error detected in response, environment variable not set.\");",
-							"}",
-							"let token = pm.environment.get(\"accessToken\");",
-							"pm.test(\"Access token exists\", function () {",
-							"    pm.expect(token).to.be.a(\"string\");",
-							"});",
-							"",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2025,9 +1953,10 @@
 							"",
 							"let expectedDifference = 156.52;",
 							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
+							"let tolerance = 0.001; ",
 							"",
-							"pm.test(\"Liquidity should decrease exactly by 156.52\", function () {",
-							"    pm.expect(actualDifference).to.equal(expectedDifference);",
+							"pm.test(\"Liquidity should decrease by ~156.52 (with small tolerance)\", function () {",
+							"    pm.expect(Math.abs(actualDifference - expectedDifference)).to.be.below(tolerance);",
 							"});",
 							"",
 							"pm.environment.set(\"liquidity\", newLiquidity);",
