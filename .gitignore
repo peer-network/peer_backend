@@ -34,3 +34,4 @@ changelog
 .gitleaks_out/
 *.generated
 *.cache
+.gitleaksignore
