@@ -3,7 +3,7 @@
 namespace Fawaz\Services;
 use Fawaz\App\Models\TokenEuroPrice;
 use Fawaz\App\Repositories\TokenEuroPriceRepository;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use PDO;
 
 class BtcService
@@ -12,7 +12,7 @@ class BtcService
      /**
      * Returns the current BTC/EUR price, updating the DB if needed.
      */
-    public static function getOrUpdateBitcoinPrice(LoggerInterface $logger, PDO $db): string
+    public static function getOrUpdateBitcoinPrice(PeerLoggerInterface $logger, PDO $db): string
     {
         $tokenPriceRepo = new TokenEuroPriceRepository($logger, $db);
         $btcTokenObj = new TokenEuroPrice(['token' => 'BTC']);
