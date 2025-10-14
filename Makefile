@@ -144,6 +144,9 @@ dev: check-hooks scan reset-db-and-backend init ## Full setup: env.ci, DB reset,
 		echo "Waiting for DB..."; sleep 2; \
 	done
 
+	@echo "Generating backend config files..."
+	bash /var/www/html/cd-generate-backend-config.sh
+
 	@echo "Starting backend..."
 	docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml up -d backend
 	
