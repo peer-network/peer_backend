@@ -5310,12 +5310,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8888/graphql",
-					"protocol": "http",
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
 					"host": [
-						"localhost"
+						"peer-network",
+						"eu"
 					],
-					"port": "8888",
 					"path": [
 						"graphql"
 					]
@@ -5376,12 +5376,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8888/graphql",
-					"protocol": "http",
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
 					"host": [
-						"localhost"
+						"peer-network",
+						"eu"
 					],
-					"port": "8888",
 					"path": [
 						"graphql"
 					]
