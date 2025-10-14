@@ -67,7 +67,7 @@ class ContactusService
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return $this::respondWithError(00000);//"$field is required"
+                return $this::respondWithError(32017);//"$field is required"
             }
         }
         return [];

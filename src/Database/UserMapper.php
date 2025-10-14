@@ -342,6 +342,10 @@ class UserMapper
         );
 
         $whereClauses = ["verified = :verified"];
+        $includeDeleted = !empty($args['includeDeleted']);
+        if ($includeDeleted) {
+            unset($args['includeDeleted']);
+        }
         // $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
         $whereClausesString = implode(" AND ", $whereClauses);
 
@@ -418,10 +422,14 @@ class UserMapper
             }
         }
 
-        $conditions[] = "u.status != :status";
-        $queryParams[':status'] = Status::DELETED;
+        if (!$includeDeleted) {
+            $conditions[] = 'u.status != :statusExcluded';
+            $queryParams[':statusExcluded'] = Status::DELETED;
+        }
 
-        $sql .= " AND " . implode(" AND ", $conditions);
+        if (!empty($conditions)) {
+            $sql .= ' AND ' . implode(' AND ', $conditions);
+        }
 
         $sql .= " ORDER BY u.createdat DESC LIMIT :limit OFFSET :offset";
         $queryParams[':limit'] = $limit;
