@@ -2147,10 +2147,10 @@ class GraphQLSchemaBuilder
                     return $root['senderid'] ?? '';
                 },
                 'tokenamount' => function (array $root): float {
-                    return $root['tokenamount'] ?? 0;
+                    return (float) ($root['tokenamount'] ?? 0.0);
                 },
                 'btcamount' => function (array $root): float {
-                    return $root['btcamount'] ?? 0;
+                    return (float) ($root['btcamount'] ?? 0.0);
                 },
                 'message' => function (array $root): string {
                     return $root['message'] ?? '';

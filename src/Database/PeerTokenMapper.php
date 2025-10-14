@@ -372,15 +372,14 @@ class PeerTokenMapper
                     FROM transactions AS tt
                     LEFT JOIN btc_swap_transactions AS bt ON tt.transactionid = bt.operationid
                     WHERE 
-                        tt.senderid = :senderid AND tt.transactiontype = :transactiontype
+                        tt.transactiontype = :transactiontype
                     ORDER BY tt.createdat DESC
                     LIMIT :limit OFFSET :offset
                 ";
 
         try {
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':senderid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':transactiontype', "btcSwap", \PDO::PARAM_STR);
+            $stmt->bindValue(':transactiontype', "btcSwapToPool", \PDO::PARAM_STR);
             $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();

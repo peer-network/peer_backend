@@ -1068,7 +1068,7 @@ class WalletMapper
                 'tokenamount' => $rowgems2token,
                 'message' => 'Airdrop',
             ];
-            $transactions = new Transaction($transObj);
+            $transactions = new Transaction($transObj, [], false);
             $transRepo = new TransactionRepository($this->logger, $this->db);
             $transRepo->saveTransaction($transactions);
 
