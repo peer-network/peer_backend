@@ -11,11 +11,11 @@ class DateService
         return (new \DateTime())->format('Y-m-d H:i:s.u');
     }
 
-    public static function nowPlusMinutes(int $minutes): string
+    public static function nowPlusSeconds(int $seconds): string
     {
         $date = (new \DateTime());
 
-        $interval = (new \DateInterval('PT' . $minutes . 'M'));
+        $interval = (new \DateInterval('PT' . $seconds . 'S'));
         $date->add($interval);
 
         return $date->format("Y-m-d H:i:s.u");

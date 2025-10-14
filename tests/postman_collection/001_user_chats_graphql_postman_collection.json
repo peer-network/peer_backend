@@ -146,7 +146,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -160,7 +161,8 @@
 							"pm.environment.set(\"random_email\", randomEmail);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -170,7 +172,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{w_userid_t2}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation Register {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{w_userid_t2}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -209,7 +211,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -219,7 +222,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{random_email}}\", \n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation Register {\n  register(input: {\n    email: \"{{random_email}}\", \n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -252,7 +255,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -265,7 +269,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"query": "mutation Login {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
 						"variables": ""
 					}
 				},
@@ -298,7 +302,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -311,53 +316,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Verification not a userid (fail)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"31007\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{uuid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -390,7 +349,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -409,7 +369,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -460,7 +420,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -473,7 +434,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"query": "mutation Login {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
 						"variables": ""
 					}
 				},
@@ -506,7 +467,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -526,7 +488,8 @@
 							"console.log(\"modified_email:\", modifiedEmail);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -539,7 +502,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{modified_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"query": "mutation Login {\n  login(email: \"{{modified_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
 						"variables": ""
 					}
 				},
@@ -657,7 +620,7 @@
 			"response": []
 		},
 		{
-			"name": "Get all users",
+			"name": "List users",
 			"event": [
 				{
 					"listen": "test",
@@ -671,7 +634,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -681,7 +645,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -701,7 +666,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Getallusers {\n  listUsers (offset:0, limit:20) {\n    status\n    counter\n    ResponseCode\n    affectedRows {\n      id\n      username\n      status\n      slug\n      img\n      biography\n      createdat\n      updatedat\n    }\n  }\n}\n\n",
+						"query": "query ListUsers {\n  listUsers (offset:0, limit:20) {\n    status\n    counter\n    ResponseCode\n    affectedRows {\n      id\n      username\n      status\n      slug\n      img\n      biography\n      createdat\n      updatedat\n    }\n  }\n}\n\n",
 						"variables": ""
 					}
 				},
@@ -790,7 +755,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -813,7 +779,8 @@
 							"console.log(\"Generated Random Username:\", randomUsername);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -833,7 +800,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateName {\n    updateUsername(username: \"{{new_username}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"{{new_username}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -867,7 +834,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -877,7 +845,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -897,7 +866,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateName {\n    updateUsername(username: \"{{new_username}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"{{new_username}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -931,7 +900,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -959,7 +929,8 @@
 							"console.log(\"Invalid Username:\", invalidUsername);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -979,7 +950,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateName {\n    updateUsername(username: \"{{invalid_username}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"{{invalid_username}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1013,7 +984,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1023,7 +995,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1043,7 +1016,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateName {\n    updateUsername(username: \"12345\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"12345\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1077,7 +1050,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1087,7 +1061,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1107,7 +1082,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateName {\n    updateUsername(username: \"! @ # $ © ® ™ ±\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"! @ # $ © ® ™ ±\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1142,7 +1117,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1152,7 +1128,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1172,7 +1149,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateName {\n    updateUsername(username: \"validuservaliduservaliduser\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"validuservaliduservaliduser\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1207,7 +1184,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1217,7 +1195,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1237,7 +1216,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateName {\n    updateUsername(username: \"vu\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"vu\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1272,7 +1251,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1285,7 +1265,8 @@
 							"console.log(\"New email set to:\", randomEmail); "
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1305,7 +1286,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateMail {\n    updateEmail(email: \"{{new_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
+						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{new_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
 						"variables": ""
 					}
 				},
@@ -1340,7 +1321,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1350,7 +1332,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1370,7 +1353,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateMail {\n    updateEmail(email: \"{{new_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
+						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{new_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
 						"variables": ""
 					}
 				},
@@ -1405,7 +1388,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1417,7 +1401,8 @@
 							"pm.environment.set(\"invalid_email\", invalidEmail);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1437,7 +1422,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateMail {\n    updateEmail(email: \"{{invalid_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
+						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{invalid_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
 						"variables": ""
 					}
 				},
@@ -1472,7 +1457,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1482,7 +1468,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1502,7 +1489,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateMail {\n    updateEmail(email: \"{{w_email_t3}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
+						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{w_email_t3}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
 						"variables": ""
 					}
 				},
@@ -1817,7 +1804,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1827,7 +1815,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n    login(email: \"{{random_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n        accessToken\n        refreshToken\n    }\n}\n",
+						"query": "mutation Login {\n    login(email: \"{{random_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n        accessToken\n        refreshToken\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1877,7 +1865,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1890,7 +1879,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"query": "mutation Login {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
 						"variables": ""
 					}
 				},
@@ -1981,7 +1970,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2001,7 +1991,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateBiography {\n    updateBio(biography: \"{{new_bio}}\") {\n        status\n        ResponseCode\n    }\n}",
+						"query": "mutation UpdateBio {\n    updateBio(biography: \"{{new_bio}}\") {\n        status\n        ResponseCode\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -2034,7 +2024,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2054,7 +2045,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateBiography {\n    updateBio(biography: \"va\") {\n        status\n        ResponseCode\n    }\n}",
+						"query": "mutation UpdateBio {\n    updateBio(biography: \"va\") {\n        status\n        ResponseCode\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -2087,7 +2078,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -2097,7 +2089,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2117,7 +2110,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateBiography {\n    updateBio(biography: \"{{xss_bio}}\") {\n        status\n        ResponseCode\n    }\n}",
+						"query": "mutation UpdateBio {\n    updateBio(biography: \"{{xss_bio}}\") {\n        status\n        ResponseCode\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -2150,7 +2143,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2170,7 +2164,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateProfilePicture {\n    updateProfileImage(img: \"{{new_profile_pic}}\") {\n        status\n        ResponseCode\n    }\n}",
+						"query": "mutation UpdateProfileImage {\n    updateProfileImage(img: \"{{new_profile_pic}}\") {\n        status\n        ResponseCode\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -2203,7 +2197,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2223,7 +2218,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  updateProfileImage(img: \"invalid_file.txt\") {\n    status\n    ResponseCode\n  }\n}",
+						"query": "mutation UpdateProfileImage{\n  updateProfileImage(img: \"invalid_file.txt\") {\n    status\n    ResponseCode\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -2337,7 +2332,8 @@
 							"pm.environment.set(\"userid_t1\", response.data.register.userid);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -2351,7 +2347,8 @@
 							"pm.environment.set(\"email_t1\", randomEmail);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2361,7 +2358,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{email_t1}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation Register {\n  register(input: {\n    email: \"{{email_t1}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -2397,7 +2394,8 @@
 							"pm.environment.set(\"userid_t2\", response.data.register.userid);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -2411,7 +2409,8 @@
 							"pm.environment.set(\"email_t2\", randomEmail);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2421,7 +2420,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{email_t2}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation Register {\n  register(input: {\n    email: \"{{email_t2}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -2454,7 +2453,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2467,121 +2467,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Verification of referral string (fail)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"31010\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
-							"});",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation VerifyReferralString {\n    verifyReferralString(referralString: \"123\") {\n        status\n        ResponseCode\n        affectedRows {\n            uid\n            username\n            slug\n            img\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Verification of postid instead of ref.id (fail)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"31007\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
-							"});",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation VerifyReferralString {\n    verifyReferralString(referralString: \"{{uuid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            uid\n            username\n            slug\n            img\n        }\n    }\n}\n",
+						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2674,7 +2560,8 @@
 							"pm.environment.set(\"userid_t3\", response.data.register.userid);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -2688,7 +2575,8 @@
 							"pm.environment.set(\"email_t3\", randomEmail);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2698,7 +2586,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{email_t3}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{userid_t2}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation Register {\n  register(input: {\n    email: \"{{email_t3}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{userid_t2}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -2731,7 +2619,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2744,7 +2633,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t1}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid_t1}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2777,7 +2666,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2790,7 +2680,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t3}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid_t3}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2841,7 +2731,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2851,7 +2742,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -3065,7 +2956,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -3075,7 +2967,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -3088,7 +2981,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{w_email_t1}}\",\n    password: \"{{w_password_t1}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"query": "mutation Login {\n  login(email: \"{{w_email_t1}}\",\n    password: \"{{w_password_t1}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3301,7 +3194,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -3311,7 +3205,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -3420,7 +3314,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -3433,7 +3328,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -3541,7 +3436,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -3554,7 +3450,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -4129,7 +4025,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -4139,7 +4036,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -4305,7 +4202,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -4318,7 +4216,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -4540,7 +4438,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -4550,7 +4449,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -4710,7 +4609,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -4723,7 +4623,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -4933,7 +4833,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -4953,7 +4854,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Searchchat {\n    getChat(chatid: \"{{chatid}}\", messageLimit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            image\n            name\n            createdat\n            updatedat\n            chatmessages {\n                id\n                content\n                senderid\n                chatid\n                createdat\n            }\n            chatparticipants {\n                userid\n                img\n                username\n                hasaccess\n            }\n        }\n    }\n}\n",
+						"query": "query Getchat {\n    getChat(chatid: \"{{chatid}}\", messageLimit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            image\n            name\n            createdat\n            updatedat\n            chatmessages {\n                id\n                content\n                senderid\n                chatid\n                createdat\n            }\n            chatparticipants {\n                userid\n                img\n                username\n                hasaccess\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
