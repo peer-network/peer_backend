@@ -6,6 +6,7 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\App\Models\MultipartPost;
+use Fawaz\Database\UserMapper;
 use Fawaz\Services\JWTService;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
@@ -21,7 +22,8 @@ class MultipartPostService
         protected PeerLoggerInterface $logger,
         protected PDO $db,
         protected PostService $postService,
-        protected JWTService $tokenService
+        protected JWTService $tokenService,
+        protected UserMapper $userMapper
     ) {
     }
 
@@ -34,6 +36,15 @@ class MultipartPostService
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
                 if ($decodedToken) {
+                    // Validate that the provided bearer access token exists in DB and is not expired
+                    if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
+                        $this->logger->warning('Access token not found or expired for user', [
+                            'userId' => $decodedToken->uid,
+                        ]);
+                        $this->currentUserId = null;
+                        return;
+                    }
+
                     $this->currentUserId = $decodedToken->uid;
                     $this->logger->debug('Query.setCurrentUserId started');
                 } else {

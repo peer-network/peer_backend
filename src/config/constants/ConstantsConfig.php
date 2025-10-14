@@ -6,7 +6,7 @@ namespace Fawaz\config\constants;
 
 use Fawaz\config\constants\ConstantsModeration;
 
-class ConstantsConfig
+class ConstantsConfig implements ConstantsConfigInterface
 {
     public function getData()
     {
@@ -75,7 +75,8 @@ class ConstantsConfig
      *     TOKEN: array{LENGTH: int},
      *     NUMBERS: array{MIN: float, MAX: float},
      *     NUMBERSQ: array{MIN: int, MAX: float},
-     *     WHEREBY: array{MIN: int, MAX: int}
+     *     WHEREBY: array{MIN: int, MAX: int},
+     *     ACTIONS: array<string, int>
      * }
      */
     public static function wallet()
@@ -341,6 +342,26 @@ class ConstantsConfig
         'WHEREBY' => [
             'MIN' => 1,
             'MAX' => 100,
+        ],
+        // Mapping of human-readable action names to action codes (whereby)
+        'ACTIONS' => [
+            'VIEW' => 1,
+            'LIKE' => 2,
+            'DISLIKE' => 3,
+            'COMMENT' => 4,
+            'POST' => 5,
+            'POSTINVESTBASIC' => 6,
+            'POSTINVESTPREMIUM' => 7,
+            'REPORT' => 8,
+            'INVITATION' => 11,
+            'OWNSHARED' => 12,
+            'OTHERSHARED' => 13,
+            'DIRECTDEBIT' => 14,
+            'CREDIT' => 15,
+            'TRANSFER' => 18,
+            'FREELIKE' => 30,
+            'FREECOMMENT' => 31,
+            'FREEPOST' => 32,
         ],
     ];
 
