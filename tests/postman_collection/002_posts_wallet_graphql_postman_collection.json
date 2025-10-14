@@ -15688,7 +15688,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 2) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 6) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -24013,7 +24013,6 @@
 							"const transactions = response?.data?.getTransactionHistory?.affectedRows || [];",
 							"",
 							"const expectedAmounts = {",
-							"    \"DEDUCT\": -156,",
 							"    \"POOL_FEE\": 1.5,",
 							"    \"CREDIT\": 150,",
 							"    \"PEER_FEE\": 3,",
@@ -24223,7 +24222,6 @@
 							"const transactions = response?.data?.getTransactionHistory?.affectedRows || [];",
 							"",
 							"const expectedAmounts = {",
-							"    \"DEDUCT\": -156.52,",
 							"    \"POOL_FEE\": 1.505,",
 							"    \"CREDIT\": 150.5,",
 							"    \"PEER_FEE\": 3.01,",

@@ -3,8 +3,8 @@
 namespace Fawaz\App\Repositories;
 
 use Fawaz\App\Models\BtcSwapTransaction;
+use Fawaz\Utils\PeerLoggerInterface;
 use PDO;
-use Psr\Log\LoggerInterface;
 
 class BtcSwapTransactionRepository
 {
@@ -12,7 +12,7 @@ class BtcSwapTransactionRepository
     /**
      * Assign BtcSwapTransaction object while instantiated
      */
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
         
     }
@@ -25,7 +25,7 @@ class BtcSwapTransactionRepository
         $this->logger->info("TransactionRepository.saveTransaction started");
 
         $query = "INSERT INTO btc_swap_transactions 
-                  (swapid, transuniqueid, transactiontype, userid, btcaddress,  tokenamount, btcamount, status, message, createdat)
+                  (swapid, operationid, transactiontype, userid, btcaddress,  tokenamount, btcamount, status, message, createdat)
                   VALUES 
                   (:swapId, :operationid, :transactiontype, :userId, :btcAddress, :tokenAmount, :btcAmount, :status, :message, :createdat)";
 

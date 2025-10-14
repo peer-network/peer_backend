@@ -28,7 +28,7 @@ class TransactionRepository
         $query = "INSERT INTO transactions 
                   (transactionid, operationid, transactiontype, senderid, recipientid, tokenamount, transferaction, message, createdat)
                   VALUES 
-                  (:transactionId, :operationId, :transactiontype, :senderId, :recipientId, :tokenAmount, :transferAction, :message, :createdat)";
+                  (:transactionId, :operationId, :transactiontype, :senderId, :recipientId, :tokenAmount, :transferaction, :message, :createdat)";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -39,7 +39,7 @@ class TransactionRepository
             $stmt->bindValue(':senderId', $transaction->getSenderId(), \PDO::PARAM_STR);
             $stmt->bindValue(':recipientId', $transaction->getRecipientId(), \PDO::PARAM_STR);
             $stmt->bindValue(':tokenAmount', $transaction->getTokenAmount(), \PDO::PARAM_STR);
-            $stmt->bindValue(':transferAction', $transaction->geTtransferAction(), \PDO::PARAM_STR);
+            $stmt->bindValue(':transferaction', $transaction->geTtransferAction(), \PDO::PARAM_STR);
             $stmt->bindValue(':message', $transaction->getMessage(), \PDO::PARAM_STR);
             $stmt->bindValue(':createdat', $transaction->getCreatedat(), \PDO::PARAM_STR);
             $stmt->execute();

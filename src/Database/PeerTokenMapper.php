@@ -362,7 +362,7 @@ class PeerTokenMapper
                     SELECT 
                         *
                     FROM transactions AS tt
-                    LEFT JOIN btc_swap_transactions AS bt ON tt.transactionid = bt.transuniqueid
+                    LEFT JOIN btc_swap_transactions AS bt ON tt.transactionid = bt.operationid
                     WHERE 
                         tt.senderid = :senderid AND tt.transactiontype = :transactiontype
                     ORDER BY tt.createdat DESC
@@ -444,7 +444,7 @@ class PeerTokenMapper
 
             $this->logger->info('Transaction marked as PAID', ['swapId' => $swapId]);
 
-            $query = "SELECT BTC_T.swapid, TNX.transactionid, BTC_T.transactiontype, TNX.senderid, BTC_T.tokenamount, BTC_T.btcamount, BTC_T.status, BTC_T.message, BTC_T.createdat FROM btc_swap_transactions AS BTC_T LEFT JOIN transactions AS TNX ON TNX.transactionid = BTC_T.transuniqueid WHERE BTC_T.swapid = :swapid";
+            $query = "SELECT BTC_T.swapid, TNX.transactionid, BTC_T.transactiontype, TNX.senderid, BTC_T.tokenamount, BTC_T.btcamount, BTC_T.status, BTC_T.message, BTC_T.createdat FROM btc_swap_transactions AS BTC_T LEFT JOIN transactions AS TNX ON TNX.transactionid = BTC_T.operationid WHERE BTC_T.swapid = :swapid";
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':swapid', $swapId, \PDO::PARAM_STR);
             $stmt->execute();
@@ -899,7 +899,6 @@ class PeerTokenMapper
 
             // 1. SENDER: Debit Token and Fees From Account
             if ($requiredAmount) {
-                $transactionid = self::generateUUID();
                 // $this->createAndSaveTransaction($transRepo, [
                 //     'transactionid' => $transactionid,
                 //     'operationid' => $operationid,
@@ -914,14 +913,16 @@ class PeerTokenMapper
 
             // 2. RECIPIENT: Credit To Account to Pool Account
             if ($numberoftokensToSwap) {
+                $transactionid = self::generateUUID();
                 $this->createAndSaveTransaction($transRepo, [
+                    'transactionid' => $transactionid,
                     'operationid' => $operationid,
                     'transactiontype' => 'btcSwapToPool',
                     'senderid' => $userId,
                     'recipientid' => $recipient,
                     'tokenamount' => $numberoftokensToSwap,
                     'message' => $message,
-                    'transferAction' => 'CREDIT'
+                    'transferaction' => 'CREDIT'
                 ]);
                 $this->walletMapper->saveWalletEntry($recipient, $numberoftokensToSwap);
             }
@@ -935,7 +936,7 @@ class PeerTokenMapper
                     'senderid' => $userId,
                     'recipientid' => $inviterId,
                     'tokenamount' => $inviterWin,
-                    'transferAction' => 'INVITER_FEE'
+                    'transferaction' => 'INVITER_FEE'
                 ]);
                 $this->walletMapper->saveWalletEntry($inviterId, $inviterWin);
             }
@@ -949,7 +950,7 @@ class PeerTokenMapper
                     'senderid' => $userId,
                     'recipientid' => $this->peerWallet,
                     'tokenamount' => $peerAmount,
-                    'transferAction' => 'PEER_FEE'
+                    'transferaction' => 'PEER_FEE'
                 ]);
                 $this->walletMapper->saveWalletEntry($this->peerWallet, $peerAmount);
             }
@@ -963,7 +964,7 @@ class PeerTokenMapper
                     'senderid' => $userId,
                     'recipientid' => $this->poolWallet,
                     'tokenamount' => $feeAmount,
-                    'transferAction' => 'POOL_FEE'
+                    'transferaction' => 'POOL_FEE'
                 ]);
                 $this->walletMapper->saveWalletEntry($this->poolWallet, $feeAmount);
             }
@@ -977,7 +978,7 @@ class PeerTokenMapper
                     'senderid' => $userId,
                     'recipientid' => $this->burnWallet,
                     'tokenamount' => $burnAmount,
-                    'transferAction' => 'BURN_FEE'
+                    'transferaction' => 'BURN_FEE'
                 ]);
                 $this->walletMapper->saveWalletEntry($this->burnWallet, $burnAmount);
             }
@@ -993,7 +994,7 @@ class PeerTokenMapper
                     'tokenamount' => $numberoftokensToSwap,
                     'btcAmount' => $btcAmountToUser,
                     'message' => $message,
-                    'transferAction' => 'CREDIT'
+                    'transferaction' => 'CREDIT'
                 ];
                 $btcTransactions = new BtcSwapTransaction($transObj);
 
@@ -1235,9 +1236,9 @@ class PeerTokenMapper
      * @params string $recipientWallet
      * @params float $amount
      * @params string $transactiontype
-     * @params string $transferAction
+     * @params string $transferaction
      */
-    private function saveLiquidity(string $userId, string $recipientWallet, string $amount, string $transactiontype, string $transferAction): void
+    private function saveLiquidity(string $userId, string $recipientWallet, string $amount, string $transactiontype, string $transferaction): void
     {
         $this->walletMapper->saveWalletEntry($recipientWallet, $amount);
 
@@ -1247,7 +1248,7 @@ class PeerTokenMapper
             'senderid' => $userId,
             'recipientid' => $recipientWallet,
             'tokenamount' => $amount,
-            'transferaction' => $transferAction,
+            'transferaction' => $transferaction,
         ], ['operationid', 'senderid', 'tokenamount'], false);
 
         $repo = new TransactionRepository($this->logger, $this->db);
