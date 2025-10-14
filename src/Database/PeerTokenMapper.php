@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Database;
@@ -9,7 +10,7 @@ use PDO;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use RuntimeException;
 use Fawaz\App\Status;
 use Fawaz\config\constants\ConstantsConfig;
@@ -22,7 +23,9 @@ class PeerTokenMapper
     private string $peerWallet;
     private string $btcpool;
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper) {}
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper)
+    {
+    }
 
     /**
      * Loads and validates the liquidity pool wallets.
@@ -52,7 +55,7 @@ class PeerTokenMapper
      *
      * @param $inputPassword string
      * @param $hashedPassword string
-     * 
+     *
      * @return bool value
      */
     private function validateFeesWalletUUIDs(): bool
@@ -64,22 +67,14 @@ class PeerTokenMapper
     }
 
     /**
-     * Transfers Peer tokens from the sender to the specified recipient.
+     * Make peer token transfer to recipient.
      *
-     * A transaction fee of up to 5% of the requested transfer amount will be applied. 
-     * This fee is deducted automatically and recorded as `Additional` Tokens.
-     * Fees consist 2% Peer, 1% Pool, 1% Burn and 1% Inviter
-     *
-     * @param string $userId: the address of Sender UUID
-     * @param array $args the total `number of tokens` requested for transfer (before fees are applied), `recipient` and `message`
      */
-
     public function transferToken(string $userId, array $args = []): ?array
     {
-
         \ignore_user_abort(true);
 
-        $this->logger->info('PeerTokenMapper.transferToken started');
+        $this->logger->debug('PeerTokenMapper.transferToken started');
 
         $recipient = (string) $args['recipient'];
 
@@ -132,7 +127,7 @@ class PeerTokenMapper
 
         if ($message !== null && strlen($message) > 200) {
             $this->logger->warning('message length is too high');
-            return self::respondWithError(30210);
+            return self::respondWithError(30210); // message length is too high.
         }
 
         try {
@@ -161,6 +156,7 @@ class PeerTokenMapper
         }
 
         $fees = ConstantsConfig::tokenomics()['FEES'];
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
         $peerFee = (float) $fees['PEER'];
         $poolFee = (float) $fees['POOL'];
         $burnFee = (float) $fees['BURN'];
@@ -201,20 +197,32 @@ class PeerTokenMapper
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
 
-            /**
-             * Debuct account from Sender
-             * 
-             * We will not records this actions
-             */
+            // 1. SENDER: Debit From Account
             if ($requiredAmount) {
-                $this->walletMapper->saveWalletEntry($userId, -abs($requiredAmount));
+                // Remove this records we don't need it anymore.
+                // $this->createAndSaveTransaction($transRepo, [
+                //     'operationid' => $transUniqueId,
+                //     'transactiontype' => 'transferDeductSenderToRecipient',
+                //     'senderid' => $userId,
+                //     'tokenamount' => -$requiredAmount,
+                //     'message' => $message
+                // ]);
+
+                $id = self::generateUUID();
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => -abs($requiredAmount),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+
+                $this->walletMapper->insertWinToLog($userId, $args);
+                $this->walletMapper->insertWinToPool($userId, $args);
+
             }
 
-            /*
-            * Credit `numberoftokens` to Receipient Account
-            * 
-            * This action considere as Credit to Receipient
-            */
+            // 2. RECIPIENT: Credit To Account
             if ($numberoftokens) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $transUniqueId,
@@ -226,14 +234,20 @@ class PeerTokenMapper
                     'transferaction' => 'CREDIT'
                 ]);
 
-                $this->walletMapper->saveWalletEntry($recipient, abs($numberoftokens));
+                $id = self::generateUUID();
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($numberoftokens),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+
+                $this->walletMapper->insertWinToLog($recipient, $args);
+                $this->walletMapper->insertWinToPool($recipient, $args);
             }
 
-            /**
-             * If current user was Invited by any Inviter than Current User has to pay 1% fee to Inviter
-             * 
-             * Consider this actions as a Transactions and Credit fees to Inviter'account
-             */
+            // 3. INVITER: Fees To Inviter (if applicable)
             if (!empty($inviterId) && $inviterWin) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $transUniqueId,
@@ -243,15 +257,20 @@ class PeerTokenMapper
                     'tokenamount' => $inviterWin,
                     'transferaction' => 'INVITER_FEE'
                 ]);
+                $id = self::generateUUID();
 
-                $this->walletMapper->saveWalletEntry($inviterId, abs($inviterWin));
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($inviterWin),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+
+                $this->walletMapper->insertWinToLog($inviterId, $args);
+                $this->walletMapper->insertWinToPool($inviterId, $args);
             }
 
-            /**
-             * 1% Pool Fees will be charged when a Token Transfer happen
-             * 
-             * Credits 1% fees to Pool's Account
-             */
+            // 4. POOLWALLET: Fee To Pool Wallet
             $feeAmount = TokenHelper::mulRc($numberoftokens, $poolFee);
             if ($feeAmount) {
                 $this->createAndSaveTransaction($transRepo, [
@@ -262,15 +281,20 @@ class PeerTokenMapper
                     'tokenamount' => $feeAmount,
                     'transferaction' => 'POOL_FEE'
                 ]);
+                $id = self::generateUUID();
 
-                $this->walletMapper->saveWalletEntry($this->poolWallet, abs($feeAmount));
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($feeAmount),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+
+                $this->walletMapper->insertWinToLog($this->poolWallet, $args);
+                $this->walletMapper->insertWinToPool($this->poolWallet, $args);
             }
 
-            /**
-             * 2% of requested tokens Peer Fees will be charged 
-             * 
-             * Credits 2% fees to Peer's Account
-             */
+            // 5. PEERWALLET: Fee To Peer Wallet
             $peerAmount = TokenHelper::mulRc($numberoftokens, $peerFee);
             if ($peerAmount) {
                 $this->createAndSaveTransaction($transRepo, [
@@ -281,13 +305,20 @@ class PeerTokenMapper
                     'tokenamount' => $peerAmount,
                     'transferaction' => 'PEER_FEE'
                 ]);
+                $id = self::generateUUID();
 
-                $this->walletMapper->saveWalletEntry($this->peerWallet, abs($peerAmount));
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($peerAmount),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+
+                $this->walletMapper->insertWinToLog($this->peerWallet, $args);
+                $this->walletMapper->insertWinToPool($this->peerWallet, $args);
             }
 
-            /**
-             * 1% of requested tokens will be transferred to Burn' account
-             */
+            // 6. BURNWALLET: Burn Tokens
             $burnAmount = TokenHelper::mulRc($numberoftokens, $burnFee);
             if ($burnAmount) {
                 $this->createAndSaveTransaction($transRepo, [
@@ -298,15 +329,23 @@ class PeerTokenMapper
                     'tokenamount' => $burnAmount,
                     'transferaction' => 'BURN_FEE'
                 ]);
+                $id = self::generateUUID();
 
-                $this->walletMapper->saveWalletEntry($this->burnWallet, abs($burnAmount));
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($burnAmount),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+                $this->walletMapper->insertWinToLog($this->burnWallet, $args);
+                $this->walletMapper->insertWinToPool($this->burnWallet, $args);
             }
 
             $this->logger->info('Token transfer completed successfully');
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11212,
+                'ResponseCode' => "11212",
                 'tokenSend' => $numberoftokens,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'createdat' => date('Y-m-d H:i:s.u')
@@ -333,7 +372,7 @@ class PeerTokenMapper
             if (isset($result['invited']) && !empty($result['invited'])) {
                 return $result["invited"];
             }
-            return NULL;
+            return null;
         } catch (\Throwable $e) {
             throw new RuntimeException($e->getMessage());
         }
@@ -345,12 +384,12 @@ class PeerTokenMapper
      *
      * @param $userId string
      * @param $hashedPassword string
-     * 
+     *
      * @return string value
      */
     public function getUserWalletBalance(string $userId): string
     {
-        $this->logger->info('WalletMapper.getUserWalletBalance started');
+        $this->logger->debug('WalletMapper.getUserWalletBalance started');
 
         $query = "SELECT liquidity AS balance 
                   FROM wallett 
@@ -381,15 +420,16 @@ class PeerTokenMapper
     }
 
     /**
-     * 
+     *
      * get transcations history of current user.
-     * 
+     *
      */
+    // DONE
     public function getTransactions(string $userId, array $args): ?array
     {
-        $this->logger->info("PeerTokenMapper.getTransactions started");
+        $this->logger->debug("PeerTokenMapper.getTransactions started");
 
-        // Define FILTER mappings. 
+        // Define FILTER mappings.
         $typeMap = [
             'TRANSACTION' => ['transferSenderToRecipient', 'transferDeductSenderToRecipient'],
             'AIRDROP' => ['airdrop'],
@@ -476,13 +516,13 @@ class PeerTokenMapper
             $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $data = array_map(
-                fn($trans) => (new Transaction($trans, [], false))->getArrayCopy(),
+                fn ($trans) => (new Transaction($trans, [], false))->getArrayCopy(),
                 $transactions
             );
 
             return [
                 'status' => 'success',
-                'ResponseCode' => 11215,
+                'ResponseCode' => "11215",
                 'affectedRows' => $data
             ];
         } catch (\Throwable $th) {
