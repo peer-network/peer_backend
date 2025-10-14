@@ -48,6 +48,7 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
 use DateTimeImmutable;
+use Fawaz\App\Role;
 
 class GraphQLSchemaBuilder
 {
@@ -99,11 +100,11 @@ class GraphQLSchemaBuilder
         $schema = $guestSchema;
 
         if ($this->currentUserId !== null) {
-            if ($this->userRoles <= 0) {
+            if ($this->userRoles === Role::USER) {
                 $schema = $userSchema;
-            } elseif ($this->userRoles === 8) {
+            } elseif ($this->userRoles === Role::WEB3_BRIDGE_USER) {
                 $schema = $bridgeSchema;
-            } elseif ($this->userRoles === 16) {
+            } elseif ($this->userRoles === Role::ADMIN) {
                 $schema = $adminSchema;
             }
         }
