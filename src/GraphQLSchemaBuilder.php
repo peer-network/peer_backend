@@ -6,20 +6,6 @@ namespace Fawaz;
 
 const INT32_MAX = 2147483647;
 
-// whereby
-const VIEW_ = 1;// whereby VIEW
-const LIKE_ = 2;// whereby LIKE
-const DISLIKE_ = 3;// whereby DISLIKE
-const COMMENT_ = 4;// whereby COMMENT
-const POST_ = 5;// whereby POST
-const REPORT_ = 6;// whereby MELDEN
-const INVITATION_ = 11;// whereby EINLADEN
-const OWNSHARED_ = 12;// whereby SHAREN SENDER
-const OTHERSHARED_ = 13;// whereby SHAREN POSTER
-const FREELIKE_ = 30;// whereby FREELIKE
-const FREECOMMENT_ = 31;// whereby FREECOMMENT
-const FREEPOST_ = 32;// whereby FREEPOST
-
 const BASIC = 50;
 const PINNED = 200;
 
@@ -50,7 +36,6 @@ use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\SearchUserContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -111,18 +96,16 @@ class GraphQLSchemaBuilder
         $userSchema = $baseQueries;
         $bridgeSchema = $bridgeOnlyQueries;
 
-        if ($this->currentUserId === null) {
-            $schema = $guestSchema;
-        } else {
-            $schema = $userSchema;
-        }
+        $schema = $guestSchema;
 
-        if ($this->userRoles <= 0) {
-            $schema = $schema;
-        } elseif ($this->userRoles === 8) {
-            $schema = $bridgeSchema;
-        } elseif ($this->userRoles === 16) {
-            $schema = $adminSchema;
+        if ($this->currentUserId !== null) {
+            if ($this->userRoles <= 0) {
+                $schema = $userSchema;
+            } elseif ($this->userRoles === 8) {
+                $schema = $bridgeSchema;
+            } elseif ($this->userRoles === 16) {
+                $schema = $adminSchema;
+            }
         }
 
         return $schema;
@@ -163,8 +146,16 @@ class GraphQLSchemaBuilder
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
                 if ($decodedToken) {
+                    // Validate that the provided bearer access token exists in DB and is not expired
+                    // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
+                    //     $this->logger->warning('Access token not found or expired for user', [
+                    //         'userId' => $decodedToken->uid,
+                    //     ]);
+                    //     $this->currentUserId = null;
+                    //     return;
+                    // }
+
                     $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
-                    //$user = $this->userMapper->loadTokenById($decodedToken->uid);
                     if ($user) {
                         $this->currentUserId = $decodedToken->uid;
                         $this->userRoles = $decodedToken->rol;
@@ -2425,6 +2416,8 @@ class GraphQLSchemaBuilder
             'hello' => fn (mixed $root, array $args, mixed $context) => $this->resolveHello($root, $args, $context),
             'searchUser' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
             'searchUserAdmin' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
+            'listUsersV2' => fn (mixed $root, array $args) => $this->resolveListUsersV2($args),
+            'listUsersAdminV2' => fn (mixed $root, array $args) => $this->resolveListUsersV2($args),
             'listUsers' => fn (mixed $root, array $args) => $this->resolveUsers($args),
             'getProfile' => fn (mixed $root, array $args) => $this->resolveProfile($args),
             'listFollowRelations' => fn (mixed $root, array $args) => $this->resolveFollows($args),
@@ -2483,7 +2476,7 @@ class GraphQLSchemaBuilder
             'updateUsername' => fn (mixed $root, array $args) => $this->userService->setUsername($args),
             'updateEmail' => fn (mixed $root, array $args) => $this->userService->setEmail($args),
             'updatePassword' => fn (mixed $root, array $args) => $this->userService->setPassword($args),
-            'toggleProfilePrivacy' => fn () => $this->userInfoService->toggleProfilePrivacy(),
+        //    'toggleProfilePrivacy' => fn () => $this->userInfoService->toggleProfilePrivacy(),
             'updateBio' => fn (mixed $root, array $args) => $this->userInfoService->updateBio($args['biography']),
             'updateProfileImage' => fn (mixed $root, array $args) => $this->userInfoService->setProfilePicture($args['img']),
             'toggleUserFollowStatus' => fn (mixed $root, array $args) => $this->userInfoService->toggleUserFollow($args['userid']),
@@ -3172,6 +3165,7 @@ class GraphQLSchemaBuilder
     {
         $tokenomicsConfig = ConstantsConfig::tokenomics();
         $dailyfreeConfig = ConstantsConfig::dailyFree();
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
@@ -3210,10 +3204,10 @@ class GraphQLSchemaBuilder
         ];
 
         $actionMaps = [
-            'like' => LIKE_,
-            'comment' => COMMENT_,
-            'post' => POST_,
-            'dislike' => DISLIKE_,
+            'like' => $actions['LIKE'],
+            'comment' => $actions['COMMENT'],
+            'post' => $actions['POST'],
+            'dislike' => $actions['DISLIKE'],
         ];
 
         // Validations
@@ -3583,7 +3577,7 @@ class GraphQLSchemaBuilder
         }
 
         if (!empty($username) && !empty($userId)) {
-            return $this::respondWithError(30104);
+            return $this::respondWithError(31012);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
@@ -3603,17 +3597,92 @@ class GraphQLSchemaBuilder
         }
 
         if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
-            return $this::respondWithError(00000);//"The IP '$ip' is not a valid IP address."
+            return $this::respondWithError(30257);//"The IP '$ip' is not a valid IP address."
         }
 
         $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $this->logger->debug('Query.resolveSearchUser started');
 
+        if ($this->userRoles === 16) {
+            $args['includeDeleted'] = true;
+        }
+
         $data = $this->userService->fetchAllAdvance($args);
 
         if (!empty($data)) {
             $this->logger->info('Query.resolveSearchUser.fetchAll successful', ['userCount' => count($data)]);
+
+            return $data;
+        }
+
+        return $this::createSuccessResponse(21001);
+    }
+
+    protected function resolveListUsersV2(array $args): ?array   
+    {
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
+            return $this::respondWithError(30103);
+        }
+
+        $username = isset($args['username']) ? trim($args['username']) : null;
+        $usernameConfig = ConstantsConfig::user()['USERNAME'];
+        $userId = $args['userid'] ?? null;
+        $email = $args['email'] ?? null;
+        $status = $args['status'] ?? null;
+        $verified = $args['verified'] ?? null;
+        $ip = $args['ip'] ?? null;
+
+        if (!empty($username) && !empty($userId)) {
+            return $this::respondWithError(31012);
+        }
+
+        if ($userId !== null && !self::isValidUUID($userId)) {
+            return $this::respondWithError(30201);
+        }
+
+        if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
+            return $this::respondWithError(30202);
+        }
+
+        if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
+            return $this::respondWithError(30202);
+        }
+
+        if (!empty($userId)) {
+            $args['uid'] = $userId;
+        }
+
+        if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $this::respondWithError(30257);//"The IP '$ip' is not a valid IP address."
+        }
+
+        $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
+
+        $this->logger->debug('Query.resolveListUsersV2 started');
+
+        $isAdmin = $this->userRoles === 16;
+        $searchesByIdentifier = !empty($username) || !empty($userId);
+        if ($isAdmin) {
+            $args['includeDeleted'] = true;
+        }
+        $data = $isAdmin || $searchesByIdentifier
+            ? $this->userService->fetchAllAdvance($args)
+            : $this->userService->fetchAll($args);
+
+        if (!empty($data)) {
+            $this->logger->info('Query.resolveListUsersV2.fetchAll successful', ['userCount' => count($data)]);
 
             return $data;
         }
@@ -3759,9 +3828,6 @@ class GraphQLSchemaBuilder
         }
 
         return $results;
-
-        $this->logger->warning('Query.resolveUsers No users found');
-        return $this::createSuccessResponse(21001);
     }
 
     protected function resolveChat(array $args): ?array
@@ -4400,6 +4466,14 @@ class GraphQLSchemaBuilder
             if (!$decodedToken) {
                 return $this::respondWithError(30901);
             }
+
+            // // Validate that the provided refresh token exists in DB and is not expired
+            // if (!$this->userMapper->refreshTokenValidForUser($decodedToken->uid, $refreshToken)) {
+            //     $this->logger->warning('Refresh token not found or expired for user', [
+            //         'userId' => $decodedToken->uid,
+            //     ]);
+            //     return $this::respondWithError(30901);
+            // }
 
             $users = $this->userMapper->loadById($decodedToken->uid);
             if (!$users) {
