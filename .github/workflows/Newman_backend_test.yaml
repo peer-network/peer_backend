@@ -73,6 +73,14 @@ jobs:
         run: |
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+      - name: Cache Composer dependencies (for PHPStan)
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
       - name: Generate backend config before PHPStan
         run: |
           docker compose --env-file .env.dev run --rm backend \
@@ -82,7 +90,7 @@ jobs:
         run: |
           docker compose --env-file .env.dev run --rm backend \
             sh -c "cd /var/www/html && \
-                   composer install --prefer-dist --no-interaction && \
+                   composer install --prefer-dist --no-interaction --no-progress && \
                    vendor/bin/phpstan analyse --configuration=/var/www/html/phpstan.neon --memory-limit=1G"
 
   validate_sql_files:
@@ -271,10 +279,17 @@ jobs:
           echo "All login attempts failed."
           exit 1
 
-      - name: Build And Start Docker Containers
-        run: |
-          docker compose -f ./docker-compose.yml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}
-          docker compose -f ./docker-compose.yml up -d
+      - name: Build backend Docker image with GitHub cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: peer-backend:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start Docker Containers
+        run: docker compose -f ./docker-compose.yml up -d
  
       - name: Set PHP upload limits
         run: |
@@ -539,6 +554,12 @@ jobs:
  
       - name: Set image name
         run: echo "IMAGE_NAME=peer-backend:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: ${{ runner.os }}-trivy-db
  
       - name: Install Trivy
         run: |
