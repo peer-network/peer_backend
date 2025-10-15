@@ -147,7 +147,6 @@ class GraphQLSchemaBuilder
         if ($bearerToken !== null && $bearerToken !== '') {
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
-                if ($decodedToken) {
                     // Validate that the provided bearer access token exists in DB and is not expired
                     // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
                     //     $this->logger->warning('Access token not found or expired for user', [
@@ -164,10 +163,6 @@ class GraphQLSchemaBuilder
                         $this->setCurrentUserIdForServices($this->currentUserId);
                         $this->logger->debug('Query.setCurrentUserId started');
                     }
-                } else {
-                    $this->currentUserId = null;
-                    return false;
-                }
 
                 $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
                 if ($user) {
