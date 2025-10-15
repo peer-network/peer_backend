@@ -32,7 +32,7 @@ return static function (App $app) {
 
     // Routes
     $app->post('/graphql', GraphQLHandler::class);
-    $app->post('/health', HealthHandler::class);
+    $app->get('/health', HealthHandler::class);
     $app->post('/upload-post', MultipartPostHandler::class);
     $app->any('/{routes:.*}', NotFoundHandler::class);
 };

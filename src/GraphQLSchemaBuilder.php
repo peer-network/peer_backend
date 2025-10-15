@@ -49,6 +49,7 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
 use DateTimeImmutable;
 use Fawaz\App\Role;
+use Fawaz\App\ValidationException;
 
 class GraphQLSchemaBuilder
 {
@@ -4475,6 +4476,7 @@ class GraphQLSchemaBuilder
 
             $decodedToken = $this->tokenService->validateToken($refreshToken, true);
 
+<<<<<<< HEAD
             if (!$decodedToken) {
                 return $this::respondWithError(30901);
             }
@@ -4488,7 +4490,7 @@ class GraphQLSchemaBuilder
             // }
 
             $users = $this->userMapper->loadById($decodedToken->uid);
-            if (!$users) {
+            if ($users === false) {
                 return $this::respondWithError(30901);
             }
 
@@ -4516,7 +4518,13 @@ class GraphQLSchemaBuilder
                 'accessToken' => $accessToken,
                 'refreshToken' => $newRefreshToken
             ];
+        } catch (ValidationException $e) {
+            $this->logger->warning('Validation Error during refreshToken process', [
+                'exception' => $e->getMessage(),
+                'stackTrace' => $e->getTraceAsString()
+            ]);
 
+            return $this::respondWithError(30901);
         } catch (\Throwable $e) {
             $this->logger->error('Error during refreshToken process', [
                 'exception' => $e->getMessage(),
