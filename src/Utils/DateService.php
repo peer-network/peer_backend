@@ -1,17 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Utils;
 
 class DateService
 {
-    static function now(): string {
+    public static function now(): string
+    {
         return (new \DateTime())->format('Y-m-d H:i:s.u');
     }
 
-    static function nowPlusMinutes(int $minutes): string {
+    public static function nowPlusSeconds(int $seconds): string
+    {
         $date = (new \DateTime());
 
-        $interval = (new \DateInterval('PT' . $minutes . 'M'));
+        $interval = (new \DateInterval('PT' . $seconds . 'S'));
         $date->add($interval);
 
         return $date->format("Y-m-d H:i:s.u");

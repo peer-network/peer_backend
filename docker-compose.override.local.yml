@@ -24,7 +24,7 @@ services:
     ports:
       - "8888:80"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/graphql"]
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -33,6 +33,7 @@ services:
     volumes:
       - ./src:/var/www/html/src
       - ./runtime-data/logs:/var/www/html/runtime-data/logs
+      - ./runtime-data/media/assets:/var/www/html/runtime-data/media/assets
     networks:
       - my-network
   newman:

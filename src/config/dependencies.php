@@ -1,18 +1,20 @@
 <?php
+
 declare(strict_types=1);
 
 use Fawaz\BaseURL;
+use Fawaz\Utils\ResponseMessagesProvider;
 use Fawaz\Services\JWTService;
 use Fawaz\Services\Mailer;
 use Fawaz\Services\LiquidityPool;
 use DI\ContainerBuilder;
 use Fawaz\App\Interfaces\UserServiceImpl;
 use Fawaz\App\Interfaces\UserServiceInterface;
+use Fawaz\Utils\PeerLogger;
+use Fawaz\Utils\ResponseMessagesProviderImpl;
 use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
-use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 
 return static function (ContainerBuilder $containerBuilder, array $settings) {
     $containerBuilder->addDefinitions([
@@ -20,13 +22,10 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 
         BaseURL::class => fn (ContainerInterface $c) => new BaseURL($c->get('settings')['base_url']),
 
-        LoggerInterface::class => function (ContainerInterface $c) {
+        PeerLoggerInterface::class => function (ContainerInterface $c) {
             $settings = $c->get('settings')['logger'];
 
-            $logger = new Logger($settings['name']);
-
-            $processor = new UidProcessor();
-            $logger->pushProcessor($processor);
+            $logger = new PeerLogger($settings['name']);
 
             $handler = new StreamHandler($settings['path'], $settings['level']);
             $logger->pushHandler($handler);
@@ -43,30 +42,30 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
                 file_get_contents($settings['refreshPublicKeyPath']),
                 (int)$settings['accessTokenValidity'],
                 (int)$settings['refreshTokenValidity'],
-                $c->get(LoggerInterface::class)
+                $c->get(PeerLoggerInterface::class)
             );
         },
 
         Mailer::class => function (ContainerInterface $c) {
             $settings = $c->get('settings');
-			$Envi = [];
-			$Envi = ['mailapilink' => (string)$settings['mailapilink'], 'mailapikey' => (string)$settings['mailapikey']];
+            $Envi = [];
+            $Envi = ['mailapilink' => (string)$settings['mailapilink'], 'mailapikey' => (string)$settings['mailapikey']];
             return new Mailer(
                 $Envi,
-                $c->get(LoggerInterface::class)
+                $c->get(PeerLoggerInterface::class)
             );
         },
 
         LiquidityPool::class => function (ContainerInterface $c) {
             $settings = $c->get('settings')['liquidity'];
-			$Envi = [];
-			$Envi = ['peer' => (string)$settings['peer'], 'pool' => (string)$settings['pool'], 'burn' => (string)$settings['burn'], 'btcpool' => (string)$settings['btcpool']];
+            $Envi = [];
+            $Envi = ['peer' => (string)$settings['peer'], 'pool' => (string)$settings['pool'], 'burn' => (string)$settings['burn'], 'btcpool' => (string)$settings['btcpool']];
             return new LiquidityPool(
                 $Envi
             );
         },
 
-        PDO::class => function(ContainerInterface $c) {
+        PDO::class => function (ContainerInterface $c) {
             $settings = $c->get('settings')['db'];
 
             $pdo = new PDO($settings['dsn'], $settings['username'], $settings['password']);
@@ -77,5 +76,9 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         },
 
         UserServiceInterface::class => \DI\autowire(UserServiceImpl::class),
+        ResponseMessagesProvider::class => function (ContainerInterface $c) {
+            $path = __DIR__ . "/../../runtime-data/media/assets/response-codes.json";
+            return new ResponseMessagesProviderImpl($path);
+        }
     ]);
 };

@@ -1,0 +1,75 @@
+# title = "Peer Backend Gitleaks Config"
+
+[[rules]]
+id = "backend-catch-common-secrets"
+description = "Catch any likely secret (broad net)"
+regex = '''(?i)(ghp_[0-9A-Za-z]{36}|github_pat_[0-9A-Za-z_]{20,}|glpat-[0-9A-Za-z\-_]{20}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|AIza[0-9A-Za-z\-_]{35}|sk_live_[0-9a-zA-Z]{24}|pk_live_[0-9a-zA-Z]{24}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+|-----BEGIN( RSA| DSA| EC| OPENSSH)? PRIVATE KEY-----)'''
+tags = ["key", "secret", "generic", "broad"]
+
+[[rules]]
+id = "backend-entropy-catch-all"
+description = "Catch any high-entropy random string (broad net for unknown keys)"
+regex = '''[A-Za-z0-9\+=!@#$%^&*._-]{36,}'''
+entropy = 4.6
+tags = ["key", "secret", "generic", "broad"]
+
+[rules.allowlist]
+description = "Ignore CLI flags, file paths, and GitHub placeholders"
+regexes = [
+  '''^--[a-zA-Z0-9._=-]+$''',
+  '''\.gitleaks_out/.*''',
+  '''^ghcr\.io/gitleaks/gitleaks.*''',
+  '''^/repo/.*''',
+  '''^[\+\-]?--config=.*gitleaks.*$''',
+  '''\^--config=.*gitleaks.*$''',
+  '''(?i)secrets\.[A-Za-z0-9_]+''',
+  '''(?i)vars\.[A-Za-z0-9_]+''',
+  '''(?i)github\.[A-Za-z0-9_]+''',
+  '''(?i)print\(|logger\.info\(|console\.log''',
+  '''(?i)file_(path|name|id)''',
+  '''(?i)test(user|post|wallet|transaction|comment)''',
+  '''(?i)temporary|sample|mock|fixture''',
+  '''(?i)(Service|Mapper|Builder|Provider|Injector|Query)\.[A-Za-z0-9_]+''',
+  '''(?i)(fetch|check|get|load|add|update|convert|insert|toggle|handle|post|transactions|eligibility|privacy|token)'''
+]
+
+# --- Global Allowlist (approved exceptions ONLY) ---
+[allowlist]
+description = "Ignore known UUIDs, hashes, and Postman/test data"
+regexes = [
+  '''85d5f836-b1f5-4c4e-9381-1b058e13df93''',
+  '''7e0b2d21-d2b0-4af5-8b73-5f8efc04b11f''',
+  '''3f6d55c1-9731-4f28-8b85-5a30cd7c5cc4''',
+  '''85d5f836-b1f5-4c4e-9381-1b058e13df94''',
+  '''334ce5b3-813d-4fb4-86be-ac88fd63b803''',
+  '''1c9448a1-3608-423f-a038-2f267c943151.webp''',
+  '''hasShortActiveAdWithUpcomingAd''',
+  '''existing_advertisementId_[0-9]+''',
+  '''testuser[0-9]+@example\.com''',
+  '''LogWin(Service|Mapper)\.\w+''',
+  '''logWinMigrationWalletNegativeToZero''',
+  '''generate(Like|Dislike|Post|Comment)PaidActionToLogWins''',
+  '''ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789''',
+  '''[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}''',
+  '''^[A-Fa-f0-9]{32,64}$''',
+  '''example\.com''',
+  '''fake(email|token|uuid)''',
+  '''mock(data|response|id)''',
+  '''tmp(file|dir|token)'''
+]
+
+# --- Path denylist (ignore noisy generated/test files) ---
+[pathDenylist]
+description = "Exclude noisy generated/test files"
+regexes = [
+  '''^runtime-data/logs/.*''',
+  '''^tests/postman_collection/.*''',
+  '''^sql_files_for_import/.*''',
+  '''^etc/busybox-paths\.d/.*''',
+  '''^etc/ssl/openssl\.cnf(\.dist)?$''',
+  '''^tests/.*''',
+  '''^postman_collections?/.*''',
+  '''^vendor/.*''',
+  '''^storage/.*''',
+  '''^node_modules/.*'''
+]

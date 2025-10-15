@@ -1,9 +1,13 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Fawaz\App\Helpers;
 
-class FeesAccountHelper{
-
-    public static function getAccounts(){
+class FeesAccountHelper
+{
+    public static function getAccounts()
+    {
         return [
             'PEER_BANK' => $_ENV['PEER_BANK'],
             'BURN_ACCOUNT' => $_ENV['BURN_ACCOUNT'],

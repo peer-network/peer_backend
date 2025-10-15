@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use RuntimeException;
@@ -7,7 +9,7 @@ use Throwable;
 
 class ValidationException extends RuntimeException
 {
-    protected array $errors = []; 
+    protected array $errors = [];
 
     public function __construct(string $message = "", array $errors = [], ?Throwable $previous = null)
     {
