@@ -1,7 +1,5 @@
 
-
-
-BEGIN 
+BEGIN;
 
 UPDATE users_info ui
 SET 
