@@ -306,17 +306,7 @@ class PeerTokenService
                 return [
                     'status' => 'success',
                     'ResponseCode' => $results['ResponseCode'],
-                    'affectedRows' => [
-                        'swapid' => $results['affectedRows']['swapid'],
-                        'transactionid' => $results['affectedRows']['transactionid'],
-                        'transactiontype' => $results['affectedRows']['transactiontype'],
-                        'senderid' => $results['affectedRows']['senderid'],
-                        'tokenamount' => $results['affectedRows']['tokenamount'],
-                        'btcamount' => $results['affectedRows']['btcamount'],
-                        'status' => $results['affectedRows']['status'],
-                        'message' => $results['affectedRows']['message'],
-                        'createdat' => $results['affectedRows']['createdat'],
-                    ]
+                    'affectedRows' => $results['affectedRows']
                 ];
             }
 

@@ -15,6 +15,7 @@ use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use RuntimeException;
 use Fawaz\App\Status;
+use Fawaz\App\User;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\BtcService;
 use Fawaz\Utils\TokenCalculations\SwapTokenHelper;
@@ -580,7 +581,25 @@ class PeerTokenMapper
         $transactionTypes = isset($args['type']) ? ($typeMap[$args['type']] ?? []) : [];
         $transferActions = isset($args['direction']) ? ($directionMap[$args['direction']] ?? []) : [];
 
-        $query = "SELECT * FROM transactions WHERE (senderid = :senderid OR recipientid = :recipientid)";
+        $query = "SELECT tt.*, 
+                        us.username AS sender_username,
+                        us.uid AS sender_userid,
+                        us.slug AS sender_slug,
+                        us.status AS sender_status,
+                        us.img AS sender_img,
+                        us.biography AS sender_biography, 
+                        us.updatedat AS sender_updatedat,
+                        ur.username AS recipient_username,
+                        ur.uid AS recipient_userid,
+                        ur.slug AS recipient_slug,
+                        ur.status AS recipient_status,
+                        ur.img AS recipient_img,
+                        ur.biography AS recipient_biography,
+                        ur.updatedat AS recipient_updatedat
+                    FROM transactions tt
+                    LEFT JOIN users AS us ON us.uid = tt.senderid
+                    LEFT JOIN users as ur ON ur.uid = tt.recipientid
+                    WHERE (tt.senderid = :senderid OR tt.recipientid = :recipientid)";
 
         $params = [':senderid' => $userId, ':recipientid' => $userId];
 
@@ -592,7 +611,7 @@ class PeerTokenMapper
                 $typePlaceholders[] = $ph;
                 $params[$ph] = $type;
             }
-            $query .= " AND transactiontype IN (" . implode(',', $typePlaceholders) . ")";
+            $query .= " AND tt.transactiontype IN (" . implode(',', $typePlaceholders) . ")";
         }
 
         // Handle TRANSFER ACTION filter.
@@ -603,17 +622,17 @@ class PeerTokenMapper
                 $actionPlaceholders[] = $ph;
                 $params[$ph] = $action;
             }
-            $query .= " AND transferaction IN (" . implode(',', $actionPlaceholders) . ")";
+            $query .= " AND tt.transferaction IN (" . implode(',', $actionPlaceholders) . ")";
         }
 
         // Handle DATE filters.(accepting only date, appending time internally)
         if (isset($args['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['start_date'])) {
-            $query .= " AND createdat >= :start_date";
+            $query .= " AND tt.createdat >= :start_date";
             $params[':start_date'] = $args['start_date'] . ' 00:00:00';
         }
 
         if (isset($args['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['end_date'])) {
-            $query .= " AND createdat <= :end_date";
+            $query .= " AND tt.createdat <= :end_date";
             $params[':end_date'] = $args['end_date'] . ' 23:59:59';
         }
 
@@ -627,7 +646,7 @@ class PeerTokenMapper
                 $sortDirection = 'DESC';
             }
         }
-        $query .= " ORDER BY createdat $sortDirection";
+        $query .= " ORDER BY tt.createdat $sortDirection";
 
         // Handle PAGINATION.(limit and offset)
         if (isset($args['limit']) && is_numeric($args['limit'])) {
@@ -649,8 +668,9 @@ class PeerTokenMapper
             $stmt->execute();
             $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            // map results to sender and recipient user details.
             $data = array_map(
-                fn ($trans) => (new Transaction($trans, [], false))->getArrayCopy(),
+                fn ($trans) => $this->mapTransaction($trans),
                 $transactions
             );
 
@@ -665,6 +685,35 @@ class PeerTokenMapper
             ]);
             throw new \RuntimeException("Database error while fetching transactions: " . $th->getMessage());
         }
+    }
+
+    /**
+     * Map transaction with sender and recipient details.
+     */
+    private function mapTransaction(array $trans): array
+    {
+        $items = (new Transaction($trans, [], false))->getArrayCopy();
+        $items['sender'] = (new User([
+            'username' => $trans['sender_username'] ?? null,
+            'uid' => $trans['sender_userid'] ?? null,
+            'slug' => $trans['sender_slug'] ?? null,
+            'status' => $trans['sender_status'] ?? null,
+            'img' => $trans['sender_img'] ?? null,
+            'biography' => $trans['sender_biography'] ?? null,
+            'updatedat' => $trans['sender_updatedat'] ?? null,
+        ], [], false))->getArrayCopy();
+
+        $items['recipient'] = (new User([
+            'username' => $trans['recipient_username'] ?? null,
+            'uid' => $trans['recipient_userid'] ?? null,
+            'slug' => $trans['recipient_slug'] ?? null,
+            'status' => $trans['recipient_status'] ?? null,
+            'img' => $trans['recipient_img'] ?? null,
+            'biography' => $trans['recipient_biography'] ?? null,
+            'updatedat' => $trans['recipient_updatedat'] ?? null,
+        ], [], false))->getArrayCopy();
+        
+        return $items;
     }
 
     /**

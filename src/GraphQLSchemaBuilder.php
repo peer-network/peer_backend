@@ -2360,6 +2360,12 @@ class GraphQLSchemaBuilder
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
                 },
+                'sender' => function (array $root): array {
+                    return $root['sender'] ?? [];
+                },
+                'recipient' => function (array $root): array {
+                    return $root['recipient'] ?? [];
+                },
             ],
             'PostInteractionResponse' => [
                 'meta' => function (array $root): array {
