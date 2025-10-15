@@ -417,14 +417,6 @@ class PeerTokenMapper
         $this->logger->debug('PeerTokenMapper.updateSwapTranStatus started', ['swapId' => $swapId]);
 
         try {
-            if (!$this->db->beginTransaction()) {
-                $this->logger->critical('Failed to start database transaction', ['swapId' => $swapId]);
-                return [
-                    'status' => 'error',
-                    'ResponseCode' => '40302',
-                    'message' => 'Unable to start database transaction.',
-                ];
-            }
 
             // 1. Check if transaction exists and is PENDING
             $query = "SELECT 1 FROM btc_swap_transactions WHERE swapid = :swapid AND status = :status";
@@ -434,7 +426,6 @@ class PeerTokenMapper
             $stmt->execute();
 
             if (!$stmt->fetchColumn()) {
-                $this->db->rollBack();
                 $this->logger->warning('No matching PENDING transaction found for swapId.', ['swapId' => $swapId]);
                 return [
                     'status' => 'error',
@@ -449,7 +440,6 @@ class PeerTokenMapper
             $updateStmt->bindValue(':status', 'PAID', \PDO::PARAM_STR);
             $updateStmt->execute();
 
-            $this->db->commit();
 
             $this->logger->debug('Transaction marked as PAID', ['swapId' => $swapId]);
 
@@ -477,10 +467,6 @@ class PeerTokenMapper
                 'ResponseCode' => '40302',
             ];
         } catch (\Throwable $e) {
-            if ($this->db->inTransaction()) {
-                $this->db->rollBack();
-            }
-
             $this->logger->error('PeerTokenMapper.updateSwapTranStatus failed', [
                 'error' => $e->getMessage(),
                 'swapId' => $swapId,

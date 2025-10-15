@@ -220,10 +220,13 @@ class PeerTokenService
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             $response = $this->peerTokenMapper->swapTokens($this->currentUserId, $args);
             if ($response['status'] === 'error') {
+                $this->transactionManager->rollback();
                 return $response;
             } else {
+                $this->transactionManager->commit();
                 return [
                     'status' => 'success',
                     'ResponseCode' => $response['ResponseCode'],
@@ -236,6 +239,7 @@ class PeerTokenService
             }
 
         } catch (\Exception $e) {
+            $this->transactionManager->rollback();
             return $this->respondWithError(41231);
         }
     }
@@ -255,10 +259,13 @@ class PeerTokenService
             return $this->respondWithError(60501);
         }
         try {
+            $this->transactionManager->beginTransaction();
             $response = $this->peerTokenMapper->addLiquidity($this->currentUserId, $args);
             if ($response['status'] === 'error') {
+                $this->transactionManager->rollback();
                 return $response;
             } else {
+                $this->transactionManager->commit();
                 return [
                     'status' => 'success',
                     'ResponseCode' => $response['ResponseCode'],
@@ -270,6 +277,7 @@ class PeerTokenService
                 ];
             }
         } catch (\Exception $e) {
+            $this->transactionManager->rollback();
             return $this->respondWithError(41228); // Failed to add Liquidity
         }
     }
@@ -297,12 +305,15 @@ class PeerTokenService
             if (!empty($transactionId) && !self::isValidUUID($transactionId)) {
                 return $this->respondWithError(30242); // Invalid transaction ID provided
             }
+            $this->transactionManager->beginTransaction();
 
             $results = $this->peerTokenMapper->updateSwapTranStatus($transactionId);
 
             if ($results['status'] === 'error') {
+                $this->transactionManager->rollback();
                 return $results;
             } else {
+                $this->transactionManager->commit();
                 return [
                     'status' => 'success',
                     'ResponseCode' => $results['ResponseCode'],
@@ -311,6 +322,7 @@ class PeerTokenService
             }
 
         } catch (\Exception $e) {
+            $this->transactionManager->rollback();
             $this->logger->error("Error in WalletService.updateSwapTranStatus", ['exception' => $e->getMessage()]);
             return $this->respondWithError(41230);  // Error occurred while update Swap transaction status
         }
