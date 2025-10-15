@@ -19,6 +19,8 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\UserPreferences;
+use Fawaz\Utils\DateService;
+
 
 class UserService
 {
@@ -1116,7 +1118,13 @@ class UserService
      */
     public function genericPasswordResetSuccessResponse(): array
     {
-        return self::createSuccessResponse(11901);
+          $nextAttemptAt = DateService::nowPlusSeconds(60); 
+
+           return [
+            'status' => 'success',
+            'ResponseCode' => "11901",
+            'nextAttemptAt' => $nextAttemptAt,
+        ];
     }
 
 
