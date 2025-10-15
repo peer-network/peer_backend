@@ -883,6 +883,10 @@
         "comment": "INVALID_ONBOARDING_VALUE — input contains onboarding not listed in AVAILABLE_ONBOARDINGS",
         "userFriendlyComment": "The onboarding value you entered is not valid. Please select a valid option and try again."
     },
+    "31012": {
+        "comment": "The 'userid' and 'username' fields cannot be used together in the same request",
+        "userFriendlyComment": "Please provide either a user ID or a username, not both."
+    },
      "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",
         "userFriendlyComment": "This action is only available for friends."
