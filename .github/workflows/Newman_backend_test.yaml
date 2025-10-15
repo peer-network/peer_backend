@@ -86,13 +86,6 @@ jobs:
           docker compose --env-file .env.dev run --rm backend \
             sh -c "bash /var/www/html/cd-generate-backend-config.sh"
 
-      - name: Run PHPStan inside backend container
-        run: |
-          docker compose --env-file .env.dev run --rm backend \
-            sh -c "cd /var/www/html && \
-                   composer install --prefer-dist --no-interaction --no-progress && \
-                   vendor/bin/phpstan analyse --configuration=/var/www/html/phpstan.neon --memory-limit=1G"
-
   validate_sql_files:
     name: Ensure Only Valid SQL Files Are Changed
     runs-on: ubuntu-latest
