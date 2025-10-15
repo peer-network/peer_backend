@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Fawaz;
 
 const INT32_MAX = 2147483647;
@@ -149,11 +147,24 @@ class GraphQLSchemaBuilder
         if ($bearerToken !== null && $bearerToken !== '') {
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
-                // Validate that the provided bearer access token exists in DB and is not expired
-                if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
-                    $this->logger->warning('Access token not found or expired for user', [
-                        'userId' => $decodedToken->uid,
-                    ]);
+                if ($decodedToken) {
+                    // Validate that the provided bearer access token exists in DB and is not expired
+                    // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
+                    //     $this->logger->warning('Access token not found or expired for user', [
+                    //         'userId' => $decodedToken->uid,
+                    //     ]);
+                    //     $this->currentUserId = null;
+                    //     return;
+                    // }
+
+                    $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
+                    if ($user) {
+                        $this->currentUserId = $decodedToken->uid;
+                        $this->userRoles = $decodedToken->rol;
+                        $this->setCurrentUserIdForServices($this->currentUserId);
+                        $this->logger->debug('Query.setCurrentUserId started');
+                    }
+                } else {
                     $this->currentUserId = null;
                     return false;
                 }
@@ -4468,13 +4479,17 @@ class GraphQLSchemaBuilder
 
             $decodedToken = $this->tokenService->validateToken($refreshToken, true);
 
-            // Validate that the provided refresh token exists in DB and is not expired
-            if (!$this->userMapper->refreshTokenValidForUser($decodedToken->uid, $refreshToken)) {
-                $this->logger->warning('Refresh token not found or expired for user', [
-                    'userId' => $decodedToken->uid,
-                ]);
+            if (!$decodedToken) {
                 return $this::respondWithError(30901);
             }
+
+            // // Validate that the provided refresh token exists in DB and is not expired
+            // if (!$this->userMapper->refreshTokenValidForUser($decodedToken->uid, $refreshToken)) {
+            //     $this->logger->warning('Refresh token not found or expired for user', [
+            //         'userId' => $decodedToken->uid,
+            //     ]);
+            //     return $this::respondWithError(30901);
+            // }
 
             $users = $this->userMapper->loadById($decodedToken->uid);
             if ($users === false) {

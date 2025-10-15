@@ -125,6 +125,9 @@ dev: check-hooks reset-db-and-backend init ## Full setup: env.ci, DB reset, vend
 
 	@echo "Restoring executable bit on git hooks..."
 	chmod +x .githooks/*
+	
+	@echo "Generating config..."
+	bash cd-generate-backend-config.sh
 
 	@echo "Building images..."
 	docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml build
@@ -488,9 +491,6 @@ scan: ensure-gitleaks check-hooks ## Run Gitleaks scan on staged changes only
 	else \
 		echo "No secrets found in repository."; \
 	fi
-
-gen:
-	bash cd-generate-backend-config.sh
 
 #linter:
 #	@echo "Linter check"
