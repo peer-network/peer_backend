@@ -553,10 +553,6 @@ class PostService
         }
 
         if (!empty($filterBy) && is_array($filterBy)) {
-            $invalidTypes = \Fawaz\Utils\ContentFilterHelper::invalidAgainstAllowed(
-                $filterBy,
-                \Fawaz\Utils\ContentFilterHelper::POST_FILTER_TYPES
-            );
             if (!empty($invalidTypes)) {
                 return $this::respondWithError(30103);
             }
