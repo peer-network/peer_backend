@@ -2142,8 +2142,8 @@ class GraphQLSchemaBuilder
                 },
             ],
             'TokenPriceData' => [
-                'currentTokenPrice' => function (array $root): float {
-                    return (float) ($root['currentTokenPrice'] ?? 0);
+                'currentTokenPrice' => function (array $root): string {
+                    return (string) ($root['currentTokenPrice'] ?? 0);
                 },
                 'updatedAt' => function (array $root): string {
                     return $root['updatedAt'] ?? '';
