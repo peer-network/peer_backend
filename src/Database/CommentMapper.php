@@ -225,6 +225,7 @@ class CommentMapper
                 'content' => $row['content'],
                 'amountlikes' => (int) $row['amountlikes'],
                 'amountreplies' => (int) $row['amountreplies'],
+                'amountreports' => (int) $row['comment_reports'],
                 'isliked' => (bool) $row['isliked'],
                 'createdat' => $row['createdat'],
                 'userstatus' => $userObj['status'],
@@ -409,6 +410,7 @@ class CommentMapper
 					c.createdat,
 					COALESCE(like_counts.like_count, 0) AS amountlikes,
 					COALESCE(comment_counts.comment_count, 0) AS amountreplies,
+                    ci.reports AS amountreports,
 					(ul.userid IS NOT NULL) AS isliked,
 					u.uid,
 					u.username,
@@ -421,6 +423,9 @@ class CommentMapper
 					comments c
 				LEFT JOIN 
 					users u ON c.userid = u.uid
+                LEFT JOIN 
+                    comment_info ci
+                    ON c.commentid = ci.commentid
 				LEFT JOIN 
 					(SELECT commentid, COUNT(*) AS like_count FROM user_comment_likes GROUP BY commentid) like_counts 
 					ON c.commentid = like_counts.commentid
@@ -472,6 +477,7 @@ class CommentMapper
                     'content' => $row['content'],
                     'amountlikes' => (int) $row['amountlikes'],
                     'amountreplies' => (int) $row['amountreplies'],
+                    'amountreports' => (int) $row['amountreports'],
                     'isliked' => (bool) $row['isliked'],
                     'createdat' => $row['createdat'],
                     'userstatus' => $userObj['status'],
@@ -630,6 +636,7 @@ class CommentMapper
                 'content' => $row['content'],
                 'amountlikes' => (int) $row['amountlikes'],
                 'amountreplies' => (int) $row['amountreplies'],
+                'amountreports' => (int) $row['amountreports'],
                 'isliked' => false,
                 'createdat' => $row['createdat'],
                 'userstatus' => $userObj['status'],

@@ -27,7 +27,7 @@ class UserInfoMapper
 
         try {
             $stmt = $this->db->prepare(
-                'SELECT userid, liquidity, amountposts, amountblocked, amountfollower, 
+                'SELECT userid, liquidity, amountposts, amountblocked, amountfollower, reports, 
                         amountfollowed, amountfriends, isprivate, invited, updatedat 
                  FROM users_info 
                  WHERE userid = :id'
@@ -78,6 +78,7 @@ class UserInfoMapper
                           amountblocked = :amountblocked, 
                           isprivate = :isprivate, 
                           reports = :reports, 
+                          totalreports = :totalreports, 
                           invited = :invited,
                           phone = :phone,                          
                           pkey = :pkey,
@@ -93,6 +94,7 @@ class UserInfoMapper
             $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
             $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
+            $stmt->bindValue(':totalreports', $data['totalreports'], \PDO::PARAM_INT);
             $stmt->bindValue(':reports', $data['reports'], \PDO::PARAM_INT);
             $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
             $stmt->bindValue(':phone', $data['phone'], \PDO::PARAM_STR);

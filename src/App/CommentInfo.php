@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 
-class CommentInfo
+class CommentInfo extends Model
 {
     protected string $commentid;
     protected string $userid;
     protected int $likes;
     protected int $reports;
+    protected int $totalreports;
     protected int $comments;
 
     // Constructor
@@ -26,6 +28,7 @@ class CommentInfo
         $this->userid = $data['userid'] ?? '';
         $this->likes = $data['likes'] ?? 0;
         $this->reports = $data['reports'] ?? 0;
+        $this->totalreports = $data['totalreports'] ?? 0;
         $this->comments = $data['comments'] ?? 0;
     }
 
@@ -37,6 +40,7 @@ class CommentInfo
             'userid' => $this->userid,
             'likes' => $this->likes,
             'reports' => $this->reports,
+            'totalreports' => $this->totalreports,
             'comments' => $this->comments,
         ];
         return $att;
@@ -83,6 +87,14 @@ class CommentInfo
         $this->reports = $reports;
     }
 
+    public function getTotalReports(): int
+    {
+        return $this->totalreports;
+    }
+    public function setTotalReports(int $totalreports): void
+    {
+        $this->totalreports = $totalreports;
+    }
     public function getComments(): int
     {
         return $this->comments;
@@ -150,5 +162,11 @@ class CommentInfo
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+    // Table name
+    public static function table(): string
+    {
+        return 'comment_info';
     }
 }

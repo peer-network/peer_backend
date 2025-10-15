@@ -10,6 +10,7 @@ use Fawaz\Services\LiquidityPool;
 use DI\ContainerBuilder;
 use Fawaz\App\Interfaces\UserServiceImpl;
 use Fawaz\App\Interfaces\UserServiceInterface;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Utils\PeerLogger;
 use Fawaz\Utils\ResponseMessagesProviderImpl;
 use Monolog\Handler\StreamHandler;
@@ -72,6 +73,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
+            Model::setDB($pdo);
             return $pdo;
         },
 

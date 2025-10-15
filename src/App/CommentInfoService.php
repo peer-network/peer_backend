@@ -171,6 +171,12 @@ class CommentInfoService
         }
 
         try {
+            // Moderator Should NOT be possible to report the same
+            if ($this->reportsMapper->isModerated($commentId, ReportTargetType::COMMENT->value)) {
+                $this->logger->warning("PostInfoService: reportComment: User tries to report a moderated comment");
+                return $this::respondWithError(0000); // This content has already been reviewed and restored by our team.
+            }
+
             $this->transactionManager->beginTransaction();
 
             $exists = $this->reportsMapper->addReport(
@@ -186,11 +192,12 @@ class CommentInfoService
             }
 
             if ($exists === true) {
-                $this->logger->warning('Post report already exists');
+                $this->logger->warning('Comment report already exists');
                 return $this->respondWithError(31605);
             }
 
             $commentInfo->setReports($commentInfo->getReports() + 1);
+            $commentInfo->setTotalReports($commentInfo->getTotalReports() + 1);
             $this->commentInfoMapper->update($commentInfo);
 
             $this->transactionManager->commit();

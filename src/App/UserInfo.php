@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 
-class UserInfo
+class UserInfo extends Model
 {
     protected string $userid;
     protected float $liquidity;
@@ -19,6 +20,7 @@ class UserInfo
     protected int $amountblocked;
     protected int $isprivate;
     protected int $reports;
+    protected int $totalreports;
     protected ?string $invited;
     protected ?string $phone;
     protected ?string $pkey;
@@ -40,6 +42,7 @@ class UserInfo
         $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->isprivate = $data['isprivate'] ?? 0;
         $this->reports = $data['reports'] ?? 0;
+        $this->totalreports = $data['totalreports'] ?? 0;
         $this->invited = $data['invited'] ?? null;
         $this->phone = $data['phone'] ?? null;
         $this->pkey = $data['pkey'] ?? null;
@@ -59,6 +62,7 @@ class UserInfo
             'amountblocked' => $this->amountblocked,
             'isprivate' => $this->isprivate,
             'reports' => $this->reports,
+            'totalreports' => $this->totalreports,
             'invited' => $this->invited,
             'phone' => $this->phone,
             'pkey' => $this->pkey,
@@ -192,6 +196,15 @@ class UserInfo
         $this->reports = $reports;
     }
 
+    public function getTotalReports(): int
+    {
+        return $this->totalreports;
+    }
+    public function setTotalReports(int $totalreports): void
+    {
+        $this->totalreports = $totalreports;
+    }
+
     // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array|false
     {
@@ -302,5 +315,13 @@ class UserInfo
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+    /**
+     * Table Name
+     */
+    public static function table(): string
+    {
+        return 'users_info';
     }
 }

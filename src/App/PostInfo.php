@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 
-class PostInfo
+class PostInfo extends Model
 {
     protected string $postid;
     protected string $userid;
     protected int $likes;
     protected int $dislikes;
     protected int $reports;
+    protected int $totalreports;
     protected int $views;
     protected int $saves;
     protected int $shares;
@@ -31,6 +33,7 @@ class PostInfo
         $this->likes = $data['likes'] ?? 0;
         $this->dislikes = $data['dislikes'] ?? 0;
         $this->reports = $data['reports'] ?? 0;
+        $this->totalreports = $data['totalreports'] ?? 0;
         $this->views = $data['views'] ?? 0;
         $this->saves = $data['saves'] ?? 0;
         $this->shares = $data['shares'] ?? 0;
@@ -46,6 +49,7 @@ class PostInfo
             'likes' => $this->likes,
             'dislikes' => $this->dislikes,
             'reports' => $this->reports,
+            'totalreports' => $this->totalreports,
             'views' => $this->views,
             'saves' => $this->saves,
             'shares' => $this->shares,
@@ -104,6 +108,17 @@ class PostInfo
     {
         $this->reports = $reports;
     }
+
+    public function getTotalReports(): int
+    {
+        return $this->totalreports;
+    }
+
+    public function setTotalReports(int $totalreports): void
+    {
+        $this->totalreports = $totalreports;
+    }
+
 
     public function getViews(): int
     {
@@ -222,5 +237,12 @@ class PostInfo
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+
+    // Table name
+    public static function table(): string
+    {
+        return 'post_info';
     }
 }

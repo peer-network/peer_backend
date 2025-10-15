@@ -88,6 +88,7 @@ type Post {
   cover: String!
   mediadescription: String!
   createdat: Date!
+  amountreports: Int!
   amountlikes: Int!
   amountviews: Int!
   amountcomments: Int!
@@ -113,6 +114,7 @@ type Comment {
   createdat: Date!
   amountlikes: Int!
   amountreplies: Int!
+  amountreports: Int!
   isliked: Boolean!
   user: ProfileUser!
 }
@@ -196,6 +198,7 @@ type UserInfo {
   userid: ID!
   liquidity: Decimal!
   amountposts: Int!
+  amountreports: Int!
   amountblocked: Int!
   amountfollower: Int!
   amountfollowed: Int!
@@ -246,12 +249,14 @@ type Profile {
   biography: String
   isfollowed: Boolean
   isfollowing: Boolean
+  role: String
   amountposts: Int
   amounttrending: Int
   amountfollowed: Int
   amountfollower: Int
   amountfriends: Int
   amountblocked: Int
+  amountreports: Int
   imageposts: [ProfilePostMedia!]
   textposts: [ProfilePostMedia!]
   videoposts: [ProfilePostMedia!]
@@ -483,4 +488,38 @@ type AllUserFriends {
   counter: Int!
   ResponseCode: String
   affectedRows: [AllUserInfo]
+}
+
+type ModerationStatsResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: ModerationStats
+  meta: DefaultResponse
+}
+type ModerationStats {
+  AmountAwaitingReview: Int!
+  AmountHidden: Int!
+  AmountRestored: Int!
+  AmountIllegal: Int!
+}
+type ModerationItemListResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: [ModerationItem!]!
+  meta: DefaultResponse
+}
+type ModerationItem {
+  targetContentId: ID!
+  targettype: String!
+  reportscount: Int!
+  status: String!
+  createdat: String!
+  targetcontent: TargetContent!
+  reporters: [BasicUserInfo!]!
+}
+
+type TargetContent {
+  post: Post
+  comment: Comment
+  user: BasicUserInfo
 }

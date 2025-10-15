@@ -1164,6 +1164,7 @@ class UserMapper
                 u.status,
                 u.img,
                 u.biography,
+                u.roles_mask,
                 ui.amountposts,
                 ui.amountfollower,
                 ui.amountfollowed,
@@ -1207,6 +1208,7 @@ class UserMapper
                     $data['img'] = $replacer->profilePicturePath($data['img']);
                 }
 
+                $data['amountreports'] = (int)$data['user_reports'];
                 return new Profile($data);
             }
 

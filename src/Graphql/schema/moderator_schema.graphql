@@ -1,0 +1,8 @@
+extend type Query {
+  moderationStats: ModerationStatsResponse!
+  moderationItems(status: ModerationStatus, contentType: ModerationContentType, offset: Int, limit: Int): ModerationItemListResponse!
+}
+
+extend type Mutation {
+  performModeration(targetContentId: ID!, moderationAction: ModerationStatus!): DefaultResponse!
+}

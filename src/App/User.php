@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Database\Interfaces\Hashable;
 use Fawaz\Utils\HashObject;
 use Fawaz\config\constants\ConstantsConfig;
 
-class User implements Hashable
+class User extends Model implements Hashable
 {
     use HashObject;
 
@@ -449,4 +450,11 @@ class User implements Hashable
     {
         return $this->hashObject($this);
     }
+
+    // Table name for the model
+    protected static function table(): string
+    {
+        return 'users';
+    }
+
 }
