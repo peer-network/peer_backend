@@ -80,11 +80,6 @@ jobs:
         run: |
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Generate backend config before PHPStan
-        run: |
-          docker compose --env-file .env.dev run --rm backend \
-            sh -c "bash /var/www/html/cd-generate-backend-config.sh"
-
       - name: Run PHPStan inside backend container
         run: |
           docker compose --env-file .env.dev run --rm backend \

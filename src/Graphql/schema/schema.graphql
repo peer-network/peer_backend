@@ -11,8 +11,9 @@ type Subscription {
 
 type Query {
   hello: HelloResponse!
-  searchUser(userid: ID,contentFilterBy: ContentFilterType, username: String, offset: Int, limit: Int): UserListResponse!
-  listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse!
+  searchUser(userid: ID,contentFilterBy: ContentFilterType, username: String, offset: Int, limit: Int): UserListResponse! @deprecated(reason: "Use listUsersV2.")
+  listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse! @deprecated(reason: "Use listUsersV2.")
+  listUsersV2(contentFilterBy: ContentFilterType, userid: ID, username: String, offset: Int, limit: Int): UserListResponse!
   getProfile(userid: ID,contentFilterBy: ContentFilterType, postLimit: Int): ProfileInfo!
   listFollowRelations(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
   listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!

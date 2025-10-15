@@ -112,6 +112,7 @@ class UserService
         return null;
     }
 
+/*  ------ Un-used function?--------
     private function createPayload(string $email, string $username, string $verificationCode): array
     {
         $email = trim($email);
@@ -142,6 +143,8 @@ class UserService
             return self::respondWithError(00000);//'Error create payload.'
         }
     }
+
+*/
 
     public function createUser(array $args): array
     {

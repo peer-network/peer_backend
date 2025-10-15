@@ -193,7 +193,7 @@ class UserInfoService
             return $this::respondWithError(41008);
         }
     }
-
+/* ----- unused function --------
     public function toggleProfilePrivacy(): array
     {
         if (!$this->checkAuthentication()) {
@@ -231,6 +231,7 @@ class UserInfoService
             return $this::respondWithError(00000);//'Failed to toggle profile privacy.'
         }
     }
+*/
 
     public function updateBio(string $biography): array
     {
