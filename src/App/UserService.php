@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
+use Fawaz\App\Specs\SpecTypes\ActiveUserSpec;
+use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -110,37 +112,6 @@ class UserService
 
         $this->logger->error('Failed to generate unique slug after maximum retries', ['username' => $username]);
         return null;
-    }
-
-    private function createPayload(string $email, string $username, string $verificationCode): array
-    {
-        $email = trim($email);
-        $username = trim($username);
-        $verificationCode = trim($verificationCode);
-
-        if (empty($email) || empty($username) || empty($verificationCode)) {
-            return self::respondWithError(40701);
-        }
-
-        $payload = [
-            "to" => [
-                [
-                    "email" => $email,
-                    "name" => $username
-                ]
-            ],
-            "templateId" => 1,
-            "params" => [
-                "verification_code" => $verificationCode
-            ]
-        ];
-
-        try {
-            return $payload;
-        } catch (\Throwable $e) {
-            $this->logger->error('Error create payload.', ['exception' => $e]);
-            return self::respondWithError(00000);//'Error create payload.'
-        }
     }
 
     public function createUser(array $args): array
@@ -356,7 +327,15 @@ class UserService
             return self::respondWithError(31010);
         }
         try {
-            $users = $this->userMapper->getValidReferralInfoByLink($referralString);
+            $activeUserSpec = new ActiveUserSpec($referralString);
+            $userRolesSpec = new BasicUserSpec($referralString);
+        
+            $userSpecs = [
+                $activeUserSpec,
+                $userRolesSpec
+            ];
+        
+            $users = $this->userMapper->getValidReferralInfoByLink($referralString, $userSpecs);
 
             if (!$users) {
                 return self::respondWithError(31007); // No valid referral information found
@@ -469,7 +448,6 @@ class UserService
             return false;
         }
     }
-
 
     public function updateUserPreferences(?array $args = []): array
     {
@@ -802,7 +780,7 @@ class UserService
             $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId, $contentFilterBy)->getArrayCopy();
             $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
 
-            $posts = $this->postMapper->fetchPostsByType($this->currentUserId, $userId, $postLimit, $contentFilterBy);
+            $posts = $this->postMapper->fetchPostsByType($this->currentUserId, $userId,[],$postLimit, $contentFilterBy);
 
             $contentTypes = ['image', 'video', 'audio', 'text'];
             foreach ($contentTypes as $type) {

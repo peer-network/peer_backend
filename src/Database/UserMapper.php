@@ -9,10 +9,10 @@ use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
-use Fawaz\App\Role;
+use Fawaz\App\Specs\Specification;
+use Fawaz\App\Specs\SpecificationSQLData;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
-use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
@@ -342,6 +342,10 @@ class UserMapper
         );
 
         $whereClauses = ["verified = :verified"];
+        $includeDeleted = !empty($args['includeDeleted']);
+        if ($includeDeleted) {
+            unset($args['includeDeleted']);
+        }
         // $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
         $whereClausesString = implode(" AND ", $whereClauses);
 
@@ -418,10 +422,14 @@ class UserMapper
             }
         }
 
-        $conditions[] = "u.status != :status";
-        $queryParams[':status'] = Status::DELETED;
+        if (!$includeDeleted) {
+            $conditions[] = 'u.status != :statusExcluded';
+            $queryParams[':statusExcluded'] = Status::DELETED;
+        }
 
-        $sql .= " AND " . implode(" AND ", $conditions);
+        if (!empty($conditions)) {
+            $sql .= ' AND ' . implode(' AND ', $conditions);
+        }
 
         $sql .= " ORDER BY u.createdat DESC LIMIT :limit OFFSET :offset";
         $queryParams[':limit'] = $limit;
@@ -786,27 +794,6 @@ class UserMapper
         }
     }
 
-    public function fetchCountPosts(string $userid): int
-    {
-        $this->logger->debug("UserMapper.fetchCountPosts started", ['userid' => $userid]);
-
-        try {
-            $sql = "SELECT COUNT(*) FROM posts WHERE userid = :userid";
-            $stmt = $this->db->prepare($sql);
-
-            $stmt->execute(['userid' => $userid]);
-
-            $postCount = (int) $stmt->fetchColumn();
-
-            $this->logger->info("Fetched post count", ['userid' => $userid, 'postCount' => $postCount]);
-
-            return $postCount;
-        } catch (\Throwable $e) {
-            $this->logger->error("Error fetching post count", ['userid' => $userid, 'error' => $e->getMessage()]);
-            return 0;
-        }
-    }
-
     public function fetchFriends(
         string $userId,
         int $offset = 0,
@@ -1069,71 +1056,7 @@ class UserMapper
         }
     }
 
-    public function isFollowing(string $userid, string $currentUserId): bool
-    {
-        $this->logger->debug("UserMapper.isFollowing started");
-
-        $sql = "SELECT COUNT(*) FROM follows WHERE followedid = :userid AND followerid = :currentUserId";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-
-            $stmt->execute();
-            return (bool) $stmt->fetchColumn();
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in isFollowing", ['error' => $e->getMessage()]);
-            return false;
-        }
-    }
-
-    public function isFollowed(string $userid, string $currentUserId): bool
-    {
-        $this->logger->debug("UserMapper.isFollowed started");
-
-        $sql = "SELECT COUNT(*) FROM follows WHERE followedid = :currentUserId AND followerid = :userid";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-
-            $stmt->execute();
-            return (bool) $stmt->fetchColumn();
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in isFollowed", ['error' => $e->getMessage()]);
-            return false;
-        }
-    }
-
-    public function fetchFollowCounts(string $userid, string $currentUserId): array
-    {
-        $sql = "
-            SELECT 
-                SUM(CASE WHEN f.followedid = :userid THEN 1 ELSE 0 END) AS amountfollower,
-                SUM(CASE WHEN f.followerid = :userid THEN 1 ELSE 0 END) AS amountfollowed,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :userid AND followerid = :currentUserId) AS isfollowing,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = :userid) AS isfollowed
-            FROM follows f
-        ";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-
-            $stmt->execute();
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            return $data ?: ['amountfollower' => 0, 'amountfollowed' => 0, 'isfollowing' => false, 'isfollowed' => false];
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in fetchFollowCounts", ['error' => $e->getMessage()]);
-            return ['amountfollower' => 0, 'amountfollowed' => 0, 'isfollowing' => false, 'isfollowed' => false];
-        }
-    }
-
-    public function fetchProfileData(string $userid, string $currentUserId, ?string $contentFilterBy): Profile|false
+    public function fetchProfileDataOriginal(string $userid, string $currentUserId, ?string $contentFilterBy): Profile|false
     {
         $whereClauses = ["u.uid = :userid AND u.verified = :verified"];
         // $whereClauses[] = 'u.status = 0';
@@ -1380,11 +1303,10 @@ class UserMapper
             'invitee_uuid' => $userId,
         ]);
 
-        $query = "
-        SELECT u.uid, u.status, u.username, u.slug, u.img
-        FROM users_info ui
-        JOIN users u ON ui.invited = u.uid
-        WHERE ui.userid = :invitee_uuid
+        $query = "SELECT u.uid, u.status, u.username, u.slug, u.img
+            FROM users_info ui
+            JOIN users u ON ui.invited = u.uid
+            WHERE ui.userid = :invitee_uuid
         ";
 
         $stmt = $this->db->prepare($query);
@@ -1398,8 +1320,7 @@ class UserMapper
 
     public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array
     {
-        $query = "
-            SELECT u.uid, u.status, u.username, u.slug, u.img
+        $query = "SELECT u.uid, u.status, u.username, u.slug, u.img
             FROM users_info ui
             JOIN users u ON ui.userid = u.uid
             WHERE ui.invited = :userId
@@ -1804,9 +1725,9 @@ class UserMapper
     {
         $this->logger->debug("UserMapper.fetchAllFriends started");
 
-        $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, u1.status as followerstatus, 
+        $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, u1.status as followerstatus,
                                 u2.uid AS followed, u2.username AS followedname, u2.slug AS followedslug, u2.status as followedstatus
-                FROM follows f1
+                FROM follows 
                 INNER JOIN follows f2 ON f1.followerid = f2.followedid 
                                      AND f1.followedid = f2.followerid
                 INNER JOIN users u1 ON u1.uid = f1.followerid
@@ -1922,26 +1843,6 @@ class UserMapper
             $this->logger->error("Error checking reset request", ['error' => $e->getMessage()]);
         }
         return [];
-    }
-
-    public function loadTokenById(string $id): bool
-    {
-        $this->logger->debug("UserMapper.loadTokenById started");
-        $time = (int)\time();
-
-        try {
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM refresh_tokens WHERE userid = :id AND expiresat > :expiresat");
-            $stmt->bindParam(':id', $id);
-            $stmt->bindParam(':expiresat', $time, \PDO::PARAM_INT);
-            $stmt->execute();
-            $exists = $stmt->fetchColumn() > 0;
-
-            $this->logger->info("Refresh_token existence check", ['exists' => $exists]);
-            return $exists;
-        } catch (\Throwable $e) {
-            $this->logger->error("General error while checking if refresh_token exists", ['error' => $e->getMessage()]);
-            return false;
-        }
     }
 
     /**
@@ -2097,26 +1998,100 @@ class UserMapper
         }
     }
 
-    public function getValidReferralInfoByLink(string $referralLink): array|null
+    public function getValidReferralInfoByLink(string $referralLink, array $specifications): array|null
     {
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $params = $allSpecs->paramsToPrepare;
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = "ur.referral_uuid = :referral_uuid";
+
         $this->logger->debug("UserMapper.getValidReferralInfoByLink started", [
             'referralLink' => $referralLink,
         ]);
 
-        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.referral_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid AND u.roles_mask IN (:role1, :role2, :role3)";
+        $whereClausesString = implode(" AND ", $whereClauses);
+        
+        $query = sprintf("SELECT 
+                ur.referral_uuid,
+                ur.referral_link, 
+                u.username, 
+                u.slug, 
+                u.img, 
+                u.uid 
+            FROM 
+                user_referral_info ur 
+            LEFT JOIN users u 
+                ON u.uid = ur.referral_uuid  
+            WHERE %s",
+            $whereClausesString
+        );
 
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':referral_uuid', $referralLink, \PDO::PARAM_STR);
-        $stmt->bindValue(':role1', Role::USER, \PDO::PARAM_INT);
-        $stmt->bindValue(':role2', Role::ADMIN, \PDO::PARAM_INT);
-        $stmt->bindValue(':role3', Role::COMPANY_ACCOUNT, \PDO::PARAM_INT);
-        $stmt->execute();
 
+        $params['referral_uuid'] = $referralLink;
+    
+        $stmt->execute($params);
+    
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         $this->logger->info("Referral info query result", ['result' => $result]);
 
 
         return $result ?: null;
+    }
+
+    public function fetchProfileData(string $userid, string $currentUserId, array $specifications): Profile|false {
+        
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = "u.uid = :userid";
+        $whereClausesString = implode(" AND ", $whereClauses);
+        $params = $allSpecs->paramsToPrepare;
+
+        $sql = sprintf("
+            SELECT 
+                u.uid,
+                u.username,
+                u.slug,
+                u.status,
+                u.img,
+                u.biography,
+                ui.amountposts,
+                ui.amountfollower,
+                ui.amountfollowed,
+                ui.amountfriends,
+                ui.amountblocked,
+                ui.reports AS user_reports,
+                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
+                COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
+                EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
+                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
+            FROM users u
+            LEFT JOIN users_info ui ON ui.userid = u.uid
+            WHERE %s",
+            $whereClausesString
+         );
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $params['userid'] = $userid;
+            $params['currentUserId'] = $currentUserId;
+
+            $stmt->execute($params);
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+
+            if ($data !== false) {
+                return new Profile($data);
+            }
+
+            $this->logger->warning("No user found with ID", ['userid' => $userid]);
+            return false;
+        } catch (\Throwable $e) {
+            $this->logger->error("Database error in fetchProfileData", ['error' => $e->getMessage()]);
+            return false;
+        }
     }
 }

@@ -30,6 +30,7 @@ class Profile
     protected ?array $textposts = [];
     protected ?array $videoposts = [];
     protected ?array $audioposts = [];
+    protected ?int $reports;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -58,6 +59,7 @@ class Profile
         $this->textposts = isset($data['textposts']) && is_array($data['textposts']) ? $data['textposts'] : [];
         $this->videoposts = isset($data['videoposts']) && is_array($data['videoposts']) ? $data['videoposts'] : [];
         $this->audioposts = isset($data['audioposts']) && is_array($data['audioposts']) ? $data['audioposts'] : [];
+        $this->reports = $data['user_reports'] ?? 0;
 
         if (($this->status == 6)) {
             $this->username = 'Deleted_Account';
@@ -90,6 +92,7 @@ class Profile
             'textposts' => $this->textposts,
             'videoposts' => $this->videoposts,
             'audioposts' => $this->audioposts,
+            'user_reports' => $this->reports
         ];
         return $att;
     }
@@ -246,6 +249,11 @@ class Profile
             'audioposts' => [
                 'required' => false,
                 'validators' => [['name' => 'IsArray']],
+            ],
+            'reports' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
             ],
         ];
 

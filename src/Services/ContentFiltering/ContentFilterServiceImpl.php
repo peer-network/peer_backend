@@ -10,11 +10,17 @@ use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
-class ContentFilterServiceImpl
-{
+class ContentFilterServiceImpl {
+    /** @var string[] Severity levels in order of importance */
     private array $contentSeverityLevels;
+    
+    /** @var array<string,int> Map of content type => reports amount to hide */
     private array $reports_amount_to_hide_content;
+
+    /** @var array<string,int> Map of content type => dismiss moderation threshold */
     private array $moderationsDismissAmountToRestoreContent;
+
+
     private ContentFilteringStrategy $contentFilterStrategy;
     private ?string $contentFilterBy;
 
@@ -73,6 +79,15 @@ class ContentFilterServiceImpl
         return null;
     }
 
+     /**
+     * @param ContentType $contentTarget
+     * @param ContentType $showingContent
+     * @param int|null $showingContentReportAmount
+     * @param int|null $showingContentDismissModerationAmount
+     * @param string|null $currentUserId
+     * @param string|null $targetUserId
+     * @return ContentFilteringAction|null
+     */
     public function getContentFilterAction(
         ContentType $contentTarget,
         ContentType $showingContent,

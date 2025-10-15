@@ -10,11 +10,12 @@ use Fawaz\App\Models\MultipartPost;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostMedia;
+use Fawaz\App\Specs\Specification;
+use Fawaz\App\Specs\SpecificationSQLData;
 use Fawaz\App\Role;
 use Fawaz\App\Status;
 use Fawaz\App\User;
 use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Database\Interfaces\PeerMapper;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrategy;
@@ -22,7 +23,6 @@ use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\App\ValidationException;
-use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\PeerLoggerInterface;
 
 class PostMapper
@@ -170,9 +170,21 @@ class PostMapper
         return false;
     }
 
-    public function fetchPostsByType(string $currentUserId, string $userid, int $limitPerType = 5, ?string $contentFilterBy = null): array
-    {
-        $whereClauses = ["sub.row_num <= :limit"];
+    public function fetchPostsByType(
+        string $currentUserId, 
+        string $userid, 
+        array $specifications,
+        int $limitPerType = 5, 
+        ?string $contentFilterBy = null
+    ): array {        
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+
+        $whereClauses = $allSpecs->whereClauses;
+
+        $whereClauses[] = "sub.row_num <= :limit";
+
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new ContentFilterServiceImpl(
@@ -197,9 +209,7 @@ class PostMapper
                 JOIN users u ON p.userid = u.uid
                 WHERE p.userid = :userid 
                 AND p.feedid IS NULL
-                AND u.status != :status
             ) sub
-            LEFT JOIN users_info ui ON sub.userid = ui.userid
             LEFT JOIN post_info pi ON sub.postid = pi.postid AND pi.userid = sub.userid
             WHERE %s
             ORDER BY sub.contenttype, sub.createdat DESC",
@@ -207,10 +217,12 @@ class PostMapper
         );
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue('status', Status::DELETED, \PDO::PARAM_INT);
-        $stmt->bindValue('userid', $userid, \PDO::PARAM_STR);
-        $stmt->bindValue('limit', $limitPerType, \PDO::PARAM_INT);
-        $stmt->execute();
+        $params = $allSpecs->paramsToPrepare;
+        $params['userid'] = $userid;
+        $params['limit'] = $limitPerType;
+
+        $stmt->execute($params);
+
         $unfidtered_result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         $result = [];
 
@@ -526,45 +538,7 @@ class PostMapper
 
             throw new \RuntimeException("Failed to insert PostMedia into database: " . $e->getMessage());
         }
-    }
-
-    // public function delete(string $postid): bool
-    // {
-    //     $this->logger->debug("PostMapper.delete started");
-
-    //     try {
-    //         $this->db->beginTransaction();
-
-    //         $tables = [
-    //             'user_post_likes',
-    //             'user_post_dislikes',
-    //             'user_post_reports',
-    //             'user_post_saves',
-    //             'user_post_shares',
-    //             'user_post_views',
-    //             'post_info',
-    //             'posts'
-    //         ];
-
-    //         foreach ($tables as $table) {
-    //             $sql = "DELETE FROM $table WHERE postid = :postid";
-    //             $stmt = $this->db->prepare($sql);
-    //             $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
-    //             $stmt->execute();
-    //         }
-
-    //         $this->db->commit();
-    //         $this->logger->info("Deleted post and related user activities successfully", ['postid' => $postid]);
-    //         return true;
-    //     } catch (\Exception $e) {
-    //         $this->db->rollBack();
-    //         $this->logger->error("Failed to delete post and related user activities", [
-    //             'postid' => $postid,
-    //             'exception' => $e->getMessage()
-    //         ]);
-    //         return false;
-    //     }
-    // }
+    } 
 
     public function findPostser(string $currentUserId, ?array $args = []): array
     {
@@ -1266,10 +1240,6 @@ class PostMapper
 
                 $stmt->execute();
             }
-            var_dump($existingToken);
-            exit;
-
-            $this->logger->info("PostMapper.addOrUpdateEligibilityToken: Inserted new token into database", ['userid' => $userId]);
 
         } catch (\Throwable $e) {
             $this->logger->error("PostMapper.addOrUpdateEligibilityToken: Exception occurred while inserting token", [

@@ -6,8 +6,14 @@ namespace Fawaz\config\constants;
 
 class ConstantsModeration
 {
-    public static function contentFiltering()
-    {
+     /**
+     * @return array{
+     *     CONTENT_SEVERITY_LEVELS: array<int,string>,
+     *     REPORTS_COUNT_TO_HIDE_FROM_IOS: array<'POST'|'COMMENT'|'USER', int>,
+     *     DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS: array<'POST'|'COMMENT'|'USER', int>
+     * }
+     */
+    public static function contentFiltering() {
         return self::CONTENT_FILTERING;
     }
 

@@ -441,7 +441,7 @@ class UserAdvanced
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 5]],
+                    ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 6]],
                 ],
             ],
             'verified' => [

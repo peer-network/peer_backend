@@ -60,6 +60,14 @@ gitleaks version
 WSL (Ubuntu on Windows):
 Use the Linux (x86_64) instructions above.
 
+# Local Gitleaks Ignore File
+
+For local development, you can use a `.gitleaksignore` file to ignore known false positives  
+(e.g. mock data, UUIDs, test fixtures).  
+
+This file is respected by both the **pre-commit hook** and manual `make scan` runs,  
+but is **excluded from Git tracking** — it only affects your local environment.
+
 ---
 
 ## 🚀 Getting Started

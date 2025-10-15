@@ -24,7 +24,7 @@ services:
     ports:
       - "8888:80"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/graphql"]
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 5s
       timeout: 5s
       retries: 5

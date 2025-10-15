@@ -1,3 +1,4 @@
+.idea
 vendor
 tools
 test
@@ -34,3 +35,4 @@ changelog
 .gitleaks_out/
 *.generated
 *.cache
+.gitleaksignore
