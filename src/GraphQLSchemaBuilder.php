@@ -4476,7 +4476,6 @@ class GraphQLSchemaBuilder
 
             $decodedToken = $this->tokenService->validateToken($refreshToken, true);
 
-<<<<<<< HEAD
             if (!$decodedToken) {
                 return $this::respondWithError(30901);
             }
