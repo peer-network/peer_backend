@@ -335,7 +335,7 @@ jobs:
             if docker run --rm \
                 --network my-network \
                 curlimages/curl:$TAG \
-                curl -sf http://backend/graphql > /dev/null; then
+                curl -sf http://backend/health > /dev/null; then
               echo "Backend is up!"
               exit 0
             fi
