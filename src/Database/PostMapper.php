@@ -92,50 +92,6 @@ class PostMapper
         return (bool) $stmt->fetchColumn();
     }
 
-    public function isNewsFeedExist(string $feedid): bool
-    {
-        $this->logger->debug("PostMapper.isNewsFeedExist started");
-
-        $sql = "SELECT COUNT(*) FROM newsfeed WHERE feedid = :feedid";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['feedid' => $feedid]);
-        return (bool) $stmt->fetchColumn();
-    }
-
-    public function isHasAccessInNewsFeed(string $chatid, string $currentUserId): bool
-    {
-        $this->logger->debug("PostMapper.isHasAccessInNewsFeed started");
-
-        $sql = "SELECT COUNT(*) FROM chatparticipants WHERE chatid = :chatid AND userid = :currentUserId";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['chatid' => $chatid, 'currentUserId' => $currentUserId]);
-
-        return (bool) $stmt->fetchColumn();
-    }
-
-    public function getChatFeedsByID(string $feedid): array
-    {
-        $this->logger->debug("PostMapper.getChatFeedsByID started");
-
-        $sql = "SELECT * FROM posts WHERE feedid = :feedid";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['feedid' => $feedid]);
-
-        $results = [];
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $results[] = new Post($row, [], false);
-        }
-
-        if (empty($results)) {
-            $this->logger->warning("No posts found with feedid", ['feedid' => $feedid]);
-            return [];
-        }
-
-        $this->logger->info("Fetched all posts from database", ['count' => count($results)]);
-
-        return $results;
-    }
-
     public function loadByTitle(string $title): array
     {
         $this->logger->debug("PostMapper.loadByTitle started");
@@ -661,15 +617,8 @@ class PostMapper
 
         // Filter: Content-Typ / Beziehungen / Viewed
         if (!empty($filterBy) && is_array($filterBy)) {
-            $validTypes  = [];
             $userFilters = [];
 
-            $mapping = [
-                'IMAGE' => 'image',
-                'AUDIO' => 'audio',
-                'VIDEO' => 'video',
-                'TEXT'  => 'text',
-            ];
             $userMapping = [
                 'FOLLOWED' => "p.userid IN (SELECT followedid FROM follows WHERE followerid = :currentUserId)",
                 'FOLLOWER' => "p.userid IN (SELECT followerid FROM follows WHERE followedid = :currentUserId)",
@@ -683,20 +632,25 @@ class PostMapper
                 )",
             ];
 
-            foreach ($filterBy as $type) {
-                if (isset($mapping[$type])) {
-                    $validTypes[] = $mapping[$type];
-                } elseif (isset($userMapping[$type])) {
+            // Normalize filterBy values
+            $filterByUpper = \Fawaz\Utils\ContentFilterHelper::normalizeToUpper($filterBy);
+
+            // Map content types using shared helper
+            $validTypes = \Fawaz\Utils\ContentFilterHelper::mapContentTypesForDb($filterByUpper);
+
+            // Collect relationship filters
+            foreach ($filterByUpper as $type) {
+                if (isset($userMapping[$type])) {
                     $userFilters[] = $userMapping[$type];
                 }
             }
 
             // eigene Posts auch bei FOLLOWED/FOLLOWER einschließen
-            if (in_array('FOLLOWED', $filterBy, true) || in_array('FOLLOWER', $filterBy, true)) {
+            if (in_array('FOLLOWED', $filterByUpper, true) || in_array('FOLLOWER', $filterByUpper, true)) {
                 $userFilters[] = "p.userid = :currentUserId";
             }
 
-            if (in_array('VIEWED', $filterBy, true)) {
+            if (in_array('VIEWED', $filterByUpper, true)) {
                 $whereClauses[] = "EXISTS (
                     SELECT 1 FROM user_post_views upv
                     WHERE upv.postid = p.postid
@@ -1261,8 +1215,6 @@ class PostMapper
 
                 $stmt->execute();
             }
-            var_dump($existingToken);
-            exit;
 
             $this->logger->info("PostMapper.addOrUpdateEligibilityToken: Inserted new token into database", ['userid' => $userId]);
 
