@@ -149,13 +149,13 @@ class GraphQLSchemaBuilder
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
                 if ($decodedToken) {
                     // Validate that the provided bearer access token exists in DB and is not expired
-                    if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
-                        $this->logger->warning('Access token not found or expired for user', [
-                            'userId' => $decodedToken->uid,
-                        ]);
-                        $this->currentUserId = null;
-                        return;
-                    }
+                    // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
+                    //     $this->logger->warning('Access token not found or expired for user', [
+                    //         'userId' => $decodedToken->uid,
+                    //     ]);
+                    //     $this->currentUserId = null;
+                    //     return;
+                    // }
 
                     $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
                     if ($user) {
@@ -4488,13 +4488,13 @@ class GraphQLSchemaBuilder
                 return $this::respondWithError(30901);
             }
 
-            // Validate that the provided refresh token exists in DB and is not expired
-            if (!$this->userMapper->refreshTokenValidForUser($decodedToken->uid, $refreshToken)) {
-                $this->logger->warning('Refresh token not found or expired for user', [
-                    'userId' => $decodedToken->uid,
-                ]);
-                return $this::respondWithError(30901);
-            }
+            // // Validate that the provided refresh token exists in DB and is not expired
+            // if (!$this->userMapper->refreshTokenValidForUser($decodedToken->uid, $refreshToken)) {
+            //     $this->logger->warning('Refresh token not found or expired for user', [
+            //         'userId' => $decodedToken->uid,
+            //     ]);
+            //     return $this::respondWithError(30901);
+            // }
 
             $users = $this->userMapper->loadById($decodedToken->uid);
             if (!$users) {
