@@ -74,11 +74,6 @@ jobs:
         run: |
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Generate backend config before PHPStan
-        run: |
-          docker compose --env-file .env.dev run --rm backend \
-            sh -c "bash /var/www/html/cd-generate-backend-config.sh"
-
       - name: Run PHPStan inside backend container
         run: |
           docker compose --env-file .env.dev run --rm backend \
@@ -323,7 +318,7 @@ jobs:
             if docker run --rm \
                 --network my-network \
                 curlimages/curl:$TAG \
-                curl -sf http://backend/graphql > /dev/null; then
+                curl -sf http://backend/health > /dev/null; then
               echo "Backend is up!"
               exit 0
             fi
@@ -359,7 +354,7 @@ jobs:
           docker run --rm \
             --network my-network \
             curlimages/curl:$TAG \
-            curl -sf http://backend/graphql
+            curl -sf http://backend/health
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
