@@ -546,24 +546,30 @@ class WalletMapper
              * If the number of gems is negative, it's a burn operation.
              * If the number of gems is positive, it's a mint operation.
              */
-            $senderid = $userId;
-            if ($numBers < 0) {
-                $transferType = 'BURN';
-                $recipientid = $this->burnWallet;
-            } else {
-                $transferType = 'MINT';
-                $recipientid = $userId;
-                $senderid = $this->companyWallet;
+            $actions = ConstantsConfig::wallet()['ACTIONS'];
+
+            if($args['whereby'] != $actions['TRANSFER']){
+                $senderid = $userId;
+                if ($numBers < 0) {
+                    $transferType = 'BURN';
+                    $recipientid = $this->burnWallet;
+                } else {
+                    $transferType = 'MINT';
+                    $recipientid = $userId;
+                    $senderid = $this->companyWallet;
+                }
+                $positiveNumBers = abs($numBers);
+                $this->createAndSaveTransaction($transRepo, [
+                    'operationid' => $tokenId,
+                    'transactiontype' => $transactionType,
+                    'senderid' => $senderid,
+                    'recipientid' => $recipientid,
+                    'tokenamount' => $positiveNumBers,
+                    'transferaction' => $transferType
+                ]);
             }
-            $this->createAndSaveTransaction($transRepo, [
-                'operationid' => $tokenId,
-                'transactiontype' => $transactionType,
-                'senderid' => $senderid,
-                'recipientid' => $recipientid,
-                'tokenamount' => $numBers,
-                'transferaction' => $transferType
-            ]);
-            if($transferType == 'BURN'){
+            
+            if(isset($transferType) && $transferType == 'BURN'){
                 /**
                  * Add Amount to Burn account
                  *
