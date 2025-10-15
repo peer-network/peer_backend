@@ -747,8 +747,10 @@ class PeerTokenMapper
             return [
                 'status' => 'success',
                 'ResponseCode' => '11202', // Successfully retrieved Peer token price
-                'currentTokenPrice' => $tokenPrice,
-                'updatedAt' => $getLpToken['updatedat'] ?? '',
+                'affectedRows' => [
+                    'currentTokenPrice' => $tokenPrice,
+                    'updatedAt' => $getLpToken['updatedat'] ?? '',
+                ],
             ];
         } catch (\PDOException $e) {
             $this->logger->error("Database error while fetching transactions - PeerTokenMapper.transactionsHistory", ['error' => $e->getMessage()]);
@@ -1062,9 +1064,11 @@ class PeerTokenMapper
             return [
                 'status' => 'success',
                 'ResponseCode' => '11217',
-                'tokenSend' => $numberoftokensToSwap,
-                'tokensSubstractedFromWallet' => $requiredAmount,
-                'expectedBtcReturn' => $btcAmountToUser
+                'affectedRows' => [
+                    'tokenSend' => $numberoftokensToSwap,
+                    'tokensSubstractedFromWallet' => $requiredAmount,
+                    'expectedBtcReturn' => $btcAmountToUser
+                ],
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Error during token swap', [
@@ -1256,9 +1260,11 @@ class PeerTokenMapper
             return [
                 'status' => 'success',
                 'ResponseCode' => '11218',
-                'newTokenAmount' => $newTokenAmount,
-                'newBtcAmount' => $newBtcAmount,
-                'newTokenPrice' => $tokenPrice
+                'affectedRows' => [
+                    'newTokenAmount' => $newTokenAmount,
+                    'newBtcAmount' => $newBtcAmount,
+                    'newTokenPrice' => $tokenPrice
+                ]
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Liquidity error', ['exception' => $e]);

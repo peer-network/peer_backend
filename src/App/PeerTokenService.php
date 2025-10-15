@@ -162,11 +162,11 @@ class PeerTokenService
         try {
             $results = $this->peerTokenMapper->getLiquidityPoolHistory($this->currentUserId, $offset, $limit);
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => $results['ResponseCode'],
-                'affectedRows' => $results['affectedRows']
-            ];
+            return $this::createSuccessResponse(
+                (int) $results['ResponseCode'],
+                $results['affectedRows'],
+                false
+            );
         } catch (\Exception $e) {
             $this->logger->error("Error in WalletService.getLiquidityPoolHistory", ['exception' => $e->getMessage()]);
             return $this->respondWithError(41226);  // Error occurred while retrieving Liquidity Pool transaction history
@@ -192,12 +192,11 @@ class PeerTokenService
             if ($results['status'] === 'error') {
                 return $results;
             } else {
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => $results['ResponseCode'],
-                    'currentTokenPrice' => $results['currentTokenPrice'],
-                    'updatedAt' => $results['updatedAt'],
-                ];
+                return $this::createSuccessResponse(
+                    (int) $results['ResponseCode'],
+                    $results['affectedRows'],
+                    false
+                );
             }
         } catch (\Exception $e) {
             $this->logger->error("Error in WalletService.getTokenPrice", ['exception' => $e->getMessage()]);
@@ -227,15 +226,12 @@ class PeerTokenService
                 return $response;
             } else {
                 $this->transactionManager->commit();
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => $response['ResponseCode'],
-                    'affectedRows' => [
-                        'tokenSend' => $response['tokenSend'],
-                        'tokensSubstractedFromWallet' => $response['tokensSubstractedFromWallet'],
-                        'expectedBtcReturn' => $response['expectedBtcReturn'] ?? 0.0
-                    ],
-                ];
+                
+                return $this::createSuccessResponse(
+                    (int) $response['ResponseCode'],
+                    $response['affectedRows'],
+                    false
+                );
             }
 
         } catch (\Exception $e) {
@@ -266,15 +262,12 @@ class PeerTokenService
                 return $response;
             } else {
                 $this->transactionManager->commit();
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => $response['ResponseCode'],
-                    'affectedRows' => [
-                        'newTokenAmount' => $response['newTokenAmount'],
-                        'newBtcAmount' => $response['newBtcAmount'],
-                        'newTokenPrice' => $response['newTokenPrice'] ?? ""
-                    ],
-                ];
+
+                return $this::createSuccessResponse(
+                    (int) $response['ResponseCode'],
+                    $response['affectedRows'],
+                    false
+                );
             }
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
@@ -314,17 +307,18 @@ class PeerTokenService
                 return $results;
             } else {
                 $this->transactionManager->commit();
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => $results['ResponseCode'],
-                    'affectedRows' => $results['affectedRows']
-                ];
+
+                return $this::createSuccessResponse(
+                    (int) $results['ResponseCode'],
+                    $results['affectedRows'],
+                    false
+                );
             }
 
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error("Error in WalletService.updateSwapTranStatus", ['exception' => $e->getMessage()]);
-            return $this->respondWithError(41230);  // Error occurred while update Swap transaction status
+            return $this->respondWithError(41230);
         }
     }
 

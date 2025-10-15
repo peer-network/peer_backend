@@ -2126,7 +2126,12 @@ class GraphQLSchemaBuilder
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
-                 'currentTokenPrice' => function (array $root): float {
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'TokenPriceData' => [
+                'currentTokenPrice' => function (array $root): float {
                     return (float) ($root['currentTokenPrice'] ?? 0);
                 },
                 'updatedAt' => function (array $root): string {
