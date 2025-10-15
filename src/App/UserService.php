@@ -815,7 +815,7 @@ class UserService
             $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId, $contentFilterBy)->getArrayCopy();
             $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
 
-            $posts = $this->postMapper->fetchPostsByType($this->currentUserId, $userId, $postLimit, $contentFilterBy);
+            $posts = $this->postMapper->fetchPostsByType($this->currentUserId, $userId,[],$postLimit, $contentFilterBy);
 
             $contentTypes = ['image', 'video', 'audio', 'text'];
             foreach ($contentTypes as $type) {

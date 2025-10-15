@@ -136,10 +136,9 @@ final class UserServiceImpl implements UserServiceInterface
             $posts = $this->postMapper->fetchPostsByType(
                 $this->currentUserId,
                 $userId, 
+                $postSpecs,
                 $postLimit,
-                $contentFilterBy,
-                $postSpecs
-            );
+                $contentFilterBy);
 
             $contentTypes = ['image', 'video', 'audio', 'text'];
             foreach ($contentTypes as $type) {
