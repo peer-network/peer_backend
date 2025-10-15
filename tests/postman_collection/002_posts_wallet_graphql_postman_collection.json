@@ -14741,7 +14741,7 @@
 			"response": []
 		},
 		{
-			"name": "showOnboardings",
+			"name": "Update preferences",
 			"event": [
 				{
 					"listen": "test",
@@ -14804,7 +14804,7 @@
 			"response": []
 		},
 		{
-			"name": "verify getUserinfo",
+			"name": "Check preferences",
 			"event": [
 				{
 					"listen": "test",

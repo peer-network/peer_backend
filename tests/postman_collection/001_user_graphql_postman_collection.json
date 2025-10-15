@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "4bfdfdf6-a3db-4d00-862b-a5adee67f0c9",
-		"name": "001_user_chats_graphql",
+		"name": "001_user_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
 		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-4bfdfdf6-a3db-4d00-862b-a5adee67f0c9?action=share&source=collection_link&creator=43606001"
@@ -5460,131 +5460,6 @@
 			"response": []
 		},
 		{
-			"name": "Login tester 2",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"10801\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
-							"} else {",
-							"    console.log(\"Error detected in response, environment variable not set.\");",
-							"}",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
-							"} else {",
-							"    console.log(\"Error detected in response, environment variable not set.\");",
-							"}",
-							"let token = pm.environment.get(\"accessToken\");",
-							"pm.test(\"Access token exists\", function () {",
-							"    pm.expect(token).to.be.a(\"string\");",
-							"});",
-							"",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Login tester 3",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"10801\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
-							"} else {",
-							"    console.log(\"Error detected in response, environment variable not set.\");",
-							"}",
-							"if (!pm.response.text().includes(\"error\")) {",
-							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
-							"} else {",
-							"    console.log(\"Error detected in response, environment variable not set.\");",
-							"}",
-							"let token = pm.environment.get(\"accessToken\");",
-							"pm.test(\"Access token exists\", function () {",
-							"    pm.expect(token).to.be.a(\"string\");",
-							"});",
-							"",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Create post",
 			"event": [
 				{
@@ -7733,7 +7608,6 @@
 			},
 			"response": []
 		},
-
 		{
 			"name": "Check comment",
 			"event": [
