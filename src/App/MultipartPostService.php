@@ -35,7 +35,6 @@ class MultipartPostService
         if ($bearerToken !== null && $bearerToken !== '') {
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
-                if ($decodedToken) {
                     // Validate that the provided bearer access token exists in DB and is not expired
                     // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
                     //     $this->logger->warning('Access token not found or expired for user', [
@@ -47,9 +46,6 @@ class MultipartPostService
 
                     $this->currentUserId = $decodedToken->uid;
                     $this->logger->debug('Query.setCurrentUserId started');
-                } else {
-                    $this->currentUserId = null;
-                }
             } catch (\Throwable $e) {
                 $this->logger->error('Invalid token', ['exception' => $e]);
                 $this->currentUserId = null;
@@ -188,13 +184,11 @@ class MultipartPostService
         if (empty($requestObj['token'])) {
             throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty
         }
-        $isValidated = $this->tokenService->validateToken($requestObj['token']);
-
-        if (empty($isValidated)) {
-            throw new ValidationException("Token Should be valid.", [40902]);
-        }
-
+        
         try {
+            $this->tokenService->validateToken($requestObj['token']);
+
+        
             $sql = "SELECT 1 FROM eligibility_token WHERE token = :token AND status IN ('FILE_UPLOADED', 'POST_CREATED')";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':token', $requestObj['token']);
