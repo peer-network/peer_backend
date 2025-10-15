@@ -2146,7 +2146,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTokenPrice {\n    getTokenPrice {\n        status\n        ResponseCode\n        currentTokenPrice\n        updatedAt\n    }\n}\n",
+						"query": "query GetTokenPrice {\n    getTokenPrice {\n        status\n        ResponseCode\n        affectedRows {\n            currentTokenPrice\n            updatedAt\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2257,7 +2257,8 @@
 							"}"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2277,7 +2278,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTokenPrice {\n    getTokenPrice {\n        status\n        ResponseCode\n        currentTokenPrice\n        updatedAt\n    }\n}\n",
+						"query": "query GetTokenPrice {\n    getTokenPrice {\n        status\n        ResponseCode\n        affectedRows {\n            currentTokenPrice\n            updatedAt\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2494,7 +2495,8 @@
 							"}"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2514,7 +2516,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTokenPrice {\n    getTokenPrice {\n        status\n        ResponseCode\n        currentTokenPrice\n        updatedAt\n    }\n}\n",
+						"query": "query GetTokenPrice {\n    getTokenPrice {\n        status\n        ResponseCode\n        affectedRows {\n            currentTokenPrice\n            updatedAt\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
