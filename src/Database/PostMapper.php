@@ -617,7 +617,15 @@ class PostMapper
 
         // Filter: Content-Typ / Beziehungen / Viewed
         if (!empty($filterBy) && is_array($filterBy)) {
+            $validTypes  = [];
             $userFilters = [];
+
+            $mapping = [
+                'IMAGE' => 'image',
+                'AUDIO' => 'audio',
+                'VIDEO' => 'video',
+                'TEXT'  => 'text',
+            ];
 
             $userMapping = [
                 'FOLLOWED' => "p.userid IN (SELECT followedid FROM follows WHERE followerid = :currentUserId)",
@@ -632,25 +640,22 @@ class PostMapper
                 )",
             ];
 
-            // Normalize filterBy values
-            $filterByUpper = \Fawaz\Utils\ContentFilterHelper::normalizeToUpper($filterBy);
-
-            // Map content types using shared helper
-            $validTypes = \Fawaz\Utils\ContentFilterHelper::mapContentTypesForDb($filterByUpper);
 
             // Collect relationship filters
-            foreach ($filterByUpper as $type) {
-                if (isset($userMapping[$type])) {
-                    $userFilters[] = $userMapping[$type];
+            foreach ($filterBy as $type) {
+                if (isset($mapping[$type])) {
+                    $validTypes[] = $mapping[$type];
+                } elseif (isset($userMapping[$type])) {
+                     $userFilters[] = $userMapping[$type];
                 }
             }
 
             // eigene Posts auch bei FOLLOWED/FOLLOWER einschließen
-            if (in_array('FOLLOWED', $filterByUpper, true) || in_array('FOLLOWER', $filterByUpper, true)) {
+            if (in_array('FOLLOWED', $filterBy, true) || in_array('FOLLOWER', $filterBy, true)) {
                 $userFilters[] = "p.userid = :currentUserId";
             }
 
-            if (in_array('VIEWED', $filterByUpper, true)) {
+            if (in_array('VIEWED', $filterBy, true)) {
                 $whereClauses[] = "EXISTS (
                     SELECT 1 FROM user_post_views upv
                     WHERE upv.postid = p.postid
