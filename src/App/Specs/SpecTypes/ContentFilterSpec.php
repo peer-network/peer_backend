@@ -49,10 +49,4 @@ final class ContentFilterSpec implements Specification
         }
         return null;
     }
-
-    // public function getParameters(): array
-    // {
-    //     // return ['ratings' => $this->allowedRatings];
-    //     return ['ratings' => "soem string"];
-    // }
 }

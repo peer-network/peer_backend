@@ -9,12 +9,10 @@ use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
-use Fawaz\App\Role;
 use Fawaz\App\Specs\Specification;
 use Fawaz\App\Specs\SpecificationSQLData;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
-use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
@@ -796,27 +794,6 @@ class UserMapper
         }
     }
 
-    public function fetchCountPosts(string $userid): int
-    {
-        $this->logger->debug("UserMapper.fetchCountPosts started", ['userid' => $userid]);
-
-        try {
-            $sql = "SELECT COUNT(*) FROM posts WHERE userid = :userid";
-            $stmt = $this->db->prepare($sql);
-
-            $stmt->execute(['userid' => $userid]);
-
-            $postCount = (int) $stmt->fetchColumn();
-
-            $this->logger->info("Fetched post count", ['userid' => $userid, 'postCount' => $postCount]);
-
-            return $postCount;
-        } catch (\Throwable $e) {
-            $this->logger->error("Error fetching post count", ['userid' => $userid, 'error' => $e->getMessage()]);
-            return 0;
-        }
-    }
-
     public function fetchFriends(
         string $userId,
         int $offset = 0,
@@ -1076,70 +1053,6 @@ class UserMapper
         } catch (\Throwable $e) {
             $this->logger->error("Database error in fetchFollowing", ['error' => $e->getMessage()]);
             return [];
-        }
-    }
-
-    public function isFollowing(string $userid, string $currentUserId): bool
-    {
-        $this->logger->debug("UserMapper.isFollowing started");
-
-        $sql = "SELECT COUNT(*) FROM follows WHERE followedid = :userid AND followerid = :currentUserId";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-
-            $stmt->execute();
-            return (bool) $stmt->fetchColumn();
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in isFollowing", ['error' => $e->getMessage()]);
-            return false;
-        }
-    }
-
-    public function isFollowed(string $userid, string $currentUserId): bool
-    {
-        $this->logger->debug("UserMapper.isFollowed started");
-
-        $sql = "SELECT COUNT(*) FROM follows WHERE followedid = :currentUserId AND followerid = :userid";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-
-            $stmt->execute();
-            return (bool) $stmt->fetchColumn();
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in isFollowed", ['error' => $e->getMessage()]);
-            return false;
-        }
-    }
-
-    public function fetchFollowCounts(string $userid, string $currentUserId): array
-    {
-        $sql = "
-            SELECT 
-                SUM(CASE WHEN f.followedid = :userid THEN 1 ELSE 0 END) AS amountfollower,
-                SUM(CASE WHEN f.followerid = :userid THEN 1 ELSE 0 END) AS amountfollowed,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :userid AND followerid = :currentUserId) AS isfollowing,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = :userid) AS isfollowed
-            FROM follows f
-        ";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-
-            $stmt->execute();
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            return $data ?: ['amountfollower' => 0, 'amountfollowed' => 0, 'isfollowing' => false, 'isfollowed' => false];
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in fetchFollowCounts", ['error' => $e->getMessage()]);
-            return ['amountfollower' => 0, 'amountfollowed' => 0, 'isfollowing' => false, 'isfollowed' => false];
         }
     }
 
@@ -1930,26 +1843,6 @@ class UserMapper
             $this->logger->error("Error checking reset request", ['error' => $e->getMessage()]);
         }
         return [];
-    }
-
-    public function loadTokenById(string $id): bool
-    {
-        $this->logger->debug("UserMapper.loadTokenById started");
-        $time = (int)\time();
-
-        try {
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM refresh_tokens WHERE userid = :id AND expiresat > :expiresat");
-            $stmt->bindParam(':id', $id);
-            $stmt->bindParam(':expiresat', $time, \PDO::PARAM_INT);
-            $stmt->execute();
-            $exists = $stmt->fetchColumn() > 0;
-
-            $this->logger->info("Refresh_token existence check", ['exists' => $exists]);
-            return $exists;
-        } catch (\Throwable $e) {
-            $this->logger->error("General error while checking if refresh_token exists", ['error' => $e->getMessage()]);
-            return false;
-        }
     }
 
     /**

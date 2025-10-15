@@ -8,8 +8,8 @@ use Fawaz\Services\JWTService;
 use Fawaz\Services\Mailer;
 use Fawaz\Services\LiquidityPool;
 use DI\ContainerBuilder;
-use Fawaz\App\Interfaces\UserServiceImpl;
-use Fawaz\App\Interfaces\UserServiceInterface;
+use Fawaz\App\Interfaces\ProfileServiceImpl;
+use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\Models\Core\Model;
 use Fawaz\Utils\PeerLogger;
 use Fawaz\Utils\ResponseMessagesProviderImpl;
@@ -77,7 +77,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
             return $pdo;
         },
 
-        UserServiceInterface::class => \DI\autowire(UserServiceImpl::class),
+        ProfileService::class => \DI\autowire(ProfileServiceImpl::class),
         ResponseMessagesProvider::class => function (ContainerInterface $c) {
             $path = __DIR__ . "/../../runtime-data/media/assets/response-codes.json";
             return new ResponseMessagesProviderImpl($path);

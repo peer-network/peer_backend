@@ -114,40 +114,6 @@ class UserService
         return null;
     }
 
-/*  ------ Un-used function?--------
-    private function createPayload(string $email, string $username, string $verificationCode): array
-    {
-        $email = trim($email);
-        $username = trim($username);
-        $verificationCode = trim($verificationCode);
-
-        if (empty($email) || empty($username) || empty($verificationCode)) {
-            return self::respondWithError(40701);
-        }
-
-        $payload = [
-            "to" => [
-                [
-                    "email" => $email,
-                    "name" => $username
-                ]
-            ],
-            "templateId" => 1,
-            "params" => [
-                "verification_code" => $verificationCode
-            ]
-        ];
-
-        try {
-            return $payload;
-        } catch (\Throwable $e) {
-            $this->logger->error('Error create payload.', ['exception' => $e]);
-            return self::respondWithError(00000);//'Error create payload.'
-        }
-    }
-
-*/
-
     public function createUser(array $args): array
     {
         $this->logger->debug('UserService.createUser started');
@@ -482,7 +448,6 @@ class UserService
             return false;
         }
     }
-
 
     public function updateUserPreferences(?array $args = []): array
     {

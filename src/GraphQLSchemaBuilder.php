@@ -19,14 +19,12 @@ use Fawaz\App\CommentService;
 use Fawaz\App\ContactusService;
 use Fawaz\App\DailyFreeService;
 use Fawaz\App\Helpers\FeesAccountHelper;
-use Fawaz\App\Interfaces\UserServiceInterface;
+use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\McapService;
 use Fawaz\App\PoolService;
-use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostInfoService;
 use Fawaz\App\PostService;
-use Fawaz\App\User;
 use Fawaz\App\UserInfoService;
 use Fawaz\App\UserService;
 use Fawaz\App\TagService;
@@ -66,7 +64,7 @@ class GraphQLSchemaBuilder
         protected ContactusService $contactusService,
         protected DailyFreeService $dailyFreeService,
         protected McapService $mcapService,
-        protected UserServiceInterface $userServiceNew,
+        protected ProfileService $profileService,
         protected UserService $userService,
         protected UserInfoService $userInfoService,
         protected PoolService $poolService,
@@ -198,7 +196,7 @@ class GraphQLSchemaBuilder
         $this->alphaMintService->setCurrentUserId($userid);
         $this->moderationService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
-        $this->userServiceNew->setCurrentUserId($userid);
+        $this->profileService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
         $this->postService->setCurrentUserId($userid);
@@ -3857,7 +3855,7 @@ class GraphQLSchemaBuilder
 
         $this->logger->debug('Query.resolveProfile started');
 
-        $results = $this->userServiceNew->Profile($args);
+        $results = $this->profileService->Profile($args);
         if (isset($results['status']) && $results['status'] === 'success') {
             $this->logger->info('Query.resolveProfile successful');
 

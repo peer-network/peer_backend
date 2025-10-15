@@ -2,7 +2,7 @@
 
 namespace Fawaz\App\Interfaces;
 
-interface UserServiceInterface {
+interface ProfileService {
     public function setCurrentUserId(string $userId): void;
     public function profile(?array $args = []): array;
 }

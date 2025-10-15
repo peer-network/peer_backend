@@ -12,21 +12,17 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
-use Fawaz\Mail\UserWelcomeMail;
-use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
-use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
-final class UserServiceImpl implements UserServiceInterface
+final class ProfileServiceImpl implements ProfileService
 {
     use ResponseHelper;
     protected ?string $currentUserId = null;
@@ -53,7 +49,6 @@ final class UserServiceImpl implements UserServiceInterface
         }
 
         $userId = $args['userid'] ?? $this->currentUserId;
-        $postLimit = min(max((int)($args['postLimit'] ?? 4), 1), 10);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $this->logger->info('UserService.Profile started');
@@ -73,14 +68,7 @@ final class UserServiceImpl implements UserServiceInterface
             $this->currentUserId,
             $userId
         );
-        $postsContentFilterSpec = new ContentFilterSpec(
-            $strategy,
-            $contentFilterBy,
-            $this->currentUserId,
-            $userId,
-            ContentType::post,
-            ContentType::post
-        );
+
         $usersContentFilterSpec = new ContentFilterSpec(
             $strategy,
             $contentFilterBy,
@@ -95,11 +83,6 @@ final class UserServiceImpl implements UserServiceInterface
             $currentUserIsBlockedSpec,
             $usersContentFilterSpec
         ];
-        $postSpecs = [
-            $basicUserSpec,
-            $currentUserIsBlockedSpec,
-            $postsContentFilterSpec
-        ];
 
         try {
             $profileData = $this->userMapper->fetchProfileData(
@@ -109,7 +92,6 @@ final class UserServiceImpl implements UserServiceInterface
             )->getArrayCopy();
 
             $userReports = (int)$profileData['user_reports'];
-            $user_dismiss_moderation_amount = (int)$profileData['user_count_content_moderation_dismissed'];
 
             $contentFilterService = new ContentFilterServiceImpl(
                 $strategy,
@@ -121,7 +103,6 @@ final class UserServiceImpl implements UserServiceInterface
                     ContentType::user,
                     ContentType::user,
                     $userReports,
-                    $user_dismiss_moderation_amount,
                     $this->currentUserId,
                     $profileData['uid']
             ) == ContentFilteringAction::replaceWithPlaceholder) {
@@ -133,16 +114,9 @@ final class UserServiceImpl implements UserServiceInterface
             // $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId,$contentFilterBy)->getArrayCopy();
             $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
 
-            $posts = $this->postMapper->fetchPostsByType(
-                $this->currentUserId,
-                $userId, 
-                $postSpecs,
-                $postLimit,
-                $contentFilterBy);
-
             $contentTypes = ['image', 'video', 'audio', 'text'];
             foreach ($contentTypes as $type) {
-                $profileData["{$type}posts"] = array_filter($posts, fn($post) => $post['contenttype'] === $type);
+                $profileData["{$type}posts"] = [];
             }
 
             $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
