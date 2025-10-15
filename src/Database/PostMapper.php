@@ -1179,54 +1179,6 @@ class PostMapper
         }
     }
 
-    /*
-    * Add or Update Eligibility Token for post
-    */
-    public function addOrUpdateEligibilityToken01(string $userId, string $eligibilityToken, string $status): void
-    {
-
-        try {
-            $this->logger->debug("PostMapper.addOrUpdateEligibilityToken started");
-            $query = "SELECT COUNT(*) FROM eligibility_token WHERE userid = :userid AND token = :token";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
-            $stmt->execute();
-
-            $existingToken = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if ($existingToken) {
-                // Token exists, update it
-                $this->logger->info("Updating existing eligibility token for user: " . $userId);
-                $query = "UPDATE eligibility_token 
-                        SET token = :token, status = :status
-                        WHERE userid = :userid";
-            } else {
-                // Token does not exist, insert a new one
-                $this->logger->info("Inserting new eligibility token for user: " . $userId);
-                $query = "INSERT INTO eligibility_token 
-                        (userid, token, expiresat) 
-                        VALUES (:userid, :token, :expiresat)";
-
-                $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
-                $stmt->bindValue(':expiresat', date('Y-m-d H:i:s', strtotime('+5 minutes')), \PDO::PARAM_STR);
-
-                $stmt->execute();
-            }
-
-            $this->logger->info("PostMapper.addOrUpdateEligibilityToken: Inserted new token into database", ['userid' => $userId]);
-
-        } catch (\Throwable $e) {
-            $this->logger->error("PostMapper.addOrUpdateEligibilityToken: Exception occurred while inserting token", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-        }
-
-    }
-
     /**
      * Add or Update Eligibility Token for post
      * Enforces: A user must NOT have more than 5 records in the past hour
