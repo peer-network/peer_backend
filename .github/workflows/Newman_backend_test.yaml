@@ -132,9 +132,9 @@ jobs:
       needs.check_branch_sync.outputs.is_behind == 'false'
       # needs.validate_sql_files.result == 'success'
     strategy:
+      fail-fast: false
       matrix:
         php-version: ['8.2', '8.3']
-        fail-fast: false
     outputs:
       outcome: ${{ steps.outcome.outputs.outcome }}
     steps:
