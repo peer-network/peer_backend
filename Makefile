@@ -85,7 +85,7 @@ reload-backend: ## Rebuild and restart backend container
 	docker-compose --env-file "./.env.ci" $(COMPOSE_FILES) up -d --force-recreate backend
 
 	@echo "Waiting for backend to be healthy..."
-	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
+	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/health | grep -q "200"; do \
 		echo "Waiting for Backend..."; sleep 2; \
 	done
 	@echo "Backend reloaded and ready!"
@@ -105,7 +105,7 @@ restart-db: ## Restart only the database (fresh schema & data, keep backend as-i
 
 	@echo "Database restarted and ready. Backend container was untouched."
 
-dev: check-hooks scan reset-db-and-backend init ## Full setup: env.ci, DB reset, vendors install, start DB+backend
+dev: check-hooks reset-db-and-backend init ## Full setup: env.ci, DB reset, vendors install, start DB+backend
 	@cp .env.dev .env.ci
 	@echo "Installing Composer dependencies on local host..."
 	composer install --prefer-dist --no-interaction
@@ -151,7 +151,7 @@ dev: check-hooks scan reset-db-and-backend init ## Full setup: env.ci, DB reset,
 	docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml up -d backend
 	
 	@echo "Waiting for backend to be healthy..."
-	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
+	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/health | grep -q "200"; do \
 		echo "Waiting for Backend..."; sleep 2; \
 	done
 
@@ -173,7 +173,7 @@ restart: ## Soft restart with fresh DB but keep current code & vendors
 	docker-compose --env-file .env.ci $(COMPOSE_FILES) up -d backend
 
 	@echo "Waiting for backend to be healthy..."
-	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
+	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/health | grep -q "200"; do \
 		echo "Waiting for Backend..."; sleep 2; \
 	done
 
