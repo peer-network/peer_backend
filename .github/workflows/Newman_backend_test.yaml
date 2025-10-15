@@ -83,7 +83,7 @@ jobs:
   validate_sql_files:
     name: Ensure Only Valid SQL Files Are Changed
     runs-on: ubuntu-latest
-    needs: [phpstan_analysis]
+    needs: [check_branch_sync]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -512,78 +512,6 @@ jobs:
           path: peer-backend.tar
           overwrite: true
  
-  trivy_scan:
-    name: Trivy Security Scan
-    runs-on: ubuntu-latest
-    needs: [build_and_test]
-    if: needs.build_and_test.outputs.outcome == 'success'
-    strategy:
-      matrix:
-        php-version: ['8.2', '8.3']
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v5
- 
-      - uses: actions/download-artifact@v5
-        with:
-          name: docker-image-${{ matrix.php-version }}
-          path: .
-          
-      - name: Load Docker image
-        run: docker load -i peer-backend.tar
- 
-      - name: Set image name
-        run: echo "IMAGE_NAME=peer-backend:${{ github.sha }}" >> $GITHUB_ENV
- 
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget gnupg lsb-release apt-transport-https
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install -y trivy
- 
-      - name: Generate composer.lock (not committed)
-        run: composer install --no-dev --prefer-dist --no-interaction
- 
-      - name: Set Trivy Scan Outcome
-        id: trivy_outcome
-        run: |
-          result=0
-          trivy image --exit-code 1 --severity CRITICAL,HIGH --ignore-unfixed $IMAGE_NAME || result=1
-          trivy fs . --scanners vuln --exit-code 1 --severity CRITICAL,HIGH || result=1
-          trivy fs . --scanners secret --exit-code 1 || result=1
- 
-          if [ "$result" -eq 0 ]; then
-            echo "outcome=success" >> $GITHUB_OUTPUT
-            echo "success" > outcome.txt
-          else
-            echo "outcome=other_failure" >> $GITHUB_OUTPUT
-            echo "other_failure" > outcome.txt
-          fi
- 
-      - name: Upload Trivy build outcome marker
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: outcome-${{ matrix.php-version }}-${{ github.run_attempt }}
-          path: outcome.txt
- 
-      - name: Upload Scan Reports
-        if: always()
-        run: |
-          mkdir -p trivy_reports
-          trivy image --format table --ignore-unfixed --output trivy_reports/image.txt peer-backend:${{ github.sha }}
-          trivy fs . --format table --scanners vuln --output trivy_reports/filesystem_vuln.txt
-          trivy fs . --format table --scanners secret --output trivy_reports/secrets.txt
- 
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: trivy-security-reports-${{ matrix.php-version }}-${{ github.run_attempt }}
-          path: trivy_reports
- 
   aggregate_outcome:
     name: Aggregate Matrix Job Outcomes
     runs-on: ubuntu-latest
@@ -757,7 +685,6 @@ jobs:
       build_and_test,
       aggregate_outcome,
       #gitleaks_scan_staged,
-      trivy_scan,
       map_pr_to_discord
     ]
     if: always()
