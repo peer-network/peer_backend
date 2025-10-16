@@ -52,7 +52,7 @@ class ModerationService
     {
         if (!$this->isAuthorized()) {
             $this->logger->warning("Unauthorized access attempt to get moderation stats by user ID: {$this->currentUserId}");
-            return self::respondWithError(0000);
+            return self::respondWithError(0000); // Unauthorized access attempt to get moderation stats
         }
 
         $amountAwaitingReview = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[0])->count();
@@ -60,7 +60,7 @@ class ModerationService
         $amountRestored = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[2])->count();
         $amountIllegal = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[3])->count();
 
-        return self::createSuccessResponse(20001, [
+        return self::createSuccessResponse(0000, [ // Moderation stats retrieved successfully
             'AmountAwaitingReview' => $amountAwaitingReview,
             'AmountHidden' => $amountHidden,
             'AmountRestored' => $amountRestored,
@@ -75,7 +75,7 @@ class ModerationService
     {
         if (!$this->isAuthorized()) {
             $this->logger->warning("Unauthorized access attempt to get moderation items by user ID: {$this->currentUserId}");
-            return self::respondWithError(0000);
+            return self::respondWithError(0000); // Unauthorized access attempt to get moderation items
         }
 
         $page = max((int)($args['offset'] ?? 1), 0);
@@ -166,7 +166,7 @@ class ModerationService
             return $item;
         }, $items['data']);
 
-        return self::createSuccessResponse(0000, $items['data'], true);
+        return self::createSuccessResponse(0000, $items['data'], true); // Moderation items retrieved successfully
     }
 
     /**
@@ -213,7 +213,7 @@ class ModerationService
         try{
             if (!$this->isAuthorized()) {
                 $this->logger->warning("Unauthorized access attempt to perform moderation action by user ID: {$this->currentUserId}");
-                return self::respondWithError(0000);
+                return self::respondWithError(0000); // Unauthorized access attempt to perform moderation action
             }
 
             $targetContentId = $args['targetContentId'] ?? null;
@@ -396,7 +396,7 @@ class ModerationService
 
             $this->transactionManager->commit();
 
-            return self::createSuccessResponse(20001, [], false); // Moderation action performed successfully
+            return self::createSuccessResponse(0000, [], false); // Moderation action performed successfully
         }catch(\Exception $e){
             $this->transactionManager->rollBack();
             $this->logger->error("Error performing moderation action: " . $e->getMessage());
