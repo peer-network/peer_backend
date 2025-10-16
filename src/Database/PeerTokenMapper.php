@@ -247,6 +247,8 @@ class PeerTokenMapper
             $operationid = self::generateUUID();
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
+            // Lock both users' balances to prevent race conditions
+            $this->lockBalances([$userId, $recipient]);
 
             // 1. SENDER: Debit From Account
             if ($requiredAmount) {
@@ -941,6 +943,8 @@ class PeerTokenMapper
         }
 
         try {
+            // Lock both users' balances to prevent race conditions
+            $this->lockBalances([$userId]);
 
             $btcLpState =  $this->getLpTokenBtcLP();
             $lpState = $this->getLpToken();
@@ -1397,5 +1401,57 @@ class PeerTokenMapper
             $this->logger->error('Password verification error', ['exception' => $e]);
             return false;
         }
+    }
+
+
+    /**
+     * Lock balances of both users to prevent race conditions
+     * Also Includes Fees wallets
+     */
+    private function lockBalances(array $userIds): void
+    {
+        $walletsToLock = [...$userIds];
+
+        $fees = ConstantsConfig::tokenomics()['FEES'];
+        if (isset($fees['PEER']) && (float)$fees['PEER'] > 0) {
+            $walletsToLock[] = $this->peerWallet;
+        }
+        if (isset($fees['POOL']) && (float)$fees['POOL'] > 0) {
+            $walletsToLock[] = $this->poolWallet;
+        }
+        if (isset($fees['BURN']) && (float)$fees['BURN'] > 0) {
+            $walletsToLock[] = $this->burnWallet;
+        }
+        if (isset($this->btcpool) && !empty($this->btcpool)) {
+            $walletsToLock[] = $this->btcpool;
+        }
+        // Remove duplicates
+        $walletsToLock = array_unique($walletsToLock);
+
+        // Sort to ensure consistent locking order
+        sort($walletsToLock);
+
+        foreach ($walletsToLock as $walletId) {
+            if (!self::isValidUUID($walletId)) {
+                $this->logger->debug('Invalid wallet UUID for locking', ['walletId' => $walletId]);
+                throw new \RuntimeException('Invalid wallet UUID for locking: ' . $walletId);
+            }
+            $this->lockWalletBalance($walletId);
+        }
+    }
+
+    /**
+     * Lock a single wallet balance for update.
+     */
+    private function lockWalletBalance(string $walletId): void
+    {
+        $this->logger->debug('Locking wallet balance', ['walletId' => $walletId]);
+        $query = "SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':userid', $walletId, \PDO::PARAM_STR);
+        $stmt->execute();
+        // Fetching the row to ensure the lock is acquired
+        $stmt->fetch(\PDO::FETCH_ASSOC);
+        $this->logger->debug('Wallet balance locked', ['walletId' => $walletId]);
     }
 }
