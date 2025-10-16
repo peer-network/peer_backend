@@ -8,6 +8,7 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\AdvertisementMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Utils\ContentFilterHelper;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use InvalidArgumentException;
@@ -408,14 +409,26 @@ class AdvertisementService
             }
         }
 
-        if (!empty($filterBy) && is_array($filterBy)) {
-            $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT'];
+        // Normalize and validate filterBy (accept scalar or array)
+        if (!empty($filterBy)) {
+            if (is_string($filterBy)) {
+                $filterBy = [$filterBy];
+            }
 
-            $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
+            if (!is_array($filterBy)) {
+                return $this->respondWithError(30103);
+            }
+
+            $invalidTypes = ContentFilterHelper::invalidAgainstAllowed(
+                $filterBy, ContentFilterHelper::CONTENT_TYPES
+            );
 
             if (!empty($invalidTypes)) {
                 return $this->respondWithError(30103);
             }
+
+            // Ensure mapper receives normalized (UPPER) enums
+            $args['filterBy'] = ContentFilterHelper::normalizeToUpper($filterBy);
         }
 
         $this->logger->debug("AdvertisementService.findAdvertiser started");
