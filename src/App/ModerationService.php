@@ -215,11 +215,15 @@ class ModerationService
                 $this->logger->warning("Unauthorized access attempt to perform moderation action by user ID: {$this->currentUserId}");
                 return self::respondWithError(0000); // Unauthorized access attempt to perform moderation action
             }
+            
+            if(empty($args['targetContentId']) || empty($args['moderationAction'])){
+                return self::respondWithError(30101); // Missing required fields
+            }
 
             $targetContentId = $args['targetContentId'] ?? null;
             $moderationAction = $args['moderationAction'] ?? null;
 
-            if (!$targetContentId || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
+            if (!$targetContentId || !self::isValidUUID($targetContentId) || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
                 return self::respondWithError(0000); // Invalid input
             }
 
@@ -398,7 +402,7 @@ class ModerationService
 
             return self::createSuccessResponse(0000, [], false); // Moderation action performed successfully
         }catch(\Exception $e){
-            $this->transactionManager->rollBack();
+            // $this->transactionManager->rollBack();
             $this->logger->error("Error performing moderation action: " . $e->getMessage());
             return self::respondWithError(0000);
         }
