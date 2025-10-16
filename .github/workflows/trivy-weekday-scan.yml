@@ -1,9 +1,6 @@
 name: Trivy Security Scan (Weekdays 9:30 AM Berlin)
 
 on:
-  pull_request:
-    branches:
-      - development
   schedule:
     - cron: "30 7 * * 1-5"  # Mon–Fri at 7:30 AM UTC ≈ 9:30 AM Berlin
   workflow_dispatch:
