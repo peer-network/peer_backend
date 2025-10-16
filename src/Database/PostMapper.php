@@ -1317,8 +1317,6 @@ class PostMapper
                 }
             }
 
-            $this->db->beginTransaction();
-
             // Check if (userId, token) exists
             $existsSql = "
                 SELECT 1
@@ -1363,13 +1361,9 @@ class PostMapper
                 $insertStmt->execute();
             }
 
-            $this->db->commit();
             $this->logger->info("PostMapper.addOrUpdateEligibilityToken completed", ['userid' => $userId]);
 
         } catch (\Throwable $e) {
-            if ($this->db->inTransaction()) {
-                $this->db->rollBack();
-            }
             $this->logger->error("PostMapper.addOrUpdateEligibilityToken failed", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
