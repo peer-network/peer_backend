@@ -839,7 +839,7 @@ class PeerTokenMapper
         }
         $btcAddress = $args['btcAddress'];
 
-        if (!PeerTokenMapper::isValidBTCAddress($btcAddress)) {
+        if (!self::isValidBTCAddress($btcAddress)) {
             $this->logger->warning('Invalid btcAddress .', [
                 'btcAddress' => $btcAddress,
             ]);
