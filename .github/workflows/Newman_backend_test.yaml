@@ -58,18 +58,18 @@ jobs:
     steps:
       - name: Display Soft Mode Notice
         run: |
-          echo "🔴 Gitleaks will show as FAILED intentionally."
-          echo "This is a visible test mode: merges are still allowed."
-          echo "Detected secrets = red ❌ on PR tab."
-          echo "No enforcement — CI continues normally."
+          echo "⚠️ Gitleaks running in SOFT MODE."
+          echo "If leaks are found, job will show YELLOW ⚠️ but merges remain allowed."
+          echo "This is for temporary monitoring — not enforcement yet."
 
   gitleaks_scan_staged:
-    name: Gitleaks PR Scan
+    name: Gitleaks PR Scan (Soft Mode)
     needs: [gitleaks_notice]
     uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
     with:
       config: "gitleaks.toml"
     secrets: inherit
+    continue-on-error: true 
 
   phpstan_analysis:
     name: Early Static Analysis (PHPStan)
@@ -781,7 +781,7 @@ jobs:
           is_behind="${{ needs.check_branch_sync.outputs.is_behind }}"
           phpstan_result="${{ needs.phpstan_analysis.result }}"
           sql_result="${{ needs.validate_sql_files.result }}"
-          # gitleaks_result="${{ needs.gitleaks_scan_staged.result }}" # uncomment when re-enabling Gitleaks
+          gitleaks_result="${{ needs.gitleaks_scan_staged.result }}"
 
           type="none"
           if [ "$is_behind" == "true" ]; then
