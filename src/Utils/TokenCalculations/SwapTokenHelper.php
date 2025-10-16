@@ -18,7 +18,7 @@ class SwapTokenHelper
      */
     public static function calculateBtc(string $btcLpTokenReserve, string $lpTokenReserve, string $tokensToSwap, string $POOLFEE = '0.01'): string
     {
-        // Step 1: Calculate fee in Q96
+        // Step 1: Calculate fee
         $feeAmount = TokenHelper::mulRc($tokensToSwap, $POOLFEE);
 
         // Step 2: Add pool fee to LP token reserve
