@@ -15,6 +15,7 @@ use Fawaz\Mail\UserWelcomeMail;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -814,7 +815,9 @@ class UserService
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        $contentFilterService = new ContentFilterServiceImpl(
+            ContentFilteringStrategies::postFeed
+        );
         if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
             return $this::respondWithError(30103);
         }
@@ -925,7 +928,7 @@ class UserService
         $this->logger->debug('UserService.fetchAllAdvance started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed,);
         if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
             return $this::respondWithError(30103);
         }

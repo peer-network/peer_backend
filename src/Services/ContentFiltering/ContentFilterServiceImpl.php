@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Fawaz\Services\ContentFiltering;
 
 use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategyFactory;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Services\ContentFiltering\Types\ContentVisibility;
 
 class ContentFilterServiceImpl {
     /** @var string[] Severity levels in order of importance */
@@ -16,27 +17,19 @@ class ContentFilterServiceImpl {
     
     /** @var array<string,int> Map of content type => reports amount to hide */
     private array $reports_amount_to_hide_content;
-
-    /** @var array<string,int> Map of content type => dismiss moderation threshold */
-    private array $moderationsDismissAmountToRestoreContent;
-
-
-    private ContentFilteringStrategy $contentFilterStrategy;
+    private ContentFilteringStrategies $contentFilterStrategyTag;
     private ?string $contentFilterBy;
 
     public function __construct(
-        ?ContentFilteringStrategy $contentFilterStrategy = null,
+        ?ContentFilteringStrategies $contentFilterStrategyTag = ContentFilteringStrategies::searchByMeta,
         ?array $contentSeverityLevels = null,
         ?string $contentFilterBy = null
     ) {
         $contentFiltering = ConstantsConfig::contentFiltering();
         $this->contentSeverityLevels = $contentSeverityLevels ?? $contentFiltering['CONTENT_SEVERITY_LEVELS'];
         $this->reports_amount_to_hide_content = $contentFiltering['REPORTS_COUNT_TO_HIDE_FROM_IOS'];
-        $this->moderationsDismissAmountToRestoreContent = $contentFiltering['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS'];
-
-        $this->contentFilterStrategy = $contentFilterStrategy ?? new ListPostsContentFilteringStrategy();
-
         $this->contentFilterBy = $contentFilterBy;
+        $this->contentFilterStrategyTag = $contentFilterStrategyTag;
     }
 
     public function validateContentFilter(?string $contentFilterBy): bool
@@ -91,40 +84,32 @@ class ContentFilterServiceImpl {
     public function getContentFilterAction(
         ContentType $contentTarget,
         ContentType $showingContent,
+        ?ContentVisibility $contentVisibility = null,
         ?int $showingContentReportAmount = null,
-        ?int $showingContentDismissModerationAmount = null,
         ?string $currentUserId = null,
         ?string $targetUserId = null,
     ): ?ContentFilteringAction {
-        if ($this->contentFilterBy === $this->contentSeverityLevels[0]) {
-            $showingContentString = strtoupper($showingContent->value);
 
-            $reportAmountToHide = $this->reports_amount_to_hide_content[$showingContentString];
-            $dismissModerationAmounToHideFromIos = $this->moderationsDismissAmountToRestoreContent[$showingContentString];
-
-
-            if (!$reportAmountToHide || !$dismissModerationAmounToHideFromIos) {
-                // echo("GetContentFilterAction: getContentFilterAction: reportAmountToHide, dismissModerationAmounToHideFromIos is null" . "\n");
-                return null;
-            }
-
-            // show all personal content
-            if ($currentUserId && $currentUserId == $targetUserId) {
-                return null;
-            }
-
-            if ($showingContentReportAmount === null && $showingContentDismissModerationAmount === null) {
-                return $this->contentFilterStrategy->getAction($contentTarget, $showingContent);
-            }
-
-            if (
-                $showingContentReportAmount >= $reportAmountToHide &&
-                $showingContentDismissModerationAmount < $dismissModerationAmounToHideFromIos
-            ) {
-                // echo("GetContentFilterAction: getContentFilterAction: start: $this->contentFilterBy" . " / target: " .$contentTarget->value . " / show: " . $contentTarget->value . "\n");
-                return $this->contentFilterStrategy->getAction($contentTarget, $showingContent);
-            }
+        if ($contentVisibility !== ContentVisibility::illegal &&
+            $showingContentReportAmount >= $this->reports_amount_to_hide_content && 
+            $this->contentFilterBy === $this->contentSeverityLevels[0]
+        ) {
+            $contentVisibility = ContentVisibility::hidden;
         }
-        return null;
+
+        $strategy = ContentFilteringStrategyFactory::create(
+            $this->contentFilterStrategyTag, 
+            $contentVisibility
+        );
+
+        if ($strategy === null) {
+            return null;
+        }
+    
+        if ($currentUserId && $currentUserId == $targetUserId) {
+            $strategy = ContentFilteringStrategyFactory::create(ContentFilteringStrategies::profile, $contentVisibility);
+        }
+
+        return $strategy->getAction($contentTarget, $showingContent);
     }
 }

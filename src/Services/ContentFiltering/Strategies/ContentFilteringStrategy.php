@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\Services\ContentFiltering\Strategies;
 
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentPolicy;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 interface ContentFilteringStrategy
@@ -19,5 +20,8 @@ interface ContentFilteringStrategy
      * @return ?ContentFilteringAction
      * For each combination funciton returns an action 'ContentFilteringAction' according to used strategy.
      */
-    public function getAction(ContentType $contentTarget, ContentType $showingContent): ?ContentFilteringAction;
+    public function getAction(
+        ContentType $contentTarget, 
+        ContentType $showingContent
+    ): ?ContentFilteringAction;
 }

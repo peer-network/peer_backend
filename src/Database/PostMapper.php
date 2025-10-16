@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\Database;
 
 use DateTime;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use PDO;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\App\Post;
@@ -188,7 +189,7 @@ class PostMapper
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
+            ContentFilteringStrategies::profile,
             null,
             $contentFilterBy
         );
@@ -565,7 +566,7 @@ class PostMapper
         $userId   = $args['userid']   ?? null;
 
         $contentFilterService = new ContentFilterServiceImpl(
-            new ListPostsContentFilteringStrategy(),
+            ContentFilteringStrategies::postFeed,
             null,
             $contentFilterBy
         );
@@ -1032,7 +1033,7 @@ class PostMapper
             $contentFilterService = null;
             if ($contentFilterBy !== null) {
                 $contentFilterService = new ContentFilterServiceImpl(
-                    new ListPostsContentFilteringStrategy(),
+                    ContentFilteringStrategies::postFeed,
                     null,
                     $contentFilterBy
                 );

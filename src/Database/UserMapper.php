@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use PDO;
 use Fawaz\App\User;
 use Fawaz\App\UserInfo;
@@ -203,7 +204,7 @@ class UserMapper
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            new ListPostsContentFilteringStrategy(),
+            ContentFilteringStrategies::postFeed,
             null,
             $contentFilterBy
         );
@@ -336,7 +337,7 @@ class UserMapper
         $trenddays = 7;
 
         $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
+            ContentFilteringStrategies::profile,
             null,
             $contentFilterBy
         );
@@ -803,7 +804,7 @@ class UserMapper
         $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
+            ContentFilteringStrategies::profile,
             null,
             $contentFilterBy
         );
@@ -888,7 +889,7 @@ class UserMapper
         $this->logger->debug("UserMapper.fetchFollowers started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
+            ContentFilteringStrategies::profile,
             null,
             $contentFilterBy
         );
@@ -977,7 +978,7 @@ class UserMapper
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
+            ContentFilteringStrategies::profile,
             null,
             $contentFilterBy
         );
@@ -1063,7 +1064,7 @@ class UserMapper
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
+            ContentFilteringStrategies::profile,
             null,
             $contentFilterBy
         );

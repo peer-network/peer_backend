@@ -49,6 +49,7 @@ use DateTimeImmutable;
 use Fawaz\App\ValidationException;
 use Fawaz\App\ModerationService;
 use Fawaz\App\Status;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 
 class GraphQLSchemaBuilder
 {
@@ -3883,7 +3884,7 @@ class GraphQLSchemaBuilder
         }
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed);
         if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
             return $this::respondWithError(30103);
         }
@@ -3942,7 +3943,7 @@ class GraphQLSchemaBuilder
         $this->logger->debug('Query.resolveUsers started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed);
         if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
             return $this::respondWithError(30103);
         }
@@ -4165,7 +4166,7 @@ class GraphQLSchemaBuilder
         $this->logger->debug('Query.resolvePosts started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed);
         if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
             return $this::respondWithError(30103);
         }
@@ -4207,7 +4208,7 @@ class GraphQLSchemaBuilder
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         
         // For Content Filtering
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed);
         if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
             return $this::respondWithError(30103);
         }

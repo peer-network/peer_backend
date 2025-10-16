@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use PDO;
 use Fawaz\App\Advertisements;
 use Fawaz\App\PostAdvanced;
@@ -828,7 +829,6 @@ class AdvertisementMapper
          * Includes Content Filtering for Reports Advertisements
          */
         $post_report_amount_to_hide     = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
-        $post_dismiss_moderation_amount = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['POST'];
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $from   = $args['from']   ?? null;
@@ -839,7 +839,7 @@ class AdvertisementMapper
         $userId = $args['userid'] ?? null;
 
         $contentFilterService = new ContentFilterServiceImpl(
-            new ListPostsContentFilteringStrategy(),
+            ContentFilteringStrategies::postFeed,
             null,
             $contentFilterBy
         );
@@ -882,13 +882,12 @@ class AdvertisementMapper
             ContentType::post,
             ContentType::post
         ) === ContentFilteringAction::hideContent) {
-            $params['post_report_amount_to_hide']     = $post_report_amount_to_hide;
-            $params['post_dismiss_moderation_amount'] = $post_dismiss_moderation_amount;
+            $params['post_report_amount_to_hide'] = $post_report_amount_to_hide;
+            
             $whereClauses[] = '(
                 p.userid = :currentUserId
                 OR (
                     pi.reports < :post_report_amount_to_hide
-                    OR pi.count_content_moderation_dismissed > :post_dismiss_moderation_amount
                 )
             )';
         }
@@ -937,8 +936,6 @@ class AdvertisementMapper
                 EXISTS (SELECT 1 FROM follows WHERE followerid = a.userid AND followedid = :currentUserId) AS tisfollowing,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = p.userid AND followerid = :currentUserId) AS isfollowed,
                 EXISTS (SELECT 1 FROM follows WHERE followerid = p.userid AND followedid = :currentUserId) AS isfollowing,
-                MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
-                MAX(pi.count_content_moderation_dismissed) AS post_count_content_moderation_dismissed,
                 MAX(ui.reports) AS user_reports,
                 MAX(pi.reports) AS post_reports
             FROM posts p
@@ -1013,13 +1010,11 @@ class AdvertisementMapper
 
                 // User-Placeholder anwenden, falls nötig
                 $user_reports = (int)$row['user_reports'];
-                $user_dismiss = (int)$row['user_count_content_moderation_dismissed'];
 
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::post,
                     ContentType::user,
                     $user_reports,
-                    $user_dismiss,
                     $currentUserId,
                     $row['userid']
                 ) === ContentFilteringAction::replaceWithPlaceholder) {

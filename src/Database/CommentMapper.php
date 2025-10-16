@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use PDO;
 use Fawaz\App\Comment;
 use Fawaz\App\CommentAdvanced;
@@ -98,7 +99,7 @@ class CommentMapper
         $this->logger->debug("CommentMapper.fetchAllByPostIdetaild started");
 
         $contentFilterService = new ContentFilterServiceImpl(
-            new ListPostsContentFilteringStrategy(),
+            ContentFilteringStrategies::postFeed,
             null,
             $contentFilterBy
         );

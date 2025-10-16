@@ -7,9 +7,9 @@ namespace Fawaz\Services\ContentFiltering\Strategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 
-class ListPostsContentFilteringStrategy implements ContentFilteringStrategy
+class PostsFeedContentFilteringStrategy extends AContentFilteringStrategy implements ContentFilteringStrategy
 {
-    public const STRATEGY = [
+    public static array $strategy = [
         ContentType::user->value => [
             ContentType::post->value => null,
             ContentType::comment->value => null,
@@ -26,20 +26,4 @@ class ListPostsContentFilteringStrategy implements ContentFilteringStrategy
             ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
         ],
     ];
-
-
-    /**
-     * @param ContentType $contentTarget
-     * For example, we have to filter content on listPosts;
-     * 'contentTarget' for this API are Post and Comment.
-     * @param ContentType $showingContent
-     * In post we are showing post itself and a user. So 'showingContent' are post and user.
-     * In comment we are showing comment itself and a user. So 'showingContent' are comment and user.
-     * @return ?ContentFilteringAction
-     * For each combination funciton returns an action 'ContentFilteringAction' according to used strategy.
-     */
-    public function getAction(ContentType $contentTarget, ContentType $showingContent): ?ContentFilteringAction
-    {
-        return self::STRATEGY[$contentTarget->value][$showingContent->value];
-    }
 }
