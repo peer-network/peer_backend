@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\Utils\ContentFilterHelper;
 use PDO;
 use Fawaz\App\Advertisements;
 use Fawaz\App\PostAdvanced;
@@ -858,12 +859,13 @@ class AdvertisementMapper
         $params['roleUser']  = Role::USER;
         $params['roleAdmin'] = Role::ADMIN;
 
-        // FilterBy Content Types
-        if (!empty($filterBy)) {
-            $validTypes = \Fawaz\Utils\ContentFilterHelper::mapContentTypesForDb($filterBy);
-            if (!empty($validTypes)) {
+        // FilterBy Content Types (reuse helper for mapping)
+        if (!empty($filterBy) && is_array($filterBy)) {
+            $dbTypes = ContentFilterHelper::mapContentTypesForDb($filterBy);
+
+            if (!empty($dbTypes)) {
                 $placeholders = [];
-                foreach ($validTypes as $i => $value) {
+                foreach (array_values($dbTypes) as $i => $value) {
                     $key = "filter$i";
                     $placeholders[] = ":$key";
                     $params[$key] = $value;
