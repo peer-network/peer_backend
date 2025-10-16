@@ -1,6 +1,9 @@
 name: Trivy Security Scan (Weekdays 9:30 AM Berlin)
 
 on:
+  pull_request:
+    branches:
+      - development
   schedule:
     - cron: "30 7 * * 1-5"  # Mon–Fri at 7:30 AM UTC ≈ 9:30 AM Berlin
   workflow_dispatch:
@@ -22,13 +25,14 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v5
 
-      - uses: actions/download-artifact@v5
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
         with:
-          name: docker-image-${{ matrix.php-version }}
-          path: .
-
-      - name: Load Docker image
-        run: docker load -i peer-backend.tar
+          context: .
+          push: false
+          tags: peer-backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Set image name
         run: echo "IMAGE_NAME=peer-backend:${{ github.sha }}" >> $GITHUB_ENV
