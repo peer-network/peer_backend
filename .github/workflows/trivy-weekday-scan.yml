@@ -25,6 +25,9 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v5
 
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
