@@ -272,6 +272,9 @@ class ModerationService
                         'status' => ConstantsModeration::POST_STATUS_ILLEGAL,
                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
                     ]);
+
+                    // Move file to illegal folder
+                    $this->moveFileToIllegalFolder($report['targetid'], 'post');
                 }
 
                 /**
@@ -400,4 +403,65 @@ class ModerationService
             return self::respondWithError(0000);
         }
     }
+
+    /**
+     * Move File to Illegal Folder
+     * Placeholder function for moving files to an illegal folder
+     * 
+     * 
+     * Example:
+     * $sourcePath = "/path/to/media/{childMedia}/{$targetType}/{$targetId}";
+     * $destinationPath = "/path/to/media/illegal/{$targetType}/{$targetId}";
+     */
+    private function moveFileToIllegalFolder(string $targetId, string $targetType): void
+    {
+        $this->logger->info("Moving {$targetType} with ID {$targetId} to illegal folder.");
+        
+        $illegalDirectoryPath = __DIR__ . "/../../runtime-data/media/illegal";
+        $directoryPath = __DIR__ . "/../../runtime-data/media";
+        if (!is_dir($illegalDirectoryPath)) {
+            try {
+                mkdir($illegalDirectoryPath, 0777, true);
+            } catch (\RuntimeException $e) {
+                throw new \Exception("Directory does not exist: $illegalDirectoryPath"); // Directory does not exist
+            }
+        }
+
+        // Target Media File for Post
+        if($targetType == 'post'){
+            $mediaRecord = Post::query()->where('postid', $targetId)->first();
+            if(!$mediaRecord || !$mediaRecord['media']){
+                throw new \Exception("Media not found for Post ID: $targetId");
+            }
+            $media = json_decode($mediaRecord['media'], true);
+
+            foreach ($media as $mediaItem) {
+
+                if (!isset($mediaItem['path']) || !file_exists($directoryPath.$mediaItem['path'])) {
+                    throw new \Exception("Invalid media path for Post ID: $targetId");
+                }
+                $media = $mediaItem['path'];
+
+                $stream = new \Slim\Psr7\Stream(fopen($directoryPath.$media, 'r'));
+
+                $uploadedFile = new \Slim\Psr7\UploadedFile(
+                    $stream,
+                    null,
+                    null
+                );
+
+                $mediaDetails = explode('/', $media);
+                $mediaUrl = end($mediaDetails);
+                
+                $filePath = $illegalDirectoryPath.'/'.$mediaUrl;
+                
+                try {
+                    $uploadedFile->moveTo($filePath);
+                } catch (\RuntimeException $e) {
+                    throw new \Exception("Failed to move file: $filePath");
+                }
+            }
+        }
+    }
+    
 }
