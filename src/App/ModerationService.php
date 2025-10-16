@@ -220,8 +220,8 @@ class ModerationService
                 return self::respondWithError(30101); // Missing required fields
             }
 
-            $targetContentId = $args['targetContentId'] ?? null;
-            $moderationAction = $args['moderationAction'] ?? null;
+            $targetContentId = $args['targetContentId'];
+            $moderationAction = $args['moderationAction'];
 
             if (!$targetContentId || !self::isValidUUID($targetContentId) || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
                 return self::respondWithError(0000); // Invalid input
