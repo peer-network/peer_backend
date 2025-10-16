@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\Utils\ContentFilterHelper;
 use PDO;
 use Fawaz\App\Advertisements;
 use Fawaz\App\PostAdvanced;
@@ -894,19 +895,13 @@ class AdvertisementMapper
         }
 
         // FilterBy Content Types
+        // FilterBy Content Types (reuse helper for mapping)
         if (!empty($filterBy) && is_array($filterBy)) {
-            $mapping = [
-                'IMAGE' => 'image',
-                'AUDIO' => 'audio',
-                'VIDEO' => 'video',
-                'TEXT'  => 'text',
-            ];
+            $dbTypes = ContentFilterHelper::mapContentTypesForDb($filterBy);
 
-            $validTypes = array_values(array_intersect_key($mapping, array_flip($filterBy)));
-
-            if ($validTypes) {
+            if (!empty($dbTypes)) {
                 $placeholders = [];
-                foreach ($validTypes as $i => $value) {
+                foreach (array_values($dbTypes) as $i => $value) {
                     $key = "filter$i";
                     $placeholders[] = ":$key";
                     $params[$key] = $value;
