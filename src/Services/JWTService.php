@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Services;
 
+use Fawaz\App\ValidationException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
@@ -66,7 +67,7 @@ class JWTService
         return JWT::encode($payload, $this->refreshPrivateKey, 'RS256');
     }
 
-    public function validateToken(string $token, bool $isRefreshToken = false): ?object
+    public function validateToken(string $token, bool $isRefreshToken = false): object
     {
         try {
             $key = $isRefreshToken ? $this->refreshPublicKey : $this->publicKey;
@@ -85,12 +86,12 @@ class JWTService
             return $decodedToken;
 
         } catch (ExpiredException $e) {
-            //$this->logger->info('Token has expired', ['exception' => $e->getMessage(), 'token' => $token]);
-            return null;
+            $this->logger->info('Token has expired', ['exception' => $e->getMessage(), 'token' => $token]);
+            throw new ValidationException('Token validation failed');
 
         } catch (\Exception $e) {
             $this->logger->error('Token validation failed', ['exception' => $e->getMessage(), 'token' => $token]);
-            return null;
+            throw new ValidationException('Token validation failed');
         }
     }
 
