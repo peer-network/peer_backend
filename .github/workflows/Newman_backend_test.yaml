@@ -790,8 +790,8 @@ jobs:
             type="invalid_sql"
           elif [ "$phpstan_result" == "failure" ]; then
             type="phpstan"
-          # elif [ "$gitleaks_result" == "failure" ]; then
-          #   type="gitleaks_failed"
+          elif [ "$gitleaks_result" == "failure" ]; then
+            type="gitleaks_failed"
           elif [ "$outcome" == "newman_failed" ]; then
             type="newman_failed"
           elif [ "$outcome" == "other_failure" ]; then
