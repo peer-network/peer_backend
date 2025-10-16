@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Fawaz;
 
 const INT32_MAX = 2147483647;
@@ -43,13 +41,14 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use Fawaz\App\PeerTokenService;
-use Fawaz\App\Role;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
 use DateTimeImmutable;
 use Fawaz\App\ModerationService;
+use Fawaz\App\Role;
+use Fawaz\App\ValidationException;
 
 class GraphQLSchemaBuilder
 {
@@ -104,11 +103,11 @@ class GraphQLSchemaBuilder
         $schema = $guestSchema;
 
         if ($this->currentUserId !== null) {
-            if ($this->userRoles <= 0) {
+            if ($this->userRoles === Role::USER) {
                 $schema = $userSchema;
-            } elseif ($this->userRoles === 8) {
+            } elseif ($this->userRoles === Role::WEB3_BRIDGE_USER) {
                 $schema = $bridgeSchema;
-            } elseif ($this->userRoles === 16) {
+            } elseif ($this->userRoles === Role::ADMIN) {
                 $schema = $adminSchema;
             } elseif ($this->userRoles === Role::SUPER_MODERATOR) { // Role::SUPER_MODERATOR
                 $schema = $moderatorSchema;
@@ -147,12 +146,13 @@ class GraphQLSchemaBuilder
         }
     }
 
-    public function setCurrentUserId(?string $bearerToken): void
+    // true - if token is empty or valid
+    // false - if not-empty and invalid
+    public function setCurrentUserId(?string $bearerToken): bool
     {
         if ($bearerToken !== null && $bearerToken !== '') {
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
-                if ($decodedToken) {
                     // Validate that the provided bearer access token exists in DB and is not expired
                     // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
                     //     $this->logger->warning('Access token not found or expired for user', [
@@ -169,15 +169,25 @@ class GraphQLSchemaBuilder
                         $this->setCurrentUserIdForServices($this->currentUserId);
                         $this->logger->debug('Query.setCurrentUserId started');
                     }
-                } else {
-                    $this->currentUserId = null;
+
+                $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
+                if ($user) {
+                    $this->currentUserId = $decodedToken->uid;
+                    $this->userRoles = $decodedToken->rol;
+                    $this->setCurrentUserIdForServices($this->currentUserId);
+                    $this->logger->debug('Query.setCurrentUserId started');
+                    return true;
                 }
+                $this->logger->error('Query.setCurrentUserId: user not found');
+                return false;
             } catch (\Throwable $e) {
                 $this->logger->error('Invalid token', ['exception' => $e]);
                 $this->currentUserId = null;
+                return false;
             }
         } else {
             $this->currentUserId = null;
+            return true;
         }
     }
 
@@ -4596,7 +4606,7 @@ class GraphQLSchemaBuilder
             // }
 
             $users = $this->userMapper->loadById($decodedToken->uid);
-            if (!$users) {
+            if ($users === false) {
                 return $this::respondWithError(30901);
             }
 
@@ -4624,7 +4634,13 @@ class GraphQLSchemaBuilder
                 'accessToken' => $accessToken,
                 'refreshToken' => $newRefreshToken
             ];
+        } catch (ValidationException $e) {
+            $this->logger->warning('Validation Error during refreshToken process', [
+                'exception' => $e->getMessage(),
+                'stackTrace' => $e->getTraceAsString()
+            ]);
 
+            return $this::respondWithError(30901);
         } catch (\Throwable $e) {
             $this->logger->error('Error during refreshToken process', [
                 'exception' => $e->getMessage(),

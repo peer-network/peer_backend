@@ -324,7 +324,7 @@ jobs:
             if docker run --rm \
                 --network my-network \
                 curlimages/curl:$TAG \
-                curl -sf http://backend/graphql > /dev/null; then
+                curl -sf http://backend/health > /dev/null; then
               echo "Backend is up!"
               exit 0
             fi
@@ -360,8 +360,7 @@ jobs:
           docker run --rm \
             --network my-network \
             curlimages/curl:$TAG \
-            curl -sf http://backend/graphql
- 
+            curl -sf http://backend/health
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
