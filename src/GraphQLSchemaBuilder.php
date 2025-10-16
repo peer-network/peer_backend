@@ -4254,8 +4254,7 @@ class GraphQLSchemaBuilder
 
         return self::createSuccessResponse(
             empty($data) ? 21501 : 11501,
-            $data,
-            false
+            $data
         );
     }
 
