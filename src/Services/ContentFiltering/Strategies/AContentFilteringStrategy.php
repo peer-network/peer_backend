@@ -11,8 +11,8 @@ use Fawaz\Services\ContentFiltering\Types\ContentType;
 abstract class AContentFilteringStrategy implements ContentFilteringStrategy
 {
     protected static array $strategy;
-    public function getAction(ContentType $contentTarget, ContentType $showingContent): ?ContentFilteringAction
+    public static function getAction(ContentType $contentTarget, ContentType $showingContent): ?ContentFilteringAction
     {
-        return self::$strategy[$contentTarget->value][$showingContent->value];
+        return static::$strategy[$contentTarget->value][$showingContent->value] ?? null;
     }
 }
