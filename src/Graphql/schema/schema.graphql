@@ -14,7 +14,11 @@ type Query {
   searchUser(userid: ID,contentFilterBy: ContentFilterType, username: String, offset: Int, limit: Int): UserListResponse! @deprecated(reason: "Use listUsersV2.")
   listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse! @deprecated(reason: "Use listUsersV2.")
   listUsersV2(contentFilterBy: ContentFilterType, userid: ID, username: String, offset: Int, limit: Int): UserListResponse!
-  getProfile(userid: ID,contentFilterBy: ContentFilterType, postLimit: Int): ProfileInfo!
+  getProfile(
+    userid: ID,
+    contentFilterBy: ContentFilterType, 
+    postLimit: Int @deprecated(reason: "to get posts, use listPosts with userid")
+  ): ProfileInfo!
   listFollowRelations(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
   listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!
   getUserInfo: UserInfoResponse!
