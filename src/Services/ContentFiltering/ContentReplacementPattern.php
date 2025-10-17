@@ -7,67 +7,67 @@ namespace Fawaz\Services\ContentFiltering;
 enum ContentReplacementPattern: string
 {
     case suspended = "suspended";
-    case flagged = "flagged";
+    case hidden = "hidden";
     case illegal = "illegal";
 
-    public function postTitle(string $title): string
+    public function postTitle(): string
     {
         return match ($this) {
-            self::flagged   => "this post is hidden",
+            self::hidden   => "this post is hidden",
             self::suspended => "this post is deleted",
             self::illegal => "this post is illegal",
         };
     }
 
-    public function postDescription(string $desc): string
+    public function postDescription(): string
     {
         return match ($this) {
-            self::flagged   => "",
+            self::hidden   => "",
             self::suspended => "",
             self::illegal => "",
         };
     }
 
-    public function postMedia(string $media): string
+    public function postMedia(): string
     {
         return match ($this) {
-            self::flagged   => "some_pic_to_be_here_some_text_to_pass_validation",
+            self::hidden   => "some_pic_to_be_here_some_text_to_pass_validation",
             self::suspended => "some_pic_to_be_here_some_text_to_pass_validation",
             self::illegal => "some_pic_to_be_here_some_text_to_pass_validation",
         };
     }
 
-    public function commentContent(string $content): string
+    public function commentContent(): string
     {
         return match ($this) {
-            self::flagged   => "this comment is hidden",
-            self::suspended => "this comment is flagged",
+            self::hidden   => "this comment is hidden",
+            self::suspended => "this comment is hidden",
             self::illegal => "this comment is illegal",
         };
     }
 
-    public function username(string $username): string
+    public function username(): string
     {
         return match ($this) {
-            self::flagged   => "hidden_account",
+            self::hidden   => "hidden_account",
             self::suspended => "deleted_account",
             self::illegal => "illegal_account",
         };
     }
 
-    public function userBiography(string $bio): string
+    public function userBiography(): string
     {
         return match ($this) {
-            self::flagged   => "",
+            self::hidden   => "",
             self::suspended => "",
             self::illegal => "",
         };
     }
 
-    public function profilePicturePath(string $path): string
+    public function profilePicturePath(): string
     {
         return match ($this) {
-            self::flagged   => "some_pic_to_be_here_some_text_to_pass_validation",
+            self::hidden   => "some_pic_to_be_here_some_text_to_pass_validation",
             self::suspended => "some_pic_to_be_here_some_text_to_pass_validation",
             self::illegal => "some_pic_to_be_here_some_text_to_pass_validation",
         };
