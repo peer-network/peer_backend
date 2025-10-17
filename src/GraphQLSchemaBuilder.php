@@ -545,16 +545,16 @@ class GraphQLSchemaBuilder
                     return (string)($root['role'] ?? '');
                 },
                 'imageposts' => function (array $root): array {
-                    return $root['imageposts'] ?? [];
+                    return [];
                 },
                 'textposts' => function (array $root): array {
-                    return $root['textposts'] ?? [];
+                    return [];
                 },
                 'videoposts' => function (array $root): array {
-                    return $root['videoposts'] ?? [];
+                    return [];
                 },
                 'audioposts' => function (array $root): array {
-                    return $root['audioposts'] ?? [];
+                    return [];
                 },
             ],
             'ProfileInfo' => [
