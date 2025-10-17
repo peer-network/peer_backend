@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Fawaz\Services\ContentFiltering\Strategies;
+namespace Fawaz\Services\ContentFiltering\Strategies\Implementations;
 
+use Fawaz\Services\ContentFiltering\Strategies\AContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 
