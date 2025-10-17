@@ -20,7 +20,7 @@ class ContentFilterServiceImpl {
     private ?string $contentFilterBy;
 
     public function __construct(
-        ?ContentFilteringStrategies $contentFilterStrategyTag = ContentFilteringStrategies::searchByMeta,
+        ?ContentFilteringStrategies $contentFilterStrategyTag,
         ?array $contentSeverityLevels = null,
         ?string $contentFilterBy = null
     ) {
@@ -31,43 +31,26 @@ class ContentFilterServiceImpl {
         $this->contentFilterStrategyTag = $contentFilterStrategyTag;
     }
 
-    public function validateContentFilter(?string $contentFilterBy): bool
+    public static function getContentFilteringSeverityLevel(string $contentFilterBy): ?int
     {
-        if (!empty($contentFilterBy) && is_array($contentFilterBy)) {
-            $allowedTypes = $this->contentSeverityLevels;
+        $contentFiltering = ConstantsConfig::contentFiltering();
+        $contentSeverityLevels = $contentFiltering['CONTENT_SEVERITY_LEVELS'];
 
-            $invalidTypes = array_diff(array_map('strtoupper', $contentFilterBy), $allowedTypes);
-
-            if (!empty($invalidTypes)) {
-                // echo("ContentFilterServiceImpl: validateContentFilter: invalid contentFilter: $contentFilterBy" . "\n");
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public function getContentFilteringSeverityLevel(string $contentFilterBy): ?int
-    {
-        $allowedTypes = $this->contentSeverityLevels;
+        $allowedTypes = $contentSeverityLevels;
 
         $key = array_search($contentFilterBy, $allowedTypes);
         return $key;
     }
 
-    public function getContentFilteringStringFromSeverityLevel(?int $contentFilterSeverityLevel): ?string
+    public static function getContentFilteringStringFromSeverityLevel(?int $contentFilterSeverityLevel): ?string
     {
-        $allowedTypes = $this->contentSeverityLevels;
+        $contentFiltering = ConstantsConfig::contentFiltering();
+        $contentSeverityLevels = $contentFiltering['CONTENT_SEVERITY_LEVELS'];
+        $allowedTypes = $contentSeverityLevels;
 
         if ($contentFilterSeverityLevel !== null && isset($allowedTypes[$contentFilterSeverityLevel]) && !empty($allowedTypes[$contentFilterSeverityLevel])) {
             return $allowedTypes[$contentFilterSeverityLevel];
         }
-        return $this->getDefaultContentFilteringString();
-    }
-
-    public function getDefaultContentFilteringString(): ?string
-    {
-        $allowedTypes = $this->contentSeverityLevels;
-
         return null;
     }
 

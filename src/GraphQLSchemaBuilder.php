@@ -12,7 +12,6 @@ use Fawaz\App\AdvertisementService;
 use Fawaz\App\AlphaMintService;
 use Fawaz\App\Chat;
 use Fawaz\App\ChatService;
-use Fawaz\App\Comment;
 use Fawaz\App\CommentAdvanced;
 use Fawaz\App\CommentInfoService;
 use Fawaz\App\CommentService;
@@ -31,8 +30,6 @@ use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -49,7 +46,11 @@ use DateTimeImmutable;
 use Fawaz\App\ValidationException;
 use Fawaz\App\ModerationService;
 use Fawaz\App\Status;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
+use Fawaz\App\Validation\RequestValidator;
+use Fawaz\App\Validation\ValidationSpec;
+use Fawaz\App\Validation\ValidatorErrors;
+use Fawaz\App\Profile;
+use function PHPUnit\Framework\returnArgument;
 
 class GraphQLSchemaBuilder
 {
@@ -3757,12 +3758,6 @@ class GraphQLSchemaBuilder
             return $validationResult;
         }
 
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed);
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
-
         $username = isset($args['username']) ? trim($args['username']) : null;
         $usernameConfig = ConstantsConfig::user()['USERNAME'];
         $userId = $args['userid'] ?? null;
@@ -3845,31 +3840,34 @@ class GraphQLSchemaBuilder
         return $this::createSuccessResponse(21001);
     }
 
-    protected function resolveProfile(array $args): ?array
+    protected function resolveProfile(array $args): array
     {
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
 
-        if (isset($args['userid']) && !self::isValidUUID($args['userid'])) {
-            return $this::respondWithError(30201);
-        }
-
         $this->logger->debug('Query.resolveProfile started');
 
-        $results = $this->profileService->Profile($args);
-        if (isset($results['status']) && $results['status'] === 'success') {
+        $validation = RequestValidator::validate($args);
+
+        if ($validation instanceof ValidatorErrors) { 
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        $result = $this->profileService->profile($validation);
+        
+        if ($result instanceof Profile) {
             $this->logger->info('Query.resolveProfile successful');
-
-            return $results;
+            return $this::createSuccessResponse(
+                11002,
+                $result->getArrayCopy(),
+                false
+            );
+        } else {
+            return $result->response;
         }
-
-        if (isset($results['status']) && $results['status'] === 'error') {
-            return $this::respondWithError((int)$results['ResponseCode']);
-        }
-
-        $this->logger->warning('Query.resolveProfile User not found');
-        return $this::createSuccessResponse(21001);
     }
 
     protected function resolveFriends(array $args): ?array
@@ -3881,12 +3879,6 @@ class GraphQLSchemaBuilder
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
             return $validationResult;
-        }
-
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed);
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
         }
 
         $this->logger->debug('Query.resolveFriends started');
@@ -3941,12 +3933,6 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->debug('Query.resolveUsers started');
-
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed);
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
 
         if ($this->userRoles === 16) {
             $results = $this->userService->fetchAllAdvance($args);
@@ -4165,12 +4151,6 @@ class GraphQLSchemaBuilder
 
         $this->logger->debug('Query.resolvePosts started');
 
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed);
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
-
         $posts = $this->postService->findPostser($args);
         if (isset($posts['status']) && $posts['status'] === 'error') {
             return $posts;
@@ -4179,6 +4159,7 @@ class GraphQLSchemaBuilder
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
+        $contentFilterBy = $args['contentFilterBy'];
 
         $data = array_map(
             fn (PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit, $contentFilterBy),
@@ -4206,12 +4187,6 @@ class GraphQLSchemaBuilder
         $this->logger->debug('Query.resolveAdvertisementsPosts started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        
-        // For Content Filtering
-        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed);
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
 
         $posts = $this->advertisementService->findAdvertiser($args);
         if (isset($posts['status']) && $posts['status'] === 'error') {

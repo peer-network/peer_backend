@@ -235,13 +235,12 @@ class PostMapper
                 ContentType::post,
                 ContentType::post,
                 $post_reports,
-                $post_dismiss_moderation_amount,
                 $currentUserId,
                 $row['userid']
             ) == ContentFilteringAction::replaceWithPlaceholder) {
-                $replacer = ContentReplacementPattern::flagged;
-                $row['title'] = $replacer->postTitle($row['title']);
-                $row['media'] = $replacer->postMedia($row['media']);
+                $replacer = ContentReplacementPattern::hidden;
+                $row['title'] = $replacer->postTitle();
+                $row['media'] = $replacer->postMedia();
             }
             $result[] = $row;
         }
@@ -844,13 +843,12 @@ class PostMapper
                     ContentType::post,
                     ContentType::user,
                     $user_reports,
-                    $user_dismiss,
                     $currentUserId,
                     $row['userid']
                 ) === ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer       = ContentReplacementPattern::flagged;
-                    $row['username'] = $replacer->username($row['username']);
-                    $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
+                    $replacer       = ContentReplacementPattern::hidden;
+                    $row['username'] = $replacer->username();
+                    $row['userimg'] = $replacer->profilePicturePath();
                 }
 
                 return self::mapRowToPost($row);
@@ -1048,14 +1046,13 @@ class PostMapper
                         ContentType::post,
                         ContentType::user,
                         $user_reports,
-                        $user_dismiss_moderation_amount,
                         $currentUserId,
                         $prt['uid']
                     );
                     if ($action === ContentFilteringAction::replaceWithPlaceholder) {
-                        $replacer = ContentReplacementPattern::flagged;
-                        $prt['username'] = $replacer->username($prt['username']);
-                        $prt['img']      = $replacer->profilePicturePath($prt['img']);
+                        $replacer = ContentReplacementPattern::hidden;
+                        $prt['username'] = $replacer->username();
+                        $prt['img']      = $replacer->profilePicturePath();
                     }
                 }
                 $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();

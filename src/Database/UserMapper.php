@@ -287,9 +287,9 @@ class UserMapper
                         $currentUserId,
                         $row['uid']
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
-                        $replacer = ContentReplacementPattern::flagged;
-                        $row['username'] = $replacer->username($row['username']);
-                        $row['img'] = $replacer->profilePicturePath($row['img']);
+                        $replacer = ContentReplacementPattern::hidden;
+                        $row['username'] = $replacer->username();
+                        $row['img'] = $replacer->profilePicturePath();
                     }
 
                     $results[] = new User([
@@ -466,9 +466,9 @@ class UserMapper
                         $currentUserId,
                         $row['uid']
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
-                        $replacer = ContentReplacementPattern::flagged;
-                        $row['username'] = $replacer->username($row['username']);
-                        $row['img'] = $replacer->profilePicturePath($row['img']);
+                        $replacer = ContentReplacementPattern::hidden;
+                        $row['username'] = $replacer->username();
+                        $row['img'] = $replacer->profilePicturePath();
                     }
 
                     $results[] = new UserAdvanced([
@@ -856,9 +856,9 @@ class UserMapper
                     ContentType::user,
                     $user_reports,
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $row['username'] = $replacer->username($row['username']);
-                    $row['img'] = $replacer->profilePicturePath($row['img']);
+                    $replacer = ContentReplacementPattern::hidden;
+                    $row['username'] = $replacer->username();
+                    $row['img'] = $replacer->profilePicturePath();
                 }
                 $filtered_friends[] = $row;
             }
@@ -943,9 +943,9 @@ class UserMapper
                     $currentUserId,
                     $row['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $row['username'] = $replacer->username($row['username']);
-                    $row['img'] = $replacer->profilePicturePath($row['img']);
+                    $replacer = ContentReplacementPattern::hidden;
+                    $row['username'] = $replacer->username();
+                    $row['img'] = $replacer->profilePicturePath();
                 }
                 $filtered_results[] = $row;
             }
@@ -1031,9 +1031,9 @@ class UserMapper
                     $currentUserId,
                     $row['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $row['username'] = $replacer->username($row['username']);
-                    $row['img'] = $replacer->profilePicturePath($row['img']);
+                    $replacer = ContentReplacementPattern::hidden;
+                    $row['username'] = $replacer->username();
+                    $row['img'] = $replacer->profilePicturePath();
                 }
                 $filtered_results[] = $row;
             }
@@ -1111,9 +1111,9 @@ class UserMapper
                     $currentUserId,
                     $data['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $data['username'] = $replacer->username($data['username']);
-                    $data['img'] = $replacer->profilePicturePath($data['img']);
+                    $replacer = ContentReplacementPattern::hidden;
+                    $data['username'] = $replacer->username();
+                    $data['img'] = $replacer->profilePicturePath();
                 }
 
                 $data['amountreports'] = (int)$data['user_reports'];
@@ -1519,7 +1519,7 @@ class UserMapper
      * const Status::DELETED = 6;
      *
      * @param string $id User unique identifier (uid).
-     * @return bool True if user was flagged as deleted, false otherwise.
+     * @return bool True if user was hidden as deleted, false otherwise.
      * @throws \RuntimeException if database operation fails.
      */
     public function delete(string $id): bool
@@ -2077,11 +2077,10 @@ class UserMapper
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
 
-        if ($data !== false) {
-            return new Profile($data);
+        if ($data === false) {
+            $this->logger->warning("No user found with ID", ['userid' => $userid]);
+            return null;
         }
-
-        $this->logger->warning("No user found with ID", ['userid' => $userid]);
-        return null;
+        return new Profile($data);
     }
 }

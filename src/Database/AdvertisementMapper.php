@@ -1018,9 +1018,9 @@ class AdvertisementMapper
                     $currentUserId,
                     $row['userid']
                 ) === ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer       = ContentReplacementPattern::flagged;
-                    $row['username'] = $replacer->username($row['username']);
-                    $row['userimg'] = $replacer->profilePicturePath($row['userimg']);
+                    $replacer = ContentReplacementPattern::hidden;
+                    $row['username'] = $replacer->username();
+                    $row['userimg'] = $replacer->profilePicturePath();
                 }
 
                 return [

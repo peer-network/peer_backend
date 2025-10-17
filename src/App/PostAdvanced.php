@@ -197,8 +197,6 @@ class PostAdvanced
         }
 
         throw new ValidationException(implode("", $errorMessages));
-
-        return [];
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter

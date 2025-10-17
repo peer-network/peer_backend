@@ -460,8 +460,6 @@ class UserService
         if (empty($args)) {
             return self::respondWithError(30101);
         }
-        $contentFilterService = new ContentFilterServiceImpl();
-
         $this->logger->debug('UserService.updateUserPreferences started');
 
         $newUserPreferences = $args['userPreferences'];
@@ -478,7 +476,7 @@ class UserService
             }
 
             if ($contentFiltering && !empty($contentFiltering)) {
-                $contentFilteringSeverityLevel = $contentFilterService->getContentFilteringSeverityLevel($contentFiltering);
+                $contentFilteringSeverityLevel = ContentFilterServiceImpl::getContentFilteringSeverityLevel($contentFiltering);
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
                 $userPreferences->setUpdatedAt();
             }
@@ -490,7 +488,9 @@ class UserService
 
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
-            $contentFilteringSeverityLevelString = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
+            $contentFilteringSeverityLevelString = ContentFilterServiceImpl::getContentFilteringStringFromSeverityLevel(
+                $resultPreferences['contentFilteringSeverityLevel']
+            );
 
             $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
@@ -756,57 +756,6 @@ class UserService
         }
     }
 
-    public function Profile(?array $args = []): array
-    {
-        if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
-        }
-
-        $userId = $args['userid'] ?? $this->currentUserId;
-        $postLimit = min(max((int)($args['postLimit'] ?? 4), 1), 10);
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-
-        $this->logger->debug('UserService.Profile started');
-
-        if (!self::isValidUUID($userId)) {
-            $this->logger->warning('Invalid UUID for profile', ['userId' => $userId]);
-            return self::respondWithError(30102);
-        }
-        if (!$this->userMapper->isUserExistById($userId)) {
-            $this->logger->warning('User not found for Follows', ['userId' => $userId]);
-            return self::respondWithError(31007);
-        }
-
-        try {
-            $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId, $contentFilterBy)->getArrayCopy();
-            $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
-
-            $posts = $this->postMapper->fetchPostsByType($this->currentUserId, $userId,[],$postLimit, $contentFilterBy);
-
-            $contentTypes = ['image', 'video', 'audio', 'text'];
-            foreach ($contentTypes as $type) {
-                $profileData["{$type}posts"] = array_filter($posts, fn ($post) => $post['contenttype'] === $type);
-            }
-
-            /**
-             * Map Role Mask 
-             */
-            if(Role::mapRolesMaskToNames($profileData['roles_mask'])[0]){
-                $role = Role::mapRolesMaskToNames($profileData['roles_mask'])[0];
-            }
-            $profileData['role'] = $role ?? 'USER';
-
-            $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
-            return $this::createSuccessResponse(11008, $profileData, false);
-        } catch (\Throwable $e) {
-            $this->logger->error('Failed to fetch profile data', [
-                'userId' => $userId,
-                'exception' => $e->getMessage(),
-            ]);
-            return $this::createSuccessResponse(21001, []);
-        }
-    }
-
     public function Follows(?array $args = []): array
     {
         $this->logger->debug('UserService.Follows started');
@@ -818,9 +767,6 @@ class UserService
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::postFeed
         );
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
@@ -928,10 +874,6 @@ class UserService
         $this->logger->debug('UserService.fetchAllAdvance started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed,);
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
 
         try {
             $users = $this->userMapper->fetchAllAdvance($args, $this->currentUserId, $contentFilterBy);

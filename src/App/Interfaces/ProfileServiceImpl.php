@@ -2,7 +2,8 @@
 
 namespace Fawaz\App\Interfaces;
 
-use Fawaz\App\Specs\SpecTypes\ActiveUserSpec;
+use Fawaz\App\Profile;
+use Fawaz\App\View\ProfileView;
 use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
 use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
 use Fawaz\App\Specs\SpecTypes\CurrentUserIsBlockedUserSpec;
@@ -15,13 +16,14 @@ use Fawaz\Database\WalletMapper;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\Mailer;
+use Fawaz\Utils\ErrorResponse;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-use function PHPUnit\Framework\returnArgument;
+use Fawaz\Services\ContentFiltering\Replacers\ProfileReplacer;
 
 final class ProfileServiceImpl implements ProfileService
 {
@@ -29,7 +31,7 @@ final class ProfileServiceImpl implements ProfileService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected DailyFreeMapper $dailyFreeMapper,
         protected UserMapper $userMapper,
         protected UserPreferencesMapper $userPreferencesMapper,
@@ -44,24 +46,12 @@ final class ProfileServiceImpl implements ProfileService
         $this->currentUserId = $userId;
     }
 
-    public function Profile(?array $args = []): array {
-        if (!self::checkAuthentication($this->currentUserId)) {
-            return self::respondWithError(60501);
-        }
-
+    public function profile(array $args): Profile|ErrorResponse {
+        $this->logger->info('UserService.Profile started');
+        
         $userId = $args['userid'] ?? $this->currentUserId;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-        $this->logger->info('UserService.Profile started');
-
-        if (!self::isValidUUID($userId)) {
-            return self::respondWithError(30102);
-        }
-        if (!$this->userMapper->isUserExistById($userId)) {
-            return self::respondWithError(31007);
-        }
-
-        $activeUserSpec = new ActiveUserSpec($userId);
         $basicUserSpec = new BasicUserSpec($userId);
         $currentUserIsBlockedSpec = new CurrentUserIsBlockedUserSpec(
             $this->currentUserId,
@@ -77,7 +67,6 @@ final class ProfileServiceImpl implements ProfileService
             ContentType::user
         );
         
-
         $userSpecs = [
             $basicUserSpec,
             $currentUserIsBlockedSpec,
@@ -91,12 +80,10 @@ final class ProfileServiceImpl implements ProfileService
                 $userSpecs
             );
 
-            
-            // $profileData = $this->userMapper->fetchProfileData(
-            //     $userId,
-            //     $this->currentUserId,
-            //     $userSpecs
-            // );
+            if (!$profileData) {
+                $this->logger->warning('Query.resolveProfile User not found');
+                return self::respondWithErrorObject(21001);
+            }
 
             $contentFilterService = new ContentFilterServiceImpl(
                 ContentFilteringStrategies::profile,
@@ -111,29 +98,25 @@ final class ProfileServiceImpl implements ProfileService
                     $this->currentUserId,
                     $profileData->getUserId()
             ) == ContentFilteringAction::replaceWithPlaceholder) {
-                $replacer = ContentReplacementPattern::flagged;
-                $profileData['username'] = $replacer->username($profileData['username']);
-                $profileData['img'] = $replacer->profilePicturePath($profileData['img']);
+                $pattern = ContentReplacementPattern::hidden;
+                $profileData = ProfileReplacer::replaceProfile($profileData, $pattern);
             }
 
-            $this->logger->debug("Fetched profile data", ['userid' => $profileData['uid']]);
+            $this->logger->debug("Fetched profile data", ['userid' => $profileData->getUserId()]);
 
-            return $this::createSuccessResponse(
-                11008,
-                $profileData
-            );
+            return $profileData;
         } catch (ValidationException $e) {
-            $this->logger->error('Failed to fetch profile data', [
+            $this->logger->error('Validation error: Failed to fetch profile data', [
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return $this::respondWithError(41007);
+            return $this::respondWithErrorObject(31007);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch profile data', [
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return $this::respondWithError(41007);
+            return $this::respondWithErrorObject(41007);
         }
     }
 }
