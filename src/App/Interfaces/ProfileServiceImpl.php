@@ -2,7 +2,6 @@
 
 namespace Fawaz\App\Interfaces;
 
-use Fawaz\App\Profile;
 use Fawaz\App\Specs\SpecTypes\ActiveUserSpec;
 use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
 use Fawaz\App\Specs\SpecTypes\ContentFilterSpec;
@@ -13,15 +12,12 @@ use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategyFactory;
-use Fawaz\Services\ContentFiltering\Strategies\ProfileContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 

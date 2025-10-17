@@ -37,7 +37,6 @@ final class ContentFilterSpec implements Specification
             $this->contentTarget,
             $this->showingContent,
             null,
-            null,
             $this->currentUserId, 
             $this->targetUserId
         ) === ContentFilteringAction::hideContent) {

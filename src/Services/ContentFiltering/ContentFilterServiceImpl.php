@@ -83,31 +83,29 @@ class ContentFilterServiceImpl {
     public function getContentFilterAction(
         ContentType $contentTarget,
         ContentType $showingContent,
-        ?ContentVisibility $contentVisibility = null,
         ?int $showingContentReportAmount = null,
         ?string $currentUserId = null,
         ?string $targetUserId = null,
     ): ?ContentFilteringAction {
 
-        if ($contentVisibility !== ContentVisibility::illegal &&
+        if (
             $showingContentReportAmount >= $this->reports_amount_to_hide_content && 
             $this->contentFilterBy === $this->contentSeverityLevels[0]
         ) {
-            $contentVisibility = ContentVisibility::hidden;
-        }
+            $strategy = ContentFilteringStrategyFactory::create(
+                $this->contentFilterStrategyTag
+            );
 
-        $strategy = ContentFilteringStrategyFactory::create(
-            $this->contentFilterStrategyTag
-        );
+            if ($strategy === null) {
+                return null;
+            }
+        
+            if ($currentUserId && $currentUserId == $targetUserId) {
+                $strategy = ContentFilteringStrategyFactory::create(ContentFilteringStrategies::profile);
+            }
 
-        if ($strategy === null) {
-            return null;
+            return $strategy->getAction($contentTarget, $showingContent);
         }
-    
-        if ($currentUserId && $currentUserId == $targetUserId) {
-            $strategy = ContentFilteringStrategyFactory::create(ContentFilteringStrategies::profile);
-        }
-
-        return $strategy->getAction($contentTarget, $showingContent);
+        return null;
     }
 }
