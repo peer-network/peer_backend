@@ -9,7 +9,6 @@ use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategyFactory;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-use Fawaz\Services\ContentFiltering\Types\ContentVisibility;
 
 class ContentFilterServiceImpl {
     /** @var string[] Severity levels in order of importance */
@@ -70,6 +69,10 @@ class ContentFilterServiceImpl {
         $allowedTypes = $this->contentSeverityLevels;
 
         return null;
+    }
+
+    public function getReportsAmountToHideContent(ContentType $type): int {
+        return $this->reports_amount_to_hide_content[$type->value];
     }
 
      /**

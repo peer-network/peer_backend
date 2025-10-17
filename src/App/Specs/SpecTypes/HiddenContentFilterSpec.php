@@ -3,16 +3,15 @@
 namespace Fawaz\App\Specs\SpecTypes;
 
 use Fawaz\App\Specs\Specification;
-use Fawaz\App\Specs\ContentFilteringSpecificationFactory;
+use Fawaz\App\Specs\HiddenContentFilteringSpecificationFactory;
 use Fawaz\App\Specs\SpecificationSQLData;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 
-final class ContentFilterSpec implements Specification
+final class HiddenContentFilterSpec implements Specification
 {
     private ContentFilterServiceImpl $contentFilterService;
 
@@ -40,7 +39,7 @@ final class ContentFilterSpec implements Specification
             $this->currentUserId, 
             $this->targetUserId
         ) === ContentFilteringAction::hideContent) {
-            return (new ContentFilteringSpecificationFactory(
+            return (new HiddenContentFilteringSpecificationFactory(
                 $this->contentFilterService
             ))->build(
                 ContentType::user,

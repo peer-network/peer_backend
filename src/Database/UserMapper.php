@@ -284,7 +284,6 @@ class UserMapper
                         ContentType::user,
                         ContentType::user,
                         $user_reports,
-                        $user_dismiss_moderation_amount,
                         $currentUserId,
                         $row['uid']
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
@@ -464,7 +463,6 @@ class UserMapper
                         ContentType::user,
                         ContentType::user,
                         $user_reports,
-                        $user_dismiss_moderation_amount,
                         $currentUserId,
                         $row['uid']
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
@@ -857,7 +855,6 @@ class UserMapper
                     ContentType::user,
                     ContentType::user,
                     $user_reports,
-                    $user_dismiss_moderation_amount
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::flagged;
                     $row['username'] = $replacer->username($row['username']);
@@ -943,7 +940,6 @@ class UserMapper
                     ContentType::user,
                     ContentType::user,
                     $user_reports,
-                    $user_dismiss_moderation_amount,
                     $currentUserId,
                     $row['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
@@ -1032,7 +1028,6 @@ class UserMapper
                     ContentType::user,
                     ContentType::user,
                     $user_reports,
-                    $user_dismiss_moderation_amount,
                     $currentUserId,
                     $row['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
@@ -1113,7 +1108,6 @@ class UserMapper
                     ContentType::user,
                     ContentType::user,
                     $user_reports,
-                    $user_dismiss_moderation_amount,
                     $currentUserId,
                     $data['uid']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
@@ -2042,7 +2036,7 @@ class UserMapper
         return $result ?: null;
     }
 
-    public function fetchProfileData(string $userid, string $currentUserId, array $specifications): Profile|false {
+    public function fetchProfileData(string $userid, string $currentUserId, array $specifications): ?Profile {
         
         $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
@@ -2075,24 +2069,19 @@ class UserMapper
             $whereClausesString
          );
 
-        try {
-            $stmt = $this->db->prepare($sql);
-            $params['userid'] = $userid;
-            $params['currentUserId'] = $currentUserId;
+        $stmt = $this->db->prepare($sql);
+        $params['userid'] = $userid;
+        $params['currentUserId'] = $currentUserId;
 
-            $stmt->execute($params);
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $stmt->execute($params);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
 
-            if ($data !== false) {
-                return new Profile($data);
-            }
-
-            $this->logger->warning("No user found with ID", ['userid' => $userid]);
-            return false;
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in fetchProfileData", ['error' => $e->getMessage()]);
-            return false;
+        if ($data !== false) {
+            return new Profile($data);
         }
+
+        $this->logger->warning("No user found with ID", ['userid' => $userid]);
+        return null;
     }
 }

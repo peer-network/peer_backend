@@ -4,8 +4,9 @@ namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Specs\SpecTypes\ActiveUserSpec;
 use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
-use Fawaz\App\Specs\SpecTypes\ContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
 use Fawaz\App\Specs\SpecTypes\CurrentUserIsBlockedUserSpec;
+use Fawaz\App\ValidationException;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -20,6 +21,7 @@ use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use function PHPUnit\Framework\returnArgument;
 
 final class ProfileServiceImpl implements ProfileService
 {
@@ -66,7 +68,7 @@ final class ProfileServiceImpl implements ProfileService
             $userId
         );
 
-        $usersContentFilterSpec = new ContentFilterSpec(
+        $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
             ContentFilteringStrategies::profile,
             $contentFilterBy,
             $this->currentUserId,
@@ -75,10 +77,11 @@ final class ProfileServiceImpl implements ProfileService
             ContentType::user
         );
         
+
         $userSpecs = [
             $basicUserSpec,
             $currentUserIsBlockedSpec,
-            $usersContentFilterSpec
+            $usersHiddenContentFilterSpec
         ];
 
         try {
@@ -86,9 +89,14 @@ final class ProfileServiceImpl implements ProfileService
                 $userId,
                 $this->currentUserId,
                 $userSpecs
-            )->getArrayCopy();
+            );
 
-            $userReports = (int)$profileData['user_reports'];
+            
+            // $profileData = $this->userMapper->fetchProfileData(
+            //     $userId,
+            //     $this->currentUserId,
+            //     $userSpecs
+            // );
 
             $contentFilterService = new ContentFilterServiceImpl(
                 ContentFilteringStrategies::profile,
@@ -99,36 +107,33 @@ final class ProfileServiceImpl implements ProfileService
             if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
-                    null,
-                    $userReports,
+                    $profileData->getReports(),
                     $this->currentUserId,
-                    $profileData['uid']
+                    $profileData->getUserId()
             ) == ContentFilteringAction::replaceWithPlaceholder) {
                 $replacer = ContentReplacementPattern::flagged;
                 $profileData['username'] = $replacer->username($profileData['username']);
                 $profileData['img'] = $replacer->profilePicturePath($profileData['img']);
             }
 
-            // $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId,$contentFilterBy)->getArrayCopy();
-            $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
+            $this->logger->debug("Fetched profile data", ['userid' => $profileData['uid']]);
 
-            $contentTypes = ['image', 'video', 'audio', 'text'];
-            foreach ($contentTypes as $type) {
-                $profileData["{$type}posts"] = [];
-            }
-
-            $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11008,
-                'affectedRows' => $profileData,
-            ];
+            return $this::createSuccessResponse(
+                11008,
+                $profileData
+            );
+        } catch (ValidationException $e) {
+            $this->logger->error('Failed to fetch profile data', [
+                'userId' => $userId,
+                'exception' => $e->getMessage(),
+            ]);
+            return $this::respondWithError(41007);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch profile data', [
                 'userId' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return $this->createSuccessResponse(21001, []);
+            return $this::respondWithError(41007);
         }
     }
 }
