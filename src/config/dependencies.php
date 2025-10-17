@@ -13,6 +13,8 @@ use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\Models\Core\Model;
 use Fawaz\Utils\PeerLogger;
 use Fawaz\Utils\ResponseMessagesProviderImpl;
+use Fawaz\Database\Interfaces\ProfileRepository;
+use Fawaz\Database\ProfileRepositoryImpl;
 use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -78,6 +80,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         },
 
         ProfileService::class => \DI\autowire(ProfileServiceImpl::class),
+        ProfileRepository::class => \DI\autowire(ProfileRepositoryImpl::class),
         ResponseMessagesProvider::class => function (ContainerInterface $c) {
             $path = __DIR__ . "/../../runtime-data/media/assets/response-codes.json";
             return new ResponseMessagesProviderImpl($path);
