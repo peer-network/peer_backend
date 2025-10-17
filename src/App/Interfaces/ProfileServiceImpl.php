@@ -3,27 +3,23 @@
 namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
-use Fawaz\App\View\ProfileView;
+use Fawaz\App\Specs\SpecTypes\ActiveUserSpec;
+use Fawaz\App\Specs\SpecTypes\IllegalContentFilterSpec;
 use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
 use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
 use Fawaz\App\Specs\SpecTypes\CurrentUserIsBlockedUserSpec;
+
 use Fawaz\App\ValidationException;
-use Fawaz\Database\DailyFreeMapper;
-use Fawaz\Database\UserMapper;
-use Fawaz\Database\UserPreferencesMapper;
-use Fawaz\Database\PostMapper;
-use Fawaz\Database\WalletMapper;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
-use Fawaz\Services\Mailer;
+
 use Fawaz\Utils\ErrorResponse;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
-use Fawaz\Database\Interfaces\TransactionManager;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Replacers\ProfileReplacer;
+
+use Fawaz\Database\Interfaces\ProfileRepository;
 
 final class ProfileServiceImpl implements ProfileService
 {
@@ -32,13 +28,7 @@ final class ProfileServiceImpl implements ProfileService
 
     public function __construct(
         protected PeerLoggerInterface $logger,
-        protected DailyFreeMapper $dailyFreeMapper,
-        protected UserMapper $userMapper,
-        protected UserPreferencesMapper $userPreferencesMapper,
-        protected PostMapper $postMapper,
-        protected WalletMapper $walletMapper,
-		protected Mailer $mailer,
-        protected TransactionManager $transactionManager
+        protected ProfileRepository $profileRepository,
     ) {}
 
     public function setCurrentUserId(string $userId): void
@@ -46,12 +36,13 @@ final class ProfileServiceImpl implements ProfileService
         $this->currentUserId = $userId;
     }
 
-    public function profile(array $args): Profile|ErrorResponse {
-        $this->logger->info('UserService.Profile started');
+    public function profile(array $args): Profile | ErrorResponse {
+        $this->logger->info('ProfileService.Profile started');
         
         $userId = $args['userid'] ?? $this->currentUserId;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
+        $activeUserSpec = new ActiveUserSpec($userId);
         $basicUserSpec = new BasicUserSpec($userId);
         $currentUserIsBlockedSpec = new CurrentUserIsBlockedUserSpec(
             $this->currentUserId,
@@ -66,41 +57,37 @@ final class ProfileServiceImpl implements ProfileService
             ContentType::user,
             ContentType::user
         );
+
+        $usersIllegalContentFilterSpec = new IllegalContentFilterSpec(
+            ContentFilteringStrategies::profile,
+            $contentFilterBy,
+            $this->currentUserId,
+            $userId,
+            ContentType::user,
+            ContentType::user
+        );
         
-        $userSpecs = [
-            $basicUserSpec,
-            $currentUserIsBlockedSpec,
-            $usersHiddenContentFilterSpec
+        $specs = [
+            $activeUserSpec,
+            // $basicUserSpec,
+            // $currentUserIsBlockedSpec,
+            $usersHiddenContentFilterSpec,
+            $usersIllegalContentFilterSpec
         ];
 
         try {
-            $profileData = $this->userMapper->fetchProfileData(
+            $profileData = $this->profileRepository->fetchProfileData(
                 $userId,
                 $this->currentUserId,
-                $userSpecs
+                $specs
             );
 
             if (!$profileData) {
                 $this->logger->warning('Query.resolveProfile User not found');
                 return self::respondWithErrorObject(21001);
             }
-
-            $contentFilterService = new ContentFilterServiceImpl(
-                ContentFilteringStrategies::profile,
-                null,
-                $contentFilterBy
-            );
             
-            if ($contentFilterService->getContentFilterAction(
-                    ContentType::user,
-                    ContentType::user,
-                    $profileData->getReports(),
-                    $this->currentUserId,
-                    $profileData->getUserId()
-            ) == ContentFilteringAction::replaceWithPlaceholder) {
-                $pattern = ContentReplacementPattern::hidden;
-                $profileData = ProfileReplacer::replaceProfile($profileData, $pattern);
-            }
+            ProfileReplacer::placeholderProfile($profileData, $specs);
 
             $this->logger->debug("Fetched profile data", ['userid' => $profileData->getUserId()]);
 
