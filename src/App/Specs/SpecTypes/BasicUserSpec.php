@@ -4,7 +4,10 @@ namespace Fawaz\App\Specs\SpecTypes;
 
 use Fawaz\App\Specs\Specification;
 use Fawaz\App\Specs\SpecificationSQLData;
-
+use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 final class BasicUserSpec implements Specification
 {
 
@@ -12,7 +15,6 @@ final class BasicUserSpec implements Specification
         private string $userid
     ) {}
 
-    
     public function toSql(): SpecificationSQLData
     {
         return new SpecificationSQLData(
@@ -28,5 +30,10 @@ final class BasicUserSpec implements Specification
                 "basicUserSpec_users_userid" => $this->userid
             ]
         );
+    }
+
+    public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern
+    {
+        return null;
     }
 }

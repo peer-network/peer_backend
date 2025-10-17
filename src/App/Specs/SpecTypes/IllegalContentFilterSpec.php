@@ -5,6 +5,8 @@ namespace Fawaz\App\Specs\SpecTypes;
 use Fawaz\App\Specs\Specification;
 use Fawaz\App\Specs\HiddenContentFilteringSpecificationFactory;
 use Fawaz\App\Specs\SpecificationSQLData;
+use Fawaz\App\Status;
+use Fawaz\Services\ContentFiltering\Capabilities\HasVisibilityStatus;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
@@ -15,7 +17,7 @@ use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 
 
-final class HiddenContentFilterSpec implements Specification
+final class IllegalContentFilterSpec implements Specification
 {
     private ContentFilterServiceImpl $contentFilterService;
 
@@ -55,15 +57,8 @@ final class HiddenContentFilterSpec implements Specification
     public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern
     {
         if ($subject instanceof ProfileReplaceable) {
-            if ($this->contentFilterService->getContentFilterAction(
-                $this->contentTarget,
-                $this->showingContent,
-                null,
-                $this->currentUserId, 
-                $this->targetUserId,
-                $subject->visibilityStatus()
-            ) === ContentFilteringAction::replaceWithPlaceholder) {
-                return ContentReplacementPattern::hidden;
+            if ($subject->visibilityStatus() === 'illegal') {
+                return ContentReplacementPattern::illegal;
             }
         }
         return null;

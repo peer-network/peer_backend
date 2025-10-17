@@ -4,6 +4,10 @@ namespace Fawaz\App\Specs\SpecTypes;
 
 use Fawaz\App\Specs\Specification;
 use Fawaz\App\Specs\SpecificationSQLData;
+use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 
 final class UserIsBlockedByMeSpec implements Specification
 {
@@ -28,5 +32,10 @@ final class UserIsBlockedByMeSpec implements Specification
                 "UserIsBlockedByMeSpec_user_block_user_blockedUserId" => $this->blockedUserId
             ]
         );
+    }
+
+    public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern
+    {
+        return null;
     }
 }
