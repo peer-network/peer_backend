@@ -6,12 +6,14 @@ namespace Fawaz\App;
 
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
-class Profile
+class Profile implements ProfileReplaceable
 {
     protected string $uid;
     protected string $username;
     protected int $status;
+    protected int $verified;
     protected int $slug;
     protected int $rolesmask;
     protected ?string $img;
@@ -26,6 +28,8 @@ class Profile
     protected ?int $amountblocked;
     protected ?int $amountreports;
     protected ?int $reports;
+    protected ?string $visibilityStatus;
+
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -38,6 +42,7 @@ class Profile
         $this->username = $data['username'] ?? '';
         $this->status = $data['status'] ?? 0;
         $this->slug = $data['slug'] ?? 0;
+        $this->verified = $data['verified'] ?? 0;
         $this->rolesmask = $data['roles_mask'] ?? 0;
         $this->img = $data['img'] ?? '';
         $this->biography = $data['biography'] ?? '';
@@ -51,12 +56,7 @@ class Profile
         $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->amountreports = $data['amountreports'] ?? 0;
         $this->reports = $data['user_reports'] ?? 0;
-
-        if (($this->status == 6)) {
-            $this->username = 'Deleted_Account';
-            $this->img = '/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg';
-            $this->biography = '/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt';
-        }
+        $this->visibilityStatus = $data['visibility_status'] ?? '';
     }
 
     // Array Copy methods
@@ -66,6 +66,7 @@ class Profile
             'uid' => $this->uid,
             'username' => $this->username,
             'status' => $this->status,
+            'verified' => $this->verified,
             'slug' => $this->slug,
             'img' => $this->img,
             'roles_mask' => $this->rolesmask,
@@ -79,7 +80,8 @@ class Profile
             'amountfriends' => $this->amountfriends,
             'amountblocked' => $this->amountblocked,
             'amountreports' => $this->amountreports,
-            'user_reports' => $this->reports
+            'user_reports' => $this->reports,
+            'visibility_status' => $this->visibilityStatus
         ];
         return $att;
     }
@@ -113,6 +115,25 @@ class Profile
     public function setStatus(int $status): void
     {
         $this->status = $status;
+    }
+    public function visibilityStatus(): string
+    {
+        return $this->visibilityStatus;
+    }
+
+    public function isVerified(): int
+    {
+        return $this->verified;
+    }
+
+    public function getVerified(): int
+    {
+        return $this->verified;
+    }
+
+    public function setVerified(int $verified): void
+    {
+        $this->verified = $verified;
     }
 
     public function getSlug(): int
@@ -245,7 +266,7 @@ class Profile
         $this->amountreports = $amountreports;
     }
 
-    public function getReports(): ?int
+    public function getReports(): int
     {
         return $this->reports;
     }
@@ -309,6 +330,13 @@ class Profile
                         'min' => $userConfig['SLUG']['MIN_LENGTH'],
                         'max' => $userConfig['SLUG']['MAX_LENGTH']
                         ]],
+                ],
+            ],
+            'verified' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [
+                    ['name' => 'IsInt'],
                 ],
             ],
             'img' => [

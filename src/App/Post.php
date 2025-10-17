@@ -9,9 +9,10 @@ use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Utils\HashObject;
 
-class Post extends Model implements Hashable
+class Post extends Model implements Hashable, PostReplaceable
 {
     use HashObject;
 
