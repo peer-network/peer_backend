@@ -8,6 +8,7 @@ use Fawaz\App\Specs\SpecificationSQLData;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 
@@ -16,7 +17,7 @@ final class ContentFilterSpec implements Specification
     private ContentFilterServiceImpl $contentFilterService;
 
     public function __construct(
-        ContentFilteringStrategy $strategy, 
+        ContentFilteringStrategies $strategy, 
         ?string $contentFilterBy,
         private string $currentUserId,
         private string $targetUserId,

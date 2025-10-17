@@ -76,7 +76,6 @@ class ContentFilterServiceImpl {
      * @param ContentType $contentTarget
      * @param ContentType $showingContent
      * @param int|null $showingContentReportAmount
-     * @param int|null $showingContentDismissModerationAmount
      * @param string|null $currentUserId
      * @param string|null $targetUserId
      * @return ContentFilteringAction|null
@@ -98,8 +97,7 @@ class ContentFilterServiceImpl {
         }
 
         $strategy = ContentFilteringStrategyFactory::create(
-            $this->contentFilterStrategyTag, 
-            $contentVisibility
+            $this->contentFilterStrategyTag
         );
 
         if ($strategy === null) {
@@ -107,7 +105,7 @@ class ContentFilterServiceImpl {
         }
     
         if ($currentUserId && $currentUserId == $targetUserId) {
-            $strategy = ContentFilteringStrategyFactory::create(ContentFilteringStrategies::profile, $contentVisibility);
+            $strategy = ContentFilteringStrategyFactory::create(ContentFilteringStrategies::profile);
         }
 
         return $strategy->getAction($contentTarget, $showingContent);

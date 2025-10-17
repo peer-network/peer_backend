@@ -3758,7 +3758,7 @@ class GraphQLSchemaBuilder
         }
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        $contentFilterService = new ContentFilterServiceImpl(ContentFilteringStrategies::postFeed);
         if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
             return $this::respondWithError(30103);
         }

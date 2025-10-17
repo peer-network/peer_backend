@@ -13,6 +13,9 @@ use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategyFactory;
+use Fawaz\Services\ContentFiltering\Strategies\ProfileContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
 use Psr\Log\LoggerInterface;
@@ -60,8 +63,6 @@ final class ProfileServiceImpl implements ProfileService
             return self::respondWithError(31007);
         }
 
-        $strategy = new GetProfileContentFilteringStrategy();
-
         $activeUserSpec = new ActiveUserSpec($userId);
         $basicUserSpec = new BasicUserSpec($userId);
         $currentUserIsBlockedSpec = new CurrentUserIsBlockedUserSpec(
@@ -70,7 +71,7 @@ final class ProfileServiceImpl implements ProfileService
         );
 
         $usersContentFilterSpec = new ContentFilterSpec(
-            $strategy,
+            ContentFilteringStrategies::profile,
             $contentFilterBy,
             $this->currentUserId,
             $userId,
@@ -94,7 +95,7 @@ final class ProfileServiceImpl implements ProfileService
             $userReports = (int)$profileData['user_reports'];
 
             $contentFilterService = new ContentFilterServiceImpl(
-                $strategy,
+                ContentFilteringStrategies::profile,
                 null,
                 $contentFilterBy
             );
@@ -102,6 +103,7 @@ final class ProfileServiceImpl implements ProfileService
             if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
+                    null,
                     $userReports,
                     $this->currentUserId,
                     $profileData['uid']
