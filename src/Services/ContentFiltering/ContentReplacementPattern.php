@@ -6,7 +6,7 @@ namespace Fawaz\Services\ContentFiltering;
 
 enum ContentReplacementPattern: string
 {
-    case suspended = "suspended";
+    case deleted = "deleted";
     case hidden = "hidden";
     case illegal = "illegal";
 
@@ -14,7 +14,7 @@ enum ContentReplacementPattern: string
     {
         return match ($this) {
             self::hidden   => "this post is hidden",
-            self::suspended => "this post is deleted",
+            self::deleted => "this post is deleted",
             self::illegal => "this post is illegal",
         };
     }
@@ -23,7 +23,7 @@ enum ContentReplacementPattern: string
     {
         return match ($this) {
             self::hidden   => "",
-            self::suspended => "",
+            self::deleted => "",
             self::illegal => "",
         };
     }
@@ -32,7 +32,7 @@ enum ContentReplacementPattern: string
     {
         return match ($this) {
             self::hidden   => "some_pic_to_be_here_some_text_to_pass_validation",
-            self::suspended => "some_pic_to_be_here_some_text_to_pass_validation",
+            self::deleted => "some_pic_to_be_here_some_text_to_pass_validation",
             self::illegal => "some_pic_to_be_here_some_text_to_pass_validation",
         };
     }
@@ -41,7 +41,7 @@ enum ContentReplacementPattern: string
     {
         return match ($this) {
             self::hidden   => "this comment is hidden",
-            self::suspended => "this comment is hidden",
+            self::deleted => "this comment is hidden",
             self::illegal => "this comment is illegal",
         };
     }
@@ -50,7 +50,7 @@ enum ContentReplacementPattern: string
     {
         return match ($this) {
             self::hidden   => "hidden_account",
-            self::suspended => "deleted_account",
+            self::deleted => "deleted_account",
             self::illegal => "illegal_account",
         };
     }
@@ -59,7 +59,7 @@ enum ContentReplacementPattern: string
     {
         return match ($this) {
             self::hidden   => "",
-            self::suspended => "",
+            self::deleted => "",
             self::illegal => "",
         };
     }
@@ -68,7 +68,7 @@ enum ContentReplacementPattern: string
     {
         return match ($this) {
             self::hidden   => "some_pic_to_be_here_some_text_to_pass_validation",
-            self::suspended => "some_pic_to_be_here_some_text_to_pass_validation",
+            self::deleted => "some_pic_to_be_here_some_text_to_pass_validation",
             self::illegal => "some_pic_to_be_here_some_text_to_pass_validation",
         };
     }
