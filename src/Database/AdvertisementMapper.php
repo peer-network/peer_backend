@@ -840,7 +840,6 @@ class AdvertisementMapper
 
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::postFeed,
-            null,
             $contentFilterBy
         );
 

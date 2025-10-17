@@ -18,8 +18,6 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\DateService;
@@ -205,7 +203,6 @@ class UserMapper
 
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::postFeed,
-            null,
             $contentFilterBy
         );
 
@@ -337,7 +334,6 @@ class UserMapper
 
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::profile,
-            null,
             $contentFilterBy
         );
 
@@ -803,7 +799,6 @@ class UserMapper
 
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::profile,
-            null,
             $contentFilterBy
         );
 
@@ -887,7 +882,6 @@ class UserMapper
 
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::profile,
-            null,
             $contentFilterBy
         );
 
@@ -975,7 +969,6 @@ class UserMapper
 
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::profile,
-            null,
             $contentFilterBy
         );
 
@@ -1060,7 +1053,6 @@ class UserMapper
 
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::profile,
-            null,
             $contentFilterBy
         );
 
@@ -2053,6 +2045,7 @@ class UserMapper
                 u.status,
                 u.img,
                 u.biography,
+                u.visibility_status,
                 ui.amountposts,
                 ui.amountfollower,
                 ui.amountfollowed,

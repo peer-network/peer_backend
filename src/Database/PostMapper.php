@@ -19,8 +19,6 @@ use Fawaz\App\User;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\App\ValidationException;
@@ -190,7 +188,6 @@ class PostMapper
 
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::profile,
-            null,
             $contentFilterBy
         );
 
@@ -566,7 +563,6 @@ class PostMapper
 
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::postFeed,
-            null,
             $contentFilterBy
         );
 
@@ -1032,7 +1028,6 @@ class PostMapper
             if ($contentFilterBy !== null) {
                 $contentFilterService = new ContentFilterServiceImpl(
                     ContentFilteringStrategies::postFeed,
-                    null,
                     $contentFilterBy
                 );
             }

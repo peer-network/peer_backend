@@ -100,7 +100,6 @@ class CommentMapper
 
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::postFeed,
-            null,
             $contentFilterBy
         );
         $whereClauses = ["c.postid = :postId AND c.parentid IS NULL"];
@@ -178,7 +177,7 @@ class CommentMapper
 
 
             if ($row['user_status'] != 0) {
-                $replacer = ContentReplacementPattern::suspended;
+                $replacer = ContentReplacementPattern::deleted;
                 $row['username'] = $replacer->username();
                 $row['img'] = $replacer->profilePicturePath();
             }
