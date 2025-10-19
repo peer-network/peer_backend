@@ -727,7 +727,7 @@ class ChatService
 
         $result = $this->chatMapper->insertMess(new ChatMessages($messageData));
         if ($result['status'] === 'success') {
-            $this->sendToWebSocket($messageData);
+            // $this->sendToWebSocket($messageData);
         }
         if (isset($result['status']) && $result['status'] === 'error') {
             $this->transactionManager->rollBack();

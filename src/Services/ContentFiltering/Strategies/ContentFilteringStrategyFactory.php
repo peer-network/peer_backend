@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\Services\ContentFiltering\Strategies;
 
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\PostsFeedContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\Implementations\ProfileContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\Implementations\MyProfileFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\SearchByIdContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\SearchByMetadataHiddenContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies as StrategyName;
@@ -20,7 +20,7 @@ final class ContentFilteringStrategyFactory
     {
         return match ($strategy) {
             StrategyName::postFeed   => new PostsFeedContentFilteringStrategy(),
-            StrategyName::profile    => new ProfileContentFilteringStrategy(),
+            StrategyName::myprofile    => new MyProfileFilteringStrategy(),
             StrategyName::searchById => new SearchByIdContentFilteringStrategy(),
             StrategyName::searchByMeta => new SearchByMetadataHiddenContentFilteringStrategy()
         };

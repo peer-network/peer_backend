@@ -9,5 +9,5 @@ enum ContentFilteringStrategies
     case postFeed;
     case searchById; 
     case searchByMeta;
-    case profile;
+    case myprofile;
 }

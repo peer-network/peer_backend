@@ -333,7 +333,7 @@ class UserMapper
         $trenddays = 7;
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::profile,
+            ContentFilteringStrategies::myprofile,
             $contentFilterBy
         );
 
@@ -798,7 +798,7 @@ class UserMapper
         $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::profile,
+            ContentFilteringStrategies::myprofile,
             $contentFilterBy
         );
 
@@ -881,7 +881,7 @@ class UserMapper
         $this->logger->debug("UserMapper.fetchFollowers started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::profile,
+            ContentFilteringStrategies::myprofile,
             $contentFilterBy
         );
 
@@ -968,7 +968,7 @@ class UserMapper
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::profile,
+            ContentFilteringStrategies::myprofile,
             $contentFilterBy
         );
 
@@ -1052,7 +1052,7 @@ class UserMapper
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::profile,
+            ContentFilteringStrategies::myprofile,
             $contentFilterBy
         );
 

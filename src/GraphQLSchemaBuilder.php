@@ -51,6 +51,7 @@ use Fawaz\App\Validation\ValidationSpec;
 use Fawaz\App\Validation\ValidatorErrors;
 use Fawaz\App\Profile;
 use function PHPUnit\Framework\returnArgument;
+use Fawaz\Utils\ErrorResponse;
 
 class GraphQLSchemaBuilder
 {
@@ -3865,9 +3866,8 @@ class GraphQLSchemaBuilder
                 $result->getArrayCopy(),
                 false
             );
-        } else {
-            return $result->response;
-        }
+        } 
+        return $result->response;
     }
 
     protected function resolveFriends(array $args): ?array

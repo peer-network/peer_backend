@@ -14,16 +14,7 @@ namespace Fawaz\Services\ContentFiltering\Types;
  * @method static self comment()
  */
 enum ContentType: string {
-    case user = 'user' ;
-    case post = 'post';
-    case comment = 'comment';
-
-    /**
-     * Returns the uppercase representation of the enum value.
-     *
-     * @return string
-     */
-    public function constantsArrayKey(): string {
-        return strtoupper($this->value);
-    }
+    case user = 'USER' ;
+    case post = 'POST';
+    case comment = 'COMMENT';
 }

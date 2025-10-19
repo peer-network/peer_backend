@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Fawaz\BaseURL;
+use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Utils\ResponseMessagesProvider;
 use Fawaz\Services\JWTService;
 use Fawaz\Services\Mailer;
@@ -13,7 +14,6 @@ use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\Models\Core\Model;
 use Fawaz\Utils\PeerLogger;
 use Fawaz\Utils\ResponseMessagesProviderImpl;
-use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Database\ProfileRepositoryImpl;
 use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;

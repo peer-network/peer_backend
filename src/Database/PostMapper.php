@@ -187,7 +187,7 @@ class PostMapper
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::profile,
+            ContentFilteringStrategies::myprofile,
             $contentFilterBy
         );
 
