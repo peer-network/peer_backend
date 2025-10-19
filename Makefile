@@ -359,7 +359,10 @@ ci2: check-hooks scan env-ci phpstan-fast init ## Run full isolated local CI2 wo
 		&& echo "Dev backend restarted." \
 		|| echo "No previously stopped dev backend to restart."
 
-	@echo "CI2 run complete — Dev containers preserved and ports 5432 & 8888 restored."
+.PHONY: unit
+unit: 
+	@echo "Running PHPUnit..."
+	php vendor/bin/phpunit tests/Service/ContentFilterServiceImplTest.php
 
 hot-ci: ## Run full local CI workflow (setup, tests, cleanup)
 	$(MAKE) restart-db
