@@ -157,7 +157,7 @@ jobs:
 
           echo "All attempts to pull from Docker Hub failed — building image locally..."
           cat <<'DOCKERFILE' > Dockerfile.newman
-          FROM alpine:3.19
+          FROM ghcr.io/library/alpine:3.19
           RUN apk add --no-cache nodejs npm git bash
           RUN npm install -g --unsafe-perm --no-progress newman newman-reporter-htmlextra
           WORKDIR /etc/newman
