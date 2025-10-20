@@ -127,7 +127,10 @@ dev: check-hooks reset-db-and-backend init ## Full setup: env.ci, DB reset, vend
 	chmod +x .githooks/*
 	
 	@echo "Generating config..."
-	bash cd-generate-backend-config.sh
+	@if ! bash cd-generate-backend-config.sh; then \
+		echo "Config generation failed. Aborting dev setup."; \
+		exit 1; \
+	fi
 
 	@echo "Building images..."
 	docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml build
@@ -314,6 +317,12 @@ ci2: check-hooks scan env-ci phpstan-fast init ## Run full isolated local CI2 wo
 
 	@echo "Removing any old CI2 volumes..."
 	-@docker volume rm $$(docker volume ls -q | grep "$${CI2_PROJECT_NAME}.*db_data") 2>/dev/null || true
+
+	@echo "Generating backend config for CI2..."
+	@if ! php tests/utils/ConfigGeneration/GenerateConfig.php; then \
+		echo "CI2 config generation failed. Aborting pipeline."; \
+		exit 1; \
+	fi
 
 	@echo "Building CI2 images..."
 	COMPOSE_PROJECT_NAME=$${CI2_PROJECT_NAME} docker-compose --env-file .env.ci \

@@ -91,50 +91,6 @@ class PostMapper
         return (bool) $stmt->fetchColumn();
     }
 
-    public function isNewsFeedExist(string $feedid): bool
-    {
-        $this->logger->debug("PostMapper.isNewsFeedExist started");
-
-        $sql = "SELECT COUNT(*) FROM newsfeed WHERE feedid = :feedid";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['feedid' => $feedid]);
-        return (bool) $stmt->fetchColumn();
-    }
-
-    public function isHasAccessInNewsFeed(string $chatid, string $currentUserId): bool
-    {
-        $this->logger->debug("PostMapper.isHasAccessInNewsFeed started");
-
-        $sql = "SELECT COUNT(*) FROM chatparticipants WHERE chatid = :chatid AND userid = :currentUserId";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['chatid' => $chatid, 'currentUserId' => $currentUserId]);
-
-        return (bool) $stmt->fetchColumn();
-    }
-
-    public function getChatFeedsByID(string $feedid): array
-    {
-        $this->logger->debug("PostMapper.getChatFeedsByID started");
-
-        $sql = "SELECT * FROM posts WHERE feedid = :feedid";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['feedid' => $feedid]);
-
-        $results = [];
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $results[] = new Post($row, [], false);
-        }
-
-        if (empty($results)) {
-            $this->logger->warning("No posts found with feedid", ['feedid' => $feedid]);
-            return [];
-        }
-
-        $this->logger->info("Fetched all posts from database", ['count' => count($results)]);
-
-        return $results;
-    }
-
     public function loadByTitle(string $title): array
     {
         $this->logger->debug("PostMapper.loadByTitle started");
@@ -645,6 +601,7 @@ class PostMapper
                 'VIDEO' => 'video',
                 'TEXT'  => 'text',
             ];
+
             $userMapping = [
                 'FOLLOWED' => "p.userid IN (SELECT followedid FROM follows WHERE followerid = :currentUserId)",
                 'FOLLOWER' => "p.userid IN (SELECT followerid FROM follows WHERE followedid = :currentUserId)",
@@ -658,11 +615,13 @@ class PostMapper
                 )",
             ];
 
+
+            // Collect relationship filters
             foreach ($filterBy as $type) {
                 if (isset($mapping[$type])) {
                     $validTypes[] = $mapping[$type];
                 } elseif (isset($userMapping[$type])) {
-                    $userFilters[] = $userMapping[$type];
+                     $userFilters[] = $userMapping[$type];
                 }
             }
 
@@ -1199,52 +1158,6 @@ class PostMapper
         }
     }
 
-    /*
-    * Add or Update Eligibility Token for post
-    */
-    public function addOrUpdateEligibilityToken01(string $userId, string $eligibilityToken, string $status): void
-    {
-
-        try {
-            $this->logger->debug("PostMapper.addOrUpdateEligibilityToken started");
-            $query = "SELECT COUNT(*) FROM eligibility_token WHERE userid = :userid AND token = :token";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
-            $stmt->execute();
-
-            $existingToken = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if ($existingToken) {
-                // Token exists, update it
-                $this->logger->info("Updating existing eligibility token for user: " . $userId);
-                $query = "UPDATE eligibility_token 
-                        SET token = :token, status = :status
-                        WHERE userid = :userid";
-            } else {
-                // Token does not exist, insert a new one
-                $this->logger->info("Inserting new eligibility token for user: " . $userId);
-                $query = "INSERT INTO eligibility_token 
-                        (userid, token, expiresat) 
-                        VALUES (:userid, :token, :expiresat)";
-
-                $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
-                $stmt->bindValue(':expiresat', date('Y-m-d H:i:s', strtotime('+5 minutes')), \PDO::PARAM_STR);
-
-                $stmt->execute();
-            }
-
-        } catch (\Throwable $e) {
-            $this->logger->error("PostMapper.addOrUpdateEligibilityToken: Exception occurred while inserting token", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-        }
-
-    }
-
     /**
      * Add or Update Eligibility Token for post
      * Enforces: A user must NOT have more than 5 records in the past hour
@@ -1286,8 +1199,6 @@ class PostMapper
                     throw new ValidationException('Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.', [31512]); // Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED
                 }
             }
-
-            $this->db->beginTransaction();
 
             // Check if (userId, token) exists
             $existsSql = "
@@ -1333,13 +1244,9 @@ class PostMapper
                 $insertStmt->execute();
             }
 
-            $this->db->commit();
             $this->logger->info("PostMapper.addOrUpdateEligibilityToken completed", ['userid' => $userId]);
 
         } catch (\Throwable $e) {
-            if ($this->db->inTransaction()) {
-                $this->db->rollBack();
-            }
             $this->logger->error("PostMapper.addOrUpdateEligibilityToken failed", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

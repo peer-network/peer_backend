@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\Database;
 
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
+use Fawaz\Utils\ContentFilterHelper;
 use PDO;
 use Fawaz\App\Advertisements;
 use Fawaz\App\PostAdvanced;
@@ -833,7 +834,10 @@ class AdvertisementMapper
 
         $from   = $args['from']   ?? null;
         $to     = $args['to']     ?? null;
-        $filterBy = $args['filterBy'] ?? [];
+        // Normalize and map content-type filter values using shared helper
+        $filterBy = isset($args['filterBy']) && is_array($args['filterBy'])
+            ? \Fawaz\Utils\ContentFilterHelper::normalizeToUpper($args['filterBy'])
+            : [];
         $tag    = $args['tag']    ?? null;
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
@@ -893,18 +897,11 @@ class AdvertisementMapper
 
         // FilterBy Content Types
         if (!empty($filterBy) && is_array($filterBy)) {
-            $mapping = [
-                'IMAGE' => 'image',
-                'AUDIO' => 'audio',
-                'VIDEO' => 'video',
-                'TEXT'  => 'text',
-            ];
+            $dbTypes = ContentFilterHelper::mapContentTypesForDb($filterBy);
 
-            $validTypes = array_values(array_intersect_key($mapping, array_flip($filterBy)));
-
-            if ($validTypes) {
+            if (!empty($dbTypes)) {
                 $placeholders = [];
-                foreach ($validTypes as $i => $value) {
+                foreach (array_values($dbTypes) as $i => $value) {
                     $key = "filter$i";
                     $placeholders[] = ":$key";
                     $params[$key] = $value;
