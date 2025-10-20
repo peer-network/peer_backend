@@ -1037,13 +1037,13 @@ class UserService
                 $this->userMapper->sendPasswordResetEmail($email, $data);
 
                 $this->transactionManager->commit();
-                return $this->genericPasswordResetSuccessResponse();
+                return $this->genericPasswordResetSuccessResponse(null);
             }
 
             // Check for rate limiting: 1st attempt
             if ($this->userMapper->isFirstAttemptTooSoon($passwordAttempt)) {
                 $this->transactionManager->rollback();
-                return $this->userMapper->rateLimitResponse(60);
+                return $this->userMapper->rateLimitResponse(60, $passwordAttempt['last_attempt']);
             }
 
             // 2nd attempt
@@ -1069,7 +1069,7 @@ class UserService
                 $this->userMapper->sendPasswordResetEmail($email, $data);
             }
             $this->transactionManager->commit();
-            return $this->genericPasswordResetSuccessResponse();
+            return $this->genericPasswordResetSuccessResponse($this->getCurrentTimestamp());
 
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
@@ -1116,11 +1116,17 @@ class UserService
     /**
      * Standard success response (avoids revealing account existence).
      */
-    public function genericPasswordResetSuccessResponse(): array
+    public function genericPasswordResetSuccessResponse(?string $lastAttemptTimestamp = null): array
     {
-          $nextAttemptAt = DateService::nowPlusSeconds(60); 
+        $nextAttemptAt = '';
 
-           return [
+        if ($lastAttemptTimestamp === null) {
+            $nextAttemptAt = DateService::nowPlusSeconds(60);
+         } else {
+            $nextAttemptAt = date('Y-m-d H:i:s.u', strtotime($lastAttemptTimestamp . ' +60 seconds'));
+        }
+
+        return [
             'status' => 'success',
             'ResponseCode' => "11901",
             'nextAttemptAt' => $nextAttemptAt,
