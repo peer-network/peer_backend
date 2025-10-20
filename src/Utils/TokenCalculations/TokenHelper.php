@@ -26,7 +26,7 @@ class TokenHelper
     {
         $peerValue = self::mulRc($btcEURPrice, $peerTokenBTCPrice);
 
-        return (string) $peerValue;
+        return $peerValue;
     }
 
     /**
@@ -39,8 +39,8 @@ class TokenHelper
     public static function calculatePeerTokenPriceValue(string $btcPoolBTCAmount, string $liqPoolTokenAmount): string
     {
         $beforeToken = self::divRc($btcPoolBTCAmount, $liqPoolTokenAmount);
-        
-        return (string) ($beforeToken);
+
+        return $beforeToken;
     }
 
 
@@ -109,6 +109,22 @@ class TokenHelper
         }
         return $result;
     }
+
+    /**
+     * Truncate number to 10 decimal places without rounding.
+     */
+    public static function truncateToTenDecimalPlaces(string $number): string
+    {
+        $runtIns = self::initRc();
+
+        $result = $runtIns->truncate_decimal($number);
+
+        if (is_numeric($result) === false) {
+            throw new \RuntimeException("Error in truncation operation, result is not numeric.");
+        }
+        return $result;
+    }
+
 
     /**
      * Multiply two values.
@@ -189,6 +205,7 @@ class TokenHelper
             const char* subtract_decimal(const char* a, const char* b);
             const char* multiply_decimal(const char* a, const char* b);
             const char* divide_decimal(const char* a, const char* b);
+            const char* truncate_decimal(const char* a);
         ", $relativePath);
 
         return $ffi;
