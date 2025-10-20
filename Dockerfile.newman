@@ -1,12 +1,7 @@
-FROM postman/newman:alpine
-
-# Prevent npm from hanging in CI environments
-ENV npm_config_loglevel=error \
-    npm_config_progress=false \
-    npm_config_update_notifier=false
+FROM ghcr.io/peer-network/newman:alpine
 
 # Install HTMLExtra reporter
-RUN npm install -g --unsafe-perm --no-progress newman newman-reporter-htmlextra
+RUN npm install -g newman-reporter-htmlextra
  
 WORKDIR /etc/newman
 
