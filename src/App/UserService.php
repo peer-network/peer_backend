@@ -1138,20 +1138,22 @@ class UserService
      */
     public function calculateNextAttemptDelay(array $passwordAttempt = []): string
     {
+        $nextAttemptAt = '';
+
         if (empty($passwordAttempt) || !isset($passwordAttempt['attempt_count'])) {
-            return '';
+            return $nextAttemptAt;
         }
         if($passwordAttempt['attempt_count'] === 1){
-            $nextAttemptAt = $this->userMapper->rateLimitResponse(60, $passwordAttempt['last_attempt']);
+            $nextAttemptAtArray = $this->userMapper->rateLimitResponse(60, $passwordAttempt['last_attempt']);
         } elseif($passwordAttempt['attempt_count'] === 2){
-            $nextAttemptAt = $this->userMapper->rateLimitResponse(600, $passwordAttempt['last_attempt']);
+            $nextAttemptAtArray = $this->userMapper->rateLimitResponse(600, $passwordAttempt['last_attempt']);
         }
         
-        if(is_array($nextAttemptAt) && isset($nextAttemptAt['nextAttemptAt'])){
-            return $nextAttemptAt['nextAttemptAt'];
+        if(isset($nextAttemptAtArray['nextAttemptAt'])){
+            return $nextAttemptAtArray['nextAttemptAt'];
         }
         
-        return '';
+        return $nextAttemptAt;
     }
 
 
