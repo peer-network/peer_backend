@@ -600,8 +600,9 @@ class PostMapper
         $whereClauses = ["p.feedid IS NULL"];
 
         // Show only Valid Content
-        $whereClauses[] = "p.status = :postStatus";
-        $params['postStatus'] = ConstantsConfig::post()['STATUS']['PUBLISHED'];
+        $whereClauses[] = "p.status IN (:postNormalStatus, :postAdvertisementStatus)";
+        $params['postNormalStatus'] = ConstantsConfig::post()['STATUS']['PUBLISHED'];
+        $params['postAdvertisementStatus'] = ConstantsConfig::post()['STATUS']['ADVERTISED'];
 
         if ($postId !== null) {
             $whereClauses[] = "p.postid = :postId";
