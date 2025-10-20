@@ -83,7 +83,7 @@ jobs:
   validate_sql_files:
     name: Ensure Only Valid SQL Files Are Changed
     runs-on: ubuntu-latest
-    needs: [phpstan_analysis]
+    needs: [check_branch_sync]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
