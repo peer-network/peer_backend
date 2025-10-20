@@ -128,14 +128,6 @@ type CommentInfoResponse {
   affectedRows: CommentInfo
 }
 
-type ChatResponse {
-  meta: DefaultResponse
-  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
-  counter: Int!
-  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
-  affectedRows: [Chat!]
-}
-
 type FollowStatusResponse {
   meta: DefaultResponse
   status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
@@ -155,21 +147,6 @@ type AddPostResponse {
   status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
   ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: PostInfo
-}
-
-type AddChatResponse {
-  meta: DefaultResponse
-  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
-  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
-  affectedRows: ChatInfo
-}
-
-type AddChatmessageResponse {
-  meta: DefaultResponse
-  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
-  counter: Int!
-  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
-  affectedRows: [ChatMessageInfo]
 }
 
 type BasicUserInfoResponse {

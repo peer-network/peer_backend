@@ -6,7 +6,6 @@ namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\User;
-use Fawaz\App\UserBlock;
 use Fawaz\App\UserInfo;
 use Fawaz\Utils\PeerLoggerInterface;
 
@@ -312,7 +311,6 @@ class UserInfoMapper
                 }
             }
 
-            // $this->updateChatsStatus($followerid, $followeduserid);
             $this->updateFriendsCount($followerid);
             $this->updateFriendsCount($followeduserid);
 
@@ -357,65 +355,6 @@ class UserInfoMapper
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
         $stmt->execute();
-    }
-
-    private function updateChatsStatus(string $followerid, string $followeduserid): void
-    {
-        $this->logger->debug('UserInfoMapper.fetchFriends started', ['userid' => $followerid]);
-
-        try {
-            $friends = $this->getFriends($followerid);
-
-            if (!is_array($friends) || empty($friends)) {
-                throw new \InvalidArgumentException('NO FRIENDS FOUND OR AN ERROR OCCURRED IN FETCHING FRIENDS');
-            }
-
-            $friendIds = array_column($friends, 'uid');
-            $this->logger->info('Fetched friend IDs', ['friendIds' => $friendIds]);
-
-            if (!in_array($followeduserid, $friendIds)) {
-                $queryRestoreAccess = "UPDATE chats 
-                    SET ispublic = 9
-                    WHERE ispublic = 0 
-                    AND chatid IN (
-                        SELECT c.chatid FROM chats c
-                        JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
-                        JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
-                        WHERE cp1.userid = :followerid 
-                        AND cp2.userid = :followeduserid
-                )";
-                $this->logger->info('Setting chat visibility to 9 (private)', ['followerid' => $followerid, 'followeduserid' => $followeduserid]);
-            } else {
-                $queryRestoreAccess = "UPDATE chats 
-                    SET ispublic = 0
-                    WHERE ispublic = 9 
-                    AND chatid IN (
-                        SELECT c.chatid FROM chats c
-                        JOIN chatparticipants cp1 ON c.chatid = cp1.chatid
-                        JOIN chatparticipants cp2 ON c.chatid = cp2.chatid
-                        WHERE cp1.userid = :followerid 
-                        AND cp2.userid = :followeduserid
-                )";
-                $this->logger->info('Restoring chat visibility to 0 (public)', ['followerid' => $followerid, 'followeduserid' => $followeduserid]);
-            }
-
-            $stmt = $this->db->prepare($queryRestoreAccess);
-            $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-            $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
-            $stmt->execute();
-
-            $this->logger->debug('Query.setFollowUserResponse Resolvers', ['uid' => $followerid]);
-        } catch (\InvalidArgumentException $e) {
-            $this->logger->error('Failed to toggle user follow', [
-                'exception' => $e->getMessage(),
-                'uid' => $followerid
-            ]);
-        } catch (\Exception $e) {
-            $this->logger->error('Unexpected error in updateChatsStatus', [
-                'exception' => $e->getMessage(),
-                'uid' => $followerid
-            ]);
-        }
     }
 
     public function isUserExistById(string $userId): bool
@@ -576,87 +515,6 @@ class UserInfoMapper
                 'ResponseCode' => "41108",
                 'affectedRows' => []
             ];
-        }
-    }
-
-    public function updateUserInfoStats(string $userid): array
-    {
-        $this->logger->debug('UserInfoMapper.updateUserInfoStats started', ['userid' => $userid]);
-        $trenddays = 7;
-
-        try {
-            $this->db->beginTransaction();
-
-            $queries = [
-                'amountposts' => "SELECT COUNT(*) FROM posts WHERE userid = :userid",
-                'amounttrending' => "SELECT COALESCE(SUM(w.numbers), 0) 
-                                     FROM logwins w
-                                     INNER JOIN posts p ON w.postid = p.postid 
-                                     WHERE p.userid = :userid 
-                                       AND w.createdat >= NOW() - INTERVAL :trenddays DAY",
-                'amountfollower' => "SELECT COUNT(*) FROM follows WHERE followedid = :userid",
-                'amountfollowed' => "SELECT COUNT(*) FROM follows WHERE followerid = :userid",
-                'amountchats' => "SELECT COUNT(*) FROM chats WHERE creatorid = :userid",
-                'amountcomments' => "SELECT COUNT(*) FROM user_post_comments WHERE userid = :userid",
-                'amountblocked' => "SELECT COUNT(*) FROM user_block_user WHERE blockerid = :userid",
-                'amountlikes' => "SELECT COUNT(*) FROM user_post_likes WHERE userid = :userid",
-                'amountdislikes' => "SELECT COUNT(*) FROM user_post_dislikes WHERE userid = :userid",
-                'amountreports' => "SELECT COUNT(*) FROM user_post_reports WHERE userid = :userid",
-                'amountsaves' => "SELECT COUNT(*) FROM user_post_saves WHERE userid = :userid",
-                'amountshares' => "SELECT COUNT(*) FROM user_post_shares WHERE userid = :userid",
-                'amountviews' => "SELECT COUNT(*) FROM user_post_views WHERE userid = :userid"
-            ];
-
-            $updates = [];
-            foreach ($queries as $field => $query) {
-                $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-
-                if ($field === 'amounttrending') {
-                    $stmt->bindValue(':trenddays', $trenddays, \PDO::PARAM_INT);
-                }
-
-                $stmt->execute();
-                $updates[$field] = (int) $stmt->fetchColumn();
-            }
-
-            $updateParts = [];
-            $params = [':userid' => $userid];
-
-            foreach ($updates as $field => $value) {
-                $updateParts[] = "$field = :$field";
-                $params[":$field"] = $value;
-            }
-
-            $updateQuery = "UPDATE users_info SET " . implode(', ', $updateParts) . " WHERE userid = :userid";
-            $stmt = $this->db->prepare($updateQuery);
-
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value, \PDO::PARAM_INT);
-            }
-
-            $stmt->execute();
-            $this->db->commit();
-
-            return [
-                'status' => 'success',
-                'message' => 11010,
-                'updated_data' => $updates
-            ];
-        } catch (\PDOException $e) {
-            $this->db->rollBack();
-            $this->logger->error('Database error in updateUserInfoStats', [
-                'userid' => $userid,
-                'error' => $e->getMessage()
-            ]);
-            return ['status' => 'error', 'message' => 41012];
-        } catch (\Exception $e) {
-            $this->db->rollBack();
-            $this->logger->error('Unexpected error in updateUserInfoStats', [
-                'userid' => $userid,
-                'error' => $e->getMessage()
-            ]);
-            return ['status' => 'error', 'message' => 41012];
         }
     }
 }

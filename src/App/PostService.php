@@ -18,8 +18,6 @@ use Fawaz\Services\Base64FileHandler;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 
 use Fawaz\config\constants\ConstantsConfig;
@@ -179,16 +177,6 @@ class PostService
             'mediadescription' => $args['mediadescription'] ?? null,
             'createdat' => $createdAt,
         ];
-
-        if ($postData['feedid']) {
-            if (!$this->postMapper->isNewsFeedExist($postData['feedid'])) {
-                return $this::respondWithError(41512);
-            }
-
-            if (!$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
-                return $this::respondWithError(31801);
-            }
-        }
 
         try {
             $this->transactionManager->beginTransaction();
@@ -589,39 +577,6 @@ class PostService
         }
 
         return $results;
-    }
-
-    public function getChatFeedsByID(string $feedid): ?array
-    {
-        if (!$this->checkAuthentication() || !self::isValidUUID($feedid)) {
-            return $this::respondWithError(30103);
-        }
-
-        $this->logger->debug("PostService.getChatFeedsByID started");
-
-        try {
-            $posts = $this->postMapper->getChatFeedsByID($feedid);
-
-            $result = array_map(
-                fn (Post $post) => $this->mapFeedsWithComments($post),
-                $posts
-            );
-
-            return $this::createSuccessResponse(11808, $result, false);
-        } catch (\Throwable $e) {
-            $this->logger->error('Failed to fetch chat feeds', ['feedid' => $feedid, 'exception' => $e]);
-            return $this::respondWithError(41807);
-        }
-    }
-
-    public function mapFeedsWithComments(Post $post): array
-    {
-        $postArray = $post->getArrayCopy();
-
-        $comments = $this->commentMapper->fetchAllByPostId($post->getPostId(), $this->currentUserId);
-        $postArray['comments'] = $this->mapCommentsWithReplies($comments);
-
-        return $postArray;
     }
 
     private function mapCommentsWithReplies(array $comments): array

@@ -10,12 +10,6 @@ use Fawaz\App\Advertisements;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\Role;
 use Fawaz\App\Status;
-use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
-use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\PeerLoggerInterface;
 
 class AdvertisementMapper
@@ -834,7 +828,10 @@ class AdvertisementMapper
 
         $from   = $args['from']   ?? null;
         $to     = $args['to']     ?? null;
-        $filterBy = $args['filterBy'] ?? [];
+        // Normalize and map content-type filter values using shared helper
+        $filterBy = isset($args['filterBy']) && is_array($args['filterBy'])
+            ? \Fawaz\Utils\ContentFilterHelper::normalizeToUpper($args['filterBy'])
+            : [];
         $tag    = $args['tag']    ?? null;
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
