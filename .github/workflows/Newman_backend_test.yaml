@@ -75,10 +75,16 @@ jobs:
 
       - name: Run PHPStan inside backend container
         run: |
-          docker compose --env-file .env.dev run --rm backend \
-            sh -c "cd /var/www/html && \
-                   composer install --prefer-dist --no-interaction && \
-                   vendor/bin/phpstan analyse --configuration=/var/www/html/phpstan.neon --memory-limit=1G"
+          for i in 1 2 3; do
+            echo "Attempt $i: Running PHPStan inside backend container..."
+            docker compose --env-file .env.dev run --rm backend \
+              sh -c "cd /var/www/html && \
+                     composer install --prefer-dist --no-interaction && \
+                     vendor/bin/phpstan analyse --configuration=/var/www/html/phpstan.neon --memory-limit=1G" && break || {
+              echo "PHPStan run failed (attempt $i). Retrying in 15s..."
+              sleep 15
+            }
+          done
 
   validate_sql_files:
     name: Ensure Only Valid SQL Files Are Changed
