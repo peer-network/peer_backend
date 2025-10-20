@@ -695,6 +695,7 @@ class PostService
                 return $this::respondWithError(51301);
             }
 
+            $this->transactionManager->beginTransaction();
             // generate PostId and JWT
             $eligibilityToken = $this->tokenService->createAccessTokenWithCustomExpriy($this->currentUserId, 300);
 
@@ -702,6 +703,7 @@ class PostService
                 // Add Eligibility Token to DB table eligibility_token
                 $this->postMapper->addOrUpdateEligibilityToken($this->currentUserId, $eligibilityToken, 'NO_FILE');
             }
+            $this->transactionManager->commit();
             $response = [
                         'status' => 'success',
                         'ResponseCode' => "10901", // You are eligible for post upload
@@ -711,9 +713,11 @@ class PostService
             return $response;
 
         } catch (ValidationException $e) {
+            $this->transactionManager->rollback();
             $this->logger->warning("PostService.postEligibility Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('PostService.postEligibility exception', [
                 'message' => $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
