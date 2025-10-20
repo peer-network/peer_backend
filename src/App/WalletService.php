@@ -42,37 +42,6 @@ class WalletService
         return true;
     }
 
-    public function fetchPool(?array $args = []): array|false
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $this->logger->debug("WalletService.fetchPool started");
-
-        $fetchPool = $this->walletMapper->fetchPool($args);
-        return $fetchPool;
-    }
-
-    public function fetchAll(?array $args = []): array|false
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $this->logger->debug("WalletService.fetchAll started");
-
-        $fetchAll = array_map(
-            static function (Wallet $wallet) {
-                $data = $wallet->getArrayCopy();
-                return $data;
-            },
-            $this->walletMapper->fetchAll($args)
-        );
-
-        return $fetchAll;
-    }
-
     public function fetchWalletById(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
@@ -226,13 +195,6 @@ class WalletService
         ];
     }
 
-    public function getPercentBeforeTransaction(string $userId, int $tokenAmount): array
-    {
-        $this->logger->debug('WalletService.getPercentBeforeTransaction started');
-
-        return $this->walletMapper->getPercentBeforeTransaction($userId, $tokenAmount);
-    }
-
     public function loadLiquidityById(string $userId): array
     {
         $this->logger->debug('WalletService.loadLiquidityById started');
@@ -302,23 +264,6 @@ class WalletService
 
         } catch (\Exception $e) {
             return $this::respondWithError(41205);
-        }
-    }
-
-    public function transferToken(array $args): array
-    {
-        $this->logger->debug('WalletService.transferToken started');
-
-        try {
-            $response = $this->walletMapper->transferToken($this->currentUserId, $args);
-            if ($response['status'] === 'error') {
-                return $response;
-            } else {
-                return $this::createSuccessResponse(11211, [], false);
-            }
-
-        } catch (\Exception $e) {
-            return $this::respondWithError(40601);//'Unknown Error.'
         }
     }
 }
