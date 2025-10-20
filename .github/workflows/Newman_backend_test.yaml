@@ -274,7 +274,16 @@ jobs:
 
       - name: Build And Start Docker Containers
         run: |
-          docker compose -f ./docker-compose.yml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}
+          for i in 1 2 3 4 5; do
+            echo "[$(date '+%H:%M:%S')] Attempt $i: building Docker containers..."
+            if docker compose -f ./docker-compose.yml build --build-arg IMAGE_TAG=${{ env.IMAGE_TAG }}; then
+              echo "Build succeeded on attempt $i."
+              break
+            else
+              echo "[$(date '+%H:%M:%S')] Build failed (attempt $i). Retrying in 30s..."
+              sleep 30
+            fi
+          done
           docker compose -f ./docker-compose.yml up -d
  
       - name: Set PHP upload limits
