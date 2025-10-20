@@ -129,18 +129,35 @@ jobs:
       - name: Log in to GHCR (Jakob's token)
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u jakobPeer --password-stdin
 
-      - name: Pull and Push Newman Image to GHCR
+      - name: Pull and Push Newman Image to GHCR (with retries)
         run: |
           set -e
           IMAGE="ghcr.io/peer-network/newman:alpine"
+
+          echo "Checking if Newman image already exists on GHCR..."
           if docker pull $IMAGE >/dev/null 2>&1; then
-            echo "Newman image already exists on GHCR, skipping mirror."
-          else
-            echo "Newman image not found on GHCR — mirroring now..."
-            docker pull postman/newman:alpine
-            docker tag postman/newman:alpine $IMAGE
-            docker push $IMAGE
+            echo "GHCR image already exists — skipping mirror."
+            exit 0
           fi
+
+          echo "GHCR image not found — starting mirror from Docker Hub..."
+
+          for i in 1 2 3 4 5; do
+            echo "Attempt $i to pull from Docker Hub..."
+            if docker pull postman/newman:alpine; then
+              echo "Successfully pulled from Docker Hub on attempt $i"
+              docker tag postman/newman:alpine $IMAGE
+              docker push $IMAGE
+              echo "Successfully mirrored to GHCR"
+              exit 0
+            else
+              echo "Docker Hub pull failed (attempt $i). Retrying in 30s..."
+              sleep 30
+            fi
+          done
+
+          echo "All attempts to pull from Docker Hub failed. Exiting."
+          exit 1
 
   build_and_test:
     name: Build And Run Postman Tests
