@@ -11,7 +11,6 @@ final class IllegalContentFilteringSpecificationFactory {
     public static function build(
         ContentType $type, 
         ContentFilteringAction $action,
-        string $targetId,
     ): ?SpecificationSQLData {
         $paramsToPrepare = [];
         $whereClauses = [];
@@ -27,7 +26,7 @@ final class IllegalContentFilteringSpecificationFactory {
                         SELECT 1
                         FROM users IllegalContentFiltering_users
                         WHERE 
-                            IllegalContentFiltering_users.userid = :targetId
+                            IllegalContentFiltering_users.userid = u.uid
                         AND 
                             IllegalContentFiltering_users.visibility_status = 'illegal'
                     )";
@@ -38,7 +37,7 @@ final class IllegalContentFilteringSpecificationFactory {
                         SELECT 1
                         FROM posts IllegalContentFiltering_posts
                         WHERE 
-                            IllegalContentFiltering_posts.userid = :targetId
+                            IllegalContentFiltering_posts.postid = p.postid
                         AND 
                             IllegalContentFiltering_posts.visibility_status = 'illegal'
                     )";
@@ -49,7 +48,7 @@ final class IllegalContentFilteringSpecificationFactory {
                         SELECT 1
                         FROM comments IllegalContentFiltering_comments
                         WHERE 
-                            IllegalContentFiltering_comments.userid = :targetId
+                            IllegalContentFiltering_comments.commentid = c.commentid
                         AND 
                             IllegalContentFiltering_comments.visibility_status = 'illegal'
                     )";
@@ -59,7 +58,6 @@ final class IllegalContentFilteringSpecificationFactory {
                     return null;
                 }
 
-                $paramsToPrepare["targetId"] = $targetId;
                 break;
             default:
                 // Unsupported action

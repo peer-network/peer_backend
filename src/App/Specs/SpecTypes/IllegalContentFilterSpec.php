@@ -40,10 +40,12 @@ final class IllegalContentFilterSpec implements Specification
             $this->targetId
         );
 
+        // For list queries, pass alias via callers if needed. Here we rely on
+        // default aliases.
         return IllegalContentFilteringSpecificationFactory::build(
             $this->showingContent,
             $action,
-            $this->targetId,
+            null,
         );
     }
 

@@ -36,8 +36,7 @@ final class HiddenContentFilteringSpecificationFactory {
 
     public function build(
         ContentType $type, 
-        ?ContentFilteringAction $action,
-        string $targetId,
+        ?ContentFilteringAction $action
     ): ?SpecificationSQLData {
         $paramsToPrepare = [];
         $whereClauses = [];
@@ -50,7 +49,7 @@ final class HiddenContentFilteringSpecificationFactory {
                     SELECT 1
                     FROM users HiddenContentFiltering_users
                     LEFT JOIN users_info HiddenContentFiltering_users_info ON HiddenContentFiltering_users_info.userid = HiddenContentFiltering_users.userid
-                    WHERE HiddenContentFiltering_users.userid = :targetId
+                    WHERE HiddenContentFiltering_users.userid = u.uid
                     AND (
                         (HiddenContentFiltering_users_info.reports >= :user_report_amount_to_hide AND HiddenContentFiltering_users.visibility_status = 'normal')
                         OR 
@@ -58,7 +57,6 @@ final class HiddenContentFilteringSpecificationFactory {
                     )
                 )";
                 $paramsToPrepare["user_report_amount_to_hide"] = $this->contentFilterService->getReportsAmountToHideContent(ContentType::user);
-                $paramsToPrepare["targetId"] = $targetId;
                 break;
             case ContentType::post:
                 $whereClauses[] = "
@@ -66,7 +64,7 @@ final class HiddenContentFilteringSpecificationFactory {
                     SELECT 1
                     FROM posts HiddenContentFiltering_posts
                     LEFT JOIN post_info HiddenContentFiltering_post_info ON HiddenContentFiltering_post_info.userid = HiddenContentFiltering_posts.userid
-                    WHERE HiddenContentFiltering_posts.postid = :targetId
+                    WHERE HiddenContentFiltering_posts.postid = p.postid
                     AND (
                         (HiddenContentFiltering_post_info.reports >= :post_report_amount_to_hide AND HiddenContentFiltering_posts.visibility_status = 'normal')
                         OR 
@@ -74,14 +72,13 @@ final class HiddenContentFilteringSpecificationFactory {
                     )
                 )";
                 $paramsToPrepare["post_report_amount_to_hide"] = $this->contentFilterService->getReportsAmountToHideContent(ContentType::post);
-                $paramsToPrepare["targetId"] = $targetId;
             case ContentType::comment:
                 $whereClauses[] = "
                 NOT EXISTS (
                     SELECT 1
                     FROM comments HiddenContentFiltering_comments 
                     LEFT JOIN comment_info HiddenContentFiltering_comment_info ON HiddenContentFiltering_comment_info.userid = HiddenContentFiltering_comments.userid
-                    WHERE HiddenContentFiltering_comments.commentid = :targetId
+                    WHERE HiddenContentFiltering_comments.commentid = c.commentid
                     AND (
                         (HiddenContentFiltering_comment_info.reports >= :comment_report_amount_to_hide AND HiddenContentFiltering_comments.visibility_status = 'normal')
                         OR 
@@ -89,7 +86,6 @@ final class HiddenContentFilteringSpecificationFactory {
                     )
                 )";
                 $paramsToPrepare["comment_report_amount_to_hide"] = $this->contentFilterService->getReportsAmountToHideContent(ContentType::comment);
-                $paramsToPrepare["targetId"] = $targetId;
                 break;
             default:
                 return null;
