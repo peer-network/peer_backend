@@ -25,23 +25,6 @@ input PostInput {
   uploadedFiles: String
 }
 
-input ChatInput {
-  name: String!
-  image: String
-  recipients: [String!]!
-}
-
-input UpdateChatInput {
-  chatid: ID!
-  name: String
-  image: String
-}
-
-input ChatParticipantsInput {
-  chatid: ID!
-  recipients: [String!]!
-}
-
 input FeedInput {
   feedid: ID!
   title: String!
