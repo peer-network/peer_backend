@@ -1035,13 +1035,16 @@ class UserService
                 $this->userMapper->sendPasswordResetEmail($email, $data);
 
                 $this->transactionManager->commit();
-                return $this->genericPasswordResetSuccessResponse();
+
+                $passwordAttempt = $this->userMapper->checkForPasswordResetExpiry($userId);
+
+                return $this->genericPasswordResetSuccessResponse($passwordAttempt);
             }
 
             // Check for rate limiting: 1st attempt
             if ($this->userMapper->isFirstAttemptTooSoon($passwordAttempt)) {
                 $this->transactionManager->rollback();
-                return $this->userMapper->rateLimitResponse(60);
+                return $this->userMapper->rateLimitResponse(60, $passwordAttempt['last_attempt']);
             }
 
             // 2nd attempt
@@ -1066,8 +1069,11 @@ class UserService
 
                 $this->userMapper->sendPasswordResetEmail($email, $data);
             }
+
+            $passwordAttempt = $this->userMapper->checkForPasswordResetExpiry($userId);
+
             $this->transactionManager->commit();
-            return $this->genericPasswordResetSuccessResponse();
+            return $this->genericPasswordResetSuccessResponse($passwordAttempt);
 
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
@@ -1114,9 +1120,38 @@ class UserService
     /**
      * Standard success response (avoids revealing account existence).
      */
-    public function genericPasswordResetSuccessResponse(): array
+    public function genericPasswordResetSuccessResponse(array $passwordAttempt = []): array
     {
-        return self::createSuccessResponse(11901);
+
+        $nextAttemptAt = $this->calculateNextAttemptDelay($passwordAttempt);
+        
+        return [
+            'status' => 'success',
+            'ResponseCode' => "11901",
+            'nextAttemptAt' => $nextAttemptAt,
+        ];
+    }
+
+
+    /**
+     * Calculates the next attempt time based on wait seconds and last attempt time.
+     */
+    public function calculateNextAttemptDelay(array $passwordAttempt = []): string
+    {
+        if (empty($passwordAttempt) || !isset($passwordAttempt['attempt_count'])) {
+            return '';
+        }
+        if($passwordAttempt['attempt_count'] === 1){
+            $nextAttemptAt = $this->userMapper->rateLimitResponse(60, $passwordAttempt['last_attempt']);
+        } elseif($passwordAttempt['attempt_count'] === 2){
+            $nextAttemptAt = $this->userMapper->rateLimitResponse(600, $passwordAttempt['last_attempt']);
+        }
+        
+        if(is_array($nextAttemptAt) && isset($nextAttemptAt['nextAttemptAt'])){
+            return $nextAttemptAt['nextAttemptAt'];
+        }
+        
+        return '';
     }
 
 
