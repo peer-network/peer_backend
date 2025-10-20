@@ -127,7 +127,7 @@ jobs:
       # needs.validate_sql_files.result == 'success'
     strategy:
       matrix:
-        php-version: ['8.2', '8.3']
+        php-version: ['8.3']
     outputs:
       outcome: ${{ steps.outcome.outputs.outcome }}
     steps:
@@ -519,7 +519,7 @@ jobs:
     if: needs.build_and_test.outputs.outcome == 'success'
     strategy:
       matrix:
-        php-version: ['8.2', '8.3']
+        php-version: ['8.3']
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v5
@@ -601,7 +601,17 @@ jobs:
       - id: aggregate
         run: |
           result="success"
-          for f in outcomes/**/outcome.txt; do
+          # Find all outcome.txt files safely
+          files=$(find outcomes -type f -name "outcome.txt" || true)
+
+          if [ -z "$files" ]; then
+            echo "No outcome files found!"
+            echo "final_outcome=other_failure" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          for f in $files; do
+            echo "Reading $f"
             outcome=$(cat "$f")
             if [ "$outcome" = "other_failure" ]; then
               result="other_failure"
@@ -631,7 +641,16 @@ jobs:
         id: setflag
         run: |
           found_failure=false
-          for f in newman_flags/**/newman_failed.txt; do
+          files=$(find newman_flags -type f -name "newman_failed.txt" || true)
+
+          if [ -z "$files" ]; then
+            echo "No newman_failed.txt files found!"
+            echo "newman_failed_any=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          for f in $files; do
+            echo "Checking $f"
             if grep -q true "$f"; then
               found_failure=true
               break
@@ -691,12 +710,6 @@ jobs:
       group: reports-deploy
       cancel-in-progress: false
     steps:
-      - name: Download PHP 8.2 HTMLExtra report
-        uses: actions/download-artifact@v5
-        with:
-          name: docker_newman_report-8.2
-          path: reports/php-8.2
- 
       - name: Download PHP 8.3 HTMLExtra report
         uses: actions/download-artifact@v5
         with:
@@ -705,10 +718,8 @@ jobs:
  
       - name: Prepare versioned HTMLExtra report
         run: |
-          mkdir -p final_reports/reports/${{ github.run_id }}/php-8.2
           mkdir -p final_reports/reports/${{ github.run_id }}/php-8.3
  
-          cp reports/php-8.2/report.html final_reports/reports/${{ github.run_id }}/php-8.2/report.html
           cp reports/php-8.3/report.html final_reports/reports/${{ github.run_id }}/php-8.3/report.html
 
       - name: Clone gh-pages branch
@@ -836,13 +847,11 @@ jobs:
             #   MESSAGE+="you MUST meet with the **CTO / Team Lead / DevOps** to approve and add it to the gitleaks ignore list."
             #   ;;
             newman_failed)
-              PHP82_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.2/report.html"
               PHP83_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.3/report.html"
               MESSAGE=":x: **Newman Tests Failed!**\n"
               MESSAGE+="**PR:** $PR_TITLE\n"
               MESSAGE+="PR Link: <$PR_URL>\n"
               MESSAGE+="CI Run: <$RUN_URL>\n"
-              MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
               MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
               MESSAGE+="Maintainer: <@1362087975906967736>\n"
               MESSAGE+="Author: $DISCORD_MENTION"
@@ -858,13 +867,11 @@ jobs:
               MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
               ;;
             success)
-              PHP82_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.2/report.html"
               PHP83_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.3/report.html"
               MESSAGE=":white_check_mark: **CI Passed Successfully**\n"
               MESSAGE+="**PR:** $PR_TITLE\n"
               MESSAGE+="PR Link: <$PR_URL>\n"
               MESSAGE+="CI Run: <$RUN_URL>\n"
-              MESSAGE+="PHP 8.2 Report: <$PHP82_URL>\n"
               MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
               MESSAGE+="<@1355093873323671742>\n"
               MESSAGE+=" **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
