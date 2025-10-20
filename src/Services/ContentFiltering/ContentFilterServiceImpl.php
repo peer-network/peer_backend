@@ -62,7 +62,7 @@ class ContentFilterServiceImpl {
      * @param ContentType $showingContent
      * @param int|null $showingContentReportAmount
      * @param string|null $currentUserId
-     * @param string|null $targetUserId
+     * @param string|null $targetId
      * @param string|null $visibilityStatus
      * @return ContentFilteringAction|null
      */
@@ -71,19 +71,30 @@ class ContentFilterServiceImpl {
         ContentType $showingContent,
         ?int $showingContentReportAmount = null,
         ?string $currentUserId = null,
-        ?string $targetUserId = null,
+        ?string $targetId = null,
         ?string $visibilityStatus = null,
     ): ?ContentFilteringAction {
-
-        if (( $visibilityStatus === "hidden" ||
-            ( $visibilityStatus === "normal" && $showingContentReportAmount >= $this->getReportsAmountToHideContent($showingContent))) && 
+        if ($visibilityStatus === null) {
+            if ($showingContentReportAmount === null && $this->contentFilterBy === $this->contentSeverityLevels[0]) {
+                if ($currentUserId && $currentUserId == $targetId) {
+                    $strategy = ContentFilteringStrategyFactory::create(ContentFilteringStrategies::myprofile);
+                } else {
+                    $strategy = ContentFilteringStrategyFactory::create($this->contentFilterStrategyTag);
+                }
+                if ($strategy === null) {
+                    return null;
+                }
+                return $strategy::getAction($contentTarget, $showingContent);
+            }
+        } else {
+            if (( $visibilityStatus === "hidden" || ( $visibilityStatus === "normal" && $showingContentReportAmount >= $this->getReportsAmountToHideContent($showingContent))) && 
             $this->contentFilterBy === $this->contentSeverityLevels[0]
         ) {
             $strategy = ContentFilteringStrategyFactory::create(
                 $this->contentFilterStrategyTag
             );
 
-            if ($currentUserId && $currentUserId == $targetUserId) {
+            if ($currentUserId && $currentUserId == $targetId) {
                 $strategy = ContentFilteringStrategyFactory::create(ContentFilteringStrategies::myprofile);
             }
             
@@ -91,6 +102,7 @@ class ContentFilterServiceImpl {
                 return null;
             }
             return $strategy::getAction($contentTarget, $showingContent);
+        }
         }
         return null;
     }

@@ -5,6 +5,7 @@ namespace Fawaz\App\Specs;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use function PHPUnit\Framework\returnArgument;
 
 
 /**
@@ -33,28 +34,72 @@ final class HiddenContentFilteringSpecificationFactory {
         private readonly ContentFilterServiceImpl $contentFilterService
     ) {}
 
-    public function build(ContentType $type, ContentFilteringAction $action): ?SpecificationSQLData
-    {
+    public function build(
+        ContentType $type, 
+        ?ContentFilteringAction $action,
+        string $targetId,
+    ): ?SpecificationSQLData {
         $paramsToPrepare = [];
         $whereClauses = [];
 
-        switch ($action) {
-            case ContentFilteringAction::replaceWithPlaceholder:
+        if ($action === ContentFilteringAction::hideContent) {
+            switch ($type) {
+            case ContentType::user:
+                $whereClauses[] = "
+                NOT EXISTS (
+                    SELECT 1
+                    FROM users HiddenContentFiltering_users
+                    LEFT JOIN users_info HiddenContentFiltering_users_info ON HiddenContentFiltering_users_info.userid = HiddenContentFiltering_users.userid
+                    WHERE HiddenContentFiltering_users.userid = :targetId
+                    AND (
+                        (HiddenContentFiltering_users_info.reports >= :user_report_amount_to_hide AND HiddenContentFiltering_users.visibility_status = 'normal')
+                        OR 
+                        HiddenContentFiltering_users.visibility_status = 'hidden'
+                    )
+                )";
+                $paramsToPrepare["user_report_amount_to_hide"] = $this->contentFilterService->getReportsAmountToHideContent(ContentType::user);
+                $paramsToPrepare["targetId"] = $targetId;
+                break;
+            case ContentType::post:
+                $whereClauses[] = "
+                NOT EXISTS (
+                    SELECT 1
+                    FROM posts HiddenContentFiltering_posts
+                    LEFT JOIN post_info HiddenContentFiltering_post_info ON HiddenContentFiltering_post_info.userid = HiddenContentFiltering_posts.userid
+                    WHERE HiddenContentFiltering_posts.postid = :targetId
+                    AND (
+                        (HiddenContentFiltering_post_info.reports >= :post_report_amount_to_hide AND HiddenContentFiltering_posts.visibility_status = 'normal')
+                        OR 
+                        HiddenContentFiltering_posts.visibility_status = 'hidden'
+                    )
+                )";
+                $paramsToPrepare["post_report_amount_to_hide"] = $this->contentFilterService->getReportsAmountToHideContent(ContentType::post);
+                $paramsToPrepare["targetId"] = $targetId;
+            case ContentType::comment:
+                $whereClauses[] = "
+                NOT EXISTS (
+                    SELECT 1
+                    FROM comments HiddenContentFiltering_comments 
+                    LEFT JOIN comment_info HiddenContentFiltering_comment_info ON HiddenContentFiltering_comment_info.userid = HiddenContentFiltering_comments.userid
+                    WHERE HiddenContentFiltering_comments.commentid = :targetId
+                    AND (
+                        (HiddenContentFiltering_comment_info.reports >= :comment_report_amount_to_hide AND HiddenContentFiltering_comments.visibility_status = 'normal')
+                        OR 
+                        HiddenContentFiltering_comments.visibility_status = 'hidden'
+                    )
+                )";
+                $paramsToPrepare["comment_report_amount_to_hide"] = $this->contentFilterService->getReportsAmountToHideContent(ContentType::comment);
+                $paramsToPrepare["targetId"] = $targetId;
+                break;
+            default:
                 return null;
-            case ContentFilteringAction::hideContent:
-                $paramsToPrepare["($type->value)_report_amount_to_hide"] = $this->contentFilterService->getReportsAmountToHideContent($type);
-                switch ($type) {
-                case ContentType::user:
-                    $whereClauses[] = '((ui.reports < :user_report_amount_to_hide) OR u.userid = :currentUserId)';
-                    break;
-                case ContentType::post:
-                    $whereClauses[] = '((pi.reports < :post_report_amount_to_hide) OR p.userid = :currentUserId)';
-                    break;
-                case ContentType::comment:
-                    $whereClauses[] = '((ci.reports < :comment_report_amount_to_hide) OR c.userid = :currentUserId)';
-                    break;
-                }
+            }
+        } else {
+            return null;
         }
-        return new SpecificationSQLData($whereClauses, $paramsToPrepare);
+        return new SpecificationSQLData(
+            $whereClauses, 
+            $paramsToPrepare
+        );
     }
 }

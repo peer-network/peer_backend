@@ -3,9 +3,19 @@
 namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
-use Fawaz\App\Specs\ProfileSpecsFactory;
+use Fawaz\App\Specs\ContentFilteringSpecsFactory;
+use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
+use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\HideIllegalContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\IllegalContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\InactiveUserSpec;
+use Fawaz\App\Specs\SpecTypes\PlaceholderIllegalContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\PlaceholderInactiveUserSpec;
 use Fawaz\App\ValidationException;
 use Fawaz\Database\Interfaces\ProfileRepository;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\ErrorResponse;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
@@ -19,7 +29,7 @@ final class ProfileServiceImpl implements ProfileService
     public function __construct(
         protected PeerLoggerInterface $logger,
         protected ProfileRepository $profileRepository,
-        protected ProfileSpecsFactory $profileSpecsFactory
+        protected ContentFilteringSpecsFactory $contentFilteringSpecsFactory
     ) {}
 
     public function setCurrentUserId(string $userId): void {
@@ -30,9 +40,35 @@ final class ProfileServiceImpl implements ProfileService
         $this->logger->info('ProfileService.Profile started');
         
         $userId = $args['userid'] ?? $this->currentUserId;
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-        $specs = $this->profileSpecsFactory->build($this->currentUserId, $userId, $contentFilterBy);
+        $inactiveUserSpec = new InactiveUserSpec(
+            $userId, 
+            ContentFilteringAction::replaceWithPlaceholder
+        );
+        $basicUserSpec = new BasicUserSpec(
+            $userId,
+            ContentFilteringAction::replaceWithPlaceholder
+        );
+
+        
+        $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
+            ContentFilteringStrategies::searchById,
+            $args['contentFilterBy'] ?? null,
+            $this->currentUserId,
+            $userId,
+            ContentType::user,
+            ContentType::user
+        );
+        
+        // illegal: placeholder if visibility_status === 'illegal'
+        $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
+
+        $specs = [
+            $inactiveUserSpec,
+            $basicUserSpec,
+            $usersHiddenContentFilterSpec,
+            $placeholderIllegalContentFilterSpec
+        ];
 
         try {
             $profileData = $this->profileRepository->fetchProfileData(
@@ -43,7 +79,7 @@ final class ProfileServiceImpl implements ProfileService
 
             if (!$profileData) {
                 $this->logger->warning('Query.resolveProfile User not found');
-                return self::respondWithErrorObject(21001);
+                return self::respondWithErrorObject(31007);
             }
             
             ProfileReplacer::placeholderProfile($profileData, $specs);

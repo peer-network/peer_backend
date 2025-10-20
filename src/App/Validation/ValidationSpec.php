@@ -118,11 +118,11 @@ class ValidationSpec
                 continue;
             }
 
-            // Heuristics: fields that look like identifiers → UUID validator
-            $low = strtolower($field);
-            if ($low === 'id' || str_ends_with($low, 'id')) {
-                $spec = array_replace($spec, self::uuid($field, $required));
-            }
+            // // Heuristics: fields that look like identifiers → UUID validator
+            // $low = strtolower($field);
+            // if ($low === 'id' || str_ends_with($low, 'id')) {
+            //     $spec = array_replace($spec, self::uuid($field, $required));
+            // }
         }
 
         return $spec;

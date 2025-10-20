@@ -9,7 +9,7 @@ use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
@@ -35,36 +35,35 @@ final class HiddenContentFilterSpec implements Specification
 
     public function toSql(): ?SpecificationSQLData
     {
-        if ($this->contentFilterService->getContentFilterAction(
+        $action = $this->contentFilterService->getContentFilterAction(
             $this->contentTarget,
             $this->showingContent,
             null,
             $this->currentUserId, 
             $this->targetUserId
-        ) === ContentFilteringAction::hideContent) {
-            return (new HiddenContentFilteringSpecificationFactory(
-                $this->contentFilterService
-            ))->build(
-                ContentType::user,
-                ContentFilteringAction::hideContent
-            );
-        }
-        return null;
+        );
+
+        return (new HiddenContentFilteringSpecificationFactory(
+            $this->contentFilterService
+        ))->build(
+            ContentType::user,
+            $action,
+            $this->targetUserId,
+        );
     }
 
     public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern
     {
-        if ($subject instanceof ProfileReplaceable) {
-            if ($this->contentFilterService->getContentFilterAction(
-                $this->contentTarget,
+        $action = $this->contentFilterService->getContentFilterAction(
+            $this->contentTarget,
                 $this->showingContent,
-                null,
+                $subject->getReports(),
                 $this->currentUserId, 
                 $this->targetUserId,
                 $subject->visibilityStatus()
-            ) === ContentFilteringAction::replaceWithPlaceholder) {
+        );
+        if ($subject instanceof ProfileReplaceable && $action === ContentFilteringAction::replaceWithPlaceholder) {
                 return ContentReplacementPattern::hidden;
-            }
         }
         return null;
     }

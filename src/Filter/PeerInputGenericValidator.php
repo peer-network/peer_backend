@@ -134,8 +134,8 @@ class PeerInputGenericValidator
     protected function Uuid(mixed $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'uuid';
-        if ($value === null || $value === '') {
-            return true;
+        if ($value !== null && $value === '') {
+            return false;
         }
         if (!is_string($value)) {
             $this->pushError($options, $fieldKey, '30201');

@@ -2,7 +2,7 @@
 
 namespace Fawaz\App\Specs;
 
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;

@@ -11,7 +11,7 @@ use Fawaz\App\CommentAdvanced;
 use Fawaz\App\Commented;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
@@ -144,10 +144,10 @@ class CommentMapper
                 u.img,
                 CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
                 CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
-                ci.count_content_moderation_dismissed AS comment_count_content_moderation_dismissed,
                 ui.reports AS user_reports,
                 u.status AS user_status,
+                u.visibility_status as user_visibility_status,
+                c.visibility_status as comment_visibility_status,
                 ci.reports AS comment_reports
                 FROM comments c
             LEFT JOIN %s
@@ -171,9 +171,7 @@ class CommentMapper
             $this->logger->info("Fetched comments for post counter", ['row' => $row]);
             // here to decide if to replace comment/user content or not
             $user_reports = (int)$row['user_reports'];
-            $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
             $comment_reports = (int)$row['comment_reports'];
-            $comment_dismiss_moderation_amount = (int)$row['comment_count_content_moderation_dismissed'];
 
 
             if ($row['user_status'] != 0) {
@@ -187,7 +185,8 @@ class CommentMapper
                 ContentType::user,
                 $user_reports,
                 $currentUserId,
-                $row['uid']
+                $row['uid'],
+                $row['user_visibility_status']
             ) == ContentFilteringAction::replaceWithPlaceholder) {
                 $replacer = ContentReplacementPattern::hidden;
                 $row['username'] = $replacer->username();
@@ -199,7 +198,8 @@ class CommentMapper
                 ContentType::comment,
                 $comment_reports,
                 $currentUserId,
-                $row['uid']
+                $row['uid'],
+                $row['comment_visibility_status']
             ) == ContentFilteringAction::replaceWithPlaceholder) {
                 $replacer = ContentReplacementPattern::hidden;
                 $row['content'] = $replacer->commentContent();

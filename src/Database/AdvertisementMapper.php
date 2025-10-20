@@ -12,7 +12,7 @@ use Fawaz\App\Role;
 use Fawaz\App\Status;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;

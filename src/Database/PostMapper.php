@@ -18,7 +18,7 @@ use Fawaz\App\Status;
 use Fawaz\App\User;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\App\ValidationException;
@@ -187,7 +187,7 @@ class PostMapper
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::myprofile,
+            ContentFilteringStrategies::searchById,
             $contentFilterBy
         );
 
@@ -200,7 +200,7 @@ class PostMapper
                 sub.media, 
                 sub.createdat,
                 pi.reports AS post_reports,
-                pi.count_content_moderation_dismissed AS post_count_content_moderation_dismissed
+                p.visibility_status as post_visibility_status
             FROM (
                 SELECT p.*, ROW_NUMBER() OVER (PARTITION BY p.contenttype ORDER BY p.createdat DESC) AS row_num
                 FROM posts p
@@ -226,14 +226,14 @@ class PostMapper
 
         foreach ($unfidtered_result as $row) {
             $post_reports = (int)$row['post_reports'];
-            $post_dismiss_moderation_amount = (int)$row['post_count_content_moderation_dismissed'];
 
             if ($contentFilterService->getContentFilterAction(
                 ContentType::post,
                 ContentType::post,
                 $post_reports,
                 $currentUserId,
-                $row['userid']
+                $row['userid'],
+                $row['post_visibility_status']
             ) == ContentFilteringAction::replaceWithPlaceholder) {
                 $replacer = ContentReplacementPattern::hidden;
                 $row['title'] = $replacer->postTitle();
@@ -544,8 +544,7 @@ class PostMapper
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit  = min(max((int)($args['limit']  ?? 10), 1), 20);
 
-        $post_report_amount_to_hide     = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
-        $post_dismiss_moderation_amount = ConstantsConfig::contentFiltering()['DISMISSING_MODERATION_COUNT_TO_RESTORE_TO_IOS']['POST'];
+        $post_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
 
         $trenddays = 7;
 
@@ -560,7 +559,6 @@ class PostMapper
         $tags     = $args['tags']     ?? [];
         $postId   = $args['postid']   ?? null;
         $userId   = $args['userid']   ?? null;
-
         $contentFilterService = new ContentFilterServiceImpl(
             ContentFilteringStrategies::postFeed,
             $contentFilterBy
@@ -622,16 +620,19 @@ class PostMapper
             ContentType::post,
             ContentType::post
         ) === ContentFilteringAction::hideContent) {
-            $params['post_report_amount_to_hide']     = $post_report_amount_to_hide;
-            $params['post_dismiss_moderation_amount'] = $post_dismiss_moderation_amount;
-            $whereClauses[] = '(
-                p.userid = :currentUserId
-                OR (
-                    pi.reports < :post_report_amount_to_hide
-                    OR pi.count_content_moderation_dismissed > :post_dismiss_moderation_amount
-                )
-            )';
-        }
+            $params['post_report_amount_to_hide'] = $post_report_amount_to_hide;
+            $whereClauses[] = "NOT EXISTS (
+                    SELECT 1
+                    FROM posts HiddenContentFiltering_posts
+                    LEFT JOIN post_info HiddenContentFiltering_post_info ON HiddenContentFiltering_post_info.postid = HiddenContentFiltering_posts.postid
+                    WHERE HiddenContentFiltering_posts.postid = p.postid
+                    AND (
+                        (HiddenContentFiltering_post_info.reports >= :post_report_amount_to_hide AND HiddenContentFiltering_posts.visibility_status = 'normal')
+                        OR 
+                        HiddenContentFiltering_posts.visibility_status = 'hidden'
+                    )
+                )";
+            }
 
         // Filter: Content-Typ / Beziehungen / Viewed
         if (!empty($filterBy) && is_array($filterBy)) {
@@ -740,15 +741,15 @@ class PostMapper
                     p.media,
                     p.cover,
                     p.mediadescription,
+                    p.visibility_status as post_visibility_status,
                     p.createdat AS createdat,
                     u.username,
                     u.slug,
                     u.img AS userimg,
                     u.status AS userstatus,
+                    u.visibility_status as user_visibility_status,
 
                     -- Moderations-/Report-Daten
-                    MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
-                    MAX(pi.count_content_moderation_dismissed) AS post_count_content_moderation_dismissed,
                     MAX(ui.reports) AS user_reports,
                     MAX(pi.reports) AS post_reports,
 
@@ -809,8 +810,8 @@ class PostMapper
                 )
                 GROUP BY
                     p.postid, p.userid, p.contenttype, p.title, p.media, p.cover,
-                    p.mediadescription, p.createdat,
-                    u.username, u.slug, userimg, userstatus
+                    p.mediadescription, p.createdat, p.visibility_status,
+                    u.username, u.slug, userimg, userstatus, u.visibility_status
             )
             SELECT * FROM base_posts
             $orderByClause
@@ -833,14 +834,14 @@ class PostMapper
 
                 // User-Placeholder anwenden, falls nötig
                 $user_reports = (int)$row['user_reports'];
-                $user_dismiss = (int)$row['user_count_content_moderation_dismissed'];
 
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::post,
                     ContentType::user,
                     $user_reports,
                     $currentUserId,
-                    $row['userid']
+                    $row['userid'],
+                    $row['user_visibility_status']
                 ) === ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer       = ContentReplacementPattern::hidden;
                     $row['username'] = $replacer->username();
@@ -998,10 +999,10 @@ class PostMapper
                         u.slug, 
                         u.img, 
                         u.status, 
+                        u.visibility_status as user_visibility_status,
                         (f1.followerid IS NOT NULL) AS isfollowing,
                         (f2.followerid IS NOT NULL) AS isfollowed,
-                        COALESCE(ui.reports, 0) AS user_reports,
-                        COALESCE(ui.count_content_moderation_dismissed, 0) AS user_count_content_moderation_dismissed
+                        COALESCE(ui.reports, 0) AS user_reports
                     FROM $needleTable uv 
                     LEFT JOIN users u ON u.uid = uv.userid
                     LEFT JOIN users_info ui ON ui.userid = u.uid  
@@ -1035,15 +1036,16 @@ class PostMapper
             foreach ($userResults as $key => $prt) {
                 if ($contentFilterService !== null) {
                     $user_reports = (int)($prt['user_reports'] ?? 0);
-                    $user_dismiss_moderation_amount = (int)($prt['user_count_content_moderation_dismissed'] ?? 0);
 
                     $action = $contentFilterService->getContentFilterAction(
                         ContentType::post,
                         ContentType::user,
                         $user_reports,
                         $currentUserId,
-                        $prt['uid']
+                        $prt['uid'],
+                        $prt['user_visibility_status']
                     );
+
                     if ($action === ContentFilteringAction::replaceWithPlaceholder) {
                         $replacer = ContentReplacementPattern::hidden;
                         $prt['username'] = $replacer->username();

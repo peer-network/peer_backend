@@ -2,64 +2,63 @@
 
 namespace Fawaz\App\Specs\SpecTypes;
 
+use Fawaz\App\Specs\IllegalContentFilteringSpecificationFactory;
 use Fawaz\App\Specs\Specification;
-use Fawaz\App\Specs\HiddenContentFilteringSpecificationFactory;
 use Fawaz\App\Specs\SpecificationSQLData;
-use Fawaz\App\Status;
-use Fawaz\Services\ContentFiltering\Capabilities\HasVisibilityStatus;
+use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
-use Fawaz\Services\ContentFiltering\Types\ContentType;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 
 final class IllegalContentFilterSpec implements Specification
 {
     private ContentFilterServiceImpl $contentFilterService;
-
     public function __construct(
-        ContentFilteringStrategies $strategy, 
-        ?string $contentFilterBy,
+        ContentFilteringStrategies $strategy,
         private string $currentUserId,
-        private string $targetUserId,
+        private string $targetId,
         private ContentType $contentTarget,
         private ContentType $showingContent,
     ) {
         $this->contentFilterService = new ContentFilterServiceImpl(
-            $strategy,
-            $contentFilterBy
+            $strategy
         );
     }
 
     public function toSql(): ?SpecificationSQLData
     {
-        if ($this->contentFilterService->getContentFilterAction(
+        $action = $this->contentFilterService->getContentFilterAction(
             $this->contentTarget,
             $this->showingContent,
             null,
             $this->currentUserId, 
-            $this->targetUserId
-        ) === ContentFilteringAction::hideContent) {
-            return (new HiddenContentFilteringSpecificationFactory(
-                $this->contentFilterService
-            ))->build(
-                ContentType::user,
-                ContentFilteringAction::hideContent
-            );
-        }
-        return null;
+            $this->targetId
+        );
+
+        return IllegalContentFilteringSpecificationFactory::build(
+            $this->showingContent,
+            $action,
+            $this->targetId,
+        );
     }
 
     public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern
     {
-        if ($subject instanceof ProfileReplaceable) {
-            if ($subject->visibilityStatus() === 'illegal') {
+        $action = $this->contentFilterService->getContentFilterAction(
+            $this->contentTarget,
+                $this->showingContent,
+                $subject->getReports(),
+                $this->currentUserId, 
+                $this->targetId,
+                $subject->visibilityStatus()
+        );
+        if ($subject instanceof ProfileReplaceable && $action === ContentFilteringAction::replaceWithPlaceholder) {
                 return ContentReplacementPattern::illegal;
-            }
         }
         return null;
     }

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\ContentFiltering\Replaceables;
 
+use Fawaz\Services\ContentFiltering\Capabilities\HasActiveReports;
+use Fawaz\Services\ContentFiltering\Capabilities\HasVisibilityStatus;
+
 /**
  * Marker interface for post-like subjects that can be replaced/masked.
  */
-interface PostReplaceable {}
+interface PostReplaceable extends HasVisibilityStatus, HasActiveReports {}
 

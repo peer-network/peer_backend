@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\App\Specs\SpecTypes\ActiveUserSpec;
+use Fawaz\App\Specs\ContentFilteringSpecsFactory;
 use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
+use Fawaz\App\Specs\SpecTypes\HideIllegalContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\InactiveUserSpec;
+use Fawaz\App\Specs\SpecTypes\IllegalContentFilterSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -14,7 +17,7 @@ use Fawaz\Database\WalletMapper;
 use Fawaz\Mail\UserWelcomeMail;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ResponseHelper;
@@ -37,7 +40,8 @@ class UserService
         protected PostMapper $postMapper,
         protected WalletMapper $walletMapper,
         protected Mailer $mailer,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected ContentFilteringSpecsFactory $contentFilteringSpecsFactoryy
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -320,23 +324,13 @@ class UserService
 
     public function verifyReferral(string $referralString): array
     {
-        if (empty($referralString)) {
-            return self::respondWithError(31010); // Invalid referral string
-        }
-
-        if (!self::isValidUUID($referralString)) {
-            return self::respondWithError(31010);
-        }
         try {
-            $activeUserSpec = new ActiveUserSpec($referralString);
-            $userRolesSpec = new BasicUserSpec($referralString);
-        
-            $userSpecs = [
-                $activeUserSpec,
-                $userRolesSpec
+            $specs = [
+                new InactiveUserSpec($referralString, ContentFilteringAction::hideContent),
+                new BasicUserSpec($referralString,ContentFilteringAction::hideContent)
             ];
         
-            $users = $this->userMapper->getValidReferralInfoByLink($referralString, $userSpecs);
+            $users = $this->userMapper->getValidReferralInfoByLink($referralString, $specs);
 
             if (!$users) {
                 return self::respondWithError(31007); // No valid referral information found
@@ -348,8 +342,6 @@ class UserService
                 $userObj,
                 false // no counter needed for object/associative array
             );
-
-
         } catch (\Throwable $e) {
             $this->logger->error('Error verifying referral info.', ['exception' => $e]);
             return self::respondWithError(41013); // Error while retriving Referral Info
@@ -764,9 +756,6 @@ class UserService
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::postFeed
-        );
 
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);

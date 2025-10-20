@@ -47,11 +47,8 @@ use Fawaz\App\ValidationException;
 use Fawaz\App\ModerationService;
 use Fawaz\App\Status;
 use Fawaz\App\Validation\RequestValidator;
-use Fawaz\App\Validation\ValidationSpec;
 use Fawaz\App\Validation\ValidatorErrors;
 use Fawaz\App\Profile;
-use function PHPUnit\Framework\returnArgument;
-use Fawaz\Utils\ErrorResponse;
 
 class GraphQLSchemaBuilder
 {
@@ -2599,7 +2596,7 @@ class GraphQLSchemaBuilder
             'verifyAccount' => fn (mixed $root, array $args) => $this->verifyAccount($args['userid']),
             'login' => fn (mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn (mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
-            'verifyReferralString' => fn (mixed $root, array $args) => $this->userService->verifyReferral($args['referralString']),
+            'verifyReferralString' => fn (mixed $root, array $args) => $this->resolveVerifyReferral($args),
             'updateUserPreferences' => fn (mixed $root, array $args) => $this->userService->updateUserPreferences($args),
             'updateUsername' => fn (mixed $root, array $args) => $this->userService->setUsername($args),
             'updateEmail' => fn (mixed $root, array $args) => $this->userService->setEmail($args),
@@ -3862,12 +3859,26 @@ class GraphQLSchemaBuilder
         if ($result instanceof Profile) {
             $this->logger->info('Query.resolveProfile successful');
             return $this::createSuccessResponse(
-                11002,
+                11008,
                 $result->getArrayCopy(),
                 false
             );
         } 
         return $result->response;
+    }
+
+    protected function resolveVerifyReferral(array $args): array {
+
+        $this->logger->debug('Query.resolveVerifyReferral started');
+        $referralString = $args['referralString'];
+
+        if (empty($referralString) || !$this->isValidUUID($referralString)) {
+            return self::respondWithError(31010); // Invalid referral string
+        }
+
+        $result = $this->userService->verifyReferral($referralString);
+        
+        return $result;
     }
 
     protected function resolveFriends(array $args): ?array

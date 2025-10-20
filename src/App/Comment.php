@@ -11,7 +11,7 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\Hashable;
 use Fawaz\Utils\HashObject;
 
-class Comment extends Model implements Hashable, \Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable
+class Comment extends Model implements Hashable
 {
     use HashObject;
 

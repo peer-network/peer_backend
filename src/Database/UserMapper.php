@@ -17,7 +17,7 @@ use Fawaz\App\Tokenize;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\DateService;
@@ -223,7 +223,7 @@ class UserMapper
                 u.createdat,
                 u.updatedat,
                 ui.reports AS user_reports,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed
+                u.visibility_status
             FROM 
                 users u
             LEFT JOIN users_info ui ON uid = ui.userid
@@ -276,13 +276,14 @@ class UserMapper
                 $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
                     $user_reports = (int)$row['user_reports'];
-                    $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+
                     if ($contentFilterService->getContentFilterAction(
                         ContentType::user,
                         ContentType::user,
                         $user_reports,
                         $currentUserId,
-                        $row['uid']
+                        $row['uid'],
+                        $row['visibility_status']
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
                         $replacer = ContentReplacementPattern::hidden;
                         $row['username'] = $replacer->username();
@@ -333,7 +334,7 @@ class UserMapper
         $trenddays = 7;
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::myprofile,
+            ContentFilteringStrategies::searchById,
             $contentFilterBy
         );
 
@@ -362,7 +363,7 @@ class UserMapper
                 u.createdat,
                 u.updatedat,
                 ui.reports AS user_reports,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
+                u.visibility_status,
                 COALESCE((
                     SELECT COUNT(p.postid)
                     FROM posts p
@@ -454,13 +455,14 @@ class UserMapper
                 $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
                     $user_reports = (int)$row['user_reports'];
-                    $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
+
                     if ($contentFilterService->getContentFilterAction(
                         ContentType::user,
                         ContentType::user,
                         $user_reports,
                         $currentUserId,
-                        $row['uid']
+                        $row['uid'],
+                        $row['visibility_status']
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
                         $replacer = ContentReplacementPattern::hidden;
                         $row['username'] = $replacer->username();
@@ -798,7 +800,7 @@ class UserMapper
         $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::myprofile,
+            ContentFilteringStrategies::searchById,
             $contentFilterBy
         );
 
@@ -813,7 +815,7 @@ class UserMapper
                     u.biography, 
                     u.img,
                     ui.reports AS user_reports,
-                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed
+                    u.visibility_status
                 FROM follows f1 
                 INNER JOIN follows f2 ON f1.followedid = f2.followerid 
                 INNER JOIN users u ON f1.followedid = u.uid 
@@ -838,7 +840,6 @@ class UserMapper
 
             foreach ($friends as $row) {
                 $user_reports = (int)$row['user_reports'];
-                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
 
                 $frdObj = (new User($row, [], false))->getArrayCopy();
 
@@ -850,6 +851,9 @@ class UserMapper
                     ContentType::user,
                     ContentType::user,
                     $user_reports,
+                    null,
+                    $userId,
+                    $row['visibility_status']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::hidden;
                     $row['username'] = $replacer->username();
@@ -881,7 +885,7 @@ class UserMapper
         $this->logger->debug("UserMapper.fetchFollowers started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::myprofile,
+            ContentFilteringStrategies::searchById,
             $contentFilterBy
         );
 
@@ -894,7 +898,7 @@ class UserMapper
                     u.status,
                     u.img,
                     ui.reports AS user_reports,
-                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
+                    u.visibility_status,
                     EXISTS (
                         SELECT 1 
                         FROM follows ff 
@@ -928,14 +932,14 @@ class UserMapper
 
             foreach ($uniqueResults as $row) {
                 $user_reports = (int)$row['user_reports'];
-                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
 
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
                     $user_reports,
                     $currentUserId,
-                    $row['uid']
+                    $row['uid'],
+                    $row['visibility_status']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::hidden;
                     $row['username'] = $replacer->username();
@@ -968,7 +972,7 @@ class UserMapper
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::myprofile,
+            ContentFilteringStrategies::searchById,
             $contentFilterBy
         );
 
@@ -981,7 +985,7 @@ class UserMapper
                     u.img,
                     u.status,
                     ui.reports AS user_reports,
-                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
+                    u.visibility_status,
                     EXISTS (
                         SELECT 1 
                         FROM follows ff 
@@ -1015,14 +1019,14 @@ class UserMapper
 
             foreach ($uniqueResults as $row) {
                 $user_reports = (int)$row['user_reports'];
-                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
 
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
                     $user_reports,
                     $currentUserId,
-                    $row['uid']
+                    $row['uid'],
+                    $row['visibility_status']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::hidden;
                     $row['username'] = $replacer->username();
@@ -1052,7 +1056,7 @@ class UserMapper
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::myprofile,
+            ContentFilteringStrategies::searchById,
             $contentFilterBy
         );
 
@@ -1072,7 +1076,7 @@ class UserMapper
                 ui.amountfriends,
                 ui.amountblocked,
                 ui.reports AS user_reports,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
+                u.visibility_status,
                 COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
@@ -1094,14 +1098,14 @@ class UserMapper
 
             if ($data !== false) {
                 $user_reports = (int)$data['user_reports'];
-                $user_dismiss_moderation_amount = (int)$data['user_count_content_moderation_dismissed'];
 
                 if ($contentFilterService->getContentFilterAction(
                     ContentType::user,
                     ContentType::user,
                     $user_reports,
                     $currentUserId,
-                    $data['uid']
+                    $data['uid'],
+                    $data['user_visibility_status']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::hidden;
                     $data['username'] = $replacer->username();
@@ -1989,8 +1993,8 @@ class UserMapper
     {
         $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
-        $params = $allSpecs->paramsToPrepare;
         $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
         $whereClauses[] = "ur.referral_uuid = :referral_uuid";
 
         $this->logger->debug("UserMapper.getValidReferralInfoByLink started", [

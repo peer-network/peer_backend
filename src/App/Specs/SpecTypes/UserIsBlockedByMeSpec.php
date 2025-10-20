@@ -4,7 +4,7 @@ namespace Fawaz\App\Specs\SpecTypes;
 
 use Fawaz\App\Specs\Specification;
 use Fawaz\App\Specs\SpecificationSQLData;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
+use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
