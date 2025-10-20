@@ -120,13 +120,35 @@ jobs:
           done
           echo "SQL file check passed."
 
+  mirror_newman_image:
+    name: Mirror Newman to GHCR (if missing)
+    runs-on: ubuntu-latest
+    needs: [check_branch_sync]
+    if: needs.check_branch_sync.outputs.is_behind == 'false'
+    steps:
+      - name: Log in to GHCR (Jakob's token)
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u jakobPeer --password-stdin
+
+      - name: Pull and Push Newman Image to GHCR
+        run: |
+          set -e
+          IMAGE="ghcr.io/peer-network/newman:alpine"
+          if docker pull $IMAGE >/dev/null 2>&1; then
+            echo "Newman image already exists on GHCR, skipping mirror."
+          else
+            echo "Newman image not found on GHCR — mirroring now..."
+            docker pull postman/newman:alpine
+            docker tag postman/newman:alpine $IMAGE
+            docker push $IMAGE
+          fi
+
   build_and_test:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
     needs: [
       check_branch_sync,
       # gitleaks_scan_staged
-      validate_sql_files, phpstan_analysis 
+      validate_sql_files, phpstan_analysis, mirror_newman_image 
     ]
     if: 
       needs.check_branch_sync.outputs.is_behind == 'false'
