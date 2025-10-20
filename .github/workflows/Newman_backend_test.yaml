@@ -121,34 +121,33 @@ jobs:
           echo "SQL file check passed."
 
   mirror_newman_image:
-    name: Mirror Newman to GHCR (if missing)
+    name: Mirror or Build Newman to GHCR (self-healing)
     runs-on: ubuntu-latest
     needs: [check_branch_sync]
     if: needs.check_branch_sync.outputs.is_behind == 'false'
     steps:
-      - name: Log in to GHCR (Jakob's token)
+      - name: Log in to GHCR (Jakob token)
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u jakobPeer --password-stdin
 
-      - name: Pull and Push Newman Image to GHCR (with retries)
+      - name: Pull or Build Newman Image
         run: |
           set -e
           IMAGE="ghcr.io/peer-network/newman:alpine"
 
           echo "Checking if Newman image already exists on GHCR..."
           if docker pull $IMAGE >/dev/null 2>&1; then
-            echo "GHCR image already exists — skipping mirror."
+            echo "GHCR image already exists — skipping mirror/build."
             exit 0
           fi
 
-          echo "GHCR image not found — starting mirror from Docker Hub..."
-
+          echo "GHCR image not found — attempting to mirror from Docker Hub..."
           for i in 1 2 3 4 5; do
             echo "Attempt $i to pull from Docker Hub..."
             if docker pull postman/newman:alpine; then
-              echo "Successfully pulled from Docker Hub on attempt $i"
+              echo "Pulled from Docker Hub successfully on attempt $i."
               docker tag postman/newman:alpine $IMAGE
               docker push $IMAGE
-              echo "Successfully mirrored to GHCR"
+              echo "Successfully mirrored to GHCR."
               exit 0
             else
               echo "Docker Hub pull failed (attempt $i). Retrying in 30s..."
@@ -156,8 +155,18 @@ jobs:
             fi
           done
 
-          echo "All attempts to pull from Docker Hub failed. Exiting."
-          exit 1
+          echo "All attempts to pull from Docker Hub failed — building image locally..."
+          cat <<'DOCKERFILE' > Dockerfile.newman
+          FROM alpine:3.19
+          RUN apk add --no-cache nodejs npm git bash
+          RUN npm install -g --unsafe-perm --no-progress newman newman-reporter-htmlextra
+          WORKDIR /etc/newman
+          ENTRYPOINT ["newman"]
+          DOCKERFILE
+
+          docker build -t $IMAGE -f Dockerfile.newman .
+          docker push $IMAGE
+          echo "Built and pushed fallback Newman image to GHCR successfully."
 
   build_and_test:
     name: Build And Run Postman Tests
