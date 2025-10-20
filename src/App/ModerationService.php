@@ -50,22 +50,28 @@ class ModerationService
      */
     public function getModerationStats(): array
     {
-        if (!$this->isAuthorized()) {
-            $this->logger->warning("Unauthorized access attempt to get moderation stats by user ID: {$this->currentUserId}");
-            return self::respondWithError(0000); // Unauthorized access attempt to get moderation stats
+        try{
+            
+            if (!$this->isAuthorized()) {
+                $this->logger->warning("Unauthorized access attempt to get moderation stats by user ID: {$this->currentUserId}");
+                return self::respondWithError(0000); // Unauthorized access attempt to get moderation stats
+            }
+
+            $amountAwaitingReview = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[0])->count();
+            $amountHidden = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[1])->count();
+            $amountRestored = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[2])->count();
+            $amountIllegal = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[3])->count();
+
+            return self::createSuccessResponse(0000, [ // Moderation stats retrieved successfully
+                'AmountAwaitingReview' => $amountAwaitingReview,
+                'AmountHidden' => $amountHidden,
+                'AmountRestored' => $amountRestored,
+                'AmountIllegal' => $amountIllegal,
+            ], false);
+        }catch(\Exception $e){
+            $this->logger->error("Error getting moderation stats: " . $e->getMessage());
+            return self::respondWithError(0000);
         }
-
-        $amountAwaitingReview = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[0])->count();
-        $amountHidden = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[1])->count();
-        $amountRestored = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[2])->count();
-        $amountIllegal = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[3])->count();
-
-        return self::createSuccessResponse(0000, [ // Moderation stats retrieved successfully
-            'AmountAwaitingReview' => $amountAwaitingReview,
-            'AmountHidden' => $amountHidden,
-            'AmountRestored' => $amountRestored,
-            'AmountIllegal' => $amountIllegal,
-        ], false);
     }
 
     /**
@@ -73,100 +79,106 @@ class ModerationService
      */
     public function getModerationItems(array $args): array
     {
-        if (!$this->isAuthorized()) {
-            $this->logger->warning("Unauthorized access attempt to get moderation items by user ID: {$this->currentUserId}");
-            return self::respondWithError(0000); // Unauthorized access attempt to get moderation items
+        try {
+            if (!$this->isAuthorized()) {
+                $this->logger->warning("Unauthorized access attempt to get moderation items by user ID: {$this->currentUserId}");
+                return self::respondWithError(0000); // Unauthorized access attempt to get moderation items
+            }
+
+            $page = max((int)($args['offset'] ?? 1), 0);
+            $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+            $statuses = array_keys(ConstantsModeration::contentModerationStatus());
+
+            $items = ModerationTicket::query();
+
+            // Apply Status filters
+            if (isset($args['status']) && in_array($args['status'], $statuses)) {
+                $items = $items->where('moderation_tickets.status', $args['status']);
+            }
+
+            // Apply Target Type filters
+            if (isset($args['contentType']) && in_array($args['contentType'], array_keys(ConstantsModeration::CONTENT_MODERATION_TARGETS))) {
+                $items = $items->where('moderation_tickets.contenttype', $args['contentType']);
+            }
+
+            $items = $items->orderByValue('status', 'ASC', $statuses)
+                            ->orderBy('reportscount', 'DESC')
+                            ->orderBy('createdat', 'DESC')
+                            ->latest()
+                            ->paginate($page, $limit);
+
+            $items['data'] = array_map(function ($item) {
+                $userReport = UserReport::query()
+                                        ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
+                                        ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
+                                        ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
+                                        ->select(
+                                            'user_reports.reportid',
+                                            'user_reports.reporter_userid',
+                                            'user_reports.targetid',
+                                            'user_reports.targettype',
+                                            'user_reports.message',
+                                            'user_reports.moderationid',
+                                            'posts.postid as post_postid', // Need to refactor this later
+                                            'posts.userid',
+                                            'posts.contenttype',
+                                            'posts.title',
+                                            'posts.mediadescription',
+                                            'posts.media',
+                                            'posts.cover',
+                                            'posts.options',
+                                            'comments.userid',
+                                            'comments.parentid',
+                                            'comments.content',
+                                            'target_user.uid as target_user_uid',
+                                            'target_user.username as target_user_username',
+                                            'target_user.email as target_user_email',
+                                            'target_user.img as target_user_img',
+                                            'target_user.slug as target_user_slug',
+                                            'target_user.status as target_user_status',
+                                            'target_user.biography as target_user_biography',
+                                            'target_user.updatedat as target_user_updatedat',
+                                        )
+                                        ->where('moderationticketid', $item['uid'])
+                                        ->latest()
+                                        ->first();
+
+
+                $targetContent = $this->mapTargetContent($userReport);
+
+                // Get all reporters for the ModerationTicket
+                $reporters = UserReport::query()
+                                        ->join('users', 'user_reports.reporter_userid', '=', 'users.uid')
+                                        ->select(
+                                            'users.uid',
+                                            'users.username',
+                                            'users.email',
+                                            'users.img',
+                                            'users.slug',
+                                            'users.status as userstatus',
+                                            'users.biography',
+                                            'users.updatedat',
+                                        )
+                                        ->where('moderationticketid', $item['uid'])
+                                        ->latest()
+                                        ->all();
+
+                $item['reporters'] = array_map(function ($reporter) {
+                    return (new User($reporter, [], false))->getArrayCopy();
+                }, $reporters);
+
+                $item['targetcontent'] = $targetContent['targetcontent'];
+                $item['targettype'] = $targetContent['targettype'];
+
+                return $item;
+            }, $items['data']);
+
+            return self::createSuccessResponse(0000, $items['data'], true); // Moderation items retrieved successfully
+
+        } catch (\Exception $e) {
+            $this->logger->error("Error getting moderation items: " . $e->getMessage());
+            return self::respondWithError(0000);
         }
-
-        $page = max((int)($args['offset'] ?? 1), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-        $statuses = array_keys(ConstantsModeration::contentModerationStatus());
-
-        $items = ModerationTicket::query();
-
-        // Apply Status filters
-        if (isset($args['status']) && in_array($args['status'], $statuses)) {
-            $items = $items->where('moderation_tickets.status', $args['status']);
-        }
-
-        // Apply Target Type filters
-        if (isset($args['contentType']) && in_array($args['contentType'], array_keys(ConstantsModeration::CONTENT_MODERATION_TARGETS))) {
-            $items = $items->where('moderation_tickets.contenttype', $args['contentType']);
-        }
-
-        $items = $items->orderByValue('status', 'ASC', $statuses)
-                        ->orderBy('reportscount', 'DESC')
-                        ->orderBy('createdat', 'DESC')
-                        ->latest()
-                        ->paginate($page, $limit);
-
-        $items['data'] = array_map(function ($item) {
-            $userReport = UserReport::query()
-                                    ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
-                                    ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
-                                    ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
-                                    ->select(
-                                        'user_reports.reportid',
-                                        'user_reports.reporter_userid',
-                                        'user_reports.targetid',
-                                        'user_reports.targettype',
-                                        'user_reports.message',
-                                        'user_reports.moderationid',
-                                        'posts.postid as post_postid', // Need to refactor this later
-                                        'posts.userid',
-                                        'posts.contenttype',
-                                        'posts.title',
-                                        'posts.mediadescription',
-                                        'posts.media',
-                                        'posts.cover',
-                                        'posts.options',
-                                        'comments.userid',
-                                        'comments.parentid',
-                                        'comments.content',
-                                        'target_user.uid as target_user_uid',
-                                        'target_user.username as target_user_username',
-                                        'target_user.email as target_user_email',
-                                        'target_user.img as target_user_img',
-                                        'target_user.slug as target_user_slug',
-                                        'target_user.status as target_user_status',
-                                        'target_user.biography as target_user_biography',
-                                        'target_user.updatedat as target_user_updatedat',
-                                    )
-                                    ->where('moderationticketid', $item['uid'])
-                                    ->latest()
-                                    ->first();
-
-
-            $targetContent = $this->mapTargetContent($userReport);
-
-            // Get all reporters for the ModerationTicket
-            $reporters = UserReport::query()
-                                    ->join('users', 'user_reports.reporter_userid', '=', 'users.uid')
-                                    ->select(
-                                        'users.uid',
-                                        'users.username',
-                                        'users.email',
-                                        'users.img',
-                                        'users.slug',
-                                        'users.status as userstatus',
-                                        'users.biography',
-                                        'users.updatedat',
-                                    )
-                                    ->where('moderationticketid', $item['uid'])
-                                    ->latest()
-                                    ->all();
-
-            $item['reporters'] = array_map(function ($reporter) {
-                return (new User($reporter, [], false))->getArrayCopy();
-            }, $reporters);
-
-            $item['targetcontent'] = $targetContent['targetcontent'];
-            $item['targettype'] = $targetContent['targettype'];
-
-            return $item;
-        }, $items['data']);
-
-        return self::createSuccessResponse(0000, $items['data'], true); // Moderation items retrieved successfully
     }
 
     /**

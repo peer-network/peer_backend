@@ -14,7 +14,6 @@ class Profile
     protected string $username;
     protected int $status;
     protected int $slug;
-    protected int $rolesmask;
     protected ?string $img;
     protected ?string $biography;
     protected ?int $amountposts;
@@ -42,7 +41,6 @@ class Profile
         $this->username = $data['username'] ?? '';
         $this->status = $data['status'] ?? 0;
         $this->slug = $data['slug'] ?? 0;
-        $this->rolesmask = $data['roles_mask'] ?? 0;
         $this->img = $data['img'] ?? '';
         $this->biography = $data['biography'] ?? '';
         $this->amountposts = $data['amountposts'] ?? 0;
@@ -75,7 +73,6 @@ class Profile
             'status' => $this->status,
             'slug' => $this->slug,
             'img' => $this->img,
-            'roles_mask' => $this->rolesmask,
             'biography' => $this->biography,
             'amountposts' => $this->amountposts,
             'amounttrending' => $this->amounttrending,

@@ -812,13 +812,6 @@ class UserService
                 $profileData["{$type}posts"] = array_filter($posts, fn ($post) => $post['contenttype'] === $type);
             }
 
-            /**
-             * Map Role Mask 
-             */
-            if(Role::mapRolesMaskToNames($profileData['roles_mask'])[0]){
-                $role = Role::mapRolesMaskToNames($profileData['roles_mask'])[0];
-            }
-            $profileData['role'] = $role ?? 'USER';
 
             $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
             return $this::createSuccessResponse(11008, $profileData, false);

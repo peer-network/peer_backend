@@ -249,7 +249,6 @@ type Profile {
   biography: String
   isfollowed: Boolean
   isfollowing: Boolean
-  role: String
   amountposts: Int
   amounttrending: Int
   amountfollowed: Int

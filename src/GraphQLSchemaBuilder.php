@@ -327,6 +327,9 @@ class GraphQLSchemaBuilder
                 'userroles' => function (array $root): int {
                     return $root['userroles'] ?? 0;
                 },
+                'userRoleString' => function (array $root): string {
+                    return  $root['userRoleString'] ?? '';
+                },
                 'currentVersion' => function (array $root): string {
                     return $root['currentVersion'] ?? '1.2.0';
                 },
@@ -537,9 +540,6 @@ class GraphQLSchemaBuilder
                 },
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
-                },
-                'role' => function (array $root): string {
-                    return (string)($root['role'] ?? '');
                 },
                 'imageposts' => function (array $root): array {
                     return $root['imageposts'] ?? [];
@@ -2645,8 +2645,17 @@ class GraphQLSchemaBuilder
 
         $lastMergedPullRequestNumber = LastGithubPullRequestNumberProvider::getValue();
 
+        /**
+         * Map Role Mask 
+         */
+        if(Role::mapRolesMaskToNames($this->userRoles)[0]){
+            $userRole = Role::mapRolesMaskToNames($this->userRoles)[0];
+        }
+        $userRoleString = $userRole ?? 'USER';
+
         return [
             'userroles' => $this->userRoles,
+            'userRoleString' => $userRoleString,
             'currentuserid' => $this->currentUserId,
             'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
             'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
