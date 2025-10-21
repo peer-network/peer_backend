@@ -159,10 +159,6 @@
         "comment": "Success: SWAP Transaction has been marked as PAID.",
         "userFriendlyComment": "Swap transaction marked as paid."
     },
-    "11215": {
-        "comment": "Success: Successfully retrieved transaction history.",
-        "userFriendlyComment": "Transaction history loaded successfully."
-    },
     "11216": {
         "comment": "Success: Successfully retrieved Peer token price.",
         "userFriendlyComment": "Peer token price retrieved successfully."
