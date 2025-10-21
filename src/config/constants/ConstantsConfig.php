@@ -419,6 +419,14 @@ class ConstantsConfig implements ConstantsConfigInterface
             'MIN' => 0,
             'MAX' => 2147483647,
         ],
+        'POST_OFFSET' => [
+            'MIN' => 0,
+            'MAX' => 2147483647,
+        ],
+        'POST_LIMIT' => [
+            'MIN' => 0,
+            'MAX' => 200,
+        ],
         'LIMIT' => [
             'MIN' => 1,
             'MAX' => 20,

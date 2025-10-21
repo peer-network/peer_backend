@@ -278,15 +278,28 @@ class PeerInputGenericValidator
     // Validate a single offset/limit-like field based on options['field']
     protected function validateOffsetAndLimit(int $value, array $options = []): bool
     {
+        // Options normalisations
+        // - normalise field name to lowercase
+        // - accept common typo 'litim' as 'limit'
+        // - accept snake_case by removing underscores (e.g., post_offset)
         $field = $options['field'] ?? null;
+        if (is_string($field)) {
+            $normalized = strtolower($field);
+            // remove underscores to support snake_case variants
+            $field = $normalized;
+            // reflect normalised field back into options for consistent error keys
+            $options['field'] = $field;
+        }
 
-        // Accept common typo 'litim' as 'limit'
-        
         $paging = ConstantsConfig::paging();
         $minOffset = (int)$paging['OFFSET']['MIN'];
         $maxOffset = (int)$paging['OFFSET']['MAX'];
+        $minPostOffset = (int)$paging['POST_OFFSET']['MIN'];
+        $maxPostOffset = (int)$paging['POST_OFFSET']['MAX'];
         $minLimit = (int)$paging['LIMIT']['MIN'];
         $maxLimit = (int)$paging['LIMIT']['MAX'];
+        $minPostLimit = (int)$paging['POST_LIMIT']['MIN'];
+        $maxPostLimit = (int)$paging['POST_LIMIT']['MAX'];
 
         $num = (int)$value;
 
@@ -307,15 +320,15 @@ class PeerInputGenericValidator
                 break;
 
             case $field === 'postoffset':
-                if ($num < $minOffset || $num > $maxOffset) {
-                    $this->pushError($options, $field, '30203');
+                if ($num < $minPostOffset || $num > $maxPostOffset) {
+                    $this->pushError($options, $field, '30214');
                     return false;
                 }
                 break;
 
             case $field === 'postlimit':
-                if ($num < $minLimit || $num > $maxLimit) {
-                    $this->pushError($options, $field, '30204');
+                if ($num < $minPostLimit || $num > $maxPostLimit) {
+                    $this->pushError($options, $field, '30205');
                     return false;
                 }
                 break;
