@@ -47,6 +47,45 @@ INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('dbe72768-0d47-4d29-9
 
 INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('dbe72768-0d47-4d29-99e7-b6ec4eadfaa3', null, '[]');
 
+
+
+
+
+-- tester04-illegal
+INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, visibility_status)
+VALUES ('00000000-0000-0000-0000-000000000004', 'tester04@tester.de', 'tester04',
+'$argon2id$v=19$m=65536,t=3,p=2$OXF0NlY5R09xRDRXLkREaw$E/P8IL1rNIRboG0Bl39kkNm9ozcoVxtNH/6NogztAD0', 0, 1, 00004, 0, '75.50.101.245',
+'/profile/00000000-0000-0000-0000-000000000004.jpg','/userData/00000000-0000-0000-0000-000000000004.txt','illegal');
+
+INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('00000000-0000-0000-0000-000000000004', 0, 0, 0);
+
+INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
+VALUES ('00000000-0000-0000-0000-000000000004', 100000, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
+
+
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('00000000-0000-0000-0000-000000000004', 100000, 0);
+
+INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('00000000-0000-0000-0000-000000000004', null, '[]');
+
+
+-- tester05-hidden
+INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, visibility_status)
+VALUES ('00000000-0000-0000-0000-000000000005', 'tester05@tester.de', 'tester05',
+'$argon2id$v=19$m=65536,t=3,p=2$OXF0NlY5R09xRDRXLkREaw$E/P8IL1rNIRboG0Bl39kkNm9ozcoVxtNH/6NogztAD0', 0, 1, 00005, 0, '75.50.101.245',
+'/profile/00000000-0000-0000-0000-000000000005.jpg','/userData/00000000-0000-0000-0000-000000000005.txt','hidden');
+
+INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('00000000-0000-0000-0000-000000000005', 0, 0, 0);
+
+INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
+VALUES ('00000000-0000-0000-0000-000000000005', 100000, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
+
+
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('00000000-0000-0000-0000-000000000005', 100000, 0);
+
+INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('00000000-0000-0000-0000-000000000005', null, '[]');
+
+
+
 -- burn_account
 INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
 VALUES ('7e0b2d21-d2b0-4af5-8b73-5f8efc04b11f', 'burn@system.com', 'burn_account',
