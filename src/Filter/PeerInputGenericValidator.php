@@ -58,6 +58,7 @@ class PeerInputGenericValidator
                     if (!isset($options['field'])) {
                         $options['field'] = $field;
                     }
+                    // Debug output removed
                     if (method_exists($this, $validatorName)) {
                         if (!$this->$validatorName($this->data[$field], $options)) {
                             // Respect chain breaking if provided; individual validators push specific errors
@@ -126,7 +127,11 @@ class PeerInputGenericValidator
     protected function pushError(array $options, string $defaultField, string $defaultCode): void
     {
         $fieldKey = $options['field'] ?? $defaultField;
-        $code = (string)($options['errorCode'] ?? $defaultCode);
+        if ($options['errorCode'] !== 0) {
+            $code = (string)($options['errorCode']);    
+        } else {
+            $code = $defaultCode;
+        }
         $this->errors[$fieldKey][] = $code;
     }
 
@@ -265,6 +270,86 @@ class PeerInputGenericValidator
         if (!preg_match('/' . $passwordConfig['PATTERN'] . '/u', $value)) {
             $this->pushError($options, $fieldKey, '30226');
             return false;
+        }
+
+        return true;
+    }
+
+    // Validate a single offset/limit-like field based on options['field']
+    protected function validateOffsetAndLimit(int $value, array $options = []): bool
+    {
+        $field = $options['field'] ?? null;
+
+        // Accept common typo 'litim' as 'limit'
+        
+        $paging = ConstantsConfig::paging();
+        $minOffset = (int)$paging['OFFSET']['MIN'];
+        $maxOffset = (int)$paging['OFFSET']['MAX'];
+        $minLimit = (int)$paging['LIMIT']['MIN'];
+        $maxLimit = (int)$paging['LIMIT']['MAX'];
+
+        $num = (int)$value;
+
+        // Determine range and error code based on the specific field
+        switch (true) {
+            case $field === 'offset':
+                if ($num < $minOffset || $num > $maxOffset) {
+                    $this->pushError($options, $field, '30203');
+                    return false;
+                }
+                break;
+
+            case $field === 'limit':
+                if ($num < $minLimit || $num > $maxLimit) {
+                    $this->pushError($options, $field, '30204');
+                    return false;
+                }
+                break;
+
+            case $field === 'postoffset':
+                if ($num < $minOffset || $num > $maxOffset) {
+                    $this->pushError($options, $field, '30203');
+                    return false;
+                }
+                break;
+
+            case $field === 'postlimit':
+                if ($num < $minLimit || $num > $maxLimit) {
+                    $this->pushError($options, $field, '30204');
+                    return false;
+                }
+                break;
+
+            case $field === 'commentoffset':
+                if ($num < $minOffset || $num > $maxOffset) {
+                    $this->pushError($options, $field, '30215');
+                    return false;
+                }
+                break;
+
+            case $field === 'commentlimit':
+                if ($num < $minLimit || $num > $maxLimit) {
+                    $this->pushError($options, $field, '30216');
+                    return false;
+                }
+                break;
+
+            case $field === 'messageoffset':
+                if ($num < $minOffset || $num > $maxOffset) {
+                    $this->pushError($options, $field, '30219');
+                    return false;
+                }
+                break;
+
+            case $field === 'messagelimit':
+                if ($num < $minLimit || $num > $maxLimit) {
+                    $this->pushError($options, $field, '30220');
+                    return false;
+                }
+                break;
+
+            default:
+                $this->pushError($options, $field, '40301');
         }
 
         return true;

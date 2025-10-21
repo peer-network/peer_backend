@@ -10,6 +10,17 @@ namespace Fawaz\App\Validation;
  */
 class ValidationSpec
 {
+    public static function offsetAndLimit(string $field, bool $required = false, int $errorCode = 00000): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateOffsetAndLimit', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
     public static function uuid(string $field, bool $required = false, int $errorCode = 30201): array
     {
         return [
@@ -108,6 +119,15 @@ class ValidationSpec
             'email' => fn(string $f, bool $r) => self::email($f, $r),
             'username' => fn(string $f, bool $r) => self::username($f, $r),
             'password' => fn(string $f, bool $r) => self::password($f, $r),
+
+            'offset' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'limit' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'postOffset' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'postLimit' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'commentOffset' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'commentLimit' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'messageOffset' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'messageLimit' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
         ];
 
         $spec = [];

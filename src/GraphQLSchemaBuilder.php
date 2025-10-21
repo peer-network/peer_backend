@@ -3381,14 +3381,17 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
-        }
-
         $this->logger->debug('Query.resolveFollows started');
 
-        $results = $this->userService->Follows($args);
+        $validation = RequestValidator::validate($args);
+
+        if ($validation instanceof ValidatorErrors) { 
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+        
+        $results = $this->userService->Follows($validation);
         if (isset($results['status']) && $results['status'] === 'success') {
             $this->logger->info('Query.resolveFollows successful');
 
@@ -3601,7 +3604,7 @@ class GraphQLSchemaBuilder
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
-        $contentFilterBy = $args['contentFilterBy'];
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $data = array_map(
             fn (PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit, $contentFilterBy),
