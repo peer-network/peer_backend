@@ -153,6 +153,20 @@ INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9
 INSERT INTO action_prices (post_price, like_price, dislike_price, comment_price, currency) 
 VALUES (2.0, 0.30, 0.50, 0.05,'EUR');
 
+-- follows
+-- tester01 follows tester04
+INSERT INTO follows (followerid, followedid)
+VALUES ('b9e94945-abd7-46a5-8c92-59037f1d73bf', '00000000-0000-0000-0000-000000000004');
+-- tester01 follows tester05
+INSERT INTO follows (followerid, followedid)
+VALUES ('b9e94945-abd7-46a5-8c92-59037f1d73bf', '00000000-0000-0000-0000-000000000005');
+-- tester01 follows tester04
+INSERT INTO follows (followerid, followedid)
+VALUES ('00000000-0000-0000-0000-000000000004', 'b9e94945-abd7-46a5-8c92-59037f1d73bf');
+-- tester01 follows tester05
+INSERT INTO follows (followerid, followedid)
+VALUES ('00000000-0000-0000-0000-000000000005', 'b9e94945-abd7-46a5-8c92-59037f1d73bf');
+
 -- adv_post
 INSERT INTO posts (
     postid, userid, feedid, contenttype, title, mediadescription,
