@@ -179,6 +179,10 @@
         "comment": "Success: Successfully returned static tokenomics information",
         "userFriendlyComment": "Tokenomics information loaded successfully"
     },
+    "11215": {
+        "comment": "Success: Successfully retrieved transaction history.",
+        "userFriendlyComment": "Transaction history loaded successfully."
+    },
     "11301": {
         "comment": "Success: Payment completed successfully",
         "userFriendlyComment": "Payment processed successfully!"
@@ -346,6 +350,10 @@
     "11901": {
         "comment": "Success: An email will be sent to your mail address if an account associated with it exists",
         "userFriendlyComment": "If an account exists, you'll receive an email with instructions."
+    },
+    "11902": {
+        "comment": "Success: Reset Password Token is valid",
+        "userFriendlyComment": "Reset Password Token is valid"
     },
     "12001": {
         "comment": "Advertisement post created successfully.",
