@@ -1988,7 +1988,7 @@ class UserMapper
     {
         return $attempt['attempt_count'] === 2
             && !$attempt['collected']
-            && time() < strtotime($attempt['last_attempt'] . ' +5 minutes');
+            && time() < strtotime($attempt['last_attempt'] . ' +10 minutes');
     }
 
     /**
