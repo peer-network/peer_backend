@@ -323,6 +323,10 @@
         "comment": "Success: An email will be sent to your mail address if an account associated with it exists",
         "userFriendlyComment": "If an account exists, you'll receive an email with instructions."
     },
+    "11902": {
+        "comment": "Success: Reset Password Token is valid",
+        "userFriendlyComment": "Reset Password Token is valid"
+    },
     "12001": {
         "comment": "Advertisement post created successfully.",
         "userFriendlyComment": "Success: Advertisement post created successfully."

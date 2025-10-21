@@ -788,7 +788,7 @@ class PostService
 
         $getOnly = $args['getOnly'] ?? null;
         $postOrCommentId = $args['postOrCommentId'] ?? null;
-        $contentFilterBy = $args['contentFilterBy'] ?? 'MYGRANDMAHATES';
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
 
         if ($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])) {
