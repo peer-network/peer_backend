@@ -261,7 +261,8 @@ class PeerTokenMapper
                 //     'message' => $message
                 // ]);
 
-                $this->walletMapper->saveWalletEntry($userId, $requiredAmount, 'DEDUCT');
+                // To defend against atomoicity issues, we will debit first and then create transaction record. $this->walletMapper->saveWalletEntry($userId, $requiredAmount, 'DEDUCT');
+                $this->walletMapper->debitIfSufficient($userId, $requiredAmount);
 
             }
 
@@ -277,8 +278,8 @@ class PeerTokenMapper
                     'transferaction' => 'CREDIT'
                 ]);
 
-                $this->walletMapper->saveWalletEntry($recipient, $numberoftokens);
-
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($recipient, $numberoftokens);
+                $this->walletMapper->credit($recipient, $numberoftokens);
             }
 
             // 3. INVITER: Fees To Inviter (if applicable)
@@ -291,7 +292,8 @@ class PeerTokenMapper
                     'tokenamount' => $inviterWin,
                     'transferaction' => 'INVITER_FEE'
                 ]);
-                $this->walletMapper->saveWalletEntry($inviterId, $inviterWin);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($inviterId, $inviterWin);
+                $this->walletMapper->credit($inviterId, $inviterWin);
 
             }
 
@@ -306,7 +308,8 @@ class PeerTokenMapper
                     'tokenamount' => $feeAmount,
                     'transferaction' => 'POOL_FEE'
                 ]);
-                $this->walletMapper->saveWalletEntry($this->poolWallet, ($feeAmount));
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->poolWallet, $feeAmount);
+                $this->walletMapper->credit($this->poolWallet, ($feeAmount));
 
             }
 
@@ -321,7 +324,9 @@ class PeerTokenMapper
                     'tokenamount' => $peerAmount,
                     'transferaction' => 'PEER_FEE'
                 ]);
-                $this->walletMapper->saveWalletEntry($this->peerWallet, ($peerAmount));
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->peerWallet, $peerAmount);
+                $this->walletMapper->credit($this->peerWallet, $peerAmount);
+
             }
 
             // 6. BURNWALLET: Burn Tokens
@@ -335,7 +340,8 @@ class PeerTokenMapper
                     'tokenamount' => $burnAmount,
                     'transferaction' => 'BURN_FEE'
                 ]);
-                $this->walletMapper->saveWalletEntry($this->burnWallet, ($burnAmount));
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->burnWallet, $burnAmount);
+                $this->walletMapper->credit($this->burnWallet, $burnAmount);
             }
 
             $this->logger->debug('Token transfer completed successfully');
@@ -965,7 +971,9 @@ class PeerTokenMapper
                 //     'tokenamount' => 0 - (float) $requiredAmount,
                 //     'message' => $message,
                 // ]);
-                $this->walletMapper->saveWalletEntry($userId, $requiredAmount, 'DEDUCT');
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($userId, $requiredAmount, 'DEDUCT');
+                $this->walletMapper->debitIfSufficient($userId, $requiredAmount);
+                
             }
 
             // 2. RECIPIENT: Credit To Account to Pool Account
@@ -981,7 +989,8 @@ class PeerTokenMapper
                     'message' => $message,
                     'transferaction' => 'CREDIT'
                 ]);
-                $this->walletMapper->saveWalletEntry($recipient, $numberoftokensToSwap);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($recipient, $numberoftokensToSwap);
+                $this->walletMapper->credit($recipient, $numberoftokensToSwap);
             }
 
 
@@ -995,7 +1004,8 @@ class PeerTokenMapper
                     'tokenamount' => $inviterWin,
                     'transferaction' => 'INVITER_FEE'
                 ]);
-                $this->walletMapper->saveWalletEntry($inviterId, $inviterWin);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method.  $this->walletMapper->saveWalletEntry($inviterId, $inviterWin);
+                $this->walletMapper->credit($inviterId, $inviterWin);
             }
 
             // 4. PEERWALLET: Fee To Account
@@ -1009,7 +1019,8 @@ class PeerTokenMapper
                     'tokenamount' => $peerAmount,
                     'transferaction' => 'PEER_FEE'
                 ]);
-                $this->walletMapper->saveWalletEntry($this->peerWallet, $peerAmount);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method.  $this->walletMapper->saveWalletEntry($this->peerWallet, $peerAmount);
+                $this->walletMapper->credit($this->peerWallet, $peerAmount);
             }
 
             // 5. POOLWALLET: Fee To Account
@@ -1023,7 +1034,8 @@ class PeerTokenMapper
                     'tokenamount' => $feeAmount,
                     'transferaction' => 'POOL_FEE'
                 ]);
-                $this->walletMapper->saveWalletEntry($this->poolWallet, $feeAmount);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->poolWallet, $feeAmount);
+                $this->walletMapper->credit($this->poolWallet, $feeAmount);
             }
 
             // 6. BURNWALLET: Fee Burning Tokens
@@ -1037,7 +1049,8 @@ class PeerTokenMapper
                     'tokenamount' => $burnAmount,
                     'transferaction' => 'BURN_FEE'
                 ]);
-                $this->walletMapper->saveWalletEntry($this->burnWallet, $burnAmount);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->burnWallet, $burnAmount);
+                $this->walletMapper->credit($this->burnWallet, $burnAmount);
             }
 
 
@@ -1062,7 +1075,8 @@ class PeerTokenMapper
 
             // Update BTC Pool
             if ($btcAmountToUser) {
-                $this->walletMapper->saveWalletEntry($this->btcpool, $btcAmountToUser);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->btcpool, $btcAmountToUser);
+                $this->walletMapper->credit($this->btcpool, $btcAmountToUser);
             }
 
             return [

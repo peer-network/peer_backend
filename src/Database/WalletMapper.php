@@ -1508,6 +1508,62 @@ class WalletMapper
     {
         return \bcadd($qValue1, $qValue2);
     }
-    
+
+
+    /**
+     * To Defend against Atomicity issues in concurrent debit operations
+     * This function debits the user's wallet only if sufficient funds are available.
+     */
+    public function debitIfSufficient(string $userId, string $amount): ?string
+    {
+        $sql = "UPDATE wallett                                                                                                                                                                                                                                                             
+                SET liquidity = liquidity - :amt,                                                                                                                                                                                                                                                  
+                updatedat = now()                                                                                                                                                                                                                                                                  
+                WHERE userid = :uid AND liquidity >= :amt                                                                                                                                                                                                                                          
+                RETURNING liquidity";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $stmt->bindValue(':amt', $amount, PDO::PARAM_STR);
+        $stmt->execute();
+        $newBal = $stmt->fetchColumn();
+        if ($newBal === false) {
+            throw new \RuntimeException('Insufficient funds or user not found', 51301);
+        }
+        // Update liquidity using returned balance
+        $liquiditq = (float)$this->decimalToQ64_96((string)$newBal);
+
+        $q = $this->db->prepare("UPDATE wallett SET liquiditq = :liq_q96 WHERE userid = :uid");
+        $q->bindValue(':liq_q96', $liquiditq, PDO::PARAM_STR);
+        $q->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $q->execute();
+
+        return (string) $newBal;
+    }
+
+    /**
+     * Credits the user's wallet and updates with Atomicity in mind
+     */
+    public function credit(string $userId, string $amount): string
+    {
+        $sql = "UPDATE wallett                                                                                                                                                                                                                                                             
+                SET liquidity = liquidity + :amt,                                                                                                                                                                                                                                                  
+                updatedat = now()                                                                                                                                                                                                                                                                  
+                WHERE userid = :uid                                                                                                                                                                                                                                                                
+                RETURNING liquidity";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $stmt->bindValue(':amt', $amount, PDO::PARAM_STR);
+        $stmt->execute();
+        $newBal = $stmt->fetchColumn();
+
+        // Should not be false if userid exists; you may validate existence separately
+        $liquiditq = (float)$this->decimalToQ64_96((string)$newBal);
+
+        $q = $this->db->prepare("UPDATE wallett SET liquiditq = :liq_q96 WHERE userid = :uid");
+        $q->bindValue(':liq_q96', $liquiditq, PDO::PARAM_STR);
+        $q->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $q->execute();
+
+        return (string)$newBal;
+    }
 }
-    
