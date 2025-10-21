@@ -3394,7 +3394,7 @@ class GraphQLSchemaBuilder
 
         $this->logger->debug('Query.resolveFollows started');
 
-        $validation = RequestValidator::validate($args);
+        $validation = RequestValidator::validate($args, []);
 
         if ($validation instanceof ValidatorErrors) { 
             return $this::respondWithError(
@@ -3431,15 +3431,16 @@ class GraphQLSchemaBuilder
 
         $result = $this->profileService->profile($validation);
         
-        if ($result instanceof Profile) {
-            $this->logger->info('Query.resolveProfile successful');
-            return $this::createSuccessResponse(
-                11008,
-                $result->getArrayCopy(),
-                false
-            );
+        if ($result instanceof ErrorResponse) {
+            return $result->response;
         } 
-        return $result->response;
+
+        $this->logger->info('Query.resolveProfile successful');
+        return $this::createSuccessResponse(
+            11008,
+            $result->getArrayCopy(),
+            false
+        );
     }
 
     protected function resolveVerifyReferral(array $args): array {
