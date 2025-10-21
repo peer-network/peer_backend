@@ -2,10 +2,7 @@ extend type Query {
   searchUserAdmin(userid: ID,contentFilterBy: ContentFilterType,email: String,username: String,status: Int,verified: Int,ip: String,offset: Int,limit: Int): UserListResponse! @deprecated(reason: "Use listUsersAdminV2.")
   listUsersAdminV2(contentFilterBy: ContentFilterType,userid: ID,email: String,username: String,status: Int,verified: Int,ip: String,offset: Int,limit: Int): UserListResponse!
   allfriends(offset: Int, limit: Int): AllUserFriends!
-  refreshmarketcap: RefreshMarketCapResponse!
   gemster: GemsterResponse!
-  liquiditypool(userid: ID, postid: ID, fromid: ID, whereby: Int, offset: Int, limit: Int): LiquidityPoolResponse!
-  testingpool(offset: Int, limit: Int): TestingPoolResponse!
   postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
   dailygemstatus: DailyGemStatusResponse!
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
@@ -14,10 +11,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  getpercentbeforetransaction(tokenAmount: Int!): PercentBeforeTransactionResponse!
   globalwins: DefaultResponse!
   gemsters(day: DayFilterType!): GemstersResponse!
-  alphaMint: DefaultResponse
   addLiquidity(amountToken: Decimal!, amountBtc: Decimal!): AddLiquidityResponse!
   updateSwapTranStatus(transactionId: ID!): UpdateSwapResponse!
 }

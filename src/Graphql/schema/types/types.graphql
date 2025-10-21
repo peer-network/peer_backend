@@ -213,32 +213,6 @@ type CommentInfo {
   comments: Int!
 }
 
-type Chat {
-  id: ID!
-  image: String!
-  name: String!
-  createdat: Date
-  updatedat: Date
-  chatmessages: [ChatMessage!]!
-  chatparticipants: [ChatParticipant!]!
-}
-
-type ChatMessage {
-  id: ID!
-  senderid: ID!
-  chatid: ID!
-  content: String!
-  createdat: Date!
-}
-
-type ChatParticipant {
-  userid: ID!
-  img: String!
-  username: String!
-  slug: Int!
-  hasaccess: Int!
-}
-
 type Profile {
   id: ID
   username: String
@@ -459,18 +433,6 @@ type PostInfo {
   saves: Int!
   shares: Int!
   comments: Int!
-}
-
-type ChatMessageInfo {
-  messid: ID
-  chatid: ID
-  userid: ID
-  content: String
-  createdat: Date
-}
-
-type ChatInfo {
-  chatid: ID
 }
 
 type AllUserInfo {

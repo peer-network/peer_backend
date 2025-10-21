@@ -219,7 +219,6 @@ class ContactusMapper
                 'data' => $contact->getArrayCopy(),
             ]);
             throw new \RuntimeException("Unexpected error during contact creation");
-            return null;
         }
     }
 
