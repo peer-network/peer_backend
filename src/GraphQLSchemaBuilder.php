@@ -45,6 +45,7 @@ use Fawaz\App\Status;
 use Fawaz\App\Validation\RequestValidator;
 use Fawaz\App\Validation\ValidatorErrors;
 use Fawaz\App\Profile;
+use Fawaz\Utils\ErrorResponse;
 
 class GraphQLSchemaBuilder
 {
@@ -3392,18 +3393,14 @@ class GraphQLSchemaBuilder
         }
         
         $results = $this->userService->Follows($validation);
-        if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Query.resolveFollows successful');
-
-            return $results;
-        }
-
-        if (isset($results['status']) && $results['status'] === 'error') {
-            return $this::respondWithError($results['ResponseCode']);
-        }
-
-        $this->logger->warning('Query.resolveFollows User not found');
-        return $this::createSuccessResponse(21001);
+        
+        
+        if ($results instanceof ErrorResponse) {
+            return $results->response;
+        } 
+        
+        $this->logger->info('Query.resolveProfile successful');
+        return $results;
     }
 
     protected function resolveProfile(array $args): array

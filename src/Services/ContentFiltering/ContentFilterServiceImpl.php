@@ -93,10 +93,6 @@ class ContentFilterServiceImpl {
             $strategy = ContentFilteringStrategyFactory::create(
                 $this->contentFilterStrategyTag
             );
-
-            if ($currentUserId && $currentUserId == $targetId) {
-                $strategy = ContentFilteringStrategyFactory::create(ContentFilteringStrategies::myprofile);
-            }
             
             if ($strategy === null) {
                 return null;

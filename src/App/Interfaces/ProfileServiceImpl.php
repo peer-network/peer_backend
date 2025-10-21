@@ -40,7 +40,10 @@ final class ProfileServiceImpl implements ProfileService
         $this->logger->info('ProfileService.Profile started');
         
         $userId = $args['userid'] ?? $this->currentUserId;
-
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        
+        $contentFilterStrategy = $userId === $this->currentUserId ? ContentFilteringStrategies::myprofile : ContentFilteringStrategies::searchById;
+        
         $inactiveUserSpec = new InactiveUserSpec(
             $userId, 
             ContentFilteringAction::replaceWithPlaceholder
@@ -52,15 +55,14 @@ final class ProfileServiceImpl implements ProfileService
 
         
         $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
-            ContentFilteringStrategies::searchById,
-            $args['contentFilterBy'] ?? null,
+            $contentFilterStrategy,
+            $contentFilterBy,
             $this->currentUserId,
             $userId,
             ContentType::user,
             ContentType::user
         );
         
-        // illegal: placeholder if visibility_status === 'illegal'
         $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
 
         $specs = [

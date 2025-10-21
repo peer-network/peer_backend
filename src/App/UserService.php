@@ -6,9 +6,11 @@ namespace Fawaz\App;
 
 use Fawaz\App\Specs\ContentFilteringSpecsFactory;
 use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
+use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
 use Fawaz\App\Specs\SpecTypes\HideIllegalContentFilterSpec;
 use Fawaz\App\Specs\SpecTypes\InactiveUserSpec;
 use Fawaz\App\Specs\SpecTypes\IllegalContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\PlaceholderIllegalContentFilterSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -17,9 +19,13 @@ use Fawaz\Database\WalletMapper;
 use Fawaz\Mail\UserWelcomeMail;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+use Fawaz\Services\ContentFiltering\Replacers\ProfileReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\Mailer;
+use Fawaz\Utils\ErrorResponse;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
@@ -748,7 +754,7 @@ class UserService
         }
     }
 
-    public function Follows(?array $args = []): array
+    public function Follows(?array $args = []): array | ErrorResponse
     {
         $this->logger->debug('UserService.Follows started');
 
@@ -765,9 +771,59 @@ class UserService
             $this->logger->warning('User not found for Follows', ['userId' => $userId]);
             return self::respondWithError(31007);
         }
+
+        $inactiveUserSpec = new InactiveUserSpec(
+            $userId, 
+            ContentFilteringAction::replaceWithPlaceholder
+        );
+        $basicUserSpec = new BasicUserSpec(
+            $userId,
+            ContentFilteringAction::replaceWithPlaceholder
+        );
+
+        
+        $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
+            ContentFilteringStrategies::searchById,
+            $contentFilterBy,
+            $this->currentUserId,
+            $userId,
+            ContentType::user,
+            ContentType::user
+        );
+        
+        // illegal: placeholder if visibility_status === 'illegal'
+        $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
+
+        $specs = [
+            $inactiveUserSpec,
+            $basicUserSpec,
+            $usersHiddenContentFilterSpec,
+            $placeholderIllegalContentFilterSpec
+        ];
+
         try {
-            $followers = $this->userMapper->fetchFollowers($userId, $this->currentUserId, $offset, $limit, $contentFilterBy);
-            $following = $this->userMapper->fetchFollowing($userId, $this->currentUserId, $offset, $limit, $contentFilterBy);
+            $followers = $this->userMapper->fetchFollowers(
+                $userId, 
+                $this->currentUserId, 
+                $specs,
+                $offset, 
+                $limit, 
+                $contentFilterBy
+                
+            );
+            $following = $this->userMapper->fetchFollowing(
+                $userId, 
+                $this->currentUserId, 
+                $offset, 
+                $limit, 
+                $contentFilterBy,
+            );
+
+            foreach ($followers as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ProfileReplacer::placeholderProfile($profile, $specs);
+                }
+            }
 
             $counter = count($followers) + count($following);
 
@@ -777,7 +833,7 @@ class UserService
                 'ResponseCode' => "11101",
                 'affectedRows' => [
                     'followers' => array_map(
-                        fn (ProfilUser $follower) => $follower->getArrayCopy(),
+                        fn (Profile $follower) => $follower->getArrayCopy(),
                         $followers
                     ),
                     'following' => array_map(
@@ -786,9 +842,12 @@ class UserService
                     )
                 ]
             ];
+        } catch (\PDOException $e) {
+            $this->logger->error('Database Error: Failed to fetch followers or following data', ['error' => $e->getMessage()]);
+            return self::respondWithErrorObject(41104);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch followers or following data', ['error' => $e->getMessage()]);
-            return self::respondWithError(41104);
+            return self::respondWithErrorObject(41104);
         }
     }
 

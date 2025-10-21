@@ -12,7 +12,6 @@ class ProfileReplacer
      * Returns a new Profile object with placeholdered content, leaving the original unchanged.
      */
     public static function placeholderProfile(ProfileReplaceable &$profile, array $specs){
-
         $replacerSpecs = array_values(
         array_filter(
             array_map(
@@ -21,11 +20,10 @@ class ProfileReplacer
             fn($v) => $v !== null
             )
         );
-
+        
         if (empty($replacerSpecs)) {
             return;
         }
-        
         $pattern = $replacerSpecs[0];
 
         $profile->setBiography($pattern->userBiography());

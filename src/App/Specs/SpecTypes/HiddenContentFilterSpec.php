@@ -47,8 +47,7 @@ final class HiddenContentFilterSpec implements Specification
             $this->contentFilterService
         ))->build(
             ContentType::user,
-            $action,
-            $this->targetUserId,
+            $action
         );
     }
 
