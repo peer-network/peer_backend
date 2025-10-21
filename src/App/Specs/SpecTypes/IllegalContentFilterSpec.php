@@ -44,8 +44,7 @@ final class IllegalContentFilterSpec implements Specification
         // default aliases.
         return IllegalContentFilteringSpecificationFactory::build(
             $this->showingContent,
-            $action,
-            null,
+            $action
         );
     }
 
