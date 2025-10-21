@@ -15,7 +15,7 @@ type ListAdvertisementPostsResponse {
 
 type HelloResponse {
   currentuserid: ID
-  userroles: String!
+  userroles: Int!
   userRoleString: String!
   currentVersion: String
   wikiLink: String

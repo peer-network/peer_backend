@@ -131,7 +131,7 @@ class GraphQLSchemaBuilder
             Executor::setDefaultFieldResolver([$this, 'fieldResolver']);
             return $resultSchema;
         } catch (\Throwable $e) {
-            $this->logger->critical('Invalid schema', ['schema' => $schema]);
+            $this->logger->critical('Invalid schema', ['schema' => $schema, 'exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
         }
     }
