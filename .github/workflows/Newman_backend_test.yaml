@@ -769,6 +769,7 @@ jobs:
           is_behind="${{ needs.check_branch_sync.outputs.is_behind }}"
           phpstan_result="${{ needs.phpstan_analysis.result }}"
           sql_result="${{ needs.validate_sql_files.result }}"
+          trivy_result="${{ needs.trivy_scan.result }}"
           # gitleaks_result="${{ needs.gitleaks_scan_staged.result }}" # uncomment when re-enabling Gitleaks
 
           type="none"
@@ -786,6 +787,8 @@ jobs:
             type="other_failure"
           elif [ "$outcome" == "success" ]; then
             type="success"
+          elif [ "$trivy_result" == "failure" ]; then
+            type="trivy_failed"
           fi
 
           echo "type=$type" >> $GITHUB_OUTPUT
@@ -857,6 +860,19 @@ jobs:
               MESSAGE+="Author: $DISCORD_MENTION"
               MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
               ;;
+            trivy_failed)
+              MESSAGE=":x: **Trivy Security Scan Failed**\n"
+              MESSAGE+="**PR:** $PR_TITLE\n"
+              MESSAGE+="PR Link: <$PR_URL>\n"
+              MESSAGE+="CI Run: <$RUN_URL>\n"
+              MESSAGE+="Maintainer: <@1362087975906967736>\n"
+              MESSAGE+="Author: $DISCORD_MENTION\n\n"
+              MESSAGE+=":warning: **Critical or High vulnerabilities or secrets were detected by Trivy.**\n"
+              MESSAGE+="You can:\n"
+              MESSAGE+="- [View the Trivy Security Reports Artifact in the Actions tab](<$RUN_URL>)\n"
+              MESSAGE+="- Check files: \`trivy_reports/image.txt\`, \`filesystem_vuln.txt\`, and \`secrets.txt\`.\n"
+              MESSAGE+="\nIf these findings are false positives or dependency issues, contact the DevOps team to review and whitelist where appropriate."
+              ;;
             success)
               PHP82_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.2/report.html"
               PHP83_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.3/report.html"
@@ -880,10 +896,26 @@ jobs:
   final_check:
     name: Fail workflow if needed
     runs-on: ubuntu-latest
-    needs: [aggregate_outcome]
-    if: always() && needs.aggregate_outcome.outputs.final_outcome != 'success'
+    needs: [aggregate_outcome, trivy_scan]
+    if: always()
     steps:
       - run: |
-          echo "Failing workflow to block merge (reason: ${{ needs.aggregate_outcome.outputs.final_outcome }})"
+          overall="${{ needs.aggregate_outcome.outputs.final_outcome }}"
+          trivy_result="${{ needs.trivy_scan.result }}"
+
+          echo "Aggregate outcome: $overall"
+          echo "Trivy result: $trivy_result"
+
+          if [ "$overall" != "success" ] && [ "$trivy_result" == "failure" ]; then
+            echo "Workflow failed — both Newman/tests and Trivy failed."
           exit 1
+          elif [ "$overall" != "success" ]; then
+            echo "Workflow failed due to test failure (reason: $overall)"
+            exit 1
+          elif [ "$trivy_result" == "failure" ]; then
+            echo "Workflow failed due to Trivy security scan issues."
+            exit 1
+          else
+            echo "All checks passed successfully."
+          fi
  
