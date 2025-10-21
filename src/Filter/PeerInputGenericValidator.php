@@ -38,6 +38,15 @@ class PeerInputGenericValidator
         $this->errors = [];
 
         foreach ($this->specification as $field => $rules) {
+            // If the field is required but missing from input, record an error
+            if (!isset($this->data[$field])) {
+                if (!empty($rules['required'])) {
+                    // Use a generic "required/missing" error code consistent with existing patterns
+                    $this->errors[$field][] = '30101';
+                }
+                continue;
+            }
+
             if (isset($this->data[$field])) {
                 // Apply filters (transformers) first, if any
                 foreach ($rules['filters'] ?? [] as $filter) {

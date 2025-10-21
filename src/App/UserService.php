@@ -763,13 +763,9 @@ class UserService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-        if (!self::isValidUUID($userId)) {
-            $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
-            return self::respondWithError(30201);
-        }
         if (!$this->userMapper->isUserExistById($userId)) {
             $this->logger->warning('User not found for Follows', ['userId' => $userId]);
-            return self::respondWithError(31007);
+            return self::respondWithErrorObject(31007);
         }
 
         $inactiveUserSpec = new InactiveUserSpec(

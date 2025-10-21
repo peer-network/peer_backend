@@ -106,6 +106,10 @@ class ValidationSpec
             ? $inputKeysOrArgs
             : array_keys($inputKeysOrArgs);
 
+        // Ensure all required keys are present in the spec even if missing from input
+        // so that required-field checks can trigger correctly.
+        $keys = array_values(array_unique(array_merge($keys, $requiredKeys)));
+
         $map = [
             // UUID-like identifiers
             'userid' => fn(string $f, bool $r) => self::uuid($f, $r),

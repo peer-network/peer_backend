@@ -11,12 +11,11 @@ class RequestValidator
     /**
      * Validates input using a Laminas-style specification compatible with PeerInputFilter.
      */
-    public static function validate(array $input): array|ValidatorErrors
+    public static function validate(array $input, array $requiredFields = []): array|ValidatorErrors
     {
-        $spec = ValidationSpec::auto($input);
+        $spec = ValidationSpec::auto($input, $requiredFields);
         $inputFilter = new PeerInputGenericValidator($spec);
         $inputFilter->setData($input);
-
         if ($inputFilter->isValid()) {
             return $inputFilter->getValues();
         }
