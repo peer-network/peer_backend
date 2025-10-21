@@ -14,7 +14,6 @@ use Fawaz\App\Status;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\config\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -849,6 +848,12 @@ class AdvertisementMapper
 
         $whereClauses = ["p.feedid IS NULL"];
         $params = ['currentUserId' => $currentUserId];
+
+        // Show only Valid Content
+        $whereClauses[] = "p.status IN (:postNormalStatus, :postAdvertisementStatus)";
+        $params['postNormalStatus'] = ConstantsConfig::post()['STATUS']['PUBLISHED'];
+        $params['postAdvertisementStatus'] = ConstantsConfig::post()['STATUS']['ADVERTISED'];
+
 
         if ($postId !== null) {
             $whereClauses[] = "p.postid = :postId";

@@ -33,7 +33,6 @@ use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use Fawaz\App\PeerTokenService;
-use Fawaz\App\Role;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -46,6 +45,8 @@ use Fawaz\App\Validation\RequestValidator;
 use Fawaz\App\Validation\ValidatorErrors;
 use Fawaz\App\Profile;
 use Fawaz\Utils\ErrorResponse;
+use Fawaz\App\Role;
+
 
 class GraphQLSchemaBuilder
 {
@@ -136,7 +137,7 @@ class GraphQLSchemaBuilder
             Executor::setDefaultFieldResolver([$this, 'fieldResolver']);
             return $resultSchema;
         } catch (\Throwable $e) {
-            $this->logger->critical('Invalid schema', ['schema' => $schema]);
+            $this->logger->critical('Invalid schema', ['schema' => $schema, 'exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
         }
     }
@@ -319,6 +320,9 @@ class GraphQLSchemaBuilder
                 },
                 'userroles' => function (array $root): int {
                     return $root['userroles'] ?? 0;
+                },
+                'userRoleString' => function (array $root): string {
+                    return  $root['userRoleString'] ?? '';
                 },
                 'currentVersion' => function (array $root): string {
                     return $root['currentVersion'] ?? '1.2.0';
@@ -530,9 +534,6 @@ class GraphQLSchemaBuilder
                 },
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
-                },
-                'role' => function (array $root): string {
-                    return (string)($root['role'] ?? '');
                 },
                 'imageposts' => function (array $root): array {
                     return [];
@@ -2372,8 +2373,17 @@ class GraphQLSchemaBuilder
 
         $lastMergedPullRequestNumber = LastGithubPullRequestNumberProvider::getValue();
 
+        /**
+         * Map Role Mask 
+         */
+        if(Role::mapRolesMaskToNames($this->userRoles)[0]){
+            $userRole = Role::mapRolesMaskToNames($this->userRoles)[0];
+        }
+        $userRoleString = $userRole ?? 'USER';
+
         return [
             'userroles' => $this->userRoles,
+            'userRoleString' => $userRoleString,
             'currentuserid' => $this->currentUserId,
             'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
             'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],

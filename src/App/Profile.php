@@ -15,7 +15,6 @@ class Profile implements ProfileReplaceable
     protected int $status;
     protected int $verified;
     protected int $slug;
-    protected int $rolesmask;
     protected ?string $img;
     protected ?string $biography;
     protected ?int $amountposts;
@@ -69,7 +68,6 @@ class Profile implements ProfileReplaceable
             'verified' => $this->verified,
             'slug' => $this->slug,
             'img' => $this->img,
-            'roles_mask' => $this->rolesmask,
             'biography' => $this->biography,
             'amountposts' => $this->amountposts,
             'amounttrending' => $this->amounttrending,
