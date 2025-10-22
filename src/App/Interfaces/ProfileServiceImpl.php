@@ -3,23 +3,23 @@
 namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
+use Fawaz\App\ValidationException;
 use Fawaz\App\Specs\ContentFilteringSpecsFactory;
 use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
 use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\HideIllegalContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\IllegalContentFilterSpec;
 use Fawaz\App\Specs\SpecTypes\InactiveUserSpec;
 use Fawaz\App\Specs\SpecTypes\PlaceholderIllegalContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\PlaceholderInactiveUserSpec;
-use Fawaz\App\ValidationException;
-use Fawaz\Database\Interfaces\ProfileRepository;
+
+use Fawaz\Services\ContentFiltering\Replacers\ProfileReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+
+use Fawaz\Database\Interfaces\ProfileRepository;
+
 use Fawaz\Utils\ErrorResponse;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
-use Fawaz\Services\ContentFiltering\Replacers\ProfileReplacer;
 
 final class ProfileServiceImpl implements ProfileService
 {
@@ -45,11 +45,9 @@ final class ProfileServiceImpl implements ProfileService
         $contentFilterStrategy = $userId === $this->currentUserId ? ContentFilteringStrategies::myprofile : ContentFilteringStrategies::searchById;
         
         $inactiveUserSpec = new InactiveUserSpec(
-            $userId, 
             ContentFilteringAction::replaceWithPlaceholder
         );
         $basicUserSpec = new BasicUserSpec(
-            $userId,
             ContentFilteringAction::replaceWithPlaceholder
         );
 

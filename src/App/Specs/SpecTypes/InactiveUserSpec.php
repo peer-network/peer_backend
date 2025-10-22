@@ -15,7 +15,6 @@ use Fawaz\Services\ContentFiltering\Types\ContentType;
 final class InactiveUserSpec implements Specification
 {
     public function __construct(
-        private string $userid,
         private ContentFilteringAction $action,
     ) {}
 
@@ -28,11 +27,10 @@ final class InactiveUserSpec implements Specification
                     "EXISTS (
                     SELECT 1
                     FROM users activeUserSpec_users
-                    WHERE activeUserSpec_users.uid = :activeUserSpec_users_userid
+                    WHERE activeUserSpec_users.uid = u.uid
                     AND activeUserSpec_users.status IN (0))"
-                ],[
-                    "activeUserSpec_users_userid" => $this->userid
-                ]
+                ],
+                []
             );
         } else {
             return null;

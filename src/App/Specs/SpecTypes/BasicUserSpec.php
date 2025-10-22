@@ -13,7 +13,6 @@ final class BasicUserSpec implements Specification
 {
 
     public function __construct(
-        private string $userid,
         private ContentFilteringAction $action,
     ) {}
 
@@ -25,13 +24,12 @@ final class BasicUserSpec implements Specification
                     "EXISTS (
                         SELECT 1
                         FROM users basicUserSpec_users
-                        WHERE basicUserSpec_users.uid = :basicUserSpec_users_userid AND
+                        WHERE basicUserSpec_users.uid = u.uid AND
                         basicUserSpec_users.roles_mask IN (0,2,16) AND
                         basicUserSpec_users.verified = 1
                     )"
-                ],[
-                    "basicUserSpec_users_userid" => $this->userid
-                ]
+                ],
+                []
             );
         }
         return null;

@@ -347,4 +347,90 @@ class ProfileRepositoryImpl implements ProfileRepository
         }
         return new Profile($data);
     }
+
+    /**
+     * Fetch multiple profiles by IDs with optional specifications merged into WHERE clause.
+     * Returns an array of Profile objects; empty if none found or on error.
+     *
+     * @param array<int, string> $userIds
+     * @param array<int, Specification> $specifications
+     * @return array<int, Profile>
+     */
+    public function fetchByIds(array $userIds, string $currentUserId, array $specifications = []): array
+    {
+        $this->logger->debug('ProfileRepository.fetchByIds started', [
+            'count' => count($userIds),
+        ]);
+
+        if (empty($userIds)) {
+            return [];
+        }
+
+        // Merge specification SQL parts (WHERE/params) similar to fetchProfileData
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+
+        // Build positional placeholders for the IN clause
+        $placeholders = [];
+        $params = $allSpecs->paramsToPrepare;
+        foreach ($userIds as $idx => $id) {
+            $ph = ":uid_$idx";
+            $placeholders[] = $ph;
+            $params[substr($ph, 1)] = $id; // strip leading ':' for execute with named params array
+        }
+
+        $whereClauses[] = 'u.uid IN (' . implode(',', $placeholders) . ')';
+        $whereClausesString = implode(' AND ', $whereClauses);
+
+        $sql = sprintf(
+            "
+            SELECT 
+                u.uid,
+                u.username,
+                u.slug,
+                u.status,
+                u.img,
+                u.biography,
+                u.visibility_status,
+                ui.amountposts,
+                ui.amountfollower,
+                ui.amountfollowed,
+                ui.amountfriends,
+                ui.amountblocked,
+                ui.reports AS user_reports,
+                COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
+                EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
+                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
+            FROM users u
+            LEFT JOIN users_info ui ON ui.userid = u.uid
+            WHERE %s",
+            $whereClausesString
+        );
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $params['currentUserId'] = $currentUserId;
+            $stmt->execute($params);
+
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            if (!$rows) {
+                return [];
+            }
+
+            // Map to Profile objects
+            $profiles = [];
+            foreach ($rows as $row) {
+                try {
+                    $profiles[] = new Profile($row);
+                } catch (\Throwable $e) {
+                    $this->logger->error('Failed to map profile row', ['error' => $e->getMessage(), 'row' => $row]);
+                }
+            }
+            return $profiles;
+        } catch (\Throwable $e) {
+            $this->logger->error('Database error in fetchByIds', ['error' => $e->getMessage()]);
+            return [];
+        }
+    }
 }
