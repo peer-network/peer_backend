@@ -846,6 +846,8 @@ class PostMapper
             'isdisliked' => (bool)$row['isdisliked'],
             'issaved' => (bool)$row['issaved'],
             'tags' => $row['tags'],
+            'visibility_status' => $row['visibility_status'],
+            'reports' => $row['post_reports'],
             'user' => [
                 'uid' => (string)$row['userid'],
                 'username' => (string)$row['username'],
@@ -1034,8 +1036,12 @@ class PostMapper
 
     /**
      * Get GuestListPost based on Filter
+     *
+     * @param array $args
+     * @param Specification[] $specifications
+     * @return PostAdvanced[]
      */
-    public function getGuestListPost(array $args = [],array $specifications): array
+    public function getGuestListPost(array $args = [], array $specifications): array
     {
         $this->logger->debug("PostMapper.getGuestListPost started");
 
@@ -1133,7 +1139,7 @@ class PostMapper
                 'tags' => $row['tags']
             ], [], false);
 
-            return (!empty($results) ? $results : []);
+            return !empty($results) ? $results : [];
         } catch (\PDOException $e) {
             $this->logger->error("Database error in PostMapper.getGuestListPost", [
                 'error' => $e->getMessage(),

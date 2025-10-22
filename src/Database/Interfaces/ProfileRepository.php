@@ -31,7 +31,7 @@ interface ProfileRepository
      * Fetch multiple profiles by IDs with optional specifications.
      * @param array<int, string> $userIds
      * @param array<int, Specification> $specifications
-     * @return array<int, Profile>
+     * @return array<string,Profile>
      */
     public function fetchByIds(array $userIds, string $currentUserId, array $specifications = []): array;
 }

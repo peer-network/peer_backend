@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use Fawaz\App\Post;
+use Fawaz\App\PostAdvancedWithUser;
 use Fawaz\App\Comment;
 use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
@@ -814,65 +815,73 @@ class PostService
             $placeholderIllegalContentFilterSpec
         ];
 
-        $results = $this->postMapper->getGuestListPost(
-            $args,
-            $specs
-        );
-
-        if (empty($results)) {
-            return $this::respondWithError(31510);
-        }
-
-        // Enrich user data via ProfileRepository::fetchByIds
         try {
-            $userIds = [];
-            foreach ($results as $post) {
-                if ($post instanceof PostAdvanced) {
-                    $userIds[] = $post->getUserId();
-                }
-            }
-            $userIds = array_values(array_unique(array_filter($userIds)));
-            
-            if (!empty($userIds)) {
-                $profiles = $this->profileRepository->fetchByIds(
-                    $userIds,
-                    PeerUUID::empty->value,
-                    $specs
-                );
-                // Map profiles by uid for quick lookup
-                $profilesById = [];
-                foreach ($profiles as $profile) {
-                    if ($profile instanceof Profile) {
-                        $profilesById[$profile->getUserId()] = $profile->getArrayCopy();
-                    }
-                }
+            $results = $this->postMapper->getGuestListPost(
+                $args,
+                $specs
+            );
 
-                // Rebuild PostAdvanced objects with enriched user
-                $enriched = [];
-                foreach ($results as $post) {
-                    if ($post instanceof PostAdvanced) {
-                        $data = $post->getArrayCopy();
-                        $uid = $post->getUserId();
-                        if (isset($profilesById[$uid])) {
-                            $data['user'] = $profilesById[$uid];
-                        }
-                        $post = new PostAdvanced($data, [], false);
-                        ContentReplacer::placeholderPost($post, $specs);
-                        $enriched[] = $post;
-                    }
-                }
-
-                return $enriched;
+            if (empty($results)) {
+                return $this::respondWithError(31510);
             }
+            $postsWithProfiles = $this->fetchAndPlaceholderProfilesAndPosts($results, $specs, PeerUUID::empty->value);
+            return $postsWithProfiles;
         } catch (\Throwable $e) {
             // Log and fall back to original results
-            $this->logger->error('Failed enriching guest list post with profiles', [
+            $this->logger->error('Failed to load guest list post', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+            return $results;
+        }
+    }
+
+    /**
+     * Enrich a list of PostAdvanced with user profiles and return PostAdvancedWithUser objects.
+     * Falls back gracefully if no profiles found.
+     *
+     * @param PostAdvanced[] $posts Array of PostAdvanced
+     * @param \Fawaz\App\Specs\Specification[] $specs Content filtering specs
+     * @param string $currentUserId Current/guest user id for profile fetch
+     * @return PostAdvanced[]
+     */
+    private function fetchAndPlaceholderProfilesAndPosts(array $posts, array $specs, string $currentUserId): array
+    {
+        $userIds = array_values(
+            array_unique(
+                array_filter(
+                    array_map(fn(PostAdvanced $post) => $post->getUserId(),$posts)
+                )
+            )
+        );
+
+        if (empty($userIds)) {
+            return $posts;
         }
 
-        return $results;
+        $profiles = $this->profileRepository->fetchByIds($userIds, $currentUserId, $specs);
+    
+        $enriched = [];
+        foreach ($posts as $post) {
+            $enriched[] = $this->enrichAndPlaceholderPostWithProfile($post, $profiles[$post->getUserId()], $specs);
+        }
+
+        return $enriched;
+    }
+
+    /**
+     * Enrich a single PostAdvanced with a Profile and return PostAdvancedWithUser.
+     */
+    private function enrichAndPlaceholderPostWithProfile(PostAdvanced $post, ?Profile $profile, array $specs): PostAdvanced
+    {
+        $data = $post->getArrayCopy();
+        if ($profile instanceof Profile) {
+            ContentReplacer::placeholderProfile($profile, $specs);
+            $data['user'] = $profile->getArrayCopy();
+        }
+        $withUser = new PostAdvanced($data, [], false);
+        ContentReplacer::placeholderPost($withUser, $specs);
+        return $withUser;
     }
 
     public function postExistsById(string $postId): bool|array

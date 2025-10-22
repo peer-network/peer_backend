@@ -130,6 +130,17 @@ class PostAdvanced implements PostReplaceable
         $this->tags = $tags;
     }
 
+    // HasUser interface
+    public function getUser(): array
+    {
+        return $this->user ?? [];
+    }
+
+    public function setUser(array $user): void
+    {
+        $this->user = $user;
+    }
+
     public function getPostId(): string
     {
         return $this->postid;

@@ -354,7 +354,7 @@ class ProfileRepositoryImpl implements ProfileRepository
      *
      * @param array<int, string> $userIds
      * @param array<int, Specification> $specifications
-     * @return array<int, Profile>
+     * @return array<string,Profile>
      */
     public function fetchByIds(array $userIds, string $currentUserId, array $specifications = []): array
     {
@@ -417,7 +417,7 @@ class ProfileRepositoryImpl implements ProfileRepository
                 try {
                     $profile = new Profile($row);
                     ContentReplacer::placeholderProfile($profile, $specifications);
-                    $profiles[] = $profile;
+                    $profiles[$profile->getUserId()] = $profile;
                 } catch (\Throwable $e) {
                     $this->logger->error('Failed to map profile row', ['error' => $e->getMessage(), 'row' => $row]);
                 }
