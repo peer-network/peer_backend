@@ -2356,7 +2356,7 @@ class GraphQLSchemaBuilder
             'gemsters' => fn (mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->resolveAdvertisePost($args),
-            'performModeration' => fn (mixed $root, array $args) => $this->moderationService->performModerationAction($args),
+            'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
         ];
     }
 
@@ -4184,7 +4184,7 @@ class GraphQLSchemaBuilder
         $this->logger->debug('GraphQLSchemaBuilder.performModerationAction started');
 
         try {
-            return $this->moderationService->performModerationAction($args, $this->currentUserId);
+            return $this->moderationService->performModerationAction($args);
 
         } catch (\Exception $e) {
             $this->logger->error("Error performing moderation action: " . $e->getMessage());
