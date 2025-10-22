@@ -40,7 +40,6 @@ final class HiddenContentFilteringSpecificationFactory {
     ): ?SpecificationSQLData {
         $paramsToPrepare = [];
         $whereClauses = [];
-
         if ($action === ContentFilteringAction::hideContent) {
             switch ($type) {
             case ContentType::user:
@@ -48,8 +47,8 @@ final class HiddenContentFilteringSpecificationFactory {
                 NOT EXISTS (
                     SELECT 1
                     FROM users HiddenContentFiltering_users
-                    LEFT JOIN users_info HiddenContentFiltering_users_info ON HiddenContentFiltering_users_info.userid = HiddenContentFiltering_users.userid
-                    WHERE HiddenContentFiltering_users.userid = u.uid
+                    LEFT JOIN users_info HiddenContentFiltering_users_info ON HiddenContentFiltering_users_info.userid = HiddenContentFiltering_users.uid
+                    WHERE HiddenContentFiltering_users.uid = u.uid
                     AND (
                         (HiddenContentFiltering_users_info.reports >= :user_report_amount_to_hide AND HiddenContentFiltering_users.visibility_status = 'normal')
                         OR 
@@ -72,6 +71,7 @@ final class HiddenContentFilteringSpecificationFactory {
                     )
                 )";
                 $paramsToPrepare["post_report_amount_to_hide"] = $this->contentFilterService->getReportsAmountToHideContent(ContentType::post);
+                break;
             case ContentType::comment:
                 $whereClauses[] = "
                 NOT EXISTS (

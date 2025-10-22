@@ -23,7 +23,7 @@ final class HiddenContentFilterSpec implements Specification
         ContentFilteringStrategies $strategy, 
         ?string $contentFilterBy,
         private string $currentUserId,
-        private string $targetUserId,
+        private ?string $targetUserId,
         private ContentType $contentTarget,
         private ContentType $showingContent,
     ) {
@@ -46,7 +46,7 @@ final class HiddenContentFilterSpec implements Specification
         return (new HiddenContentFilteringSpecificationFactory(
             $this->contentFilterService
         ))->build(
-            ContentType::user,
+            $this->showingContent,
             $action
         );
     }
@@ -61,7 +61,7 @@ final class HiddenContentFilterSpec implements Specification
                 $this->targetUserId,
                 $subject->visibilityStatus()
         );
-        if ($subject instanceof ProfileReplaceable && $action === ContentFilteringAction::replaceWithPlaceholder) {
+        if ($action === ContentFilteringAction::replaceWithPlaceholder) {
                 return ContentReplacementPattern::hidden;
         }
         return null;

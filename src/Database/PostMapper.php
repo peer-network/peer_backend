@@ -493,18 +493,28 @@ class PostMapper
         }
     } 
 
-    public function findPostser(string $currentUserId, ?array $args = []): array
+    /**
+     * Get GuestListPost based on Filter
+     *
+     * @param string $currentUserId
+     * @param array $args
+     * @param Specification[] $specifications
+     * @return PostAdvanced[]
+     */
+    public function findPostser(string $currentUserId, ?array $args = [], array $specifications): array
     {
         $this->logger->debug("PostMapper.findPostser started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit  = min(max((int)($args['limit']  ?? 10), 1), 20);
 
-        $post_report_amount_to_hide = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
 
         $trenddays = 7;
 
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
         $from     = $args['from']     ?? null;
         $to       = $args['to']       ?? null;
         $filterBy = $args['filterBy'] ?? [];
@@ -515,13 +525,9 @@ class PostMapper
         $tags     = $args['tags']     ?? [];
         $postId   = $args['postid']   ?? null;
         $userId   = $args['userid']   ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::postFeed,
-            $contentFilterBy
-        );
 
-        $params = ['currentUserId' => $currentUserId];
-        $whereClauses = ["p.feedid IS NULL"];
+        $params['currentUserId'] = $currentUserId;
+        $whereClauses[] = "p.feedid IS NULL";
 
         // Show only Valid Content
         $whereClauses[] = "p.status IN (:postNormalStatus, :postAdvertisementStatus)";
@@ -565,31 +571,6 @@ class PostMapper
             }
             $whereClauses[] = "t.name IN (" . implode(", ", $tagPlaceholders) . ")";
         }
-
-        // Nur normale User & Admin-Accounts
-        $whereClauses[] = 'u.status = :stNormal AND u.roles_mask IN (:roleUser, :roleAdmin)';
-        $params['stNormal']  = Status::NORMAL;
-        $params['roleUser']  = Role::USER;
-        $params['roleAdmin'] = Role::ADMIN;
-
-        // Content Filtering: eigene Posts immer sichtbar
-        if ($contentFilterService->getContentFilterAction(
-            ContentType::post,
-            ContentType::post
-        ) === ContentFilteringAction::hideContent) {
-            $params['post_report_amount_to_hide'] = $post_report_amount_to_hide;
-            $whereClauses[] = "NOT EXISTS (
-                    SELECT 1
-                    FROM posts HiddenContentFiltering_posts
-                    LEFT JOIN post_info HiddenContentFiltering_post_info ON HiddenContentFiltering_post_info.postid = HiddenContentFiltering_posts.postid
-                    WHERE HiddenContentFiltering_posts.postid = p.postid
-                    AND (
-                        (HiddenContentFiltering_post_info.reports >= :post_report_amount_to_hide AND HiddenContentFiltering_posts.visibility_status = 'normal')
-                        OR 
-                        HiddenContentFiltering_posts.visibility_status = 'hidden'
-                    )
-                )";
-            }
 
         // Filter: Content-Typ / Beziehungen / Viewed
         if (!empty($filterBy) && is_array($filterBy)) {
@@ -701,16 +682,10 @@ class PostMapper
                     p.media,
                     p.cover,
                     p.mediadescription,
-                    p.visibility_status as post_visibility_status,
+                    p.visibility_status,
                     p.createdat AS createdat,
-                    u.username,
-                    u.slug,
-                    u.img AS userimg,
-                    u.status AS userstatus,
-                    u.visibility_status as user_visibility_status,
 
                     -- Moderations-/Report-Daten
-                    MAX(ui.reports) AS user_reports,
                     MAX(pi.reports) AS post_reports,
 
                     COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
@@ -755,9 +730,7 @@ class PostMapper
                     ) AS friendoffriends
 
                 FROM posts p
-                JOIN users u           ON p.userid = u.uid
                 LEFT JOIN post_info pi ON pi.postid = p.postid AND pi.userid = p.userid
-                LEFT JOIN users_info ui ON ui.userid = p.userid
                 LEFT JOIN post_tags pt  ON pt.postid = p.postid
                 LEFT JOIN tags t        ON t.tagid = pt.tagid
                 WHERE " . implode(" AND ", $whereClauses) . "
@@ -770,8 +743,7 @@ class PostMapper
                 )
                 GROUP BY
                     p.postid, p.userid, p.contenttype, p.title, p.media, p.cover,
-                    p.mediadescription, p.createdat, p.visibility_status,
-                    u.username, u.slug, userimg, userstatus, u.visibility_status
+                    p.mediadescription, p.createdat, p.visibility_status
             )
             SELECT * FROM base_posts
             $orderByClause
@@ -789,25 +761,9 @@ class PostMapper
 
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            $results = array_map(function (array $row) use ($contentFilterService, $currentUserId) {
+            $results = array_map(function (array $row) {
                 $row['tags'] = json_decode($row['tags'], true) ?? [];
-
                 // User-Placeholder anwenden, falls nötig
-                $user_reports = (int)$row['user_reports'];
-
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::post,
-                    ContentType::user,
-                    $user_reports,
-                    $currentUserId,
-                    $row['userid'],
-                    $row['user_visibility_status']
-                ) === ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer       = ContentReplacementPattern::hidden;
-                    $row['username'] = $replacer->username();
-                    $row['userimg'] = $replacer->profilePicturePath();
-                }
-
                 return self::mapRowToPost($row);
             }, $rows);
 
@@ -847,16 +803,7 @@ class PostMapper
             'issaved' => (bool)$row['issaved'],
             'tags' => $row['tags'],
             'visibility_status' => $row['visibility_status'],
-            'reports' => $row['post_reports'],
-            'user' => [
-                'uid' => (string)$row['userid'],
-                'username' => (string)$row['username'],
-                'slug' => (int)$row['slug'],
-                'img' => (string)$row['userimg'],
-                'isfollowed' => (bool)$row['isfollowed'],
-                'isfollowing' => (bool)$row['isfollowing'],
-                'isfriend' => (bool)$row['isfriend'],
-            ],
+            'reports' => $row['post_reports']
         ]);
     }
 
@@ -1028,126 +975,6 @@ class PostMapper
             return [];
         } catch (\Exception $e) {
             $this->logger->error("Error fetching posts from database", [
-                'error' => $e->getMessage(),
-            ]);
-            return [];
-        }
-    }
-
-    /**
-     * Get GuestListPost based on Filter
-     *
-     * @param array $args
-     * @param Specification[] $specifications
-     * @return PostAdvanced[]
-     */
-    public function getGuestListPost(array $args = [], array $specifications): array
-    {
-        $this->logger->debug("PostMapper.getGuestListPost started");
-
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
-        $whereClauses = $allSpecs->whereClauses;
-        $params = $allSpecs->paramsToPrepare;
-
-        $offset = 0;
-        $limit = 1;
-
-        $postId = $args['postid'] ?? null;
-
-        $whereClauses[] = "p.feedid IS NULL";
-        $joinClausesString = "
-            post_tags pt ON p.postid = pt.postid
-            LEFT JOIN tags t ON pt.tagid = t.tagid
-            LEFT JOIN post_info pi ON p.postid = pi.postid AND pi.userid = p.userid
-        ";
-
-        if ($postId !== null) {
-            $whereClauses[] = "p.postid = :postId";
-            $params['postId'] = $postId;
-        }
-
-        $orderBy = "p.createdat DESC";
-
-        $whereClausesString = implode(" AND ", $whereClauses);
-
-        $sql = sprintf(
-            "SELECT 
-                p.postid, 
-                p.userid, 
-                p.contenttype, 
-                p.title, 
-                p.media, 
-                p.cover, 
-                p.mediadescription, 
-                p.createdat, 
-                p.visibility_status, 
-                MAX(pi.reports) AS post_reports,
-                COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
-                (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) as amountlikes,
-                (SELECT COUNT(*) FROM user_post_dislikes WHERE postid = p.postid) as amountdislikes,
-                (SELECT COUNT(*) FROM user_post_views WHERE postid = p.postid) as amountviews,
-                (SELECT COUNT(*) FROM comments WHERE postid = p.postid) as amountcomments
-            FROM posts p
-            LEFT JOIN %s
-            WHERE %s
-            GROUP BY p.postid
-            ORDER BY %s
-            LIMIT :limit OFFSET :offset",
-            $joinClausesString,
-            $whereClausesString,
-            $orderBy
-        );
-
-        $params['limit'] = $limit;
-        $params['offset'] = $offset;
-
-        try {
-            $stmt = $this->db->prepare($sql);
-
-            $results = [];
-            $stmt->execute($params);
-            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if (!$row) {
-                $this->logger->warning("PostMapper.getGuestListPost No posts found for the given criteria");
-                return [];
-            }
-            $row['tags'] = json_decode($row['tags'], true) ?? [];
-
-            $results[] = new PostAdvanced([
-                'postid' => $row['postid'],
-                'userid' => $row['userid'],
-                'contenttype' => $row['contenttype'],
-                'title' => $row['title'],
-                'media' => $row['media'],
-                'cover' => $row['cover'],
-                'mediadescription' => $row['mediadescription'],
-                'createdat' => $row['createdat'],
-                'amountlikes' => (int)$row['amountlikes'],
-                'amountviews' => (int)$row['amountviews'],
-                'amountcomments' => (int)$row['amountcomments'],
-                'amountdislikes' => (int)$row['amountdislikes'],
-                'amounttrending' => 0,
-                'isliked' => false,
-                'isviewed' => false,
-                'isreported' => false,
-                'isdisliked' => false,
-                'issaved' => false,
-                'visibility_status' => $row['visibility_status'],
-                'reports' => $row['post_reports'],
-                'tags' => $row['tags']
-            ], [], false);
-
-            return !empty($results) ? $results : [];
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error in PostMapper.getGuestListPost", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return [];
-        } catch (\Exception $e) {
-            $this->logger->error('Database error in PostMapper.getGuestListPost', [
                 'error' => $e->getMessage(),
             ]);
             return [];

@@ -10,6 +10,7 @@ use Fawaz\App\Comment;
 use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
+use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
 use Fawaz\App\Specs\SpecTypes\InactiveUserSpec;
 use Fawaz\App\Specs\SpecTypes\PlaceholderIllegalContentFilterSpec;
 use Fawaz\config\constants\PeerUUID;
@@ -20,6 +21,8 @@ use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Services\VideoCoverGenerator;
 use Fawaz\Services\Base64FileHandler;
@@ -523,6 +526,7 @@ class PostService
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
+        $userId = $args['userid'] ?? null;
 
         $from = $args['from'] ?? null;
         $to = $args['to'] ?? null;
@@ -532,8 +536,10 @@ class PostService
         $title = $args['title'] ?? null;
         $tag = $args['tag'] ?? null;
         $postId = $args['postid'] ?? null;
-        $userId = $args['userid'] ?? null;
         $titleConfig = ConstantsConfig::post()['TITLE'];
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        
+        $contentFilterStrategy = ContentFilteringStrategies::searchById;
 
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this::respondWithError(30209);
@@ -580,13 +586,77 @@ class PostService
         }
 
         $this->logger->debug("PostService.findPostser started");
+        
+        // if ($title || $tag) {
+        //     $contentFilterStrategy = ContentFilteringStrategies::searchByMeta;
+        // }
+        // if ($userId || $postId) {
+        //     $contentFilterStrategy = ContentFilteringStrategies::searchById;
+        // }
+        // if ($userId && $userId === $this->currentUserId) { 
+        //     $contentFilterStrategy = ContentFilteringStrategies::myprofile;
+        // }
+        
+        $inactiveUserSpec = new InactiveUserSpec(
+            ContentFilteringAction::replaceWithPlaceholder
+        );
+        $basicUserSpec = new BasicUserSpec(
+            ContentFilteringAction::replaceWithPlaceholder
+        );
+        
+        $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
 
-        $results = $this->postMapper->findPostser($this->currentUserId, $args);
-        if (empty($results) && $postId != null) {
-            return $this::respondWithError(31510);
+        $postsHiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterStrategy,
+            $contentFilterBy,
+            $this->currentUserId,
+            $userId,
+            ContentType::post,
+            ContentType::post
+        );
+
+        $userHiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterStrategy,
+            $contentFilterBy,
+            $this->currentUserId,
+            $userId,
+            ContentType::post,
+            ContentType::user
+        );
+
+        $postSpecs = [
+            $inactiveUserSpec,
+            $basicUserSpec,
+            $placeholderIllegalContentFilterSpec,
+            $postsHiddenContentFilterSpec
+        ];
+
+        $userSpecs = [
+            $inactiveUserSpec,
+            $basicUserSpec,
+            $placeholderIllegalContentFilterSpec,
+            $userHiddenContentFilterSpec
+        ];
+        try {
+            $results = $this->postMapper->findPostser($this->currentUserId, $args,$postSpecs);
+            if (empty($results) && $postId != null) {
+                return $this::respondWithError(31510);
+            }
+            
+            $postsWithProfiles = $this->fetchAndPlaceholderProfiles($results, $userSpecs, $this->currentUserId);
+            
+            foreach($postsWithProfiles as $post) {
+                ContentReplacer::placeholderPost($post, $postSpecs);
+            }
+            return $postsWithProfiles;
+        } catch (\Throwable $e) {
+            // Log and fall back to original results
+            $this->logger->error('Failed to load list post', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $results;
         }
-
-        return $results;
     }
 
     private function mapCommentsWithReplies(array $comments): array
@@ -809,22 +879,28 @@ class PostService
         
         $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
 
-        $specs = [
+        $postSpecs = [
             $inactiveUserSpec,
             $basicUserSpec,
-            $placeholderIllegalContentFilterSpec
+            $placeholderIllegalContentFilterSpec,
         ];
 
         try {
-            $results = $this->postMapper->getGuestListPost(
+            $results = $this->postMapper->findPostser(
+                PeerUUID::empty->value,
                 $args,
-                $specs
+                $postSpecs
             );
+            // $results = $this->postMapper->getGuestListPost(
+            //     $args,
+            //     $specs
+            // );
 
             if (empty($results)) {
                 return $this::respondWithError(31510);
             }
-            $postsWithProfiles = $this->fetchAndPlaceholderProfilesAndPosts($results, $specs, PeerUUID::empty->value);
+            $postsWithProfiles = $this->fetchAndPlaceholderProfiles($results, $postSpecs, PeerUUID::empty->value);
+            $postsWithProfiles = array_map(fn(PostAdvanced $p) =>  ContentReplacer::placeholderPost($p, $postSpecs),$postsWithProfiles);
             return $postsWithProfiles;
         } catch (\Throwable $e) {
             // Log and fall back to original results
@@ -845,7 +921,7 @@ class PostService
      * @param string $currentUserId Current/guest user id for profile fetch
      * @return PostAdvanced[]
      */
-    private function fetchAndPlaceholderProfilesAndPosts(array $posts, array $specs, string $currentUserId): array
+    private function fetchAndPlaceholderProfiles(array $posts, array $specs, string $currentUserId): array
     {
         $userIds = array_values(
             array_unique(
@@ -880,7 +956,6 @@ class PostService
             $data['user'] = $profile->getArrayCopy();
         }
         $withUser = new PostAdvanced($data, [], false);
-        ContentReplacer::placeholderPost($withUser, $specs);
         return $withUser;
     }
 

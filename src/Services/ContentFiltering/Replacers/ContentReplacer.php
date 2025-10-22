@@ -47,7 +47,6 @@ class ContentReplacer
             fn($v) => $v !== null
             )
         );
-        
         if (empty($replacerSpecs)) {
             return;
         }
