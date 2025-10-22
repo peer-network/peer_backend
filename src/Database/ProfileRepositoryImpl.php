@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use PDO;
 use Fawaz\App\User;
 use Fawaz\App\Profile;
@@ -16,8 +17,7 @@ use Fawaz\App\Status;
 
 class ProfileRepositoryImpl implements ProfileRepository
 {
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
-    {
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db) {
     }
 
     public function fetchAll(string $currentUserId, array $args = []): array
@@ -372,17 +372,12 @@ class ProfileRepositoryImpl implements ProfileRepository
         $whereClauses = $allSpecs->whereClauses;
 
         // Build positional placeholders for the IN clause
-        $placeholders = [];
         $params = $allSpecs->paramsToPrepare;
-        foreach ($userIds as $idx => $id) {
-            $ph = ":uid_$idx";
-            $placeholders[] = $ph;
-            $params[substr($ph, 1)] = $id; // strip leading ':' for execute with named params array
-        }
+        $userIdsForInStatement = array_map(fn($id) => "'$id'", $userIds);
 
-        $whereClauses[] = 'u.uid IN (' . implode(',', $placeholders) . ')';
+        $userIdsString = implode(',', $userIdsForInStatement);
+        $whereClauses[] = "u.uid IN ($userIdsString)";
         $whereClausesString = implode(' AND ', $whereClauses);
-
         $sql = sprintf(
             "
             SELECT 
@@ -407,12 +402,10 @@ class ProfileRepositoryImpl implements ProfileRepository
             WHERE %s",
             $whereClausesString
         );
-
         try {
             $stmt = $this->db->prepare($sql);
             $params['currentUserId'] = $currentUserId;
             $stmt->execute($params);
-
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             if (!$rows) {
                 return [];
@@ -422,7 +415,9 @@ class ProfileRepositoryImpl implements ProfileRepository
             $profiles = [];
             foreach ($rows as $row) {
                 try {
-                    $profiles[] = new Profile($row);
+                    $profile = new Profile($row);
+                    ContentReplacer::placeholderProfile($profile, $specifications);
+                    $profiles[] = $profile;
                 } catch (\Throwable $e) {
                     $this->logger->error('Failed to map profile row', ['error' => $e->getMessage(), 'row' => $row]);
                 }

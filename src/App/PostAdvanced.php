@@ -7,8 +7,9 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 
-class PostAdvanced
+class PostAdvanced implements PostReplaceable
 {
     protected string $postid;
     protected string $userid;
@@ -38,6 +39,8 @@ class PostAdvanced
     protected ?array $tags = [];
     protected ?array $user = [];
     protected ?array $comments = [];
+    protected ?int $reports = null;
+    protected ?string $visibilityStatus = null;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -71,6 +74,8 @@ class PostAdvanced
         $this->isfriend = $data['isfriend'] ?? false;
         $this->url = $this->getPostUrl();
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->reports = $data['post_reports'] ?? null;
+        $this->visibilityStatus = $data['visibility_status']?? null;
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->comments = isset($data['comments']) && is_array($data['comments']) ? $data['comments'] : [];
@@ -106,6 +111,8 @@ class PostAdvanced
             'isfriend' => $this->isfriend,
             'createdat' => $this->createdat,
             'tags' => $this->tags, // Include tags
+            'visibility_status' => $this->visibilityStatus,
+            'reports' => $this->reports,
             'user' => $this->user,
             'comments' => $this->comments,
         ];
@@ -145,6 +152,11 @@ class PostAdvanced
     {
         $this->mediadescription = $mediadescription;
     }
+    // PostReplaceable requires setDescription
+    public function setDescription(string $descriptionConfig): void
+    {
+        $this->mediadescription = $descriptionConfig;
+    }
     public function getUserId(): string
     {
         return $this->userid;
@@ -167,6 +179,16 @@ class PostAdvanced
     public function getContentType(): string
     {
         return $this->contenttype;
+    }
+    // Capabilities for content filtering
+    public function visibilityStatus(): string
+    {
+        return $this->visibilityStatus ?? '';
+    }
+
+    public function getReports(): ?int
+    {
+        return $this->reports;
     }
 
     public function getPostUrl(): string

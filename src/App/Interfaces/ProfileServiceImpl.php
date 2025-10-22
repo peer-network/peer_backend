@@ -10,7 +10,7 @@ use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
 use Fawaz\App\Specs\SpecTypes\InactiveUserSpec;
 use Fawaz\App\Specs\SpecTypes\PlaceholderIllegalContentFilterSpec;
 
-use Fawaz\Services\ContentFiltering\Replacers\ProfileReplacer;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
@@ -82,7 +82,7 @@ final class ProfileServiceImpl implements ProfileService
                 return self::respondWithErrorObject(31007);
             }
             
-            ProfileReplacer::placeholderProfile($profileData, $specs);
+            ContentReplacer::placeholderProfile($profileData, $specs);
 
             $this->logger->debug("Fetched profile data", ['userid' => $profileData->getUserId()]);
 

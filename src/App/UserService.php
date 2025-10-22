@@ -20,7 +20,7 @@ use Fawaz\Mail\UserWelcomeMail;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
-use Fawaz\Services\ContentFiltering\Replacers\ProfileReplacer;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
@@ -815,7 +815,7 @@ class UserService
 
             foreach ($followers as $profile) {
                 if ($profile instanceof ProfileReplaceable) {
-                    ProfileReplacer::placeholderProfile($profile, $specs);
+                    ContentReplacer::placeholderProfile($profile, $specs);
                 }
             }
 

@@ -1051,11 +1051,9 @@ class PostMapper
 
         $whereClauses[] = "p.feedid IS NULL";
         $joinClausesString = "
-            users u ON p.userid = u.uid
-            LEFT JOIN post_tags pt ON p.postid = pt.postid
+            post_tags pt ON p.postid = pt.postid
             LEFT JOIN tags t ON pt.tagid = t.tagid
             LEFT JOIN post_info pi ON p.postid = pi.postid AND pi.userid = p.userid
-            LEFT JOIN users_info ui ON p.userid = ui.userid
         ";
 
         if ($postId !== null) {
@@ -1077,11 +1075,7 @@ class PostMapper
                 p.cover, 
                 p.mediadescription, 
                 p.createdat, 
-                u.username, 
-                u.slug,
-                u.img AS userimg,
-                MAX(u.status) AS user_status,
-                MAX(ui.reports) AS user_reports,
+                p.visibility_status, 
                 MAX(pi.reports) AS post_reports,
                 COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,
                 (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) as amountlikes,
@@ -1089,9 +1083,9 @@ class PostMapper
                 (SELECT COUNT(*) FROM user_post_views WHERE postid = p.postid) as amountviews,
                 (SELECT COUNT(*) FROM comments WHERE postid = p.postid) as amountcomments
             FROM posts p
-            JOIN %s
+            LEFT JOIN %s
             WHERE %s
-            GROUP BY p.postid, u.username, u.slug, u.img
+            GROUP BY p.postid
             ORDER BY %s
             LIMIT :limit OFFSET :offset",
             $joinClausesString,
@@ -1134,15 +1128,9 @@ class PostMapper
                 'isreported' => false,
                 'isdisliked' => false,
                 'issaved' => false,
-                'tags' => $row['tags'],
-                'user' => [
-                    'uid' => $row['userid'],
-                    'username' => $row['username'],
-                    'slug' => $row['slug'],
-                    'img' => $row['userimg'],
-                    'isfollowed' => false,
-                    'isfollowing' => false,
-                ],
+                'visibility_status' => $row['visibility_status'],
+                'reports' => $row['post_reports'],
+                'tags' => $row['tags']
             ], [], false);
 
             return (!empty($results) ? $results : []);

@@ -26,6 +26,7 @@ class Profile implements ProfileReplaceable
     protected ?int $amountfriends;
     protected ?int $amountblocked;
     protected ?int $amountreports;
+    protected ?int $rolesmask;
     protected ?int $reports;
     protected ?string $visibilityStatus;
 
@@ -79,7 +80,8 @@ class Profile implements ProfileReplaceable
             'amountblocked' => $this->amountblocked,
             'amountreports' => $this->amountreports,
             'user_reports' => $this->reports,
-            'visibility_status' => $this->visibilityStatus
+            'visibility_status' => $this->visibilityStatus,
+            'roles_mask' => $this->rolesmask
         ];
         return $att;
     }

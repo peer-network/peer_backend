@@ -6,15 +6,18 @@ namespace Fawaz\App;
 
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
+use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
 use Fawaz\App\Specs\SpecTypes\InactiveUserSpec;
 use Fawaz\App\Specs\SpecTypes\PlaceholderIllegalContentFilterSpec;
+use Fawaz\config\constants\PeerUUID;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Services\VideoCoverGenerator;
@@ -26,6 +29,7 @@ use Fawaz\Services\JWTService;
 
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Database\Interfaces\ProfileRepository;
 
 class PostService
 {
@@ -46,7 +50,8 @@ class PostService
         protected DailyFreeService $dailyFreeService,
         protected WalletService $walletService,
         protected JWTService $tokenService,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected ProfileRepository $profileRepository
     ) {
     }
 
@@ -816,6 +821,55 @@ class PostService
 
         if (empty($results)) {
             return $this::respondWithError(31510);
+        }
+
+        // Enrich user data via ProfileRepository::fetchByIds
+        try {
+            $userIds = [];
+            foreach ($results as $post) {
+                if ($post instanceof PostAdvanced) {
+                    $userIds[] = $post->getUserId();
+                }
+            }
+            $userIds = array_values(array_unique(array_filter($userIds)));
+            
+            if (!empty($userIds)) {
+                $profiles = $this->profileRepository->fetchByIds(
+                    $userIds,
+                    PeerUUID::empty->value,
+                    $specs
+                );
+                // Map profiles by uid for quick lookup
+                $profilesById = [];
+                foreach ($profiles as $profile) {
+                    if ($profile instanceof Profile) {
+                        $profilesById[$profile->getUserId()] = $profile->getArrayCopy();
+                    }
+                }
+
+                // Rebuild PostAdvanced objects with enriched user
+                $enriched = [];
+                foreach ($results as $post) {
+                    if ($post instanceof PostAdvanced) {
+                        $data = $post->getArrayCopy();
+                        $uid = $post->getUserId();
+                        if (isset($profilesById[$uid])) {
+                            $data['user'] = $profilesById[$uid];
+                        }
+                        $post = new PostAdvanced($data, [], false);
+                        ContentReplacer::placeholderPost($post, $specs);
+                        $enriched[] = $post;
+                    }
+                }
+
+                return $enriched;
+            }
+        } catch (\Throwable $e) {
+            // Log and fall back to original results
+            $this->logger->error('Failed enriching guest list post with profiles', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
         }
 
         return $results;
