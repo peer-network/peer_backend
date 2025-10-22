@@ -39,6 +39,7 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
 use DateTimeImmutable;
+use Fawaz\App\ModerationService;
 use Fawaz\App\Role;
 use Fawaz\App\ValidationException;
 
@@ -67,6 +68,7 @@ class GraphQLSchemaBuilder
         protected PeerTokenService $peerTokenService,
         protected AdvertisementService $advertisementService,
         protected JWTService $tokenService,
+        protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
     ) {
         $this->resolvers = $this->buildResolvers();
@@ -80,8 +82,10 @@ class GraphQLSchemaBuilder
         $guestOnlyQueries =  \file_get_contents(__DIR__ . '/' . $graphqlPath . 'schemaguest.graphql');
         $adminOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'admin_schema.graphql');
         $bridgeOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'bridge_schema.graphql');
+        $moderatorOnlyQueries = \file_get_contents(__DIR__ . '/' . $graphqlPath . 'moderator_schema.graphql');
 
         $adminSchema = $baseQueries . $adminOnlyQueries;
+        $moderatorSchema = $baseQueries . $moderatorOnlyQueries;
         $guestSchema = $guestOnlyQueries;
         $userSchema = $baseQueries;
         $bridgeSchema = $bridgeOnlyQueries;
@@ -95,6 +99,8 @@ class GraphQLSchemaBuilder
                 $schema = $bridgeSchema;
             } elseif ($this->userRoles === Role::ADMIN) {
                 $schema = $adminSchema;
+            } elseif ($this->userRoles === Role::SUPER_MODERATOR) { // Role::SUPER_MODERATOR
+                $schema = $moderatorSchema;
             }
         }
 
@@ -125,7 +131,7 @@ class GraphQLSchemaBuilder
             Executor::setDefaultFieldResolver([$this, 'fieldResolver']);
             return $resultSchema;
         } catch (\Throwable $e) {
-            $this->logger->critical('Invalid schema', ['schema' => $schema]);
+            $this->logger->critical('Invalid schema', ['schema' => $schema, 'exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
         }
     }
@@ -177,6 +183,7 @@ class GraphQLSchemaBuilder
 
     protected function setCurrentUserIdForServices(string $userid): void
     {
+        $this->moderationService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
@@ -306,6 +313,9 @@ class GraphQLSchemaBuilder
                 },
                 'userroles' => function (array $root): int {
                     return $root['userroles'] ?? 0;
+                },
+                'userRoleString' => function (array $root): string {
+                    return  $root['userRoleString'] ?? '';
                 },
                 'currentVersion' => function (array $root): string {
                     return $root['currentVersion'] ?? '1.2.0';
@@ -508,6 +518,9 @@ class GraphQLSchemaBuilder
                 },
                 'amountblocked' => function (array $root): int {
                     return $root['amountblocked'] ?? 0;
+                },
+                'amountreports' => function (array $root): int {
+                    return $root['amountreports'] ?? 0;
                 },
                 'isfollowed' => function (array $root): bool {
                     return $root['isfollowed'] ?? false;
@@ -791,6 +804,9 @@ class GraphQLSchemaBuilder
                 'amounttrending' => function (array $root): int {
                     return $root['amounttrending'] ?? 0;
                 },
+                'amountreports' => function (array $root): int {
+                    return $root['amountreports'] ?? 0;
+                },
                 'isliked' => function (array $root): bool {
                     return $root['isliked'] ?? false;
                 },
@@ -954,6 +970,9 @@ class GraphQLSchemaBuilder
                 },
                 'amountreplies' => function (array $root): int {
                     return $root['amountreplies'] ?? 0;
+                },
+                'amountreports' => function (array $root): int {
+                    return $root['amountreports'] ?? 0;
                 },
                 'isliked' => function (array $root): bool {
                     return $root['isliked'] ?? false;
@@ -1211,6 +1230,9 @@ class GraphQLSchemaBuilder
                 },
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
+                },
+                'amountreports' => function (array $root): int {
+                    return $root['reports'] ?? 0;
                 },
                 'amountposts' => function (array $root): int {
                     return $root['amountposts'] ?? 0;
@@ -2163,6 +2185,94 @@ class GraphQLSchemaBuilder
                     return $root['advertisements'] ?? [];
                 },
             ],
+            'ModerationStatsResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ModerationStatsResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+            ],
+            'ModerationStats' => [
+                'AmountAwaitingReview' => function (array $root): int {
+                    return $root['AmountAwaitingReview'] ?? 0;
+                },
+                'AmountHidden' => function (array $root): int {
+                    return $root['AmountHidden'] ?? 0;
+                },
+                'AmountRestored' => function (array $root): int {
+                    return $root['AmountRestored'] ?? 0;
+                },
+                'AmountIllegal' => function (array $root): int {
+                    return $root['AmountIllegal'] ?? 0;
+                }
+            ],
+            'ModerationItemListResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ModerationItemListResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+            ],
+            'ModerationItem' => [
+                'targetContentId' => function (array $root): string {
+                    return $root['uid'] ?? '';
+                },
+                'targettype' => function (array $root): string {
+                    return $root['targettype'] ?? '';
+                },
+                'status' => function (array $root): string {
+                    return $root['status'] ?? '';
+                },
+                'reportscount' => function (array $root): int {
+                    return $root['reportscount'] ?? 1;
+                },
+                'targetcontent' => function (array $root): array {
+                    return $root['targetcontent'] ?? [];
+                },
+                'reporters' => function (array $root): array {
+                    return $root['reporters'] ?? [];
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+            ],
+            'TargetContent' => [
+                'post' => function (array|null $root): ?array {
+                    return $root['post'] ?? null;
+                },
+                'comment' => function (array|null $root): ?array {
+                    return $root['comment'] ?? null;
+                },
+                'user' => function (array|null $root): ?array {
+                    return $root['user'] ?? null;
+                },
+            ],
         ];
     }
 
@@ -2208,6 +2318,8 @@ class GraphQLSchemaBuilder
             'postInteractions' => fn (mixed $root, array $args) => $this->postInteractions($args),
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
+            'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
+            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
         ];
     }
 
@@ -2244,6 +2356,7 @@ class GraphQLSchemaBuilder
             'gemsters' => fn (mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->resolveAdvertisePost($args),
+            'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
         ];
     }
 
@@ -2253,8 +2366,17 @@ class GraphQLSchemaBuilder
 
         $lastMergedPullRequestNumber = LastGithubPullRequestNumberProvider::getValue();
 
+        /**
+         * Map Role Mask 
+         */
+        if(Role::mapRolesMaskToNames($this->userRoles)[0]){
+            $userRole = Role::mapRolesMaskToNames($this->userRoles)[0];
+        }
+        $userRoleString = $userRole ?? 'USER';
+
         return [
             'userroles' => $this->userRoles,
+            'userRoleString' => $userRoleString,
             'currentuserid' => $this->currentUserId,
             'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
             'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
@@ -3518,6 +3640,12 @@ class GraphQLSchemaBuilder
         $this->logger->debug('Query.resolveAdvertisementsPosts started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
+        
+        // For Content Filtering
+        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
+        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
+            return $this::respondWithError(30103);
+        }
 
         $posts = $this->advertisementService->findAdvertiser($args);
         if (isset($posts['status']) && $posts['status'] === 'error') {
@@ -4003,5 +4131,64 @@ class GraphQLSchemaBuilder
             $comments
         );
         return $postArray;
+    }
+
+    /**
+     * Get Moderation Stats
+     */
+    protected function moderationStats(): array
+    {
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+        $this->logger->debug('GraphQLSchemaBuilder.moderationStats started');
+
+        try {
+            return $this->moderationService->getModerationStats();
+        } catch (\PDOException $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.moderationStats", ['exception' => $e->getMessage()]);
+            return self::respondWithError(40302);
+        } catch (\Exception $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.moderationStats", ['exception' => $e->getMessage()]);
+            return self::respondWithError(40301);
+        }
+    }
+
+    /**
+     * Get Moderation Items
+     */
+    protected function moderationItems(array $args): array
+    {
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+        $this->logger->debug('GraphQLSchemaBuilder.moderationItems started');
+
+        try {
+            return $this->moderationService->getModerationItems($args);
+
+        } catch (\Exception $e) {
+            $this->logger->error("Error getting moderation items: " . $e->getMessage());
+            return self::respondWithError(40301);
+        }
+    }
+
+    /**
+     * Perform Moderation Action
+     */
+    protected function performModerationAction(array $args): array
+    {
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+        $this->logger->debug('GraphQLSchemaBuilder.performModerationAction started');
+
+        try {
+            return $this->moderationService->performModerationAction($args);
+
+        } catch (\Exception $e) {
+            $this->logger->error("Error performing moderation action: " . $e->getMessage());
+            return self::respondWithError(40301);
+        }
     }
 }

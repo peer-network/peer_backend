@@ -60,7 +60,8 @@ class ConstantsConfig implements ConstantsConfigInterface
      *             CREATE: int,
      *             SEARCH: int
      *         }
-     *     }
+     *     },
+     *     STATUS: array{PUBLISHED: int, ADVERTISED: int, ILLEGAL: int}
      * }
      */
     public static function post(): array
@@ -313,6 +314,11 @@ class ConstantsConfig implements ConstantsConfigInterface
                 'CREATE' => 10,
                 'SEARCH' => 5,
             ],
+        ],
+        'STATUS' => [
+            'PUBLISHED' => 0,
+            'ADVERTISED' => 1,
+            'ILLEGAL' => 2,
         ],
     ];
 

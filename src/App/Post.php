@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\Hashable;
 use Fawaz\Utils\HashObject;
 
-class Post implements Hashable
+class Post extends Model implements Hashable
 {
     use HashObject;
 
@@ -227,4 +228,11 @@ class Post implements Hashable
         }
         return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
     }
+
+    // Table name
+    public static function table(): string
+    {
+        return 'posts';
+    }
+
 }

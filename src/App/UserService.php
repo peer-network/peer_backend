@@ -812,6 +812,7 @@ class UserService
                 $profileData["{$type}posts"] = array_filter($posts, fn ($post) => $post['contenttype'] === $type);
             }
 
+
             $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
             return $this::createSuccessResponse(11008, $profileData, false);
         } catch (\Throwable $e) {

@@ -17,6 +17,7 @@ class CommentAdvanced
     protected string $content;
     protected string $createdat;
     protected ?int $amountlikes;
+    protected ?int $amountreports;
     protected ?int $amountreplies;
     protected ?bool $isliked;
     protected ?int $userstatus;
@@ -38,6 +39,7 @@ class CommentAdvanced
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->amountlikes = $data['amountlikes'] ?? 0;
         $this->amountreplies = $data['amountreplies'] ?? 0;
+        $this->amountreports = $data['amountreports'] ?? 0;
         $this->isliked = $data['isliked'] ?? false;
         $this->userstatus = $data['userstatus'] ?? 0;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
@@ -59,6 +61,7 @@ class CommentAdvanced
             'createdat' => $this->createdat,
             'amountlikes' => $this->amountlikes,
             'amountreplies' => $this->amountreplies,
+            'amountreports' => $this->amountreports,
             'isliked' => $this->isliked,
             'user' => $this->user,
         ];

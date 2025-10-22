@@ -555,6 +555,11 @@ class PostMapper
         $params = ['currentUserId' => $currentUserId];
         $whereClauses = ["p.feedid IS NULL"];
 
+        // Show only Valid Content
+        $whereClauses[] = "p.status IN (:postNormalStatus, :postAdvertisementStatus)";
+        $params['postNormalStatus'] = ConstantsConfig::post()['STATUS']['PUBLISHED'];
+        $params['postAdvertisementStatus'] = ConstantsConfig::post()['STATUS']['ADVERTISED'];
+
         if ($postId !== null) {
             $whereClauses[] = "p.postid = :postId";
             $params['postId'] = $postId;
@@ -860,6 +865,7 @@ class PostMapper
             'mediadescription' => (string)$row['mediadescription'],
             'createdat' => (string)$row['createdat'],
             'amountlikes' => (int)$row['amountlikes'],
+            'amountreports' => (int)$row['post_reports'],
             'amountviews' => (int)$row['amountviews'],
             'amountcomments' => (int)$row['amountcomments'],
             'amountdislikes' => (int)$row['amountdislikes'],

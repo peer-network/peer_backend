@@ -25,6 +25,7 @@ class PostAdvanced
     protected ?int $amountcomments;
     protected ?int $amountposts;
     protected ?int $amounttrending;
+    protected ?int $amountreports;
     protected ?bool $isliked;
     protected ?bool $isviewed;
     protected ?bool $isreported;
@@ -59,6 +60,7 @@ class PostAdvanced
         $this->amountcomments = $data['amountcomments'] ?? 0;
         $this->amountposts = $data['amountposts'] ?? 0;
         $this->amounttrending = $data['amounttrending'] ?? 0;
+        $this->amountreports = $data['amountreports'] ?? 0;
         $this->isliked = $data['isliked'] ?? false;
         $this->isviewed = $data['isviewed'] ?? false;
         $this->isreported = $data['isreported'] ?? false;
@@ -93,6 +95,7 @@ class PostAdvanced
             'amountcomments' => $this->amountcomments,
             'amountposts' => $this->amountposts,
             'amounttrending' => $this->amounttrending,
+            'amountreports' => $this->amountreports,
             'isliked' => $this->isliked,
             'isviewed' => $this->isviewed,
             'isreported' => $this->isreported,

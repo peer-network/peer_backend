@@ -24,6 +24,7 @@ class Profile
     protected ?int $amountfollowed;
     protected ?int $amountfriends;
     protected ?int $amountblocked;
+    protected ?int $amountreports;
     protected ?array $imageposts = [];
     protected ?array $textposts = [];
     protected ?array $videoposts = [];
@@ -50,6 +51,7 @@ class Profile
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
         $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->amountblocked = $data['amountblocked'] ?? 0;
+        $this->amountreports = $data['amountreports'] ?? 0;
         $this->imageposts = isset($data['imageposts']) && is_array($data['imageposts']) ? $data['imageposts'] : [];
         $this->textposts = isset($data['textposts']) && is_array($data['textposts']) ? $data['textposts'] : [];
         $this->videoposts = isset($data['videoposts']) && is_array($data['videoposts']) ? $data['videoposts'] : [];
@@ -80,6 +82,7 @@ class Profile
             'amountfollowed' => $this->amountfollowed,
             'amountfriends' => $this->amountfriends,
             'amountblocked' => $this->amountblocked,
+            'amountreports' => $this->amountreports,
             'imageposts' => $this->imageposts,
             'textposts' => $this->textposts,
             'videoposts' => $this->videoposts,
