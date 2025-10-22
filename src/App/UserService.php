@@ -332,8 +332,8 @@ class UserService
     {
         try {
             $specs = [
-                new InactiveUserSpec($referralString, ContentFilteringAction::hideContent),
-                new BasicUserSpec($referralString,ContentFilteringAction::hideContent)
+                new InactiveUserSpec(ContentFilteringAction::hideContent),
+                new BasicUserSpec(ContentFilteringAction::hideContent)
             ];
         
             $users = $this->userMapper->getValidReferralInfoByLink($referralString, $specs);
@@ -769,11 +769,9 @@ class UserService
         }
 
         $inactiveUserSpec = new InactiveUserSpec(
-            $userId, 
             ContentFilteringAction::replaceWithPlaceholder
         );
         $basicUserSpec = new BasicUserSpec(
-            $userId,
             ContentFilteringAction::replaceWithPlaceholder
         );
 

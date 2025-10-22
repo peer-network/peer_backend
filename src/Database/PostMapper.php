@@ -1035,16 +1035,21 @@ class PostMapper
     /**
      * Get GuestListPost based on Filter
      */
-    public function getGuestListPost(array $args = []): array
+    public function getGuestListPost(array $args = [],array $specifications): array
     {
         $this->logger->debug("PostMapper.getGuestListPost started");
+
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
 
         $offset = 0;
         $limit = 1;
 
         $postId = $args['postid'] ?? null;
 
-        $whereClauses = ["p.feedid IS NULL"];
+        $whereClauses[] = "p.feedid IS NULL";
         $joinClausesString = "
             users u ON p.userid = u.uid
             LEFT JOIN post_tags pt ON p.postid = pt.postid
@@ -1057,8 +1062,6 @@ class PostMapper
             $whereClauses[] = "p.postid = :postId";
             $params['postId'] = $postId;
         }
-
-        $whereClauses[] = 'u.status = 0 AND (u.roles_mask = 0 OR u.roles_mask = 16)';
 
         $orderBy = "p.createdat DESC";
 
@@ -1078,8 +1081,6 @@ class PostMapper
                 u.slug,
                 u.img AS userimg,
                 MAX(u.status) AS user_status,
-                MAX(ui.count_content_moderation_dismissed) AS user_count_content_moderation_dismissed,
-                MAX(pi.count_content_moderation_dismissed) AS post_count_content_moderation_dismissed,
                 MAX(ui.reports) AS user_reports,
                 MAX(pi.reports) AS post_reports,
                 COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]') AS tags,

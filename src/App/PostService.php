@@ -7,11 +7,15 @@ namespace Fawaz\App;
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
 use Fawaz\App\Models\MultipartPost;
+use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
+use Fawaz\App\Specs\SpecTypes\InactiveUserSpec;
+use Fawaz\App\Specs\SpecTypes\PlaceholderIllegalContentFilterSpec;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Services\VideoCoverGenerator;
 use Fawaz\Services\Base64FileHandler;
@@ -789,8 +793,26 @@ class PostService
         }
 
         $this->logger->debug("PostService.getGuestListPost started");
+        
+        $inactiveUserSpec = new InactiveUserSpec(
+            ContentFilteringAction::replaceWithPlaceholder
+        );
+        $basicUserSpec = new BasicUserSpec(
+            ContentFilteringAction::replaceWithPlaceholder
+        );
+        
+        $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
 
-        $results = $this->postMapper->getGuestListPost($args);
+        $specs = [
+            $inactiveUserSpec,
+            $basicUserSpec,
+            $placeholderIllegalContentFilterSpec
+        ];
+
+        $results = $this->postMapper->getGuestListPost(
+            $args,
+            $specs
+        );
 
         if (empty($results)) {
             return $this::respondWithError(31510);
