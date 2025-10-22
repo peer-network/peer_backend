@@ -18,8 +18,6 @@ use Fawaz\Services\Base64FileHandler;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 
 use Fawaz\config\constants\ConstantsConfig;
@@ -179,16 +177,6 @@ class PostService
             'mediadescription' => $args['mediadescription'] ?? null,
             'createdat' => $createdAt,
         ];
-
-        if ($postData['feedid']) {
-            if (!$this->postMapper->isNewsFeedExist($postData['feedid'])) {
-                return $this::respondWithError(41512);
-            }
-
-            if (!$this->postMapper->isHasAccessInNewsFeed($postData['feedid'], $this->currentUserId)) {
-                return $this::respondWithError(31801);
-            }
-        }
 
         try {
             $this->transactionManager->beginTransaction();
@@ -591,39 +579,6 @@ class PostService
         return $results;
     }
 
-    public function getChatFeedsByID(string $feedid): ?array
-    {
-        if (!$this->checkAuthentication() || !self::isValidUUID($feedid)) {
-            return $this::respondWithError(30103);
-        }
-
-        $this->logger->debug("PostService.getChatFeedsByID started");
-
-        try {
-            $posts = $this->postMapper->getChatFeedsByID($feedid);
-
-            $result = array_map(
-                fn (Post $post) => $this->mapFeedsWithComments($post),
-                $posts
-            );
-
-            return $this::createSuccessResponse(11808, $result, false);
-        } catch (\Throwable $e) {
-            $this->logger->error('Failed to fetch chat feeds', ['feedid' => $feedid, 'exception' => $e]);
-            return $this::respondWithError(41807);
-        }
-    }
-
-    public function mapFeedsWithComments(Post $post): array
-    {
-        $postArray = $post->getArrayCopy();
-
-        $comments = $this->commentMapper->fetchAllByPostId($post->getPostId(), $this->currentUserId);
-        $postArray['comments'] = $this->mapCommentsWithReplies($comments);
-
-        return $postArray;
-    }
-
     private function mapCommentsWithReplies(array $comments): array
     {
         return array_map(
@@ -740,6 +695,7 @@ class PostService
                 return $this::respondWithError(51301);
             }
 
+            $this->transactionManager->beginTransaction();
             // generate PostId and JWT
             $eligibilityToken = $this->tokenService->createAccessTokenWithCustomExpriy($this->currentUserId, 300);
 
@@ -747,6 +703,7 @@ class PostService
                 // Add Eligibility Token to DB table eligibility_token
                 $this->postMapper->addOrUpdateEligibilityToken($this->currentUserId, $eligibilityToken, 'NO_FILE');
             }
+            $this->transactionManager->commit();
             $response = [
                         'status' => 'success',
                         'ResponseCode' => "10901", // You are eligible for post upload
@@ -756,9 +713,11 @@ class PostService
             return $response;
 
         } catch (ValidationException $e) {
+            $this->transactionManager->rollback();
             $this->logger->warning("PostService.postEligibility Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('PostService.postEligibility exception', [
                 'message' => $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
@@ -784,7 +743,7 @@ class PostService
 
         $getOnly = $args['getOnly'] ?? null;
         $postOrCommentId = $args['postOrCommentId'] ?? null;
-        $contentFilterBy = $args['contentFilterBy'] ?? 'MYGRANDMAHATES';
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
 
         if ($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])) {
