@@ -34,21 +34,6 @@ abstract class Model
         return static::$db;
     }
 
-    /**
-     * Find a record by its ID
-     * protected static string static::table() must be defined in the child class
-     *
-     * @param mixed $id
-     *
-     * @return array|false The record as an associative array, or false if not found
-     *
-     */
-    public static function find($id): array|false
-    {
-        $result = static::query()->where('uid', '=', $id)->limit(1)->all()[0] ?? null;
-
-        return $result ?: false;
-    }
 
     /**
      * Get the first record matching the query
@@ -87,12 +72,16 @@ abstract class Model
         $whereSql = $this->buildWhere($params);
 
         $sql = "SELECT COUNT(*) as count FROM " . static::table() . " {$joinsSql} {$whereSql}";
-        $stmt = $db->prepare($sql);
-        $stmt->execute($params);
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return (int)($result['count'] ?? 0);
+        try {
+          $stmt = $db->prepare($sql);                                                                                                                                                                                                                                                  
+          $stmt->execute($params);                                                                                                                                                                                                                                                     
+          $result = $stmt->fetch(PDO::FETCH_ASSOC);                                                                                                                                                                                                                                    
+          return (int)($result['count'] ?? 0);                                                                                                                                                                                                                                         
+        } catch (\PDOException $e) {                                                                                                                                                                                                                                                     
+            throw new \PDOException('Failed to count() . error:' . $e->getMessage(), 40302);                                                                                                                                                                                                                
+        }  
+        
     }
 
     /**
@@ -130,10 +119,14 @@ abstract class Model
 
         $sql = "SELECT * FROM " . static::table() . " {$joinsSql} {$whereSql} {$orderSql} " . static::$limit;
 
-        $stmt = $db->prepare($sql);
-        $stmt->execute($params);
+        try {
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            throw new \PDOException('Failed to all() . error:' . $e->getMessage(), 40302);
+        }
     }
 
 
@@ -166,32 +159,35 @@ abstract class Model
         // Fetch data with limit and offset
         $sql = "SELECT {$selectColumns} FROM " . static::table() . " {$joinsSql} {$whereSql} {$orderSql} LIMIT :limit OFFSET :offset";
 
-        // var_dump($sql); exit;
-        $stmt = $db->prepare($sql);
+        try {
+            $stmt = $db->prepare($sql);
 
-        // Bind limit and offset
-        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            // Bind limit and offset
+            $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
-        // Bind other where parameters
-        foreach ($params as $key => $val) {
-            $stmt->bindValue($key, $val);
+            // Bind other where parameters
+            foreach ($params as $key => $val) {
+                $stmt->bindValue($key, $val);
+            }
+
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Get total count
+            $total = $this->count();
+            $lastPage = (int) ceil($total / $perPage);
+
+            return [
+                'data' => $data,
+                'total' => $total,
+                'per_page' => $perPage,
+                'current_page' => $page,
+                'last_page' => $lastPage,
+            ];
+        } catch (\PDOException $e) {
+            throw new \PDOException('Failed to paginate() . Error:' . $e->getMessage(), 40302);
         }
-
-        $stmt->execute();
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Get total count
-        $total = $this->count();
-        $lastPage = (int) ceil($total / $perPage);
-
-        return [
-            'data' => $data,
-            'total' => $total,
-            'per_page' => $perPage,
-            'current_page' => $page,
-            'last_page' => $lastPage,
-        ];
     }
 
     /**
@@ -368,9 +364,13 @@ abstract class Model
 
         $sql = "INSERT INTO " . static::table() . " (" . implode(", ", $columns) . ") VALUES (" . implode(", ", $placeholders) . ")";
 
-        $stmt = $db->prepare($sql);
+        try {
+            $stmt = $db->prepare($sql);
 
-        return $stmt->execute($data);
+            return $stmt->execute($data);
+        } catch (\PDOException $e) {
+            throw new \PDOException('Failed to insert record. Error:' . $e->getMessage(), 40302);
+        }
     }
 
     /**
@@ -387,13 +387,18 @@ abstract class Model
             $setClauses[] = "{$col} = {$param}";
             $params[$param] = $val;
         }
-        $joinsSql = $this->buildJoins();
+        // $joinsSql = $this->buildJoins();
         $whereSql = $this->buildWhere($params);
 
         $sql = "UPDATE " . static::table() . " SET " . implode(", ", $setClauses) . " {$whereSql}";
-        $stmt = $db->prepare($sql);
 
-        return $stmt->execute($params);
+        try{
+            $stmt = $db->prepare($sql);
+
+            return $stmt->execute($params);
+        } catch (\PDOException $e) {
+            throw new \PDOException('Failed to update record. Error:' . $e->getMessage(), 40302);
+        }
     }
 
 
