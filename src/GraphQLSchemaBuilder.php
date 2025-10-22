@@ -2193,7 +2193,7 @@ class GraphQLSchemaBuilder
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
-                'affectedRows' => function (array $root): ?array {
+                'affectedRows' => function (array $root): array {
                     return $root['affectedRows'] ?? [];
                 },
                 'meta' => function (array $root): array {
@@ -2318,7 +2318,7 @@ class GraphQLSchemaBuilder
             'postInteractions' => fn (mixed $root, array $args) => $this->postInteractions($args),
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
-            'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats($args),
+            'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
             'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
         ];
     }
@@ -4136,7 +4136,7 @@ class GraphQLSchemaBuilder
     /**
      * Get Moderation Stats
      */
-    protected function moderationStats(array $args): array
+    protected function moderationStats(): array
     {
         if (!$this->checkAuthentication()) {
             return self::respondWithError(60501);
@@ -4144,7 +4144,7 @@ class GraphQLSchemaBuilder
         $this->logger->debug('GraphQLSchemaBuilder.moderationStats started');
 
         try {
-            return $this->moderationService->getModerationStats($args);
+            return $this->moderationService->getModerationStats();
         } catch (\PDOException $e) {
             $this->logger->error("Error in GraphQLSchemaBuilder.moderationStats", ['exception' => $e->getMessage()]);
             return self::respondWithError(40302);
@@ -4169,6 +4169,25 @@ class GraphQLSchemaBuilder
 
         } catch (\Exception $e) {
             $this->logger->error("Error getting moderation items: " . $e->getMessage());
+            return self::respondWithError(40301);
+        }
+    }
+
+    /**
+     * Perform Moderation Action
+     */
+    protected function performModerationAction(array $args): array
+    {
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+        $this->logger->debug('GraphQLSchemaBuilder.performModerationAction started');
+
+        try {
+            return $this->moderationService->performModerationAction($args, $this->currentUserId);
+
+        } catch (\Exception $e) {
+            $this->logger->error("Error performing moderation action: " . $e->getMessage());
             return self::respondWithError(40301);
         }
     }

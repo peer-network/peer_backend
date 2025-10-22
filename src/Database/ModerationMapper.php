@@ -6,14 +6,17 @@ namespace Fawaz\Database;
 
 use DateTime;
 use Fawaz\App\Comment;
+use Fawaz\App\CommentInfo;
 use Fawaz\App\Models\UserReport;
 use Fawaz\config\constants\ConstantsModeration;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\App\Models\Moderation;
 use Fawaz\App\Models\ModerationTicket;
 use Fawaz\App\Post;
+use Fawaz\App\PostInfo;
 use Fawaz\App\Role;
 use Fawaz\App\User;
+use Fawaz\App\UserInfo;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\PeerLoggerInterface;
 use Tests\utils\ConfigGeneration\Constants;
@@ -183,6 +186,14 @@ class ModerationMapper
 
 
     /**
+     * Check if Moderation Action Already Performed
+     */
+    public function findModerationAction(string $targetContentId): array|bool
+    {
+        return UserReport::query()->where('moderationticketid', $targetContentId)->first();
+    }
+
+    /**
      * Perform Moderation Action
      *
      * Update status of a moderation item
@@ -191,200 +202,178 @@ class ModerationMapper
      *  3. restored
      *  4. illegal
      */
-    // public function performModerationAction(array $args): array
-    // {
-    //     try{
-            
-    //         if(empty($args['targetContentId']) || empty($args['moderationAction'])){
-    //             return self::respondWithError(30101); // Missing required fields
-    //         }
+    public function performModerationAction(string $targetContentId, string $moderationAction, string $currentUserId): bool
+    {
+        try{
+            $moderationId = self::generateUUID();
+            $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
 
-    //         $targetContentId = $args['targetContentId'];
-    //         $moderationAction = $args['moderationAction'];
+            $report = UserReport::query()->where('moderationticketid', $targetContentId)->first();
 
-    //         if (!$targetContentId || !self::isValidUUID($targetContentId) || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
-    //             return self::respondWithError(0000); // Invalid input
-    //         }
+            Moderation::insert([
+                'uid' => $moderationId,
+                'moderationticketid' => $targetContentId,
+                'moderatorid' => $currentUserId,
+                'status' => $moderationAction,
+                'createdat' => $createdat,
+            ]);
 
-    //         $report = UserReport::query()->where('moderationticketid', $targetContentId)->first();
-    //         if (!$report) {
-    //             return self::respondWithError(0000); // Report not found
-    //         }
+            UserReport::query()->where('targetid', $report['targetid'])->where('targettype', $report['targettype'])->updateColumns([
+                'moderationid' => $moderationId
+            ]);
 
-    //         if($report['moderationid']) {
-    //             return self::respondWithError(0000); // Moderation action already performed
-    //         }
+            ModerationTicket::query()->where('uid', $targetContentId)->updateColumns([
+                'status' => $moderationAction,
+                'updatedat' => $createdat
+            ]);
 
-    //         $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
+            /**
+             * Apply Content Action based on Moderation Action
+             *
+             * For Post Content Type Only
+             *  1. illegal: Set post status to '2' (illegal) in posts table
+             *  2. restored: Set post status to '0' (published) in posts table and update REPORTS counts to ZERO
+             *  3. hidden: Update REPORTS counts to FIVE or more
+             */
+            if ($report['targettype'] === 'post') {
 
-    //         $moderationId = self::generateUUID();
+                /**
+                 * Moderation Status: illegal
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
+                    Post::query()->where('postid', $report['targetid'])->updateColumns([
+                        'status' => ConstantsModeration::POST_STATUS_ILLEGAL,
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
+                    ]);
 
-    //         Moderation::insert([
-    //             'uid' => $moderationId,
-    //             'moderationticketid' => $targetContentId,
-    //             'moderatorid' => $this->currentUserId,
-    //             'status' => $moderationAction,
-    //             'createdat' => $createdat,
-    //         ]);
+                    // Move file to illegal folder
+                    $this->moveFileToIllegalFolder($report['targetid'], 'post');
+                }
 
-    //         UserReport::query()->where('targetid', $report['targetid'])->where('targettype', $report['targettype'])->updateColumns([
-    //             'moderationid' => $moderationId
-    //         ]);
+                /**
+                 * Moderation Status: restored
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
+                    $postInfo = PostInfo::query()->where('postid', $report['targetid'])->first();
+                    if ($postInfo) {
+                        PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
+                            'reports' => 0
+                        ]);
+                        Post::query()->where('postid', $report['targetid'])->updateColumns([
+                            'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
+                        ]);
+                    }
+                }
 
-    //         ModerationTicket::query()->where('uid', $targetContentId)->updateColumns([
-    //             'status' => $moderationAction,
-    //             'updatedat' => $createdat
-    //         ]);
+                /**
+                 * hidden: Update REPORTS counts to FIVE or more
+                 * This will ensure that the post remains hidden in the listPosts logic
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
+                    PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
+                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST']
+                    ]);
+                    Post::query()->where('postid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
+                    ]);
+                }
+            }
 
-    //         /**
-    //          * Apply Content Action based on Moderation Action
-    //          *
-    //          * For Post Content Type Only
-    //          *  1. illegal: Set post status to '2' (illegal) in posts table
-    //          *  2. restored: Set post status to '0' (published) in posts table and update REPORTS counts to ZERO
-    //          *  3. hidden: Update REPORTS counts to FIVE or more
-    //          */
-    //         if ($report['targettype'] === 'post') {
+            /**
+             * For User Content Type Only
+             *  1. illegal:  // TBC
+             *  2. restored: Set user status to '0' (active) in users table and update REPORTS counts to ZERO
+             *  3. hidden: Update REPORTS counts to FIVE or more
+             */
+            if ($report['targettype'] === 'user') {
 
-    //             /**
-    //              * Moderation Status: illegal
-    //              */
-    //             if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
-    //                 Post::query()->where('postid', $report['targetid'])->updateColumns([
-    //                     'status' => ConstantsModeration::POST_STATUS_ILLEGAL,
-    //                     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
-    //                 ]);
+                /**
+                 * Moderation Status: illegal
+                 */
+                // TBC
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
+                    User::query()->where('uid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
+                    ]);
+                }
 
-    //                 // Move file to illegal folder
-    //                 $this->moveFileToIllegalFolder($report['targetid'], 'post');
-    //             }
+                /**
+                 * Moderation Status: restored
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
+                    UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
+                        'reports' => 0
+                    ]);
+                    User::query()->where('uid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
+                    ]);
+                }
 
-    //             /**
-    //              * Moderation Status: restored
-    //              */
-    //             if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
-    //                 $postInfo = PostInfo::query()->where('postid', $report['targetid'])->first();
-    //                 if ($postInfo) {
-    //                     PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
-    //                         'reports' => 0
-    //                     ]);
-    //                     Post::query()->where('postid', $report['targetid'])->updateColumns([
-    //                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
-    //                     ]);
-    //                 }
-    //             }
+                /**
+                 * hidden: Update REPORTS counts to FIVE or more
+                 * This will ensure that the user remains hidden in the listPosts logic
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
+                    UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
+                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER']
+                    ]);
+                    User::query()->where('uid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
+                    ]);
+                }
 
-    //             /**
-    //              * hidden: Update REPORTS counts to FIVE or more
-    //              * This will ensure that the post remains hidden in the listPosts logic
-    //              */
-    //             if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
-    //                 PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
-    //                     'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST']
-    //                 ]);
-    //                 Post::query()->where('postid', $report['targetid'])->updateColumns([
-    //                     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
-    //                 ]);
-    //             }
-    //         }
+            }
 
-    //         /**
-    //          * For User Content Type Only
-    //          *  1. illegal:  // TBC
-    //          *  2. restored: Set user status to '0' (active) in users table and update REPORTS counts to ZERO
-    //          *  3. hidden: Update REPORTS counts to FIVE or more
-    //          */
-    //         if ($report['targettype'] === 'user') {
+            /**
+             * For Comment Content Type Only
+             *  1. illegal: // TBC
+             *  2. restored: Set comment status to '0' (published) in comments table and update REPORTS counts to ZERO
+             *  3. hidden: Update REPORTS counts to FIVE or more
+             */
+            if ($report['targettype'] === 'comment') {
 
-    //             /**
-    //              * Moderation Status: illegal
-    //              */
-    //             // TBC
-    //             if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
-    //                 User::query()->where('uid', $report['targetid'])->updateColumns([
-    //                     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
-    //                 ]);
-    //             }
+                /**
+                 * Moderation Status: illegal
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
+                    Comment::query()->where('commentid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
+                    ]);
+                }
 
-    //             /**
-    //              * Moderation Status: restored
-    //              */
-    //             if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
-    //                 UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
-    //                     'reports' => 0
-    //                 ]);
-    //                 User::query()->where('uid', $report['targetid'])->updateColumns([
-    //                     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
-    //                 ]);
-    //             }
+                /**
+                 * Moderation Status: restored
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
+                    CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
+                        'reports' => 0
+                    ]);
+                    Comment::query()->where('commentid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
+                    ]);
+                }
 
-    //             /**
-    //              * hidden: Update REPORTS counts to FIVE or more
-    //              * This will ensure that the user remains hidden in the listPosts logic
-    //              */
-    //             if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
-    //                 UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
-    //                     'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER']
-    //                 ]);
-    //                 User::query()->where('uid', $report['targetid'])->updateColumns([
-    //                     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
-    //                 ]);
-    //             }
+                /**
+                 * hidden: Update REPORTS counts to FIVE or more
+                 * This will ensure that the comment remains hidden in the listPosts logic
+                 */
+                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
+                    CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
+                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['COMMENT']
+                    ]);
+                    Comment::query()->where('commentid', $report['targetid'])->updateColumns([
+                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
+                    ]);
+                }
+            }
 
-    //         }
-
-    //         /**
-    //          * For Comment Content Type Only
-    //          *  1. illegal: // TBC
-    //          *  2. restored: Set comment status to '0' (published) in comments table and update REPORTS counts to ZERO
-    //          *  3. hidden: Update REPORTS counts to FIVE or more
-    //          */
-    //         if ($report['targettype'] === 'comment') {
-
-    //             /**
-    //              * Moderation Status: illegal
-    //              */
-    //             if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
-    //                 Comment::query()->where('commentid', $report['targetid'])->updateColumns([
-    //                     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
-    //                 ]);
-    //             }
-
-    //             /**
-    //              * Moderation Status: restored
-    //              */
-    //             if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
-    //                 CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
-    //                     'reports' => 0
-    //                 ]);
-    //                 Comment::query()->where('commentid', $report['targetid'])->updateColumns([
-    //                     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
-    //                 ]);
-    //             }
-
-    //             /**
-    //              * hidden: Update REPORTS counts to FIVE or more
-    //              * This will ensure that the comment remains hidden in the listPosts logic
-    //              */
-    //             if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
-    //                 CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
-    //                     'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['COMMENT']
-    //                 ]);
-    //                 Comment::query()->where('commentid', $report['targetid'])->updateColumns([
-    //                     'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
-    //                 ]);
-    //             }
-    //         }
-
-    //         $this->transactionManager->commit();
-
-    //         return self::createSuccessResponse(0000, [], false); // Moderation action performed successfully
-    //     }catch(\Exception $e){
-    //         // $this->transactionManager->rollBack();
-    //         $this->logger->error("Error performing moderation action: " . $e->getMessage());
-    //         return self::respondWithError(0000);
-    //     }
-    // }
+            return true; // Moderation action performed successfully
+        }catch(\Exception $e){
+            // $this->transactionManager->rollBack();
+            $this->logger->error("Error performing moderation action: " . $e->getMessage());
+            return false;
+        }
+    }
 
     /**
      * Move File to Illegal Folder
