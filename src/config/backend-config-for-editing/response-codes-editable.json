@@ -1135,17 +1135,13 @@
         "comment": "Error: Moderation action already performed",
         "userFriendlyComment": "This item has already been decided."
     },
+    "22103": {
+        "comment": "Moderation item not found",
+        "userFriendlyComment": "Moderation item not found."
+    },
     "62101": {
-        "comment": "Forbidden: Unauthorized access to moderation stats",
-        "userFriendlyComment": "You don t have permission to view moderation statistics."
-    },
-    "62102": {
-        "comment": "Forbidden: Unauthorized access attempt to get moderation items",
-        "userFriendlyComment": "You don t have permission to view moderation items."
-    },
-    "62103": {
-        "comment": "Forbidden: Unauthorized access attempt to perform moderation action",
-        "userFriendlyComment": "You don t have permission to perform this action."
+        "comment": "Forbidden: Unauthorized access to moderation",
+        "userFriendlyComment": "You don't have permission to use moderation."
     },
     "32101": {
         "comment": "Bad Request: Invalid input",
