@@ -4094,36 +4094,17 @@ class GraphQLSchemaBuilder
         if (isset($posts['status']) && $posts['status'] === 'error') {
             return $posts;
         }
+        $post = $posts[0];
 
-        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
-        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
-
-        $data = array_map(
-            fn (PostAdvanced $post) => $this->guestPostMapPostWithComments($post, $commentOffset, $commentLimit),
-            $posts
-        );
-
-        return [
-            'status' => 'success',
-            'counter' => count($data),
-            'ResponseCode' => empty($data) ? "21501" : "11501",
-            'affectedRows' => $data[0] ?? [],
-        ];
-    }
-
-    /**
-     * Map Guest Post with Comments
-     *
-     */
-    protected function guestPostMapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit): array
-    {
-        $postArray = $post->getArrayCopy();
-        $comments = $this->commentService->fetchAllByGuestPostIdetaild($post->getPostId(), $commentOffset, $commentLimit);
-
-        $postArray['comments'] = array_map(
-            fn (CommentAdvanced $comment) => $comment->getArrayCopy(),
-            $comments
-        );
-        return $postArray;
+        if ($post instanceof PostAdvanced) {
+            return [
+                'status' => 'success',
+                'counter' => 1,
+                'ResponseCode' => "11501",
+                'affectedRows' => $post->getArrayCopy(),
+            ];
+        } else {
+            return $this::respondWithError(40301);
+        }
     }
 }

@@ -13,8 +13,6 @@ use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostMedia;
 use Fawaz\App\Specs\Specification;
 use Fawaz\App\Specs\SpecificationSQLData;
-use Fawaz\App\Role;
-use Fawaz\App\Status;
 use Fawaz\App\User;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
@@ -501,7 +499,7 @@ class PostMapper
      * @param Specification[] $specifications
      * @return PostAdvanced[]
      */
-    public function findPostser(string $currentUserId, ?array $args = [], array $specifications): array
+    public function findPostser(string $currentUserId, array $specifications, ?array $args = []): array
     {
         $this->logger->debug("PostMapper.findPostser started");
 

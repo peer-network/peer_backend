@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use Fawaz\App\Post;
-use Fawaz\App\PostAdvancedWithUser;
 use Fawaz\App\Comment;
 use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
-use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
-use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\InactiveUserSpec;
-use Fawaz\App\Specs\SpecTypes\PlaceholderIllegalContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\User\BasicUserSpec;
+use Fawaz\App\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\User\HideInactiveUserPostSpec;
+use Fawaz\App\Specs\SpecTypes\User\InactiveUserPostSpec;
+use Fawaz\App\Specs\SpecTypes\User\InactiveUserSpec;
+use Fawaz\App\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
 use Fawaz\config\constants\PeerUUID;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
@@ -538,8 +540,11 @@ class PostService
         $postId = $args['postid'] ?? null;
         $titleConfig = ConstantsConfig::post()['TITLE'];
         $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
         
-        $contentFilterStrategy = ContentFilteringStrategies::searchById;
+        $contentFilterStrategy = ContentFilteringStrategies::postFeed;
+        $illegalPostContentAction = ContentFilteringAction::hideContent;
 
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this::respondWithError(30209);
@@ -587,24 +592,42 @@ class PostService
 
         $this->logger->debug("PostService.findPostser started");
         
-        // if ($title || $tag) {
-        //     $contentFilterStrategy = ContentFilteringStrategies::searchByMeta;
-        // }
-        // if ($userId || $postId) {
-        //     $contentFilterStrategy = ContentFilteringStrategies::searchById;
-        // }
-        // if ($userId && $userId === $this->currentUserId) { 
-        //     $contentFilterStrategy = ContentFilteringStrategies::myprofile;
-        // }
+        if ($title || $tag) {
+            $contentFilterStrategy = ContentFilteringStrategies::searchByMeta;
+            $illegalPostContentAction = ContentFilteringAction::hideContent;
+        }
+        if ($userId || $postId) {
+            $contentFilterStrategy = ContentFilteringStrategies::searchById;
+            $illegalPostContentAction = ContentFilteringAction::replaceWithPlaceholder;
+        }
+        if ($userId && $userId === $this->currentUserId) { 
+            $contentFilterStrategy = ContentFilteringStrategies::myprofile;
+            $illegalPostContentAction = ContentFilteringAction::replaceWithPlaceholder;
+        }
         
         $inactiveUserSpec = new InactiveUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
+        $hideInactiveUserPostSpec = new HideInactiveUserPostSpec();
+        
         $basicUserSpec = new BasicUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
         
-        $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
+        $placeholderIllegalPostContentFilterSpec = new IllegalContentFilterSpec(
+            $illegalPostContentAction,
+            ContentType::post
+        );
+
+        $placeholderIllegalUserContentFilterSpec = new IllegalContentFilterSpec(
+            $illegalPostContentAction,
+            ContentType::user
+        );
+
+        $placeholderIllegalCommentContentFilterSpec = new IllegalContentFilterSpec(
+            $illegalPostContentAction,
+            ContentType::comment
+        );
 
         $postsHiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterStrategy,
@@ -624,38 +647,64 @@ class PostService
             ContentType::user
         );
 
+        $commentsHiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterStrategy,
+            $contentFilterBy,
+            $this->currentUserId,
+            $userId,
+            ContentType::post,
+            ContentType::comment
+        );
+
         $postSpecs = [
             $inactiveUserSpec,
             $basicUserSpec,
-            $placeholderIllegalContentFilterSpec,
-            $postsHiddenContentFilterSpec
+            $hideInactiveUserPostSpec,
+            $placeholderIllegalPostContentFilterSpec,
+            $postsHiddenContentFilterSpec,
         ];
 
         $userSpecs = [
             $inactiveUserSpec,
             $basicUserSpec,
-            $placeholderIllegalContentFilterSpec,
+            $placeholderIllegalUserContentFilterSpec,
             $userHiddenContentFilterSpec
         ];
+
+        $commentSpecs = [
+            $inactiveUserSpec,
+            $basicUserSpec,
+            $placeholderIllegalCommentContentFilterSpec,
+            $commentsHiddenContentFilterSpec
+        ];
+
         try {
-            $results = $this->postMapper->findPostser($this->currentUserId, $args,$postSpecs);
+            $results = $this->postMapper->findPostser($this->currentUserId,$postSpecs, $args);
             if (empty($results) && $postId != null) {
                 return $this::respondWithError(31510);
             }
             
-            $postsWithProfiles = $this->fetchAndPlaceholderProfiles($results, $userSpecs, $this->currentUserId);
-            
-            foreach($postsWithProfiles as $post) {
+            $postsEnriched = $this->enrichWithProfileAndComment(
+                $results, 
+                $userSpecs, 
+                $commentSpecs, 
+                $this->currentUserId,
+                $commentOffset,
+                $commentLimit
+            );
+
+
+            foreach($postsEnriched as $post) {
                 ContentReplacer::placeholderPost($post, $postSpecs);
             }
-            return $postsWithProfiles;
+            return $postsEnriched;
         } catch (\Throwable $e) {
             // Log and fall back to original results
             $this->logger->error('Failed to load list post', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $results;
+            return false;
         }
     }
 
@@ -862,6 +911,8 @@ class PostService
      */
     public function getGuestListPost(?array $args = []): array|false
     {
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
         $postId = $args['postid'] ?? null;
 
         if (!self::isValidUUID($postId)) {
@@ -873,13 +924,22 @@ class PostService
         $inactiveUserSpec = new InactiveUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
+        $hideInactiveUserPostSpec = new HideInactiveUserPostSpec();
+
         $basicUserSpec = new BasicUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
         
         $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
-
+        
         $postSpecs = [
+            $inactiveUserSpec,
+            // $hideInactiveUserPostSpec,
+            $basicUserSpec,
+            $placeholderIllegalContentFilterSpec,
+        ];
+
+        $userSpecs = [
             $inactiveUserSpec,
             $basicUserSpec,
             $placeholderIllegalContentFilterSpec,
@@ -888,27 +948,33 @@ class PostService
         try {
             $results = $this->postMapper->findPostser(
                 PeerUUID::empty->value,
-                $args,
-                $postSpecs
+                $postSpecs,
+                $args
             );
-            // $results = $this->postMapper->getGuestListPost(
-            //     $args,
-            //     $specs
-            // );
-
             if (empty($results)) {
                 return $this::respondWithError(31510);
             }
-            $postsWithProfiles = $this->fetchAndPlaceholderProfiles($results, $postSpecs, PeerUUID::empty->value);
-            $postsWithProfiles = array_map(fn(PostAdvanced $p) =>  ContentReplacer::placeholderPost($p, $postSpecs),$postsWithProfiles);
-            return $postsWithProfiles;
+
+            $postsEnriched = $this->enrichWithProfileAndComment(
+                $results, 
+                $userSpecs, 
+                $postSpecs,
+                PeerUUID::empty->value,
+                $commentOffset,
+                $commentLimit
+            );
+
+            foreach($postsEnriched as $post) {
+                ContentReplacer::placeholderPost($post, $postSpecs);
+            }
+            return $postsEnriched;
         } catch (\Throwable $e) {
             // Log and fall back to original results
             $this->logger->error('Failed to load guest list post', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return $results;
+            return false;
         }
     }
 
@@ -917,13 +983,22 @@ class PostService
      * Falls back gracefully if no profiles found.
      *
      * @param PostAdvanced[] $posts Array of PostAdvanced
-     * @param \Fawaz\App\Specs\Specification[] $specs Content filtering specs
+     * @param \Fawaz\App\Specs\Specification[] $userSpecs Content filtering specs
+     * @param \Fawaz\App\Specs\Specification[] $commentSpecs Content filtering specs
      * @param string $currentUserId Current/guest user id for profile fetch
+     * @param int $commentOffset
+     * @param int $commentLimit
      * @return PostAdvanced[]
      */
-    private function fetchAndPlaceholderProfiles(array $posts, array $specs, string $currentUserId): array
-    {
-        $userIds = array_values(
+    private function enrichWithProfileAndComment(
+        array $posts, 
+        array $userSpecs, 
+        array $commentSpecs, 
+        string $currentUserId, 
+        int $commentOffset, 
+        int $commentLimit
+    ): array {
+        $userIdsFromPosts = array_values(
             array_unique(
                 array_filter(
                     array_map(fn(PostAdvanced $post) => $post->getUserId(),$posts)
@@ -931,15 +1006,24 @@ class PostService
             )
         );
 
-        if (empty($userIds)) {
+        if (empty($userIdsFromPosts)) {
             return $posts;
         }
+        
+        $profiles = $this->profileRepository->fetchByIds($userIdsFromPosts, $currentUserId, $userSpecs);
 
-        $profiles = $this->profileRepository->fetchByIds($userIds, $currentUserId, $specs);
-    
         $enriched = [];
         foreach ($posts as $post) {
-            $enriched[] = $this->enrichAndPlaceholderPostWithProfile($post, $profiles[$post->getUserId()], $specs);
+            $data = $post->getArrayCopy();
+            $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($data, $profiles[$post->getUserId()], $userSpecs);
+            $enrichedWithCommentsAndProfiles = $this->enrichAndPlaceholderWithComments(
+                $enrichedWithProfiles,
+                $commentSpecs,
+                $commentOffset,
+                $commentLimit
+            );
+            $post = new PostAdvanced($enrichedWithCommentsAndProfiles, [],false);
+            $enriched[] = $post;
         }
 
         return $enriched;
@@ -948,15 +1032,28 @@ class PostService
     /**
      * Enrich a single PostAdvanced with a Profile and return PostAdvancedWithUser.
      */
-    private function enrichAndPlaceholderPostWithProfile(PostAdvanced $post, ?Profile $profile, array $specs): PostAdvanced
+    private function enrichAndPlaceholderWithProfile(array $data, ?Profile $profile, array $specs): array
     {
-        $data = $post->getArrayCopy();
         if ($profile instanceof Profile) {
             ContentReplacer::placeholderProfile($profile, $specs);
             $data['user'] = $profile->getArrayCopy();
         }
-        $withUser = new PostAdvanced($data, [], false);
-        return $withUser;
+        return $data;
+    }
+
+    private function enrichAndPlaceholderWithComments(array $data, array $specs, int $commentOffset, int $commentLimit): array
+    {
+        $comments = $this->commentMapper->fetchAllByGuestPostIdetaild($data['postid'], $commentOffset, $commentLimit);
+        $commentsArray = [];
+        foreach($comments as $comment) {
+            if ($comment instanceof CommentAdvanced) {
+                ContentReplacer::placeholderComments($comment, $specs);
+                $commentsArray[] = $comment->getArrayCopy();
+            }
+        }
+        
+        $data['comments'] = $commentsArray;
+        return $data;
     }
 
     public function postExistsById(string $postId): bool|array
