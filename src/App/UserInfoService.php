@@ -389,7 +389,7 @@ class UserInfoService
             // Moderated items should not be reported again
             if ($this->reportsMapper->isModerated($reported_userid, ReportTargetType::USER->value)) {
                 $this->logger->warning("UserInfoService.reportUser: User report already exists");
-                return $this::respondWithError(0000); // This content has already been reviewed and restored by our team.
+                return $this::respondWithError(22101); // This content has already been reviewed and restored by our team.
             }
 
             $this->transactionManager->beginTransaction();

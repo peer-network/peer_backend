@@ -2200,8 +2200,8 @@ class GraphQLSchemaBuilder
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
-                'affectedRows' => function (array $root): ?array {
-                    return $root['affectedRows'] ?? null;
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
                 },
                 'meta' => function (array $root): array {
                     return [
@@ -2234,8 +2234,8 @@ class GraphQLSchemaBuilder
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
-                'affectedRows' => function (array $root): ?array {
-                    return $root['affectedRows'] ?? null;
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
                 },
                 'meta' => function (array $root): array {
                     return [
@@ -2325,8 +2325,8 @@ class GraphQLSchemaBuilder
             'postInteractions' => fn (mixed $root, array $args) => $this->postInteractions($args),
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
-            'moderationStats' => fn (mixed $root, array $args) => $this->moderationService->getModerationStats(),
-            'moderationItems' => fn (mixed $root, array $args) => $this->moderationService->getModerationItems($args),
+            'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
+            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
         ];
     }
 
@@ -2363,7 +2363,7 @@ class GraphQLSchemaBuilder
             'gemsters' => fn (mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->resolveAdvertisePost($args),
-            'performModeration' => fn (mixed $root, array $args) => $this->moderationService->performModerationAction($args),
+            'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
         ];
     }
 
@@ -4105,6 +4105,65 @@ class GraphQLSchemaBuilder
             ];
         } else {
             return $this::respondWithError(40301);
+        }
+    }
+
+    /**
+     * Get Moderation Stats
+     */
+    protected function moderationStats(): array
+    {
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+        $this->logger->debug('GraphQLSchemaBuilder.moderationStats started');
+
+        try {
+            return $this->moderationService->getModerationStats();
+        } catch (\PDOException $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.moderationStats", ['exception' => $e->getMessage()]);
+            return self::respondWithError(40302);
+        } catch (\Exception $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.moderationStats", ['exception' => $e->getMessage()]);
+            return self::respondWithError(40301);
+        }
+    }
+
+    /**
+     * Get Moderation Items
+     */
+    protected function moderationItems(array $args): array
+    {
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+        $this->logger->debug('GraphQLSchemaBuilder.moderationItems started');
+
+        try {
+            return $this->moderationService->getModerationItems($args);
+
+        } catch (\Exception $e) {
+            $this->logger->error("Error getting moderation items: " . $e->getMessage());
+            return self::respondWithError(40301);
+        }
+    }
+
+    /**
+     * Perform Moderation Action
+     */
+    protected function performModerationAction(array $args): array
+    {
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+        $this->logger->debug('GraphQLSchemaBuilder.performModerationAction started');
+
+        try {
+            return $this->moderationService->performModerationAction($args);
+
+        } catch (\Exception $e) {
+            $this->logger->error("Error performing moderation action: " . $e->getMessage());
+            return self::respondWithError(40301);
         }
     }
 }

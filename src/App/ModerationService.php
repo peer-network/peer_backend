@@ -11,8 +11,8 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\App\Models\Moderation;
 use Fawaz\App\Models\ModerationTicket;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Database\ModerationMapper;
 use Fawaz\Utils\PeerLoggerInterface;
-use Tests\utils\ConfigGeneration\Constants;
 
 class ModerationService
 {
@@ -21,6 +21,7 @@ class ModerationService
 
     public function __construct(
         protected PeerLoggerInterface $logger,
+        protected ModerationMapper $moderationMapper,
         protected TransactionManager $transactionManager
     ) {
 
@@ -31,7 +32,7 @@ class ModerationService
      */
     public function isAuthorized(): bool
     {
-        if (!User::query()->where('uid', $this->currentUserId)->where('roles_mask', Role::SUPER_MODERATOR)->exists()) {
+        if (!$this->moderationMapper->isAuthenticatedUserModerator($this->currentUserId)) {
             return false;
         }
         return true;
@@ -54,23 +55,15 @@ class ModerationService
             
             if (!$this->isAuthorized()) {
                 $this->logger->warning("Unauthorized access attempt to get moderation stats by user ID: {$this->currentUserId}");
-                return self::respondWithError(0000); // Unauthorized access attempt to get moderation stats
+                return self::respondWithError(62101); // Unauthorized access attempt to get moderation stats
             }
 
-            $amountAwaitingReview = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[0])->count();
-            $amountHidden = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[1])->count();
-            $amountRestored = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[2])->count();
-            $amountIllegal = ModerationTicket::query()->where('status', array_keys(ConstantsModeration::contentModerationStatus())[3])->count();
+            $statuses = $this->moderationMapper->getModerationStats();
 
-            return self::createSuccessResponse(0000, [ // Moderation stats retrieved successfully
-                'AmountAwaitingReview' => $amountAwaitingReview,
-                'AmountHidden' => $amountHidden,
-                'AmountRestored' => $amountRestored,
-                'AmountIllegal' => $amountIllegal,
-            ], false);
+            return self::createSuccessResponse(12101, $statuses, false);
         }catch(\Exception $e){
             $this->logger->error("Error getting moderation stats: " . $e->getMessage());
-            return self::respondWithError(0000);
+            return self::respondWithError(40301);
         }
     }
 
@@ -82,133 +75,20 @@ class ModerationService
         try {
             if (!$this->isAuthorized()) {
                 $this->logger->warning("Unauthorized access attempt to get moderation items by user ID: {$this->currentUserId}");
-                return self::respondWithError(0000); // Unauthorized access attempt to get moderation items
+                return self::respondWithError(62101); // Unauthorized access attempt to get moderation items
             }
 
-            $page = max((int)($args['offset'] ?? 1), 0);
+            $offset = max((int)($args['offset'] ?? 1), 0);
             $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-            $statuses = array_keys(ConstantsModeration::contentModerationStatus());
 
-            $items = ModerationTicket::query();
+            $results = $this->moderationMapper->getModerationItems($offset, $limit, $args);
 
-            // Apply Status filters
-            if (isset($args['status']) && in_array($args['status'], $statuses)) {
-                $items = $items->where('moderation_tickets.status', $args['status']);
-            }
-
-            // Apply Target Type filters
-            if (isset($args['contentType']) && in_array($args['contentType'], array_keys(ConstantsModeration::CONTENT_MODERATION_TARGETS))) {
-                $items = $items->where('moderation_tickets.contenttype', $args['contentType']);
-            }
-
-            $items = $items->orderByValue('status', 'ASC', $statuses)
-                            ->orderBy('reportscount', 'DESC')
-                            ->orderBy('createdat', 'DESC')
-                            ->latest()
-                            ->paginate($page, $limit);
-
-            $items['data'] = array_map(function ($item) {
-                $userReport = UserReport::query()
-                                        ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
-                                        ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
-                                        ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
-                                        ->select(
-                                            'user_reports.reportid',
-                                            'user_reports.reporter_userid',
-                                            'user_reports.targetid',
-                                            'user_reports.targettype',
-                                            'user_reports.message',
-                                            'user_reports.moderationid',
-                                            'posts.postid as post_postid', // Need to refactor this later
-                                            'posts.userid',
-                                            'posts.contenttype',
-                                            'posts.title',
-                                            'posts.mediadescription',
-                                            'posts.media',
-                                            'posts.cover',
-                                            'posts.options',
-                                            'comments.userid',
-                                            'comments.parentid',
-                                            'comments.content',
-                                            'target_user.uid as target_user_uid',
-                                            'target_user.username as target_user_username',
-                                            'target_user.email as target_user_email',
-                                            'target_user.img as target_user_img',
-                                            'target_user.slug as target_user_slug',
-                                            'target_user.status as target_user_status',
-                                            'target_user.biography as target_user_biography',
-                                            'target_user.updatedat as target_user_updatedat',
-                                        )
-                                        ->where('moderationticketid', $item['uid'])
-                                        ->latest()
-                                        ->first();
-
-
-                $targetContent = $this->mapTargetContent($userReport);
-
-                // Get all reporters for the ModerationTicket
-                $reporters = UserReport::query()
-                                        ->join('users', 'user_reports.reporter_userid', '=', 'users.uid')
-                                        ->select(
-                                            'users.uid',
-                                            'users.username',
-                                            'users.email',
-                                            'users.img',
-                                            'users.slug',
-                                            'users.status as userstatus',
-                                            'users.biography',
-                                            'users.updatedat',
-                                        )
-                                        ->where('moderationticketid', $item['uid'])
-                                        ->latest()
-                                        ->all();
-
-                $item['reporters'] = array_map(function ($reporter) {
-                    return (new User($reporter, [], false))->getArrayCopy();
-                }, $reporters);
-
-                $item['targetcontent'] = $targetContent['targetcontent'];
-                $item['targettype'] = $targetContent['targettype'];
-
-                return $item;
-            }, $items['data']);
-
-            return self::createSuccessResponse(0000, $items['data'], true); // Moderation items retrieved successfully
+            return self::createSuccessResponse(12102, $results, true); // Moderation items retrieved successfully
 
         } catch (\Exception $e) {
             $this->logger->error("Error getting moderation items: " . $e->getMessage());
-            return self::respondWithError(0000);
+            return self::respondWithError(40301);
         }
-    }
-
-    /**
-     * Map Target Content based on Target Type
-     */
-    private function mapTargetContent(array $item): array
-    {
-        $item['targetcontent']['post'] = null;
-        $item['targetcontent']['comment'] = null;
-        $item['targetcontent']['user'] = null;
-
-        if ($item['targettype'] === 'post') {
-            $item['postid'] = $item['targetid']; // Temporary fix, need to refactor this later
-            $item['targetcontent']['post'] = (new Post($item, [], false))->getArrayCopy();
-        } elseif ($item['targettype'] === 'comment') {
-            $item['targetcontent']['comment'] = (new Comment($item, [], false))->getArrayCopy();
-        } elseif ($item['targettype'] === 'user') {
-            $item['targetcontent']['user'] = (new User([
-                'uid' => $item['uid'],
-                'username' => $item['username'],
-                'email' => $item['email'],
-                'img' => $item['img'],
-                'slug' => $item['slug'],
-                'status' => $item['status'],
-                'biography' => $item['biography'],
-                'updatedat' => $item['updatedat'],
-            ], [], false))->getArrayCopy();
-        }
-
-        return $item;
     }
 
     /**
@@ -225,7 +105,7 @@ class ModerationService
         try{
             if (!$this->isAuthorized()) {
                 $this->logger->warning("Unauthorized access attempt to perform moderation action by user ID: {$this->currentUserId}");
-                return self::respondWithError(0000); // Unauthorized access attempt to perform moderation action
+                return self::respondWithError(62101); // Unauthorized access attempt to perform moderation action
             }
             
             if(empty($args['targetContentId']) || empty($args['moderationAction'])){
@@ -236,248 +116,38 @@ class ModerationService
             $moderationAction = $args['moderationAction'];
 
             if (!$targetContentId || !self::isValidUUID($targetContentId) || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
-                return self::respondWithError(0000); // Invalid input
+                return self::respondWithError(32101); // Invalid input
             }
 
-            $report = UserReport::query()->where('moderationticketid', $targetContentId)->first();
-            if (!$report) {
-                return self::respondWithError(0000); // Report not found
+            $report = $this->moderationMapper->findModerationAction($targetContentId);
+            if ($report === false) {
+                return self::respondWithError(22103); // Report not found
             }
 
-            if($report['moderationid']) {
-                return self::respondWithError(0000); // Moderation action already performed
+            // If report is an array and already has a moderation id, it's already processed
+            if (is_array($report) && array_key_exists('moderationid', $report) && !empty($report['moderationid'])) {
+                return self::respondWithError(22102); // Moderation action already performed
             }
-
-            $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
-
-            $moderationId = self::generateUUID();
 
             $this->transactionManager->beginTransaction();
-            Moderation::insert([
-                'uid' => $moderationId,
-                'moderationticketid' => $targetContentId,
-                'moderatorid' => $this->currentUserId,
-                'status' => $moderationAction,
-                'createdat' => $createdat,
-            ]);
+            
+            // Create Moderation Record
+            $result = $this->moderationMapper->performModerationAction($targetContentId, $moderationAction, $this->currentUserId);
 
-            UserReport::query()->where('targetid', $report['targetid'])->where('targettype', $report['targettype'])->updateColumns([
-                'moderationid' => $moderationId
-            ]);
-
-            ModerationTicket::query()->where('uid', $targetContentId)->updateColumns([
-                'status' => $moderationAction,
-                'updatedat' => $createdat
-            ]);
-
-            /**
-             * Apply Content Action based on Moderation Action
-             *
-             * For Post Content Type Only
-             *  1. illegal: Set post status to '2' (illegal) in posts table
-             *  2. restored: Set post status to '0' (published) in posts table and update REPORTS counts to ZERO
-             *  3. hidden: Update REPORTS counts to FIVE or more
-             */
-            if ($report['targettype'] === 'post') {
-
-                /**
-                 * Moderation Status: illegal
-                 */
-                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
-                    Post::query()->where('postid', $report['targetid'])->updateColumns([
-                        'status' => ConstantsModeration::POST_STATUS_ILLEGAL,
-                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
-                    ]);
-
-                    // Move file to illegal folder
-                    $this->moveFileToIllegalFolder($report['targetid'], 'post');
-                }
-
-                /**
-                 * Moderation Status: restored
-                 */
-                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
-                    $postInfo = PostInfo::query()->where('postid', $report['targetid'])->first();
-                    if ($postInfo) {
-                        PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
-                            'reports' => 0
-                        ]);
-                        Post::query()->where('postid', $report['targetid'])->updateColumns([
-                            'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
-                        ]);
-                    }
-                }
-
-                /**
-                 * hidden: Update REPORTS counts to FIVE or more
-                 * This will ensure that the post remains hidden in the listPosts logic
-                 */
-                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
-                    PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
-                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST']
-                    ]);
-                    Post::query()->where('postid', $report['targetid'])->updateColumns([
-                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
-                    ]);
-                }
-            }
-
-            /**
-             * For User Content Type Only
-             *  1. illegal:  // TBC
-             *  2. restored: Set user status to '0' (active) in users table and update REPORTS counts to ZERO
-             *  3. hidden: Update REPORTS counts to FIVE or more
-             */
-            if ($report['targettype'] === 'user') {
-
-                /**
-                 * Moderation Status: illegal
-                 */
-                // TBC
-                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
-                    User::query()->where('uid', $report['targetid'])->updateColumns([
-                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
-                    ]);
-                }
-
-                /**
-                 * Moderation Status: restored
-                 */
-                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
-                    UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
-                        'reports' => 0
-                    ]);
-                    User::query()->where('uid', $report['targetid'])->updateColumns([
-                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
-                    ]);
-                }
-
-                /**
-                 * hidden: Update REPORTS counts to FIVE or more
-                 * This will ensure that the user remains hidden in the listPosts logic
-                 */
-                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
-                    UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
-                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER']
-                    ]);
-                    User::query()->where('uid', $report['targetid'])->updateColumns([
-                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
-                    ]);
-                }
-
-            }
-
-            /**
-             * For Comment Content Type Only
-             *  1. illegal: // TBC
-             *  2. restored: Set comment status to '0' (published) in comments table and update REPORTS counts to ZERO
-             *  3. hidden: Update REPORTS counts to FIVE or more
-             */
-            if ($report['targettype'] === 'comment') {
-
-                /**
-                 * Moderation Status: illegal
-                 */
-                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
-                    Comment::query()->where('commentid', $report['targetid'])->updateColumns([
-                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
-                    ]);
-                }
-
-                /**
-                 * Moderation Status: restored
-                 */
-                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[2]) {
-                    CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
-                        'reports' => 0
-                    ]);
-                    Comment::query()->where('commentid', $report['targetid'])->updateColumns([
-                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[0]
-                    ]);
-                }
-
-                /**
-                 * hidden: Update REPORTS counts to FIVE or more
-                 * This will ensure that the comment remains hidden in the listPosts logic
-                 */
-                if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
-                    CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
-                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['COMMENT']
-                    ]);
-                    Comment::query()->where('commentid', $report['targetid'])->updateColumns([
-                        'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
-                    ]);
-                }
+            if(!$result){
+                $this->transactionManager->rollBack();
+                return self::respondWithError(42101); // Error performing moderation action
             }
 
             $this->transactionManager->commit();
 
-            return self::createSuccessResponse(0000, [], false); // Moderation action performed successfully
+            return self::createSuccessResponse(12103, [], false); // Moderation action performed successfully
         }catch(\Exception $e){
-            // $this->transactionManager->rollBack();
+            $this->transactionManager->rollBack();
             $this->logger->error("Error performing moderation action: " . $e->getMessage());
-            return self::respondWithError(0000);
+            return self::respondWithError(42101);
         }
     }
 
-    /**
-     * Move File to Illegal Folder
-     * Placeholder function for moving files to an illegal folder
-     * 
-     * 
-     * Example:
-     * $sourcePath = "/path/to/media/{childMedia}/{$targetType}/{$targetId}";
-     * $destinationPath = "/path/to/media/illegal/{$targetType}/{$targetId}";
-     */
-    private function moveFileToIllegalFolder(string $targetId, string $targetType): void
-    {
-        $this->logger->info("Moving {$targetType} with ID {$targetId} to illegal folder.");
-        
-        $illegalDirectoryPath = __DIR__ . "/../../runtime-data/media/illegal";
-        $directoryPath = __DIR__ . "/../../runtime-data/media";
-        if (!is_dir($illegalDirectoryPath)) {
-            try {
-                mkdir($illegalDirectoryPath, 0777, true);
-            } catch (\RuntimeException $e) {
-                throw new \Exception("Directory does not exist: $illegalDirectoryPath"); // Directory does not exist
-            }
-        }
-
-        // Target Media File for Post
-        if($targetType == 'post'){
-            $mediaRecord = Post::query()->where('postid', $targetId)->first();
-            if(!$mediaRecord || !$mediaRecord['media']){
-                throw new \Exception("Media not found for Post ID: $targetId");
-            }
-            $media = json_decode($mediaRecord['media'], true);
-
-            foreach ($media as $mediaItem) {
-
-                if (!isset($mediaItem['path']) || !file_exists($directoryPath.$mediaItem['path'])) {
-                    throw new \Exception("Invalid media path for Post ID: $targetId");
-                }
-                $media = $mediaItem['path'];
-
-                $stream = new \Slim\Psr7\Stream(fopen($directoryPath.$media, 'r'));
-
-                $uploadedFile = new \Slim\Psr7\UploadedFile(
-                    $stream,
-                    null,
-                    null
-                );
-
-                $mediaDetails = explode('/', $media);
-                $mediaUrl = end($mediaDetails);
-                
-                $filePath = $illegalDirectoryPath.'/'.$mediaUrl;
-                
-                try {
-                    $uploadedFile->moveTo($filePath);
-                } catch (\RuntimeException $e) {
-                    throw new \Exception("Failed to move file: $filePath");
-                }
-            }
-        }
-    }
     
 }
