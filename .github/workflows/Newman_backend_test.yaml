@@ -6,7 +6,8 @@ on:
       - development
       - main
       - pre-release
-
+      - wisdom/fix/scan
+      
 permissions:
   contents: write
  

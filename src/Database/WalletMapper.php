@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\App\Models\Transaction;
+use Fawaz\App\Repositories\TransactionRepository;
 use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
@@ -21,9 +23,8 @@ class WalletMapper
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
-    private string $poolWallet;
     private string $burnWallet;
-    private string $peerWallet;
+    private string $companyWallet;
 
     public const STATUS_DELETED = 6;
 
@@ -31,252 +32,27 @@ class WalletMapper
     {
     }
 
-    // Transfer Token From Wallet To Wallets
-    public function transferToken(string $userId, array $args = []): ?array
+    /**
+     * Initialize and validates the liquidity pool wallets.
+     *
+     * @throws \RuntimeException if accounts are missing or invalid
+     */
+    private function initializeLiquidityPool(): void
     {
-        \ignore_user_abort(true);
-
-        $this->logger->debug('WalletMapper.transferToken started');
-
-        $accountsResult = $this->pool->returnAccounts();
-
-        if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
-            $this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
-            return self::respondWithError(40701);
+        $accounts = $this->pool->returnAccounts();
+        if (($accounts['status'] ?? '') === 'error') {
+            throw new \RuntimeException("Failed to load pool accounts");
         }
 
-        $liqpool = $accountsResult['response'] ?? null;
-
-        if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
-            $this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
-            return self::respondWithError(30102);
+        $data = $accounts['response'] ?? [];
+        if (!isset($data['pool'], $data['burn'], $data['peer'])) {
+            throw new \RuntimeException("Liquidity pool wallets incomplete");
         }
 
-        $this->poolWallet = $liqpool['pool'];
-        $this->burnWallet = $liqpool['burn'];
-        $this->peerWallet = $liqpool['peer'];
-
-        $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
-
-        $currentBalance = $this->getUserWalletBalance($userId);
-        if (empty($currentBalance)) {
-            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(51301);
-        }
-
-        $recipient = (string) $args['recipient'];
-        if (!self::isValidUUID($recipient)) {
-            $this->logger->warning('Incorrect recipientId Exception.', [
-                'recipient' => $recipient,
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(30201);
-        }
-
-        $numberoftokens = (float) $args['numberoftokens'];
-        if ($numberoftokens <= 0) {
-            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
-                'numberoftokens' => $numberoftokens,
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(30264);
-        }
-
-        try {
-            $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':uid', $recipient);
-            $stmt->bindValue(':status', self::STATUS_DELETED);
-            $stmt->execute();
-            $row = $stmt->fetchColumn();
-        } catch (\Throwable $e) {
-            $this->logger->error('WalletMapper.transferToken exception during recipient validation query', [
-               'message' => $e->getMessage(),
-               'trace' => $e->getTraceAsString()
-            ]);
-            return self::respondWithError(40301);
-        }
-
-        if (empty($row)) {
-            $this->logger->warning('Unknown Id Exception.');
-            return self::respondWithError(31007);
-        }
-
-        if ((string)$row === $userId) {
-            $this->logger->warning('Send and Receive Same Wallet Error.');
-            return self::respondWithError(31202);
-        }
-        $fees = ConstantsConfig::tokenomics()['FEES'];
-        $actions = ConstantsConfig::wallet()['ACTIONS'];
-        $peerFee = (float)$fees['PEER'];
-        $poolFee = (float)$fees['POOL'];
-        $burnFee = (float)$fees['BURN'];
-        $inviteFee = (float)$fees['INVITATION'];
-
-        $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee);
-        $feeAmount = round((float)$numberoftokens * $poolFee, 2);
-        $peerAmount = round((float)$numberoftokens * $peerFee, 2);
-        $burnAmount = round((float)$numberoftokens * $burnFee, 2);
-        $countAmount = $feeAmount + $peerAmount + $burnAmount;
-        $inviterId = null;
-        $inviterWin = 0.0;
-
-        try {
-            $query = "SELECT ui.invited, u.status FROM users_info ui LEFT JOIN users u ON ui.invited = u.uid WHERE ui.userid = :userid AND ui.invited IS NOT NULL";
-            $stmt = $this->db->prepare($query);
-            $stmt->execute(['userid' => $userId]);
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != 6) {
-                $inviterId = $result['invited'];
-                $inviterWin = round((float)$numberoftokens * $inviteFee, 2);
-                $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
-                $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnAmount + $inviteFee);
-                $this->logger->info('Invited By', [
-                    'invited' => $inviterId,
-                ]);
-            }
-
-            // If user's account deleted then we will send that percentage amount to PEER
-            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == 6) {
-                $peerAmount = $peerAmount + round((float)$numberoftokens * $inviteFee, 2);
-                $countAmount = $feeAmount + $peerAmount + $burnAmount;
-                $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee + $inviteFee);
-            }
-
-
-        } catch (\Throwable $e) {
-            $this->logger->error('WalletMapper.transferToken unexpected exception during token transfer execution', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return self::respondWithError(40301);
-        }
-
-        if ($currentBalance < $requiredAmount) {
-            $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
-                'userId' => $userId,
-                'Balance' => $currentBalance,
-                'requiredAmount' => $requiredAmount,
-            ]);
-            return self::respondWithError(51301);
-        }
-
-        try {
-            // 1. SENDER: Debit From Account
-            if ($numberoftokens) {
-                $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => -abs($numberoftokens),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-
-                $this->insertWinToLog($userId, $args);
-                $this->insertWinToPool($userId, $args);
-            }
-
-            // 2. RECIPIENT: Credit To Account
-            if ($numberoftokens) {
-                $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($numberoftokens),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-
-                $this->insertWinToLog($row, $args);
-                $this->insertWinToPool($row, $args);
-            }
-
-            if (isset($result['invited']) && !empty($result['invited'])) {
-                // 3 . INVITER: Fees To inviter Account (if exist)
-                if ($inviterWin) {
-                    $id = self::generateUUID();
-
-                    $args = [
-                        'token' => $id,
-                        'fromid' => $userId,
-                        'numbers' => abs($inviterWin),
-                        'whereby' => $actions['TRANSFER'],
-                    ];
-
-                    $this->insertWinToLog($inviterId, $args);
-                    $this->insertWinToPool($inviterId, $args);
-                }
-            }
-
-            // 4. SENDER: Deduct Fees From Sender
-            if ($countAmount) {
-                $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => -abs($countAmount),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-
-                $this->insertWinToLog($userId, $args);
-                $this->insertWinToPool($userId, $args);
-            }
-
-            // 5. POOLWALLET: Fee To Account
-            if ($feeAmount) {
-                $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($feeAmount),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-
-                $this->insertWinToLog($this->poolWallet, $args);
-                $this->insertWinToPool($this->poolWallet, $args);
-            }
-
-            // 6. PEERWALLET: Fee To Account
-            if ($peerAmount) {
-                $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($peerAmount),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-
-                $this->insertWinToLog($this->peerWallet, $args);
-                $this->insertWinToPool($this->peerWallet, $args);
-            }
-
-            // 7. BURNWALLET: Fee Burning Tokens
-            if ($burnAmount) {
-                $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($burnAmount),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-
-                $this->insertWinToLog($this->burnWallet, $args);
-                $this->insertWinToPool($this->burnWallet, $args);
-            }
-            return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
-
-        } catch (\Throwable $e) {
-            return self::respondWithError((int)$e->getMessage());
-        }
+        $this->burnWallet = $data['burn'];
+        $this->companyWallet = $data['peer'];
     }
+
 
     public function fetchPool(array $args = []): array
     {
@@ -692,6 +468,24 @@ class WalletMapper
         }
     }
 
+    /**
+     * Records Paid Actions such Post Creation, Like, Dislike, Views, Comment
+     * 
+     * Used for Peer Token transfer to Receipient (Peer-to-Peer transfer).  @deprecated
+     * 
+     * Now Peer-to-Peer transfer will be stored on `transactions` table, Refers to PeerTokenMapper->transferToken
+     * 
+     * Used for Actions records:
+     * whereby = 1  -> Post Views
+     * whereby = 2  -> Post Like
+     * whereby = 3  -> Post Dislike
+     * whereby = 4  -> Post Comment
+     * whereby = 5  -> Post Creation
+     * whereby = 18 -> Token transfer @deprecated
+     * 
+     * Records `Transactions` as well, for each above mentioned Actions.
+     * Table `Transactions` has Foreign key on `operationsid`, which refers to `logWins`'s `token` PK. 
+     */
     public function insertWinToLog(string $userId, array $args): array|bool
     {
         \ignore_user_abort(true);
@@ -714,7 +508,8 @@ class WalletMapper
         try {
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':token', $args['gemid'] ?? $id, \PDO::PARAM_STR);
+            $tokenId = $args['gemid'] ?? $id;
+            $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
             $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
@@ -725,8 +520,65 @@ class WalletMapper
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
             $stmt->execute();
-            //$this->saveWalletEntry($userId, $numBers);
 
+            
+            $this->initializeLiquidityPool();
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+
+            $transactionType = '';
+            if($args['whereby'] == 1){
+                $transactionType = 'postViewed';
+            }elseif ($args['whereby'] == 2) {
+                $transactionType = 'postLiked';
+            }elseif ($args['whereby'] == 3) {
+                $transactionType = 'postDisLiked';
+            }elseif ($args['whereby'] == 4) {
+                $transactionType = 'postComment';
+            }elseif ($args['whereby'] == 5) {
+                $transactionType = 'postCreated';
+            }
+
+            /**
+             * PENDING FOR API: `getpercentbeforetransaction`, 
+             * Need to check first, is this API in co-operation or not, and if it is than, what is it for?
+             * 
+             * Determine the transfer type based on the number of gems.
+             * If the number of gems is negative, it's a burn operation.
+             * If the number of gems is positive, it's a mint operation.
+             */
+            $actions = ConstantsConfig::wallet()['ACTIONS'];
+
+            if($args['whereby'] != $actions['TRANSFER']){
+                $senderid = $userId;
+                if ($numBers < 0) {
+                    $transferType = 'BURN';
+                    $recipientid = $this->burnWallet;
+                } else {
+                    $transferType = 'MINT';
+                    $recipientid = $userId;
+                    $senderid = $this->companyWallet;
+                }
+                $positiveNumBers = abs($numBers);
+                $this->createAndSaveTransaction($transRepo, [
+                    'operationid' => $tokenId,
+                    'transactiontype' => $transactionType,
+                    'senderid' => $senderid,
+                    'recipientid' => $recipientid,
+                    'tokenamount' => $positiveNumBers,
+                    'transferaction' => $transferType
+                ]);
+            }
+            
+            if(isset($transferType) && $transferType == 'BURN'){
+                /**
+                 * Add Amount to Burn account
+                 *
+                 * Reason behind keeping -$numBers is to, Add to Burn Account Positively
+                 */
+                $this->saveWalletEntry($this->burnWallet, -$numBers);
+            }
+            
+            
             $this->logger->info('Inserted into logwins successfully', [
                 'userId' => $userId,
                 'postid' => $postId
@@ -741,6 +593,15 @@ class WalletMapper
 
             return false;
         }
+    }
+
+    /**
+     * Helper to create and save a transaction
+     */
+    private function createAndSaveTransaction($transRepo, array $transObj): void
+    {
+        $transaction = new Transaction($transObj, ['operationid', 'senderid', 'tokenamount'], false);
+        $transRepo->saveTransaction($transaction);
     }
 
     public function insertWinToPool(string $userId, array $args): bool
