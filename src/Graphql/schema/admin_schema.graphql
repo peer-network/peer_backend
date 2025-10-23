@@ -6,6 +6,14 @@ extend type Query {
   postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
   dailygemstatus: DailyGemStatusResponse!
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
+  logWinsPaidActionForMarchApril: DefaultResponse
+  logWinMigration: DefaultResponse
+  logWinMigration02: DefaultResponse
+  logWinMigration03: DefaultResponse
+  logWinMigration04: DefaultResponse
+  logWinMigration05: DefaultResponse
+  logWinMigrationWalletUpdate: DefaultResponse
+  logWinMigrationWalletNegativeToZero: DefaultResponse
 }
 
 extend type Mutation {
