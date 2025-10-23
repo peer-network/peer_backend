@@ -46,6 +46,13 @@ use Fawaz\App\Validation\ValidatorErrors;
 use Fawaz\App\Profile;
 use Fawaz\Utils\ErrorResponse;
 use Fawaz\App\Role;
+use Fawaz\App\Specs\SpecTypes\User\InactiveUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\App\Specs\SpecTypes\User\BasicUserSpec;
+use Fawaz\App\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 
 
 class GraphQLSchemaBuilder
@@ -2795,20 +2802,41 @@ class GraphQLSchemaBuilder
                 'invitedBy' => [],
                 'iInvited' => [],
             ];
+        
+            $inactiveUserSpec = new InactiveUserSpec(
+                ContentFilteringAction::replaceWithPlaceholder
+            );
+            $basicUserSpec = new BasicUserSpec(
+                ContentFilteringAction::replaceWithPlaceholder
+            );
+            
+            $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
 
-            $inviter = $this->userMapper->getInviterByInvitee($userId);
-            $this->logger->info('Inviter data', ['inviter' => $inviter]);
+            $specs = [
+                $inactiveUserSpec,
+                $basicUserSpec,
+                $placeholderIllegalContentFilterSpec
+            ];
 
+            
+            $inviter = $this->userMapper->getInviterByInvitee($userId,$specs);
+            $referralUsers['invitedBy'] = null;
             if (!empty($inviter)) {
-                $referralUsers['invitedBy'] = $inviter;
+                $this->logger->info('Inviter data', ['inviter' => $inviter->getUserId()]);
+                ContentReplacer::placeholderProfile($inviter, $specs);
+                $referralUsers['invitedBy'] = $inviter->getArrayCopy();
             }
+
             $offset = $args['offset'] ?? 0;
             $limit = $args['limit'] ?? 20;
-            $referrals = $this->userMapper->getReferralRelations($userId, $offset, $limit);
-            $this->logger->info('Referral relations', ['referrals' => $referrals]);
 
-            if (!empty($referrals['iInvited'])) {
-                $referralUsers['iInvited'] = $referrals['iInvited'];
+            $invited= $this->userMapper->getReferralRelations($userId, $offset, $limit, $specs);
+
+            if (!empty($invited)) {
+                foreach ($invited as $user) {
+                    ContentReplacer::placeholderProfile($user, $specs);
+                    $referralUsers['iInvited'][] = $user->getArrayCopy();
+                }
             }
 
             if (empty($referralUsers['invitedBy']) && empty($referralUsers['iInvited'])) {
@@ -2916,7 +2944,6 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.getTokenomics finished', ['payload' => $payload]);
         return $payload;
     }
-
     protected function resolveActionPost(?array $args = []): ?array
     {
         $tokenomicsConfig = ConstantsConfig::tokenomics();

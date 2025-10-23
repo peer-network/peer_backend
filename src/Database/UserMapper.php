@@ -893,11 +893,6 @@ class UserMapper
         $whereClausesString = implode(" AND ", $whereClauses);
         $params = $allSpecs->paramsToPrepare;
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::searchById,
-            $contentFilterBy
-        );
-
         try {
             $sql = "
                 SELECT 
@@ -923,7 +918,7 @@ class UserMapper
                 FROM follows f
                 JOIN users u ON u.uid = f.followerid
                 LEFT JOIN users_info ui ON ui.userid = u.uid
-                WHERE f.followedid = :userId
+                WHERE $whereClausesString
                 ORDER BY f.createdat DESC
                 LIMIT :limit OFFSET :offset
             ";
@@ -1035,81 +1030,6 @@ class UserMapper
         );
 
         return $users;
-    }
-
-    public function fetchProfileDataOriginal(string $userid, string $currentUserId, ?string $contentFilterBy): Profile|false
-    {
-        $whereClauses = ["u.uid = :userid AND u.verified = :verified"];
-        // $whereClauses[] = 'u.status = 0';
-        $whereClausesString = implode(" AND ", $whereClauses);
-
-        $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::searchById,
-            $contentFilterBy
-        );
-
-        $sql = sprintf(
-            "
-            SELECT 
-                u.uid,
-                u.username,
-                u.slug,
-                u.status,
-                u.img,
-                u.biography,
-                u.roles_mask,
-                ui.amountposts,
-                ui.amountfollower,
-                ui.amountfollowed,
-                ui.amountfriends,
-                ui.amountblocked,
-                ui.reports AS user_reports,
-                u.visibility_status,
-                COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
-            FROM users u
-            LEFT JOIN users_info ui ON ui.userid = u.uid
-            WHERE %s",
-            $whereClausesString
-        );
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            $stmt->bindValue(':verified', 1, \PDO::PARAM_INT);
-
-            $stmt->execute();
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-
-            if ($data !== false) {
-                $user_reports = (int)$data['user_reports'];
-
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::user,
-                    ContentType::user,
-                    $user_reports,
-                    $currentUserId,
-                    $data['uid'],
-                    $data['user_visibility_status']
-                ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::hidden;
-                    $data['username'] = $replacer->username();
-                    $data['img'] = $replacer->profilePicturePath();
-                }
-
-                $data['amountreports'] = (int)$data['user_reports'];
-                return new Profile($data);
-            }
-
-            $this->logger->warning("No user found with ID", ['userid' => $userid]);
-            return false;
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in fetchProfileData", ['error' => $e->getMessage()]);
-            return false;
-        }
     }
 
     private function setPassword(string $password): string
@@ -1248,7 +1168,13 @@ class UserMapper
             'userId' => $userId,
         ]);
 
-        $query = "SELECT referral_uuid, referral_link FROM user_referral_info WHERE uid = :uid";
+        $query = "SELECT 
+                referral_uuid, 
+                referral_link 
+            FROM 
+                user_referral_info 
+            WHERE 
+                uid = :uid";
 
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
@@ -1276,47 +1202,63 @@ class UserMapper
         return $result ?: null;
     }
 
-    public function getInviterByInvitee(string $userId): ?array
+    public function getInviterByInvitee(string $userId, array $specs): ?Profile
     {
         $this->logger->debug("UserMapper.getInviterByInvitee started", [
             'invitee_uuid' => $userId,
         ]);
-
-        $query = "SELECT u.uid, u.status, u.username, u.slug, u.img
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specs);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = "ui.userid = :invitee_uuid";
+        $whereClausesString = implode(" AND ", $whereClauses);
+        $params = $allSpecs->paramsToPrepare;
+        $query = "SELECT *
             FROM users_info ui
             JOIN users u ON ui.invited = u.uid
-            WHERE ui.userid = :invitee_uuid
+            WHERE $whereClausesString
         ";
 
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':invitee_uuid', $userId, \PDO::PARAM_STR);
-        $stmt->execute();
+        $params['invitee_uuid'] = $userId;
+        $stmt->execute($params);
 
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        return $result ? ((new User($result, [], false))->getArrayCopy()) : null;
+        
+        if (!empty($result)) {
+            return new Profile($result, [], false) ?? null;
+        }
+        
+        return null;
     }
 
-    public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array
+    public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20, array $specs): ?array
     {
-        $query = "SELECT u.uid, u.status, u.username, u.slug, u.img
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specs);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = "ui.invited = :userId";
+        $whereClausesString = implode(" AND ", $whereClauses);
+        $params = $allSpecs->paramsToPrepare;
+
+
+        $query = "SELECT *
             FROM users_info ui
             JOIN users u ON ui.userid = u.uid
-            WHERE ui.invited = :userId
+            WHERE $whereClausesString
             ORDER BY ui.updatedat DESC
             LIMIT :limit OFFSET :offset
         ";
 
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':userId', $userId);
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
+        $params[':userId']= $userId;
+        $params[':limit']= $limit;
+        $params[':offset']= $offset;
+        $stmt->execute($params);
 
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        return [
-            'iInvited' => array_map(fn ($user) => (new User($user, [], false))->getArrayCopy(), $data)
-        ];
+
+        return array_map(fn ($user) => (new Profile($user, [], false)), $data);
     }
 
     public function generateReferralLink(string $referralUuid): string
