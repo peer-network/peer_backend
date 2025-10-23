@@ -416,7 +416,6 @@ class ProfileRepositoryImpl implements ProfileRepository
             foreach ($rows as $row) {
                 try {
                     $profile = new Profile($row);
-                    ContentReplacer::placeholderProfile($profile, $specifications);
                     $profiles[$profile->getUserId()] = $profile;
                 } catch (\Throwable $e) {
                     $this->logger->error('Failed to map profile row', ['error' => $e->getMessage(), 'row' => $row]);

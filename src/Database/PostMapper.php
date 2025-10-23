@@ -747,7 +747,6 @@ class PostMapper
             $orderByClause
             LIMIT :limit OFFSET :offset
         ";
-
         try {
             $stmt = $this->db->prepare($sql);
             foreach ($params as $k => $v) {
@@ -756,7 +755,6 @@ class PostMapper
             $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
-
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $results = array_map(function (array $row) {
@@ -766,7 +764,6 @@ class PostMapper
             }, $rows);
 
             //$this->logger->info('findPostser.results', ['postArray' => array_map(fn(PostAdvanced $p) => $p->getArrayCopy(), $results)]);
-
             return $results;
 
         } catch (\Throwable $e) {

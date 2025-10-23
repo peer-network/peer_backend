@@ -252,12 +252,4 @@ class CommentService
     {
         return $this->commentMapper->fetchAllByPostIdetaild($postId, $this->currentUserId, $offset, $limit, $contentFilterBy);
     }
-
-    /**
-     * Get Comments for Geust based on Filter
-     */
-    public function fetchAllByGuestPostIdetaild(string $postId, int $offset = 0, int $limit = 10): array
-    {
-        return $this->commentMapper->fetchAllByGuestPostIdetaild($postId, $offset, $limit);
-    }
 }
