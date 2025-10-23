@@ -32,9 +32,9 @@ class ConstantsModeration
             10 => 'MYGRANDMAHATES'
         ],
         'REPORTS_COUNT_TO_HIDE_FROM_IOS' => [
-            'POST' => 5,
-            'COMMENT' => 5,
-            'USER' => 5,
+            'POST' => 1,
+            'COMMENT' => 1,
+            'USER' => 1,
         ]
     ];
 

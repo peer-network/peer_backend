@@ -594,8 +594,6 @@ class CommentMapper
 				u.slug,
                 u.status,
                 u.img,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
-                ci.count_content_moderation_dismissed AS comment_count_content_moderation_dismissed,
                 ui.reports AS user_reports,
                 u.status AS user_status,
                 ci.reports AS comment_reports

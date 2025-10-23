@@ -26,7 +26,7 @@ final class IllegalContentFilteringSpecificationFactory {
                         SELECT 1
                         FROM users IllegalContentFiltering_users
                         WHERE 
-                            IllegalContentFiltering_users.userid = u.uid
+                            IllegalContentFiltering_users.uid = u.uid
                         AND 
                             IllegalContentFiltering_users.visibility_status = 'illegal'
                     )";

@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\App\Specs;
 
-use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\IllegalContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 

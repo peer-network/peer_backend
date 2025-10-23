@@ -3,12 +3,12 @@
 namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
+use Fawaz\App\Specs\SpecTypes\User\BasicUserSpec;
+use Fawaz\App\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\User\InactiveUserSpec;
+use Fawaz\App\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
 use Fawaz\App\ValidationException;
 use Fawaz\App\Specs\ContentFilteringSpecsFactory;
-use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
-use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\InactiveUserSpec;
-use Fawaz\App\Specs\SpecTypes\PlaceholderIllegalContentFilterSpec;
 
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;

@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use Fawaz\App\Specs\ContentFilteringSpecsFactory;
-use Fawaz\App\Specs\SpecTypes\BasicUserSpec;
-use Fawaz\App\Specs\SpecTypes\HiddenContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\HideIllegalContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\InactiveUserSpec;
-use Fawaz\App\Specs\SpecTypes\IllegalContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\PlaceholderIllegalContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\User\BasicUserSpec;
+use Fawaz\App\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\App\Specs\SpecTypes\User\InactiveUserSpec;
+use Fawaz\App\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
