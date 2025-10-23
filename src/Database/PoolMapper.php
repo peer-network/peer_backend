@@ -1,49 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\ResponseHelper;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class PoolMapper
 {
+    use ResponseHelper;
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
 
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
-    }
-
-    protected function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    protected function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
-    {
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
-        ];
-
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
-            }
-        }
-
-        return $response;
     }
 
     public function fetchPool(array $args = []): array
     {
-        $this->logger->info('WalletMapper.fetchPool started');
+        $this->logger->debug('WalletMapper.fetchPool started');
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = max((int)($args['limit'] ?? self::DEFAULT_LIMIT), 1);
@@ -131,22 +111,16 @@ class PoolMapper
                 COUNT(CASE WHEN EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE) THEN 1 END) AS y0
                 FROM gems
             ";
-            
+
             $stmt = $this->db->query($sql);
             $entries = $stmt->fetch(\PDO::FETCH_ASSOC);
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
 
-        $success = [
-            'status' => 'success',
-            'ResponseCode' => 11207,
-            'affectedRows' => $entries
-        ];
-
-        return $success;
+        return $this::createSuccessResponse(11207, $entries, false);
 
     }
 
@@ -154,7 +128,7 @@ class PoolMapper
     {
         \ignore_user_abort(true);
 
-        $this->logger->info('WalletMapper.getTimeSortedMatch started');
+        $this->logger->debug('WalletMapper.getTimeSortedMatch started');
 
         $dayOptions = [
             "D0" => "createdat::date = CURRENT_DATE",
@@ -169,7 +143,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            return $this->respondWithError(30223);
+            return $this::respondWithError(30223);
         }
 
         $whereCondition = $dayOptions[$day];
@@ -208,11 +182,11 @@ class PoolMapper
             $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
 
         if (empty($data)) {
-            return $this->createSuccessResponse(21202); //'No records found for ' . $day
+            return $this::createSuccessResponse(21202); //'No records found for ' . $day
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
@@ -241,7 +215,7 @@ class PoolMapper
             ];
 
             if (!isset($mapping[$whereby])) {
-                return $this->respondWithError(41221);
+                return $this::respondWithError(41221);
             }
 
             $whereby = $mapping[$whereby]['text'];
@@ -250,21 +224,21 @@ class PoolMapper
         if (!empty($data)) {
             return [
                 'status' => 'success',
-                'counter' => count($args) -1,
-                'ResponseCode' => 11208,
+                'counter' => count($args) - 1,
+                'ResponseCode' => "11208",
                 'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
             ];
         }
-        
-        return $this->respondWithError(40301);
+
+        return $this::respondWithError(40301);
     }
 
     private function decimalToQ64_96(float $value): string
     {
         $scaleFactor = bcpow('2', '96');
-        
+
         $scaledValue = bcmul((string)$value, $scaleFactor, 0);
-        
+
         return $scaledValue;
     }
     public function fetchCurrentActionPrices(): ?array

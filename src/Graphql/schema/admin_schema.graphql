@@ -1,0 +1,27 @@
+extend type Query {
+  searchUserAdmin(userid: ID,contentFilterBy: ContentFilterType,email: String,username: String,status: Int,verified: Int,ip: String,offset: Int,limit: Int): UserListResponse! @deprecated(reason: "Use listUsersAdminV2.")
+  listUsersAdminV2(contentFilterBy: ContentFilterType,userid: ID,email: String,username: String,status: Int,verified: Int,ip: String,offset: Int,limit: Int): UserListResponse!
+  allfriends(offset: Int, limit: Int): AllUserFriends!
+  gemster: GemsterResponse!
+  postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
+  dailygemstatus: DailyGemStatusResponse!
+  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
+}
+
+extend type Mutation {
+  globalwins: DefaultResponse!
+  gemsters(day: DayFilterType!): GemstersResponse!
+}
+
+extend type HelloResponse {
+  userroles: Int
+}
+
+extend type User {
+  situation: String
+  email: String
+  verified: Int
+  roles_mask: Int
+  ip: String
+  liquidity: Decimal
+}
