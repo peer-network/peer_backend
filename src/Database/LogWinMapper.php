@@ -1489,10 +1489,10 @@ class LogWinMapper
 
                 
                 $totalGems = isset($gemAllDays[0]['overall_total']) ? (string)$gemAllDays[0]['overall_total'] : '0';
-                $dailyToken = (float) (\Fawaz\config\constants\ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
+                $dailyToken = (string) (\Fawaz\config\constants\ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
-                $gemsintoken = TokenHelper::divRc((float)$dailyToken, (float)$totalGems);
-                $bestatigungInitial = TokenHelper::mulRc((float)$totalGems, (float)$gemsintoken);
+                $gemsintoken = TokenHelper::divRc($dailyToken, $totalGems);
+                $bestatigungInitial = TokenHelper::mulRc($totalGems, $gemsintoken);
 
                 $args = [
                     'winstatus' => [
@@ -1517,7 +1517,7 @@ class LogWinMapper
                             continue;
                         }
 
-                        $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
+                        $rowgems2token = TokenHelper::mulRc((string) $row['gems'], (string) $gemsintoken);
 
                         $args = [
                             'gemid' => $row['gemid'],
@@ -1584,7 +1584,7 @@ class LogWinMapper
                             ]);
 
                             if ($transferType === 'BURN') {
-                                $this->saveWalletEntry($this->burnWallet, -$numBers);
+                                $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
                             }
 
                             $this->logger->info('Inserted into logwins successfully', [
@@ -1711,10 +1711,10 @@ class LogWinMapper
     }
 
 
-    public function saveWalletEntry(string $userId, float $liquidity): float
+    public function saveWalletEntry(string $userId, string $liquidity, string $type = 'CREDIT'): string
     {
         \ignore_user_abort(true);
-        $this->logger->info('WalletMapper.saveWalletEntry started');
+        $this->logger->debug('WalletMapper.saveWalletEntry started');
 
         try {
             $stmt = $this->db->prepare("SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE");
@@ -1724,7 +1724,7 @@ class LogWinMapper
 
             if (!$row) {
                 // User does not exist, insert new wallet entry
-                $newLiquidity = abs($liquidity);
+                $newLiquidity = ($liquidity);
                 $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
 
                 $stmt = $this->db->prepare(
@@ -1738,9 +1738,20 @@ class LogWinMapper
                 $stmt->execute();
             } else {
                 // User exists, safely calculate new liquidity
-                $currentBalance = (float)$row['liquidity'];
-                $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
-                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
+                $currentBalance = (string)$row['liquidity'];
+
+                if($liquidity < 0){
+                    $liquidity = (string) (abs((float)$liquidity));
+                    $type = 'DEBIT';
+                }
+
+                if($type === 'CREDIT'){
+                    $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
+                } else {
+                    $newLiquidity = TokenHelper::subRc($currentBalance, $liquidity);
+                }
+
+                $liquiditq = (float)$this->decimalToQ64_96((string)$newLiquidity);
 
                 $stmt = $this->db->prepare(
                     "UPDATE wallett
