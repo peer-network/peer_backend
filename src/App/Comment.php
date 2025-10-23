@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -36,7 +38,7 @@ class Comment implements Hashable
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->userstatus = $data['userstatus'] ?? 0;
 
-        if($this->userstatus == 6){
+        if ($this->userstatus == 6) {
             $this->content = "Comment by deleted Account";
         }
 
@@ -124,13 +126,13 @@ class Comment implements Hashable
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -161,7 +163,7 @@ class Comment implements Hashable
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     [
-                        'name' => 'StringLength', 
+                        'name' => 'StringLength',
                         'options' => [
                             'min' => $commentConfig['CONTENT']['MIN_LENGTH'],
                             'max' => $commentConfig['CONTENT']['MAX_LENGTH'],
@@ -181,19 +183,21 @@ class Comment implements Hashable
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
     }
 
-    public function getHashableContent(): string {
+    public function getHashableContent(): string
+    {
         return implode('|', [
             $this->content
         ]);
     }
 
-    public function hashValue(): string {
+    public function hashValue(): string
+    {
         return $this->hashObject($this);
     }
 }
