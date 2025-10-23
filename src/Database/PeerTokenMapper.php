@@ -27,8 +27,10 @@ class PeerTokenMapper
     private string $burnWallet;
     private string $peerWallet;
     private string $btcpool;
+    private string $senderId;
+    private string $inviterId;
 
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper, protected UserMapper $userMapper)
     {
     }
 
@@ -37,7 +39,7 @@ class PeerTokenMapper
      *
      * @throws \RuntimeException if accounts are missing or invalid
      */
-    private function initializeLiquidityPool(): void
+    public function initializeLiquidityPool(): void
     {
         $accounts = $this->pool->returnAccounts();
         if (($accounts['status'] ?? '') === 'error') {
@@ -53,6 +55,20 @@ class PeerTokenMapper
         $this->burnWallet = $data['burn'];
         $this->peerWallet = $data['peer'];
         $this->btcpool = $data['btcpool'];
+    }
+
+
+    /**
+     * Receipient should not be any of the fee wallets.
+     */
+    public function recipientShouldNotBeFeesAccount(string $recipientId): bool
+    {
+        $this->initializeLiquidityPool();
+
+        return $recipientId !== $this->poolWallet
+            && $recipientId !== $this->burnWallet
+            && $recipientId !== $this->peerWallet
+            && $recipientId !== $this->btcpool;
     }
 
     /**
@@ -114,32 +130,72 @@ class PeerTokenMapper
     }
 
     /**
+     * 
+     */
+    public function setSenderId(string $senderId): void
+    {
+        $this->senderId = $senderId;
+    }
+
+    /**
+     * Includes fees while calculating required amount for transfer.
+     */
+    public function calculateRequiredAmount(string $numberOfTokens): string
+    {
+        [$peerFee, $poolFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
+
+        return TokenHelper::calculateTokenRequiredAmount($numberOfTokens, $peerFee, $poolFee, $burnFee, $inviteFee);
+    }
+
+    /**
+     * Each Fees Amount
+     */
+    private function getEachFeesAmount(): array
+    {
+        $fees = ConstantsConfig::tokenomics()['FEES'];
+        $peerFee = (string) $fees['PEER'];
+        $poolFee = (string) $fees['POOL'];
+        $burnFee = (string) $fees['BURN'];
+
+        // Check for Inviter Fee
+        $inviteFee = '0';
+        $inviterId = $this->userMapper->getInviterID($this->senderId);
+
+        if(!empty($inviterId) && self::isValidUUID($inviterId)){
+            $this->inviterId = $inviterId;
+            $inviteFee = (string) $fees['INVITATION'];
+        }
+        return [$peerFee, $poolFee, $burnFee, $inviteFee];
+    }
+
+    /**
+     * Each Fees Amount Calculation. 
+     */
+    public function calculateEachFeesAmount(string $numberOfTokens): array
+    {
+        [$peerFee, $poolFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
+
+        return [
+            TokenHelper::mulRc($numberOfTokens, $peerFee), // Peer Fee Amount
+            TokenHelper::mulRc($numberOfTokens, $poolFee), // Pool Fee Amount
+            TokenHelper::mulRc($numberOfTokens, $burnFee), // Burn Fee Amount
+            TokenHelper::mulRc($numberOfTokens, $inviteFee), // Invite Fee Amount
+        ];
+    }
+
+    /**
      * Make PEER to PEER Token Transfer.
      * 
      * This function handles the transfer of tokens between users, applying necessary fees and ensuring all validations.
      * It also stores the transaction details.
      * Different fees are stored individually for transparency.
+     * 
+     * @param string $numberOfTokens Number of tokens to transfer to Receipient's wallet, Without any Fees.
      *
      */
-    public function transferToken(string $userId, array $args = []): ?array
+    public function transferToken(string $senderId, string $recipientId, string $numberOfTokens, ?string $message = null, bool $isWithFees = true): ?array
     {
         \ignore_user_abort(true);
-
-        $this->logger->debug('PeerTokenMapper.transferToken started');
-
-        $recipient = (string) $args['recipient'];
-
-        if ((string) $recipient === $userId) {
-            $this->logger->warning('Send and Receive Same Wallet Error.');
-            return self::respondWithError(31202);
-        }
-
-        if (!self::isValidUUID($recipient)) {
-            $this->logger->warning('Incorrect recipientid Exception.', [
-                'recipient' => $recipient,
-            ]);
-            return self::respondWithError(30201);
-        }
 
         $this->initializeLiquidityPool();
 
@@ -147,205 +203,105 @@ class PeerTokenMapper
             return self::respondWithError(41222);
         }
 
-        $currentBalance = $this->getUserWalletBalance($userId);
-        $numberoftokens = (string) $args['numberoftokens'];
-
-        if (empty($currentBalance) || $currentBalance < $numberoftokens) {
-            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(51301);
-        }
-        
-        if ($numberoftokens <= 0) {
-            $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
-                'numberoftokens' => $numberoftokens,
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(30264);
-        }
-        if ($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient) {
-            $this->logger->warning('Unauthorized to send token');
-            return self::respondWithError(31203);
-        }
-
-        if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
-            return self::respondWithError(30264);
-        }
-
-        
-        $message = isset($args['message']) ? (string) $args['message'] : null;
-
-
-        if ($message !== null && strlen($message) > 200) {
-            $this->logger->warning('message length is too high');
-            return self::respondWithError(30210); // message length is too high.
-        }
+        $this->senderId = $senderId;
+        $requiredAmount = $this->calculateRequiredAmount($numberOfTokens);
 
         try {
-            $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':uid', $recipient);
-            $stmt->bindValue(':status', Status::DELETED);
-            $stmt->execute();
-            $row = $stmt->fetchColumn();
-        } catch (\Throwable $e) {
-            $this->logger->error('Database error while fetching recipient user', [
-                'error' => $e->getMessage(),
-                'recipient' => $recipient
-            ]);
-            return self::respondWithError(31007);
-        }
-
-        if (empty($row)) {
-            $this->logger->warning('Unknown Id Exception.');
-            return self::respondWithError(31007);
-        }
-
-        if ((string)$row === $userId) {
-            $this->logger->warning('Send and Receive Same Wallet Error.');
-            return self::respondWithError(31202);
-        }
-
-        $fees = ConstantsConfig::tokenomics()['FEES'];
-        $peerFee = (string) $fees['PEER'];
-        $poolFee = (string) $fees['POOL'];
-        $burnFee = (string) $fees['BURN'];
-        $inviteFee = (string) $fees['INVITATION'];
-        $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, $peerFee, $poolFee, $burnFee);
-
-        $inviterId = $this->getInviterID($userId);
-        try {
-            if ($inviterId && !empty($inviterId)) {
-                $inviterWin = TokenHelper::mulRc($numberoftokens, $inviteFee);
-
-                $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, $peerFee, $poolFee, $burnFee, $inviteFee);
-
-                $this->logger->debug('Invited By', [
-                    'invited' => $inviterId,
-                ]);
+            if($isWithFees){
+                // Fees Amount Calculation
+                [$peerFeeAmount, $poolFeeAmount, $burnFeeAmount, $inviteFeeAmount] = $this->calculateEachFeesAmount($numberOfTokens);
             }
-        } catch (\Throwable $e) {
-            $this->logger->error('Error while fetching inviter ID', [
-                'error' => $e->getMessage(),
-                'userId' => $userId
-            ]);
-            return self::respondWithError(31007);
-        }
-
-        if ($currentBalance < $requiredAmount) {
-            $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
-                'userId' => $userId,
-                'Balance' => $currentBalance,
-                'requiredAmount' => $requiredAmount,
-            ]);
-            return self::respondWithError(51301);
-        }
-
-        try {
-
+            
             $operationid = self::generateUUID();
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
             // Lock both users' balances to prevent race conditions
-            if ($inviterId && !empty($inviterId)) {
-                $this->lockBalances([$inviterId, $userId, $recipient]);
+            if (!empty($this->inviterId)) {
+                $this->lockBalances([$this->inviterId, $senderId, $recipientId]);
             }else{
-                $this->lockBalances([$userId, $recipient]);
+                $this->lockBalances([$senderId, $recipientId]);
             }
             
             // 1. SENDER: Debit From Account
             if ($requiredAmount) {
-                // Remove this records we don't need it anymore.
-                // $this->createAndSaveTransaction($transRepo, [
-                //     'operationid' => $operationid,
-                //     'transactiontype' => 'transferDeductSenderToRecipient',
-                //     'senderid' => $userId,
-                //     'tokenamount' => -$requiredAmount,
-                //     'message' => $message
-                // ]);
-
-                // To defend against atomoicity issues, we will debit first and then create transaction record. $this->walletMapper->saveWalletEntry($userId, $requiredAmount, 'DEDUCT');
-                $this->walletMapper->debitIfSufficient($userId, $requiredAmount);
+                // To defend against atomoicity issues, we will debit first and then create transaction record. $this->walletMapper->saveWalletEntry($senderId, $requiredAmount, 'DEDUCT');
+                $this->walletMapper->debitIfSufficient($senderId, $requiredAmount);
 
             }
 
             // 2. RECIPIENT: Credit To Account
-            if ($numberoftokens) {
+            if ($numberOfTokens) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
                     'transactiontype' => 'transferSenderToRecipient',
-                    'senderid' => $userId,
-                    'recipientid' => $recipient,
-                    'tokenamount' => $numberoftokens,
+                    'senderid' => $senderId,
+                    'recipientid' => $recipientId,
+                    'tokenamount' => $numberOfTokens,
                     'message' => $message,
                     'transferaction' => 'CREDIT'
                 ]);
 
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($recipient, $numberoftokens);
-                $this->walletMapper->credit($recipient, $numberoftokens);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($recipientId, $numberOfTokens);
+                $this->walletMapper->credit($recipientId, $numberOfTokens);
             }
 
             // 3. INVITER: Fees To Inviter (if applicable)
-            if (!empty($inviterId) && $inviterWin) {
+            if (!empty($this->inviterId) && isset($inviteFeeAmount) && $inviteFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
                     'transactiontype' => 'transferSenderToInviter',
-                    'senderid' => $userId,
-                    'recipientid' => $inviterId,
-                    'tokenamount' => $inviterWin,
+                    'senderid' => $senderId,
+                    'recipientid' => $this->inviterId,
+                    'tokenamount' => $inviteFeeAmount,
                     'transferaction' => 'INVITER_FEE'
                 ]);
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($inviterId, $inviterWin);
-                $this->walletMapper->credit($inviterId, $inviterWin);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->inviterId, $inviteFeeAmount);
+                $this->walletMapper->credit($this->inviterId, $inviteFeeAmount);
 
             }
 
             // 4. POOLWALLET: Fee To Pool Wallet
-            $feeAmount = TokenHelper::mulRc($numberoftokens, $poolFee);
-            if ($feeAmount) {
+            if (isset($poolFeeAmount) && $poolFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
                     'transactiontype' => 'transferSenderToPoolWallet',
-                    'senderid' => $userId,
+                    'senderid' => $senderId,
                     'recipientid' => $this->poolWallet,
-                    'tokenamount' => $feeAmount,
+                    'tokenamount' => $poolFeeAmount,
                     'transferaction' => 'POOL_FEE'
                 ]);
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->poolWallet, $feeAmount);
-                $this->walletMapper->credit($this->poolWallet, ($feeAmount));
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->poolWallet, $poolFeeAmount);
+                $this->walletMapper->credit($this->poolWallet, ($poolFeeAmount));
 
             }
 
             // 5. PEERWALLET: Fee To Peer Wallet
-            $peerAmount = TokenHelper::mulRc($numberoftokens, $peerFee);
-            if ($peerAmount) {
+            if (isset($peerFeeAmount) && $peerFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
                     'transactiontype' => 'transferSenderToPeerWallet',
-                    'senderid' => $userId,
+                    'senderid' => $senderId,
                     'recipientid' => $this->peerWallet,
-                    'tokenamount' => $peerAmount,
+                    'tokenamount' => $peerFeeAmount,
                     'transferaction' => 'PEER_FEE'
                 ]);
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->peerWallet, $peerAmount);
-                $this->walletMapper->credit($this->peerWallet, $peerAmount);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->peerWallet, $peerFeeAmount);
+                $this->walletMapper->credit($this->peerWallet, $peerFeeAmount);
 
             }
 
             // 6. BURNWALLET: Burn Tokens
-            $burnAmount = TokenHelper::mulRc($numberoftokens, $burnFee);
-            if ($burnAmount) {
+            if (isset($burnFeeAmount) && $burnFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
                     'transactiontype' => 'transferSenderToBurnWallet',
-                    'senderid' => $userId,
+                    'senderid' => $senderId,
                     'recipientid' => $this->burnWallet,
-                    'tokenamount' => $burnAmount,
+                    'tokenamount' => $burnFeeAmount,
                     'transferaction' => 'BURN_FEE'
                 ]);
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->burnWallet, $burnAmount);
-                $this->walletMapper->credit($this->burnWallet, $burnAmount);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->burnWallet, $burnFeeAmount);
+                $this->walletMapper->credit($this->burnWallet, $burnFeeAmount);
             }
 
             $this->logger->debug('Token transfer completed successfully');
@@ -353,11 +309,18 @@ class PeerTokenMapper
             return [
                 'status' => 'success',
                 'ResponseCode' => "11212",
-                'tokenSend' => $numberoftokens,
+                'tokenSend' => $numberOfTokens,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'createdat' => date('Y-m-d H:i:s.u')
             ];
         } catch (\Throwable $e) {
+            $this->logger->error('PeerTokenMapper.transferToken failed', [
+                'error' => $e->getMessage(),
+                'senderId' => $senderId,
+                'recipientId' => $recipientId,
+                'numberOfTokens' => $numberOfTokens,
+                'trace' => $e->getTraceAsString(),
+            ]);
             return self::respondWithError(40301);
         }
     }
@@ -492,25 +455,6 @@ class PeerTokenMapper
         }
     }
 
-    /**
-     * Get Inviter ID of a user.
-     */
-    private function getInviterID(string $userId): ?string
-    {
-        try {
-            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
-            $stmt = $this->db->prepare($query);
-            $stmt->execute(['userid' => $userId]);
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if (isset($result['invited']) && !empty($result['invited'])) {
-                return $result["invited"];
-            }
-            return null;
-        } catch (\Throwable $e) {
-            throw new RuntimeException($e->getMessage());
-        }
-    }
 
 
     /**
@@ -928,7 +872,7 @@ class PeerTokenMapper
         $inviteFee = (string)$fees['INVITATION'];
         $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokensToSwap, $peerFee, $poolFee, $burnFee);
 
-        $inviterId = $this->getInviterID($userId);
+        $inviterId = $this->userMapper->getInviterID($userId);
         try {
             if ($inviterId && !empty($inviterId)) {
                 $inviterWin = TokenHelper::mulRc($numberoftokensToSwap, $inviteFee);
