@@ -248,8 +248,12 @@ class PeerTokenMapper
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
             // Lock both users' balances to prevent race conditions
-            $this->lockBalances([$userId, $recipient]);
-
+            if ($inviterId && !empty($inviterId)) {
+                $this->lockBalances([$inviterId, $userId, $recipient]);
+            }else{
+                $this->lockBalances([$userId, $recipient]);
+            }
+            
             // 1. SENDER: Debit From Account
             if ($requiredAmount) {
                 // Remove this records we don't need it anymore.
@@ -950,7 +954,11 @@ class PeerTokenMapper
 
         try {
             // Lock both users' balances to prevent race conditions
-            $this->lockBalances([$userId]);
+            if ($inviterId && !empty($inviterId)) {
+                $this->lockBalances([$inviterId, $userId]);
+            }else{
+                $this->lockBalances([$userId]);
+            }
 
             $btcLpState =  $this->getLpTokenBtcLP();
             $lpState = $this->getLpToken();
@@ -1076,7 +1084,7 @@ class PeerTokenMapper
             // Update BTC Pool
             if ($btcAmountToUser) {
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->btcpool, $btcAmountToUser);
-                $this->walletMapper->credit($this->btcpool, $btcAmountToUser);
+                $this->walletMapper->debitIfSufficient($this->btcpool, $btcAmountToUser);
             }
 
             return [
