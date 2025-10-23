@@ -1,7 +1,7 @@
 -- tester01
 INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
 VALUES ('b9e94945-abd7-46a5-8c92-59037f1d73bf', 'tester01@tester.de', 'tester01',
-'$argon2id$v=19$m=65536,t=3,p=2$OXF0NlY5R09xRDRXLkREaw$E/P8IL1rNIRboG0Bl39kkNm9ozcoVxtNH/6NogztAD0', 0, 1, 97183, 0, '75.50.101.245',
+'$argon2id$v=19$m=65536,t=3,p=2$OXF0NlY5R09xRDRXLkREaw$E/P8IL1rNIRboG0Bl39kkNm9ozcoVxtNH/6NogztAD0', 0, 1, 97183, 256, '75.50.101.245',
 '/profile/b9e94945-abd7-46a5-8c92-59037f1d73bf.jpg',
 '/userData/b9e94945-abd7-46a5-8c92-59037f1d73bf.txt');
 
