@@ -45,6 +45,7 @@ final class ProfileServiceImplTest extends TestCase
             public function fetchAll(string $currentUserId, array $args = []): array { return []; }
             public function fetchAllAdvance(array $args = [], ?string $currentUserId = null, ?string $contentFilterBy = null): array { return []; }
             public function fetchProfileData(string $userid, string $currentUserId, array $specifications): ?Profile { return null; }
+            public function fetchByIds(array $userIds, string $currentUserId, array $specifications = []): array { return []; }
         };
 
         $service = $this->makeService($repo);
@@ -65,7 +66,8 @@ final class ProfileServiceImplTest extends TestCase
             public function __construct(private Profile $profile) {}
             public function fetchAll(string $currentUserId, array $args = []): array { return []; }
             public function fetchAllAdvance(array $args = [], ?string $currentUserId = null, ?string $contentFilterBy = null): array { return []; }
-            public function fetchProfileData(string $userid, string $currentUserId, array $specifications): ?Profile { return $this->profile; }
+            public function fetchProfileData(string $userid, string $currentUserId, array $specifications): Profile { return $this->profile; }
+            public function fetchByIds(array $userIds, string $currentUserId, array $specifications = []): array { return []; }
         };
 
         $service = $this->makeService($repo);
@@ -89,7 +91,8 @@ final class ProfileServiceImplTest extends TestCase
             public function __construct(private Profile $profile) {}
             public function fetchAll(string $currentUserId, array $args = []): array { return []; }
             public function fetchAllAdvance(array $args = [], ?string $currentUserId = null, ?string $contentFilterBy = null): array { return []; }
-            public function fetchProfileData(string $userid, string $currentUserId, array $specifications): ?Profile { return $this->profile; }
+            public function fetchProfileData(string $userid, string $currentUserId, array $specifications): Profile { return $this->profile; }
+            public function fetchByIds(array $userIds, string $currentUserId, array $specifications = []): array { return []; }
         };
 
         $service = $this->makeService($repo);
@@ -107,4 +110,3 @@ final class ProfileServiceImplTest extends TestCase
         $this->assertNotEmpty($result->getImg());
     }
 }
-
