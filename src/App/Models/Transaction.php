@@ -15,14 +15,7 @@ class Transaction
     use ResponseHelper;
 
     protected string $transactionid;
-
-    /**
-     * Operation ID Refers to Bunch of All Fees transactions.
-     *
-     * `operationid` foreign key reference to logWins Table -> `token` field.
-     */
     protected string $operationid;
-
     protected string $senderid;
     protected string $recipientid;
     protected string $transactiontype;
