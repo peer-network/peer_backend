@@ -5,9 +5,11 @@ declare(strict_types=1);
 use Slim\App;
 use Psr\Container\ContainerInterface;
 use Fawaz\Middleware\RateLimiterMiddleware;
+use Fawaz\Middleware\UserLockMiddleware;
 use Fawaz\Middleware\SecurityHeadersMiddleware;
 use Fawaz\RateLimiter\RateLimiter;
 use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Services\JWTService;
 
 return static function (App $app, ContainerInterface $container, array $settings) {
     $app->addBodyParsingMiddleware();
@@ -22,6 +24,16 @@ return static function (App $app, ContainerInterface $container, array $settings
     $logger = $container->get(PeerLoggerInterface::class);
 
     $app->add(new RateLimiterMiddleware($rateLimiter, $logger));
+
+    // Per-user request serialization for GraphQL
+    $lockDir = __DIR__ . '/../../runtime-data/locks';
+    $lockTimeoutSeconds = 30; // adjust if needed
+    $app->add(new UserLockMiddleware(
+        $container->get(JWTService::class),
+        $logger,
+        $lockDir,
+        $lockTimeoutSeconds
+    ));
 
     $app->addErrorMiddleware(true, true, true);
 

@@ -22,6 +22,7 @@ runtime-data/media/userData/*
 runtime-data/media/video/*
 runtime-data/media/tmp/*
 runtime-data/logs/*
+runtime-data/locks/*
 runtime-data/ratelimiter/*
 !/**/placeholder.txt
 *_rate_limiter_storage.json
