@@ -119,6 +119,12 @@ class UserLockMiddleware implements MiddlewareInterface
                 // ignore
             }
             fclose($fp);
+            // Best-effort cleanup of the lock file to avoid stale files
+            try {
+                @unlink($lockFile);
+            } catch (\Throwable $e) {
+                // ignore
+            }
             $this->logger->debug('UserLockMiddleware: released lock', ['key' => $safeKey, 'type' => $lockKeyType]);
         }
     }
