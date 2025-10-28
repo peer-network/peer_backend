@@ -53,8 +53,8 @@ class User implements Hashable
 
         if ($this->status == 6) {
             $this->username = 'Deleted_Account';
-            $this->img = '/profile/default4.jpeg';
-            $this->biography = '/userData/default.txt';
+            $this->img = '/profile/00000000-0000-0000-0000-000000000000.jpeg';
+            $this->biography = '/userData/00000000-0000-0000-0000-000000000000.txt';
         }
     }
 
