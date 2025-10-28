@@ -43,23 +43,35 @@ class UserLockMiddleware implements MiddlewareInterface
             }
         }
 
-        // If no bearer token, skip locking (guest schema is allowed concurrently)
-        if ($bearerToken === null || $bearerToken === '') {
-            return $handler->handle($request);
+        // Determine lock key: prefer authenticated user id, otherwise fall back to client IP
+        $lockKey = null;
+        $lockKeyType = null;
+
+        if ($bearerToken !== null && $bearerToken !== '') {
+            try {
+                $decoded = $this->jwtService->validateToken($bearerToken);
+                if (isset($decoded->uid) && $decoded->uid !== '') {
+                    $lockKey = (string)$decoded->uid;
+                    $lockKeyType = 'user';
+                }
+            } catch (\Throwable $e) {
+                // ignore, will try IP below
+                $this->logger->debug('UserLockMiddleware: token invalid, will use IP lock');
+            }
         }
 
-        // Decode token to get user id. If invalid, skip locking and let downstream handle error
-        try {
-            $decoded = $this->jwtService->validateToken($bearerToken);
-            $userId = isset($decoded->uid) ? (string)$decoded->uid : null;
-        } catch (\Throwable $e) {
-            $this->logger->debug('UserLockMiddleware: token invalid, skipping lock');
-            $userId = null;
+        if ($lockKey === null) {
+            $ip = $this->getClientIp($request);
+            if ($ip !== null) {
+                $lockKey = $ip;
+                $lockKeyType = 'ip';
+            }
         }
 
-        if ($userId === null || $userId === '') {
-            return $handler->handle($request);
-        }
+        // If we still do not have a key, proceed without locking
+        // if ($lockKey === null) {
+        //     return $handler->handle($request);
+        // }
 
         // Ensure lock directory exists
         if (!is_dir($this->lockDir)) {
@@ -67,8 +79,9 @@ class UserLockMiddleware implements MiddlewareInterface
         }
 
         // Sanitize and derive lock file path
-        $safeUserId = preg_replace('/[^A-Za-z0-9_-]/', '_', $userId);
-        $lockFile = $this->lockDir . DIRECTORY_SEPARATOR . 'user_' . $safeUserId . '.lock';
+        $safeKey = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $lockKey);
+        $prefix = $lockKeyType === 'user' ? 'user_' : 'guest_';
+        $lockFile = $this->lockDir . DIRECTORY_SEPARATOR . $prefix . $safeKey . '.lock';
 
         $fp = @fopen($lockFile, 'c');
         if ($fp === false) {
@@ -90,11 +103,11 @@ class UserLockMiddleware implements MiddlewareInterface
 
         if (!$acquired) {
             // Optional: block indefinitely as last resort
-            $this->logger->warning('UserLockMiddleware: lock timeout reached, blocking until available', ['userId' => $safeUserId]);
+            $this->logger->warning('UserLockMiddleware: lock timeout reached, blocking until available', ['key' => $safeKey, 'type' => $lockKeyType]);
             flock($fp, LOCK_EX); // Block until lock acquired
         }
 
-        $this->logger->debug('UserLockMiddleware: acquired lock', ['userId' => $safeUserId]);
+        $this->logger->debug('UserLockMiddleware: acquired lock', ['key' => $safeKey, 'type' => $lockKeyType]);
 
         try {
             return $handler->handle($request);
@@ -106,8 +119,36 @@ class UserLockMiddleware implements MiddlewareInterface
                 // ignore
             }
             fclose($fp);
-            $this->logger->debug('UserLockMiddleware: released lock', ['userId' => $safeUserId]);
+            $this->logger->debug('UserLockMiddleware: released lock', ['key' => $safeKey, 'type' => $lockKeyType]);
         }
     }
-}
 
+    private function getClientIp(ServerRequestInterface $request): ?string
+    {
+        // Prefer X-Forwarded-For (first IP), then X-Real-IP, then REMOTE_ADDR
+        $headers = $request->getHeaders();
+        $ip = null;
+
+        if (!empty($headers['X-Forwarded-For'][0])) {
+            $forwarded = explode(',', $headers['X-Forwarded-For'][0]);
+            $candidate = trim($forwarded[0]);
+            if (filter_var($candidate, FILTER_VALIDATE_IP)) {
+                $ip = $candidate;
+            }
+        }
+
+        if ($ip === null && !empty($headers['X-Real-IP'][0]) && filter_var($headers['X-Real-IP'][0], FILTER_VALIDATE_IP)) {
+            $ip = $headers['X-Real-IP'][0];
+        }
+
+        if ($ip === null) {
+            $serverParams = $request->getServerParams();
+            $candidate = $serverParams['REMOTE_ADDR'] ?? null;
+            if (is_string($candidate) && filter_var($candidate, FILTER_VALIDATE_IP)) {
+                $ip = $candidate;
+            }
+        }
+
+        return $ip;
+    }
+}
