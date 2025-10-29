@@ -2441,7 +2441,7 @@ class GraphQLSchemaBuilder
             $response = $this->advertisementService->createAdvertisement($args);
             if (isset($response['status']) && $response['status'] === 'success') {
                 $args['art'] = ($advertisePlan === $this->advertisementService::PLAN_BASIC) ? 6 : (($advertisePlan === $this->advertisementService::PLAN_PINNED) ? 7 : null);
-                $args['price'] = $CostPlan ?? null;
+                $args['price'] = $CostPlan;
 
                 $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
