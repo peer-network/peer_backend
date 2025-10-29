@@ -20,8 +20,8 @@ class AdvertisementService
     public const PLAN_BASIC = 'BASIC';
     public const PLAN_PINNED = 'PINNED';
 
-    public const PRICE_BASIC = 50;
-    public const PRICE_PINNED = 200;
+    public const PRICE_BASIC = 5;
+    public const PRICE_PINNED = 20;
 
     public const DURATION_ONE_DAY = 'ONE_DAY';
     public const DURATION_TWO_DAYS = 'TWO_DAYS';
