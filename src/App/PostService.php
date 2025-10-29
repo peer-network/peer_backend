@@ -34,6 +34,8 @@ class PostService
         protected PostMapper $postMapper,
         protected CommentMapper $commentMapper,
         protected PostInfoMapper $postInfoMapper,
+        protected CommentService $commentService,
+        protected PostInfoService $postInfoService,
         protected TagMapper $tagMapper,
         protected TagPostMapper $tagPostMapper,
         protected FileUploadDispatcher $base64filehandler,
@@ -359,6 +361,182 @@ class PostService
             }
             $this->logger->error('Failed to create post', ['exception' => $e]);
             return $this::respondWithError(41508);
+        }
+    }
+
+    /**
+     * Consolidated handler for post-related actions like like/dislike/comment/post,
+     * including free-daily quotas and wallet deductions.
+     */
+    public function resolveActionPost(?array $args = []): ?array
+    {
+        $tokenomicsConfig = ConstantsConfig::tokenomics();
+        $dailyfreeConfig = ConstantsConfig::dailyFree();
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
+
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('PostService.resolveActionPost started');
+
+        $postId = $args['postid'] ?? null;
+        $action = $args['action'] = strtolower($args['action'] ?? 'LIKE');
+        $args['fromid'] = $this->currentUserId;
+
+        $freeActions = ['report', 'save', 'share', 'view'];
+
+        if (in_array($action, $freeActions, true)) {
+            $response = $this->postInfoService->{$action . 'Post'}($postId);
+            return $response;
+        }
+
+        $paidActions = ['like', 'dislike', 'comment', 'post'];
+
+        if (!in_array($action, $paidActions, true)) {
+            return $this::respondWithError(30105);
+        }
+
+        $dailyLimits = [
+            'like' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['like'],
+            'comment' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['comment'],
+            'post' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['post'],
+            'dislike' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['dislike'],
+        ];
+
+        $actionPrices = [
+            'like' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['like'],
+            'comment' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['comment'],
+            'post' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['post'],
+            'dislike' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['dislike'],
+        ];
+
+        $actionMaps = [
+            'like' => $actions['LIKE'],
+            'comment' => $actions['COMMENT'],
+            'post' => $actions['POST'],
+            'dislike' => $actions['DISLIKE'],
+        ];
+
+        // Validations
+        if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
+            $this->logger->warning('Invalid action parameter', ['action' => $action]);
+            return $this->respondWithError(30105);
+        }
+
+        $limit = $dailyLimits[$action];
+        $price = $actionPrices[$action];
+        $actionMap = $args['art'] = $actionMaps[$action];
+
+        try {
+            if ($limit > 0) {
+                $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
+
+                if ($DailyUsage < $limit) {
+                    if ($action === 'comment') {
+                        $response = $this->commentService->createComment($args);
+                        if (isset($response['status']) && $response['status'] === 'error') {
+                            return $response;
+                        }
+                        $response['ResponseCode'] = "11608";
+
+                    } elseif ($action === 'post') {
+                        $response = $this->createPost($args['input']);
+                        if (isset($response['status']) && $response['status'] === 'error') {
+                            return $response;
+                        }
+                        $response['ResponseCode'] = "11513";
+                    } elseif ($action === 'like') {
+                        $response = $this->postInfoService->likePost($postId);
+                        if (isset($response['status']) && $response['status'] === 'error') {
+                            return $response;
+                        }
+                        $response['ResponseCode'] = "11514";
+                    } else {
+                        return $this::respondWithError(30105);
+                    }
+
+                    if (isset($response['status']) && $response['status'] === 'success') {
+                        $incrementResult = $this->dailyFreeService->incrementUserDailyUsage($this->currentUserId, $actionMap);
+
+                        if ($incrementResult) {
+                            $this->logger->info('Daily usage incremented successfully', ['userId' => $this->currentUserId]);
+                        } else {
+                            $this->logger->warning('Failed to increment daily usage', ['userId' => $this->currentUserId]);
+                        }
+
+                        $DailyUsage += 1;
+                        return $response;
+                    }
+
+                    $this->logger->error("{$action}Post failed", ['response' => $response]);
+                    $response['affectedRows'] = $args;
+                    return $response;
+                }
+            }
+
+            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
+            if ($balance < $price) {
+                $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                return $this::respondWithError(51301);
+            }
+
+            if ($action === 'comment') {
+                $response = $this->commentService->createComment($args);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    return $response;
+                }
+                $response['ResponseCode'] = "11605";
+            } elseif ($action === 'post') {
+                $response = $this->createPost($args['input']);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    return $response;
+                }
+                $response['ResponseCode'] = "11508";
+
+                if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])) {
+                    unset($args['input'], $args['action']);
+                    $args['postid'] = $response['affectedRows']['postid'];
+                }
+            } elseif ($action === 'like') {
+                $response = $this->postInfoService->likePost($postId);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    return $response;
+                }
+                $response['ResponseCode'] = "11503";
+            } elseif ($action === 'dislike') {
+                $response = $this->postInfoService->dislikePost($postId);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    return $response;
+                }
+                $response['ResponseCode'] = "11504";
+            } else {
+                return $this::respondWithError(30105);
+            }
+
+            if (isset($response['status']) && $response['status'] === 'success') {
+                $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
+                if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    return $deducted;
+                }
+
+                if (!$deducted) {
+                    $this->logger->error('Failed to deduct from wallet', ['userId' => $this->currentUserId]);
+                    return $this::respondWithError($deducted['ResponseCode']);
+                }
+
+                return $response;
+            }
+
+            $this->logger->error("{$action}Post failed after wallet deduction", ['response' => $response]);
+            $response['affectedRows'] = $args;
+            return $response;
+        } catch (\Throwable $e) {
+            $this->logger->error('Unexpected error in resolveActionPost', [
+                'exception' => $e->getMessage(),
+                'args' => $args,
+            ]);
+            return $this::respondWithError(40301);
         }
     }
 
