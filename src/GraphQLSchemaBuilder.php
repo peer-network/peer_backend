@@ -41,6 +41,7 @@ use Fawaz\Utils\ResponseMessagesProvider;
 use DateTimeImmutable;
 use Fawaz\App\Role;
 use Fawaz\App\ValidationException;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class GraphQLSchemaBuilder
 {
@@ -68,6 +69,7 @@ class GraphQLSchemaBuilder
         protected AdvertisementService $advertisementService,
         protected JWTService $tokenService,
         protected ResponseMessagesProvider $responseMessagesProvider,
+        protected TransactionManager $transactionManager,
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -2430,10 +2432,12 @@ class GraphQLSchemaBuilder
         }
 
         try {
+            $this->transactionManager->beginTransaction();
             // Wallet prüfen
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             if ($balance < $CostPlan) {
                 $this->logger->warning('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
+                $this->transactionManager->rollback();
                 return $this->respondWithError(51301);
             }
 
@@ -2445,20 +2449,24 @@ class GraphQLSchemaBuilder
 
                 $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $deducted;
                 }
 
                 if (!$deducted) {
                     $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
+                    $this->transactionManager->rollback();
                     return $this->respondWithError($deducted['ResponseCode']);
                 }
-
+                $this->transactionManager->commit();
                 return $response;
             }
-
+            $this->logger->warning('Werbeanzeige konnte nicht erstellt werden', ['userId' => $this->currentUserId]);
+            $this->transactionManager->rollback();
             return $response;
 
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             return $this->respondWithError(40301);
         }
     }
