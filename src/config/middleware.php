@@ -25,12 +25,13 @@ return static function (App $app, ContainerInterface $container, array $settings
 
     $app->add(new RateLimiterMiddleware($rateLimiter, $logger));
 
-    // Per-user request serialization for GraphQL
-    $app->add(new UserLockMiddleware(
-        $container->get(JWTService::class)
-    ));
 
     $app->addErrorMiddleware(true, true, true);
 
     $app->addRoutingMiddleware();
+
+    // Per-user request serialization for GraphQL
+    $app->add(new UserLockMiddleware(
+        $container->get(JWTService::class)
+    ));
 };
