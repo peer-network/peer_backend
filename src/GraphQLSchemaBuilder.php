@@ -4,8 +4,8 @@ namespace Fawaz;
 
 const INT32_MAX = 2147483647;
 
-const BASIC = 50;
-const PINNED = 200;
+const BASIC = 5;
+const PINNED = 20;
 
 use Fawaz\App\Advertisements;
 use Fawaz\App\AdvertisementService;
