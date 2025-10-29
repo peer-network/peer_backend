@@ -26,13 +26,8 @@ return static function (App $app, ContainerInterface $container, array $settings
     $app->add(new RateLimiterMiddleware($rateLimiter, $logger));
 
     // Per-user request serialization for GraphQL
-    $lockDir = __DIR__ . '/../../runtime-data/locks';
-    $lockTimeoutSeconds = 30; // adjust if needed
     $app->add(new UserLockMiddleware(
-        $container->get(JWTService::class),
-        $logger,
-        $lockDir,
-        $lockTimeoutSeconds
+        $container->get(JWTService::class)
     ));
 
     $app->addErrorMiddleware(true, true, true);

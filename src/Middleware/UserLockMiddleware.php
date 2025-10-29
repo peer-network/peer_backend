@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Fawaz\Middleware;
 
 use Fawaz\Services\JWTService;
-use Fawaz\Utils\PeerLoggerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -14,16 +13,22 @@ use Psr\Http\Server\RequestHandlerInterface;
 class UserLockMiddleware implements MiddlewareInterface
 {
     private JWTService $jwtService;
-    private PeerLoggerInterface $logger;
-    private string $lockDir;
-    private int $timeoutSeconds;
+    private string $lockDir = __DIR__ . '/../../runtime-data/locks';
+    private int $timeoutSeconds = 30; // adjust if needed
 
-    public function __construct(JWTService $jwtService, PeerLoggerInterface $logger, string $lockDir, int $timeoutSeconds = 30)
+    /**
+     * Only lock these mutation field names.
+     * Extend this list if more write operations need serialization.
+     */
+    private array $lockedMutations = [
+        'resolveTransferV2',
+        'createPost',
+        'createComment',
+    ];
+
+    public function __construct(JWTService $jwtService)
     {
         $this->jwtService = $jwtService;
-        $this->logger = $logger;
-        $this->lockDir = rtrim($lockDir, '/\\');
-        $this->timeoutSeconds = $timeoutSeconds;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -33,11 +38,85 @@ class UserLockMiddleware implements MiddlewareInterface
         if ($path !== '/graphql') {
             return $handler->handle($request);
         }
+        // Lock only for selected mutation operations
+        $queryString = '';
+        $parsedBody = $request->getParsedBody();
+        if (is_array($parsedBody) && isset($parsedBody['query']) && is_string($parsedBody['query'])) {
+            $queryString = $parsedBody['query'];
+        } else {
+            // Fallbacks when the body parser doesn't populate parsed body
+            // 1) Try query param
+            $queryParams = $request->getQueryParams();
+            if (isset($queryParams['query']) && is_string($queryParams['query'])) {
+                $queryString = $queryParams['query'];
+            } else {
+                // 2) Try raw body (JSON single/batch or application/graphql)
+                $raw = '';
+                try {
+                    $raw = (string)$request->getBody();
+                } catch (\Throwable $e) {
+                    $raw = '';
+                }
 
-        $authorizationHeader = $request->getHeader('Authorization');
+                $decoded = null;
+                if ($raw !== '') {
+                    $decoded = json_decode($raw, true);
+                }
+
+                if (is_array($decoded)) {
+                    if (isset($decoded['query']) && is_string($decoded['query'])) {
+                        $queryString = $decoded['query'];
+                    } else {
+                        $collected = [];
+                        foreach ($decoded as $item) {
+                            if (is_array($item) && isset($item['query']) && is_string($item['query'])) {
+                                $collected[] = $item['query'];
+                            }
+                        }
+                        if (!empty($collected)) {
+                            $queryString = implode("\n\n", $collected);
+                        }
+                    }
+                }
+
+                if ($queryString === '' && !empty($raw) && $raw !== '') {
+                    $contentType = $request->getHeaderLine('Content-Type');
+                    if (stripos($contentType, 'application/graphql') !== false || stripos($raw, 'mutation') !== false) {
+                        $queryString = $raw;
+                    }
+                }
+
+                // Rewind body for downstream consumers
+                try {
+                    $request->getBody()->rewind();
+                } catch (\Throwable $e) {
+                    // ignore
+                }
+            }
+        }
+
+
+        $shouldLock = false;
+        if (!empty($queryString) && $queryString !== '') {
+            // Check if it's a mutation and contains one of the locked field names
+            if (stripos($queryString, 'mutation') !== false) {
+                $escaped = array_map(static fn($s) => preg_quote($s, '/'), $this->lockedMutations);
+                $pattern = '/\\b(' . implode('|', $escaped) . ')\\b/i';
+                if (preg_match($pattern, $queryString) === 1) {
+                    $shouldLock = true;
+                }
+            }
+        }
+
+        if ($shouldLock === false) {
+            return $handler->handle($request);
+        }
+
+        // Read Authorization header line (keeps compatibility as requested)
+        $authorizationLine = $request->getHeaderLine('Authorization');
         $bearerToken = null;
-        if (!empty($authorizationHeader)) {
-            $parts = explode(' ', $authorizationHeader[0]);
+        if ($authorizationLine !== '') {
+            $parts = explode(' ', $authorizationLine, 2);
             if (count($parts) === 2 && strtolower($parts[0]) === 'bearer') {
                 $bearerToken = $parts[1];
             }
@@ -56,22 +135,13 @@ class UserLockMiddleware implements MiddlewareInterface
                 }
             } catch (\Throwable $e) {
                 // ignore, will try IP below
-                $this->logger->debug('UserLockMiddleware: token invalid, will use IP lock');
-            }
-        }
-
-        if ($lockKey === null) {
-            $ip = $this->getClientIp($request);
-            if ($ip !== null) {
-                $lockKey = $ip;
-                $lockKeyType = 'ip';
             }
         }
 
         // If we still do not have a key, proceed without locking
-        // if ($lockKey === null) {
-        //     return $handler->handle($request);
-        // }
+        if ($lockKey === null) {
+            return $handler->handle($request);
+        }
 
         // Ensure lock directory exists
         if (!is_dir($this->lockDir)) {
@@ -86,7 +156,6 @@ class UserLockMiddleware implements MiddlewareInterface
         $fp = @fopen($lockFile, 'c');
         if ($fp === false) {
             // If lock file cannot be opened, log and proceed without locking
-            $this->logger->error('UserLockMiddleware: cannot open lock file', ['file' => $lockFile]);
             return $handler->handle($request);
         }
 
@@ -103,11 +172,9 @@ class UserLockMiddleware implements MiddlewareInterface
 
         if (!$acquired) {
             // Optional: block indefinitely as last resort
-            $this->logger->warning('UserLockMiddleware: lock timeout reached, blocking until available', ['key' => $safeKey, 'type' => $lockKeyType]);
             flock($fp, LOCK_EX); // Block until lock acquired
         }
 
-        $this->logger->debug('UserLockMiddleware: acquired lock', ['key' => $safeKey, 'type' => $lockKeyType]);
 
         try {
             return $handler->handle($request);
@@ -125,36 +192,7 @@ class UserLockMiddleware implements MiddlewareInterface
             } catch (\Throwable $e) {
                 // ignore
             }
-            $this->logger->debug('UserLockMiddleware: released lock', ['key' => $safeKey, 'type' => $lockKeyType]);
         }
     }
 
-    private function getClientIp(ServerRequestInterface $request): ?string
-    {
-        // Prefer X-Forwarded-For (first IP), then X-Real-IP, then REMOTE_ADDR
-        $headers = $request->getHeaders();
-        $ip = null;
-
-        if (!empty($headers['X-Forwarded-For'][0])) {
-            $forwarded = explode(',', $headers['X-Forwarded-For'][0]);
-            $candidate = trim($forwarded[0]);
-            if (filter_var($candidate, FILTER_VALIDATE_IP)) {
-                $ip = $candidate;
-            }
-        }
-
-        if ($ip === null && !empty($headers['X-Real-IP'][0]) && filter_var($headers['X-Real-IP'][0], FILTER_VALIDATE_IP)) {
-            $ip = $headers['X-Real-IP'][0];
-        }
-
-        if ($ip === null) {
-            $serverParams = $request->getServerParams();
-            $candidate = $serverParams['REMOTE_ADDR'] ?? null;
-            if (is_string($candidate) && filter_var($candidate, FILTER_VALIDATE_IP)) {
-                $ip = $candidate;
-            }
-        }
-
-        return $ip;
-    }
 }
