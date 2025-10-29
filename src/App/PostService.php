@@ -681,7 +681,6 @@ class PostService
                         'ResponseCode' => "40301", // Not eligible for upload for post
                     ];
             $hasFreeDaily = false;
-            $this->transactionManager->beginTransaction();
 
             $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
             if ($DailyUsage < $limit) {
@@ -693,10 +692,10 @@ class PostService
             // Return ResponseCode with Daily Free Code
             if ($balance < $price && !$hasFreeDaily) {
                 $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
-                $this->transactionManager->rollback();
                 return $this::respondWithError(51301);
             }
 
+            $this->transactionManager->beginTransaction();
             // generate PostId and JWT
             $eligibilityToken = $this->tokenService->createAccessTokenWithCustomExpriy($this->currentUserId, 300);
 
