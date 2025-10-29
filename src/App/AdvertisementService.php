@@ -34,20 +34,8 @@ class AdvertisementService
         protected AdvertisementMapper $advertisementMapper,
         protected UserMapper $userMapper,
         protected PostMapper $postMapper,
-
-        protected TagService $tagService,
-        protected ContactusService $contactusService,
-        protected DailyFreeService $dailyFreeService,
-        protected UserService $userService,
-        protected UserInfoService $userInfoService,
-        protected PoolService $poolService,
-        protected PostInfoService $postInfoService,
         protected PostService $postService,
-        protected CommentService $commentService,
-        protected CommentInfoService $commentInfoService,
         protected WalletService $walletService,
-        protected PeerTokenService $peerTokenService,
-        protected AdvertisementService $advertisementService,
     ) {
     }
 
@@ -113,7 +101,7 @@ class AdvertisementService
             return $this->respondWithError(32005);
         }
 
-        if ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
+        if ($advertisePlan === $this::PLAN_BASIC) {
             // Startdatum validieren
             if (isset($startdayInput) && empty($startdayInput)) {
                 $this->logger->warning('Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
@@ -150,18 +138,18 @@ class AdvertisementService
             }
         }
 
-        if ($this->advertisementService->isAdvertisementDurationValid($postId) === true) {
+        if ($this->isAdvertisementDurationValid($postId) === true) {
             $reducePrice = true;
         }
 
         if ($reducePrice === false) {
-            if ($this->advertisementService->hasShortActiveAdWithUpcomingAd($postId) === true) {
+            if ($this->hasShortActiveAdWithUpcomingAd($postId) === true) {
                 $reducePrice = true;
             }
         }
 
         // Kosten berechnen je nach Plan (BASIC oder PINNED)
-        if ($advertisePlan === $this->advertisementService::PLAN_PINNED) {
+        if ($advertisePlan === $this::PLAN_PINNED) {
             $CostPlan = $this->advertisePostPinnedResolver($args); // PINNED Kosten berechnen
 
             // 20% discount weil advertisement >= 24 stunde aktive noch
@@ -173,7 +161,7 @@ class AdvertisementService
 
             $this->logger->info('Werbeanzeige PINNED', ['CostPlan' => $CostPlan]);
             $rescode = 12003;
-        } elseif ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
+        } elseif ($advertisePlan === $this::PLAN_BASIC) {
             $CostPlan = $this->advertisePostBasicResolver($args); // BASIC Kosten berechnen
             $this->logger->info('Werbeanzeige BASIC', ["Kosten für $durationInDays Tage: " => $CostPlan]);
             $rescode = 12004;
@@ -191,7 +179,7 @@ class AdvertisementService
         }
 
         // // Euro in PeerTokens umrechnen
-        // $results = $this->advertisementService->convertEuroToTokens($CostPlan, $rescode);
+        // $results = $this->convertEuroToTokens($CostPlan, $rescode);
         // if (isset($results['status']) && $results['status'] === 'error') {
         //     $this->logger->warning('Fehler bei convertEuroToTokens', ['results' => $results]);
         //     return $results;
@@ -211,9 +199,9 @@ class AdvertisementService
             }
 
             // Werbeanzeige erstellen
-            $response = $this->advertisementService->createAdvertisement($args);
+            $response = $this->createAdvertisement($args);
             if (isset($response['status']) && $response['status'] === 'success') {
-                $args['art'] = ($advertisePlan === $this->advertisementService::PLAN_BASIC) ? 6 : (($advertisePlan === $this->advertisementService::PLAN_PINNED) ? 7 : null);
+                $args['art'] = ($advertisePlan === $this::PLAN_BASIC) ? 6 : (($advertisePlan === $this::PLAN_PINNED) ? 7 : null);
                 $args['price'] = $CostPlan;
 
                 $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
@@ -245,7 +233,7 @@ class AdvertisementService
             $postId = $args['postid'];
             $duration = $args['durationInDays'];
 
-            $price = $this->advertisementService::calculatePrice($this->advertisementService::PLAN_BASIC, $duration);
+            $price = $this::calculatePrice($this::PLAN_BASIC, $duration);
 
             return $price;
         } catch (\Throwable $e) {
@@ -262,7 +250,7 @@ class AdvertisementService
 
             $postId = $args['postid'];
 
-            $price = $this->advertisementService::calculatePrice($this->advertisementService::PLAN_PINNED);
+            $price = $this::calculatePrice($this::PLAN_PINNED);
 
             return $price;
         } catch (\Throwable $e) {
