@@ -954,6 +954,8 @@ class WalletMapper
             "D3" => "createdat::date = CURRENT_DATE - INTERVAL '3 day'",
             "D4" => "createdat::date = CURRENT_DATE - INTERVAL '4 day'",
             "D5" => "createdat::date = CURRENT_DATE - INTERVAL '5 day'",
+            "D6" => "createdat::date = CURRENT_DATE - INTERVAL '6 day'",
+            "D7" => "createdat::date = CURRENT_DATE - INTERVAL '7 day'",
             "W0" => "DATE_PART('week', createdat) = DATE_PART('week', CURRENT_DATE) AND EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE)",
             "M0" => "TO_CHAR(createdat, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM')",
             "Y0" => "EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE)"
