@@ -7,7 +7,6 @@ namespace Fawaz\App;
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
 use Fawaz\App\Models\MultipartPost;
-use DateTimeImmutable;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
@@ -45,8 +44,7 @@ class PostService
         protected DailyFreeService $dailyFreeService,
         protected WalletService $walletService,
         protected JWTService $tokenService,
-        protected TransactionManager $transactionManager,
-        protected AdvertisementService $advertisementService
+        protected TransactionManager $transactionManager
     ) {
     }
 
@@ -553,167 +551,6 @@ class PostService
             ]);
             $this->transactionManager->rollback();
             return $this::respondWithError(40301);
-        }
-    }
-
-    // Calculate BASIC advertisement price
-    public function advertisePostBasicResolver(?array $args = []): int
-    {
-        try {
-            $postId = $args['postid'] ?? null;
-            $duration = $args['durationInDays'] ?? null;
-            return $this->advertisementService::calculatePrice($this->advertisementService::PLAN_BASIC, $duration);
-        } catch (\Throwable $e) {
-            $this->logger->warning('Invalid price provided.', ['Error' => $e]);
-            return 0;
-        }
-    }
-
-    // Calculate PINNED advertisement price
-    public function advertisePostPinnedResolver(?array $args = []): int
-    {
-        try {
-            $postId = $args['postid'] ?? null;
-            return $this->advertisementService::calculatePrice($this->advertisementService::PLAN_PINNED);
-        } catch (\Throwable $e) {
-            $this->logger->warning('Invalid price provided.', ['Error' => $e]);
-            return 0;
-        }
-    }
-
-    // Validate and place advertisement for a post
-    public function resolveAdvertisePost(?array $args = []): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
-        }
-
-        $postId = $args['postid'] ?? null;
-        $durationInDays = $args['durationInDays'] ?? null;
-        $startdayInput = $args['startday'] ?? null;
-        $advertisePlan = $args['advertisePlan'] ?? null;
-        $reducePrice = false;
-        $CostPlan = 0;
-
-        if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(30209);
-        }
-
-        if ($this->postExistsById($postId) === false) {
-            return $this->respondWithError(31510);
-        }
-
-        $advertiseActions = ['BASIC', 'PINNED'];
-        if (!in_array($advertisePlan, $advertiseActions, true)) {
-            $this->logger->warning('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
-            return $this->respondWithError(32006);
-        }
-
-        if ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
-            if (isset($startdayInput) && empty($startdayInput)) {
-                $this->logger->warning('Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
-                return $this->respondWithError(32007);
-            }
-
-            $startday = DateTimeImmutable::createFromFormat('Y-m-d', $startdayInput);
-            $errors = DateTimeImmutable::getLastErrors();
-            if (!$startday) {
-                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
-                return $this->respondWithError(32008);
-            }
-            if ((isset($errors['warning_count']) && $errors['warning_count'] > 0) || (isset($errors['error_count']) && $errors['error_count'] > 0)) {
-                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
-                return $this->respondWithError(42004);
-            }
-
-            $tomorrow = new DateTimeImmutable('tomorrow');
-            if ($startday < $tomorrow) {
-                $this->logger->warning('Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
-                return $this->respondWithError(32008);
-            }
-
-            $durationActions = ['ONE_DAY', 'TWO_DAYS', 'THREE_DAYS', 'FOUR_DAYS', 'FIVE_DAYS', 'SIX_DAYS', 'SEVEN_DAYS'];
-            if ($durationInDays !== null && !in_array($durationInDays, $durationActions, true)) {
-                $this->logger->warning('Ungültige Laufzeit', ['durationInDays' => $durationInDays]);
-                return $this->respondWithError(32009);
-            }
-        }
-
-        if ($this->advertisementService->isAdvertisementDurationValid($postId) === true) {
-            $reducePrice = true;
-        }
-        if ($reducePrice === false) {
-            if ($this->advertisementService->hasShortActiveAdWithUpcomingAd($postId) === true) {
-                $reducePrice = true;
-            }
-        }
-
-        if ($advertisePlan === $this->advertisementService::PLAN_PINNED) {
-            $CostPlan = $this->advertisePostPinnedResolver($args);
-            if ($reducePrice === true) {
-                $CostPlan = $CostPlan - ($CostPlan * 0.20);
-                $this->logger->info('20% Discount Exestiert:', ['CostPlan' => $CostPlan]);
-            }
-            $this->logger->info('Werbeanzeige PINNED', ['CostPlan' => $CostPlan]);
-            $rescode = 12003;
-        } elseif ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
-            $CostPlan = $this->advertisePostBasicResolver($args);
-            $this->logger->info('Werbeanzeige BASIC', ["Kosten für $durationInDays Tage: " => $CostPlan]);
-            $rescode = 12004;
-        } else {
-            $this->logger->warning('Ungültige Ads Plan', ['CostPlan' => $CostPlan]);
-            return $this->respondWithError(32005);
-        }
-
-        $args['eurocost'] = $CostPlan;
-        if (empty($CostPlan) || (int)$CostPlan === 0) {
-            $this->logger->warning('Kostenprüfung fehlgeschlagen', ['CostPlan' => $CostPlan]);
-            return $this->respondWithError(42005);
-        }
-
-        $results = $this->advertisementService->convertEuroToTokens($CostPlan, $rescode);
-        if (isset($results['status']) && $results['status'] === 'error') {
-            $this->logger->warning('Fehler bei convertEuroToTokens', ['results' => $results]);
-            return $results;
-        }
-        if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Umrechnung erfolgreich', ["€$CostPlan in PeerTokens: " => $results['affectedRows']['TokenAmount']]);
-            $CostPlan = $results['affectedRows']['TokenAmount'];
-            $args['tokencost'] = $CostPlan;
-        }
-
-        try {
-            $this->transactionManager->beginTransaction();
-            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
-            if ($balance < $CostPlan) {
-                $this->logger->warning('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
-                $this->transactionManager->rollback();
-                return $this->respondWithError(51301);
-            }
-
-            $response = $this->advertisementService->createAdvertisement($args);
-            if (isset($response['status']) && $response['status'] === 'success') {
-                $args['art'] = ($advertisePlan === $this->advertisementService::PLAN_BASIC) ? 6 : (($advertisePlan === $this->advertisementService::PLAN_PINNED) ? 7 : null);
-                $args['price'] = $CostPlan ?? null;
-
-                $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
-                if (isset($deducted['status']) && $deducted['status'] === 'error') {
-                    $this->transactionManager->rollback();
-                    return $deducted;
-                }
-                if (!$deducted) {
-                    $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
-                    $this->transactionManager->rollback();
-                    return $this->respondWithError($deducted['ResponseCode']);
-                }
-                $this->transactionManager->commit();
-                return $response;
-            }
-            $this->transactionManager->rollback();
-            return $response;
-        } catch (\Throwable $e) {
-            $this->transactionManager->rollback();
-            return $this->respondWithError(40301);
         }
     }
 
