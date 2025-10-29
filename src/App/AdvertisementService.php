@@ -20,9 +20,6 @@ class AdvertisementService
     public const PLAN_BASIC = 'BASIC';
     public const PLAN_PINNED = 'PINNED';
 
-    public const PRICE_BASIC = 5;
-    public const PRICE_PINNED = 20;
-
     public const DURATION_ONE_DAY = 'ONE_DAY';
     public const DURATION_TWO_DAYS = 'TWO_DAYS';
     public const DURATION_THREE_DAYS = 'THREE_DAYS';
@@ -58,8 +55,12 @@ class AdvertisementService
     // Convert the price + days of the advertisement -> Basic (Plan, Days) -> Pinned (Plan) in Euro
     public static function calculatePrice(string $plan, ?string $duration = null): int
     {
+        $priceBasic = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES']['advertisementBasic'];
+        $pricePinned = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES']['advertisementPinned'];
+
+        
         if ($plan === self::PLAN_PINNED) {
-            return self::PRICE_PINNED;
+            return (int)$pricePinned;
         }
 
         if ($plan === self::PLAN_BASIC) {
@@ -71,7 +72,7 @@ class AdvertisementService
                 throw new InvalidArgumentException('Unknown duration value: ' . $duration);
             }
 
-            return self::PRICE_BASIC * self::$durationDaysMap[$duration];
+            return (int)$priceBasic * self::$durationDaysMap[$duration];
         }
 
         throw new InvalidArgumentException('Unknown advertisement plan: ' . $plan);
@@ -355,24 +356,24 @@ class AdvertisementService
         }
     }
 
-    public function convertEuroToTokens(float $amount = 0, int $rescode = 0): array
-    {
+    // public function convertEuroToTokens(float $amount = 0, int $rescode = 0): array
+    // {
 
-        $this->logger->debug('AdvertisementService.convertEuroToTokens started');
+    //     $this->logger->debug('AdvertisementService.convertEuroToTokens started');
 
-        try {
-            $fetchPrices = $this->advertisementMapper->convertEuroToTokens($amount, $rescode);
+    //     try {
+    //         $fetchPrices = $this->advertisementMapper->convertEuroToTokens($amount, $rescode);
 
-            if ($fetchPrices) {
-                $fetchPrices['ResponseCode'] = json_encode($fetchPrices['affectedRows']);
-                return $fetchPrices;
-            }
+    //         if ($fetchPrices) {
+    //             $fetchPrices['ResponseCode'] = json_encode($fetchPrices['affectedRows']);
+    //             return $fetchPrices;
+    //         }
 
-            return self::respondWithError(42002);
-        } catch (\Throwable $e) {
-            return self::respondWithError(42005);
-        }
-    }
+    //         return self::respondWithError(42002);
+    //     } catch (\Throwable $e) {
+    //         return self::respondWithError(42005);
+    //     }
+    // }
 
     public function findAdvertiser(?array $args = []): array|false
     {

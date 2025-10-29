@@ -4,9 +4,6 @@ namespace Fawaz;
 
 const INT32_MAX = 2147483647;
 
-const BASIC = 5;
-const PINNED = 20;
-
 use Fawaz\App\Advertisements;
 use Fawaz\App\AdvertisementService;
 use Fawaz\App\CommentAdvanced;
@@ -2329,10 +2326,12 @@ class GraphQLSchemaBuilder
             $this->logger->warning('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
             return $this->respondWithError(32006);
         }
+        
+        $prices = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
 
         $actionPrices = [
-            'BASIC' => BASIC,
-            'PINNED' => PINNED,
+            'BASIC' => $prices['advertisementBasic'],
+            'PINNED' => $prices['advertisementPinned'],
         ];
 
         // Preisvalidierung
@@ -2410,24 +2409,25 @@ class GraphQLSchemaBuilder
             return $this->respondWithError(32005);
         }
 
+        $args['tokencost'] = $CostPlan;
         // Wenn Kosten leer oder 0 sind, Fehler zurückgeben
-        $args['eurocost'] = $CostPlan;
+        $args['eurocost'] = $CostPlan/ 10;
         if (empty($CostPlan) || (int)$CostPlan === 0) {
             $this->logger->warning('Kostenprüfung fehlgeschlagen', ['CostPlan' => $CostPlan]);
             return $this->respondWithError(42005);
         }
 
-        // Euro in PeerTokens umrechnen
-        $results = $this->advertisementService->convertEuroToTokens($CostPlan, $rescode);
-        if (isset($results['status']) && $results['status'] === 'error') {
-            $this->logger->warning('Fehler bei convertEuroToTokens', ['results' => $results]);
-            return $results;
-        }
-        if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Umrechnung erfolgreich', ["€$CostPlan in PeerTokens: " => $results['affectedRows']['TokenAmount']]);
-            $CostPlan = $results['affectedRows']['TokenAmount'];
-            $args['tokencost'] = $CostPlan;
-        }
+        // // Euro in PeerTokens umrechnen
+        // $results = $this->advertisementService->convertEuroToTokens($CostPlan, $rescode);
+        // if (isset($results['status']) && $results['status'] === 'error') {
+        //     $this->logger->warning('Fehler bei convertEuroToTokens', ['results' => $results]);
+        //     return $results;
+        // }
+        // if (isset($results['status']) && $results['status'] === 'success') {
+        //     $this->logger->info('Umrechnung erfolgreich', ["€$CostPlan in PeerTokens: " => $results['affectedRows']['TokenAmount']]);
+        //     $CostPlan = $results['affectedRows']['TokenAmount'];
+        //     $args['tokencost'] = $CostPlan;
+        // }
 
         try {
             // Wallet prüfen
