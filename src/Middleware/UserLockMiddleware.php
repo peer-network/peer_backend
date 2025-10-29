@@ -12,13 +12,11 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class UserLockMiddleware implements MiddlewareInterface
 {
-    private JWTService $jwtService;
-    private string $lockDir = __DIR__ . '/../../runtime-data/locks';
-    private int $timeoutSeconds = 30; // adjust if needed
+    private const LOCK_DIR = __DIR__ . '/../../runtime-data/locks';
+    private const TIMEOUT_SECONDS = 30;
 
     /**
      * Only lock these mutation field names.
-     * Extend this list if more write operations need serialization.
      */
     private array $lockedMutations = [
         'resolveTransferV2',
@@ -26,173 +24,189 @@ class UserLockMiddleware implements MiddlewareInterface
         'createComment',
     ];
 
-    public function __construct(JWTService $jwtService)
+    public function __construct(private readonly JWTService $jwtService)
     {
-        $this->jwtService = $jwtService;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // Apply locking only for GraphQL endpoint
-        $path = $request->getUri()->getPath();
-        if ($path !== '/graphql') {
-            return $handler->handle($request);
-        }
-        // Lock only for selected mutation operations
-        $queryString = '';
-        $parsedBody = $request->getParsedBody();
-        if (is_array($parsedBody) && isset($parsedBody['query']) && is_string($parsedBody['query'])) {
-            $queryString = $parsedBody['query'];
-        } else {
-            // Fallbacks when the body parser doesn't populate parsed body
-            // 1) Try query param
-            $queryParams = $request->getQueryParams();
-            if (isset($queryParams['query']) && is_string($queryParams['query'])) {
-                $queryString = $queryParams['query'];
-            } else {
-                // 2) Try raw body (JSON single/batch or application/graphql)
-                $raw = '';
-                try {
-                    $raw = (string)$request->getBody();
-                } catch (\Throwable $e) {
-                    $raw = '';
-                }
-
-                $decoded = null;
-                if ($raw !== '') {
-                    $decoded = json_decode($raw, true);
-                }
-
-                if (is_array($decoded)) {
-                    if (isset($decoded['query']) && is_string($decoded['query'])) {
-                        $queryString = $decoded['query'];
-                    } else {
-                        $collected = [];
-                        foreach ($decoded as $item) {
-                            if (is_array($item) && isset($item['query']) && is_string($item['query'])) {
-                                $collected[] = $item['query'];
-                            }
-                        }
-                        if (!empty($collected)) {
-                            $queryString = implode("\n\n", $collected);
-                        }
-                    }
-                }
-
-                if ($queryString === '' && !empty($raw) && $raw !== '') {
-                    $contentType = $request->getHeaderLine('Content-Type');
-                    if (stripos($contentType, 'application/graphql') !== false || stripos($raw, 'mutation') !== false) {
-                        $queryString = $raw;
-                    }
-                }
-
-                // Rewind body for downstream consumers
-                try {
-                    $request->getBody()->rewind();
-                } catch (\Throwable $e) {
-                    // ignore
-                }
-            }
-        }
-
-
-        $shouldLock = false;
-        if (!empty($queryString) && $queryString !== '') {
-            // Check if it's a mutation and contains one of the locked field names
-            if (stripos($queryString, 'mutation') !== false) {
-                $escaped = array_map(static fn($s) => preg_quote($s, '/'), $this->lockedMutations);
-                $pattern = '/\\b(' . implode('|', $escaped) . ')\\b/i';
-                if (preg_match($pattern, $queryString) === 1) {
-                    $shouldLock = true;
-                }
-            }
-        }
-
-        if ($shouldLock === false) {
+        if ($request->getUri()->getPath() !== '/graphql') {
             return $handler->handle($request);
         }
 
-        // Read Authorization header line (keeps compatibility as requested)
-        $authorizationLine = $request->getHeaderLine('Authorization');
-        $bearerToken = null;
-        if ($authorizationLine !== '') {
-            $parts = explode(' ', $authorizationLine, 2);
-            if (count($parts) === 2 && strtolower($parts[0]) === 'bearer') {
-                $bearerToken = $parts[1];
-            }
+        $queryString = $this->extractGraphQLQuery($request);
+
+        if (!$this->shouldLock($queryString)) {
+            return $handler->handle($request);
         }
 
-        // Determine lock key: prefer authenticated user id, otherwise fall back to client IP
-        $lockKey = null;
-        $lockKeyType = null;
-
-        if ($bearerToken !== null && $bearerToken !== '') {
-            try {
-                $decoded = $this->jwtService->validateToken($bearerToken);
-                if (isset($decoded->uid) && $decoded->uid !== '') {
-                    $lockKey = (string)$decoded->uid;
-                    $lockKeyType = 'user';
-                }
-            } catch (\Throwable $e) {
-                // ignore, will try IP below
-            }
-        }
-
-        // If we still do not have a key, proceed without locking
+        $lockKey = $this->determineLockKey($request);
         if ($lockKey === null) {
             return $handler->handle($request);
         }
 
-        // Ensure lock directory exists
-        if (!is_dir($this->lockDir)) {
-            @mkdir($this->lockDir, 0775, true);
-        }
-
-        // Sanitize and derive lock file path
-        $safeKey = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $lockKey);
-        $prefix = $lockKeyType === 'user' ? 'user_' : 'guest_';
-        $lockFile = $this->lockDir . DIRECTORY_SEPARATOR . $prefix . $safeKey . '.lock';
-
+        $lockFile = $this->createLockFilePath($lockKey);
         $fp = @fopen($lockFile, 'c');
+
         if ($fp === false) {
-            // If lock file cannot be opened, log and proceed without locking
+            // Cannot create/open lock file → proceed without locking
             return $handler->handle($request);
         }
 
-        $acquired = false;
-        $start = time();
-        // Try to acquire exclusive lock with timeout by retrying non-blocking
-        do {
-            $acquired = flock($fp, LOCK_EX | LOCK_NB);
-            if ($acquired) {
-                break;
-            }
-            usleep(100_000); // 100ms
-        } while ((time() - $start) < $this->timeoutSeconds);
-
-        if (!$acquired) {
-            // Optional: block indefinitely as last resort
-            flock($fp, LOCK_EX); // Block until lock acquired
-        }
-
+        $this->acquireLock($fp);
 
         try {
             return $handler->handle($request);
         } finally {
-            // Always release the lock
-            try {
-                flock($fp, LOCK_UN);
-            } catch (\Throwable $e) {
-                // ignore
-            }
-            fclose($fp);
-            // Best-effort cleanup of the lock file to avoid stale files
-            try {
-                @unlink($lockFile);
-            } catch (\Throwable $e) {
-                // ignore
-            }
+            $this->releaseLock($fp, $lockFile);
         }
     }
 
+    // ---------------------------------------------------------
+    // 🔒 Lock Handling
+    // ---------------------------------------------------------
+
+    private function acquireLock($fp): void
+    {
+        $start = time();
+
+        while (!flock($fp, LOCK_EX | LOCK_NB)) {
+            if ((time() - $start) >= self::TIMEOUT_SECONDS) {
+                // As a last resort, block until available
+                flock($fp, LOCK_EX);
+                break;
+            }
+            usleep(100_000); // Retry every 100ms
+        }
+    }
+
+    private function releaseLock($fp, string $lockFile): void
+    {
+        try {
+            flock($fp, LOCK_UN);
+        } catch (\Throwable) {
+            // ignore
+        } finally {
+            fclose($fp);
+        }
+
+        // Cleanup (best effort)
+        @unlink($lockFile);
+    }
+
+    private function createLockFilePath(string $lockKey): string
+    {
+        if (!is_dir(self::LOCK_DIR)) {
+            @mkdir(self::LOCK_DIR, 0775, true);
+        }
+
+        $safeKey = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $lockKey);
+        return self::LOCK_DIR . DIRECTORY_SEPARATOR . "user_{$safeKey}.lock";
+    }
+
+    // ---------------------------------------------------------
+    // 🧩 Query Parsing
+    // ---------------------------------------------------------
+
+    private function extractGraphQLQuery(ServerRequestInterface $request): string
+    {
+        // Try parsed body
+        $parsedBody = $request->getParsedBody();
+        if (is_array($parsedBody) && isset($parsedBody['query'])) {
+            return (string)$parsedBody['query'];
+        }
+
+        // Try query param
+        $queryParams = $request->getQueryParams();
+        if (isset($queryParams['query'])) {
+            return (string)$queryParams['query'];
+        }
+
+        // Try raw body
+        $raw = $this->getRawBody($request);
+        if ($raw === '') {
+            return '';
+        }
+
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded)) {
+            if (isset($decoded['query'])) {
+                return (string)$decoded['query'];
+            }
+
+            // Handle batch queries
+            $queries = array_column(array_filter($decoded, fn($i) => isset($i['query'])), 'query');
+            if ($queries) {
+                return implode("\n\n", $queries);
+            }
+        }
+
+        $contentType = $request->getHeaderLine('Content-Type');
+        if (stripos($contentType, 'application/graphql') !== false || stripos($raw, 'mutation') !== false) {
+            return $raw;
+        }
+
+        return '';
+    }
+
+    private function getRawBody(ServerRequestInterface $request): string
+    {
+        try {
+            $raw = (string)$request->getBody();
+            $request->getBody()->rewind();
+            return $raw;
+        } catch (\Throwable) {
+            return '';
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 🔐 Token / User Key Handling
+    // ---------------------------------------------------------
+
+    private function determineLockKey(ServerRequestInterface $request): ?string
+    {
+        $token = $this->extractBearerToken($request);
+        if (!$token) {
+            return null;
+        }
+
+        try {
+            $decoded = $this->jwtService->validateToken($token);
+            if (isset($decoded->uid) && $decoded->uid !== '') {
+                return (string)$decoded->uid;
+            }
+        } catch (\Throwable) {
+            // Invalid or expired token
+        }
+
+        return null;
+    }
+
+    private function extractBearerToken(ServerRequestInterface $request): ?string
+    {
+        $header = $request->getHeaderLine('Authorization');
+        if (!$header) {
+            return null;
+        }
+
+        $parts = explode(' ', $header, 2);
+        return (count($parts) === 2 && strtolower($parts[0]) === 'bearer') ? $parts[1] : null;
+    }
+
+    // ---------------------------------------------------------
+    // ⚙️ Logic
+    // ---------------------------------------------------------
+
+    private function shouldLock(string $queryString): bool
+    {
+        if ($queryString === '' || stripos($queryString, 'mutation') === false) {
+            return false;
+        }
+
+        $escaped = array_map(static fn($s) => preg_quote($s, '/'), $this->lockedMutations);
+        $pattern = '/\\b(' . implode('|', $escaped) . ')\\b/i';
+
+        return (bool)preg_match($pattern, $queryString);
+    }
 }
