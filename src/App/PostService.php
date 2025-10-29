@@ -181,7 +181,6 @@ class PostService
         ];
 
         try {
-            $this->transactionManager->beginTransaction();
             // Media Upload
             if (isset($args['media']) && $this->isValidMedia($args['media'])) {
                 $validateContentCountResult = $this->validateContentCount($args);
@@ -279,7 +278,6 @@ class PostService
                 // Post speichern
                 $post = new Post($postData);
             } catch (\Throwable $e) {
-                $this->transactionManager->rollback();
                 $this->logger->error('Failed to create post', [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
@@ -327,7 +325,6 @@ class PostService
                     $this->handleTags($args['tags'], $postId, $createdAt);
                 }
             } catch (\Throwable $e) {
-                $this->transactionManager->rollback();
                 if (isset($args['uploadedFiles'])) {
                     $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                 }
@@ -351,11 +348,9 @@ class PostService
 
             $data = $post->getArrayCopy();
             $data['tags'] = $tagNames;
-            $this->transactionManager->commit();
             return $this::createSuccessResponse(11513, $data);
 
         } catch (\Throwable $e) {
-            $this->transactionManager->rollback();
             if (isset($args['uploadedFiles'])) {
                 $this->postMapper->revertFileToTmp($args['uploadedFiles']);
             }
@@ -429,6 +424,9 @@ class PostService
         $actionMap = $args['art'] = $actionMaps[$action];
 
         try {
+            $this->transactionManager->beginTransaction();
+            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
+
             if ($limit > 0) {
                 $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
 
@@ -436,6 +434,7 @@ class PostService
                     if ($action === 'comment') {
                         $response = $this->commentService->createComment($args);
                         if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
                             return $response;
                         }
                         $response['ResponseCode'] = "11608";
@@ -443,16 +442,19 @@ class PostService
                     } elseif ($action === 'post') {
                         $response = $this->createPost($args['input']);
                         if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
                             return $response;
                         }
                         $response['ResponseCode'] = "11513";
                     } elseif ($action === 'like') {
                         $response = $this->postInfoService->likePost($postId);
                         if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
                             return $response;
                         }
                         $response['ResponseCode'] = "11514";
                     } else {
+                        $this->transactionManager->rollback();
                         return $this::respondWithError(30105);
                     }
 
@@ -466,30 +468,34 @@ class PostService
                         }
 
                         $DailyUsage += 1;
+                        $this->transactionManager->commit();
                         return $response;
                     }
 
                     $this->logger->error("{$action}Post failed", ['response' => $response]);
                     $response['affectedRows'] = $args;
+                    $this->transactionManager->rollback();
                     return $response;
                 }
             }
 
-            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             if ($balance < $price) {
                 $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                $this->transactionManager->rollback();
                 return $this::respondWithError(51301);
             }
 
             if ($action === 'comment') {
                 $response = $this->commentService->createComment($args);
                 if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $response;
                 }
                 $response['ResponseCode'] = "11605";
             } elseif ($action === 'post') {
                 $response = $this->createPost($args['input']);
                 if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $response;
                 }
                 $response['ResponseCode'] = "11508";
@@ -501,41 +507,49 @@ class PostService
             } elseif ($action === 'like') {
                 $response = $this->postInfoService->likePost($postId);
                 if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $response;
                 }
                 $response['ResponseCode'] = "11503";
             } elseif ($action === 'dislike') {
                 $response = $this->postInfoService->dislikePost($postId);
                 if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $response;
                 }
                 $response['ResponseCode'] = "11504";
             } else {
+                $this->transactionManager->rollback();
                 return $this::respondWithError(30105);
             }
 
             if (isset($response['status']) && $response['status'] === 'success') {
                 $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $deducted;
                 }
 
                 if (!$deducted) {
                     $this->logger->error('Failed to deduct from wallet', ['userId' => $this->currentUserId]);
+                    $this->transactionManager->rollback();
                     return $this::respondWithError($deducted['ResponseCode']);
                 }
 
+                $this->transactionManager->commit();
                 return $response;
             }
 
             $this->logger->error("{$action}Post failed after wallet deduction", ['response' => $response]);
             $response['affectedRows'] = $args;
+            $this->transactionManager->rollback();
             return $response;
         } catch (\Throwable $e) {
             $this->logger->error('Unexpected error in resolveActionPost', [
                 'exception' => $e->getMessage(),
                 'args' => $args,
             ]);
+            $this->transactionManager->rollback();
             return $this::respondWithError(40301);
         }
     }

@@ -78,7 +78,6 @@ class DailyFreeService
         $this->logger->debug('DailyFreeService.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
 
         try {
-            $this->transactionManager->beginTransaction();
             $response =  $this->dailyFreeMapper->incrementUserDailyUsage($userId, $artType);
 
             if (!$response) {
@@ -86,12 +85,10 @@ class DailyFreeService
                 $this->transactionManager->rollback();
                 return false;
             }
-            $this->transactionManager->commit();
             $this->logger->info('Daily usage incremented successfully');
 
             return true;
         } catch (\Throwable $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('Error in incrementUserDailyUsage', ['exception' => $e->getMessage()]);
             return false;
         }

@@ -31,4 +31,8 @@ class TransactionManager implements RollbackableDatabase
     {
         return $this->db->rollBack();
     }
+    public function isTransactionActive(): bool
+    {
+        return $this->db->inTransaction();
+    }
 }
