@@ -1389,6 +1389,12 @@ class GraphQLSchemaBuilder
                 'd5' => function (array $root): int {
                     return $root['d5'] ?? 0;
                 },
+                'd6' => function (array $root): int {
+                    return $root['d6'] ?? 0;
+                },
+                'd7' => function (array $root): int {
+                    return $root['d7'] ?? 0;
+                },
                 'w0' => function (array $root): int {
                     return $root['q0'] ?? 0;
                 },
