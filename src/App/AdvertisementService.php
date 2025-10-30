@@ -7,6 +7,7 @@ namespace Fawaz\App;
 use DateTimeImmutable;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\AdvertisementMapper;
+use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Utils\ContentFilterHelper;
@@ -36,6 +37,7 @@ class AdvertisementService
         protected PostMapper $postMapper,
         protected PostService $postService,
         protected WalletService $walletService,
+        protected TransactionManager $transactionManager,
     ) {
     }
 
@@ -191,10 +193,12 @@ class AdvertisementService
         // }
 
         try {
+            $this->transactionManager->beginTransaction();
             // Wallet prüfen
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             if ($balance < $CostPlan) {
                 $this->logger->warning('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
+                $this->transactionManager->rollBack();
                 return $this->respondWithError(51301);
             }
 
@@ -206,20 +210,24 @@ class AdvertisementService
 
                 $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    $this->transactionManager->rollBack();
                     return $deducted;
                 }
 
                 if (!$deducted) {
                     $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
+                    $this->transactionManager->rollBack();
                     return $this->respondWithError($deducted['ResponseCode']);
                 }
 
+                $this->transactionManager->commit();
                 return $response;
             }
-
+            $this->transactionManager->rollBack();
             return $response;
 
         } catch (\Throwable $e) {
+            $this->transactionManager->rollBack();
             return $this->respondWithError(40301);
         }
     }
