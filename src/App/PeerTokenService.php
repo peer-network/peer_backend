@@ -10,6 +10,7 @@ use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Utils\TokenCalculations\TokenHelper;
 
 class PeerTokenService
 {
@@ -118,18 +119,22 @@ class PeerTokenService
                 $this->logger->warning('Unknown Id Exception.');
                 return self::respondWithError(31007);
             }
+            
+            if (!$this->peerTokenMapper->recipientShouldNotBeFeesAccount($recipientId)) {
+                $this->logger->warning('Unauthorized to send token');
+                $this->transactionManager->rollback();
+                return self::respondWithError(31203);
+            }
+
+            $this->transactionManager->beginTransaction();
 
             $currentBalance = $this->peerTokenMapper->getUserWalletBalance($this->currentUserId);
             if (empty($currentBalance) || $currentBalance < $numberOfTokens) {
                 $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                     'Balance' => $currentBalance,
                 ]);
+                $this->transactionManager->rollback();
                 return self::respondWithError(51301);
-            }
-
-            if (!$this->peerTokenMapper->recipientShouldNotBeFeesAccount($recipientId)) {
-                $this->logger->warning('Unauthorized to send token');
-                return self::respondWithError(31203);
             }
             
             $this->peerTokenMapper->setSenderId($this->currentUserId);
@@ -140,11 +145,10 @@ class PeerTokenService
                     'Balance' => $currentBalance,
                     'requiredAmount' => $requiredAmount,
                 ]);
+                $this->transactionManager->rollback();
                 return self::respondWithError(51301);
             }
 
-            
-            $this->transactionManager->beginTransaction();
             $response = $this->peerTokenMapper->transferToken($this->currentUserId, $recipientId, $numberOfTokens, $message, true);
             if ($response['status'] === 'error') {
                 $this->transactionManager->rollback();
@@ -286,8 +290,98 @@ class PeerTokenService
         }
 
         try {
+            
+            $this->logger->debug('PeerTokenMapper.swapTokens started');
+
+            if (empty($args['btcAddress'])) {
+                $this->logger->warning('BTC Address required');
+                return self::respondWithError(31204);
+            }
+            $btcAddress = $args['btcAddress'];
+
+            if (!$this->peerTokenMapper->isValidBTCAddress($btcAddress)) {
+                $this->logger->warning('Invalid btcAddress .', [
+                    'btcAddress' => $btcAddress,
+                ]);
+                return self::respondWithError(31204);
+            }
+
+            if (!isset($args['password']) && empty($args['password'])) {
+                $this->logger->warning('Password required');
+                return self::respondWithError(30237);
+            }
+
+            $user = $this->userMapper->loadById($this->currentUserId);
+            $password = $args['password'];
+            if (!$this->validatePasswordMatch($password, $user->getPassword())) {
+                return self::respondWithError(31001);
+            }
+
+            $this->peerTokenMapper->initializeLiquidityPool();
+
+            if (!$this->peerTokenMapper->validateFeesWalletUUIDs()) {
+                return self::respondWithError(41227);
+            }
+            
+            if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (string) $args['numberoftokens'] != $args['numberoftokens']) {
+                return self::respondWithError(30264);
+            }
+            $numberoftokensToSwap = (string) $args['numberoftokens'];
+
             $this->transactionManager->beginTransaction();
-            $response = $this->peerTokenMapper->swapTokens($this->currentUserId, $args);
+            
+            $currentBalance = $this->peerTokenMapper->getUserWalletBalance($this->currentUserId);
+
+            if (empty($currentBalance) || $currentBalance < $numberoftokensToSwap) {
+                $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+                    'Balance' => $currentBalance,
+                ]);
+                return self::respondWithError(51301);
+            }
+
+            $peerTokenBTCPrice = $this->peerTokenMapper->getTokenPriceValue();
+
+            if (!$peerTokenBTCPrice) {
+                $this->logger->error('Peer/BTC Price is NULL');
+                return self::respondWithError(41203);
+            }
+
+                
+            // Get EUR/BTC price
+            $btcPrice = $this->peerTokenMapper->getOrUpdateBitcoinPrice();
+            if (empty($btcPrice)) {
+                $this->logger->error('Empty EUR/BTC Price');
+                return self::respondWithError(41203);
+            }
+            $peerTokenEURPrice = TokenHelper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
+
+            if (TokenHelper::mulRc($peerTokenEURPrice, $numberoftokensToSwap) < 10) {
+                $this->logger->warning('Incorrect Amount Exception: Price should be above 10 EUROs', [
+                    'btcPrice' => $btcPrice,
+                    'tokenBtc' => TokenHelper::mulRc($peerTokenEURPrice, $numberoftokensToSwap),
+                    'peerTokenBTCPrice' => $peerTokenBTCPrice,
+                    'peerTokenEURPrice' => $peerTokenEURPrice,
+                    'numberoftokens' => $numberoftokensToSwap,
+                    'Balance' => $currentBalance,
+                ]);
+                return self::respondWithError(30271);
+            }
+            $message = isset($args['message']) ? (string) $args['message'] : null;
+
+            
+            $this->peerTokenMapper->setSenderId($this->currentUserId);
+            $requiredAmount = $this->peerTokenMapper->calculateRequiredAmount($numberoftokensToSwap);
+            if ($currentBalance < $requiredAmount) {
+                $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
+                    'senderId' => $this->currentUserId,
+                    'Balance' => $currentBalance,
+                    'requiredAmount' => $requiredAmount,
+                ]);
+                $this->transactionManager->rollback();
+                return self::respondWithError(51301);
+            }
+
+            $response = $this->peerTokenMapper->swapTokens($this->currentUserId, $btcAddress, $numberoftokensToSwap, $message);
             if ($response['status'] === 'error') {
                 $this->transactionManager->rollback();
                 return $response;
@@ -389,6 +483,30 @@ class PeerTokenService
         }
     }
 
+
+    
+    /**
+     * validate password.
+     *
+     * @param $inputPassword string
+     * @param $hashedPassword string
+     * 
+     * @return bool value
+     */
+    private function validatePasswordMatch(?string $inputPassword, string $hashedPassword): bool
+    {
+        if (empty($inputPassword) || empty($hashedPassword)) {
+            $this->logger->warning('Password or hash cannot be empty');
+            return false;
+        }
+
+        try {
+            return password_verify($inputPassword, $hashedPassword);
+        } catch (\Throwable $e) {
+            $this->logger->error('Password verification error', ['exception' => $e]);
+            return false;
+        }
+    }
     
 
 }
