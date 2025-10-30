@@ -538,6 +538,8 @@ class PeerTokenMapper
             throw new \RuntimeException("Database error while fetching transactions: " . $th->getMessage());
         }
     }
+
+
     /**
      * Lock balances of both users to prevent race conditions
      * Also Includes Fees wallets
@@ -588,5 +590,4 @@ class PeerTokenMapper
         $stmt->fetch(\PDO::FETCH_ASSOC);
         $this->logger->debug('Wallet balance locked', ['walletId' => $walletId]);
     }
-
 }

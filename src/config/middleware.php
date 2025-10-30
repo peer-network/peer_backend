@@ -5,9 +5,11 @@ declare(strict_types=1);
 use Slim\App;
 use Psr\Container\ContainerInterface;
 use Fawaz\Middleware\RateLimiterMiddleware;
+use Fawaz\Middleware\UserLockMiddleware;
 use Fawaz\Middleware\SecurityHeadersMiddleware;
 use Fawaz\RateLimiter\RateLimiter;
 use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Services\JWTService;
 
 return static function (App $app, ContainerInterface $container, array $settings) {
     $app->addBodyParsingMiddleware();
@@ -23,7 +25,13 @@ return static function (App $app, ContainerInterface $container, array $settings
 
     $app->add(new RateLimiterMiddleware($rateLimiter, $logger));
 
+
     $app->addErrorMiddleware(true, true, true);
 
     $app->addRoutingMiddleware();
+
+    // Per-user request serialization for GraphQL
+    $app->add(new UserLockMiddleware(
+        $container->get(JWTService::class)
+    ));
 };

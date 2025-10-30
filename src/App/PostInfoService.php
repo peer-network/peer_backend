@@ -111,19 +111,16 @@ class PostInfoService
         }
 
         try {
-            $this->transactionManager->beginTransaction();
 
             $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
 
             if (!$exists) {
-                $this->transactionManager->rollback();
                 return $this::respondWithError(31501);
             }
 
             $postInfo->setLikes($postInfo->getLikes() + 1);
             $this->postInfoMapper->update($postInfo);
 
-            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 // 'ResponseCode' => "11503",
@@ -131,7 +128,6 @@ class PostInfoService
 
             ];
         } catch (\Exception $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: likePost: Error while fetching post data', ['exception' => $e]);
             return $this::respondWithError(41505);
         }
@@ -159,25 +155,21 @@ class PostInfoService
         }
 
         try {
-            $this->transactionManager->beginTransaction();
 
             $exists = $this->postInfoMapper->addUserActivity('dislikePost', $this->currentUserId, $postId);
 
             if (!$exists) {
-                $this->transactionManager->rollback();
                 return $this::respondWithError(31502);
             }
 
             $postInfo->setDislikes($postInfo->getDislikes() + 1);
             $this->postInfoMapper->update($postInfo);
 
-            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => "11504",
             ];
         } catch (\Exception $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: dislikePost: Error while fetching post data', ['exception' => $e]);
             return $this::respondWithError(41505);
         }

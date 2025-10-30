@@ -233,18 +233,31 @@ class WalletService
         $this->logger->debug('WalletService.deductFromWallet started');
 
         try {
-            $this->transactionManager->beginTransaction();
+            // This flag will help us determine if we started the transaction from here or not
+            // This is important to avoid committing or rolling back a transaction
+            // deductFromWallet is used by other services that may already have an active transaction
+            $isTnxStartedHere = false;
+            if (!$this->transactionManager->isTransactionActive()) {
+                $isTnxStartedHere = true;
+                $this->transactionManager->beginTransaction();
+            }
             $response = $this->walletMapper->deductFromWallets($userId, $args);
             if ($response['status'] === 'success') {
-                $this->transactionManager->commit();
+                if($isTnxStartedHere) {
+                    $this->transactionManager->commit();
+                }
                 return $response;
             } else {
-                $this->transactionManager->rollBack();
+                if($isTnxStartedHere) {
+                    $this->transactionManager->rollBack();
+                }
                 return $response;
             }
 
         } catch (\Exception $e) {
-            $this->transactionManager->rollBack();
+            if ($isTnxStartedHere) {
+                $this->transactionManager->rollBack();
+            }
             return $this::respondWithError(40301);
         }
     }
