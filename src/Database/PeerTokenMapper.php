@@ -486,7 +486,7 @@ class PeerTokenMapper
 
         $query = "SELECT liquidity AS balance 
                   FROM wallett 
-                  WHERE userid = :userId";
+                  WHERE userid = :userId FOR UPDATE";
 
         try {
             $stmt = $this->db->prepare($query);
