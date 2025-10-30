@@ -122,7 +122,6 @@ class PeerTokenService
             
             if (!$this->peerTokenMapper->recipientShouldNotBeFeesAccount($recipientId)) {
                 $this->logger->warning('Unauthorized to send token');
-                $this->transactionManager->rollback();
                 return self::respondWithError(31203);
             }
 
@@ -336,6 +335,7 @@ class PeerTokenService
                 $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                     'Balance' => $currentBalance,
                 ]);
+                $this->transactionManager->rollback();
                 return self::respondWithError(51301);
             }
 
@@ -343,6 +343,7 @@ class PeerTokenService
 
             if (!$peerTokenBTCPrice) {
                 $this->logger->error('Peer/BTC Price is NULL');
+                $this->transactionManager->rollback();
                 return self::respondWithError(41203);
             }
 
@@ -351,6 +352,7 @@ class PeerTokenService
             $btcPrice = $this->peerTokenMapper->getOrUpdateBitcoinPrice();
             if (empty($btcPrice)) {
                 $this->logger->error('Empty EUR/BTC Price');
+                $this->transactionManager->rollback();
                 return self::respondWithError(41203);
             }
             $peerTokenEURPrice = TokenHelper::calculatePeerTokenEURPrice($btcPrice, $peerTokenBTCPrice);
@@ -364,6 +366,7 @@ class PeerTokenService
                     'numberoftokens' => $numberoftokensToSwap,
                     'Balance' => $currentBalance,
                 ]);
+                $this->transactionManager->rollback();
                 return self::respondWithError(30271);
             }
             $message = isset($args['message']) ? (string) $args['message'] : null;
