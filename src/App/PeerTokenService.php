@@ -418,23 +418,58 @@ class PeerTokenService
         if (!$this->checkAuthentication()) {
             return $this->respondWithError(60501);
         }
-        try {
-            $this->transactionManager->beginTransaction();
-            $response = $this->peerTokenMapper->addLiquidity($this->currentUserId, $args);
-            if ($response['status'] === 'error') {
-                $this->transactionManager->rollback();
-                return $response;
-            } else {
-                $this->transactionManager->commit();
 
-                return $this::createSuccessResponse(
-                    (int) $response['ResponseCode'],
-                    $response['affectedRows'],
-                    false
-                );
+        try {
+            // Validate inputs (business logic)
+            if (!isset($args['amountToken']) || !is_numeric($args['amountToken']) || (float)$args['amountToken'] != $args['amountToken'] || (float)$args['amountToken'] <= 0) {
+                return $this->respondWithError(30241);
             }
+            if (!isset($args['amountBtc']) || !is_numeric($args['amountBtc']) || (float)$args['amountBtc'] != $args['amountBtc'] || (float)$args['amountBtc'] <= 0) {
+                return $this->respondWithError(30270);
+            }
+
+            // Load pool wallets and validate (business logic)
+            $this->peerTokenMapper->initializeLiquidityPool();
+            $walletIds = $this->peerTokenMapper->getPoolWalletIds();
+            $poolWallet = $walletIds['pool'] ?? null;
+            $btcPool = $walletIds['btcpool'] ?? null;
+
+            if (!$poolWallet || !$btcPool || !self::isValidUUID((string)$poolWallet) || !self::isValidUUID((string)$btcPool)) {
+                $this->logger->warning('Invalid pool or btcpool wallet', ['poolWallet' => $poolWallet, 'btcpool' => $btcPool]);
+                return $this->respondWithError(41214);
+            }
+
+            $amountPeerToken = (string)$args['amountToken'];
+            $amountBtc = (string)$args['amountBtc'];
+
+            // DB interactions in mapper only
+            $this->transactionManager->beginTransaction();
+            $this->peerTokenMapper->addLiquidityDb(
+                $this->currentUserId,
+                $poolWallet,
+                $btcPool,
+                $amountPeerToken,
+                $amountBtc
+            );
+            $this->transactionManager->commit();
+
+            // Read new amounts and compute price (business logic)
+            $newTokenAmount = $this->peerTokenMapper->getLpToken();
+            $newBtcAmount = $this->peerTokenMapper->getLpTokenBtcLP();
+            $tokenPrice = TokenHelper::calculatePeerTokenPriceValue($newBtcAmount, $newTokenAmount);
+
+            return $this::createSuccessResponse(
+                11218,
+                [
+                    'newTokenAmount' => $newTokenAmount,
+                    'newBtcAmount' => $newBtcAmount,
+                    'newTokenPrice' => $tokenPrice,
+                ],
+                false
+            );
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
+            $this->logger->error('WalletService.addLiquidity failed', ['exception' => $e->getMessage()]);
             return $this->respondWithError(41228); // Failed to add Liquidity
         }
     }

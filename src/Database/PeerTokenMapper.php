@@ -980,49 +980,20 @@ class PeerTokenMapper
      */
     public function addLiquidity(string $userId, array $args): array
     {
-        $this->logger->debug("addLiquidity started");
+        $this->logger->debug("PeerTokenMapper.addLiquidity (DB only) started");
 
         try {
-            // Validate inputs
-            if (!isset($args['amountToken']) || !is_numeric($args['amountToken']) || (float) $args['amountToken'] != $args['amountToken'] || (float) $args['amountToken'] <= 0) {
-                return self::respondWithError(30241);
-            }
-            if (!isset($args['amountBtc']) || !is_numeric($args['amountBtc']) || (float) $args['amountBtc'] != $args['amountBtc'] || (float) $args['amountBtc'] <= 0) {
-                return self::respondWithError(30270); 
+            if (!isset($args['amountToken']) || !isset($args['amountBtc'])) {
+                return self::respondWithError(30101);
             }
 
-            // Fetch pool wallets
-            $accountsResult = $this->pool->returnAccounts();
+            // Assume inputs are validated in service layer
+            $amountPeerToken = (string)$args['amountToken'];
+            $amountBtc = (string)$args['amountBtc'];
 
-            if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
-                $this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
-                return self::respondWithError(40701);
-            }
+            // Ensure wallets are loaded
+            $this->initializeLiquidityPool();
 
-            $poolAccounts = $accountsResult['response'] ?? null;
-            if (!is_array($poolAccounts) || !isset($poolAccounts['pool'], $poolAccounts['btcpool'])) {
-                $this->logger->warning('Missing pool or btcpool account', ['accounts' => $poolAccounts]);
-                return self::respondWithError(30102);
-            }
-
-            $this->poolWallet = $poolAccounts['pool'];
-            $this->btcpool = $poolAccounts['btcpool'];
-
-            if (!self::isValidUUID($this->poolWallet)) {
-                $this->logger->warning('Incorrect poolWallet Exception.', [
-                    'poolWallet' => $this->poolWallet,
-                ]);
-                return self::respondWithError(41214);
-            }
-            if (!self::isValidUUID($this->btcpool)) {
-                $this->logger->warning('Incorrect BTC Pool Exception.', [
-                    'btcpool' => $this->btcpool,
-                ]);
-                return self::respondWithError(41214);
-            }
-
-            $amountPeerToken =  $args['amountToken'];
-            $amountBtc = $args['amountBtc'];
             // Save PeerToken liquidity
             $this->saveLiquidity(
                 $userId,
@@ -1041,24 +1012,51 @@ class PeerTokenMapper
                 'ADD_BTC_LIQUIDITY'
             );
 
-            $newTokenAmount = $this->getLpToken();
-            $newBtcAmount = $this->getLpTokenBtcLP();
-
-            $tokenPrice = TokenHelper::calculatePeerTokenPriceValue($newBtcAmount, $newTokenAmount);
-
+            // DB-only method now returns a minimal success
             return [
                 'status' => 'success',
                 'ResponseCode' => '11218',
-                'affectedRows' => [
-                    'newTokenAmount' => $newTokenAmount,
-                    'newBtcAmount' => $newBtcAmount,
-                    'newTokenPrice' => $tokenPrice
-                ]
+                'affectedRows' => [],
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Liquidity error', ['exception' => $e]);
             return self::respondWithError(40301);
         }
+    }
+
+    /**
+     * DB-only method used by service to add liquidity records.
+     */
+    public function addLiquidityDb(string $userId, string $poolWallet, string $btcPool, string $amountPeerToken, string $amountBtc): void
+    {
+        // Save PeerToken liquidity
+        $this->saveLiquidity(
+            $userId,
+            $poolWallet,
+            $amountPeerToken,
+            'addPeerTokenLiquidity',
+            'ADD_PEER_LIQUIDITY'
+        );
+
+        // Save BTC liquidity
+        $this->saveLiquidity(
+            $userId,
+            $btcPool,
+            $amountBtc,
+            'addBtcTokenLiquidity',
+            'ADD_BTC_LIQUIDITY'
+        );
+    }
+
+    /**
+     * Expose pool wallet IDs (pool and btcpool) already loaded via initializeLiquidityPool().
+     */
+    public function getPoolWalletIds(): array
+    {
+        return [
+            'pool' => $this->poolWallet ?? null,
+            'btcpool' => $this->btcpool ?? null,
+        ];
     }
 
     /**
