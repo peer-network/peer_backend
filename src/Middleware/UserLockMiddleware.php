@@ -22,6 +22,7 @@ class UserLockMiddleware implements MiddlewareInterface
         'resolveTransferV2',
         'createPost',
         'createComment',
+        'toggleUserFollowStatus'
     ];
 
     public function __construct(private readonly JWTService $jwtService)
