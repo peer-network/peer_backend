@@ -1,27 +1,22 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Fawaz\App\Models;
 
 use DateTime;
 use Fawaz\App\ValidationException;
-use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Filter\PeerInputFilter;
-use Fawaz\Utils\ResponseHelper;
 
-class Transaction
+class BtcSwapTransaction
 {
-    use ResponseHelper;
-
-    protected string $transactionid;
+    protected string $swapId;
     protected string $operationid;
-    protected string $senderid;
-    protected string $recipientid;
+    protected string $userId;
+    protected string $btcAddress;
     protected string $transactiontype;
     protected string $tokenamount;
-    protected string $transferaction;
+    protected ?string $btcAmount;
     protected ?string $message;
+    protected ?string $status;
     protected ?string $createdat;
 
     /**
@@ -29,13 +24,14 @@ class Transaction
      */
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $this->transactionid = $data['transactionid'] ?? self::generateUUID();
+        $this->swapId = $data['swapId'] ?? self::generateUUID();
         $this->operationid = $data['operationid'] ?? null;
-        $this->senderid = $data['senderid'] ?? null;
-        $this->recipientid = $data['recipientid'] ?? null;
+        $this->userId = $data['userId'] ?? null;
+        $this->btcAddress = $data['btcAddress'] ?? null;
         $this->transactiontype = $data['transactiontype'] ?? null;
-        $this->tokenamount = (string) $data['tokenamount'];
-        $this->transferaction = $data['transferaction'] ?? 'DEDUCT';
+        $this->tokenamount = $data['tokenamount'] ?? '0';
+        $this->btcAmount = $data['btcAmount'] ?? '0.0';
+        $this->status = $data['status'] ?? 'PENDING';
         $this->message = $data['message'] ?? null;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
 
@@ -43,35 +39,15 @@ class Transaction
             $data = $this->validate($data, $elements);
         }
     }
-
-    /**
-     * Get Values of current state
-     */
-    public function getArrayCopy(): array
-    {
-        $att = [
-            'transactionid' => $this->transactionid,
-            'operationid' => $this->operationid,
-            'transactiontype' => $this->transactiontype,
-            'senderid' => $this->senderid,
-            'recipientid' => $this->recipientid,
-            'tokenamount' => $this->tokenamount,
-            'transferaction' => $this->transferaction,
-            'message' => $this->message,
-            'createdat' => $this->createdat,
-        ];
-        return $att;
-    }
-
+    
+    
     /**
      * Define Input filter
-     */
+     */   
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $tranConfig = ConstantsConfig::transaction();
-
         $specification = [
-            'transactionid' => [
+            'swapId' => [
                 'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],
@@ -79,35 +55,45 @@ class Transaction
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'senderid' => [
+            'userId' => [
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'recipientid' => [
+            'btcAddress' => [
                 'required' => true,
-                'validators' => [['name' => 'Uuid']],
+                'validators' => [
+                    ['name' => 'StringLength', 'options' => [
+                        'min' => 2,
+                        'max' => 256,
+                        'errorCode' => 30210
+                    ]],
+                    ['name' => 'isString'],
+                ],
             ],
             'transactiontype' => [
-                'required' => false,
+                'required' => true,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
-                        'max' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
+                        'min' => 2,
+                        'max' => 63,
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'tokenamount' => [
-                'required' => true
+                'required' => true,
             ],
-            'transferaction' => [
+            'btcAmount' => [
+                'required' => true,
+            ],
+            'status' => [
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
-                        'max' => $tranConfig['ACTIONTYPE']['MAX_LENGTH'],
+                        'min' => 2,
+                        'max' => 63,
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
@@ -117,8 +103,8 @@ class Transaction
                 'required' => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
-                        'max' => $tranConfig['ACTIONTYPE']['MAX_LENGTH'],
+                        'min' => 0,
+                        'max' => 200,
                         'errorCode' => 30210
                     ]],
                     ['name' => 'isString'],
@@ -134,7 +120,7 @@ class Transaction
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
@@ -142,7 +128,7 @@ class Transaction
 
     /**
      * Apply Input filter
-     */
+     */  
     public function validate(array $data, array $elements = []): array|false
     {
         $inputFilter = $this->createInputFilter($elements);
@@ -154,7 +140,7 @@ class Transaction
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $errors) {
+        foreach ($validationErrors as $field => $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
@@ -164,87 +150,149 @@ class Transaction
         }
         return false;
     }
-
+    
     /**
-     * Getter method for transactionid
-     */
-    public function getTransactionId(): string
+     * Generate UUID
+     */ 
+    private static function generateUUID(): string
     {
-        return $this->transactionid;
+        return \sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0x0fff) | 0x4000,
+            \mt_rand(0, 0x3fff) | 0x8000,
+            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+        );
     }
 
-
     /**
-     * Getter method for operationid
+     * Getter and Setter methods for swapId
      */
-    public function getOperationId(): string
+    public function getSwapId(): string
+    {
+        return $this->swapId;
+    }
+    public function setSwapId(string $swapId): void
+    {
+        $this->swapId = $swapId;
+    }
+
+    
+    /**
+     * Getter and Setter methods for operationid
+     */
+    public function getTransUniqueId(): string
     {
         return $this->operationid;
     }
-
-
-    /**
-     * Getter method for senderid
-     */
-    public function getSenderId(): string
+    public function setTransUniqueId(string $operationid): void
     {
-        return $this->senderid;
+        $this->operationid = $operationid;
     }
 
 
     /**
-     * Getter method for recipientid
+     * Getter and Setter methods for userId
      */
-    public function getRecipientId(): string|null
+    public function getUserId(): string
     {
-        return $this->recipientid;
+        return $this->userId;
+    }
+    public function setUserId(string $userId): void
+    {
+        $this->userId = $userId;
     }
 
 
+    
+    /**
+     * Getter and Setter methods for btcAddress
+     */
+    public function getBtcAddress(): string
+    {
+        return $this->btcAddress;
+    }
+    public function setBtcAddress(string $btcAddress): void
+    {
+        $this->btcAddress = $btcAddress;
+    }
+
 
     /**
-     * Getter method for transactiontype
+     * Getter and Setter methods for status
+     */
+    public function getStatus(): string|null
+    {
+        return $this->status;
+    }
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
+    }
+
+
+    /**
+     * Getter and Setter methods for transactiontype
      */
     public function getTransactionType(): string|null
     {
         return $this->transactiontype;
     }
+    public function setTransactionType(string $transactiontype): void
+    {
+        $this->transactiontype = $transactiontype;
+    }
 
-
-
+    
     /**
-     * Getter method for tokenamount
+     * Getter and Setter methods for tokenamount
      */
     public function getTokenAmount(): string
     {
         return $this->tokenamount;
     }
-
-
-
-    /**
-     * Getter method for transferaction
-     */
-    public function getTransferAction(): string
+    public function setTokenAmount(string $tokenamount): void
     {
-        return $this->transferaction;
+        $this->tokenamount = $tokenamount;
     }
+    
+        
+    /**
+     * Getter and Setter methods for btcAmount
+     */
+    public function getBtcAmount(): string
+    {
+        return $this->btcAmount;
+    }
+    public function setBtcAmount(string $btcAmount): void
+    {
+        $this->btcAmount = $btcAmount;
+    }
+    
 
     /**
-     * Getter method for message
+     * Getter and Setter methods for message
      */
     public function getMessage(): string|null
     {
         return $this->message;
     }
-
+    public function setMessage(string $message): void
+    {
+        $this->message = $message;
+    }
 
     /**
-     * Getter method for createdat
+     * Getter and Setter methods for createdat
      */
     public function getCreatedat(): string
     {
         return $this->createdat;
+    }
+    public function setCreatedat(string $createdat): void
+    {
+        $this->createdat = $createdat;
     }
 
 }

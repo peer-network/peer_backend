@@ -76,7 +76,7 @@ INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfo
 VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5cc4', 100000, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
 
-INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5cc4', 100000, 0);
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5cc4', 100000, 7922816251426433759354395033600000);
 
 
 -- company_account
@@ -107,7 +107,9 @@ INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('85d5f836-b1f5-4
 INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
 VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
-INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 0);
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 7922816251426434199159046144);
+
+INSERT INTO token_euro_price (token, europrice, updatedat) VALUES ('BTC', '91853.0000000000', '2025-06-30 10:18:32');
 
 
 --action_prices

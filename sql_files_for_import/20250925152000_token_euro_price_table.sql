@@ -1,0 +1,10 @@
+BEGIN;
+
+-- Table: token_euro_price
+CREATE TABLE IF NOT EXISTS token_euro_price (
+    token VARCHAR(255) DEFAULT NULL,
+    europrice NUMERIC(30,10) DEFAULT NULL,
+    updatedat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+COMMIT;
