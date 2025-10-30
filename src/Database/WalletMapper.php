@@ -1190,7 +1190,7 @@ class WalletMapper
 
         $query = "SELECT COALESCE(liquidity, 0) AS balance 
                   FROM wallett 
-                  WHERE userid = :userId";
+                  WHERE userid = :userId FOR UPDATE";
 
         try {
             $stmt = $this->db->prepare($query);
