@@ -19,6 +19,9 @@ use Fawaz\App\User;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\BtcService;
 use Fawaz\Utils\TokenCalculations\SwapTokenHelper;
+use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\SwapToPoolTransferStrategy;
 
 class PeerTokenMapper
 {
@@ -199,13 +202,14 @@ class PeerTokenMapper
         string $numberOfTokens,
         ?string $message = null,
         bool $isWithFees = true,
-        ?string $recipientTransactionType = 'transferSenderToRecipient',
-        ?string $recipientTransactionId = null
+        ?string $recipientTransactionId = null,
+        ?TransferStrategy $strategy = null
     ): ?array
     {
         \ignore_user_abort(true);
 
         $this->initializeLiquidityPool();
+        $strategy = $strategy ?? new DefaultTransferStrategy();
 
         if (!$this->validateFeesWalletUUIDs()) {
             return self::respondWithError(41222);
@@ -240,7 +244,7 @@ class PeerTokenMapper
             if ($numberOfTokens) {
                 $payload = [
                     'operationid' => $operationid,
-                    'transactiontype' => $recipientTransactionType,
+                    'transactiontype' => $strategy->getRecipientTransactionType(),
                     'senderid' => $senderId,
                     'recipientid' => $recipientId,
                     'tokenamount' => $numberOfTokens,
@@ -260,7 +264,7 @@ class PeerTokenMapper
             if (!empty($this->inviterId) && isset($inviteFeeAmount) && $inviteFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
-                    'transactiontype' => 'transferSenderToInviter',
+                    'transactiontype' => $strategy->getInviterFeeTransactionType(),
                     'senderid' => $senderId,
                     'recipientid' => $this->inviterId,
                     'tokenamount' => $inviteFeeAmount,
@@ -275,7 +279,7 @@ class PeerTokenMapper
             if (isset($poolFeeAmount) && $poolFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
-                    'transactiontype' => 'transferSenderToPoolWallet',
+                    'transactiontype' => $strategy->getPoolFeeTransactionType(),
                     'senderid' => $senderId,
                     'recipientid' => $this->poolWallet,
                     'tokenamount' => $poolFeeAmount,
@@ -290,7 +294,7 @@ class PeerTokenMapper
             if (isset($peerFeeAmount) && $peerFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
-                    'transactiontype' => 'transferSenderToPeerWallet',
+                    'transactiontype' => $strategy->getPeerFeeTransactionType(),
                     'senderid' => $senderId,
                     'recipientid' => $this->peerWallet,
                     'tokenamount' => $peerFeeAmount,
@@ -305,7 +309,7 @@ class PeerTokenMapper
             if (isset($burnFeeAmount) && $burnFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
-                    'transactiontype' => 'transferSenderToBurnWallet',
+                    'transactiontype' => $strategy->getBurnFeeTransactionType(),
                     'senderid' => $senderId,
                     'recipientid' => $this->burnWallet,
                     'tokenamount' => $burnFeeAmount,
@@ -818,8 +822,8 @@ class PeerTokenMapper
                 $numberoftokensToSwap,
                 $message,
                 $isWithFees,
-                'btcSwapToPool',
-                $recipientTransactionId
+                $recipientTransactionId,
+                new SwapToPoolTransferStrategy()
             );
 
             if (!is_array($transferRes) || ($transferRes['status'] ?? 'error') === 'error') {
