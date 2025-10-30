@@ -193,7 +193,15 @@ class PeerTokenMapper
      * @param string $numberOfTokens Number of tokens to transfer to Receipient's wallet, Without any Fees.
      *
      */
-    public function transferToken(string $senderId, string $recipientId, string $numberOfTokens, ?string $message = null, bool $isWithFees = true): ?array
+    public function transferToken(
+        string $senderId,
+        string $recipientId,
+        string $numberOfTokens,
+        ?string $message = null,
+        bool $isWithFees = true,
+        ?string $recipientTransactionType = 'transferSenderToRecipient',
+        ?string $recipientTransactionId = null
+    ): ?array
     {
         \ignore_user_abort(true);
 
@@ -230,15 +238,19 @@ class PeerTokenMapper
 
             // 2. RECIPIENT: Credit To Account
             if ($numberOfTokens) {
-                $this->createAndSaveTransaction($transRepo, [
+                $payload = [
                     'operationid' => $operationid,
-                    'transactiontype' => 'transferSenderToRecipient',
+                    'transactiontype' => $recipientTransactionType,
                     'senderid' => $senderId,
                     'recipientid' => $recipientId,
                     'tokenamount' => $numberOfTokens,
                     'message' => $message,
                     'transferaction' => 'CREDIT'
-                ]);
+                ];
+                if (!empty($recipientTransactionId)) {
+                    $payload['transactionid'] = $recipientTransactionId;
+                }
+                $this->createAndSaveTransaction($transRepo, $payload);
 
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($recipientId, $numberOfTokens);
                 $this->walletMapper->credit($recipientId, $numberOfTokens);
@@ -789,137 +801,48 @@ class PeerTokenMapper
         $this->initializeLiquidityPool();
         
         $recipient = (string) $this->poolWallet;
-
-
+        
         [$peerFee, $poolFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
 
-        $requiredAmount = $this->calculateRequiredAmount($numberoftokensToSwap);
-
         try {
-            // Lock both users' balances to prevent race conditions
-            if ($this->inviterId && !empty($this->inviterId)) {
-                $this->lockBalances([$this->inviterId, $userId]);
-            }else{
-                $this->lockBalances([$userId]);
-            }
-
-            if($isWithFees){
-                // Fees Amount Calculation
-                [$peerFeeAmount, $poolFeeAmount, $burnFeeAmount, $inviteFeeAmount] = $this->calculateEachFeesAmount($numberoftokensToSwap);
-            }
-
+            // Calculate BTC amount upfront based on current LP state
             $btcLpState =  $this->getLpTokenBtcLP();
             $lpState = $this->getLpToken();
-
             $btcAmountToUser = SwapTokenHelper::calculateBtc($btcLpState, $lpState, $numberoftokensToSwap, $poolFee);
-            
-            $transRepo = new TransactionRepository($this->logger, $this->db);
-            $operationid = self::generateUUID();
 
-            // 1. SENDER: Debit Token and Fees From Account
-            if ($requiredAmount) {
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($userId, $requiredAmount, 'DEDUCT');
-                $this->walletMapper->debitIfSufficient($userId, $requiredAmount);
-                
+            // Perform token transfer to LP and fees via reusable method
+            $recipientTransactionId = self::generateUUID();
+            $transferRes = $this->transferToken(
+                $userId,
+                $recipient,
+                $numberoftokensToSwap,
+                $message,
+                $isWithFees,
+                'btcSwapToPool',
+                $recipientTransactionId
+            );
+
+            if (!is_array($transferRes) || ($transferRes['status'] ?? 'error') === 'error') {
+                return is_array($transferRes) ? $transferRes : self::respondWithError(40301);
             }
 
-            // 2. RECIPIENT: Credit To Account to Pool Account
-            if ($numberoftokensToSwap) {
-                $transactionid = self::generateUUID();
-                $this->createAndSaveTransaction($transRepo, [
-                    'transactionid' => $transactionid,
-                    'operationid' => $operationid,
-                    'transactiontype' => 'btcSwapToPool',
-                    'senderid' => $userId,
-                    'recipientid' => $recipient,
-                    'tokenamount' => $numberoftokensToSwap,
-                    'message' => $message,
-                    'transferaction' => 'CREDIT'
-                ]);
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($recipient, $numberoftokensToSwap);
-                $this->walletMapper->credit($recipient, $numberoftokensToSwap);
-            }
+            // Link swap request to the transfer transaction
+            $transObj = [
+                'operationid' => $recipientTransactionId,
+                'transactiontype' => 'btcSwapToPool',
+                'userId' => $userId,
+                'btcAddress' => $btcAddress,
+                'tokenamount' => $numberoftokensToSwap,
+                'btcAmount' => $btcAmountToUser,
+                'message' => $message,
+                'transferaction' => 'CREDIT'
+            ];
+            $btcTransactions = new BtcSwapTransaction($transObj);
+            $btcTransRepo = new BtcSwapTransactionRepository($this->logger, $this->db);
+            $btcTransRepo->saveTransaction($btcTransactions);
 
-
-            // 3. INVITER: Fees To inviter Account (if exist)
-            if (!empty($this->inviterId) && isset($inviteFeeAmount) && $inviteFeeAmount > 0) {
-                $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $operationid,
-                    'transactiontype' => 'transferSenderToInviter',
-                    'senderid' => $userId,
-                    'recipientid' => $this->inviterId,
-                    'tokenamount' => $inviteFeeAmount,
-                    'transferaction' => 'INVITER_FEE'
-                ]);
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method.  $this->walletMapper->saveWalletEntry($this->inviterId, $inviteFeeAmount);
-                $this->walletMapper->credit($this->inviterId, $inviteFeeAmount);
-            }
-
-            // 4. PEERWALLET: Fee To Account
-            if (isset($peerFeeAmount) && $peerFeeAmount > 0) {
-                $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $operationid,
-                    'transactiontype' => 'transferSenderToPeerWallet',
-                    'senderid' => $userId,
-                    'recipientid' => $this->peerWallet,
-                    'tokenamount' => $peerFeeAmount,
-                    'transferaction' => 'PEER_FEE'
-                ]);
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method.  $this->walletMapper->saveWalletEntry($this->peerWallet, $peerFeeAmount);
-                $this->walletMapper->credit($this->peerWallet, $peerFeeAmount);
-            }
-
-            // 5. POOLWALLET: Fee To Account
-            if (isset($poolFeeAmount) && $poolFeeAmount > 0) {
-                $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $operationid,
-                    'transactiontype' => 'transferSenderToPoolWallet',
-                    'senderid' => $userId,
-                    'recipientid' => $this->poolWallet,
-                    'tokenamount' => $poolFeeAmount,
-                    'transferaction' => 'POOL_FEE'
-                ]);
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->poolWallet, $feeAmount);
-                $this->walletMapper->credit($this->poolWallet, $poolFeeAmount);
-            }
-
-            // 6. BURNWALLET: Fee Burning Tokens
-            if (isset($burnFeeAmount) && $burnFeeAmount > 0) {
-                $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $operationid,
-                    'transactiontype' => 'transferSenderToBurnWallet',
-                    'senderid' => $userId,
-                    'recipientid' => $this->burnWallet,
-                    'tokenamount' => $burnFeeAmount,
-                    'transferaction' => 'BURN_FEE'
-                ]);
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->burnWallet, $burnFeeAmount);
-                $this->walletMapper->credit($this->burnWallet, $burnFeeAmount);
-            }
-
-
-            // Should be placed at last because it should include 1% LP Fees
-            if ($numberoftokensToSwap && isset($transactionid)) {
-                $transObj = [
-                    'operationid' => $transactionid,
-                    'transactiontype' => 'btcSwapToPool',
-                    'userId' => $userId,
-                    'btcAddress' => $btcAddress,
-                    'tokenamount' => $numberoftokensToSwap,
-                    'btcAmount' => $btcAmountToUser,
-                    'message' => $message,
-                    'transferaction' => 'CREDIT'
-                ];
-                $btcTransactions = new BtcSwapTransaction($transObj);
-
-                $btcTransRepo = new BtcSwapTransactionRepository($this->logger, $this->db);
-                $btcTransRepo->saveTransaction($btcTransactions);
-            }
-
-
-            // Update BTC Pool
+            // Debit BTC pool for the payable BTC
             if ($btcAmountToUser) {
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->btcpool, $btcAmountToUser);
                 $this->walletMapper->debitIfSufficient($this->btcpool, $btcAmountToUser);
             }
 
@@ -928,7 +851,7 @@ class PeerTokenMapper
                 'ResponseCode' => '11217',
                 'affectedRows' => [
                     'tokenSend' => $numberoftokensToSwap,
-                    'tokensSubstractedFromWallet' => $requiredAmount,
+                    'tokensSubstractedFromWallet' => $transferRes['tokensSubstractedFromWallet'] ?? null,
                     'expectedBtcReturn' => $btcAmountToUser
                 ],
             ];
