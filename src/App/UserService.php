@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\App\Specs\ContentFilteringSpecsFactory;
-use Fawaz\App\Specs\SpecTypes\User\BasicUserSpec;
-use Fawaz\App\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\User\InactiveUserSpec;
-use Fawaz\App\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\ContentFilteringSpecsFactory;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -330,8 +330,8 @@ class UserService
     {
         try {
             $specs = [
-                new InactiveUserSpec(ContentFilteringAction::hideContent),
-                new BasicUserSpec(ContentFilteringAction::hideContent)
+                new DeletedUserSpec(ContentFilteringAction::hideContent),
+                new SystemUserSpec(ContentFilteringAction::hideContent)
             ];
         
             $users = $this->userMapper->getValidReferralInfoByLink($referralString, $specs);
@@ -354,7 +354,7 @@ class UserService
 
     public function referralList(string $userId, int $offset = 0, int $limit = 20): array
     {
-        $data = $this->userMapper->getReferralRelations($userId, $offset, $limit);
+        $data = $this->userMapper->getReferralRelations($userId, [],  $offset, $limit);
 
         return [
             'status' => 'success',
@@ -766,10 +766,10 @@ class UserService
             return self::respondWithErrorObject(31007);
         }
 
-        $inactiveUserSpec = new InactiveUserSpec(
+        $DeletedUserSpec = new DeletedUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
-        $basicUserSpec = new BasicUserSpec(
+        $SystemUserSpec = new SystemUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
 
@@ -787,8 +787,8 @@ class UserService
         $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
 
         $specs = [
-            $inactiveUserSpec,
-            $basicUserSpec,
+            $DeletedUserSpec,
+            $SystemUserSpec,
             $usersHiddenContentFilterSpec,
             $placeholderIllegalContentFilterSpec
         ];

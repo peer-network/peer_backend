@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 namespace Fawaz\Services\ContentFiltering\Replacers;
-use Fawaz\App\Specs\Specification;
+use Fawaz\App\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;

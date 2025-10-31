@@ -13,17 +13,13 @@ class PostsFeedContentFilteringStrategy extends AContentFilteringStrategy implem
 {
     public static array $strategy = [
         ContentType::user->value => [
-            ContentType::post->value => null,
-            ContentType::comment->value => null,
             ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
         ],
         ContentType::post->value => [
             ContentType::post->value => ContentFilteringAction::hideContent,
-            ContentType::comment->value => null,
             ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
         ],
         ContentType::comment->value => [
-            ContentType::post->value => null,
             ContentType::comment->value => ContentFilteringAction::replaceWithPlaceholder,
             ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
         ],

@@ -1,10 +1,10 @@
 <?php
 
-namespace Fawaz\App\Specs\SpecTypes\HiddenContent;
+namespace Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\HiddenContent;
 
-use Fawaz\App\Specs\Specification;
-use Fawaz\App\Specs\HiddenContentFilteringSpecificationFactory;
-use Fawaz\App\Specs\SpecificationSQLData;
+use Fawaz\App\Services\ContentFiltering\Specs\Specification;
+use Fawaz\App\Services\ContentFiltering\Specs\HiddenContentSpecSQLFactory;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
@@ -33,7 +33,7 @@ final class HiddenContentFilterSpec implements Specification
         );
     }
 
-    public function toSql(): ?SpecificationSQLData
+    public function toSql(ContentType $targetContent): ?SpecificationSQLData
     {
         $action = $this->contentFilterService->getContentFilterAction(
             $this->contentTarget,
@@ -43,12 +43,12 @@ final class HiddenContentFilterSpec implements Specification
             $this->targetUserId
         );
 
-        return (new HiddenContentFilteringSpecificationFactory(
-            $this->contentFilterService
-        ))->build(
-            $this->showingContent,
-            $action
-        );
+        if ($action === ContentFilteringAction::hideContent) {
+            return (new HiddenContentSpecSQLFactory(
+                $this->contentFilterService
+            ))->build($this->showingContent);
+        }
+        return null;
     }
 
     public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern

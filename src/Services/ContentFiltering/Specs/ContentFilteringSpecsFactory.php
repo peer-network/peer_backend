@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Fawaz\App\Specs;
+namespace Fawaz\App\Services\ContentFiltering\Specs;
 
-use Fawaz\App\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 

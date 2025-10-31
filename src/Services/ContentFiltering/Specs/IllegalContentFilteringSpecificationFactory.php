@@ -1,6 +1,6 @@
 <?php
 
-namespace Fawaz\App\Specs;
+namespace Fawaz\App\Services\ContentFiltering\Specs;
 
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;

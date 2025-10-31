@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Fawaz\Database;
 
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use PDO;
 use Fawaz\App\User;
 use Fawaz\App\Profile;
-use Fawaz\App\Specs\Specification;
-use Fawaz\App\Specs\SpecificationSQLData;
+use Fawaz\App\Services\ContentFiltering\Specs\Specification;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\App\UserAdvanced;
 use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -302,7 +303,7 @@ class ProfileRepositoryImpl implements ProfileRepository
     }
 
     public function fetchProfileData(string $userid, string $currentUserId, array $specifications): ?Profile {
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = "u.uid = :userid";
@@ -367,7 +368,7 @@ class ProfileRepositoryImpl implements ProfileRepository
         }
 
         // Merge specification SQL parts (WHERE/params) similar to fetchProfileData
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
 

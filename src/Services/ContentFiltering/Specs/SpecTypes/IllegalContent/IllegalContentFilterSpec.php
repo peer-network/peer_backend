@@ -1,10 +1,10 @@
 <?php
 
-namespace Fawaz\App\Specs\SpecTypes\IllegalContent;
+namespace Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\IllegalContent;
 
-use Fawaz\App\Specs\IllegalContentFilteringSpecificationFactory;
-use Fawaz\App\Specs\Specification;
-use Fawaz\App\Specs\SpecificationSQLData;
+use Fawaz\App\Services\ContentFiltering\Specs\IllegalContentFilteringSpecificationFactory;
+use Fawaz\App\Services\ContentFiltering\Specs\Specification;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
@@ -20,7 +20,7 @@ final class IllegalContentFilterSpec implements Specification
         private ContentType $showingContent,
     ) {}
 
-    public function toSql(): ?SpecificationSQLData
+    public function toSql(ContentType $targetContent): ?SpecificationSQLData
     {
         if ($this->action === ContentFilteringAction::hideContent) {
             return IllegalContentFilteringSpecificationFactory::build(

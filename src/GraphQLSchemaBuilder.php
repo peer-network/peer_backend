@@ -46,11 +46,11 @@ use Fawaz\App\Validation\ValidatorErrors;
 use Fawaz\App\Profile;
 use Fawaz\Utils\ErrorResponse;
 use Fawaz\App\Role;
-use Fawaz\App\Specs\SpecTypes\User\InactiveUserSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
-use Fawaz\App\Specs\SpecTypes\User\BasicUserSpec;
-use Fawaz\App\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 
@@ -2803,18 +2803,18 @@ class GraphQLSchemaBuilder
                 'iInvited' => [],
             ];
         
-            $inactiveUserSpec = new InactiveUserSpec(
+            $DeletedUserSpec = new DeletedUserSpec(
                 ContentFilteringAction::replaceWithPlaceholder
             );
-            $basicUserSpec = new BasicUserSpec(
+            $SystemUserSpec = new SystemUserSpec(
                 ContentFilteringAction::replaceWithPlaceholder
             );
             
             $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
 
             $specs = [
-                $inactiveUserSpec,
-                $basicUserSpec,
+                $DeletedUserSpec,
+                $SystemUserSpec,
                 $placeholderIllegalContentFilterSpec
             ];
 

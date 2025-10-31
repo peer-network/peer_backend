@@ -1,6 +1,6 @@
 <?php
 
-namespace Fawaz\App\Specs;
+namespace Fawaz\App\Services\ContentFiltering\Specs;
 
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
@@ -29,19 +29,18 @@ use function PHPUnit\Framework\returnArgument;
  *   - It has been dismissed by moderation more times than the configured threshold, OR
  *   - The content belongs to the currently logged-in user (always visible to them).
  */
-final class HiddenContentFilteringSpecificationFactory {
+final class HiddenContentSpecSQLFactory {
     public function __construct(
         private readonly ContentFilterServiceImpl $contentFilterService
     ) {}
 
     public function build(
         ContentType $type, 
-        ?ContentFilteringAction $action
     ): ?SpecificationSQLData {
         $paramsToPrepare = [];
         $whereClauses = [];
-        if ($action === ContentFilteringAction::hideContent) {
-            switch ($type) {
+            
+        switch ($type) {
             case ContentType::user:
                 $whereClauses[] = "
                 NOT EXISTS (
@@ -90,9 +89,6 @@ final class HiddenContentFilteringSpecificationFactory {
             default:
                 return null;
             }
-        } else {
-            return null;
-        }
         return new SpecificationSQLData(
             $whereClauses, 
             $paramsToPrepare

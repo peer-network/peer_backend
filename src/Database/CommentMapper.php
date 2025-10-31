@@ -98,10 +98,6 @@ class CommentMapper
     {
         $this->logger->debug("CommentMapper.fetchAllByPostIdetaild started");
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::postFeed,
-            $contentFilterBy
-        );
         $whereClauses = ["c.postid = :postId AND c.parentid IS NULL"];
         // $whereClauses[] = 'u.status = 0 AND (u.roles_mask = 0 OR u.roles_mask = 16)';
 
@@ -170,50 +166,6 @@ class CommentMapper
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $this->logger->info("Fetched comments for post counter", ['row' => $row]);
             // here to decide if to replace comment/user content or not
-            $user_reports = (int)$row['user_reports'];
-            $comment_reports = (int)$row['comment_reports'];
-
-
-            if ($row['user_status'] != 0) {
-                $replacer = ContentReplacementPattern::deleted;
-                $row['username'] = $replacer->username();
-                $row['img'] = $replacer->profilePicturePath();
-            }
-
-            if ($contentFilterService->getContentFilterAction(
-                ContentType::comment,
-                ContentType::user,
-                $user_reports,
-                $currentUserId,
-                $row['uid'],
-                $row['user_visibility_status']
-            ) == ContentFilteringAction::replaceWithPlaceholder) {
-                $replacer = ContentReplacementPattern::hidden;
-                $row['username'] = $replacer->username();
-                $row['img'] = $replacer->profilePicturePath();
-            }
-
-            if ($contentFilterService->getContentFilterAction(
-                ContentType::comment,
-                ContentType::comment,
-                $comment_reports,
-                $currentUserId,
-                $row['uid'],
-                $row['comment_visibility_status']
-            ) == ContentFilteringAction::replaceWithPlaceholder) {
-                $replacer = ContentReplacementPattern::hidden;
-                $row['content'] = $replacer->commentContent();
-            }
-
-
-            $userObj = [
-                        'uid' => $row['uid'],
-                        'status' => $row['status'],
-                        'username' => $row['username'],
-                        'slug' => $row['slug'],
-                        'img' => $row['img'],
-                    ];
-            $userObj = (new User($userObj, [], false))->getArrayCopy();
 
             $results[] = new CommentAdvanced([
                 'commentid' => $row['commentid'],
@@ -225,46 +177,13 @@ class CommentMapper
                 'amountreplies' => (int) $row['amountreplies'],
                 'amountreports' => (int) $row['comment_reports'],
                 'isliked' => (bool) $row['isliked'],
-                'createdat' => $row['createdat'],
-                'userstatus' => $userObj['status'],
-                'user' => [
-                    'uid' => $userObj['uid'],
-                    'username' => $userObj['username'],
-                    'status' => $userObj['status'],
-                    'slug' => $userObj['slug'],
-                    'img' => $userObj['img'],
-                    'isfollowed' => (bool) $row['isfollowed'],
-                    'isfollowing' => (bool) $row['isfollowing'],
-                ],
+                'createdat' => $row['createdat']
             ]);
         }
 
         $this->logger->info("Fetched comments for post", ['count' => count($results)]);
 
         return $results;
-    }
-
-    public function fetchAllByPostIdd(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
-    {
-        $this->logger->debug("CommentMapper.fetchAllByPostId started");
-
-        $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.postid = :postId AND c.parentid IS NULL ORDER BY c.createdat ASC LIMIT :limit OFFSET :offset";
-        $params = [
-            'postId' => $postId,
-            'limit' => $limit,
-            'offset' => $offset,
-        ];
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-
-        $comments = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $row['userstatus'] = $row['status'];
-            $comments[] = new Comment($row);
-        }
-
-        return $comments;
     }
 
     public function fetchAllByPostId(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array

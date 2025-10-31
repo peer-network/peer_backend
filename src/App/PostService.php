@@ -8,13 +8,11 @@ use Fawaz\App\Post;
 use Fawaz\App\Comment;
 use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
-use Fawaz\App\Specs\SpecTypes\User\BasicUserSpec;
-use Fawaz\App\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\User\HideInactiveUserPostSpec;
-use Fawaz\App\Specs\SpecTypes\User\InactiveUserPostSpec;
-use Fawaz\App\Specs\SpecTypes\User\InactiveUserSpec;
-use Fawaz\App\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\HideInactiveUserPostSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\config\constants\PeerUUID;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
@@ -542,7 +540,7 @@ class PostService
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
-        
+            
         $contentFilterStrategy = ContentFilteringStrategies::postFeed;
         $illegalPostContentAction = ContentFilteringAction::hideContent;
 
@@ -605,12 +603,12 @@ class PostService
             $illegalPostContentAction = ContentFilteringAction::replaceWithPlaceholder;
         }
         
-        $inactiveUserSpec = new InactiveUserSpec(
+        $DeletedUserSpec = new DeletedUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
         $hideInactiveUserPostSpec = new HideInactiveUserPostSpec();
         
-        $basicUserSpec = new BasicUserSpec(
+        $SystemUserSpec = new SystemUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
         
@@ -657,23 +655,23 @@ class PostService
         );
 
         $postSpecs = [
-            $inactiveUserSpec,
-            $basicUserSpec,
+            $DeletedUserSpec,
+            $SystemUserSpec,
             $hideInactiveUserPostSpec,
             $placeholderIllegalPostContentFilterSpec,
             $postsHiddenContentFilterSpec,
         ];
 
         $userSpecs = [
-            $inactiveUserSpec,
-            $basicUserSpec,
+            $DeletedUserSpec,
+            $SystemUserSpec,
             $placeholderIllegalUserContentFilterSpec,
             $userHiddenContentFilterSpec
         ];
 
         $commentSpecs = [
-            $inactiveUserSpec,
-            $basicUserSpec,
+            $DeletedUserSpec,
+            $SystemUserSpec,
             $placeholderIllegalCommentContentFilterSpec,
             $commentsHiddenContentFilterSpec
         ];
@@ -920,13 +918,13 @@ class PostService
 
         $this->logger->debug("PostService.getGuestListPost started");
         
-        $inactiveUserSpec = new InactiveUserSpec(
+        $DeletedUserSpec = new DeletedUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
 
         $hideInactiveUserPostSpec = new HideInactiveUserPostSpec();
 
-        $basicUserSpec = new BasicUserSpec(
+        $SystemUserSpec = new SystemUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
 
@@ -942,8 +940,8 @@ class PostService
         ];
 
         $userSpecs = [
-            $inactiveUserSpec,
-            $basicUserSpec,
+            $DeletedUserSpec,
+            $SystemUserSpec,
             $placeholderIllegalContentFilterSpec,
         ];
 
@@ -988,8 +986,8 @@ class PostService
      * Falls back gracefully if no profiles found.
      *
      * @param PostAdvanced[] $posts Array of PostAdvanced
-     * @param \Fawaz\App\Specs\Specification[] $userSpecs Content filtering specs
-     * @param \Fawaz\App\Specs\Specification[] $commentSpecs Content filtering specs
+     * @param \Fawaz\App\Services\ContentFiltering\Specs\Specification[] $userSpecs Content filtering specs
+     * @param \Fawaz\App\Services\ContentFiltering\Specs\Specification[] $commentSpecs Content filtering specs
      * @param string $currentUserId Current/guest user id for profile fetch
      * @param int $commentOffset
      * @param int $commentLimit

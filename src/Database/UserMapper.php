@@ -11,8 +11,8 @@ use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
-use Fawaz\App\Specs\Specification;
-use Fawaz\App\Specs\SpecificationSQLData;
+use Fawaz\App\Services\ContentFiltering\Specs\Specification;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -886,7 +886,7 @@ class UserMapper
     ): array {
         $this->logger->debug("UserMapper.fetchFollowers started", ['userId' => $userId]);
 
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = 'f.followedid = :userId';
@@ -1207,7 +1207,7 @@ class UserMapper
         $this->logger->debug("UserMapper.getInviterByInvitee started", [
             'invitee_uuid' => $userId,
         ]);
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specs);
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specs);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = "ui.userid = :invitee_uuid";
@@ -1232,9 +1232,9 @@ class UserMapper
         return null;
     }
 
-    public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20, array $specs): ?array
+    public function getReferralRelations(string $userId, array $specs, int $offset = 0, int $limit = 20): ?array
     {
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specs);
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specs);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = "ui.invited = :userId";
@@ -1921,7 +1921,7 @@ class UserMapper
 
     public function getValidReferralInfoByLink(string $referralLink, array $specifications): array|null
     {
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $params = $allSpecs->paramsToPrepare;
@@ -1964,7 +1964,7 @@ class UserMapper
 
     public function fetchProfileData(string $userid, string $currentUserId, array $specifications): ?Profile {
         
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = "u.uid = :userid";

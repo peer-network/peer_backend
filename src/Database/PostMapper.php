@@ -11,8 +11,8 @@ use Fawaz\App\Models\MultipartPost;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostMedia;
-use Fawaz\App\Specs\Specification;
-use Fawaz\App\Specs\SpecificationSQLData;
+use Fawaz\App\Services\ContentFiltering\Specs\Specification;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\App\User;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
@@ -130,7 +130,7 @@ class PostMapper
         int $limitPerType = 5, 
         ?string $contentFilterBy = null
     ): array {        
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
 
         $allSpecs = SpecificationSQLData::merge($specsSQL);
 
@@ -506,7 +506,7 @@ class PostMapper
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit  = min(max((int)($args['limit']  ?? 10), 1), 20);
 
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(), $specifications);
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $params = $allSpecs->paramsToPrepare;

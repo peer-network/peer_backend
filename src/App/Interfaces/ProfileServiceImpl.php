@@ -3,12 +3,12 @@
 namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
-use Fawaz\App\Specs\SpecTypes\User\BasicUserSpec;
-use Fawaz\App\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
-use Fawaz\App\Specs\SpecTypes\User\InactiveUserSpec;
-use Fawaz\App\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
 use Fawaz\App\ValidationException;
-use Fawaz\App\Specs\ContentFilteringSpecsFactory;
+use Fawaz\App\Services\ContentFiltering\Specs\ContentFilteringSpecsFactory;
 
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
@@ -44,10 +44,10 @@ final class ProfileServiceImpl implements ProfileService
         
         $contentFilterStrategy = $userId === $this->currentUserId ? ContentFilteringStrategies::myprofile : ContentFilteringStrategies::searchById;
         
-        $inactiveUserSpec = new InactiveUserSpec(
+        $DeletedUserSpec = new DeletedUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
-        $basicUserSpec = new BasicUserSpec(
+        $SystemUserSpec = new SystemUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
 
@@ -64,8 +64,8 @@ final class ProfileServiceImpl implements ProfileService
         $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
 
         $specs = [
-            $inactiveUserSpec,
-            $basicUserSpec,
+            $DeletedUserSpec,
+            $SystemUserSpec,
             $usersHiddenContentFilterSpec,
             $placeholderIllegalContentFilterSpec
         ];

@@ -1,6 +1,6 @@
 <?php
 
-namespace Fawaz\App\Specs;
+namespace Fawaz\App\Services\ContentFiltering\Specs;
 
 final class SpecificationSQLData {
     public function __construct(
