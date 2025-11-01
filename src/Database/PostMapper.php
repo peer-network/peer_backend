@@ -185,8 +185,6 @@ class PostMapper
                 ContentType::post,
                 ContentType::post,
                 $post_reports,
-                $currentUserId,
-                $row['userid'],
                 $row['post_visibility_status']
             ) == ContentFilteringAction::replaceWithPlaceholder) {
                 $replacer = ContentReplacementPattern::hidden;
@@ -752,9 +750,10 @@ class PostMapper
             foreach ($params as $k => $v) {
                 $stmt->bindValue(':' . ltrim($k, ':'), $v);
             }
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-            $stmt->execute();
+            
+            $params['limit'] = $limit;
+            $params['offset'] = $offset;
+            $stmt->execute($params);
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $results = array_map(function (array $row) {
@@ -945,8 +944,6 @@ class PostMapper
                         ContentType::post,
                         ContentType::user,
                         $user_reports,
-                        $currentUserId,
-                        $prt['uid'],
                         $prt['user_visibility_status']
                     );
 

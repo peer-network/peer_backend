@@ -283,8 +283,6 @@ class UserMapper
                         ContentType::user,
                         ContentType::user,
                         $user_reports,
-                        $currentUserId,
-                        $row['uid'],
                         $row['visibility_status']
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
                         $replacer = ContentReplacementPattern::hidden;
@@ -462,8 +460,6 @@ class UserMapper
                         ContentType::user,
                         ContentType::user,
                         $user_reports,
-                        $currentUserId,
-                        $row['uid'],
                         $row['visibility_status']
                     ) == ContentFilteringAction::replaceWithPlaceholder) {
                         $replacer = ContentReplacementPattern::hidden;
@@ -860,8 +856,6 @@ class UserMapper
                     ContentType::user,
                     ContentType::user,
                     $user_reports,
-                    null,
-                    $userId,
                     $row['visibility_status']
                 ) == ContentFilteringAction::replaceWithPlaceholder) {
                     $replacer = ContentReplacementPattern::hidden;
@@ -1019,8 +1013,6 @@ class UserMapper
                 ContentType::user,
                 ContentType::user,
                 $user_reports,
-                $currentUserId,
-                $row['uid'],
                 $row['visibility_status']
             ) == ContentFilteringAction::replaceWithPlaceholder) {
                 $replacer = ContentReplacementPattern::hidden;
@@ -1955,8 +1947,6 @@ class UserMapper
             WHERE %s",
             $whereClausesString
         );
-
-        var_dump($query);
 
         $stmt = $this->db->prepare($query);
 

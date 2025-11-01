@@ -366,7 +366,7 @@ class ProfileRepositoryImpl implements ProfileRepository
         if (empty($userIds)) {
             return [];
         }
-
+        
         // Merge specification SQL parts (WHERE/params) similar to fetchProfileData
         $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);

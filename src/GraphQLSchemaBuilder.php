@@ -3451,7 +3451,7 @@ class GraphQLSchemaBuilder
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $data = array_map(
-            fn (PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit, $contentFilterBy),
+            fn (PostAdvanced $post) => $post->getArrayCopy(),
             $posts
         );
         return [

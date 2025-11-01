@@ -635,7 +635,6 @@ class PostService
                 $commentLimit
             );
 
-
             foreach($postsEnriched as $post) {
                 ContentReplacer::placeholderPost($post, $specs);
             }
@@ -940,6 +939,7 @@ class PostService
         int $commentOffset, 
         int $commentLimit
     ): array {
+
         $userIdsFromPosts = array_values(
             array_unique(
                 array_filter(
@@ -991,7 +991,7 @@ class PostService
         if (empty($comments)) {
             return $data;
         }
-        // add here userids
+
         $userIdsFromComments = array_values(
             array_unique(
                 array_filter(
@@ -1003,14 +1003,15 @@ class PostService
         if (empty($userIdsFromComments)) {
             return $comments;
         }
+        
         $profiles = $this->profileRepository->fetchByIds($userIdsFromComments, $currentUserId, $specs);
         $commentsArray = [];
+
         foreach($comments as $comment) {
             if ($comment instanceof CommentAdvanced) {
                 ContentReplacer::placeholderComments($comment, $specs);
                 $dataComment = $comment->getArrayCopy();
                 $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($dataComment, $profiles[$comment->getUserId()], $specs);
-                // var_dump($enrichedWithProfiles);
                 $commentsArray[] = $enrichedWithProfiles;
             }
         }
