@@ -3,6 +3,7 @@
 namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\App\ValidationException;
@@ -44,11 +45,11 @@ final class ProfileServiceImpl implements ProfileService
             $contentFilterCase,
             ContentType::user
         );
-        $SystemUserSpec = new SystemUserSpec(
-            ContentFilteringAction::replaceWithPlaceholder
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
         );
 
-        
         // $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
         //     $contentFilterStrategy,
         //     $contentFilterBy,
@@ -57,13 +58,16 @@ final class ProfileServiceImpl implements ProfileService
         //     ContentType::user
         // );
         
-        // $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
 
         $specs = [
             $deletedUserSpec,
-            // $SystemUserSpec,
+            $systemUserSpec,
             // $usersHiddenContentFilterSpec,
-            // $placeholderIllegalContentFilterSpec
+            $illegalContentSpec
         ];
 
         try {

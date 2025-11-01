@@ -335,7 +335,10 @@ class UserService
                     ContentFilteringCases::hideAll,
                     ContentType::user
                 ),
-                new SystemUserSpec(ContentFilteringAction::hideContent)
+                new SystemUserSpec(
+                    ContentFilteringCases::hideAll,
+                    ContentType::user
+                ),
             ];
         
             $users = $this->userMapper->getValidReferralInfoByLink($referralString, $specs);
@@ -774,8 +777,9 @@ class UserService
             ContentFilteringCases::searchById,
             ContentType::user
         );
-        $SystemUserSpec = new SystemUserSpec(
-            ContentFilteringAction::replaceWithPlaceholder
+        $systemUserSpec = new SystemUserSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
         );
 
         
@@ -792,7 +796,7 @@ class UserService
 
         $specs = [
             $deletedUserSpec,
-            // $SystemUserSpec,
+            $systemUserSpec,
             // $usersHiddenContentFilterSpec,
             // $placeholderIllegalContentFilterSpec
         ];
@@ -857,10 +861,29 @@ class UserService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $specs = [
+            $deletedUserSpec,
+            $systemUserSpec,
+            // $usersHiddenContentFilterSpec,
+            // $placeholderIllegalContentFilterSpec
+        ];
+
         $this->logger->info('Fetching friends list', ['currentUserId' => $this->currentUserId, 'offset' => $offset, 'limit' => $limit]);
 
         try {
-            $users = $this->userMapper->fetchFriends($this->currentUserId, $offset, $limit, $contentFilterBy);
+            $users = $this->userMapper->fetchFriends($this->currentUserId,$specs, $offset, $limit, $contentFilterBy);
 
             if (!empty($users)) {
                 $this->logger->info('Friends list retrieved successfully', ['userCount' => count($users)]);

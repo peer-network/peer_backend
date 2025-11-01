@@ -2809,8 +2809,9 @@ class GraphQLSchemaBuilder
                 ContentFilteringCases::searchById,
                 ContentType::user
             );
-            $SystemUserSpec = new SystemUserSpec(
-                ContentFilteringAction::replaceWithPlaceholder
+            $systemUserSpec = new SystemUserSpec(
+                ContentFilteringCases::searchById,
+                ContentType::user
             );
             
             $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
@@ -2833,7 +2834,7 @@ class GraphQLSchemaBuilder
             $offset = $args['offset'] ?? 0;
             $limit = $args['limit'] ?? 20;
 
-            $invited= $this->userMapper->getReferralRelations($userId, $offset, $limit, $specs);
+            $invited= $this->userMapper->getReferralRelations($userId, $specs, $offset, $limit);
 
             if (!empty($invited)) {
                 foreach ($invited as $user) {

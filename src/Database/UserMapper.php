@@ -795,6 +795,7 @@ class UserMapper
 
     public function fetchFriends(
         string $userId,
+        array $specifications,
         int $offset = 0,
         int $limit = 10,
         ?string $contentFilterBy = null
@@ -806,6 +807,12 @@ class UserMapper
             $contentFilterBy
         );
 
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+
+        // Build positional placeholders for the IN clause
+        $params = $allSpecs->paramsToPrepare;
         try {
             $sql = "
                 SELECT 
@@ -830,11 +837,11 @@ class UserMapper
 
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_INT);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $params['userId'] = $userId;
+            $params['limit']= $limit;
+            $params['offset']= $offset;
 
-            $stmt->execute();
+            $stmt->execute($params);
 
             $friends = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             $filtered_friends = [];
@@ -1948,6 +1955,8 @@ class UserMapper
             WHERE %s",
             $whereClausesString
         );
+
+        var_dump($query);
 
         $stmt = $this->db->prepare($query);
 

@@ -2,25 +2,42 @@
 
 namespace Fawaz\Services\ContentFiltering\Specs\SpecTypes\User;
 
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
+use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\Implementations\HideEverythingContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 final class SystemUserSpec implements Specification
 {
+    private ContentFilterServiceImpl $contentFilterService;
+    private ContentFilteringStrategy $contentFilterStrategy;
 
     public function __construct(
-        private ContentFilteringAction $action,
-    ) {}
+        ContentFilteringCases $case,
+        ContentType $targetContent
+    ) {
+        $this->contentFilterService = new ContentFilterServiceImpl(
+            $targetContent
+        );
+        $this->contentFilterStrategy = self::createStrategy(
+            $case
+        );
+    }
 
     public function toSql(ContentType $showingContent): ?SpecificationSQLData
     {
-        if ($this->action === ContentFilteringAction::hideContent) {
-            match ($showingContent) {
+        if ($this->contentFilterService->getContentFilterAction(
+            $showingContent,
+            $this->contentFilterStrategy
+        ) === ContentFilteringAction::hideContent) {
+            return match ($showingContent) {
                 ContentType::user => new SpecificationSQLData(
                 [
                     "EXISTS (
@@ -56,5 +73,11 @@ final class SystemUserSpec implements Specification
     public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern
     {
         return null;
+    }
+
+    private static function createStrategy(
+        ContentFilteringCases $strategy
+    ): ContentFilteringStrategy {
+        return new HideEverythingContentFilteringStrategy();
     }
 }

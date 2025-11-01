@@ -42,7 +42,7 @@ final class DeletedUserSpec implements Specification {
             $showingContent,
             $this->contentFilterStrategy
         ) === ContentFilteringAction::hideContent) {
-            match ($showingContent) {
+            return match ($showingContent) {
                 ContentType::user => new SpecificationSQLData(
                 [
                     "EXISTS (
