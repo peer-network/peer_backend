@@ -21,8 +21,6 @@ final class HiddenContentFilterSpec implements Specification
     public function __construct(
         ContentFilteringCases $case, 
         ?string $contentFilterBy,
-        private string $currentUserId,
-        private ?string $targetUserId,
         private ContentType $contentTarget,
     ) {
         $this->contentFilterService = new HiddenContentFilterServiceImpl(
@@ -36,9 +34,6 @@ final class HiddenContentFilterSpec implements Specification
         $action = $this->contentFilterService->getContentFilterAction(
             $this->contentTarget,
             $showingContent,
-            null,
-            $this->currentUserId, 
-            $this->targetUserId
         );
 
         if ($action === ContentFilteringAction::hideContent) {
@@ -106,8 +101,6 @@ final class HiddenContentFilterSpec implements Specification
             $this->contentTarget,
                 $showingContent,
                 $subject->getReports(),
-                $this->currentUserId, 
-                $this->targetUserId,
                 $subject->visibilityStatus()
         );
         if ($action === ContentFilteringAction::replaceWithPlaceholder) {

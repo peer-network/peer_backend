@@ -54,8 +54,6 @@ final class ProfileServiceImpl implements ProfileService
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            $this->currentUserId,
-            $userId,
             ContentType::user
         );
         

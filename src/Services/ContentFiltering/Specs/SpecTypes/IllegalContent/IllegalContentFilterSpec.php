@@ -43,13 +43,28 @@ final class IllegalContentFilterSpec implements Specification {
         ) === ContentFilteringAction::hideContent) {
             return match ($showingContent) {
                 ContentType::user => new SpecificationSQLData([
-                    "EXISTS (\n                        SELECT 1\n                            FROM users IllegalContentFilterSpec_users\n                            WHERE IllegalContentFilterSpec_users.uid = u.uid\n                            AND IllegalContentFilterSpec_users.visibility_status = 'illegal'\n                    )"
+                    "NOT EXISTS (
+                        SELECT 1
+                            FROM users IllegalContentFilterSpec_users
+                            WHERE IllegalContentFilterSpec_users.uid = u.uid
+                            AND IllegalContentFilterSpec_users.visibility_status = 'illegal'
+                        )"
                 ], []),
                 ContentType::post => new SpecificationSQLData([
-                    "EXISTS (\n                        SELECT 1\n                            FROM posts IllegalContentFilterSpec_posts\n                            WHERE IllegalContentFilterSpec_posts.postid = p.postid\n                            AND IllegalContentFilterSpec_posts.visibility_status = 'illegal'\n                    )"
+                    "NOT EXISTS (
+                        SELECT 1
+                            FROM posts IllegalContentFilterSpec_posts
+                            WHERE IllegalContentFilterSpec_posts.postid = p.postid
+                            AND IllegalContentFilterSpec_posts.visibility_status = 'illegal'
+                        )"
                 ], []),
                 ContentType::comment => new SpecificationSQLData([
-                    "EXISTS (\n                        SELECT 1\n                            FROM comments IllegalContentFilterSpec_comments\n                            WHERE IllegalContentFilterSpec_comments.commentid = c.commentid\n                            AND IllegalContentFilterSpec_comments.visibility_status = 'illegal'\n                    )"
+                    "NOT EXISTS (
+                        SELECT 1
+                            FROM comments IllegalContentFilterSpec_comments
+                            WHERE IllegalContentFilterSpec_comments.commentid = c.commentid
+                            AND IllegalContentFilterSpec_comments.visibility_status = 'illegal'
+                        )"
                 ], []),
             };
         }

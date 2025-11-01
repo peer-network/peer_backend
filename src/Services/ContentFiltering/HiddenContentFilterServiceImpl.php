@@ -61,8 +61,6 @@ class HiddenContentFilterServiceImpl  {
      * @param ContentType $contentTarget
      * @param ContentType $showingContent
      * @param int|null $showingContentReportAmount
-     * @param string|null $currentUserId
-     * @param string|null $targetId
      * @param string|null $visibilityStatus
      * @return ContentFilteringAction|null
      */
@@ -70,17 +68,13 @@ class HiddenContentFilterServiceImpl  {
         ContentType $contentTarget,
         ContentType $showingContent,
         ?int $showingContentReportAmount = null,
-        ?string $currentUserId = null,
-        ?string $targetId = null,
         ?string $visibilityStatus = null,
     ): ?ContentFilteringAction {
         if ($visibilityStatus === null) {
             if ($showingContentReportAmount === null && $this->contentFilterBy === $this->contentSeverityLevels[0]) {
-                if ($currentUserId && $currentUserId == $targetId) {
-                    $strategy = ContentFilteringStrategyFactory::create(ContentFilteringCases::myprofile);
-                } else {
-                    $strategy = ContentFilteringStrategyFactory::create($this->contentFilterCase);
-                }
+                
+                $strategy = ContentFilteringStrategyFactory::create($this->contentFilterCase);
+                
                 if ($strategy === null) {
                     return null;
                 }

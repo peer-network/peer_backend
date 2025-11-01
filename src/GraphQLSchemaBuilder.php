@@ -52,6 +52,7 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 
 
 class GraphQLSchemaBuilder
@@ -2615,12 +2616,15 @@ class GraphQLSchemaBuilder
                 ContentType::user
             );
             
-            $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
+            $illegalContentFilterSpec = new IllegalContentFilterSpec(
+                ContentFilteringCases::searchById,
+                ContentType::user
+            );
 
             $specs = [
                 $deletedUserSpec,
-                // $SystemUserSpec,
-                // $placeholderIllegalContentFilterSpec
+                $systemUserSpec,
+                $illegalContentFilterSpec
             ];
 
             

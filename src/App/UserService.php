@@ -6,6 +6,7 @@ namespace Fawaz\App;
 
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Specs\ContentFilteringSpecsFactory;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
@@ -786,19 +787,19 @@ class UserService
         $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
             ContentFilteringCases::searchById,
             $contentFilterBy,
-            $this->currentUserId,
-            $userId,
             ContentType::user
         );
         
-        // illegal: placeholder if visibility_status === 'illegal'
-        $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
+        $illegalContentFilterSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
 
         $specs = [
             $deletedUserSpec,
             $systemUserSpec,
-            // $usersHiddenContentFilterSpec,
-            // $placeholderIllegalContentFilterSpec
+            $usersHiddenContentFilterSpec,
+            $illegalContentFilterSpec
         ];
 
         try {

@@ -8,6 +8,8 @@ use Fawaz\App\Post;
 use Fawaz\App\Comment;
 use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\config\constants\PeerUUID;
 use Fawaz\Database\CommentMapper;
@@ -16,6 +18,7 @@ use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\FileUploadDispatcher;
@@ -534,8 +537,6 @@ class PostService
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
-            
-        $contentFilterStrategy = ContentFilteringCases::postFeed;
 
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this::respondWithError(30209);
@@ -582,33 +583,43 @@ class PostService
         }
 
         $this->logger->debug("PostService.findPostser started");
-        
+        $contentFilterCase = ContentFilteringCases::postFeed;
+
         if ($title || $tag) {
-            $contentFilterStrategy = ContentFilteringCases::searchByMeta;
+            $contentFilterCase = ContentFilteringCases::searchByMeta;
         }
         if ($userId || $postId) {
-            $contentFilterStrategy = ContentFilteringCases::searchById;
+            $contentFilterCase = ContentFilteringCases::searchById;
         }
         if ($userId && $userId === $this->currentUserId) { 
-            $contentFilterStrategy = ContentFilteringCases::myprofile;
+            $contentFilterCase = ContentFilteringCases::myprofile;
         }
 
-        // we have targetContent: post
-        // we have strategy        
-        // we have spec : deletedUser
-
-
-
-        // now we need to combine target+strategyTag+specname to spec object
         $deletedUserSpec = new DeletedUserSpec(
-            $contentFilterStrategy,
+            $contentFilterCase,
+            ContentType::post
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
             ContentType::post
         );
 
-        // in mapper we give showing content
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::post
+        );
+        
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
 
         $specs = [
-            $deletedUserSpec
+            $deletedUserSpec,
+            $systemUserSpec,
+            $hiddenContentFilterSpec,
+            $illegalContentSpec
         ];
 
         try {
@@ -858,21 +869,26 @@ class PostService
             ContentType::post
         );
 
-        // $hideInactiveUserPostSpec = new HideInactiveUserPostSpec();
+        $contentFilterCase = ContentFilteringCases::searchById;
 
-        // $SystemUserSpec = new SystemUserSpec(
-        //     ContentFilteringAction::replaceWithPlaceholder
-        // );
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
 
-        // $placeholderIllegalContentFilterSpec = new IllegalContentFilterSpec(
-        //     ContentFilteringAction::replaceWithPlaceholder,
-        //     ContentType::comment
-        // );
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
 
         $specs = [
             $deletedUserSpec,
-            // $SystemUserSpec,
-            // $placeholderIllegalContentFilterSpec,
+            $systemUserSpec,
+            $illegalContentSpec
         ];
 
         try {
