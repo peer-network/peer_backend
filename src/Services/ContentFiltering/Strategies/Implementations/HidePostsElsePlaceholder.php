@@ -9,7 +9,7 @@ use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 
-class PostsFeedContentFilteringStrategy extends AContentFilteringStrategy implements ContentFilteringStrategy
+class HidePostsElsePlaceholder extends AContentFilteringStrategy implements ContentFilteringStrategy
 {
     public static array $strategy = [
         ContentType::user->value => [

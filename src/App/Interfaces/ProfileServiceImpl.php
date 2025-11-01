@@ -3,16 +3,13 @@
 namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\App\ValidationException;
-use Fawaz\App\Services\ContentFiltering\Specs\ContentFilteringSpecsFactory;
 
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 use Fawaz\Database\Interfaces\ProfileRepository;
@@ -29,7 +26,6 @@ final class ProfileServiceImpl implements ProfileService
     public function __construct(
         protected PeerLoggerInterface $logger,
         protected ProfileRepository $profileRepository,
-        protected ContentFilteringSpecsFactory $contentFilteringSpecsFactory
     ) {}
 
     public function setCurrentUserId(string $userId): void {
@@ -42,32 +38,32 @@ final class ProfileServiceImpl implements ProfileService
         $userId = $args['userid'] ?? $this->currentUserId;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         
-        $contentFilterStrategy = $userId === $this->currentUserId ? ContentFilteringStrategies::myprofile : ContentFilteringStrategies::searchById;
+        $contentFilterCase = $userId === $this->currentUserId ? ContentFilteringCases::myprofile : ContentFilteringCases::searchById;
         
-        $DeletedUserSpec = new DeletedUserSpec(
-            ContentFilteringAction::replaceWithPlaceholder
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::user
         );
         $SystemUserSpec = new SystemUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
         );
 
         
-        $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
-            $contentFilterStrategy,
-            $contentFilterBy,
-            $this->currentUserId,
-            $userId,
-            ContentType::user,
-            ContentType::user
-        );
+        // $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
+        //     $contentFilterStrategy,
+        //     $contentFilterBy,
+        //     $this->currentUserId,
+        //     $userId,
+        //     ContentType::user
+        // );
         
-        $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
+        // $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
 
         $specs = [
-            $DeletedUserSpec,
-            $SystemUserSpec,
-            $usersHiddenContentFilterSpec,
-            $placeholderIllegalContentFilterSpec
+            $deletedUserSpec,
+            // $SystemUserSpec,
+            // $usersHiddenContentFilterSpec,
+            // $placeholderIllegalContentFilterSpec
         ];
 
         try {
@@ -81,7 +77,8 @@ final class ProfileServiceImpl implements ProfileService
                 $this->logger->warning('Query.resolveProfile User not found');
                 return self::respondWithErrorObject(31007);
             }
-            
+            /** @var Profile $profileData */
+            // Hint analyzers: keep concrete type after by-ref mutation
             ContentReplacer::placeholderProfile($profileData, $specs);
 
             $this->logger->debug("Fetched profile data", ['userid' => $profileData->getUserId()]);

@@ -8,11 +8,7 @@ use Fawaz\App\Post;
 use Fawaz\App\Comment;
 use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\HideInactiveUserPostSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\config\constants\PeerUUID;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
@@ -20,8 +16,7 @@ use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Services\VideoCoverGenerator;
@@ -527,7 +522,6 @@ class PostService
             return $this::respondWithError(60501);
         }
         $userId = $args['userid'] ?? null;
-
         $from = $args['from'] ?? null;
         $to = $args['to'] ?? null;
         $filterBy = $args['filterBy'] ?? [];
@@ -541,8 +535,7 @@ class PostService
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
             
-        $contentFilterStrategy = ContentFilteringStrategies::postFeed;
-        $illegalPostContentAction = ContentFilteringAction::hideContent;
+        $contentFilterStrategy = ContentFilteringCases::postFeed;
 
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this::respondWithError(30209);
@@ -591,100 +584,41 @@ class PostService
         $this->logger->debug("PostService.findPostser started");
         
         if ($title || $tag) {
-            $contentFilterStrategy = ContentFilteringStrategies::searchByMeta;
-            $illegalPostContentAction = ContentFilteringAction::hideContent;
+            $contentFilterStrategy = ContentFilteringCases::searchByMeta;
         }
         if ($userId || $postId) {
-            $contentFilterStrategy = ContentFilteringStrategies::searchById;
-            $illegalPostContentAction = ContentFilteringAction::replaceWithPlaceholder;
+            $contentFilterStrategy = ContentFilteringCases::searchById;
         }
         if ($userId && $userId === $this->currentUserId) { 
-            $contentFilterStrategy = ContentFilteringStrategies::myprofile;
-            $illegalPostContentAction = ContentFilteringAction::replaceWithPlaceholder;
+            $contentFilterStrategy = ContentFilteringCases::myprofile;
         }
-        
-        $DeletedUserSpec = new DeletedUserSpec(
-            ContentFilteringAction::replaceWithPlaceholder
-        );
-        $hideInactiveUserPostSpec = new HideInactiveUserPostSpec();
-        
-        $SystemUserSpec = new SystemUserSpec(
-            ContentFilteringAction::replaceWithPlaceholder
-        );
-        
-        $placeholderIllegalPostContentFilterSpec = new IllegalContentFilterSpec(
-            $illegalPostContentAction,
+
+        // we have targetContent: post
+        // we have strategy        
+        // we have spec : deletedUser
+
+
+
+        // now we need to combine target+strategyTag+specname to spec object
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterStrategy,
             ContentType::post
         );
 
-        $placeholderIllegalUserContentFilterSpec = new IllegalContentFilterSpec(
-            $illegalPostContentAction,
-            ContentType::user
-        );
+        // in mapper we give showing content
 
-        $placeholderIllegalCommentContentFilterSpec = new IllegalContentFilterSpec(
-            $illegalPostContentAction,
-            ContentType::comment
-        );
-
-        $postsHiddenContentFilterSpec = new HiddenContentFilterSpec(
-            $contentFilterStrategy,
-            $contentFilterBy,
-            $this->currentUserId,
-            $userId,
-            ContentType::post,
-            ContentType::post
-        );
-
-        $userHiddenContentFilterSpec = new HiddenContentFilterSpec(
-            $contentFilterStrategy,
-            $contentFilterBy,
-            $this->currentUserId,
-            $userId,
-            ContentType::post,
-            ContentType::user
-        );
-
-        $commentsHiddenContentFilterSpec = new HiddenContentFilterSpec(
-            $contentFilterStrategy,
-            $contentFilterBy,
-            $this->currentUserId,
-            $userId,
-            ContentType::post,
-            ContentType::comment
-        );
-
-        $postSpecs = [
-            $DeletedUserSpec,
-            $SystemUserSpec,
-            $hideInactiveUserPostSpec,
-            $placeholderIllegalPostContentFilterSpec,
-            $postsHiddenContentFilterSpec,
-        ];
-
-        $userSpecs = [
-            $DeletedUserSpec,
-            $SystemUserSpec,
-            $placeholderIllegalUserContentFilterSpec,
-            $userHiddenContentFilterSpec
-        ];
-
-        $commentSpecs = [
-            $DeletedUserSpec,
-            $SystemUserSpec,
-            $placeholderIllegalCommentContentFilterSpec,
-            $commentsHiddenContentFilterSpec
+        $specs = [
+            $deletedUserSpec
         ];
 
         try {
-            $results = $this->postMapper->findPostser($this->currentUserId,$postSpecs, $args);
+            $results = $this->postMapper->findPostser($this->currentUserId,$specs, $args);
             if (empty($results) && $postId != null) {
                 return $this::respondWithError(31510);
             }
             $postsEnriched = $this->enrichWithProfileAndComment(
                 $results, 
-                $userSpecs, 
-                $commentSpecs, 
+                $specs, 
                 $this->currentUserId,
                 $commentOffset,
                 $commentLimit
@@ -692,7 +626,7 @@ class PostService
 
 
             foreach($postsEnriched as $post) {
-                ContentReplacer::placeholderPost($post, $postSpecs);
+                ContentReplacer::placeholderPost($post, $specs);
             }
             return $postsEnriched;
         } catch (\Throwable $e) {
@@ -918,41 +852,32 @@ class PostService
 
         $this->logger->debug("PostService.getGuestListPost started");
         
-        $DeletedUserSpec = new DeletedUserSpec(
-            ContentFilteringAction::replaceWithPlaceholder
+        $deletedUserSpec = new DeletedUserSpec(
+            ContentFilteringCases::searchById,
+            ContentType::post
         );
 
-        $hideInactiveUserPostSpec = new HideInactiveUserPostSpec();
+        // $hideInactiveUserPostSpec = new HideInactiveUserPostSpec();
 
-        $SystemUserSpec = new SystemUserSpec(
-            ContentFilteringAction::replaceWithPlaceholder
-        );
+        // $SystemUserSpec = new SystemUserSpec(
+        //     ContentFilteringAction::replaceWithPlaceholder
+        // );
 
-        $placeholderIllegalContentFilterSpec = new IllegalContentFilterSpec(
-            ContentFilteringAction::replaceWithPlaceholder,
-            ContentType::comment
-        );
-        
-        
-        $postSpecs = [
-            $hideInactiveUserPostSpec,
-            $placeholderIllegalContentFilterSpec,
-        ];
+        // $placeholderIllegalContentFilterSpec = new IllegalContentFilterSpec(
+        //     ContentFilteringAction::replaceWithPlaceholder,
+        //     ContentType::comment
+        // );
 
-        $userSpecs = [
-            $DeletedUserSpec,
-            $SystemUserSpec,
-            $placeholderIllegalContentFilterSpec,
-        ];
-
-        $commentsSpecs = [
-            $placeholderIllegalContentFilterSpec,
+        $specs = [
+            $deletedUserSpec,
+            // $SystemUserSpec,
+            // $placeholderIllegalContentFilterSpec,
         ];
 
         try {
             $results = $this->postMapper->findPostser(
                 PeerUUID::empty->value,
-                $postSpecs,
+                $specs,
                 $args
             );
             
@@ -961,14 +886,13 @@ class PostService
             }
             $postsEnriched = $this->enrichWithProfileAndComment(
                 $results, 
-                $userSpecs, 
-                $commentsSpecs,
+                $specs,
                 PeerUUID::empty->value,
                 $commentOffset,
                 $commentLimit
             );
             foreach($postsEnriched as $post) {
-                ContentReplacer::placeholderPost($post, $postSpecs);
+                ContentReplacer::placeholderPost($post, $specs);
             }
             return $postsEnriched;
         } catch (\Throwable $e) {
@@ -986,8 +910,7 @@ class PostService
      * Falls back gracefully if no profiles found.
      *
      * @param PostAdvanced[] $posts Array of PostAdvanced
-     * @param \Fawaz\App\Services\ContentFiltering\Specs\Specification[] $userSpecs Content filtering specs
-     * @param \Fawaz\App\Services\ContentFiltering\Specs\Specification[] $commentSpecs Content filtering specs
+     * @param \Fawaz\Services\ContentFiltering\Specs\Specification[] $specs Content filtering specs
      * @param string $currentUserId Current/guest user id for profile fetch
      * @param int $commentOffset
      * @param int $commentLimit
@@ -995,8 +918,7 @@ class PostService
      */
     private function enrichWithProfileAndComment(
         array $posts, 
-        array $userSpecs, 
-        array $commentSpecs, 
+        array $specs,
         string $currentUserId, 
         int $commentOffset, 
         int $commentLimit
@@ -1013,16 +935,15 @@ class PostService
             return $posts;
         }
 
-        $profiles = $this->profileRepository->fetchByIds($userIdsFromPosts, $currentUserId, $userSpecs);
+        $profiles = $this->profileRepository->fetchByIds($userIdsFromPosts, $currentUserId, $specs);
 
         $enriched = [];
         foreach ($posts as $post) {
             $data = $post->getArrayCopy();
-            $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($data, $profiles[$post->getUserId()], $userSpecs);
+            $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($data, $profiles[$post->getUserId()], $specs);
             $enrichedWithCommentsAndProfiles = $this->enrichAndPlaceholderWithComments(
                 $enrichedWithProfiles,
-                $commentSpecs,
-                $userSpecs,
+                $specs,
                 $commentOffset,
                 $commentLimit,
                 $currentUserId
@@ -1046,7 +967,7 @@ class PostService
         return $data;
     }
 
-    private function enrichAndPlaceholderWithComments(array $data, array $commentSpecs, array $userSpecs, int $commentOffset, int $commentLimit, string $currentUserId): array
+    private function enrichAndPlaceholderWithComments(array $data, array $specs, int $commentOffset, int $commentLimit, string $currentUserId): array
     {
         $comments = $this->commentMapper->fetchAllByPostIdetaild($data['postid'],$currentUserId, $commentOffset, $commentLimit);
         
@@ -1065,13 +986,13 @@ class PostService
         if (empty($userIdsFromComments)) {
             return $comments;
         }
-        $profiles = $this->profileRepository->fetchByIds($userIdsFromComments, $currentUserId, $userSpecs);
+        $profiles = $this->profileRepository->fetchByIds($userIdsFromComments, $currentUserId, $specs);
         $commentsArray = [];
         foreach($comments as $comment) {
             if ($comment instanceof CommentAdvanced) {
-                ContentReplacer::placeholderComments($comment, $commentSpecs);
+                ContentReplacer::placeholderComments($comment, $specs);
                 $dataComment = $comment->getArrayCopy();
-                $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($dataComment, $profiles[$comment->getUserId()], $userSpecs);
+                $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($dataComment, $profiles[$comment->getUserId()], $specs);
                 // var_dump($enrichedWithProfiles);
                 $commentsArray[] = $enrichedWithProfiles;
             }

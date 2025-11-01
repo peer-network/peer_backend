@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\Database\Interfaces;
 
 use Fawaz\App\Profile;
-use Fawaz\App\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
 
 interface ProfileRepository
 {

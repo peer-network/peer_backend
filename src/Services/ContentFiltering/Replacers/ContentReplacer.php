@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 namespace Fawaz\Services\ContentFiltering\Replacers;
-use Fawaz\App\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
@@ -14,7 +14,7 @@ class ContentReplacer
      * Returns a new Profile object with placeholdered content, leaving the original unchanged.
      */
     public static function placeholderProfile(
-        ProfileReplaceable &$profile, 
+        ProfileReplaceable $profile, 
         array $specs
     ){
         $replacerSpecs = array_values(
@@ -37,7 +37,7 @@ class ContentReplacer
     }
 
     public static function placeholderPost(
-        PostReplaceable &$post, 
+        PostReplaceable $post, 
         array $specs
     ){
         $replacerSpecs = array_values(
@@ -59,7 +59,7 @@ class ContentReplacer
     }
 
     public static function placeholderComments(
-        CommentReplaceable &$comment, 
+        CommentReplaceable $comment, 
         array $specs
     ){
         $replacerSpecs = array_values(

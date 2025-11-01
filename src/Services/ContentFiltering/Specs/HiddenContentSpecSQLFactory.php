@@ -1,8 +1,9 @@
 <?php
 
-namespace Fawaz\App\Services\ContentFiltering\Specs;
+namespace Fawaz\Services\ContentFiltering\Specs;
 
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use function PHPUnit\Framework\returnArgument;
@@ -16,7 +17,7 @@ use function PHPUnit\Framework\returnArgument;
  *
  * Responsibilities:
  * - Delegates thresholds (e.g., number of reports required to hide content,
- *   or dismissals needed to restore visibility) to ContentFilterServiceImpl.
+ *   or dismissals needed to restore visibility) to HiddenContentFilterServiceImpl.
  * - Produces parameterized SQL conditions specific to users, posts, or comments.
  * - Encapsulates filtering logic so that database queries can remain clean
  *   and reusable.
@@ -31,7 +32,7 @@ use function PHPUnit\Framework\returnArgument;
  */
 final class HiddenContentSpecSQLFactory {
     public function __construct(
-        private readonly ContentFilterServiceImpl $contentFilterService
+        private readonly HiddenContentFilterServiceImpl $contentFilterService
     ) {}
 
     public function build(

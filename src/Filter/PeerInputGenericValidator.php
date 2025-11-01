@@ -7,7 +7,7 @@ namespace Fawaz\Filter;
 use Exception;
 use DateTime;
 use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 
 use function trim;
 use function preg_match;
@@ -210,7 +210,7 @@ class PeerInputGenericValidator
     }
 
     /**
-     * Validates contentFilterBy using ContentFilterServiceImpl::validateContentFilter
+     * Validates contentFilterBy using HiddenContentFilterServiceImpl::validateContentFilter
      * Accepts null, string, or array per existing usage. Returns true if valid or empty.
      */
     protected function ContentFilter(mixed $value, array $options = []): bool
@@ -221,7 +221,7 @@ class PeerInputGenericValidator
         }
 
         // Delegate validation to the service implementation
-        $isValid = ContentFilterServiceImpl::getContentFilteringSeverityLevel($value);
+        $isValid = HiddenContentFilterServiceImpl::getContentFilteringSeverityLevel($value);
         if ($isValid === false) {
             $this->errors['contentFilterBy'][] = "30103";
             return false;

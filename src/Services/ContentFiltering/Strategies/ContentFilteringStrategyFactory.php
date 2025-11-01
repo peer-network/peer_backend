@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Fawaz\Services\ContentFiltering\Strategies;
 
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\PlaceholderEverythingContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\Implementations\PostsFeedContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies as StrategyName;
+use Fawaz\Services\ContentFiltering\Strategies\Implementations\HidePostsElsePlaceholder;
+use Fawaz\Services\ContentFiltering\Strategies\Implementations\StrictlyHideEverythingContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 
 final class ContentFilteringStrategyFactory
 {
@@ -15,13 +16,14 @@ final class ContentFilteringStrategyFactory
      * and current content visibility policy (normal/hidden/illegal).
      */
     public static function create(
-        StrategyName $strategy
+        ContentFilteringCases $strategy
     ): ContentFilteringStrategy {
         return match ($strategy) {
-            StrategyName::postFeed   => new PostsFeedContentFilteringStrategy(),
-            StrategyName::myprofile    => new PlaceholderEverythingContentFilteringStrategy(),
-            StrategyName::searchById => new PlaceholderEverythingContentFilteringStrategy(),
-            StrategyName::searchByMeta => new PlaceholderEverythingContentFilteringStrategy()
+            ContentFilteringCases::postFeed   => new HidePostsElsePlaceholder(),
+            ContentFilteringCases::myprofile    => new PlaceholderEverythingContentFilteringStrategy(),
+            ContentFilteringCases::searchById => new PlaceholderEverythingContentFilteringStrategy(),
+            ContentFilteringCases::searchByMeta => new PlaceholderEverythingContentFilteringStrategy(),
+            ContentFilteringCases::hideAll => new StrictlyHideEverythingContentFilteringStrategy()
         };
     }
 }

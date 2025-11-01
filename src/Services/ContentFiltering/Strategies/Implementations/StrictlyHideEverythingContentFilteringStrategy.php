@@ -9,7 +9,7 @@ use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 
-class HideEverythingContentFilteringStrategy extends AContentFilteringStrategy implements ContentFilteringStrategy
+class StrictlyHideEverythingContentFilteringStrategy extends AContentFilteringStrategy implements ContentFilteringStrategy
 {
     public static array $strategy = [
         ContentType::user->value => [
@@ -17,11 +17,11 @@ class HideEverythingContentFilteringStrategy extends AContentFilteringStrategy i
         ],
         ContentType::post->value => [
             ContentType::post->value => ContentFilteringAction::hideContent,
-            ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
+            ContentType::user->value => ContentFilteringAction::hideContent,
         ],
         ContentType::comment->value => [
             ContentType::comment->value => ContentFilteringAction::hideContent,
-            ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
+            ContentType::user->value => ContentFilteringAction::hideContent,
         ],
     ];
 }

@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Fawaz\Database;
 
 use DateTime;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use PDO;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\App\Post;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostMedia;
-use Fawaz\App\Services\ContentFiltering\Specs\Specification;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecificationSQLData;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\App\User;
 use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
@@ -140,8 +140,8 @@ class PostMapper
 
         $whereClausesString = implode(" AND ", $whereClauses);
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::searchById,
+        $contentFilterService = new HiddenContentFilterServiceImpl(
+            ContentFilteringCases::searchById,
             $contentFilterBy
         );
 
@@ -931,8 +931,8 @@ class PostMapper
 
             $contentFilterService = null;
             if ($contentFilterBy !== null) {
-                $contentFilterService = new ContentFilterServiceImpl(
-                    ContentFilteringStrategies::postFeed,
+                $contentFilterService = new HiddenContentFilterServiceImpl(
+                    ContentFilteringCases::postFeed,
                     $contentFilterBy
                 );
             }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Utils\ContentFilterHelper;
 use PDO;
@@ -841,8 +843,8 @@ class AdvertisementMapper
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::postFeed,
+        $contentFilterService = new HiddenContentFilterServiceImpl(
+            ContentFilteringCases::postFeed,
             $contentFilterBy
         );
 

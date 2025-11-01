@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Utils\ErrorResponse;
 use PDO;
@@ -11,13 +12,13 @@ use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
 use Fawaz\App\ProfilUser;
-use Fawaz\App\Services\ContentFiltering\Specs\Specification;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecificationSQLData;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
@@ -202,8 +203,8 @@ class UserMapper
         $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
         $whereClausesString = implode(" AND ", $whereClauses);
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::postFeed,
+        $contentFilterService = new HiddenContentFilterServiceImpl(
+            ContentFilteringCases::postFeed,
             $contentFilterBy
         );
 
@@ -334,8 +335,8 @@ class UserMapper
         $trendlimit = 4;
         $trenddays = 7;
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::searchById,
+        $contentFilterService = new HiddenContentFilterServiceImpl(
+            ContentFilteringCases::searchById,
             $contentFilterBy
         );
 
@@ -800,8 +801,8 @@ class UserMapper
     ): ?array {
         $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::searchById,
+        $contentFilterService = new HiddenContentFilterServiceImpl(
+            ContentFilteringCases::searchById,
             $contentFilterBy
         );
 
@@ -959,8 +960,8 @@ class UserMapper
     ): array {
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            ContentFilteringStrategies::searchById,
+        $contentFilterService = new HiddenContentFilterServiceImpl(
+            ContentFilteringCases::searchById,
             $contentFilterBy
         );
 
@@ -1226,7 +1227,7 @@ class UserMapper
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
         
         if (!empty($result)) {
-            return new Profile($result, [], false) ?? null;
+            return new Profile($result, [], false);
         }
         
         return null;

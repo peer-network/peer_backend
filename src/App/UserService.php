@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\App\Services\ContentFiltering\Specs\ContentFilteringSpecsFactory;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Specs\ContentFilteringSpecsFactory;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -20,6 +21,7 @@ use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\Mailer;
@@ -44,8 +46,7 @@ class UserService
         protected PostMapper $postMapper,
         protected WalletMapper $walletMapper,
         protected Mailer $mailer,
-        protected TransactionManager $transactionManager,
-        protected ContentFilteringSpecsFactory $contentFilteringSpecsFactoryy
+        protected TransactionManager $transactionManager
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -330,7 +331,10 @@ class UserService
     {
         try {
             $specs = [
-                new DeletedUserSpec(ContentFilteringAction::hideContent),
+                new DeletedUserSpec(
+                    ContentFilteringCases::hideAll,
+                    ContentType::user
+                ),
                 new SystemUserSpec(ContentFilteringAction::hideContent)
             ];
         
@@ -472,7 +476,7 @@ class UserService
             }
 
             if ($contentFiltering && !empty($contentFiltering)) {
-                $contentFilteringSeverityLevel = ContentFilterServiceImpl::getContentFilteringSeverityLevel($contentFiltering);
+                $contentFilteringSeverityLevel = HiddenContentFilterServiceImpl::getContentFilteringSeverityLevel($contentFiltering);
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
                 $userPreferences->setUpdatedAt();
             }
@@ -484,7 +488,7 @@ class UserService
 
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
-            $contentFilteringSeverityLevelString = ContentFilterServiceImpl::getContentFilteringStringFromSeverityLevel(
+            $contentFilteringSeverityLevelString = HiddenContentFilterServiceImpl::getContentFilteringStringFromSeverityLevel(
                 $resultPreferences['contentFilteringSeverityLevel']
             );
 
@@ -766,8 +770,9 @@ class UserService
             return self::respondWithErrorObject(31007);
         }
 
-        $DeletedUserSpec = new DeletedUserSpec(
-            ContentFilteringAction::replaceWithPlaceholder
+        $deletedUserSpec = new DeletedUserSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
         );
         $SystemUserSpec = new SystemUserSpec(
             ContentFilteringAction::replaceWithPlaceholder
@@ -775,11 +780,10 @@ class UserService
 
         
         $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
-            ContentFilteringStrategies::searchById,
+            ContentFilteringCases::searchById,
             $contentFilterBy,
             $this->currentUserId,
             $userId,
-            ContentType::user,
             ContentType::user
         );
         
@@ -787,10 +791,10 @@ class UserService
         $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
 
         $specs = [
-            $DeletedUserSpec,
-            $SystemUserSpec,
-            $usersHiddenContentFilterSpec,
-            $placeholderIllegalContentFilterSpec
+            $deletedUserSpec,
+            // $SystemUserSpec,
+            // $usersHiddenContentFilterSpec,
+            // $placeholderIllegalContentFilterSpec
         ];
 
         try {

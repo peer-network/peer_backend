@@ -77,7 +77,7 @@ class UserInfoService
 
                 $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
 
-                $resultPreferences['contentFilteringSeverityLevel'] = ContentFilterServiceImpl::getContentFilteringStringFromSeverityLevel($contentFiltering);
+                $resultPreferences['contentFilteringSeverityLevel'] = HiddenContentFilterServiceImpl::getContentFilteringStringFromSeverityLevel($contentFiltering);
 
                 $affectedRows['userPreferences'] = $resultPreferences;
                 $affectedRows['onboardingsWereShown']   = $onboardings;

@@ -1,9 +1,9 @@
 <?php
 
-namespace Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User;
+namespace Fawaz\Services\ContentFiltering\Specs\SpecTypes\User;
 
-use Fawaz\App\Services\ContentFiltering\Specs\Specification;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecificationSQLData;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
@@ -17,10 +17,10 @@ final class SystemUserSpec implements Specification
         private ContentFilteringAction $action,
     ) {}
 
-    public function toSql(ContentType $targetContent): ?SpecificationSQLData
+    public function toSql(ContentType $showingContent): ?SpecificationSQLData
     {
         if ($this->action === ContentFilteringAction::hideContent) {
-            match ($targetContent) {
+            match ($showingContent) {
                 ContentType::user => new SpecificationSQLData(
                 [
                     "EXISTS (

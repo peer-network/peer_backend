@@ -46,13 +46,15 @@ use Fawaz\App\Validation\ValidatorErrors;
 use Fawaz\App\Profile;
 use Fawaz\Utils\ErrorResponse;
 use Fawaz\App\Role;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
-use Fawaz\App\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 
 class GraphQLSchemaBuilder
@@ -2803,8 +2805,9 @@ class GraphQLSchemaBuilder
                 'iInvited' => [],
             ];
         
-            $DeletedUserSpec = new DeletedUserSpec(
-                ContentFilteringAction::replaceWithPlaceholder
+            $deletedUserSpec = new DeletedUserSpec(
+                ContentFilteringCases::searchById,
+                ContentType::user
             );
             $SystemUserSpec = new SystemUserSpec(
                 ContentFilteringAction::replaceWithPlaceholder
@@ -2813,9 +2816,9 @@ class GraphQLSchemaBuilder
             $placeholderIllegalContentFilterSpec = new PlaceholderIllegalContentFilterSpec();
 
             $specs = [
-                $DeletedUserSpec,
-                $SystemUserSpec,
-                $placeholderIllegalContentFilterSpec
+                $deletedUserSpec,
+                // $SystemUserSpec,
+                // $placeholderIllegalContentFilterSpec
             ];
 
             
