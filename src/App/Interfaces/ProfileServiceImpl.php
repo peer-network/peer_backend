@@ -3,6 +3,7 @@
 namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
@@ -50,13 +51,13 @@ final class ProfileServiceImpl implements ProfileService
             ContentType::user
         );
 
-        // $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
-        //     $contentFilterStrategy,
-        //     $contentFilterBy,
-        //     $this->currentUserId,
-        //     $userId,
-        //     ContentType::user
-        // );
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            $this->currentUserId,
+            $userId,
+            ContentType::user
+        );
         
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
@@ -66,7 +67,7 @@ final class ProfileServiceImpl implements ProfileService
         $specs = [
             $deletedUserSpec,
             $systemUserSpec,
-            // $usersHiddenContentFilterSpec,
+            $hiddenContentFilterSpec,
             $illegalContentSpec
         ];
 

@@ -111,7 +111,7 @@ final class HiddenContentFilterSpec implements Specification
                 $subject->visibilityStatus()
         );
         if ($action === ContentFilteringAction::replaceWithPlaceholder) {
-                return ContentReplacementPattern::hidden;
+            return ContentReplacementPattern::hidden;
         }
         return null;
     }
