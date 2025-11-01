@@ -798,26 +798,26 @@ class AdvertisementMapper
         }
     }
 
-    public function convertEuroToTokens(float $euroAmount, int $rescode): array
-    {
-        $this->logger->debug('AdvertisementMapper.convertEuroToTokens started', ['euroAmount' => $euroAmount]);
+    // public function convertEuroToTokens(float $euroAmount, int $rescode): array
+    // {
+    //     $this->logger->debug('AdvertisementMapper.convertEuroToTokens started', ['euroAmount' => $euroAmount]);
 
-        $tokenPrice = 0.10; // Fixed price: 10 cent
-        $tokens = $euroAmount / $tokenPrice;
+    //     $tokenPrice = 0.10; // Fixed price: 10 cent
+    //     $tokens = $euroAmount / $tokenPrice;
 
-        $response = [
-            'status' => 'success',
-            'ResponseCode' => $rescode,
-            'affectedRows' => [
-                'InputEUR' => round($euroAmount, 2),
-                'TokenPriceFixedEUR' => $tokenPrice,
-                'TokenAmount' => floor($tokens),
-            ]
-        ];
+    //     $response = [
+    //         'status' => 'success',
+    //         'ResponseCode' => $rescode,
+    //         'affectedRows' => [
+    //             'InputEUR' => round($euroAmount, 2),
+    //             'TokenPriceFixedEUR' => $tokenPrice,
+    //             'TokenAmount' => floor($tokens),
+    //         ]
+    //     ];
 
-        $this->logger->info('convertEuroToTokens response', ['response' => $response]);
-        return $response;
-    }
+    //     $this->logger->info('convertEuroToTokens response', ['response' => $response]);
+    //     return $response;
+    // }
 
     public function findAdvertiser(string $currentUserId, ?array $args = []): array
     {

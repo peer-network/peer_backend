@@ -237,8 +237,8 @@ class ConstantsConfig implements ConstantsConfigInterface
             'like'    => 3.0,
             'dislike' => 3.0,
             'comment' => 1.0,
-            'advertisementBasic' => 500.0,
-            'advertisementPinned' => 2000.0,
+            'advertisementBasic' => 50.0,
+            'advertisementPinned' => 200.0,
         ],
         'ACTION_GEMS_RETURNS' => [
             'view'    => 0.25,
