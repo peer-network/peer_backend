@@ -844,7 +844,7 @@ class AdvertisementMapper
         $userId = $args['userid'] ?? null;
 
         $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentFilteringCases::postFeed,
+            ContentType::post,
             $contentFilterBy
         );
 

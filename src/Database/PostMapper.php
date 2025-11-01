@@ -141,7 +141,7 @@ class PostMapper
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentFilteringCases::searchById,
+            ContentType::post,
             $contentFilterBy
         );
 
@@ -181,16 +181,16 @@ class PostMapper
         foreach ($unfidtered_result as $row) {
             $post_reports = (int)$row['post_reports'];
 
-            if ($contentFilterService->getContentFilterAction(
-                ContentType::post,
-                ContentType::post,
-                $post_reports,
-                $row['post_visibility_status']
-            ) == ContentFilteringAction::replaceWithPlaceholder) {
-                $replacer = ContentReplacementPattern::hidden;
-                $row['title'] = $replacer->postTitle();
-                $row['media'] = $replacer->postMedia();
-            }
+            // if ($contentFilterService->getContentFilterAction(
+            //     ContentType::post,
+            //     ContentType::post,
+            //     $post_reports,
+            //     $row['post_visibility_status']
+            // ) == ContentFilteringAction::replaceWithPlaceholder) {
+            //     $replacer = ContentReplacementPattern::hidden;
+            //     $row['title'] = $replacer->postTitle();
+            //     $row['media'] = $replacer->postMedia();
+            // }
             $result[] = $row;
         }
         return $result;
@@ -931,7 +931,7 @@ class PostMapper
             $contentFilterService = null;
             if ($contentFilterBy !== null) {
                 $contentFilterService = new HiddenContentFilterServiceImpl(
-                    ContentFilteringCases::postFeed,
+                    ContentType::post,
                     $contentFilterBy
                 );
             }
@@ -940,18 +940,18 @@ class PostMapper
                 if ($contentFilterService !== null) {
                     $user_reports = (int)($prt['user_reports'] ?? 0);
 
-                    $action = $contentFilterService->getContentFilterAction(
-                        ContentType::post,
-                        ContentType::user,
-                        $user_reports,
-                        $prt['user_visibility_status']
-                    );
+                    // $action = $contentFilterService->getContentFilterAction(
+                    //     ContentType::post,
+                    //     ContentType::user,
+                    //     $user_reports,
+                    //     $prt['user_visibility_status']
+                    // );
 
-                    if ($action === ContentFilteringAction::replaceWithPlaceholder) {
-                        $replacer = ContentReplacementPattern::hidden;
-                        $prt['username'] = $replacer->username();
-                        $prt['img']      = $replacer->profilePicturePath();
-                    }
+                    // if ($action === ContentFilteringAction::replaceWithPlaceholder) {
+                    //     $replacer = ContentReplacementPattern::hidden;
+                    //     $prt['username'] = $replacer->username();
+                    //     $prt['img']      = $replacer->profilePicturePath();
+                    // }
                 }
                 $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
                 $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];

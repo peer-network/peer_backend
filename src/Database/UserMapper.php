@@ -204,7 +204,7 @@ class UserMapper
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentFilteringCases::postFeed,
+            ContentType::user,
             $contentFilterBy
         );
 
@@ -279,16 +279,16 @@ class UserMapper
                 try {
                     $user_reports = (int)$row['user_reports'];
 
-                    if ($contentFilterService->getContentFilterAction(
-                        ContentType::user,
-                        ContentType::user,
-                        $user_reports,
-                        $row['visibility_status']
-                    ) == ContentFilteringAction::replaceWithPlaceholder) {
-                        $replacer = ContentReplacementPattern::hidden;
-                        $row['username'] = $replacer->username();
-                        $row['img'] = $replacer->profilePicturePath();
-                    }
+                    // if ($contentFilterService->getContentFilterAction(
+                    //     ContentType::user,
+                    //     ContentType::user,
+                    //     $user_reports,
+                    //     $row['visibility_status']
+                    // ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    //     $replacer = ContentReplacementPattern::hidden;
+                    //     $row['username'] = $replacer->username();
+                    //     $row['img'] = $replacer->profilePicturePath();
+                    // }
 
                     $results[] = new User([
                         'uid' => $row['uid'],
@@ -334,10 +334,10 @@ class UserMapper
         $trenddays = 7;
 
         $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentFilteringCases::searchById,
+            ContentType::user,
             $contentFilterBy
         );
-
+        
         $whereClauses = ["verified = :verified"];
         $includeDeleted = !empty($args['includeDeleted']);
         if ($includeDeleted) {
@@ -456,16 +456,16 @@ class UserMapper
                 try {
                     $user_reports = (int)$row['user_reports'];
 
-                    if ($contentFilterService->getContentFilterAction(
-                        ContentType::user,
-                        ContentType::user,
-                        $user_reports,
-                        $row['visibility_status']
-                    ) == ContentFilteringAction::replaceWithPlaceholder) {
-                        $replacer = ContentReplacementPattern::hidden;
-                        $row['username'] = $replacer->username();
-                        $row['img'] = $replacer->profilePicturePath();
-                    }
+                    // if ($contentFilterService->getContentFilterAction(
+                    //     ContentType::user,
+                    //     ContentType::user,
+                    //     $user_reports,
+                    //     $row['visibility_status']
+                    // ) == ContentFilteringAction::replaceWithPlaceholder) {
+                    //     $replacer = ContentReplacementPattern::hidden;
+                    //     $row['username'] = $replacer->username();
+                    //     $row['img'] = $replacer->profilePicturePath();
+                    // }
 
                     $results[] = new UserAdvanced([
                         'uid' => $row['uid'],
@@ -799,7 +799,7 @@ class UserMapper
         $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
 
         $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentFilteringCases::searchById,
+            ContentType::user,
             $contentFilterBy
         );
 
@@ -852,16 +852,16 @@ class UserMapper
                 $row['img'] = $frdObj['img'];
                 $row['biography'] = $frdObj['biography'];
 
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::user,
-                    ContentType::user,
-                    $user_reports,
-                    $row['visibility_status']
-                ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::hidden;
-                    $row['username'] = $replacer->username();
-                    $row['img'] = $replacer->profilePicturePath();
-                }
+                // if ($contentFilterService->getContentFilterAction(
+                //     ContentType::user,
+                //     ContentType::user,
+                //     $user_reports,
+                //     $row['visibility_status']
+                // ) == ContentFilteringAction::replaceWithPlaceholder) {
+                //     $replacer = ContentReplacementPattern::hidden;
+                //     $row['username'] = $replacer->username();
+                //     $row['img'] = $replacer->profilePicturePath();
+                // }
                 $filtered_friends[] = $row;
             }
 
@@ -962,7 +962,7 @@ class UserMapper
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
         $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentFilteringCases::searchById,
+            ContentType::user,
             $contentFilterBy
         );
 
@@ -1009,16 +1009,16 @@ class UserMapper
         foreach ($uniqueResults as $row) {
             $user_reports = (int)$row['user_reports'];
 
-            if ($contentFilterService->getContentFilterAction(
-                ContentType::user,
-                ContentType::user,
-                $user_reports,
-                $row['visibility_status']
-            ) == ContentFilteringAction::replaceWithPlaceholder) {
-                $replacer = ContentReplacementPattern::hidden;
-                $row['username'] = $replacer->username();
-                $row['img'] = $replacer->profilePicturePath();
-            }
+            // if ($contentFilterService->getContentFilterAction(
+            //     ContentType::user,
+            //     ContentType::user,
+            //     $user_reports,
+            //     $row['visibility_status']
+            // ) == ContentFilteringAction::replaceWithPlaceholder) {
+            //     $replacer = ContentReplacementPattern::hidden;
+            //     $row['username'] = $replacer->username();
+            //     $row['img'] = $replacer->profilePicturePath();
+            // }
             $filtered_results[] = $row;
         }
 

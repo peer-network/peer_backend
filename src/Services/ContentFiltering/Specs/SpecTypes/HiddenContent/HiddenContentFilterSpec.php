@@ -2,9 +2,14 @@
 
 namespace Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent;
 
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
+use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\Implementations\HidePostsElsePlaceholder;
+use Fawaz\Services\ContentFiltering\Strategies\Implementations\PlaceholderEverythingContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\Implementations\StrictlyHideEverythingContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
@@ -12,28 +17,33 @@ use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
+use Rector\TypeDeclaration\Rector\ClassMethod\StrictArrayParamDimFetchRector;
 
 
 final class HiddenContentFilterSpec implements Specification
 {
     private HiddenContentFilterServiceImpl $contentFilterService;
+    private ContentFilteringStrategy $contentFilterStrategy;
 
     public function __construct(
         ContentFilteringCases $case, 
         ?string $contentFilterBy,
-        private ContentType $contentTarget,
+        ContentType $contentTarget,
     ) {
         $this->contentFilterService = new HiddenContentFilterServiceImpl(
-            $case,
+            $contentTarget,
             $contentFilterBy
+        );
+        $this->contentFilterStrategy = self::createStrategy(
+            $case
         );
     }
 
     public function toSql(ContentType $showingContent): ?SpecificationSQLData
     {
         $action = $this->contentFilterService->getContentFilterAction(
-            $this->contentTarget,
             $showingContent,
+            $this->contentFilterStrategy
         );
 
         if ($action === ContentFilteringAction::hideContent) {
@@ -98,8 +108,8 @@ final class HiddenContentFilterSpec implements Specification
             $showingContent = ContentType::post;
         }
         $action = $this->contentFilterService->getContentFilterAction(
-            $this->contentTarget,
-                $showingContent,
+            $showingContent,
+                $this->contentFilterStrategy,
                 $subject->getReports(),
                 $subject->visibilityStatus()
         );
@@ -107,5 +117,17 @@ final class HiddenContentFilterSpec implements Specification
             return ContentReplacementPattern::hidden;
         }
         return null;
+    }
+
+    private static function createStrategy(
+        ContentFilteringCases $strategy
+    ): ContentFilteringStrategy {
+        return match ($strategy) {
+            ContentFilteringCases::myprofile => new PlaceholderEverythingContentFilteringStrategy(),
+            ContentFilteringCases::searchById => new PlaceholderEverythingContentFilteringStrategy(),
+            ContentFilteringCases::searchByMeta => new PlaceholderEverythingContentFilteringStrategy(),
+            ContentFilteringCases::postFeed => new HidePostsElsePlaceholder(),
+            ContentFilteringCases::hideAll => new StrictlyHideEverythingContentFilteringStrategy()
+        };
     }
 }
