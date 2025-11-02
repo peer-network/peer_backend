@@ -49,8 +49,7 @@ class ProfileRepositoryImpl implements ProfileRepository
                 u.biography,
                 u.createdat,
                 u.updatedat,
-                ui.reports AS user_reports,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed
+                ui.reports AS user_reports
             FROM 
                 users u
             LEFT JOIN users_info ui ON uid = ui.userid
@@ -170,7 +169,6 @@ class ProfileRepositoryImpl implements ProfileRepository
                 u.createdat,
                 u.updatedat,
                 ui.reports AS user_reports,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
                 COALESCE((
                     SELECT COUNT(p.postid)
                     FROM posts p

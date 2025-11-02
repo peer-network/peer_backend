@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
-use Fawaz\Utils\ErrorResponse;
 use PDO;
 use Fawaz\App\User;
 use Fawaz\App\UserInfo;
@@ -19,8 +16,6 @@ use Fawaz\App\Tokenize;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
-use Fawaz\config\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\DateService;
 use Fawaz\App\Status;
@@ -793,21 +788,16 @@ class UserMapper
         string $userId,
         array $specifications,
         int $offset = 0,
-        int $limit = 10,
-        ?string $contentFilterBy = null
+        int $limit = 10
     ): ?array {
         $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
-
-        $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentType::user,
-            $contentFilterBy
-        );
 
         $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = "f1.followerid = :userId AND f2.followedid = :userId";
+        $whereClausesString = implode(" AND ", $whereClauses);
 
-        // Build positional placeholders for the IN clause
         $params = $allSpecs->paramsToPrepare;
         try {
             $sql = "
@@ -825,8 +815,7 @@ class UserMapper
                 INNER JOIN follows f2 ON f1.followedid = f2.followerid 
                 INNER JOIN users u ON f1.followedid = u.uid 
                 LEFT JOIN users_info ui ON ui.userid = u.uid
-                WHERE f1.followerid = :userId 
-                AND f2.followedid = :userId
+                WHERE $whereClausesString
                 ORDER BY u.username ASC
                 LIMIT :limit OFFSET :offset
             ";
@@ -844,25 +833,13 @@ class UserMapper
 
 
             foreach ($friends as $row) {
-                $user_reports = (int)$row['user_reports'];
+                $frdObj = new Profile($row, [], false);
 
-                $frdObj = (new User($row, [], false))->getArrayCopy();
+                // $row['username'] = $frdObj['username'];
+                // $row['img'] = $frdObj['img'];
+                // $row['biography'] = $frdObj['biography'];
 
-                $row['username'] = $frdObj['username'];
-                $row['img'] = $frdObj['img'];
-                $row['biography'] = $frdObj['biography'];
-
-                // if ($contentFilterService->getContentFilterAction(
-                //     ContentType::user,
-                //     ContentType::user,
-                //     $user_reports,
-                //     $row['visibility_status']
-                // ) == ContentFilteringAction::replaceWithPlaceholder) {
-                //     $replacer = ContentReplacementPattern::hidden;
-                //     $row['username'] = $replacer->username();
-                //     $row['img'] = $replacer->profilePicturePath();
-                // }
-                $filtered_friends[] = $row;
+                $filtered_friends[] = $frdObj;
             }
 
             if ($filtered_friends) {

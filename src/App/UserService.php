@@ -863,13 +863,23 @@ class UserService
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $contentFilterCase = ContentFilteringCases::searchById;
-
+        
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
             ContentType::user
         );
-
         $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::user
+        );
+        
+        $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
             ContentType::user
         );
@@ -877,22 +887,30 @@ class UserService
         $specs = [
             $deletedUserSpec,
             $systemUserSpec,
-            // $usersHiddenContentFilterSpec,
-            // $placeholderIllegalContentFilterSpec
+            $hiddenContentFilterSpec,
+            $illegalContentSpec
         ];
 
         $this->logger->info('Fetching friends list', ['currentUserId' => $this->currentUserId, 'offset' => $offset, 'limit' => $limit]);
 
         try {
-            $users = $this->userMapper->fetchFriends($this->currentUserId,$specs, $offset, $limit, $contentFilterBy);
+            $users = $this->userMapper->fetchFriends($this->currentUserId,$specs, $offset, $limit);
+
+            $usersArray = [];
+            foreach ($users as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
+                $usersArray[] = $profile->getArrayCopy();
+            }
 
             if (!empty($users)) {
-                $this->logger->info('Friends list retrieved successfully', ['userCount' => count($users)]);
+                $this->logger->info('Friends list retrieved successfully', ['userCount' => count($usersArray)]);
                 return [
                     'status' => 'success',
-                    'counter' => count($users),
+                    'counter' => count($usersArray),
                     'ResponseCode' => "11102",
-                    'affectedRows' => $users,
+                    'affectedRows' => $usersArray,
                 ];
             }
 
