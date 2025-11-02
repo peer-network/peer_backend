@@ -815,12 +815,18 @@ class UserService
             $following = $this->userMapper->fetchFollowing(
                 $userId, 
                 $this->currentUserId, 
+                $specs,
                 $offset, 
                 $limit, 
-                $contentFilterBy,
             );
 
             foreach ($followers as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
+            }
+
+            foreach ($following as $profile) {
                 if ($profile instanceof ProfileReplaceable) {
                     ContentReplacer::placeholderProfile($profile, $specs);
                 }
@@ -838,7 +844,7 @@ class UserService
                         $followers
                     ),
                     'following' => array_map(
-                        fn (ProfilUser $followed) => $followed->getArrayCopy(),
+                        fn (Profile $followed) => $followed->getArrayCopy(),
                         $following
                     )
                 ]

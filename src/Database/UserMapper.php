@@ -8,7 +8,7 @@ use PDO;
 use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
-use Fawaz\App\ProfilUser;
+ 
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\App\UserAdvanced;
@@ -932,81 +932,71 @@ class UserMapper
     public function fetchFollowing(
         string $userId,
         string $currentUserId,
+        array $specifications,
         int $offset = 0,
-        int $limit = 10,
-        ?string $contentFilterBy = null
+        int $limit = 10
     ): array {
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
-        $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentType::user,
-            $contentFilterBy
-        );
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = 'f.followerid = :userId';
+        $whereClausesString = implode(" AND ", $whereClauses);
+        $params = $allSpecs->paramsToPrepare;
 
-        $sql = "
-            SELECT 
-                f.followedid AS uid, 
-                u.username, 
-                u.slug,
-                u.img,
-                u.status,
-                ui.reports AS user_reports,
-                u.visibility_status,
-                EXISTS (
-                    SELECT 1 
-                    FROM follows ff 
-                    WHERE ff.followerid = :currentUserId AND ff.followedid = f.followedid
-                ) AS isfollowed,
-                EXISTS (
-                    SELECT 1 
-                    FROM follows ff 
-                    WHERE ff.followerid = f.followedid AND ff.followedid = :currentUserId
-                ) AS isfollowing
-            FROM follows f
-            JOIN users u ON u.uid = f.followedid
-            LEFT JOIN users_info ui ON ui.userid = u.uid
-            WHERE f.followerid = :userId
-            ORDER BY f.createdat DESC
-            LIMIT :limit OFFSET :offset
-        ";
+        try {
+            $sql = "
+                SELECT 
+                    f.followedid AS uid, 
+                    u.username, 
+                    u.slug,
+                    u.status,
+                    u.img,
+                    ui.reports AS user_reports,
+                    u.visibility_status,
+                    EXISTS (
+                        SELECT 1 
+                        FROM follows ff 
+                        WHERE ff.followerid = :currentUserId AND ff.followedid = f.followedid
+                    ) AS isfollowed,
+                    EXISTS (
+                        SELECT 1 
+                        FROM follows ff 
+                        WHERE ff.followerid = f.followedid AND ff.followedid = :currentUserId
+                    ) AS isfollowing
+                FROM follows f
+                JOIN users u ON u.uid = f.followedid
+                LEFT JOIN users_info ui ON ui.userid = u.uid
+                WHERE $whereClausesString
+                ORDER BY f.createdat DESC
+                LIMIT :limit OFFSET :offset
+            ";
 
-        $stmt = $this->db->prepare($sql);
+            $stmt = $this->db->prepare($sql);
 
-        $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
-        $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $params['userId'] = $userId;
+            $params['currentUserId'] = $currentUserId;
+            $params['limit'] = $limit;
+            $params['offset'] = $offset;
 
-        $stmt->execute();
-        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $stmt->execute($params);
+            $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-        $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
-        $filtered_results = [];
+            $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
 
-        foreach ($uniqueResults as $row) {
-            $user_reports = (int)$row['user_reports'];
+            $users = array_map(fn ($row) => new Profile($row), $uniqueResults);
 
-            // if ($contentFilterService->getContentFilterAction(
-            //     ContentType::user,
-            //     ContentType::user,
-            //     $user_reports,
-            //     $row['visibility_status']
-            // ) == ContentFilteringAction::replaceWithPlaceholder) {
-            //     $replacer = ContentReplacementPattern::hidden;
-            //     $row['username'] = $replacer->username();
-            //     $row['img'] = $replacer->profilePicturePath();
-            // }
-            $filtered_results[] = $row;
+            $this->logger->info(
+                count($users) > 0 ? "fetchFollowing retrieved users" : "No users found",
+                ['count' => count($users)]
+            );
+
+            return $users;
+        } catch (\Throwable $e) {
+            $this->logger->error("Database error in fetchFollowing", ['error' => $e->getMessage()]);
+            return [];
         }
-
-        $users = array_map(fn ($row) => new ProfilUser($row), $filtered_results);
-
-        $this->logger->info(
-            count($users) > 0 ? "fetchFollowing retrieved users" : "No users found",
-            ['count' => count($users)]
-        );
-
-        return $users;
     }
 
     private function setPassword(string $password): string
