@@ -827,18 +827,54 @@ class PostService
             return $this::respondWithError(30201);
         }
 
+
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::user
+        );
+        
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $specs = [
+            $deletedUserSpec,
+            $systemUserSpec,
+            $hiddenContentFilterSpec,
+            $illegalContentSpec
+        ];
+
         try {
             $result = $this->postMapper->getInteractions(
+                $specs,
                 $getOnly,
                 $postOrCommentId,
                 $this->currentUserId,
                 $offset,
-                $limit,
-                $contentFilterBy
+                $limit
             );
 
+            $usersArray = [];
+            
+            foreach($result as $user) {
+                ContentReplacer::placeholderProfile($user, $specs);
+                $usersArray[] = $user->getArrayCopy();
+            }
             $this->logger->info("Interaction fetched successfully", ['count' => count($result)]);
-            return $this::createSuccessResponse(11205, $result);
+            return $this::createSuccessResponse(11205, $usersArray);
 
         } catch (\Throwable $e) {
             $this->logger->error("Error fetching Posts", [
@@ -862,11 +898,6 @@ class PostService
         }
 
         $this->logger->debug("PostService.getGuestListPost started");
-        
-        $deletedUserSpec = new DeletedUserSpec(
-            ContentFilteringCases::searchById,
-            ContentType::post
-        );
 
         $contentFilterCase = ContentFilteringCases::searchById;
 
@@ -878,7 +909,7 @@ class PostService
             $contentFilterCase,
             ContentType::post
         );
-
+        
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
             ContentType::post

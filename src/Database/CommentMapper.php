@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\App\Profile;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
@@ -148,8 +149,7 @@ class CommentMapper
                 CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed,
                 ui.reports AS user_reports,
                 u.status AS user_status,
-                u.visibility_status as user_visibility_status,
-                c.visibility_status as comment_visibility_status,
+                c.visibility_status as visibility_status,
                 ci.reports AS comment_reports
                 FROM comments c
             LEFT JOIN %s
@@ -185,7 +185,7 @@ class CommentMapper
                 'amountreports' => (int) $row['comment_reports'],
                 'isliked' => (bool) $row['isliked'],
                 'createdat' => $row['createdat'],
-                'visibility_status' => $row['comment_visibility_status'],
+                'visibility_status' => $row['visibility_status'],
                 'reports' => $row['comment_reports']
             ]);
         }
@@ -239,7 +239,7 @@ class CommentMapper
                         'biography' => $row['biography'],
                         'updatedat' => $row['updatedat'],
                     ];
-            $userObj = (new User($userObj, [], false))->getArrayCopy();
+            $userObj = (new Profile($userObj, [], false))->getArrayCopy();
 
             $row['user'] = [
                 'uid' => $userObj['uid'] ?? '',

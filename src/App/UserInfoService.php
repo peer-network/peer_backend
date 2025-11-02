@@ -9,7 +9,7 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\ReportsMapper;
 use Fawaz\Services\Base64FileHandler;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;

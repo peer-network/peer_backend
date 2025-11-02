@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\Database;
 
 use DateTime;
+use Fawaz\App\Profile;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use PDO;
 use Fawaz\App\Models\MultipartPost;
@@ -875,8 +876,12 @@ class PostMapper
     /**
      * Get Interactions based on Filter
      */
-    public function getInteractions(string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit, ?string $contentFilterBy = null): array
+    public function getInteractions(array $specifications,string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit, ?string $contentFilterBy = null): array
     {
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
         $this->logger->debug("PostMapper.getInteractions started");
 
         try {
@@ -896,13 +901,18 @@ class PostMapper
                 $needleColumn = 'commentid';
             }
 
-            $sql = "SELECT 
+
+            $whereClauses[] = "$needleColumn = :postid";
+
+            $whereClausesString = implode(" AND ", $whereClauses);
+
+            $sql = sprintf("SELECT 
                         u.uid, 
                         u.username, 
                         u.slug, 
                         u.img, 
                         u.status, 
-                        u.visibility_status as user_visibility_status,
+                        u.visibility_status,
                         (f1.followerid IS NOT NULL) AS isfollowing,
                         (f2.followerid IS NOT NULL) AS isfollowed,
                         COALESCE(ui.reports, 0) AS user_reports
@@ -915,47 +925,26 @@ class PostMapper
                     LEFT JOIN 
                         follows f2 
                         ON u.uid = f2.followedid AND f2.followerid = :currentUserId
-                    WHERE $needleColumn = :postid
-                    LIMIT :limit OFFSET :offset";
+                    WHERE %s
+                    LIMIT :limit OFFSET :offset",
+                    $whereClausesString
+                );
 
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':postid', $postOrCommentId, \PDO::PARAM_STR);
-            $stmt->bindParam(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
+            $params['postid'] =  $postOrCommentId;
+            $params['currentUserId'] =  $currentUserId;
+            $params['limit'] =  $limit;
+            $params['offset'] =  $offset;
 
-            $stmt->execute();
+            $stmt->execute($params);
 
             $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            $contentFilterService = null;
-            if ($contentFilterBy !== null) {
-                $contentFilterService = new HiddenContentFilterServiceImpl(
-                    ContentType::post,
-                    $contentFilterBy
-                );
-            }
             $userResultObj = [];
             foreach ($userResults as $key => $prt) {
-                if ($contentFilterService !== null) {
-                    $user_reports = (int)($prt['user_reports'] ?? 0);
-
-                    // $action = $contentFilterService->getContentFilterAction(
-                    //     ContentType::post,
-                    //     ContentType::user,
-                    //     $user_reports,
-                    //     $prt['user_visibility_status']
-                    // );
-
-                    // if ($action === ContentFilteringAction::replaceWithPlaceholder) {
-                    //     $replacer = ContentReplacementPattern::hidden;
-                    //     $prt['username'] = $replacer->username();
-                    //     $prt['img']      = $replacer->profilePicturePath();
-                    // }
-                }
-                $userResultObj[$key] = (new User($prt, [], false))->getArrayCopy();
-                $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
-                $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
+                $userResultObj[$key] = new Profile($prt, [], false);
+                // $userResultObj[$key]['isfollowed'] = $prt['isfollowed'];
+                // $userResultObj[$key]['isfollowing'] = $prt['isfollowing'];
             }
 
             return $userResultObj;

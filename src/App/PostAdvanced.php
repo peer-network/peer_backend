@@ -74,7 +74,7 @@ class PostAdvanced implements PostReplaceable
         $this->isfriend = $data['isfriend'] ?? false;
         $this->url = $this->getPostUrl();
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->reports = $data['post_reports'] ?? null;
+        $this->reports = $data['reports'] ?? null;
         $this->visibilityStatus = $data['visibility_status']?? null;
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
