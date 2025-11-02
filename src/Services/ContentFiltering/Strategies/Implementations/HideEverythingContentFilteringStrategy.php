@@ -17,6 +17,7 @@ class HideEverythingContentFilteringStrategy extends AContentFilteringStrategy i
         ],
         ContentType::post->value => [
             ContentType::post->value => ContentFilteringAction::hideContent,
+            ContentType::comment->value => ContentFilteringAction::replaceWithPlaceholder,
             ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
         ],
         ContentType::comment->value => [

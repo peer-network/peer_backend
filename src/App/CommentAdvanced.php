@@ -43,7 +43,7 @@ class CommentAdvanced implements CommentReplaceable
         $this->amountreplies = $data['amountreplies'] ?? 0;
         $this->amountreports = $data['amountreports'] ?? 0;
         $this->isliked = $data['isliked'] ?? false;
-        $this->reports = $data['comment_reports'] ?? null;
+        $this->reports = $data['reports'] ?? null;
         $this->visibilityStatus = $data['visibility_status']?? null;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
     }

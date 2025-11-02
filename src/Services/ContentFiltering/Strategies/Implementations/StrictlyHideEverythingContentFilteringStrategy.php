@@ -17,6 +17,7 @@ class StrictlyHideEverythingContentFilteringStrategy extends AContentFilteringSt
         ],
         ContentType::post->value => [
             ContentType::post->value => ContentFilteringAction::hideContent,
+            ContentType::comment->value => ContentFilteringAction::hideContent,
             ContentType::user->value => ContentFilteringAction::hideContent,
         ],
         ContentType::comment->value => [

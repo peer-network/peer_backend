@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use PDO;
 use Fawaz\App\Comment;
@@ -94,12 +96,16 @@ class CommentMapper
         return $deleted;
     }
 
-    public function fetchAllByPostIdetaild(string $postId, string $currentUserId, int $offset = 0, int $limit = 10, ?string $contentFilterBy = null): array
+    public function fetchAllByPostIdetaild(string $postId, array $specifications, string $currentUserId, int $offset = 0, int $limit = 10): array
     {
         $this->logger->debug("CommentMapper.fetchAllByPostIdetaild started");
 
-        $whereClauses = ["c.postid = :postId AND c.parentid IS NULL"];
-        // $whereClauses[] = 'u.status = 0 AND (u.roles_mask = 0 OR u.roles_mask = 16)';
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::comment), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
+        
+        $whereClauses[] = "c.postid = :postId AND c.parentid IS NULL";
 
         $joinClausesString = "
                 users u ON c.userid = u.uid
@@ -154,13 +160,14 @@ class CommentMapper
             $joinClausesString,
             $whereClausesString
         );
-
+            
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':postId', $postId, PDO::PARAM_STR);
-        $stmt->bindValue(':currentUserId', $currentUserId, PDO::PARAM_STR);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
+        $params['postId']=$postId;
+        $params['currentUserId']=$currentUserId;
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
+
+        $stmt->execute($params);
 
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -177,7 +184,9 @@ class CommentMapper
                 'amountreplies' => (int) $row['amountreplies'],
                 'amountreports' => (int) $row['comment_reports'],
                 'isliked' => (bool) $row['isliked'],
-                'createdat' => $row['createdat']
+                'createdat' => $row['createdat'],
+                'visibility_status' => $row['comment_visibility_status'],
+                'reports' => $row['comment_reports']
             ]);
         }
 

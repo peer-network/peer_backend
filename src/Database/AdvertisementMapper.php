@@ -888,19 +888,19 @@ class AdvertisementMapper
         $params['roleAdmin'] = Role::ADMIN;
 
         // Content Filtering
-        if ($contentFilterService->getContentFilterAction(
-            ContentType::post,
-            ContentType::post
-        ) === ContentFilteringAction::hideContent) {
-            $params['post_report_amount_to_hide'] = $post_report_amount_to_hide;
+        // if ($contentFilterService->getContentFilterAction(
+        //     ContentType::post,
+        //     ContentType::post
+        // ) === ContentFilteringAction::hideContent) {
+        //     $params['post_report_amount_to_hide'] = $post_report_amount_to_hide;
             
-            $whereClauses[] = '(
-                p.userid = :currentUserId
-                OR (
-                    pi.reports < :post_report_amount_to_hide
-                )
-            )';
-        }
+        //     $whereClauses[] = '(
+        //         p.userid = :currentUserId
+        //         OR (
+        //             pi.reports < :post_report_amount_to_hide
+        //         )
+        //     )';
+        // }
 
         // FilterBy Content Types
         if (!empty($filterBy) && is_array($filterBy)) {
@@ -1014,17 +1014,17 @@ class AdvertisementMapper
                 // User-Placeholder anwenden, falls nötig
                 $user_reports = (int)$row['user_reports'];
 
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::post,
-                    ContentType::user,
-                    $user_reports,
-                    $currentUserId,
-                    $row['userid']
-                ) === ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::hidden;
-                    $row['username'] = $replacer->username();
-                    $row['userimg'] = $replacer->profilePicturePath();
-                }
+                // if ($contentFilterService->getContentFilterAction(
+                //     ContentType::post,
+                //     ContentType::user,
+                //     $user_reports,
+                //     $currentUserId,
+                //     $row['userid']
+                // ) === ContentFilteringAction::replaceWithPlaceholder) {
+                //     $replacer = ContentReplacementPattern::hidden;
+                //     $row['username'] = $replacer->username();
+                //     $row['userimg'] = $replacer->profilePicturePath();
+                // }
 
                 return [
                     'post' => self::mapRowToPost($row),

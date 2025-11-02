@@ -986,8 +986,7 @@ class PostService
 
     private function enrichAndPlaceholderWithComments(array $data, array $specs, int $commentOffset, int $commentLimit, string $currentUserId): array
     {
-        $comments = $this->commentMapper->fetchAllByPostIdetaild($data['postid'],$currentUserId, $commentOffset, $commentLimit);
-        
+        $comments = $this->commentMapper->fetchAllByPostIdetaild($data['postid'],$specs,$currentUserId, $commentOffset, $commentLimit);
         if (empty($comments)) {
             return $data;
         }

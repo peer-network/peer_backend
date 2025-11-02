@@ -96,13 +96,13 @@ class HiddenContentFilterServiceImpl  {
             }
         } else {
             if (( $visibilityStatus === "hidden" || ( $visibilityStatus === "normal" && $showingContentReportAmount >= $this->getReportsAmountToHideContent($showingContent))) && 
-            $this->contentFilterBy === $this->contentSeverityLevels[0]
-        ) { 
-            if ($strategy === null) {
-                return null;
+                $this->contentFilterBy === $this->contentSeverityLevels[0]
+            ) { 
+                if ($strategy === null) {
+                    return null;
+                }
+                return $strategy::getAction($this->targetContent, $showingContent);
             }
-            return $strategy::getAction($this->targetContent, $showingContent);
-        }
         }
         return null;
     }
