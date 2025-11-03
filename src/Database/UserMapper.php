@@ -8,7 +8,6 @@ use PDO;
 use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
- 
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\App\UserAdvanced;
@@ -186,7 +185,7 @@ class UserMapper
         }
     }
 
-    public function fetchAll(string $currentUserId, array $args = []): array
+    public function fetchAll(string $currentUserId, array $args = [], array $specifications = []): array
     {
         $this->logger->debug("UserMapper.fetchAll started");
 
@@ -194,14 +193,12 @@ class UserMapper
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-        $whereClauses = ["verified = :verified"];
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = "verified = :verified";
         $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
         $whereClausesString = implode(" AND ", $whereClauses);
-
-        $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentType::user,
-            $contentFilterBy
-        );
 
         $sql = sprintf(
             "
@@ -229,7 +226,7 @@ class UserMapper
         );
 
         $conditions = [];
-        $queryParams = [':verified' => 1];
+        $queryParams = array_merge($allSpecs->paramsToPrepare, [':verified' => 1]);
 
         foreach ($args as $field => $value) {
             if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
@@ -272,34 +269,7 @@ class UserMapper
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
-                    $user_reports = (int)$row['user_reports'];
-
-                    // if ($contentFilterService->getContentFilterAction(
-                    //     ContentType::user,
-                    //     ContentType::user,
-                    //     $user_reports,
-                    //     $row['visibility_status']
-                    // ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    //     $replacer = ContentReplacementPattern::hidden;
-                    //     $row['username'] = $replacer->username();
-                    //     $row['img'] = $replacer->profilePicturePath();
-                    // }
-
-                    $results[] = new User([
-                        'uid' => $row['uid'],
-                        'email' => $row['email'],
-                        'username' => $row['username'],
-                        'password' => $row['password'],
-                        'status' => $row['status'],
-                        'verified' => $row['verified'],
-                        'slug' => $row['slug'],
-                        'roles_mask' => $row['roles_mask'],
-                        'ip' => $row['ip'],
-                        'img' => $row['img'],
-                        'biography' => $row['biography'],
-                        'createdat' => $row['createdat'],
-                        'updatedat' => $row['updatedat']
-                    ]);
+                    $results[] = new User($row);
                 } catch (\Throwable $e) {
                     $this->logger->error("Failed to map user data", ['error' => $e->getMessage(), 'data' => $row]);
                 }
@@ -319,7 +289,7 @@ class UserMapper
         }
     }
 
-    public function fetchAllAdvance(array $args = [], ?string $currentUserId = null, ?string $contentFilterBy = null): array
+    public function fetchAllAdvance(array $args = [], ?string $currentUserId = null, ?string $contentFilterBy = null, array $specifications = []): array
     {
         $this->logger->debug("UserMapper.fetchAll started");
 
@@ -333,7 +303,10 @@ class UserMapper
             $contentFilterBy
         );
         
-        $whereClauses = ["verified = :verified"];
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = "verified = :verified";
         $includeDeleted = !empty($args['includeDeleted']);
         if ($includeDeleted) {
             unset($args['includeDeleted']);
@@ -400,7 +373,7 @@ class UserMapper
         );
 
         $conditions = [];
-        $queryParams = [':verified' => 1, ':currentUserId' => $currentUserId];
+        $queryParams = array_merge($allSpecs->paramsToPrepare, [':verified' => 1, ':currentUserId' => $currentUserId]);
 
         foreach ($args as $field => $value) {
             if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
@@ -934,7 +907,8 @@ class UserMapper
         string $currentUserId,
         array $specifications,
         int $offset = 0,
-        int $limit = 10
+        int $limit = 10,
+        ?string $contentFilterBy = null
     ): array {
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
@@ -953,6 +927,8 @@ class UserMapper
                     u.slug,
                     u.status,
                     u.img,
+                    u.roles_mask,
+                    u.verified,
                     ui.reports AS user_reports,
                     u.visibility_status,
                     EXISTS (

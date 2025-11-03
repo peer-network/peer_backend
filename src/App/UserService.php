@@ -808,8 +808,7 @@ class UserService
                 $this->currentUserId, 
                 $specs,
                 $offset, 
-                $limit, 
-                $contentFilterBy
+                $limit
                 
             );
             $following = $this->userMapper->fetchFollowing(
@@ -966,9 +965,12 @@ class UserService
         $this->logger->debug('UserService.fetchAllAdvance started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
+        
+        $specs = [
+        ];
 
         try {
-            $users = $this->userMapper->fetchAllAdvance($args, $this->currentUserId, $contentFilterBy);
+            $users = $this->userMapper->fetchAllAdvance($args, $this->currentUserId, $contentFilterBy, $specs);
             $fetchAll = array_map(fn (UserAdvanced $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {
@@ -991,16 +993,50 @@ class UserService
 
         $this->logger->debug('UserService.fetchAll started');
 
-        try {
-            $users = $this->userMapper->fetchAll($this->currentUserId, $args);
-            $fetchAll = array_map(fn (User $user) => $user->getArrayCopy(), $users);
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-            if ($fetchAll) {
+        $contentFilterCase = ContentFilteringCases::searchById;
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::user
+        );
+        $illegalContentFilterSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $specs = [
+            $deletedUserSpec,
+            $systemUserSpec,
+            $hiddenContentFilterSpec,
+            $illegalContentFilterSpec
+        ];
+
+        try {
+            $users = $this->userMapper->fetchAll($this->currentUserId, $args, $specs);
+            
+            $usersArray = [];
+            foreach ($users as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
+                $usersArray[] = $profile->getArrayCopy();
+            }
+
+            if ($usersArray) {
                 return [
                     'status' => 'success',
-                    'counter' => count($fetchAll),
+                    'counter' => count($usersArray),
                     'ResponseCode' => "11009",
-                    'affectedRows' => $fetchAll,
+                    'affectedRows' => $usersArray,
                 ];
             }
 

@@ -7,8 +7,9 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
-class UserAdvanced
+class UserAdvanced implements ProfileReplaceable
 {
     protected string $uid;
     protected string $email;
@@ -32,6 +33,8 @@ class UserAdvanced
     protected ?float $liquidity;
     protected ?string $createdat;
     protected ?string $updatedat;
+    protected ?int $reports;
+    protected ?string $visibilityStatus;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -62,12 +65,8 @@ class UserAdvanced
         $this->liquidity = $data['liquidity'] ?? 0.0;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-
-        if ($this->status == 6) {
-            $this->username = 'Deleted_Account';
-            $this->img = '/profile/00000000-0000-0000-0000-000000000000.jpeg';
-            $this->biography = '/userData/00000000-0000-0000-0000-000000000000.txt';
-        }
+        $this->reports = $data['user_reports'] ?? 0;
+        $this->visibilityStatus = $data['visibility_status'] ?? '';
     }
 
     // Array Copy methods
@@ -96,6 +95,8 @@ class UserAdvanced
             'liquidity' => $this->liquidity,
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
+            'user_reports' => $this->reports,
+            'visibility_status' => $this->visibilityStatus
         ];
         return $att;
     }
@@ -355,6 +356,21 @@ class UserAdvanced
     public function setUpdatedAt(): void
     {
         $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
+    }
+
+    public function getReports(): int
+    {
+        return $this->reports;
+    }
+
+    public function getRolesmask(): int
+    {
+        return $this->roles_mask;
+    }
+
+        public function visibilityStatus(): string
+    {
+        return $this->visibilityStatus;
     }
 
     // Password Verify methods
