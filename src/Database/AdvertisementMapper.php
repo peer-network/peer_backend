@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Fawaz\Database;
 
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Utils\ContentFilterHelper;
 use PDO;
 use Fawaz\App\Advertisements;
@@ -14,9 +12,6 @@ use Fawaz\App\PostAdvanced;
 use Fawaz\App\Role;
 use Fawaz\App\Status;
 use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\config\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\PeerLoggerInterface;
 
@@ -1008,23 +1003,8 @@ class AdvertisementMapper
                 $finalPosts = array_merge($finalPosts, $basic);
             }
 
-            return array_map(function ($row) use ($contentFilterService, $currentUserId) {
+            return array_map(function ($row) {
                 $row['tags'] = json_decode($row['tags'], true) ?? [];
-
-                // User-Placeholder anwenden, falls nötig
-                $user_reports = (int)$row['user_reports'];
-
-                // if ($contentFilterService->getContentFilterAction(
-                //     ContentType::post,
-                //     ContentType::user,
-                //     $user_reports,
-                //     $currentUserId,
-                //     $row['userid']
-                // ) === ContentFilteringAction::replaceWithPlaceholder) {
-                //     $replacer = ContentReplacementPattern::hidden;
-                //     $row['username'] = $replacer->username();
-                //     $row['userimg'] = $replacer->profilePicturePath();
-                // }
 
                 return [
                     'post' => self::mapRowToPost($row),

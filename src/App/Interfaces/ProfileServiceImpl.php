@@ -138,7 +138,7 @@ final class ProfileServiceImpl implements ProfileService
         return null;
     }
 
-    public function listUsers(array $args): array | ErrorResponse
+    public function listUsers(array $args): array
     {
         if ($this->currentUserId === null) {
             return $this::respondWithError(60501);
@@ -219,7 +219,7 @@ final class ProfileServiceImpl implements ProfileService
         if (!empty($data)) {
             $this->logger->info('ProfileService.listUsers.fetchAll successful', ['userCount' => count($data)]);
             foreach ($data as $i => $item) {
-                if ($item instanceof \Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable) {
+                if ($item instanceof ProfileReplaceable) {
                     ContentReplacer::placeholderProfile($item, $specs);
                 }
             }
@@ -229,7 +229,7 @@ final class ProfileServiceImpl implements ProfileService
         return $this::createSuccessResponse(21001);
     }
 
-    public function listUsersAdmin(array $args): array | ErrorResponse
+    public function listUsersAdmin(array $args): array
     {
         if ($this->currentUserId === null) {
             return $this::respondWithError(60501);
@@ -274,30 +274,7 @@ final class ProfileServiceImpl implements ProfileService
 
         $this->logger->debug('ProfileService.listUsersAdmin started');
 
-        // $contentFilterCase = ContentFilteringCases::searchById;
-        // $deletedUserSpec = new DeletedUserSpec(
-        //     $contentFilterCase,
-        //     ContentType::user
-        // );
-        // $systemUserSpec = new SystemUserSpec(
-        //     $contentFilterCase,
-        //     ContentType::user
-        // );
-        // $hiddenContentFilterSpec = new HiddenContentFilterSpec(
-        //     $contentFilterCase,
-        //     $contentFilterBy,
-        //     ContentType::user
-        // );
-        // $illegalContentSpec = new IllegalContentFilterSpec(
-        //     $contentFilterCase,
-        //     ContentType::user
-        // );
-        $specs = [
-        //     $deletedUserSpec,
-        //     $systemUserSpec,
-        //     $hiddenContentFilterSpec,
-        //     $illegalContentSpec
-        ];
+        $specs = [];
 
         $data = $this->userService->fetchAllAdvance($args);
 
