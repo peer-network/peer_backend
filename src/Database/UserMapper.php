@@ -191,14 +191,32 @@ class UserMapper
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $trendlimit = 4;
 
         $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
-        $whereClauses[] = "verified = :verified";
-        $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
-        $whereClausesString = implode(" AND ", $whereClauses);
+        $params = $allSpecs->paramsToPrepare;
+
+        $params['currentUserId'] = $currentUserId;
+
+        foreach ($args as $field => $value) {
+            if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
+                $whereClauses[] = "u.$field = :$field";
+                $params[$field] = $value;
+            }
+
+            if ($field === 'username') {
+                $whereClauses[] = "u.username ILIKE :username";
+                $params['username'] = '%' . $value . '%';
+            }
+        }
+
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
+        $params['trendlimit'] = $trendlimit;
+        
+        $whereClausesString = implode(' AND ', $whereClauses);
 
         $sql = sprintf(
             "
@@ -217,59 +235,85 @@ class UserMapper
                 u.createdat,
                 u.updatedat,
                 ui.reports AS user_reports,
-                u.visibility_status
+                u.visibility_status,
+                COALESCE((
+                    SELECT COUNT(p.postid)
+                    FROM posts p
+                    WHERE p.userid = u.uid
+                ), 0) AS amountposts,
+                COALESCE((
+                    SELECT COUNT(*) 
+                    FROM post_info pi 
+                    WHERE pi.userid = u.uid 
+                      AND pi.likes > :trendlimit 
+                      AND pi.createdat >= NOW() - INTERVAL '7 days'
+                ), 0) AS amounttrending,
+                CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed,
+                CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
+                COALESCE((
+                    SELECT COUNT(*)
+                    FROM follows fr
+                    WHERE fr.followerid = u.uid
+                ), 0) AS amountfollowed,
+                COALESCE((
+                    SELECT COUNT(*)
+                    FROM follows fd
+                    WHERE fd.followedid = u.uid
+                ), 0) AS amountfollower,
+                COALESCE((
+                    SELECT SUM(numbers)
+                    FROM wallet w
+                    WHERE w.userid = u.uid
+                ), 0) AS liquidity
             FROM 
                 users u
-            LEFT JOIN users_info ui ON uid = ui.userid
-            WHERE %s",
-            $whereClausesString,
+            LEFT JOIN 
+                follows f1 ON u.uid = f1.followerid AND f1.followedid = :currentUserId
+            LEFT JOIN 
+                follows f2 ON u.uid = f2.followedid AND f2.followerid = :currentUserId
+            LEFT JOIN users_info ui ON ui.userid = u.uid
+            WHERE %s
+            ORDER BY u.createdat DESC 
+            LIMIT :limit 
+            OFFSET :offset",
+            $whereClausesString
         );
 
-        $conditions = [];
-        $queryParams = array_merge($allSpecs->paramsToPrepare, [':verified' => 1]);
-
-        foreach ($args as $field => $value) {
-            if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
-                $conditions[] = "u.$field = :$field";
-                $queryParams[":$field"] = $value;
-            }
-
-            if ($field === 'username') {
-                $conditions[] = "username ILIKE :username";
-                $queryParams[':username'] = '%' . $value . '%';
-            }
-        }
-        $conditions[] = "status != :status";
-        $queryParams[':status'] = Status::DELETED;
-
-        $sql .= " AND " . implode(" AND ", $conditions);
-
-        $sql .= " ORDER BY uid LIMIT :limit OFFSET :offset";
-        $queryParams[':limit'] = $limit;
-        $queryParams[':offset'] = $offset;
-
-        $this->logger->info("Executing SQL query", ['sql' => $sql, 'params' => $queryParams]);
+        $this->logger->info("Executing SQL query", ['sql' => $sql, 'params' => $params]);
 
         try {
             $stmt = $this->db->prepare($sql);
 
-            foreach ($queryParams as $key => $value) {
-                if (is_int($value)) {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_INT);
-                } elseif (is_bool($value)) {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_BOOL);
-                } else {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_STR);
-                }
-            }
-
-            $stmt->execute();
+            $stmt->execute($params);
 
             $results = [];
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
-                    $results[] = new User($row);
+                    $results[] = new UserAdvanced([
+                        'uid' => $row['uid'],
+                        'email' => $row['email'],
+                        'username' => $row['username'],
+                        'password' => $row['password'],
+                        'status' => $row['status'],
+                        'verified' => $row['verified'],
+                        'slug' => $row['slug'],
+                        'roles_mask' => $row['roles_mask'],
+                        'ip' => $row['ip'],
+                        'img' => $row['img'],
+                        'biography' => $row['biography'],
+                        'visibility_status' => $row['visibility_status'],
+                        'user_reports' => $row['user_reports'],
+                        'amountposts' => (int)$row['amountposts'],
+                        'amounttrending' => (int)$row['amounttrending'],
+                        'isfollowed' => (bool)$row['isfollowed'],
+                        'isfollowing' => (bool)$row['isfollowing'],
+                        'amountfollower' => (int)$row['amountfollower'],
+                        'amountfollowed' => (int)$row['amountfollowed'],
+                        'liquidity' => (float)$row['liquidity'],
+                        'createdat' => $row['createdat'],
+                        'updatedat' => $row['updatedat'],
+                    ]);
                 } catch (\Throwable $e) {
                     $this->logger->error("Failed to map user data", ['error' => $e->getMessage(), 'data' => $row]);
                 }
@@ -289,7 +333,7 @@ class UserMapper
         }
     }
 
-    public function fetchAllAdvance(array $args = [], ?string $currentUserId = null, ?string $contentFilterBy = null, array $specifications = []): array
+    public function fetchAllAdvance(array $args,array $specifications, ?string $currentUserId = null): array
     {
         $this->logger->debug("UserMapper.fetchAll started");
 
@@ -297,21 +341,40 @@ class UserMapper
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $trendlimit = 4;
         $trenddays = 7;
-
-        $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentType::user,
-            $contentFilterBy
-        );
         
         $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
-        $whereClauses[] = "verified = :verified";
+        $params = $allSpecs->paramsToPrepare;
+    
         $includeDeleted = !empty($args['includeDeleted']);
         if ($includeDeleted) {
             unset($args['includeDeleted']);
         }
-        // $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
+
+        $params['currentUserId'] =  $currentUserId;
+
+        foreach ($args as $field => $value) {
+            if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
+                $whereClauses[] = "u.$field = :$field";
+                $params[$field] = $value;
+            }
+
+            if ($field === 'username') {
+                $whereClauses[] = "u.username ILIKE :username";
+                $params['username'] = '%' . $value . '%';
+            }
+        }
+
+        if (!$includeDeleted) {
+            $whereClauses[] = 'u.status != :statusExcluded';
+            $params['statusExcluded'] = Status::DELETED;
+        }
+
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
+        $params['trendlimit'] = $trendlimit;
+
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $sql = sprintf(
@@ -368,73 +431,24 @@ class UserMapper
             LEFT JOIN 
                 follows f2 ON u.uid = f2.followedid AND f2.followerid = :currentUserId -- Is the current user following this user?
             LEFT JOIN users_info ui ON ui.userid = u.uid
-            WHERE %s",
+            WHERE %s
+            ORDER BY u.createdat DESC 
+            LIMIT :limit 
+            OFFSET :offset",
             $whereClausesString
         );
 
-        $conditions = [];
-        $queryParams = array_merge($allSpecs->paramsToPrepare, [':verified' => 1, ':currentUserId' => $currentUserId]);
-
-        foreach ($args as $field => $value) {
-            if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
-                $conditions[] = "u.$field = :$field";
-                $queryParams[":$field"] = $value;
-            }
-
-            if ($field === 'username') {
-                $conditions[] = "u.username ILIKE :username";
-                $queryParams[':username'] = '%' . $value . '%';
-            }
-        }
-
-        if (!$includeDeleted) {
-            $conditions[] = 'u.status != :statusExcluded';
-            $queryParams[':statusExcluded'] = Status::DELETED;
-        }
-
-        if (!empty($conditions)) {
-            $sql .= ' AND ' . implode(' AND ', $conditions);
-        }
-
-        $sql .= " ORDER BY u.createdat DESC LIMIT :limit OFFSET :offset";
-        $queryParams[':limit'] = $limit;
-        $queryParams[':offset'] = $offset;
-        $queryParams[':trendlimit'] = $trendlimit;
-
-        $this->logger->info("Executing SQL query", ['sql' => $sql, 'params' => $queryParams]);
+        $this->logger->info("Executing SQL query", ['sql' => $sql, 'params' => $params]);
 
         try {
             $stmt = $this->db->prepare($sql);
 
-            foreach ($queryParams as $key => $value) {
-                if (is_int($value)) {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_INT);
-                } elseif (is_bool($value)) {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_BOOL);
-                } else {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_STR);
-                }
-            }
-
-            $stmt->execute();
+            $stmt->execute($params);
 
             $results = [];
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
-                    $user_reports = (int)$row['user_reports'];
-
-                    // if ($contentFilterService->getContentFilterAction(
-                    //     ContentType::user,
-                    //     ContentType::user,
-                    //     $user_reports,
-                    //     $row['visibility_status']
-                    // ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    //     $replacer = ContentReplacementPattern::hidden;
-                    //     $row['username'] = $replacer->username();
-                    //     $row['img'] = $replacer->profilePicturePath();
-                    // }
-
                     $results[] = new UserAdvanced([
                         'uid' => $row['uid'],
                         'email' => $row['email'],
@@ -1194,9 +1208,9 @@ class UserMapper
         ";
 
         $stmt = $this->db->prepare($query);
-        $params[':userId']= $userId;
-        $params[':limit']= $limit;
-        $params[':offset']= $offset;
+        $params['userId']= $userId;
+        $params['limit']= $limit;
+        $params['offset']= $offset;
         $stmt->execute($params);
 
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);

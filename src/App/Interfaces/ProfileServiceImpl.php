@@ -3,20 +3,17 @@
 namespace Fawaz\App\Interfaces;
 
 use Fawaz\App\Profile;
+use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\App\ValidationException;
-
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-
 use Fawaz\Database\Interfaces\ProfileRepository;
-
 use Fawaz\Utils\ErrorResponse;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
@@ -32,6 +29,7 @@ final class ProfileServiceImpl implements ProfileService
         protected PeerLoggerInterface $logger,
         protected ProfileRepository $profileRepository,
         protected UserService $userService,
+        protected UserMapper $userMapper,
     ) {}
 
     public function setCurrentUserId(string $userId): void {
@@ -173,9 +171,6 @@ final class ProfileServiceImpl implements ProfileService
             return $this::respondWithError(30202);
         }
 
-        if (!empty($userId)) {
-            $args['uid'] = $userId;
-        }
 
         if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
             return $this::respondWithError(30257);
@@ -186,7 +181,13 @@ final class ProfileServiceImpl implements ProfileService
         $this->logger->debug('ProfileService.listUsers started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $contentFilterCase = ContentFilteringCases::searchByMeta;
+        if (!empty($userId)) {
+            $contentFilterCase = ContentFilteringCases::searchById;
+            $args['uid'] = $userId;
+        }        
+
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
             ContentType::user
@@ -211,22 +212,32 @@ final class ProfileServiceImpl implements ProfileService
             $illegalContentSpec
         ];
 
-        $searchesByIdentifier = !empty($username) || !empty($userId);
-        $data = $searchesByIdentifier
-            ? $this->userService->fetchAllAdvance($args)
-            : $this->userService->fetchAll($args);
 
-        if (!empty($data)) {
-            $this->logger->info('ProfileService.listUsers.fetchAll successful', ['userCount' => count($data)]);
-            foreach ($data as $i => $item) {
-                if ($item instanceof ProfileReplaceable) {
-                    ContentReplacer::placeholderProfile($item, $specs);
+        try {
+            $users = $this->userMapper->fetchAll($this->currentUserId, $args, $specs);
+            $usersArray = [];
+            foreach ($users as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
                 }
+                $usersArray[] = $profile->getArrayCopy();
             }
-            return $data;
-        }
 
-        return $this::createSuccessResponse(21001);
+            if ($usersArray) {
+                $this->logger->info('ProfileService.listUsers successful', ['userCount' => count($usersArray)]);
+
+                return [
+                    'status' => 'success',
+                    'counter' => count($usersArray),
+                    'ResponseCode' => "11009",
+                    'affectedRows' => $usersArray,
+                ];
+            }
+
+            return self::createSuccessResponse(21001);
+        } catch (\Throwable $e) {
+            return self::respondWithError(41207);
+        }
     }
 
     public function listUsersAdmin(array $args): array

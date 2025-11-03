@@ -966,11 +966,10 @@ class UserService
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         
-        $specs = [
-        ];
+        $specs = [];
 
         try {
-            $users = $this->userMapper->fetchAllAdvance($args, $this->currentUserId, $contentFilterBy, $specs);
+            $users = $this->userMapper->fetchAllAdvance($args,$specs, $this->currentUserId);
             $fetchAll = array_map(fn (UserAdvanced $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {
@@ -996,6 +995,7 @@ class UserService
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $contentFilterCase = ContentFilteringCases::searchById;
+        
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
             ContentType::user
@@ -1022,7 +1022,6 @@ class UserService
 
         try {
             $users = $this->userMapper->fetchAll($this->currentUserId, $args, $specs);
-            
             $usersArray = [];
             foreach ($users as $profile) {
                 if ($profile instanceof ProfileReplaceable) {

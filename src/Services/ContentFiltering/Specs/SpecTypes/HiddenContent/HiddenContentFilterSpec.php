@@ -7,6 +7,7 @@ use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\Implementations\DoNothingContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\HidePostsElsePlaceholder;
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\PlaceholderEverythingContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\StrictlyHideEverythingContentFilteringStrategy;
@@ -67,7 +68,7 @@ final class HiddenContentFilterSpec implements Specification
                     "NOT EXISTS (
                         SELECT 1
                         FROM posts HiddenContentFiltering_posts
-                        LEFT JOIN post_info HiddenContentFiltering_post_info ON HiddenContentFiltering_post_info.userid = HiddenContentFiltering_posts.userid
+                        LEFT JOIN post_info HiddenContentFiltering_post_info ON HiddenContentFiltering_post_info.postid = HiddenContentFiltering_posts.postid
                         WHERE HiddenContentFiltering_posts.postid = p.postid
                         AND (
                             (HiddenContentFiltering_post_info.reports >= :post_report_amount_to_hide AND HiddenContentFiltering_posts.visibility_status = 'normal')
@@ -82,7 +83,7 @@ final class HiddenContentFilterSpec implements Specification
                     "NOT EXISTS (
                         SELECT 1
                         FROM comments HiddenContentFiltering_comments 
-                        LEFT JOIN comment_info HiddenContentFiltering_comment_info ON HiddenContentFiltering_comment_info.userid = HiddenContentFiltering_comments.userid
+                        LEFT JOIN comment_info HiddenContentFiltering_comment_info ON HiddenContentFiltering_comment_info.commentid = HiddenContentFiltering_comments.commentid
                         WHERE HiddenContentFiltering_comments.commentid = c.commentid
                         AND (
                             (HiddenContentFiltering_comment_info.reports >= :comment_report_amount_to_hide AND HiddenContentFiltering_comments.visibility_status = 'normal')
@@ -123,7 +124,7 @@ final class HiddenContentFilterSpec implements Specification
         ContentFilteringCases $strategy
     ): ContentFilteringStrategy {
         return match ($strategy) {
-            ContentFilteringCases::myprofile => new PlaceholderEverythingContentFilteringStrategy(),
+            ContentFilteringCases::myprofile => new DoNothingContentFilteringStrategy(),
             ContentFilteringCases::searchById => new PlaceholderEverythingContentFilteringStrategy(),
             ContentFilteringCases::searchByMeta => new PlaceholderEverythingContentFilteringStrategy(),
             ContentFilteringCases::postFeed => new HidePostsElsePlaceholder(),
