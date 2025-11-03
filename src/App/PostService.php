@@ -32,6 +32,7 @@ use Fawaz\Services\JWTService;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\Interfaces\ProfileRepository;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\Advertisements\ExcludeAdvertisementsForNormalFeedSpec;
 
 class PostService
 {
@@ -614,12 +615,14 @@ class PostService
             $contentFilterCase,
             ContentType::post
         );
+        $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
 
         $specs = [
             $deletedUserSpec,
             $systemUserSpec,
             $hiddenContentFilterSpec,
-            $illegalContentSpec
+            $illegalContentSpec,
+            $excludeAdvertisementsForNormalFeedSpec
         ];
 
         try {
@@ -914,11 +917,13 @@ class PostService
             $contentFilterCase,
             ContentType::post
         );
+        $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
 
         $specs = [
             $deletedUserSpec,
             $systemUserSpec,
-            $illegalContentSpec
+            $illegalContentSpec,
+            $excludeAdvertisementsForNormalFeedSpec
         ];
 
         try {
