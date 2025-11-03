@@ -1127,14 +1127,6 @@
         "comment": "Success: Moderation action performed successfully",
         "userFriendlyComment": "Your moderation decision has been applied."
     },
-    "22101": {
-        "comment": "Error: Content already reviewed and restored",
-        "userFriendlyComment": "This content was already restored."
-    },
-    "22102": {
-        "comment": "Error: Moderation action already performed",
-        "userFriendlyComment": "This item has already been decided."
-    },
     "22103": {
         "comment": "Moderation item not found",
         "userFriendlyComment": "Moderation item not found."
@@ -1146,6 +1138,14 @@
     "32101": {
         "comment": "Bad Request: Invalid input",
         "userFriendlyComment": "Invalid input. Please check the fields and try again."
+    },
+    "32102": {
+        "comment": "Error: Content already reviewed and restored",
+        "userFriendlyComment": "This content was already restored."
+    },
+    "32103": {
+        "comment": "Error: Moderation action already performed",
+        "userFriendlyComment": "This item has already been decided."
     },
     "42101": {
         "comment": "Error: Failed while performing moderation action",

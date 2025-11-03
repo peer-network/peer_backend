@@ -34,25 +34,21 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
-use DateTimeImmutable;
 use Fawaz\App\ValidationException;
 use Fawaz\App\ModerationService;
 use Fawaz\App\Status;
 use Fawaz\App\Validation\RequestValidator;
 use Fawaz\App\Validation\ValidatorErrors;
-use Fawaz\App\Profile;
 use Fawaz\Utils\ErrorResponse;
 use Fawaz\App\Role;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
 
 class GraphQLSchemaBuilder
@@ -2308,7 +2304,7 @@ class GraphQLSchemaBuilder
             'searchUserAdmin' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
             'listUsersV2' => fn (mixed $root, array $args) => $this->profileService->listUsers($args),
             'listUsersAdminV2' => fn (mixed $root, array $args) => $this->profileService->listUsersAdmin($args),
-            'listUsers' => fn (mixed $root, array $args) => $this->resolveUsers($args),
+            'listUsers' => fn (mixed $root, array $args) => $this->profileService->listUsers($args),
             'getProfile' => fn (mixed $root, array $args) => $this->resolveProfile($args),
             'listFollowRelations' => fn (mixed $root, array $args) => $this->resolveFollows($args),
             'listFriends' => fn (mixed $root, array $args) => $this->resolveFriends($args),
@@ -2374,9 +2370,9 @@ class GraphQLSchemaBuilder
             'resolveTransferV2' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'globalwins' => fn (mixed $root, array $args) => $this->walletService->callGlobalWins(),
             'gemsters' => fn (mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
-            'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
+            'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
         ];
     }
 
@@ -3130,10 +3126,6 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(30202);
         }
 
-        if (!empty($userId)) {
-            $args['uid'] = $userId;
-        }
-
         if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
             return $this::respondWithError(30257);//"The IP '$ip' is not a valid IP address."
         }
@@ -3146,80 +3138,70 @@ class GraphQLSchemaBuilder
             $args['includeDeleted'] = true;
         }
 
-        $data = $this->userService->fetchAllAdvance($args);
-
-        if (!empty($data)) {
-            $this->logger->info('Query.resolveSearchUser.fetchAll successful', ['userCount' => count($data)]);
-
-            return $data;
-        }
-
-        return $this::createSuccessResponse(21001);
-    }
-
-    protected function resolveListUsersV2(array $args): ?array   
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
-        }
-
-        $username = isset($args['username']) ? trim($args['username']) : null;
-        $usernameConfig = ConstantsConfig::user()['USERNAME'];
-        $userId = $args['userid'] ?? null;
-        $email = $args['email'] ?? null;
-        $status = $args['status'] ?? null;
-        $verified = $args['verified'] ?? null;
-        $ip = $args['ip'] ?? null;
-
-        if (!empty($username) && !empty($userId)) {
-            return $this::respondWithError(31012);
-        }
-
-        if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this::respondWithError(30201);
-        }
-
-        if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
-            return $this::respondWithError(30202);
-        }
-
-        if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
-            return $this::respondWithError(30202);
-        }
-
+        $contentFilterCase = ContentFilteringCases::searchByMeta;
         if (!empty($userId)) {
+            $contentFilterCase = ContentFilteringCases::searchById;
+            if ($userId == $this->currentUserId) {
+                
+                $contentFilterCase = ContentFilteringCases::myprofile;
+            }
             $args['uid'] = $userId;
         }
 
-        if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
-            return $this::respondWithError(30257);//"The IP '$ip' is not a valid IP address."
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::user
+        );
+        $illegalContentFilterSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $specs = [
+            $deletedUserSpec,
+            $systemUserSpec,
+            $hiddenContentFilterSpec,
+            $illegalContentFilterSpec
+        ];
+
+
+        try {
+            $users = $this->userMapper->fetchAll($this->currentUserId, $args, $specs);
+            $usersArray = [];
+            foreach ($users as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
+                $usersArray[] = $profile->getArrayCopy();
+            }
+
+            if (!empty($usersArray)) {
+                $this->logger->info('Query.resolveSearchUser successful', ['userCount' => count($usersArray)]);
+                return [
+                    'status' => 'success',
+                    'counter' => count($usersArray),
+                    'ResponseCode' => "11009",
+                    'affectedRows' => $usersArray,
+                ]; 
+            } else {
+                if ($userId) {
+                    return self::respondWithError(31007);
+                }
+                return self::createSuccessResponse(21001);
+            }
+        } catch (\Throwable $e) {
+            return self::respondWithError(41207);
         }
-
-        $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
-
-        $this->logger->debug('Query.resolveListUsersV2 started');
-
-        $isAdmin = $this->userRoles === 16;
-        $searchesByIdentifier = !empty($username) || !empty($userId);
-        if ($isAdmin) {
-            $args['includeDeleted'] = true;
-        }
-        $data = $isAdmin || $searchesByIdentifier
-            ? $this->userService->fetchAllAdvance($args)
-            : $this->userService->fetchAll($args);
-
-        if (!empty($data)) {
-            $this->logger->info('Query.resolveListUsersV2.fetchAll successful', ['userCount' => count($data)]);
-
-            return $data;
-        }
-
-        return $this::createSuccessResponse(21001);
     }
 
     protected function resolveFollows(array $args): ?array

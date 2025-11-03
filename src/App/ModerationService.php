@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
-use Fawaz\App\Models\UserReport;
 use Fawaz\config\constants\ConstantsModeration;
 use Fawaz\Utils\ResponseHelper;
-use Fawaz\App\Models\Moderation;
-use Fawaz\App\Models\ModerationTicket;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\ModerationMapper;
 use Fawaz\Utils\PeerLoggerInterface;
