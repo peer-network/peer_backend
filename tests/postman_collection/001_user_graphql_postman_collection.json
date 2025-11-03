@@ -7774,16 +7774,32 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"31510\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
 							"});",
 							"",
-							""
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All posts by userid_t2 have username 'Deleted_Account'\", function () {",
+							"    const response = pm.response.json();",
+							"    const posts = response.data?.listPosts?.affectedRows || [];",
+							"    const expectedUserId = pm.environment.get(\"userid_t2\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'userid_t2' is not set.\");",
+							"    }",
+							"",
+							"    posts.forEach(post => {",
+							"        if (post.user?.id === expectedUserId) {",
+							"            pm.expect(post.user.username, `Post ID ${post.id} has correct username`).to.eql(\"Deleted_Account\");",
+							"        }",
+							"    });",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -7793,7 +7809,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
