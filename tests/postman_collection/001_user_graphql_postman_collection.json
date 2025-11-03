@@ -7767,7 +7767,7 @@
 			"response": []
 		},
 		{
-			"name": "Check if postid is invalid",
+			"name": "Check postid",
 			"event": [
 				{
 					"listen": "test",
@@ -7982,16 +7982,25 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"31007\");",
+							"    pm.expect(pm.response.text()).to.include(\"11009\");",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Username is Deleted_Account\", function () {",
+							"    const res = pm.response.json();",
+							"    const user = res?.data?.searchUser?.affectedRows?.[0];",
+							"",
+							"    pm.expect(user).to.be.an(\"object\");",
+							"    pm.expect(user.username).to.eql(\"Deleted_Account\");",
 							"});",
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],

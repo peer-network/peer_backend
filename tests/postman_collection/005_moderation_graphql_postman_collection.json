@@ -4,7 +4,7 @@
 		"name": "005_moderation_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-9cbdfc1a-6d2c-47e4-8632-a0131b4a7c7b?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-9cbdfc1a-6d2c-47e4-8632-a0131b4a7c7b?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -8895,8 +8895,8 @@
 							"const stats = res?.data?.moderationStats?.affectedRows;",
 							"",
 							"pm.test(\"Moderation stats match expected values\", function () {",
-							"    pm.expect(stats.AmountAwaitingReview).to.eql(1);",
-							"    pm.expect(stats.AmountHidden).to.eql(3);",
+							"    pm.expect(stats.AmountAwaitingReview).to.eql(4);",
+							"    pm.expect(stats.AmountHidden).to.eql(0);",
 							"    pm.expect(stats.AmountRestored).to.eql(0);",
 							"    pm.expect(stats.AmountIllegal).to.eql(0);",
 							"});"
@@ -9014,13 +9014,13 @@
 							"        const id = item.targetContentId;",
 							"",
 							"        if (type === \"post\" && item.targetcontent?.post?.id === postIdEnv) {",
-							"            pm.expect(item.status, `Post ${postIdEnv} status`).to.eql(\"hidden\");",
+							"            pm.expect(item.status, `Post ${postIdEnv} status`).to.eql(\"waiting_for_review\");",
 							"        } else if (type === \"comment\" && item.targetcontent?.comment?.commentid === commentIdEnv) {",
-							"            pm.expect(item.status, `Comment ${commentIdEnv} status`).to.eql(\"hidden\");",
+							"            pm.expect(item.status, `Comment ${commentIdEnv} status`).to.eql(\"waiting_for_review\");",
 							"        } else if (type === \"user\") {",
 							"            const userId = item.targetcontent?.user?.userid;",
 							"            if (userId === userIdT2) {",
-							"                pm.expect(item.status, `User ${userIdT2} status`).to.eql(\"hidden\");",
+							"                pm.expect(item.status, `User ${userIdT2} status`).to.eql(\"waiting_for_review\");",
 							"            } else if (userId === userIdT3) {",
 							"                pm.expect(item.status, `User ${userIdT3} status`).to.eql(\"waiting_for_review\");",
 							"            }",
@@ -9361,8 +9361,8 @@
 							"const stats = res?.data?.moderationStats?.affectedRows;",
 							"",
 							"pm.test(\"Moderation stats match expected values\", function () {",
-							"    pm.expect(stats.AmountAwaitingReview).to.eql(0);",
-							"    pm.expect(stats.AmountHidden).to.eql(4);",
+							"    pm.expect(stats.AmountAwaitingReview).to.eql(3);",
+							"    pm.expect(stats.AmountHidden).to.eql(1);",
 							"    pm.expect(stats.AmountRestored).to.eql(0);",
 							"    pm.expect(stats.AmountIllegal).to.eql(0);",
 							"});"
