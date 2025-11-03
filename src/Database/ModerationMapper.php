@@ -17,9 +17,7 @@ use Fawaz\App\PostInfo;
 use Fawaz\App\Role;
 use Fawaz\App\User;
 use Fawaz\App\UserInfo;
-use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\PeerLoggerInterface;
-use Tests\utils\ConfigGeneration\Constants;
 
 class ModerationMapper
 {
