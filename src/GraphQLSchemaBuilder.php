@@ -3043,18 +3043,24 @@ class GraphQLSchemaBuilder
             }
         }
 
+        
+            $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+            $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
-        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
-        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
-
-
-        $comments = $this->commentService->fetchAllByPostIdetaild(
-            $postId,
-            $commentOffset,
-            $commentLimit,
-            $contentFilterBy
-        );
-
+        try {
+            $comments = $this->commentService->fetchAllByPostIdetaild(
+                $postId,
+                $commentOffset,
+                $commentLimit,
+                $contentFilterBy
+            );
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to fetch comments', [
+                'postId' => $postId,
+                'error' => $e->getMessage()
+            ]);
+            return $this::respondWithError(41601);
+        }
 
         $results = array_map(
             fn (CommentAdvanced $comment) => $comment->getArrayCopy(),
