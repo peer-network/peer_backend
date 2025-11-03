@@ -2370,9 +2370,9 @@ class GraphQLSchemaBuilder
             'resolveTransferV2' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'globalwins' => fn (mixed $root, array $args) => $this->walletService->callGlobalWins(),
             'gemsters' => fn (mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
-            'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
+            'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
         ];
     }
 
