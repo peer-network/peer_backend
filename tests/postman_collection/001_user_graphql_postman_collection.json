@@ -4,7 +4,7 @@
 		"name": "001_user_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-4bfdfdf6-a3db-4d00-862b-a5adee67f0c9?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-4bfdfdf6-a3db-4d00-862b-a5adee67f0c9?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -5516,7 +5516,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -5526,7 +5527,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -5779,7 +5781,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListComments {\n    listComments(\n        postid: \"{{postid}}\"\n        contentFilterBy: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        counter\n        affectedRows {\n            commentid\n            userid\n            postid\n            parentid\n            content\n            createdat\n            amountlikes\n            amountreplies\n            isliked\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n                isfriend\n            }\n        }\n    }\n}\n",
+						"query": "query ListComments {\n    listComments(\n        postid: \"{{postid}}\"\n        contentFilterBy: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        counter\n        affectedRows {\n            commentid\n            userid\n            postid\n            parentid\n            content\n            createdat\n            amountlikes\n            amountreplies\n            isliked\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n                isfriend\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5905,7 +5907,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11607\");",
+							"    pm.expect(pm.response.text()).to.include(\"11601\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
@@ -5934,7 +5936,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListComments {\n    listComments(\n        postid: \"{{postid}}\"\n        contentFilterBy: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        counter\n        affectedRows {\n            commentid\n            userid\n            postid\n            parentid\n            content\n            createdat\n            amountlikes\n            amountreplies\n            isliked\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n                isfriend\n            }\n        }\n    }\n}\n",
+						"query": "query ListComments {\n    listComments(\n        postid: \"{{postid}}\"\n        contentFilterBy: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        counter\n        affectedRows {\n            commentid\n            userid\n            postid\n            parentid\n            content\n            createdat\n            amountlikes\n            amountreplies\n            isliked\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n                isfriend\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7903,7 +7905,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
