@@ -70,14 +70,21 @@ final class SystemUserSpec implements Specification
         return null;
     }
 
-    public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern
-    {
+    public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern {
         return null;
     }
+
 
     private static function createStrategy(
         ContentFilteringCases $strategy
     ): ContentFilteringStrategy {
         return new HideEverythingContentFilteringStrategy();
+    }
+
+    public function forbidInteractions(
+        ContentType $targetContent, 
+        string $targetContentId
+    ): bool {
+        return true;
     }
 }

@@ -135,6 +135,10 @@ class PostAdvanced implements PostReplaceable
     {
         return $this->user ?? [];
     }
+    public function getUserid(): string
+    {
+        return $this->userid;
+    }
 
     public function setUser(array $user): void
     {
@@ -167,10 +171,6 @@ class PostAdvanced implements PostReplaceable
     public function setDescription(string $descriptionConfig): void
     {
         $this->mediadescription = $descriptionConfig;
-    }
-    public function getUserId(): string
-    {
-        return $this->userid;
     }
 
     public function getFeedId(): string

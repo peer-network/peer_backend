@@ -3161,7 +3161,8 @@ class GraphQLSchemaBuilder
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId
         );
         $illegalContentFilterSpec = new IllegalContentFilterSpec(
             $contentFilterCase,

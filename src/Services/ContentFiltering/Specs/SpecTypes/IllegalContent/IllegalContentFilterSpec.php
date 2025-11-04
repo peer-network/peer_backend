@@ -105,4 +105,55 @@ final class IllegalContentFilterSpec implements Specification {
         };
     }
 
+    // on input we have only targetId
+    // we need to forbid interactions 
+    // with system/deleted accounts and
+    // illegal targets
+    // and illegal post comments
+
+    // also resolve action post
+    public function forbidInteractions(
+        ContentType $targetContent, 
+        string $targetContentId
+    ): bool {
+        match ($targetContent) {
+            ContentType::user => new SpecificationSQLData([
+                "SELECT 1
+                    FROM 
+                        users IllegalContentFilterSpec_users
+                    WHERE 
+                        IllegalContentFilterSpec_users.uid = :IllegalContentFilterSpec_userid AND
+                        IllegalContentFilterSpec_users.visibility_status = 'illegal'
+                "
+            ], [
+                    "IllegalContentFilterSpec_userid" => $targetContentId
+            ]),
+            ContentType::post => new SpecificationSQLData([
+                "SELECT 1
+                    FROM 
+                        posts IllegalContentFilterSpec_posts
+                    WHERE
+                        IllegalContentFilterSpec_posts.postid = :IllegalContentFilterSpec_postid AND
+                        IllegalContentFilterSpec_posts.visibility_status = 'illegal'
+                "
+            ], [
+                    "IllegalContentFilterSpec_postid" => $targetContentId
+            ]),
+            ContentType::comment => new SpecificationSQLData([
+                    "SELECT 1
+                        FROM 
+                            comments IllegalContentFilterSpec_comments
+                        LEFT JOIN 
+                            posts IllegalContentFilterSpec_posts ON IllegalContentFilterSpec_posts.postid = c.postid
+                        WHERE 
+                            IllegalContentFilterSpec_comments.commentid = :IllegalContentFilterSpec_commentid AND
+                            IllegalContentFilterSpec_comments.visibility_status = 'illegal' AND
+                            IllegalContentFilterSpec_posts.visibility_status = 'illegal'
+                    "
+                ], [
+                    "IllegalContentFilterSpec_commentid" => $targetContentId
+                ]
+            )};        
+        return true;
+    }
 }

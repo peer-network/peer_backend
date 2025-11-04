@@ -39,4 +39,11 @@ final class UserIsBlockedByMeSpec implements Specification
     {
         return null;
     }
+
+    public function forbidInteractions(
+        ContentType $targetContent, 
+        string $targetContentId
+    ): bool {
+        return true;
+    }
 }

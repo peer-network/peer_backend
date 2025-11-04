@@ -608,13 +608,15 @@ class PostService
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::post
+            ContentType::post,
+            $this->currentUserId,
         );
         
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
             ContentType::post
         );
+
         $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
 
         $specs = [
@@ -845,7 +847,8 @@ class PostService
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId,
         );
         
         $illegalContentSpec = new IllegalContentFilterSpec(

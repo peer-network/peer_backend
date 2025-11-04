@@ -98,6 +98,13 @@ final class DeletedUserSpec implements Specification {
         return null;
     }
 
+    public function forbidInteractions(
+        ContentType $targetContent, 
+        string $targetContentId
+    ): bool {
+        return true;
+    }
+
     private static function createStrategy(
         ContentFilteringCases $strategy
     ): ContentFilteringStrategy {

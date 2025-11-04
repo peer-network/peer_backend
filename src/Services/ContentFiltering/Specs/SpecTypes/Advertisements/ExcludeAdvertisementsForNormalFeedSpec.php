@@ -23,7 +23,7 @@ final class ExcludeAdvertisementsForNormalFeedSpec implements Specification
         }
 
         // If postid is not NULL, return NOT EXISTS (active advertisements)
-        if ($this->postId !== null) {
+        if ($this->postId === null) {
             return new SpecificationSQLData([
                 "NOT EXISTS (
                   SELECT 1

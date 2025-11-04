@@ -787,7 +787,8 @@ class UserService
         $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
             ContentFilteringCases::searchById,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId,
         );
         
         $illegalContentFilterSpec = new IllegalContentFilterSpec(
@@ -881,7 +882,8 @@ class UserService
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId,
         );
         
         $illegalContentSpec = new IllegalContentFilterSpec(
@@ -1007,7 +1009,8 @@ class UserService
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId,
         );
         $illegalContentFilterSpec = new IllegalContentFilterSpec(
             $contentFilterCase,

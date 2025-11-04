@@ -19,17 +19,18 @@ use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Rector\TypeDeclaration\Rector\ClassMethod\StrictArrayParamDimFetchRector;
+use function DI\string;
 
 
 final class HiddenContentFilterSpec implements Specification
 {
     private HiddenContentFilterServiceImpl $contentFilterService;
     private ContentFilteringStrategy $contentFilterStrategy;
-
     public function __construct(
         ContentFilteringCases $case, 
         ?string $contentFilterBy,
         ContentType $contentTarget,
+        private string $currentUserId
     ) {
         $this->contentFilterService = new HiddenContentFilterServiceImpl(
             $contentTarget,
@@ -60,9 +61,12 @@ final class HiddenContentFilterSpec implements Specification
                             OR 
                             HiddenContentFiltering_users.visibility_status = 'hidden'
                         )
+                        AND 
+                        HiddenContentFiltering_users.userid != :HiddenContentFiltering_currentUserId
                     )"
                 ], [
-                    "user_report_amount_to_hide" => $this->contentFilterService->getReportsAmountToHideContent(ContentType::user)
+                    "user_report_amount_to_hide" => $this->contentFilterService->getReportsAmountToHideContent(ContentType::user),
+                    "HiddenContentFiltering_currentUserId" => $this->currentUserId,
                 ]),
                 ContentType::post => new SpecificationSQLData([
                     "NOT EXISTS (
@@ -75,9 +79,12 @@ final class HiddenContentFilterSpec implements Specification
                             OR 
                             HiddenContentFiltering_posts.visibility_status = 'hidden'
                         )
+                        AND 
+                        HiddenContentFiltering_posts.userid != :HiddenContentFiltering_currentUserId
                     )"
                 ], [
-                    "post_report_amount_to_hide" => $this->contentFilterService->getReportsAmountToHideContent(ContentType::post)
+                    "post_report_amount_to_hide" => $this->contentFilterService->getReportsAmountToHideContent(ContentType::post),
+                    "HiddenContentFiltering_currentUserId" => $this->currentUserId,
                 ]),
                 ContentType::comment => new SpecificationSQLData([
                     "NOT EXISTS (
@@ -90,9 +97,12 @@ final class HiddenContentFilterSpec implements Specification
                             OR 
                             HiddenContentFiltering_comments.visibility_status = 'hidden'
                         )
+                        AND 
+                        HiddenContentFiltering_comments.userid != :HiddenContentFiltering_currentUserId
                     )"
                 ], [
-                    "comment_report_amount_to_hide" => $this->contentFilterService->getReportsAmountToHideContent(ContentType::comment)
+                    "comment_report_amount_to_hide" => $this->contentFilterService->getReportsAmountToHideContent(ContentType::comment),
+                    "HiddenContentFiltering_currentUserId" => $this->currentUserId,
                 ]),
             };
         }
@@ -114,10 +124,21 @@ final class HiddenContentFilterSpec implements Specification
                 $subject->getReports(),
                 $subject->visibilityStatus()
         );
+
+        if ($subject->getUserId() === $this->currentUserId) {
+            return null;    
+        }
         if ($action === ContentFilteringAction::replaceWithPlaceholder) {
             return ContentReplacementPattern::hidden;
         }
         return null;
+    }
+
+    public function forbidInteractions(
+        ContentType $targetContent, 
+        string $targetContentId
+    ): bool {
+        return false;
     }
 
     private static function createStrategy(
