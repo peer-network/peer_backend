@@ -1226,7 +1226,7 @@ class WalletMapper
         }
     }
 
-    public function saveWalletEntry(string $userId, float $liquidity): float
+    public function saveWalletEntry(string $userId, float $liquidity, string $type = 'CREDIT'): float
     {
         \ignore_user_abort(true);
         $this->logger->debug('WalletMapper.saveWalletEntry started');
@@ -1254,8 +1254,19 @@ class WalletMapper
             } else {
                 // User exists, safely calculate new liquidity
                 $currentBalance = (string)$row['liquidity'];
-                $newLiquidity = TokenHelper::addRc($currentBalance, (string) $liquidity);
-                $liquiditq = (float)$this->decimalToQ64_96((float) $newLiquidity);
+
+                if($liquidity < 0){
+                    $liquidity = (string) (abs((float)$liquidity));
+                    $type = 'DEBIT';
+                }
+
+                if($type === 'CREDIT'){
+                    $newLiquidity = TokenHelper::addRc($currentBalance, (string) $liquidity);
+                } else {
+                    $newLiquidity = TokenHelper::subRc($currentBalance, (string) $liquidity);
+                }
+
+                $liquiditq = (float)$this->decimalToQ64_96((float)$newLiquidity);
 
                 $stmt = $this->db->prepare(
                     "UPDATE wallett
@@ -1271,9 +1282,9 @@ class WalletMapper
             }
 
             $this->logger->info('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
-            $this->updateUserLiquidity($userId, $newLiquidity);
+            $this->updateUserLiquidity($userId, (float) $newLiquidity);
 
-            return $newLiquidity;
+            return  (float) $newLiquidity;
         } catch (\Throwable $e) {
             $this->logger->error('Database error in saveWalletEntry: ' . $e);
             throw new \RuntimeException('Unable to save wallet entry');

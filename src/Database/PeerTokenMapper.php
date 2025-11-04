@@ -515,7 +515,6 @@ class PeerTokenMapper
 
         foreach ($walletsToLock as $walletId) {
             if (!self::isValidUUID($walletId)) {
-                $this->logger->debug('Invalid wallet UUID for locking', ['walletId' => $walletId]);
                 throw new \RuntimeException('Invalid wallet UUID for locking: ' . $walletId);
             }
             $this->lockWalletBalance($walletId);
@@ -527,14 +526,12 @@ class PeerTokenMapper
      */
     private function lockWalletBalance(string $walletId): void
     {
-        $this->logger->debug('Locking wallet balance', ['walletId' => $walletId]);
         $query = "SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE";
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':userid', $walletId, \PDO::PARAM_STR);
         $stmt->execute();
         // Fetching the row to ensure the lock is acquired
         $stmt->fetch(\PDO::FETCH_ASSOC);
-        $this->logger->debug('Wallet balance locked', ['walletId' => $walletId]);
     }
 
 }
