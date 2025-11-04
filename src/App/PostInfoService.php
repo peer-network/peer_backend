@@ -227,7 +227,7 @@ class PostInfoService
             // Moderated items should not be reported again
             if ($this->reportMapper->isModerated($postId, ReportTargetType::POST->value)) {
                 $this->logger->warning("PostInfoService: reportPost: User tries to report a moderated post");
-                return $this::respondWithError(22101); // This content has already been reviewed and restored by our team.
+                return $this::respondWithError(32102); // This content has already been reviewed and restored by our team.
             }
 
             $this->transactionManager->beginTransaction();
