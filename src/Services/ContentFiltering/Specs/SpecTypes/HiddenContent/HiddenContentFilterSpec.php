@@ -2,7 +2,6 @@
 
 namespace Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent;
 
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
@@ -18,7 +17,6 @@ use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
-use Rector\TypeDeclaration\Rector\ClassMethod\StrictArrayParamDimFetchRector;
 use function DI\string;
 
 
@@ -134,13 +132,6 @@ final class HiddenContentFilterSpec implements Specification
         return null;
     }
 
-    public function forbidInteractions(
-        ContentType $targetContent, 
-        string $targetContentId
-    ): bool {
-        return false;
-    }
-
     private static function createStrategy(
         ContentFilteringCases $strategy
     ): ContentFilteringStrategy {
@@ -151,5 +142,9 @@ final class HiddenContentFilterSpec implements Specification
             ContentFilteringCases::postFeed => new HidePostsElsePlaceholder(),
             ContentFilteringCases::hideAll => new StrictlyHideEverythingContentFilteringStrategy()
         };
+    }
+
+    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData {
+        return null;
     }
 }

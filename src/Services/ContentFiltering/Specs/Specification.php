@@ -10,8 +10,6 @@ use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 interface Specification {
     public function toSql(ContentType $showingContent): ?SpecificationSQLData;
-
     public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern;
-
-    // public function forbidInteractions(ContentType $targetContent, string $targetContentId): bool;
+    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData;
 }
