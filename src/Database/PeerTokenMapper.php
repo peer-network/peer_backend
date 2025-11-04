@@ -35,7 +35,7 @@ class PeerTokenMapper
      *
      * @throws \RuntimeException if accounts are missing or invalid
      */
-    public function initializeLiquidityPool(): void
+    public function initializeLiquidityPool(): array
     {
         $accounts = $this->pool->returnAccounts();
         if (($accounts['status'] ?? '') === 'error') {
@@ -51,6 +51,13 @@ class PeerTokenMapper
         $this->burnWallet = $data['burn'];
         $this->peerWallet = $data['peer'];
         $this->btcpool = $data['btcpool'];
+
+        return [
+            $this->poolWallet, 
+            $this->burnWallet, 
+            $this->peerWallet, 
+            $this->btcpool
+        ];
     }
 
 
@@ -209,7 +216,6 @@ class PeerTokenMapper
         }
 
         $this->senderId = $senderId;
-        $requiredAmount = $this->calculateRequiredAmount($numberOfTokens);
 
         try {
             // Lock both users' balances to prevent race conditions
@@ -219,8 +225,12 @@ class PeerTokenMapper
                 $this->lockBalances([$senderId, $recipientId]);
             }
             if($isWithFees){
+                $requiredAmount = $this->calculateRequiredAmount($numberOfTokens);
+
                 // Fees Amount Calculation
                 [$peerFeeAmount, $poolFeeAmount, $burnFeeAmount, $inviteFeeAmount] = $this->calculateEachFeesAmount($numberOfTokens);
+            }else{
+                $requiredAmount = $numberOfTokens;
             }
             
             $operationid = self::generateUUID();

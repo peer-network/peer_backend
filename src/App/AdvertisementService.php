@@ -204,7 +204,7 @@ class AdvertisementService
                 $args['art'] = ($advertisePlan === $this::PLAN_BASIC) ? 6 : (($advertisePlan === $this::PLAN_PINNED) ? 7 : null);
                 $args['price'] = $CostPlan;
 
-                $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
+                $deducted = $this->walletService->deductFromWalletForAds($this->currentUserId, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
                     return $deducted;
                 }
