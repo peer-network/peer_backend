@@ -7,8 +7,14 @@ namespace Fawaz\App;
 use DateTimeImmutable;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\AdvertisementMapper;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\ContentFilterHelper;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -36,6 +42,7 @@ class AdvertisementService
         protected PostMapper $postMapper,
         protected PostService $postService,
         protected WalletService $walletService,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper
     ) {
     }
 
@@ -78,6 +85,30 @@ class AdvertisementService
 
         if ($this->postService->postExistsById($postId) === false) {
             return $this->respondWithError(31510);
+        }
+
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+        
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+
+        $specs = [
+            $systemUserSpec,
+            $illegalContentSpec,
+        ];
+
+        if($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $postId
+        ) === false) {
+            return $this::respondWithError(32020, ['postid'=> $postId]);
         }
 
         $advertiseActions = ['BASIC', 'PINNED'];
