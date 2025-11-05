@@ -275,7 +275,7 @@ class WalletService
     /**
      * Deducts the specified amount from the user's wallet for advertisement actions.
      */
-    public function deductFromWalletForAds(string $userId, ?array $args = [], TransferStrategy $transferStrategy): ?array
+    public function deductFromWalletForAds(string $userId, TransferStrategy $transferStrategy, ?array $args = []): ?array
     {
         $this->logger->debug('WalletService.deductFromWalletForAds started');
 

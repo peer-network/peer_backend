@@ -205,12 +205,12 @@ class AdvertisementService
             $transferStrategy = new AdsTransferStrategy();
             $transferStrategy->setOperationId($gemid);
             
-            $response = $this->createAdvertisement($args, $transferStrategy);
+            $response = $this->createAdvertisement($transferStrategy, $args);
             if (isset($response['status']) && $response['status'] === 'success') {
                 $args['art'] = ($advertisePlan === $this::PLAN_BASIC) ? 6 : (($advertisePlan === $this::PLAN_PINNED) ? 7 : null);
                 $args['price'] = $CostPlan;
 
-                $deducted = $this->walletService->deductFromWalletForAds($this->currentUserId, $args, $transferStrategy);
+                $deducted = $this->walletService->deductFromWalletForAds($this->currentUserId, $transferStrategy, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
                     return $deducted;
                 }
@@ -336,7 +336,7 @@ class AdvertisementService
         ];
     }
 
-    public function createAdvertisement(array $args = [], TransferStrategy $transferStrategy): array
+    public function createAdvertisement(TransferStrategy $transferStrategy, array $args = []): array
     {
         if (!$this->checkAuthentication()) {
             return self::respondWithError(60501);
