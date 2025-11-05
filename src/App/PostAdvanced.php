@@ -39,7 +39,7 @@ class PostAdvanced implements PostReplaceable
     protected ?array $tags = [];
     protected ?array $user = [];
     protected ?array $comments = [];
-    protected ?int $reports = null;
+    protected ?int $activeReports = null;
     protected ?string $visibilityStatus = null;
 
     // Constructor
@@ -74,7 +74,7 @@ class PostAdvanced implements PostReplaceable
         $this->isfriend = $data['isfriend'] ?? false;
         $this->url = $this->getPostUrl();
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->reports = $data['reports'] ?? null;
+        $this->activeReports= $data['reports'] ?? null;
         $this->visibilityStatus = $data['visibility_status']?? null;
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
@@ -112,7 +112,7 @@ class PostAdvanced implements PostReplaceable
             'createdat' => $this->createdat,
             'tags' => $this->tags, // Include tags
             'visibility_status' => $this->visibilityStatus,
-            'reports' => $this->reports,
+            'reports' => $this->activeReports,
             'user' => $this->user,
             'comments' => $this->comments,
         ];
@@ -197,9 +197,9 @@ class PostAdvanced implements PostReplaceable
         return $this->visibilityStatus ?? '';
     }
 
-    public function getReports(): ?int
+    public function getActiveReports(): ?int
     {
-        return $this->reports;
+        return $this->activeReports;
     }
 
     public function getPostUrl(): string

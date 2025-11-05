@@ -232,7 +232,7 @@ class CommentInfoService
                 return $this->respondWithError(31605);
             }
 
-            $commentInfo->setReports($commentInfo->getReports() + 1);
+            $commentInfo->setReports($commentInfo->getActiveReports() + 1);
             $commentInfo->setTotalReports($commentInfo->getTotalReports() + 1);
             $this->commentInfoMapper->update($commentInfo);
 

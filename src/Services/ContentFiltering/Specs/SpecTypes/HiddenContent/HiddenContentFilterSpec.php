@@ -119,7 +119,7 @@ final class HiddenContentFilterSpec implements Specification
         $action = $this->contentFilterService->getContentFilterAction(
             $showingContent,
                 $this->contentFilterStrategy,
-                $subject->getReports(),
+                $subject->getActiveReports(),
                 $subject->visibilityStatus()
         );
 

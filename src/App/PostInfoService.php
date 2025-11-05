@@ -251,7 +251,7 @@ class PostInfoService
                 return $this::respondWithError(31503);
             }
 
-            $postInfo->setReports($postInfo->getReports() + 1);
+            $postInfo->setReports($postInfo->getActiveReports() + 1);
             $postInfo->setTotalReports($postInfo->getTotalReports() + 1);
             $this->postInfoMapper->update($postInfo);
 

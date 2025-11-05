@@ -41,7 +41,7 @@ class PostAdvancedWithUser implements PostReplaceable, HasUserProfile
     protected ?array $tags = [];
     protected ?Profile $user;
     protected ?array $comments = [];
-    protected ?int $reports = null;
+    protected ?int $activeReports = null;
     protected ?string $visibilityStatus = null;
 
     // Constructor
@@ -76,7 +76,7 @@ class PostAdvancedWithUser implements PostReplaceable, HasUserProfile
         $this->isfriend = $data['isfriend'] ?? false;
         $this->url = $this->getPostUrl();
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->reports = $data['post_reports'] ?? null;
+        $this->activeReports= $data['post_reports'] ?? null;
         $this->visibilityStatus = $data['visibility_status']?? null;
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = new Profile(isset($data['user']) && is_array($data['user']) ? $data['user'] : []);
@@ -114,7 +114,7 @@ class PostAdvancedWithUser implements PostReplaceable, HasUserProfile
             'createdat' => $this->createdat,
             'tags' => $this->tags, // Include tags
             'visibility_status' => $this->visibilityStatus,
-            'reports' => $this->reports,
+            'reports' => $this->activeReports,
             'user' => $this->user->getArrayCopy(),
             'comments' => $this->comments,
         ];
@@ -199,9 +199,9 @@ class PostAdvancedWithUser implements PostReplaceable, HasUserProfile
         return $this->visibilityStatus ?? '';
     }
 
-    public function getReports(): ?int
+    public function getActiveReports(): ?int
     {
-        return $this->reports;
+        return $this->activeReports;
     }
 
     public function getPostUrl(): string

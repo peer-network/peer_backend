@@ -456,7 +456,7 @@ class UserInfoService
                 return $this::respondWithError(31008); // report already exists
             }
 
-            $userInfo->setReports($userInfo->getReports() + 1);
+            $userInfo->setReports($userInfo->getActiveReports() + 1);
             $userInfo->setTotalReports($userInfo->getTotalReports() + 1);
             $this->userInfoMapper->update($userInfo);
 

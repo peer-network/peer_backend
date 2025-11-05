@@ -10,5 +10,5 @@ namespace Fawaz\Services\ContentFiltering\Capabilities;
 interface HasActiveReports
 {
     /** True if there are active reports that should affect visibility/filtering. */
-    public function getReports(): ?int;
+    public function getActiveReports(): ?int;
 }

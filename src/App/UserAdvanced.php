@@ -33,7 +33,7 @@ class UserAdvanced implements ProfileReplaceable
     protected ?float $liquidity;
     protected ?string $createdat;
     protected ?string $updatedat;
-    protected ?int $reports;
+    protected ?int $activeReports;
     protected ?string $visibilityStatus;
 
     // Constructor
@@ -65,7 +65,7 @@ class UserAdvanced implements ProfileReplaceable
         $this->liquidity = $data['liquidity'] ?? 0.0;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->reports = $data['user_reports'] ?? 0;
+        $this->activeReports= $data['user_reports'] ?? 0;
         $this->visibilityStatus = $data['visibility_status'] ?? '';
     }
 
@@ -95,7 +95,7 @@ class UserAdvanced implements ProfileReplaceable
             'liquidity' => $this->liquidity,
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
-            'user_reports' => $this->reports,
+            'user_reports' => $this->activeReports,
             'visibility_status' => $this->visibilityStatus
         ];
         return $att;
@@ -358,9 +358,9 @@ class UserAdvanced implements ProfileReplaceable
         $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
-    public function getReports(): int
+    public function getActiveReports(): int
     {
-        return $this->reports;
+        return $this->activeReports;
     }
 
     public function getRolesmask(): int
