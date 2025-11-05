@@ -52,5 +52,5 @@ type Mutation {
   resolveTransfer(recipient: ID!, numberoftokens: Int!): DefaultResponse! @deprecated(reason: "Use `resolveTransferV2`.")
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
   advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): ListAdvertisementData!
-  advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!, forceUpdate: Boolean): ListAdvertisementData!
+  advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!): ListAdvertisementData!
 }
