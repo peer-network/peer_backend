@@ -202,7 +202,6 @@ class PeerTokenMapper
         string $numberOfTokens,
         ?string $message = null,
         bool $isWithFees = true,
-        ?string $recipientTransactionId = null,
         ?TransferStrategy $strategy = null
     ): ?array
     {
@@ -230,7 +229,7 @@ class PeerTokenMapper
                 [$peerFeeAmount, $poolFeeAmount, $burnFeeAmount, $inviteFeeAmount] = $this->calculateEachFeesAmount($numberOfTokens);
             }
             
-            $operationid = self::generateUUID();
+            $operationid = $strategy->getOperationId();
             $transRepo = new TransactionRepository($this->logger, $this->db);
             
             // 1. SENDER: Debit From Account
@@ -251,8 +250,9 @@ class PeerTokenMapper
                     'message' => $message,
                     'transferaction' => 'CREDIT'
                 ];
-                if (!empty($recipientTransactionId)) {
-                    $payload['transactionid'] = $recipientTransactionId;
+                $transactionid = $strategy->getTransactionId();
+                if (!empty($transactionid)) {
+                    $payload['transactionid'] = $transactionid;
                 }
                 $this->createAndSaveTransaction($transRepo, $payload);
 
@@ -815,15 +815,15 @@ class PeerTokenMapper
             $btcAmountToUser = SwapTokenHelper::calculateBtc($btcLpState, $lpState, $numberoftokensToSwap, $poolFee);
 
             // Perform token transfer to LP and fees via reusable method
-            $recipientTransactionId = self::generateUUID();
+            $strategy = new SwapToPoolTransferStrategy();
+            $transactionId = $strategy->getTransactionId();
             $transferRes = $this->transferToken(
                 $userId,
                 $recipient,
                 $numberoftokensToSwap,
                 $message,
                 $isWithFees,
-                $recipientTransactionId,
-                new SwapToPoolTransferStrategy()
+                $strategy
             );
 
             if (!is_array($transferRes) || ($transferRes['status'] ?? 'error') === 'error') {
@@ -832,7 +832,7 @@ class PeerTokenMapper
 
             // Link swap request to the transfer transaction
             $transObj = [
-                'operationid' => $recipientTransactionId,
+                'operationid' => $transactionId,
                 'transactiontype' => 'btcSwapToPool',
                 'userId' => $userId,
                 'btcAddress' => $btcAddress,
