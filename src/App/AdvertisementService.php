@@ -201,11 +201,10 @@ class AdvertisementService
             }
 
             // Werbeanzeige erstellen
-            $gemid = self::generateUUID();
             $transferStrategy = new AdsTransferStrategy();
-            $transferStrategy->setOperationId($gemid);
+            $args['operationid'] = $transferStrategy->getOperationId();
             
-            $response = $this->createAdvertisement($transferStrategy, $args);
+            $response = $this->createAdvertisement($args);
             if (isset($response['status']) && $response['status'] === 'success') {
                 $args['art'] = ($advertisePlan === $this::PLAN_BASIC) ? 6 : (($advertisePlan === $this::PLAN_PINNED) ? 7 : null);
                 $args['price'] = $CostPlan;
@@ -336,7 +335,7 @@ class AdvertisementService
         ];
     }
 
-    public function createAdvertisement(TransferStrategy $transferStrategy, array $args = []): array
+    public function createAdvertisement(array $args = []): array
     {
         if (!$this->checkAuthentication()) {
             return self::respondWithError(60501);
@@ -353,7 +352,7 @@ class AdvertisementService
         $advertisementId = self::generateUUID();
 
         $postId = $args['postid'] ?? null;
-        $operationId = $args['operationid'] ?? $transferStrategy->getOperationId();
+        $operationId = $args['operationid'] ?? '';
         $date = $args['durationInDays'] ?? null;
         $startday = $args['startday'] ?? null;
         $CostPlan = $args['advertisePlan'] ?? null;
