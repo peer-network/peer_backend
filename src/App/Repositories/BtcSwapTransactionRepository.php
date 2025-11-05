@@ -1,45 +1,45 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Fawaz\App\Repositories;
 
-use Fawaz\App\Models\Transaction;
-use PDO;
+use Fawaz\App\Models\BtcSwapTransaction;
 use Fawaz\Utils\PeerLoggerInterface;
+use PDO;
 
-class TransactionRepository
+class BtcSwapTransactionRepository
 {
+
     /**
-     * Assign Transaction object while instantiated
+     * Assign BtcSwapTransaction object while instantiated
      */
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
+        
     }
-
 
     /**
      * Save transaction data
      */
-    public function saveTransaction(Transaction $transaction)
+    public function saveTransaction(BtcSwapTransaction $transaction)
     {
         $this->logger->debug("TransactionRepository.saveTransaction started");
 
-        $query = "INSERT INTO transactions 
-                  (transactionid, operationid, transactiontype, senderid, recipientid, tokenamount, transferaction, message, createdat)
+        $query = "INSERT INTO btc_swap_transactions 
+                  (swapid, operationid, transactiontype, userid, btcaddress,  tokenamount, btcamount, status, message, createdat)
                   VALUES 
-                  (:transactionId, :operationId, :transactiontype, :senderId, :recipientId, :tokenAmount, :transferaction, :message, :createdat)";
+                  (:swapId, :operationid, :transactiontype, :userId, :btcAddress, :tokenAmount, :btcAmount, :status, :message, :createdat)";
 
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':transactionId', $transaction->getTransactionId(), \PDO::PARAM_STR);
-            $stmt->bindValue(':operationId', $transaction->getOperationId(), \PDO::PARAM_STR);
+            $stmt->bindValue(':swapId', $transaction->getSwapId(), \PDO::PARAM_STR);
+            $stmt->bindValue(':operationid', $transaction->getTransUniqueId(), \PDO::PARAM_STR);
             $stmt->bindValue(':transactiontype', $transaction->getTransactionType(), \PDO::PARAM_STR);
-            $stmt->bindValue(':senderId', $transaction->getSenderId(), \PDO::PARAM_STR);
-            $stmt->bindValue(':recipientId', $transaction->getRecipientId(), \PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $transaction->getUserId(), \PDO::PARAM_STR);
+            $stmt->bindValue(':btcAddress', $transaction->getBtcAddress(), \PDO::PARAM_STR);
             $stmt->bindValue(':tokenAmount', $transaction->getTokenAmount(), \PDO::PARAM_STR);
-            $stmt->bindValue(':transferaction', $transaction->geTtransferAction(), \PDO::PARAM_STR);
+            $stmt->bindValue(':btcAmount', $transaction->getBtcAmount(), \PDO::PARAM_STR);
+            $stmt->bindValue(':status', $transaction->getStatus(), \PDO::PARAM_STR);
             $stmt->bindValue(':message', $transaction->getMessage(), \PDO::PARAM_STR);
             $stmt->bindValue(':createdat', $transaction->getCreatedat(), \PDO::PARAM_STR);
             $stmt->execute();
@@ -67,5 +67,5 @@ class TransactionRepository
         }
     }
 
-
+    
 }
