@@ -9,6 +9,8 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\AdvertisementMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Services\TokenTransfer\Strategies\AdsTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 use Fawaz\Utils\ContentFilterHelper;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -199,12 +201,16 @@ class AdvertisementService
             }
 
             // Werbeanzeige erstellen
-            $response = $this->createAdvertisement($args);
+            $gemid = self::generateUUID();
+            $transferStrategy = new AdsTransferStrategy();
+            $transferStrategy->setOperationId($gemid);
+            
+            $response = $this->createAdvertisement($args, $transferStrategy);
             if (isset($response['status']) && $response['status'] === 'success') {
                 $args['art'] = ($advertisePlan === $this::PLAN_BASIC) ? 6 : (($advertisePlan === $this::PLAN_PINNED) ? 7 : null);
                 $args['price'] = $CostPlan;
 
-                $deducted = $this->walletService->deductFromWalletForAds($this->currentUserId, $args);
+                $deducted = $this->walletService->deductFromWalletForAds($this->currentUserId, $args, $transferStrategy);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
                     return $deducted;
                 }
@@ -330,7 +336,7 @@ class AdvertisementService
         ];
     }
 
-    public function createAdvertisement(array $args = []): array
+    public function createAdvertisement(array $args = [], TransferStrategy $transferStrategy): array
     {
         if (!$this->checkAuthentication()) {
             return self::respondWithError(60501);
@@ -347,6 +353,7 @@ class AdvertisementService
         $advertisementId = self::generateUUID();
 
         $postId = $args['postid'] ?? null;
+        $operationId = $args['operationid'] ?? $transferStrategy->getOperationId();
         $date = $args['durationInDays'] ?? null;
         $startday = $args['startday'] ?? null;
         $CostPlan = $args['advertisePlan'] ?? null;
@@ -407,6 +414,7 @@ class AdvertisementService
 
             $advertisementData = [
                 'advertisementid' => $advertisementId,
+                'operationid' => $operationId,
                 'postid' => $postId,
                 'userid' => $this->currentUserId,
                 'status' => \strtolower($CostPlan),

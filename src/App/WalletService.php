@@ -13,6 +13,7 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Services\TokenTransfer\Strategies\AdsTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 
 class WalletService
 {
@@ -274,7 +275,7 @@ class WalletService
     /**
      * Deducts the specified amount from the user's wallet for advertisement actions.
      */
-    public function deductFromWalletForAds(string $userId, ?array $args = []): ?array
+    public function deductFromWalletForAds(string $userId, ?array $args = [], TransferStrategy $transferStrategy): ?array
     {
         $this->logger->debug('WalletService.deductFromWalletForAds started');
 
@@ -343,12 +344,9 @@ class WalletService
                 'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
             ];
 
-            $gemid = self::generateUUID();
-            $transferStrategy = new AdsTransferStrategy();
-            $transferStrategy->setOperationId($gemid);
             $response = $this->peerTokenMapper->transferToken($userId, $fromId, $price, $text, false, $transferStrategy);
 
-            $args['gemid'] = $gemid;
+            $args['gemid'] = $transferStrategy->getOperationId();
             $results = $this->walletMapper->insertWinToLog($userId, $args);
             if ($results === false) {
                 $this->logger->warning("Error occurred in deductFromWalletsForAds.insertWinToLog", [
