@@ -2768,38 +2768,39 @@ class GraphQLSchemaBuilder
 
         $freeActions = ['report', 'save', 'share', 'view'];
 
-        $postId = trim($args['postid']);
-        if (!$this->isValidUUID($postId)) {
+        if (!empty($postId) && !$this->isValidUUID($postId)) {
             return $this::respondWithError(30209, ['postid' => $postId]);
         }
 
-        $contentFilterCase = ContentFilteringCases::searchById;
+        if ($postId) {
+            $contentFilterCase = ContentFilteringCases::searchById;
 
-        $deletedUserSpec = new DeletedUserSpec(
-            $contentFilterCase,
-            ContentType::post
-        );
-        $systemUserSpec = new SystemUserSpec(
-            $contentFilterCase,
-            ContentType::post
-        );
-        
-        $illegalContentSpec = new IllegalContentFilterSpec(
-            $contentFilterCase,
-            ContentType::post
-        );
+            $deletedUserSpec = new DeletedUserSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+            $systemUserSpec = new SystemUserSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+            
+            $illegalContentSpec = new IllegalContentFilterSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
 
-        $specs = [
-            $deletedUserSpec,
-            $systemUserSpec,
-            $illegalContentSpec,
-        ];
+            $specs = [
+                $deletedUserSpec,
+                $systemUserSpec,
+                $illegalContentSpec,
+            ];
 
-        if($this->interactionsPermissionsMapper->isInteractionAllowed(
-            $specs,
-            $postId
-        ) === false) {
-            return $this::respondWithError(31513, ['postid'=> $postId]);
+            if($this->interactionsPermissionsMapper->isInteractionAllowed(
+                $specs,
+                $postId
+            ) === false) {
+                return $this::respondWithError(31513, ['postid'=> $postId]);
+            }
         }
 
         if (in_array($action, $freeActions, true)) {

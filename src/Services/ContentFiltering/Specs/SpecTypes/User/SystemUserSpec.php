@@ -81,7 +81,7 @@ final class SystemUserSpec implements Specification
         return new HideEverythingContentFilteringStrategy();
     }
 
-    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData {
+    public function forbidInteractions(string $targetContentId): SpecificationSQLData {
         return match ($this->targetContent) {
             ContentType::user => new SpecificationSQLData([
                 "EXISTS (
