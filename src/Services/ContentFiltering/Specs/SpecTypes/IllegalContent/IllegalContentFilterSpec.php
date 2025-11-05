@@ -145,11 +145,11 @@ final class IllegalContentFilterSpec implements Specification {
                         FROM 
                             comments IllegalContentFilterSpec_comments
                         LEFT JOIN 
-                            posts IllegalContentFilterSpec_posts ON IllegalContentFilterSpec_posts.postid = c.postid
+                            posts IllegalContentFilterSpec_posts ON IllegalContentFilterSpec_posts.postid = IllegalContentFilterSpec_comments.postid
                         WHERE 
                             IllegalContentFilterSpec_comments.commentid = :IllegalContentFilterSpec_commentid AND
-                            IllegalContentFilterSpec_comments.visibility_status = 'illegal' AND
-                            IllegalContentFilterSpec_posts.visibility_status = 'illegal'
+                            (IllegalContentFilterSpec_comments.visibility_status = 'illegal' OR
+                            IllegalContentFilterSpec_posts.visibility_status = 'illegal')
                     )"
                 ], [
                     "IllegalContentFilterSpec_commentid" => $targetContentId
