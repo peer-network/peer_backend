@@ -55,7 +55,7 @@ class PeerTokenService
         $recipientid =  $args['recipient'];
         
         if (!$this->userMapper->isUserExistById($recipientid)) {
-            return $this::respondWithError(31003);
+            return $this::respondWithError(31007);
         }
 
         $contentFilterCase = ContentFilteringCases::searchById;
@@ -70,7 +70,7 @@ class PeerTokenService
         ];
 
         if($this->interactionsPermissionsMapper->isInteractionAllowed($specs,$recipientid) === false) {
-            return $this::respondWithError(31608, ['recipientid'=> $recipientid]);
+            return $this::respondWithError(31203, ['recipientid'=> $recipientid]);
         }
 
         try {

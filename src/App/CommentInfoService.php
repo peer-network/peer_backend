@@ -104,6 +104,17 @@ class CommentInfoService
 
         $this->logger->debug('CommentInfoService.likeComment started');
 
+        $commentInfo = $this->commentInfoMapper->loadById($commentId);
+
+        if (!$commentInfo) {
+            return $this::respondWithError(31601);
+        }
+
+        if ($commentInfo->getOwnerId() === $this->currentUserId) {
+            return $this::respondWithError(31606);
+        }
+
+
         $contentFilterCase = ContentFilteringCases::searchById;
 
         $deletedUserSpec = new DeletedUserSpec(
@@ -132,17 +143,6 @@ class CommentInfoService
         ) === false) {
             return $this::respondWithError(31608, ['commentid'=> $commentId]);
         }
-
-        $commentInfo = $this->commentInfoMapper->loadById($commentId);
-
-        if (!$commentInfo) {
-            return $this::respondWithError(31601);
-        }
-
-        if ($commentInfo->getOwnerId() === $this->currentUserId) {
-            return $this::respondWithError(31606);
-        }
-
         try {
             $this->transactionManager->beginTransaction();
 

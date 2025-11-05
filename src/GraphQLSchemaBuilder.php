@@ -3308,24 +3308,6 @@ class GraphQLSchemaBuilder
             return self::respondWithError(31010); // Invalid referral string
         }
 
-        $contentFilterCase = ContentFilteringCases::searchById;
-
-        $systemUserSpec = new SystemUserSpec(
-            $contentFilterCase,
-            ContentType::user
-        );
-
-        $specs = [
-            $systemUserSpec,
-        ];
-
-        if($this->interactionsPermissionsMapper->isInteractionAllowed(
-            $specs,
-            $referralString
-        ) === false) {
-            return $this::respondWithError(31010, ['referralUserId'=> $referralString]);
-        }
-
         $result = $this->userService->verifyReferral($referralString);
         
         return $result;
