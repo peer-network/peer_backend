@@ -131,8 +131,7 @@ class PeerTokenService
                 return self::respondWithError(51301);
             }
             
-            $this->peerTokenMapper->setSenderId($this->currentUserId);
-            $requiredAmount = $this->peerTokenMapper->calculateRequiredAmount($numberOfTokens);
+            $requiredAmount = $this->peerTokenMapper->calculateRequiredAmount($this->currentUserId, $numberOfTokens);
             if ($currentBalance < $requiredAmount) {
                 $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
                     'senderId' => $this->currentUserId,

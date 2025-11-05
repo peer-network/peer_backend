@@ -143,8 +143,10 @@ class PeerTokenMapper
     /**
      * Includes fees while calculating required amount for transfer.
      */
-    public function calculateRequiredAmount(string $numberOfTokens): string
+    public function calculateRequiredAmount(string $senderId, string $numberOfTokens): string
     {
+        $this->senderId = $senderId;
+
         [$peerFee, $poolFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
 
         return TokenHelper::calculateTokenRequiredAmount($numberOfTokens, $peerFee, $poolFee, $burnFee, $inviteFee);
@@ -224,7 +226,7 @@ class PeerTokenMapper
                 $this->lockBalances([$senderId, $recipientId]);
             }
             if($isWithFees){
-                $requiredAmount = $this->calculateRequiredAmount($numberOfTokens);
+                $requiredAmount = $this->calculateRequiredAmount($senderId, $numberOfTokens);
 
                 // Fees Amount Calculation
                 [$peerFeeAmount, $poolFeeAmount, $burnFeeAmount, $inviteFeeAmount] = $this->calculateEachFeesAmount($numberOfTokens);

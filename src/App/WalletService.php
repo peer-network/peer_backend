@@ -320,8 +320,7 @@ class WalletService
             }
             $price = (string) $price;
 
-            $this->peerTokenMapper->setSenderId($userId);
-            $requiredAmount = $this->peerTokenMapper->calculateRequiredAmount((string) $price);
+            $requiredAmount = $this->peerTokenMapper->calculateRequiredAmount($userId, (string) $price);
             if ($currentBalance < $requiredAmount) {
                 $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
                     'senderId' => $this->currentUserId,
