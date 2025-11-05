@@ -202,7 +202,6 @@ class PeerTokenMapper
         string $numberOfTokens,
         ?string $message = null,
         bool $isWithFees = true,
-        ?string $recipientTransactionId = null,
         ?TransferStrategy $strategy = null
     ): ?array
     {
@@ -233,7 +232,7 @@ class PeerTokenMapper
                 $requiredAmount = $numberOfTokens;
             }
             
-            $operationid = self::generateUUID();
+            $operationid = $strategy->getOperationId();
             $transRepo = new TransactionRepository($this->logger, $this->db);
             
             // 1. SENDER: Debit From Account
@@ -254,8 +253,9 @@ class PeerTokenMapper
                     'message' => $message,
                     'transferaction' => 'CREDIT'
                 ];
-                if (!empty($recipientTransactionId)) {
-                    $payload['transactionid'] = $recipientTransactionId;
+                $transactionId = $strategy->getTransactionId();
+                if (!empty($transactionId)) {
+                    $payload['transactionid'] = $transactionId;
                 }
                 $this->createAndSaveTransaction($transRepo, $payload);
 

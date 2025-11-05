@@ -15,4 +15,7 @@ interface TransferStrategy
     public function getPoolFeeTransactionType(): string;
     public function getPeerFeeTransactionType(): string;
     public function getBurnFeeTransactionType(): string;
+
+    public function getTransactionId(): string;
+    public function getOperationId(): string;
 }
