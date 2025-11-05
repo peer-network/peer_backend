@@ -39,4 +39,7 @@ final class UserIsBlockedByMeSpec implements Specification
     {
         return null;
     }
+    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData {
+        return null;
+    }
 }

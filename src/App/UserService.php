@@ -787,7 +787,8 @@ class UserService
         $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
             ContentFilteringCases::searchById,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId,
         );
         
         $illegalContentFilterSpec = new IllegalContentFilterSpec(
@@ -881,7 +882,8 @@ class UserService
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId,
         );
         
         $illegalContentSpec = new IllegalContentFilterSpec(
@@ -902,14 +904,15 @@ class UserService
             $users = $this->userMapper->fetchFriends($this->currentUserId,$specs, $offset, $limit);
 
             $usersArray = [];
-            foreach ($users as $profile) {
-                if ($profile instanceof ProfileReplaceable) {
-                    ContentReplacer::placeholderProfile($profile, $specs);
-                }
-                $usersArray[] = $profile->getArrayCopy();
-            }
 
             if (!empty($users)) {
+                foreach ($users as $profile) {
+                    if ($profile instanceof ProfileReplaceable) {
+                        ContentReplacer::placeholderProfile($profile, $specs);
+                    }
+                    $usersArray[] = $profile->getArrayCopy();
+                }
+                
                 $this->logger->info('Friends list retrieved successfully', ['userCount' => count($usersArray)]);
                 return [
                     'status' => 'success',
@@ -1007,7 +1010,8 @@ class UserService
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId,
         );
         $illegalContentFilterSpec = new IllegalContentFilterSpec(
             $contentFilterCase,

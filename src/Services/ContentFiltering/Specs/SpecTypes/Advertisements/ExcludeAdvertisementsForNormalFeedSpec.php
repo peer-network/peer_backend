@@ -23,7 +23,7 @@ final class ExcludeAdvertisementsForNormalFeedSpec implements Specification
         }
 
         // If postid is not NULL, return NOT EXISTS (active advertisements)
-        if ($this->postId !== null) {
+        if ($this->postId === null) {
             return new SpecificationSQLData([
                 "NOT EXISTS (
                   SELECT 1
@@ -40,6 +40,9 @@ final class ExcludeAdvertisementsForNormalFeedSpec implements Specification
 
     public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern
     {
+        return null;
+    }
+    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData {
         return null;
     }
 }

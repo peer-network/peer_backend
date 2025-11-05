@@ -227,7 +227,7 @@ class PostInfoService
             // Moderated items should not be reported again
             if ($this->reportMapper->isModerated($postId, ReportTargetType::POST->value)) {
                 $this->logger->warning("PostInfoService: reportPost: User tries to report a moderated post");
-                return $this::respondWithError(22101); // This content has already been reviewed and restored by our team.
+                return $this::respondWithError(32102); // This content has already been reviewed and restored by our team.
             }
 
             $this->transactionManager->beginTransaction();
@@ -251,7 +251,7 @@ class PostInfoService
                 return $this::respondWithError(31503);
             }
 
-            $postInfo->setReports($postInfo->getReports() + 1);
+            $postInfo->setReports($postInfo->getActiveReports() + 1);
             $postInfo->setTotalReports($postInfo->getTotalReports() + 1);
             $this->postInfoMapper->update($postInfo);
 
@@ -352,37 +352,6 @@ class PostInfoService
             $this->logger->error('PostInfoService: sharePost: Error while fetching post data', ['exception' => $e]);
             return $this::respondWithError(41505);
         }
-    }
-
-    public function toggleUserFollow(string $followedUserId): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        if (!self::isValidUUID($followedUserId)) {
-            return $this::respondWithError(30201);
-        }
-
-        $this->logger->debug('PostInfoService.toggleUserFollow started');
-
-        if (!$this->postInfoMapper->isUserExistById($followedUserId)) {
-            return $this::respondWithError(31105);
-        }
-
-        $this->transactionManager->beginTransaction();
-
-        $response = $this->postInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
-
-        if (isset($response['status']) && $response['status'] === 'error') {
-            $this->logger->error('PostInfoService.toggleUserFollow Error toggling user follow', ['error' => $response]);
-            $this->transactionManager->rollback();
-            return $response;
-        }
-        $this->transactionManager->commit();
-
-        return $response;
-
     }
 
     public function savePost(string $postId): array

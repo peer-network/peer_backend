@@ -8,6 +8,7 @@ use Fawaz\App\Post;
 use Fawaz\App\Comment;
 use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
@@ -54,7 +55,8 @@ class PostService
         protected WalletService $walletService,
         protected JWTService $tokenService,
         protected TransactionManager $transactionManager,
-        protected ProfileRepository $profileRepository
+        protected ProfileRepository $profileRepository,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
     ) {
     }
 
@@ -608,13 +610,15 @@ class PostService
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::post
+            ContentType::post,
+            $this->currentUserId,
         );
         
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
             ContentType::post
         );
+
         $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
 
         $specs = [
@@ -830,7 +834,6 @@ class PostService
             return $this::respondWithError(30201);
         }
 
-
         $contentFilterCase = ContentFilteringCases::searchById;
 
         $deletedUserSpec = new DeletedUserSpec(
@@ -845,7 +848,8 @@ class PostService
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId,
         );
         
         $illegalContentSpec = new IllegalContentFilterSpec(

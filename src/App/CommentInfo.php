@@ -13,7 +13,7 @@ class CommentInfo extends Model
     protected string $commentid;
     protected string $userid;
     protected int $likes;
-    protected int $reports;
+    protected int $activeReports;
     protected int $totalreports;
     protected int $comments;
 
@@ -27,7 +27,7 @@ class CommentInfo extends Model
         $this->commentid = $data['commentid'] ?? '';
         $this->userid = $data['userid'] ?? '';
         $this->likes = $data['likes'] ?? 0;
-        $this->reports = $data['reports'] ?? 0;
+        $this->activeReports = $data['reports'] ?? 0;
         $this->totalreports = $data['totalreports'] ?? 0;
         $this->comments = $data['comments'] ?? 0;
     }
@@ -39,7 +39,7 @@ class CommentInfo extends Model
             'commentid' => $this->commentid,
             'userid' => $this->userid,
             'likes' => $this->likes,
-            'reports' => $this->reports,
+            'reports' => $this->activeReports,
             'totalreports' => $this->totalreports,
             'comments' => $this->comments,
         ];
@@ -77,14 +77,14 @@ class CommentInfo extends Model
         $this->likes = $likes;
     }
 
-    public function getReports(): int
+    public function getActiveReports(): int
     {
-        return $this->reports;
+        return $this->activeReports;
     }
 
     public function setReports(int $reports): void
     {
-        $this->reports = $reports;
+        $this->activeReports = $reports;
     }
 
     public function getTotalReports(): int

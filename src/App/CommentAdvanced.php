@@ -21,7 +21,7 @@ class CommentAdvanced implements CommentReplaceable
     protected ?int $amountreports;
     protected ?int $amountreplies;
     protected ?bool $isliked;
-    protected ?int $reports = null;
+    protected ?int $activeReports = null;
     protected ?string $visibilityStatus = null;
     protected ?array $user = [];
 
@@ -43,7 +43,7 @@ class CommentAdvanced implements CommentReplaceable
         $this->amountreplies = $data['amountreplies'] ?? 0;
         $this->amountreports = $data['amountreports'] ?? 0;
         $this->isliked = $data['isliked'] ?? false;
-        $this->reports = $data['reports'] ?? null;
+        $this->activeReports = $data['reports'] ?? null;
         $this->visibilityStatus = $data['visibility_status']?? null;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
     }
@@ -63,7 +63,7 @@ class CommentAdvanced implements CommentReplaceable
             'amountreports' => $this->amountreports,
             'isliked' => $this->isliked,
             'visibility_status' => $this->visibilityStatus,
-            'reports' => $this->reports,
+            'reports' => $this->activeReports,
             'user' => $this->user,
         ];
         return $att;
@@ -129,9 +129,14 @@ class CommentAdvanced implements CommentReplaceable
         return $this->visibilityStatus ?? '';
     }
 
-    public function getReports(): ?int
+    public function setVisibilityStatus(?string $status): void
     {
-        return $this->reports;
+        $this->visibilityStatus = $status;
+    }
+
+    public function getActiveReports(): ?int
+    {
+        return $this->activeReports;
     }
 
     // Validation and Array Filtering methods

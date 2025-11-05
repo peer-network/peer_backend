@@ -26,7 +26,7 @@ final class DeletedUserSpec implements Specification {
 
     public function __construct(
         ContentFilteringCases $case,
-        ContentType $targetContent
+        private ContentType $targetContent
     ) {
         $this->contentFilterService = new ContentFilterServiceImpl(
             $targetContent
@@ -96,6 +96,45 @@ final class DeletedUserSpec implements Specification {
             // posts, comments of Deleted User are not changed
         }
         return null;
+    }
+
+    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData {
+        return match ($this->targetContent) {
+            ContentType::user => new SpecificationSQLData([
+                "EXISTS (
+                    SELECT 1
+                        FROM users DeletedUserSpec_users
+                        WHERE DeletedUserSpec_users.uid = :DeletedUserSpec_userid
+                        AND DeletedUserSpec_users.status IN (0)
+                )"
+            ], [
+                    "DeletedUserSpec_userid" => $targetContentId
+            ]),
+            ContentType::post => null,
+            ContentType::comment => null
+            // ContentType::post => new SpecificationSQLData([
+            //     "EXISTS (
+            //         SELECT 1
+            //             FROM posts DeletedUserSpec_posts
+            //             LEFT JOIN users DeletedUserSpec_users ON DeletedUserSpec_users.uid = DeletedUserSpec_posts.userid
+            //             WHERE DeletedUserSpec_posts.postid = :DeletedUserSpec_postid
+            //             AND DeletedUserSpec_users.status IN (0)
+            //     )"
+            // ], [
+            //         "DeletedUserSpec_postid" => $targetContentId
+            // ]),
+            // ContentType::comment => new SpecificationSQLData([
+            //     "EXISTS (
+            //         SELECT 1
+            //             FROM comments DeletedUserSpec_comments
+            //             LEFT JOIN users DeletedUserSpec_users ON DeletedUserSpec_users.uid = DeletedUserSpec_comments.userid
+            //             WHERE DeletedUserSpec_comments.commentid = :DeletedUserSpec_commentid
+            //             AND DeletedUserSpec_users.status IN (0)
+            //     )"
+            // ], [
+            //         "DeletedUserSpec_commentid" => $targetContentId
+            // ]),
+        };
     }
 
     private static function createStrategy(

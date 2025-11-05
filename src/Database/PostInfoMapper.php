@@ -285,52 +285,7 @@ class PostInfoMapper
             ]);
             return ['status' => 'error', 'ResponseCode' => "41502"];
         }
-    }
-
-    public function toggleUserFollow(string $followerid, string $followeduserid): array
-    {
-        $this->logger->debug("PostInfoMapper.toggleUserFollow started");
-
-        try {
-
-            // Check if the follow relationship already exists
-            $query = "SELECT COUNT(*) FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-            $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
-            $stmt->execute();
-
-            $isFollowing = $stmt->fetchColumn() > 0;
-
-            if ($isFollowing) {
-                // Unfollow: delete the relationship
-                $query = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-                $action = "11103";
-                $isfollowing = false;
-            } else {
-                // Follow: insert the relationship
-                $query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
-                $action = "11104";
-                $isfollowing = true;
-            }
-
-            // Execute the toggle action
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-            $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
-            $stmt->execute();
-
-
-            return ['status' => 'success', 'isfollowing' => $isfollowing, 'ResponseCode' => $action];
-        } catch (\Exception $e) {
-            $this->logger->error('Failed to toggle user follow', [
-                'followerid' => $followerid,
-                'followeduserid' => $followeduserid,
-                'exception' => $e->getMessage(),
-            ]);
-            return ['status' => 'error', 'ResponseCode' => "41103"];
-        }
-    }
+    } 
 
     private function mapRowToActiveAdsInfo(
         string $postId,

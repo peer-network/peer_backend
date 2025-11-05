@@ -49,6 +49,7 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 
 
 class GraphQLSchemaBuilder
@@ -79,6 +80,7 @@ class GraphQLSchemaBuilder
         protected JWTService $tokenService,
         protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -400,6 +402,13 @@ class GraphQLSchemaBuilder
                     $this->logger->debug('Query.User Resolvers');
                     return $root['uid'] ?? '';
                 },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
+                },
                 'situation' => function (array $root): string {
                     $status = $root['status'] ?? 0;
                     return $this->getStatusNameByID($status) ?? '';
@@ -491,6 +500,13 @@ class GraphQLSchemaBuilder
                 'id' => function (array $root): string {
                     $this->logger->debug('Query.User Resolvers');
                     return $root['uid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'situation' => function (array $root): string {
                     $status = $root['status'] ?? 0;
@@ -594,6 +610,13 @@ class GraphQLSchemaBuilder
                     $this->logger->debug('Query.ProfileUser Resolvers');
                     return $root['uid'] ?? '';
                 },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
+                },
                 'username' => function (array $root): string {
                     return $root['username'] ?? '';
                 },
@@ -617,6 +640,13 @@ class GraphQLSchemaBuilder
                 'userid' => function (array $root): string {
                     $this->logger->debug('Query.BasicUserInfo Resolvers');
                     return $root['uid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'img' => function (array $root): string {
                     return $root['img'] ?? '';
@@ -780,6 +810,13 @@ class GraphQLSchemaBuilder
                 'id' => function (array $root): string {
                     $this->logger->debug('Query.Post Resolvers');
                     return $root['postid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'contenttype' => function (array $root): string {
                     return $root['contenttype'] ?? '';
@@ -959,6 +996,13 @@ class GraphQLSchemaBuilder
                 'commentid' => function (array $root): string {
                     $this->logger->debug('Query.Comment Resolvers');
                     return $root['commentid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'userid' => function (array $root): string {
                     return $root['userid'] ?? '';
@@ -2766,6 +2810,41 @@ class GraphQLSchemaBuilder
 
         $freeActions = ['report', 'save', 'share', 'view'];
 
+        if (!empty($postId) && !$this->isValidUUID($postId)) {
+            return $this::respondWithError(30209, ['postid' => $postId]);
+        }
+
+        if ($postId) {
+            $contentFilterCase = ContentFilteringCases::searchById;
+
+            $deletedUserSpec = new DeletedUserSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+            $systemUserSpec = new SystemUserSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+            
+            $illegalContentSpec = new IllegalContentFilterSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+
+            $specs = [
+                $deletedUserSpec,
+                $systemUserSpec,
+                $illegalContentSpec,
+            ];
+
+            if($this->interactionsPermissionsMapper->isInteractionAllowed(
+                $specs,
+                $postId
+            ) === false) {
+                return $this::respondWithError(31513, ['postid'=> $postId]);
+            }
+        }
+
         if (in_array($action, $freeActions, true)) {
             $response = $this->postInfoService->{$action . 'Post'}($postId);
             return $response;
@@ -2798,10 +2877,10 @@ class GraphQLSchemaBuilder
             'dislike' => $actions['DISLIKE'],
         ];
 
-        // Validations
+        // Validations  
         if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
             $this->logger->warning('Invalid action parameter', ['action' => $action]);
-            return $this->respondWithError(30105);
+            return $this::respondWithError(30105);
         }
 
         $limit = $dailyLimits[$action];
@@ -3161,7 +3240,8 @@ class GraphQLSchemaBuilder
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId
         );
         $illegalContentFilterSpec = new IllegalContentFilterSpec(
             $contentFilterCase,

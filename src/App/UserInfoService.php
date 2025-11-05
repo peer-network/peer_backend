@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\UserInfoMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\ReportsMapper;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
@@ -28,7 +34,8 @@ class UserInfoService
         protected UserMapper $userMapper,
         protected UserPreferencesMapper $userPreferencesMapper,
         protected ReportsMapper $reportsMapper,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -115,6 +122,24 @@ class UserInfoService
             return $this::respondWithError(31003);
         }
 
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $specs = [
+            $systemUserSpec
+        ];
+
+        if($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $followedUserId
+        ) === false) {
+            return $this::respondWithError(31107, ['followedUserId'=> $followedUserId]);
+        }
+
         $this->transactionManager->beginTransaction();
 
         $response = $this->userInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
@@ -152,6 +177,24 @@ class UserInfoService
 
         if (!$this->userInfoMapper->isUserExistById($blockedUserId)) {
             return $this::respondWithError(31106);
+        }
+
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $specs = [
+            $systemUserSpec
+        ];
+
+        if($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $blockedUserId
+        ) === false) {
+            return $this::respondWithError(31107, ['blockedUserId'=> $blockedUserId]);
         }
 
         $this->transactionManager->beginTransaction();
@@ -389,7 +432,7 @@ class UserInfoService
             // Moderated items should not be reported again
             if ($this->reportsMapper->isModerated($reported_userid, ReportTargetType::USER->value)) {
                 $this->logger->warning("UserInfoService.reportUser: User report already exists");
-                return $this::respondWithError(22101); // This content has already been reviewed and restored by our team.
+                return $this::respondWithError(32102); // This content has already been reviewed and restored by our team.
             }
 
             $this->transactionManager->beginTransaction();
@@ -413,7 +456,7 @@ class UserInfoService
                 return $this::respondWithError(31008); // report already exists
             }
 
-            $userInfo->setReports($userInfo->getReports() + 1);
+            $userInfo->setReports($userInfo->getActiveReports() + 1);
             $userInfo->setTotalReports($userInfo->getTotalReports() + 1);
             $this->userInfoMapper->update($userInfo);
 

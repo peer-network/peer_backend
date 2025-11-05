@@ -56,7 +56,8 @@ final class ProfileServiceImpl implements ProfileService
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId,
         );
         
         $illegalContentSpec = new IllegalContentFilterSpec(
@@ -199,7 +200,8 @@ final class ProfileServiceImpl implements ProfileService
         $hiddenContentFilterSpec = new HiddenContentFilterSpec(
             $contentFilterCase,
             $contentFilterBy,
-            ContentType::user
+            ContentType::user,
+            $this->currentUserId,
         );
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,

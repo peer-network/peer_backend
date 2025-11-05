@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Fawaz\BaseURL;
+use Fawaz\Database\InteractionsPermissionsMapperImpl;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Utils\ResponseMessagesProvider;
 use Fawaz\Services\JWTService;
@@ -84,6 +86,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         ResponseMessagesProvider::class => function (ContainerInterface $c) {
             $path = __DIR__ . "/../../runtime-data/media/assets/response-codes.json";
             return new ResponseMessagesProviderImpl($path);
-        }
+        },
+        InteractionsPermissionsMapper::class => \DI\autowire(InteractionsPermissionsMapperImpl::class),
     ]);
 };
