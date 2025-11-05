@@ -822,26 +822,13 @@ class AdvertisementMapper
         $limit  = min(max((int)($args['limit'] ?? 10), 1), 20);
         $trenddays = 7;
 
-        /**
-         * Includes Content Filtering for Reports Advertisements
-         */
-        $post_report_amount_to_hide     = ConstantsConfig::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST'];
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-
         $from   = $args['from']   ?? null;
         $to     = $args['to']     ?? null;
         // Normalize and map content-type filter values using shared helper
-        $filterBy = isset($args['filterBy']) && is_array($args['filterBy'])
-            ? \Fawaz\Utils\ContentFilterHelper::normalizeToUpper($args['filterBy'])
-            : [];
+        $filterBy = isset($args['filterBy']) && is_array($args['filterBy']) ? ContentFilterHelper::normalizeToUpper($args['filterBy']) : [];
         $tag    = $args['tag']    ?? null;
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
-
-        $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentType::post,
-            $contentFilterBy
-        );
 
         $whereClauses = ["p.feedid IS NULL"];
         $params = ['currentUserId' => $currentUserId];
@@ -872,30 +859,6 @@ class AdvertisementMapper
             $whereClauses[] = "t.name = :tag";
             $params['tag'] = $tag;
         }
-        // Show only Valid Content
-        // $whereClauses[] = "p.status = :postStatus";
-        // $params['postStatus'] = ConstantsConfig::post()['STATUS']['ADVERTISED'];
-
-        // Allow Only (Normal Status) Plus (User's & Admin's Mode) Posts
-        $whereClauses[] = 'u.status = :stNormal AND u.roles_mask IN (:roleUser, :roleAdmin)';
-        $params['stNormal']  = Status::NORMAL;
-        $params['roleUser']  = Role::USER;
-        $params['roleAdmin'] = Role::ADMIN;
-
-        // Content Filtering
-        // if ($contentFilterService->getContentFilterAction(
-        //     ContentType::post,
-        //     ContentType::post
-        // ) === ContentFilteringAction::hideContent) {
-        //     $params['post_report_amount_to_hide'] = $post_report_amount_to_hide;
-            
-        //     $whereClauses[] = '(
-        //         p.userid = :currentUserId
-        //         OR (
-        //             pi.reports < :post_report_amount_to_hide
-        //         )
-        //     )';
-        // }
 
         // FilterBy Content Types
         if (!empty($filterBy) && is_array($filterBy)) {
