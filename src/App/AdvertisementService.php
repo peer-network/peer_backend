@@ -430,23 +430,30 @@ class AdvertisementService
                 $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                 $rescode = 12001; // Advertisement post erfolgreich erstellt.
             } elseif ($CostPlan === self::PLAN_PINNED) {
-                if ($this->advertisementMapper->isAdvertisementIdExist($postId, \strtolower($CostPlan)) === true) {
-                    $advertData = $this->advertisementMapper->fetchByAdvID($postId, \strtolower($CostPlan));
-                    $data = $advertData[0];
-                    $data->setUserId($this->currentUserId);
-                    $data->setTimestart($timestart);
-                    $data->setTimeend($timeend);
-                    $data->setTokencost($tokencost);
-                    $data->setEurocost($eurocost);
-                    $this->logger->info('Befor Update Get Advertisement Data', ['data' => $data->getArrayCopy()]);
-                    $resp = $this->advertisementMapper->update($data);
-                    $this->logger->info('Update Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
-                    $rescode = 12005; // Advertisement post erfolgreich aktualisiert.
-                } else {
-                    $resp = $this->advertisementMapper->insert($advertisement);
-                    $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
-                    $rescode = 12001; // Advertisement post erfolgreich erstellt.
-                }
+                // NOTE: Repinning functionality commented out (not in current feature scope)
+                // if ($this->advertisementMapper->isAdvertisementIdExist($postId, \strtolower($CostPlan)) === true) {
+                //     $advertData = $this->advertisementMapper->fetchByAdvID($postId, \strtolower($CostPlan));
+                //     $data = $advertData[0];
+                //     $data->setUserId($this->currentUserId);
+                //     $data->setTimestart($timestart);
+                //     $data->setTimeend($timeend);
+                //     $data->setTokencost($tokencost);
+                //     $data->setEurocost($eurocost);
+                //     $this->logger->info('Befor Update Get Advertisement Data', ['data' => $data->getArrayCopy()]);
+                //     $resp = $this->advertisementMapper->update($data);
+                //     $this->logger->info('Update Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
+                //     $rescode = 12005; // Advertisement post erfolgreich aktualisiert.
+                // } else {
+                //     $resp = $this->advertisementMapper->insert($advertisement);
+                //     $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
+                //     $rescode = 12001; // Advertisement post erfolgreich erstellt.
+                // }
+                
+                
+                // Always create new advertisement with unique ID and current timestamp
+                $resp = $this->advertisementMapper->insert($advertisement);
+                $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
+                $rescode = 12001; // Advertisement post erfolgreich erstellt.
             } else {
                 $this->logger->warning('Fehler, Falsche CostPlan angegeben.');
                 return self::respondWithError(32005); // Fehler, Falsche CostPlan angegeben.
