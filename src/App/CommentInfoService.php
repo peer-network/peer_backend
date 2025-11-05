@@ -6,8 +6,14 @@ namespace Fawaz\App;
 
 use Fawaz\Database\CommentInfoMapper;
 use Fawaz\Database\CommentMapper;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\ReportsMapper;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -22,7 +28,8 @@ class CommentInfoService
         protected CommentInfoMapper $commentInfoMapper,
         protected ReportsMapper $reportsMapper,
         protected CommentMapper $commentMapper,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
     ) {
     }
 
@@ -96,6 +103,35 @@ class CommentInfoService
         }
 
         $this->logger->debug('CommentInfoService.likeComment started');
+
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+        
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+
+        $specs = [
+            $deletedUserSpec,
+            $systemUserSpec,
+            $illegalContentSpec,
+        ];
+
+        if($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $commentId
+        ) === false) {
+            return $this::respondWithError(31608, ['commentid'=> $commentId]);
+        }
 
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
