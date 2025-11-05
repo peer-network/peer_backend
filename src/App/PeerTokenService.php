@@ -105,7 +105,11 @@ class PeerTokenService
                 return self::respondWithError(31202);
             }
             
-            if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
+            // Strict numeric validation for decimals (e.g., "1", "1.0", "0.25")
+            $numRaw = (string)($args['numberoftokens'] ?? '');
+            // Accepts unsigned decimal numbers with optional fractional part
+            $isStrictDecimal = $numRaw !== '' && preg_match('/^(?:\d+)(?:\.\d+)?$/', $numRaw) === 1;
+            if (!$isStrictDecimal) {
                 return self::respondWithError(30264);
             }
             
