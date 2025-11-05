@@ -121,6 +121,11 @@ class Profile implements ProfileReplaceable
         return $this->visibilityStatus;
     }
 
+    public function setVisibilityStatus(?string $status): void
+    {
+        $this->visibilityStatus = $status;
+    }
+
     public function isVerified(): int
     {
         return $this->verified;

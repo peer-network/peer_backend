@@ -262,6 +262,11 @@ class User extends Model implements Hashable, ProfileReplaceable
         return (string)($this->visibilityStatus ?? '');
     }
 
+    public function setVisibilityStatus(?string $status): void
+    {
+        $this->visibilityStatus = $status;
+    }
+
     public function updateBio(string $biography): void
     {
         $this->biography = $biography;

@@ -129,6 +129,11 @@ class CommentAdvanced implements CommentReplaceable
         return $this->visibilityStatus ?? '';
     }
 
+    public function setVisibilityStatus(?string $status): void
+    {
+        $this->visibilityStatus = $status;
+    }
+
     public function getActiveReports(): ?int
     {
         return $this->activeReports;

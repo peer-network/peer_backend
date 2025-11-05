@@ -278,6 +278,16 @@ class UserAdvanced implements ProfileReplaceable
         $this->img = $imgPath;
     }
 
+    public function visibilityStatus(): string
+    {
+        return (string)($this->visibilityStatus ?? '');
+    }
+
+    public function setVisibilityStatus(?string $status): void
+    {
+        $this->visibilityStatus = $status;
+    }
+
     public function getAmountPosts(): int|null
     {
         return $this->amountposts;
@@ -368,10 +378,7 @@ class UserAdvanced implements ProfileReplaceable
         return $this->roles_mask;
     }
 
-        public function visibilityStatus(): string
-    {
-        return $this->visibilityStatus;
-    }
+    
 
     // Password Verify methods
     public function verifyPassword(string $password): bool

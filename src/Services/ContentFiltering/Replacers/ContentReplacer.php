@@ -30,10 +30,18 @@ class ContentReplacer
             return;
         }
         $pattern = $replacerSpecs[0];
-
-        $profile->setBiography($pattern->userBiography());
-        $profile->setName($pattern->username());
-        $profile->setImg($pattern->profilePicturePath());
+        if ($pattern->userBiography()) {
+            $profile->setBiography($pattern->userBiography());
+        }
+        if ($pattern->username()) {
+            $profile->setName($pattern->username());
+        }
+        if ($pattern->profilePicturePath()) {
+            $profile->setImg($pattern->profilePicturePath());
+        }
+        if ($profile->visibilityStatus() === "normal") {
+            $profile->setVisibilityStatus($pattern->visibilityStatus());
+        }
     }
 
     public static function placeholderPost(
@@ -53,9 +61,18 @@ class ContentReplacer
         }
         $pattern = $replacerSpecs[0];
 
-        $post->setTitle($pattern->postTitle());
-        $post->setDescription($pattern->postDescription());
-        $post->setMedia($pattern->postMedia());
+        if ($pattern->postTitle()) {
+            $post->setTitle($pattern->postTitle());
+        }
+        if ($pattern->postDescription()) {
+            $post->setDescription($pattern->postDescription());
+        }
+        if ($pattern->postMedia()) {
+            $post->setMedia($pattern->postMedia());
+        }
+        if ($post->visibilityStatus() === "normal") {
+            $post->setVisibilityStatus($pattern->visibilityStatus());
+        }
     }
 
     public static function placeholderComments(
@@ -75,6 +92,11 @@ class ContentReplacer
         }
         $pattern = $replacerSpecs[0];
 
-        $comment->setContent($pattern->commentContent());
+        if ($pattern->commentContent()) {
+            $comment->setContent($pattern->commentContent());
+        }
+        if ($comment->visibilityStatus() === "normal") {
+            $comment->setVisibilityStatus($pattern->visibilityStatus());
+        }
     }
 }
