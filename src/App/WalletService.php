@@ -344,7 +344,7 @@ class WalletService
                 'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
             ];
 
-            $response = $this->peerTokenMapper->transferToken($userId, $fromId, $price, $text, false, $transferStrategy);
+            $response = $this->peerTokenMapper->transferToken($userId, $fromId, $price, $text, true, $transferStrategy);
 
             $args['gemid'] = $transferStrategy->getOperationId();
             $results = $this->walletMapper->insertWinToLog($userId, $args);
