@@ -402,6 +402,13 @@ class GraphQLSchemaBuilder
                     $this->logger->debug('Query.User Resolvers');
                     return $root['uid'] ?? '';
                 },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
+                },
                 'situation' => function (array $root): string {
                     $status = $root['status'] ?? 0;
                     return $this->getStatusNameByID($status) ?? '';
@@ -493,6 +500,13 @@ class GraphQLSchemaBuilder
                 'id' => function (array $root): string {
                     $this->logger->debug('Query.User Resolvers');
                     return $root['uid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'situation' => function (array $root): string {
                     $status = $root['status'] ?? 0;
@@ -596,6 +610,13 @@ class GraphQLSchemaBuilder
                     $this->logger->debug('Query.ProfileUser Resolvers');
                     return $root['uid'] ?? '';
                 },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
+                },
                 'username' => function (array $root): string {
                     return $root['username'] ?? '';
                 },
@@ -619,6 +640,13 @@ class GraphQLSchemaBuilder
                 'userid' => function (array $root): string {
                     $this->logger->debug('Query.BasicUserInfo Resolvers');
                     return $root['uid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'img' => function (array $root): string {
                     return $root['img'] ?? '';
@@ -782,6 +810,13 @@ class GraphQLSchemaBuilder
                 'id' => function (array $root): string {
                     $this->logger->debug('Query.Post Resolvers');
                     return $root['postid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'contenttype' => function (array $root): string {
                     return $root['contenttype'] ?? '';
@@ -961,6 +996,13 @@ class GraphQLSchemaBuilder
                 'commentid' => function (array $root): string {
                     $this->logger->debug('Query.Comment Resolvers');
                     return $root['commentid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'userid' => function (array $root): string {
                     return $root['userid'] ?? '';

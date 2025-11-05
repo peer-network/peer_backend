@@ -79,7 +79,7 @@ class Profile implements ProfileReplaceable
             'amountfriends' => $this->amountfriends,
             'amountblocked' => $this->amountblocked,
             'amountreports' => $this->amountreports,
-            'user_reports' => $this->activeReports,
+            'reports' => $this->activeReports,
             'visibility_status' => $this->visibilityStatus,
             'roles_mask' => $this->rolesmask
         ];

@@ -142,3 +142,9 @@ enum ModerationContentType {
   comment
   user
 }
+
+enum ContentVisibilityStatus {
+  NORMAL
+  HIDDEN
+  ILLEGAL
+}

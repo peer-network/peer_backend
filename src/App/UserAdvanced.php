@@ -95,7 +95,7 @@ class UserAdvanced implements ProfileReplaceable
             'liquidity' => $this->liquidity,
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
-            'user_reports' => $this->activeReports,
+            'reports' => $this->activeReports,
             'visibility_status' => $this->visibilityStatus
         ];
         return $att;
