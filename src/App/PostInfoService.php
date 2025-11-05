@@ -354,37 +354,6 @@ class PostInfoService
         }
     }
 
-    public function toggleUserFollow(string $followedUserId): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        if (!self::isValidUUID($followedUserId)) {
-            return $this::respondWithError(30201);
-        }
-
-        $this->logger->debug('PostInfoService.toggleUserFollow started');
-
-        if (!$this->postInfoMapper->isUserExistById($followedUserId)) {
-            return $this::respondWithError(31105);
-        }
-
-        $this->transactionManager->beginTransaction();
-
-        $response = $this->postInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
-
-        if (isset($response['status']) && $response['status'] === 'error') {
-            $this->logger->error('PostInfoService.toggleUserFollow Error toggling user follow', ['error' => $response]);
-            $this->transactionManager->rollback();
-            return $response;
-        }
-        $this->transactionManager->commit();
-
-        return $response;
-
-    }
-
     public function savePost(string $postId): array
     {
         if (!$this->checkAuthentication()) {

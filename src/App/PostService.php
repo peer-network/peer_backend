@@ -8,6 +8,7 @@ use Fawaz\App\Post;
 use Fawaz\App\Comment;
 use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
@@ -54,7 +55,8 @@ class PostService
         protected WalletService $walletService,
         protected JWTService $tokenService,
         protected TransactionManager $transactionManager,
-        protected ProfileRepository $profileRepository
+        protected ProfileRepository $profileRepository,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
     ) {
     }
 
@@ -831,7 +833,6 @@ class PostService
             $this->logger->info("PostService.postInteractions failed due to invalid postOrCommentId");
             return $this::respondWithError(30201);
         }
-
 
         $contentFilterCase = ContentFilteringCases::searchById;
 
