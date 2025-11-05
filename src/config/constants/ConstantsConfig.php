@@ -141,10 +141,12 @@ class ConstantsConfig implements ConstantsConfigInterface
     /**
      * @return array{
      *     OFFSET: array{MIN: int, MAX: int},
+     *     POST_OFFSET: array{MIN: int, MAX: int},
+     *     POST_LIMIT: array{MIN: int, MAX: int},
      *     LIMIT: array{MIN: int, MAX: int}
      * }
      */
-    public static function paging()
+    public static function paging(): array
     {
         return ConstantsConfig::PAGING;
     }
@@ -418,6 +420,14 @@ class ConstantsConfig implements ConstantsConfigInterface
         'OFFSET' => [
             'MIN' => 0,
             'MAX' => 2147483647,
+        ],
+        'POST_OFFSET' => [
+            'MIN' => 0,
+            'MAX' => 2147483647,
+        ],
+        'POST_LIMIT' => [
+            'MIN' => 0,
+            'MAX' => 200,
         ],
         'LIMIT' => [
             'MIN' => 1,

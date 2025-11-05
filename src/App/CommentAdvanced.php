@@ -7,8 +7,9 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 
-class CommentAdvanced
+class CommentAdvanced implements CommentReplaceable
 {
     protected string $commentid;
     protected string $userid;
@@ -20,7 +21,8 @@ class CommentAdvanced
     protected ?int $amountreports;
     protected ?int $amountreplies;
     protected ?bool $isliked;
-    protected ?int $userstatus;
+    protected ?int $reports = null;
+    protected ?string $visibilityStatus = null;
     protected ?array $user = [];
 
 
@@ -41,12 +43,9 @@ class CommentAdvanced
         $this->amountreplies = $data['amountreplies'] ?? 0;
         $this->amountreports = $data['amountreports'] ?? 0;
         $this->isliked = $data['isliked'] ?? false;
-        $this->userstatus = $data['userstatus'] ?? 0;
+        $this->reports = $data['reports'] ?? null;
+        $this->visibilityStatus = $data['visibility_status']?? null;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
-
-        if ($this->userstatus == 6) {
-            $this->content = "Comment by deleted Account";
-        }
     }
 
     // Array Copy methods
@@ -63,6 +62,8 @@ class CommentAdvanced
             'amountreplies' => $this->amountreplies,
             'amountreports' => $this->amountreports,
             'isliked' => $this->isliked,
+            'visibility_status' => $this->visibilityStatus,
+            'reports' => $this->reports,
             'user' => $this->user,
         ];
         return $att;
@@ -122,6 +123,15 @@ class CommentAdvanced
     public function setContent(string $content): void
     {
         $this->content = $content;
+    }
+    public function visibilityStatus(): string
+    {
+        return $this->visibilityStatus ?? '';
+    }
+
+    public function getReports(): ?int
+    {
+        return $this->reports;
     }
 
     // Validation and Array Filtering methods

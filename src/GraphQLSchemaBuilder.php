@@ -12,6 +12,7 @@ use Fawaz\App\CommentService;
 use Fawaz\App\ContactusService;
 use Fawaz\App\DailyFreeService;
 use Fawaz\App\Helpers\FeesAccountHelper;
+use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\PoolService;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostInfoService;
@@ -22,8 +23,6 @@ use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -35,10 +34,23 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
-use DateTimeImmutable;
-use Fawaz\App\ModerationService;
-use Fawaz\App\Role;
 use Fawaz\App\ValidationException;
+use Fawaz\App\ModerationService;
+use Fawaz\App\Status;
+use Fawaz\App\Validation\RequestValidator;
+use Fawaz\App\Validation\ValidatorErrors;
+use Fawaz\Utils\ErrorResponse;
+use Fawaz\App\Role;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
+
 
 class GraphQLSchemaBuilder
 {
@@ -54,6 +66,7 @@ class GraphQLSchemaBuilder
         protected CommentMapper $commentMapper,
         protected ContactusService $contactusService,
         protected DailyFreeService $dailyFreeService,
+        protected ProfileService $profileService,
         protected UserService $userService,
         protected UserInfoService $userInfoService,
         protected PoolService $poolService,
@@ -67,6 +80,7 @@ class GraphQLSchemaBuilder
         protected JWTService $tokenService,
         protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -182,6 +196,7 @@ class GraphQLSchemaBuilder
     {
         $this->moderationService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
+        $this->profileService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
         $this->postService->setCurrentUserId($userid);
@@ -198,7 +213,7 @@ class GraphQLSchemaBuilder
     protected function getStatusNameByID(int $status): ?string
     {
         $statusCode = $status;
-        $statusMap = \Fawaz\App\Status::getMap();
+        $statusMap = Status::getMap();
 
         if (isset($statusMap[$statusCode])) {
             return $statusMap[$statusCode];
@@ -526,16 +541,16 @@ class GraphQLSchemaBuilder
                     return $root['isfollowing'] ?? false;
                 },
                 'imageposts' => function (array $root): array {
-                    return $root['imageposts'] ?? [];
+                    return [];
                 },
                 'textposts' => function (array $root): array {
-                    return $root['textposts'] ?? [];
+                    return [];
                 },
                 'videoposts' => function (array $root): array {
-                    return $root['videoposts'] ?? [];
+                    return [];
                 },
                 'audioposts' => function (array $root): array {
-                    return $root['audioposts'] ?? [];
+                    return [];
                 },
             ],
             'ProfileInfo' => [
@@ -2289,9 +2304,9 @@ class GraphQLSchemaBuilder
             'hello' => fn (mixed $root, array $args, mixed $context) => $this->resolveHello($root, $args, $context),
             'searchUser' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
             'searchUserAdmin' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
-            'listUsersV2' => fn (mixed $root, array $args) => $this->resolveListUsersV2($args),
-            'listUsersAdminV2' => fn (mixed $root, array $args) => $this->resolveListUsersV2($args),
-            'listUsers' => fn (mixed $root, array $args) => $this->resolveUsers($args),
+            'listUsersV2' => fn (mixed $root, array $args) => $this->profileService->listUsers($args),
+            'listUsersAdminV2' => fn (mixed $root, array $args) => $this->profileService->listUsersAdmin($args),
+            'listUsers' => fn (mixed $root, array $args) => $this->profileService->listUsers($args),
             'getProfile' => fn (mixed $root, array $args) => $this->resolveProfile($args),
             'listFollowRelations' => fn (mixed $root, array $args) => $this->resolveFollows($args),
             'listFriends' => fn (mixed $root, array $args) => $this->resolveFriends($args),
@@ -2336,7 +2351,7 @@ class GraphQLSchemaBuilder
             'verifyAccount' => fn (mixed $root, array $args) => $this->verifyAccount($args['userid']),
             'login' => fn (mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn (mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
-            'verifyReferralString' => fn (mixed $root, array $args) => $this->userService->verifyReferral($args['referralString']),
+            'verifyReferralString' => fn (mixed $root, array $args) => $this->resolveVerifyReferral($args),
             'updateUserPreferences' => fn (mixed $root, array $args) => $this->userService->updateUserPreferences($args),
             'updateUsername' => fn (mixed $root, array $args) => $this->userService->setUsername($args),
             'updateEmail' => fn (mixed $root, array $args) => $this->userService->setEmail($args),
@@ -2589,20 +2604,46 @@ class GraphQLSchemaBuilder
                 'invitedBy' => [],
                 'iInvited' => [],
             ];
+        
+            $deletedUserSpec = new DeletedUserSpec(
+                ContentFilteringCases::searchById,
+                ContentType::user
+            );
+            $systemUserSpec = new SystemUserSpec(
+                ContentFilteringCases::searchById,
+                ContentType::user
+            );
+            
+            $illegalContentFilterSpec = new IllegalContentFilterSpec(
+                ContentFilteringCases::searchById,
+                ContentType::user
+            );
 
-            $inviter = $this->userMapper->getInviterByInvitee($userId);
-            $this->logger->info('Inviter data', ['inviter' => $inviter]);
+            $specs = [
+                $deletedUserSpec,
+                $systemUserSpec,
+                $illegalContentFilterSpec
+            ];
 
+            
+            $inviter = $this->userMapper->getInviterByInvitee($userId,$specs);
+            $referralUsers['invitedBy'] = null;
             if (!empty($inviter)) {
-                $referralUsers['invitedBy'] = $inviter;
+                $this->logger->info('Inviter data', ['inviter' => $inviter->getUserId()]);
+                ContentReplacer::placeholderProfile($inviter, $specs);
+                $referralUsers['invitedBy'] = $inviter->getArrayCopy();
             }
+
             $offset = $args['offset'] ?? 0;
             $limit = $args['limit'] ?? 20;
-            $referrals = $this->userMapper->getReferralRelations($userId, $offset, $limit);
-            $this->logger->info('Referral relations', ['referrals' => $referrals]);
 
-            if (!empty($referrals['iInvited'])) {
-                $referralUsers['iInvited'] = $referrals['iInvited'];
+            $invited= $this->userMapper->getReferralRelations($userId, $specs, $offset, $limit);
+
+            if (!empty($invited)) {
+                foreach ($invited as $user) {
+                    ContentReplacer::placeholderProfile($user, $specs);
+                    $referralUsers['iInvited'][] = $user->getArrayCopy();
+                }
             }
 
             if (empty($referralUsers['invitedBy']) && empty($referralUsers['iInvited'])) {
@@ -2710,7 +2751,6 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.getTokenomics finished', ['payload' => $payload]);
         return $payload;
     }
-
     protected function resolveActionPost(?array $args = []): ?array
     {
         $tokenomicsConfig = ConstantsConfig::tokenomics();
@@ -2727,6 +2767,41 @@ class GraphQLSchemaBuilder
         $args['fromid'] = $this->currentUserId;
 
         $freeActions = ['report', 'save', 'share', 'view'];
+
+        if (!empty($postId) && !$this->isValidUUID($postId)) {
+            return $this::respondWithError(30209, ['postid' => $postId]);
+        }
+
+        if ($postId) {
+            $contentFilterCase = ContentFilteringCases::searchById;
+
+            $deletedUserSpec = new DeletedUserSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+            $systemUserSpec = new SystemUserSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+            
+            $illegalContentSpec = new IllegalContentFilterSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+
+            $specs = [
+                $deletedUserSpec,
+                $systemUserSpec,
+                $illegalContentSpec,
+            ];
+
+            if($this->interactionsPermissionsMapper->isInteractionAllowed(
+                $specs,
+                $postId
+            ) === false) {
+                return $this::respondWithError(31513, ['postid'=> $postId]);
+            }
+        }
 
         if (in_array($action, $freeActions, true)) {
             $response = $this->postInfoService->{$action . 'Post'}($postId);
@@ -2760,10 +2835,10 @@ class GraphQLSchemaBuilder
             'dislike' => $actions['DISLIKE'],
         ];
 
-        // Validations
+        // Validations  
         if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
             $this->logger->warning('Invalid action parameter', ['action' => $action]);
-            return $this->respondWithError(30105);
+            return $this::respondWithError(30105);
         }
 
         $limit = $dailyLimits[$action];
@@ -3088,10 +3163,6 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(30202);
         }
 
-        if (!empty($userId)) {
-            $args['uid'] = $userId;
-        }
-
         if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
             return $this::respondWithError(30257);//"The IP '$ip' is not a valid IP address."
         }
@@ -3104,86 +3175,71 @@ class GraphQLSchemaBuilder
             $args['includeDeleted'] = true;
         }
 
-        $data = $this->userService->fetchAllAdvance($args);
-
-        if (!empty($data)) {
-            $this->logger->info('Query.resolveSearchUser.fetchAll successful', ['userCount' => count($data)]);
-
-            return $data;
-        }
-
-        return $this::createSuccessResponse(21001);
-    }
-
-    protected function resolveListUsersV2(array $args): ?array   
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
-        }
-
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
-
-        $username = isset($args['username']) ? trim($args['username']) : null;
-        $usernameConfig = ConstantsConfig::user()['USERNAME'];
-        $userId = $args['userid'] ?? null;
-        $email = $args['email'] ?? null;
-        $status = $args['status'] ?? null;
-        $verified = $args['verified'] ?? null;
-        $ip = $args['ip'] ?? null;
-
-        if (!empty($username) && !empty($userId)) {
-            return $this::respondWithError(31012);
-        }
-
-        if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this::respondWithError(30201);
-        }
-
-        if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
-            return $this::respondWithError(30202);
-        }
-
-        if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
-            return $this::respondWithError(30202);
-        }
-
+        $contentFilterCase = ContentFilteringCases::searchByMeta;
         if (!empty($userId)) {
+            $contentFilterCase = ContentFilteringCases::searchById;
+            if ($userId == $this->currentUserId) {
+                
+                $contentFilterCase = ContentFilteringCases::myprofile;
+            }
             $args['uid'] = $userId;
         }
 
-        if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
-            return $this::respondWithError(30257);//"The IP '$ip' is not a valid IP address."
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::user,
+            $this->currentUserId
+        );
+        $illegalContentFilterSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $specs = [
+            $deletedUserSpec,
+            $systemUserSpec,
+            $hiddenContentFilterSpec,
+            $illegalContentFilterSpec
+        ];
+
+
+        try {
+            $users = $this->userMapper->fetchAll($this->currentUserId, $args, $specs);
+            $usersArray = [];
+            foreach ($users as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
+                $usersArray[] = $profile->getArrayCopy();
+            }
+
+            if (!empty($usersArray)) {
+                $this->logger->info('Query.resolveSearchUser successful', ['userCount' => count($usersArray)]);
+                return [
+                    'status' => 'success',
+                    'counter' => count($usersArray),
+                    'ResponseCode' => "11009",
+                    'affectedRows' => $usersArray,
+                ]; 
+            } else {
+                if ($userId) {
+                    return self::respondWithError(31007);
+                }
+                return self::createSuccessResponse(21001);
+            }
+        } catch (\Throwable $e) {
+            return self::respondWithError(41207);
         }
-
-        $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
-
-        $this->logger->debug('Query.resolveListUsersV2 started');
-
-        $isAdmin = $this->userRoles === 16;
-        $searchesByIdentifier = !empty($username) || !empty($userId);
-        if ($isAdmin) {
-            $args['includeDeleted'] = true;
-        }
-        $data = $isAdmin || $searchesByIdentifier
-            ? $this->userService->fetchAllAdvance($args)
-            : $this->userService->fetchAll($args);
-
-        if (!empty($data)) {
-            $this->logger->info('Query.resolveListUsersV2.fetchAll successful', ['userCount' => count($data)]);
-
-            return $data;
-        }
-
-        return $this::createSuccessResponse(21001);
     }
 
     protected function resolveFollows(array $args): ?array
@@ -3192,53 +3248,69 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
-        }
-
         $this->logger->debug('Query.resolveFollows started');
 
-        $results = $this->userService->Follows($args);
-        if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Query.resolveFollows successful');
+        $validation = RequestValidator::validate($args, []);
 
-            return $results;
+        if ($validation instanceof ValidatorErrors) { 
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
         }
-
-        if (isset($results['status']) && $results['status'] === 'error') {
-            return $this::respondWithError($results['ResponseCode']);
-        }
-
-        $this->logger->warning('Query.resolveFollows User not found');
-        return $this::createSuccessResponse(21001);
+        
+        $results = $this->userService->Follows($validation);
+        
+        
+        if ($results instanceof ErrorResponse) {
+            return $results->response;
+        } 
+        
+        $this->logger->info('Query.resolveProfile successful');
+        return $results;
     }
 
-    protected function resolveProfile(array $args): ?array
+    protected function resolveProfile(array $args): array
     {
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
 
-        if (isset($args['userid']) && !self::isValidUUID($args['userid'])) {
-            return $this::respondWithError(30201);
-        }
-
         $this->logger->debug('Query.resolveProfile started');
 
-        $results = $this->userService->Profile($args);
-        if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Query.resolveProfile successful');
+        $validation = RequestValidator::validate($args);
 
-            return $results;
+        if ($validation instanceof ValidatorErrors) { 
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
         }
 
-        if (isset($results['status']) && $results['status'] === 'error') {
-            return $this::respondWithError((int)$results['ResponseCode']);
+        $result = $this->profileService->profile($validation);
+        
+        if ($result instanceof ErrorResponse) {
+            return $result->response;
+        } 
+
+        $this->logger->info('Query.resolveProfile successful');
+        return $this::createSuccessResponse(
+            11008,
+            $result->getArrayCopy(),
+            false
+        );
+    }
+
+    protected function resolveVerifyReferral(array $args): array {
+
+        $this->logger->debug('Query.resolveVerifyReferral started');
+        $referralString = $args['referralString'];
+
+        if (empty($referralString) || !$this->isValidUUID($referralString)) {
+            return self::respondWithError(31010); // Invalid referral string
         }
 
-        $this->logger->warning('Query.resolveProfile User not found');
-        return $this::createSuccessResponse(21001);
+        $result = $this->userService->verifyReferral($referralString);
+        
+        return $result;
     }
 
     protected function resolveFriends(array $args): ?array
@@ -3250,12 +3322,6 @@ class GraphQLSchemaBuilder
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
             return $validationResult;
-        }
-
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
         }
 
         $this->logger->debug('Query.resolveFriends started');
@@ -3310,12 +3376,6 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->debug('Query.resolveUsers started');
-
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
 
         if ($this->userRoles === 16) {
             $results = $this->userService->fetchAllAdvance($args);
@@ -3400,12 +3460,6 @@ class GraphQLSchemaBuilder
 
         $this->logger->debug('Query.resolvePosts started');
 
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
-
         $posts = $this->postService->findPostser($args);
         if (isset($posts['status']) && $posts['status'] === 'error') {
             return $posts;
@@ -3414,9 +3468,10 @@ class GraphQLSchemaBuilder
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $data = array_map(
-            fn (PostAdvanced $post) => $this->mapPostWithComments($post, $commentOffset, $commentLimit, $contentFilterBy),
+            fn (PostAdvanced $post) => $post->getArrayCopy(),
             $posts
         );
         return [
@@ -3441,12 +3496,6 @@ class GraphQLSchemaBuilder
         $this->logger->debug('Query.resolveAdvertisementsPosts started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        
-        // For Content Filtering
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
 
         $posts = $this->advertisementService->findAdvertiser($args);
         if (isset($posts['status']) && $posts['status'] === 'error') {
@@ -3901,37 +3950,18 @@ class GraphQLSchemaBuilder
         if (isset($posts['status']) && $posts['status'] === 'error') {
             return $posts;
         }
+        $post = $posts[0];
 
-        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
-        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
-
-        $data = array_map(
-            fn (PostAdvanced $post) => $this->guestPostMapPostWithComments($post, $commentOffset, $commentLimit),
-            $posts
-        );
-
-        return [
-            'status' => 'success',
-            'counter' => count($data),
-            'ResponseCode' => empty($data) ? "21501" : "11501",
-            'affectedRows' => $data[0] ?? [],
-        ];
-    }
-
-    /**
-     * Map Guest Post with Comments
-     *
-     */
-    protected function guestPostMapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit): array
-    {
-        $postArray = $post->getArrayCopy();
-        $comments = $this->commentService->fetchAllByGuestPostIdetaild($post->getPostId(), $commentOffset, $commentLimit);
-
-        $postArray['comments'] = array_map(
-            fn (CommentAdvanced $comment) => $comment->getArrayCopy(),
-            $comments
-        );
-        return $postArray;
+        if ($post instanceof PostAdvanced) {
+            return [
+                'status' => 'success',
+                'counter' => 1,
+                'ResponseCode' => "11501",
+                'affectedRows' => $post->getArrayCopy(),
+            ];
+        } else {
+            return $this::respondWithError(40301);
+        }
     }
 
     /**

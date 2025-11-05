@@ -122,7 +122,7 @@ class ModerationService
 
             // If report is an array and already has a moderation id, it's already processed
             if (is_array($report) && array_key_exists('moderationid', $report) && !empty($report['moderationid'])) {
-                return self::respondWithError(22102); // Moderation action already performed
+                return self::respondWithError(32103); // Moderation action already performed
             }
 
             $this->transactionManager->beginTransaction();

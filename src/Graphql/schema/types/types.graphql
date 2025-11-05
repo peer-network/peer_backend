@@ -230,10 +230,10 @@ type Profile {
   amountfriends: Int
   amountblocked: Int
   amountreports: Int
-  imageposts: [ProfilePostMedia!]
-  textposts: [ProfilePostMedia!]
-  videoposts: [ProfilePostMedia!]
-  audioposts: [ProfilePostMedia!]
+  imageposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
+  textposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
+  videoposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
+  audioposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
 }
 
 type ProfileInfo {
