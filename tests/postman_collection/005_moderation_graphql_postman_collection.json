@@ -381,6 +381,68 @@
 			"response": []
 		},
 		{
+			"name": "Registration t6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10601\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"pm.environment.set(\"userid_t6\", response.data.register.userid);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// generate random email",
+							"let randomEmail = `user_${Math.floor(Math.random() * 1000000)}@example.com`;",
+							"",
+							"// save",
+							"pm.environment.set(\"email_t6\", randomEmail);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation Register {\n  register(input: {\n    email: \"{{email_t6}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Verification t1",
 			"event": [
 				{
@@ -649,6 +711,64 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t5}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verification t6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10701\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t6}}\") {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5998,7 +6118,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -6019,6 +6140,64 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{w_userid_t2}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Follow t6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Account is not followed\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"true\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t6}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -10410,126 +10589,6 @@
 			"response": []
 		},
 		{
-			"name": "Registration t6",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"10601\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"pm.environment.set(\"userid_t6\", response.data.register.userid);"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"// generate random email",
-							"let randomEmail = `user_${Math.floor(Math.random() * 1000000)}@example.com`;",
-							"",
-							"// save",
-							"pm.environment.set(\"email_t6\", randomEmail);"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation Register {\n  register(input: {\n    email: \"{{email_t6}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Verification t6",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"10701\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t6}}\") {\n        status\n        ResponseCode\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Login t6",
 			"event": [
 				{
@@ -10574,6 +10633,64 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation Login {\n  login(email: \"{{email_t6}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Follow t5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Account is not followed\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"true\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t5}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -11989,7 +12106,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{postidadd}}\"\n        action: REPORT\n    ) {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{existing_postid}}\"\n        action: REPORT\n    ) {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -12054,7 +12171,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{postidadd1}}\"\n        action: REPORT\n    ) {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{existing_postid_2}}\"\n        action: REPORT\n    ) {\n        status\n        ResponseCode\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -12147,8 +12264,8 @@
 							"",
 							"    const postId = pm.environment.get(\"postid\");",
 							"    const commentId = pm.environment.get(\"commentid\");",
-							"    const exPost1 = pm.environment.get(\"postidadd\");",
-							"    const exPost2 = pm.environment.get(\"postidadd1\");",
+							"    const exPost1 = pm.environment.get(\"existing_postid\");",
+							"    const exPost2 = pm.environment.get(\"existing_postid_2\");",
 							"    const u2 = pm.environment.get(\"w_userid_t2\");",
 							"    const u3 = pm.environment.get(\"w_userid_t3\");",
 							"    const u6 = pm.environment.get(\"userid_t6\");",
@@ -12198,8 +12315,8 @@
 							"",
 							"    if (!foundPost2) throw new Error(\"postid not found in moderationItems\");",
 							"    if (!foundComment2) throw new Error(\"commentid not found in moderationItems\");",
-							"    if (!foundAdvPost1) throw new Error(\"postidadd not found\");",
-							"    if (!foundAdvPost2) throw new Error(\"postidadd1 not found\");",
+							"    if (!foundAdvPost1) throw new Error(\"existing_postid not found\");",
+							"    if (!foundAdvPost2) throw new Error(\"existing_postid_2 not found\");",
 							"    if (!foundT02) throw new Error(\"userid_t2 not found\");",
 							"    if (!foundT03) throw new Error(\"userid_t3 not found\");",
 							"    if (!foundT06) throw new Error(\"userid_t6 not found\");",
@@ -12567,13 +12684,13 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Post title for postidadd from env is 'this post is hidden'\", function () {",
+							"pm.test(\"Post title for existing_postid from env is 'this post is hidden'\", function () {",
 							"    const response = pm.response.json();",
 							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
-							"    const expectedPostId = pm.environment.get(\"postidadd\");",
+							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
 							"",
 							"    if (!expectedPostId) {",
-							"        throw new Error(\"Environment variable 'postidadd' is not set.\");",
+							"        throw new Error(\"Environment variable 'existing_postid' is not set.\");",
 							"    }",
 							"",
 							"    const found = items.find(i => i.post?.id === expectedPostId);",
@@ -12618,7 +12735,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(postid: \"{{postidadd}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(postid: \"{{existing_postid}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -12650,13 +12767,13 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Post title for postidadd1 from env is 'this post is illegal'\", function () {",
+							"pm.test(\"Post title for existing_postid_2 from env is 'this post is illegal'\", function () {",
 							"    const response = pm.response.json();",
 							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
-							"    const expectedPostId = pm.environment.get(\"postidadd1\");",
+							"    const expectedPostId = pm.environment.get(\"existing_postid_2\");",
 							"",
 							"    if (!expectedPostId) {",
-							"        throw new Error(\"Environment variable 'postidadd1' is not set.\");",
+							"        throw new Error(\"Environment variable 'existing_postid_2' is not set.\");",
 							"    }",
 							"",
 							"    const found = items.find(i => i.post?.id === expectedPostId);",
@@ -12666,6 +12783,30 @@
 							"    }",
 							"",
 							"    pm.expect(found.post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
+							"});",
+							"",
+							"pm.test(\"User w_userid_t3 username is 'hidden_account'\", function () {",
+							"    const response = pm.response.json();",
+							"    const rows = response.data?.listAdvertisementPosts?.affectedRows || [];",
+							"    const userIdT3 = pm.environment.get(\"w_userid_t3\");",
+							"",
+							"    if (!userIdT3) {",
+							"        throw new Error(\"Env var w_userid_t3 is not set\");",
+							"    }",
+							"",
+							"    let found = false;",
+							"",
+							"    rows.forEach(row => {",
+							"        const user = row?.post?.user;",
+							"        if (user?.id === userIdT3) {",
+							"            found = true;",
+							"            pm.expect(user.username).to.eql(\"hidden_account\");",
+							"        }",
+							"    });",
+							"",
+							"    if (!found) {",
+							"        throw new Error(`User with ID ${userIdT3} not found in listAdvertisementPosts`);",
+							"    }",
 							"});"
 						],
 						"type": "text/javascript",
@@ -12701,7 +12842,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(postid: \"{{postidadd1}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(postid: \"{{existing_postid_2}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -12741,11 +12882,11 @@
 							"",
 							"pm.test(\"Posts are not in listAdvertisementPosts\", function () {",
 							"    const body = pm.response.text();",
-							"    const id1 = pm.environment.get(\"postidadd\");",
-							"    const id2 = pm.environment.get(\"postidadd1\");",
+							"    const id1 = pm.environment.get(\"existing_postid\");",
+							"    const id2 = pm.environment.get(\"existing_postid_2\");",
 							"",
 							"    if (!id1 || !id2) {",
-							"        throw new Error(\"Environment variables postidadd or postidadd1 are not set.\");",
+							"        throw new Error(\"Environment variables existing_postid or existing_postid_2 are not set.\");",
 							"    }",
 							"",
 							"    pm.expect(body).not.to.include(id1);",
@@ -12804,7 +12945,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listAdPost (userid)",
+			"name": "Confirm listAdPost (profile)",
 			"event": [
 				{
 					"listen": "test",
@@ -12818,13 +12959,13 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Post title for postidadd from env is 'this post is hidden'\", function () {",
+							"pm.test(\"Post title for existing_postid from env is 'this post is hidden'\", function () {",
 							"    const response = pm.response.json();",
 							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
-							"    const expectedPostId = pm.environment.get(\"postidadd\");",
+							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
 							"",
 							"    if (!expectedPostId) {",
-							"        throw new Error(\"Environment variable 'postidadd' is not set.\");",
+							"        throw new Error(\"Environment variable 'existing_postid' is not set.\");",
 							"    }",
 							"",
 							"    const found = items.find(i => i.post?.id === expectedPostId);",
@@ -12872,6 +13013,1530 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(userid: \"{{w_userid_t2}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listAdPost (profile)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post is not there\", function () {",
+							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"existing_postid_2\"));",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(userid: \"{{w_userid_t3}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listPost (title)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post is not there\", function () {",
+							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"existing_postid_2\"));",
+							"});",
+							"",
+							"pm.test(\"Post title for existing_postid from env is 'this post is hidden'\", function () {",
+							"    const response = pm.response.json();",
+							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
+							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'existing_postid' is not set.\");",
+							"    }",
+							"",
+							"    const found = items.find(i => i.post?.id === expectedPostId);",
+							"",
+							"    if (!found) {",
+							"        throw new Error(`Advertisement post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(found.post.title, `Post ${expectedPostId} title`).to.eql(\"this post is hidden\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(title: \"Test Advertisement Post\", contentFilterBy: MYGRANDMALIKES, limit:20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Guest list post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post title for existing_postid from env is 'this post is hidden'\", function () {",
+							"    const response = pm.response.json();",
+							"    const post = response.data?.guestListPost?.affectedRows;",
+							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'existing_postid' is not set.\");",
+							"    }",
+							"",
+							"    if (!post || post.id !== expectedPostId) {",
+							"        throw new Error(`Guest list post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(post.title, `Post ${expectedPostId} title`).to.eql(\"this post is hidden\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GuestListPost {\n    guestListPost(postid: \"{{existing_postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                amountreports\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Guest list post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post title for existing_postid_2 from env is 'this post is illegal'\", function () {",
+							"    const response = pm.response.json();",
+							"    const post = response.data?.guestListPost?.affectedRows;",
+							"    const expectedPostId = pm.environment.get(\"existing_postid_2\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'existing_postid_2' is not set.\");",
+							"    }",
+							"",
+							"    if (!post || post.id !== expectedPostId) {",
+							"        throw new Error(`Guest list post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
+							"});",
+							"",
+							"pm.test(\"User w_userid_t3 username is 'hidden_account'\", function () {",
+							"    const response = pm.response.json();",
+							"    const post = response.data?.guestListPost?.affectedRows;",
+							"    const userIdT3 = pm.environment.get(\"w_userid_t3\");",
+							"",
+							"    if (!userIdT3) {",
+							"        throw new Error(\"Environment variable 'w_userid_t3' is not set.\");",
+							"    }",
+							"",
+							"    const user = post?.user;",
+							"    if (!user || user.id !== userIdT3) {",
+							"        throw new Error(`User with ID ${userIdT3} not found in guestListPost`);",
+							"    }",
+							"",
+							"    pm.expect(user.username).to.eql(\"hidden_account\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GuestListPost {\n    guestListPost(postid: \"{{existing_postid_2}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                amountreports\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listAdPost (postid) shows urself",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post title for existing_postid from env is 'Test Advertisement Post'\", function () {",
+							"    const response = pm.response.json();",
+							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
+							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'existing_postid' is not set.\");",
+							"    }",
+							"",
+							"    const found = items.find(i => i.post?.id === expectedPostId);",
+							"",
+							"    if (!found) {",
+							"        throw new Error(`Advertisement post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(found.post.title, `Post ${expectedPostId} title`).to.eql(\"Test Advertisement Post\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(postid: \"{{existing_postid}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listAdPost (feed) shows urself",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Counter is 4\", function () {",
+							"    const json = pm.response.json();",
+							"    pm.expect(json.data.listAdvertisementPosts.counter).to.eql(4);",
+							"});",
+							"",
+							"pm.test(\"Illegal post is not in listAdvertisementPosts but ur hidden there\", function () {",
+							"    const body = pm.response.text();",
+							"    const id1 = pm.environment.get(\"existing_postid\");",
+							"    const id2 = pm.environment.get(\"existing_postid_2\");",
+							"",
+							"    if (!id1 || !id2) {",
+							"        throw new Error(\"Environment variables existing_postid or existing_postid_2 are not set.\");",
+							"    }",
+							"",
+							"    pm.expect(body).to.include(id1);",
+							"    pm.expect(body).not.to.include(id2);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(limit:20, contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listAdPost (profile) shows urself",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post title for existing_postid from env is 'Test Advertisement Post'\", function () {",
+							"    const response = pm.response.json();",
+							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
+							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'existing_postid' is not set.\");",
+							"    }",
+							"",
+							"    const found = items.find(i => i.post?.id === expectedPostId);",
+							"",
+							"    if (!found) {",
+							"        throw new Error(`Advertisement post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(found.post.title, `Post ${expectedPostId} title`).to.eql(\"Test Advertisement Post\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(userid: \"{{w_userid_t2}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listPost (title) shows urself",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post is not there\", function () {",
+							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"existing_postid_2\"));",
+							"});",
+							"",
+							"pm.test(\"Post title for existing_postid from env is 'Test Advertisement Post'\", function () {",
+							"    const response = pm.response.json();",
+							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
+							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'existing_postid' is not set.\");",
+							"    }",
+							"",
+							"    const found = items.find(i => i.post?.id === expectedPostId);",
+							"",
+							"    if (!found) {",
+							"        throw new Error(`Advertisement post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(found.post.title, `Post ${expectedPostId} title`).to.eql(\"Test Advertisement Post\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(title: \"Test Advertisement Post\", contentFilterBy: MYGRANDMALIKES, limit:20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create comment on illegal (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{existing_postid_2}}\", content: \"moderation_comment\") {\n        status\n        ResponseCode\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Like illegal post (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(postid:\"{{existing_postid_2}}\" , action: LIKE) {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Dislike illegal post (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(postid:\"{{existing_postid_2}}\" , action: DISLIKE) {\n        status\n        ResponseCode\n    } \n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View illegal post (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{existing_postid_2}}\"\n        action: VIEW\n    ) {\n        status\n        ResponseCode\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Save illegal post (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{existing_postid_2}}\"\n        action: SAVE\n    ) {\n        status\n        ResponseCode\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Share illegal post (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{existing_postid_2}}\"\n        action: SHARE\n    ) {\n        status\n        ResponseCode\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login tester 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t3}}\",\n    password: \"{{w_password_t3}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listAdPost (postid) urs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post title for existing_postid_2 from env is 'this post is illegal'\", function () {",
+							"    const response = pm.response.json();",
+							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
+							"    const expectedPostId = pm.environment.get(\"existing_postid_2\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'existing_postid_2' is not set.\");",
+							"    }",
+							"",
+							"    const found = items.find(i => i.post?.id === expectedPostId);",
+							"",
+							"    if (!found) {",
+							"        throw new Error(`Advertisement post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(found.post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
+							"});",
+							"",
+							"pm.test(\"User w_userid_t3 username is 'tester03'\", function () {",
+							"    const response = pm.response.json();",
+							"    const rows = response.data?.listAdvertisementPosts?.affectedRows || [];",
+							"    const userIdT3 = pm.environment.get(\"w_userid_t3\");",
+							"",
+							"    if (!userIdT3) {",
+							"        throw new Error(\"Env var w_userid_t3 is not set\");",
+							"    }",
+							"",
+							"    let found = false;",
+							"",
+							"    rows.forEach(row => {",
+							"        const user = row?.post?.user;",
+							"        if (user?.id === userIdT3) {",
+							"            found = true;",
+							"            pm.expect(user.username).to.eql(\"tester03\");",
+							"        }",
+							"    });",
+							"",
+							"    if (!found) {",
+							"        throw new Error(`User with ID ${userIdT3} not found in listAdvertisementPosts`);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(postid: \"{{existing_postid_2}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listAdPost (feed) urs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Counter is 3\", function () {",
+							"    const json = pm.response.json();",
+							"    pm.expect(json.data.listAdvertisementPosts.counter).to.eql(3);",
+							"});",
+							"",
+							"pm.test(\"Posts are not in listAdvertisementPosts\", function () {",
+							"    const body = pm.response.text();",
+							"    const id1 = pm.environment.get(\"existing_postid\");",
+							"    const id2 = pm.environment.get(\"existing_postid_2\");",
+							"",
+							"    if (!id1 || !id2) {",
+							"        throw new Error(\"Environment variables existing_postid or existing_postid_2 are not set.\");",
+							"    }",
+							"",
+							"    pm.expect(body).not.to.include(id1);",
+							"    pm.expect(body).not.to.include(id2);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(limit:20, contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listAdPost (profile) urs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post title for existing_postid_2 from env is 'this post is illegal'\", function () {",
+							"    const response = pm.response.json();",
+							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
+							"    const expectedPostId = pm.environment.get(\"existing_postid_2\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'existing_postid_2' is not set.\");",
+							"    }",
+							"",
+							"    const found = items.find(i => i.post?.id === expectedPostId);",
+							"",
+							"    if (!found) {",
+							"        throw new Error(`Advertisement post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(found.post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(userid: \"{{w_userid_t3}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listPost (title) urs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post is not there\", function () {",
+							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"existing_postid_2\"));",
+							"});",
+							"",
+							"pm.test(\"Post title for existing_postid from env is 'this post is hidden'\", function () {",
+							"    const response = pm.response.json();",
+							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
+							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'existing_postid' is not set.\");",
+							"    }",
+							"",
+							"    const found = items.find(i => i.post?.id === expectedPostId);",
+							"",
+							"    if (!found) {",
+							"        throw new Error(`Advertisement post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(found.post.title, `Post ${expectedPostId} title`).to.eql(\"this post is hidden\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(title: \"Test Advertisement Post\", contentFilterBy: MYGRANDMALIKES, limit:20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -13393,6 +15058,68 @@
 			"response": []
 		},
 		{
+			"name": "Login t5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation Login {\n  login(email: \"{{email_t5}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Confirm post is not seen (feed)",
 			"event": [
 				{
@@ -13720,6 +15447,1750 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query GuestListPost {\n    guestListPost(postid: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                amountreports\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create comment on illegal (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{postid}}\", content: \"moderation_comment\") {\n        status\n        ResponseCode\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Like illegal post (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(postid:\"{{postid}}\" , action: LIKE) {\n        status\n        ResponseCode\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Dislike illegal post (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(postid:\"{{postid}}\" , action: DISLIKE) {\n        status\n        ResponseCode\n    } \n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View illegal post (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{postid}}\"\n        action: VIEW\n    ) {\n        status\n        ResponseCode\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Save illegal post (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{postid}}\"\n        action: SAVE\n    ) {\n        status\n        ResponseCode\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Share illegal post (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"32104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{postid}}\"\n        action: SHARE\n    ) {\n        status\n        ResponseCode\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login tester 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t1}}\",\n    password: \"{{w_password_t1}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Moderate illegal user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12103\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdt6}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Moderation items",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12102\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Check statuses by env IDs\", function () {",
+							"    const response = pm.response.json();",
+							"    const items = response.data?.moderationItems?.affectedRows || [];",
+							"",
+							"    const postIdEnv = pm.environment.get(\"postid\");",
+							"    const commentIdEnv = pm.environment.get(\"commentid\");",
+							"    const userIdT2 = pm.environment.get(\"w_userid_t2\");",
+							"    const userIdT3 = pm.environment.get(\"w_userid_t3\");",
+							"",
+							"    items.forEach(item => {",
+							"        const type = item.targettype;",
+							"        const id = item.targetContentId;",
+							"",
+							"        if (type === \"post\" && item.targetcontent?.post?.id === postIdEnv) {",
+							"            pm.expect(item.status, `Post ${postIdEnv} status`).to.eql(\"illegal\");",
+							"        } else if (type === \"comment\" && item.targetcontent?.comment?.commentid === commentIdEnv) {",
+							"            pm.expect(item.status, `Comment ${commentIdEnv} status`).to.eql(\"illegal\");",
+							"        } else if (type === \"user\") {",
+							"            const userId = item.targetcontent?.user?.userid;",
+							"            if (userId === userIdT2) {",
+							"                pm.expect(item.status, `User ${userIdT2} status`).to.eql(\"restored\");",
+							"            } else if (userId === userIdT3) {",
+							"                pm.expect(item.status, `User ${userIdT3} status`).to.eql(\"hidden\");",
+							"            }",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ModerationItems {\n    moderationItems {\n        status\n        ResponseCode\n        affectedRows {\n            targetContentId\n            targettype\n            reportscount\n            status\n            createdat\n            targetcontent {\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            isfollowed\n                            isfollowing\n                            isfriend\n                        }\n                    }\n                }\n                comment {\n                    commentid\n                    userid\n                    postid\n                    parentid\n                    content\n                    createdat\n                    amountlikes\n                    amountreplies\n                    amountreports\n                    isliked\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n                user {\n                    userid\n                    img\n                    username\n                    slug\n                    biography\n                    updatedat\n                }\n            }\n            reporters {\n                userid\n                img\n                username\n                slug\n                biography\n                updatedat\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Moderation stats",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12101\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const res = pm.response.json();",
+							"const stats = res?.data?.moderationStats?.affectedRows;",
+							"",
+							"pm.test(\"Moderation stats match expected values\", function () {",
+							"    pm.expect(stats.AmountAwaitingReview).to.eql(0);",
+							"    pm.expect(stats.AmountHidden).to.eql(2);",
+							"    pm.expect(stats.AmountRestored).to.eql(3);",
+							"    pm.expect(stats.AmountIllegal).to.eql(4);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ModerationStats {\n    moderationStats {\n        status\n        ResponseCode\n        affectedRows {\n            AmountAwaitingReview\n            AmountHidden\n            AmountRestored\n            AmountIllegal\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login t5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation Login {\n  login(email: \"{{email_t5}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listUsers is hidden",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11009\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User is not there\", function () {",
+							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"userid_t6\"));",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListUsers {\n    listUsers(contentFilterBy: MYGRANDMALIKES, limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm searchUser is hidden",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11009\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User with userid_t6 should have username 'illegal_account'\", function () {",
+							"    const response = pm.response.json();",
+							"    const users = response.data?.searchUser?.affectedRows || [];",
+							"    const expectedUserId = pm.environment.get(\"userid_t6\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'userid_t6' is not set.\");",
+							"    }",
+							"",
+							"    const user = users.find(u => u.id === expectedUserId);",
+							"",
+							"    if (!user) {",
+							"        throw new Error(`User with ID ${expectedUserId} not found in searchUser response.`);",
+							"    }",
+							"",
+							"    pm.expect(user.username, `User ${user.id} should be hidden`).to.eql(\"illegal_account\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query SearchUser {\n    searchUser(contentFilterBy: MYGRANDMALIKES, userid: \"{{userid_t6}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm searchUser is hidden",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11009\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User is not there\", function () {",
+							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"userid_t6\"));",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query SearchUser {\n    searchUser(contentFilterBy: MYGRANDMALIKES, username: \"validuser\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm getProfile is hidden",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11008\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"getProfile returns 'illegal_account' for userid_t6\", function () {",
+							"    const response = pm.response.json();",
+							"    const profile = response.data?.getProfile?.affectedRows;",
+							"    const expectedUserId = pm.environment.get(\"userid_t6\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'userid_t6' is not set.\");",
+							"    }",
+							"",
+							"    if (!profile || profile.id !== expectedUserId) {",
+							"        throw new Error(`Profile ID does not match userid_t6. Found: ${profile?.id}, Expected: ${expectedUserId}`);",
+							"    }",
+							"",
+							"    pm.expect(profile.username, `User ${profile.id} should have username 'illegal_account'`).to.eql(\"hidden_account\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetProfile {\n    getProfile(userid: \"{{userid_t6}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            isfollowed\n            isfollowing\n            amountposts\n            amounttrending\n            amountfollowed\n            amountfollower\n            amountfriends\n            amountblocked\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listFollowRelations is hidden",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11101\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User from userid_t6 in followers and following has username 'illegal_account'\", function () {",
+							"    const response = pm.response.json();",
+							"    const relations = response.data?.listFollowRelations?.affectedRows || {};",
+							"    const expectedUserId = pm.environment.get(\"userid_t6\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'userid_t6' is not set.\");",
+							"    }",
+							"",
+							"    const checkList = (listName) => {",
+							"        const list = relations[listName] || [];",
+							"        const user = list.find(u => u.id === expectedUserId);",
+							"",
+							"        if (!user) {",
+							"            throw new Error(`User with ID ${expectedUserId} not found in '${listName}' list.`);",
+							"        }",
+							"",
+							"        pm.expect(user.username, `User ${user.id} in ${listName} should be 'illegal_account'`).to.eql(\"illegal_account\");",
+							"    };",
+							"",
+							"    checkList(\"followers\");",
+							"    checkList(\"following\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListFollowRelations {\n    listFollowRelations(contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            followers {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            following {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listFriends is hidden",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11102\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User from userid_t6 in listFriends has username 'illegal_account'\", function () {",
+							"    const response = pm.response.json();",
+							"    const friends = response.data?.listFriends?.affectedRows || [];",
+							"    const expectedUserId = pm.environment.get(\"userid_t6\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'userid_t6' is not set.\");",
+							"    }",
+							"",
+							"    const user = friends.find(u => u.userid === expectedUserId);",
+							"",
+							"    if (!user) {",
+							"        throw new Error(`User with ID ${expectedUserId} not found in 'listFriends' response.`);",
+							"    }",
+							"",
+							"    pm.expect(user.username, `Friend ${user.userid} should have username 'illegal_account'`).to.eql(\"illegal_account\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListFriends {\n    listFriends(contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            updatedat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login t6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation Login {\n  login(email: \"{{email_t6}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listPosts doesnt show urself (feed)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post is not there\", function () {",
+							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"postid\"));",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(contentFilterBy: MYGRANDMALIKES, limit:20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listPosts doesnt show urself (postid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post title for postid from env is 'this post is illegal'\", function () {",
+							"    const response = pm.response.json();",
+							"    const post = response.data?.listPosts?.affectedRows;",
+							"",
+							"    const expectedPostId = pm.environment.get(\"postid\");",
+							"    if (!expectedPostId) throw new Error(\"Environment variable 'postid' is not set.\");",
+							"",
+							"    if (!post || post.id !== expectedPostId) {",
+							"        throw new Error(`Post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
+							"});",
+							"",
+							"pm.test(\"Comment content for commentid from env is 'this comment is illegal'\", function () {",
+							"    const response = pm.response.json();",
+							"    const post = response.data?.listPosts?.affectedRows;",
+							"",
+							"    const expectedCommentId = pm.environment.get(\"commentid\");",
+							"    if (!expectedCommentId) throw new Error(\"Environment variable 'commentid' is not set.\");",
+							"",
+							"    const comment = post?.comments?.find(c => c.commentid === expectedCommentId);",
+							"    if (!comment) throw new Error(`Comment with ID ${expectedCommentId} not found in the post.`);",
+							"",
+							"    pm.expect(comment.content, `Comment ${expectedCommentId} content`).to.eql(\"this comment is illegal\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(contentFilterBy: MYGRANDMALIKES, postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listPosts doesnt show urself (profile)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post title for postid from env is 'this post is illegal'\", function () {",
+							"    const response = pm.response.json();",
+							"    const post = response.data?.listPosts?.affectedRows;",
+							"",
+							"    const expectedPostId = pm.environment.get(\"postid\");",
+							"    if (!expectedPostId) throw new Error(\"Environment variable 'postid' is not set.\");",
+							"",
+							"    if (!post || post.id !== expectedPostId) {",
+							"        throw new Error(`Post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
+							"});",
+							"",
+							"pm.test(\"Comment content for commentid from env is 'this comment is illegal'\", function () {",
+							"    const response = pm.response.json();",
+							"    const post = response.data?.listPosts?.affectedRows;",
+							"",
+							"    const expectedCommentId = pm.environment.get(\"commentid\");",
+							"    if (!expectedCommentId) throw new Error(\"Environment variable 'commentid' is not set.\");",
+							"",
+							"    const comment = post?.comments?.find(c => c.commentid === expectedCommentId);",
+							"    if (!comment) throw new Error(`Comment with ID ${expectedCommentId} not found in the post.`);",
+							"",
+							"    pm.expect(comment.content, `Comment ${expectedCommentId} content`).to.eql(\"this comment is illegal\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(contentFilterBy: MYGRANDMALIKES, userid: \"{{userid_t6}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listPosts doesnt show urself (title)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Post is not there\", function () {",
+							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"postid\"));",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(contentFilterBy: MYGRANDMALIKES, title: \"moderation_post2\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listUsers doesnt show urself",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11009\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User from userid_t6 in listUsers has username 'illegal_account'\", function () {",
+							"    const response = pm.response.json();",
+							"    const users = response.data?.listUsers?.affectedRows || [];",
+							"    const expectedUserId = pm.environment.get(\"userid_t6\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'userid_t6' is not set.\");",
+							"    }",
+							"",
+							"    const user = users.find(u => u.id === expectedUserId);",
+							"",
+							"    if (!user) {",
+							"        throw new Error(`User with ID ${expectedUserId} not found in listUsers response.`);",
+							"    }",
+							"",
+							"    pm.expect(user.username, `User ${user.id} should have username 'illegal_account'`).to.eql(\"illegal_account\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListUsers {\n    listUsers(contentFilterBy: MYGRANDMALIKES, limit:20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm searchUser doesnt show urself",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11009\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User with userid_t6 should have username 'illegal_account'\", function () {",
+							"    const response = pm.response.json();",
+							"    const users = response.data?.searchUser?.affectedRows || [];",
+							"    const expectedUserId = pm.environment.get(\"userid_t6\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'userid_t6' is not set.\");",
+							"    }",
+							"",
+							"    const user = users.find(u => u.id === expectedUserId);",
+							"",
+							"    if (!user) {",
+							"        throw new Error(`User with ID ${expectedUserId} not found in searchUser response.`);",
+							"    }",
+							"",
+							"    pm.expect(user.username, `User ${user.id} should be illegal`).to.eql(\"illegal_account\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query SearchUser {\n    searchUser(contentFilterBy: MYGRANDMALIKES, userid: \"{{userid_t6}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm searchUser doesnt show urself",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11009\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User is not there\", function () {",
+							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"userid_t6\"));",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query SearchUser {\n    searchUser(contentFilterBy: MYGRANDMALIKES, username: \"validuser\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm getProfile doesnt show urself",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11008\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"getProfile returns 'illegal_account' for userid_t6\", function () {",
+							"    const response = pm.response.json();",
+							"    const profile = response.data?.getProfile?.affectedRows;",
+							"    const expectedUserId = pm.environment.get(\"userid_t6\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'userid_t6' is not set.\");",
+							"    }",
+							"",
+							"    if (!profile || profile.id !== expectedUserId) {",
+							"        throw new Error(`Profile ID does not match userid_t6. Found: ${profile?.id}, Expected: ${expectedUserId}`);",
+							"    }",
+							"",
+							"    pm.expect(profile.username, `User ${profile.id} should have username 'illegal_account'`).to.eql(\"illegal_account\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetProfile {\n    getProfile(contentFilterBy: MYGRANDMALIKES, userid: \"{{userid_t6}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            isfollowed\n            isfollowing\n            amountposts\n            amounttrending\n            amountfollowed\n            amountfollower\n            amountfriends\n            amountblocked\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
