@@ -392,7 +392,7 @@ class ModerationMapper
             try {
                 mkdir($illegalDirectoryPath, 0777, true);
             } catch (\RuntimeException $e) {
-                throw new \Exception("Directory does not exist: $illegalDirectoryPath"); // Directory does not exist
+                $this->logger->error("Directory does not exist: $illegalDirectoryPath"); // Directory does not exist
             }
         }
 
@@ -400,14 +400,14 @@ class ModerationMapper
         if($targetType == 'post'){
             $mediaRecord = Post::query()->where('postid', $targetId)->first();
             if(!$mediaRecord || !$mediaRecord['media']){
-                throw new \Exception("Media not found for Post ID: $targetId");
+                $this->logger->error("Media not found for Post ID: $targetId");
             }
             $media = json_decode($mediaRecord['media'], true);
 
             foreach ($media as $mediaItem) {
 
                 if (!isset($mediaItem['path']) || !file_exists($directoryPath.$mediaItem['path'])) {
-                    throw new \Exception("Invalid media path for Post ID: $targetId");
+                    $this->logger->error("Invalid media path for Post ID: $targetId");
                 }
                 $media = $mediaItem['path'];
 
@@ -427,7 +427,7 @@ class ModerationMapper
                 try {
                     $uploadedFile->moveTo($filePath);
                 } catch (\RuntimeException $e) {
-                    throw new \Exception("Failed to move file: $filePath");
+                    $this->logger->error("Failed to move file: $filePath");
                 }
             }
         }
