@@ -129,22 +129,12 @@ class PostMapper
         string $userid, 
         array $specifications,
         int $limitPerType = 5, 
-        ?string $contentFilterBy = null
     ): array {        
         $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
-
         $allSpecs = SpecificationSQLData::merge($specsSQL);
-
         $whereClauses = $allSpecs->whereClauses;
-
         $whereClauses[] = "sub.row_num <= :limit";
-
         $whereClausesString = implode(" AND ", $whereClauses);
-
-        $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentType::post,
-            $contentFilterBy
-        );
 
         $sql = sprintf(
             "SELECT 
@@ -180,18 +170,6 @@ class PostMapper
         $result = [];
 
         foreach ($unfidtered_result as $row) {
-            $post_reports = (int)$row['post_reports'];
-
-            // if ($contentFilterService->getContentFilterAction(
-            //     ContentType::post,
-            //     ContentType::post,
-            //     $post_reports,
-            //     $row['post_visibility_status']
-            // ) == ContentFilteringAction::replaceWithPlaceholder) {
-            //     $replacer = ContentReplacementPattern::hidden;
-            //     $row['title'] = $replacer->postTitle();
-            //     $row['media'] = $replacer->postMedia();
-            // }
             $result[] = $row;
         }
         return $result;

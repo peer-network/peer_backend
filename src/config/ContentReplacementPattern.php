@@ -60,7 +60,7 @@ enum ContentReplacementPattern: string
         return match ($this) {
             self::hidden   => "hidden_account",
             self::deleted => "Deleted_Account",
-            self::illegal => "Illegal_Account",
+            self::illegal => "illegal_account",
         };
     }
 

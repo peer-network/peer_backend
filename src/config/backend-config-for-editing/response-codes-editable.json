@@ -1163,10 +1163,6 @@
         "comment": "Error: Moderation action already performed",
         "userFriendlyComment": "This item has already been decided."
     },
-    "32104": {
-        "comment": "Error: You cannot interact with illegal content",
-        "userFriendlyComment": "This content is illegal and unavailable to interact."
-    },
     "42101": {
         "comment": "Error: Failed while performing moderation action",
         "userFriendlyComment": "Error: Failed while performing moderation action"
