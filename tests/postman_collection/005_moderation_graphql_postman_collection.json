@@ -9345,7 +9345,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdT03}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdT03}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9411,7 +9411,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdT03}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdT03}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9477,7 +9477,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdT03}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdT03}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9543,7 +9543,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdT03}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdT03}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -10438,7 +10438,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdComment}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdComment}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -10504,7 +10504,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdPost}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdPost}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -10570,7 +10570,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdT02}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdT02}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -12524,7 +12524,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdAdvPost}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdAdvPost}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -12590,7 +12590,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdAdvPost2}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdAdvPost2}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -14678,7 +14678,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdComment2}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdComment2}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -15039,7 +15039,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdPost2}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdPost2}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -15924,7 +15924,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(targetContentId: \"{{targetContentIdt6}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdt6}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
