@@ -1015,9 +1015,9 @@ class WalletMapper
         $dailyToken = (string)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
         // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
-        $gemsintoken = TokenHelper::divRc((string) $dailyToken, (string) $totalGems);
+        $gemsintoken = TokenHelper::divRc( $dailyToken, $totalGems);
 
-        $bestatigungInitial = TokenHelper::mulRc((string) $totalGems, (string) $gemsintoken);
+        $bestatigungInitial = TokenHelper::mulRc( $totalGems, $gemsintoken);
 
         $args = [
             'winstatus' => [
@@ -1032,7 +1032,7 @@ class WalletMapper
 
             if (!isset($args[$userId])) {
 
-                $totalTokenNumber = TokenHelper::mulRc((string) $row['total_numbers'], (string) $gemsintoken);
+                $totalTokenNumber = TokenHelper::mulRc((string) $row['total_numbers'], $gemsintoken);
                 $args[$userId] = [
                     'userid' => $userId,
                     'gems' => (float)$row['total_numbers'],
@@ -1042,7 +1042,7 @@ class WalletMapper
                 ];
             }
 
-            $rowgems2token = TokenHelper::mulRc((string) $row['gems'], (string) $gemsintoken);
+            $rowgems2token = TokenHelper::mulRc((string) $row['gems'], $gemsintoken);
 
             $args[$userId]['details'][] = [
                 'gemid' => (string)$row['gemid'],
@@ -1207,7 +1207,7 @@ class WalletMapper
         }
     }
 
-    public function updateUserLiquidity(string $userId, float $liquidity): bool
+    public function updateUserLiquidity(string $userId, string $liquidity): bool
     {
         try {
 
@@ -1282,7 +1282,7 @@ class WalletMapper
             }
 
             $this->logger->info('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
-            $this->updateUserLiquidity($userId, (float) $newLiquidity);
+            $this->updateUserLiquidity($userId,  $newLiquidity);
 
             return  (float) $newLiquidity;
         } catch (\Throwable $e) {

@@ -6,6 +6,7 @@ namespace Fawaz\Database;
 
 use Fawaz\App\Models\Transaction;
 use Fawaz\App\Repositories\TransactionRepository;
+use Fawaz\App\User;
 use PDO;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
@@ -391,84 +392,74 @@ class PeerTokenMapper
      *
      */
     // DONE
+      /**
+     *
+     * get transcations history of current user.
+     *
+     */
     public function getTransactions(string $userId, array $args): ?array
     {
-        $this->logger->debug("PeerTokenMapper.getTransactions started");
+        $this->logger->debug('PeerTokenMapper.getTransactions started');
 
-        // Define FILTER mappings.
-        $typeMap = [
-            'TRANSACTION' => ['transferSenderToRecipient', 'transferDeductSenderToRecipient'],
-            'AIRDROP' => ['airdrop'],
-            'MINT' => ['mint'],
-            'FEES' => ['transferSenderToBurnWallet', 'transferSenderToPeerWallet', 'transferSenderToPoolWallet', 'transferSenderToInviter']
+        // Resolve filters from simple enums to actual DB values                                                                                                                                                                                                                                                    
+        [$transactionTypes, $transferActions] = $this->resolveFilters($args);
+
+        // Base select with sender/recipient user details                                                                                                                                                                                                                                                           
+        $query =
+            "SELECT tt.*,
+                us.username AS sender_username, 
+                us.uid AS sender_userid, 
+                us.slug AS sender_slug,
+                us.status AS sender_status, 
+                us.img AS sender_img, 
+                us.biography AS sender_biography, 
+                us.updatedat AS sender_updatedat,
+                ur.username AS recipient_username, 
+                ur.uid AS recipient_userid, 
+                ur.slug AS recipient_slug,
+                ur.status AS recipient_status, 
+                ur.img AS recipient_img, 
+                ur.biography AS recipient_biography, 
+                ur.updatedat AS recipient_updatedat
+                FROM transactions tt
+                LEFT JOIN users AS us ON us.uid = tt.senderid
+                LEFT JOIN users AS ur ON ur.uid = tt.recipientid
+                WHERE (tt.senderid = :senderid OR tt.recipientid = :recipientid)";
+
+        $params = [
+            ':senderid' => $userId,
+            ':recipientid' => $userId,
         ];
 
-        // Define DIRECTION FILTER mappings.
-        $directionMap = [
-            'INCOME' => ['CREDIT'],
-            'DEDUCTION' => ['DEDUCT', 'BURN_FEE', 'POOL_FEE', 'PEER_FEE', 'INVITER_FEE']
-        ];
+        // Apply type and action filters                                                                                                                                                                                                                                                                            
+        $query .= $this->appendInFilter('tt.transactiontype', $transactionTypes, $params, 'type');
+        $query .= $this->appendInFilter('tt.transferaction', $transferActions, $params, 'action');
 
-        $transactionTypes = isset($args['type']) ? ($typeMap[$args['type']] ?? []) : [];
-        $transferActions = isset($args['direction']) ? ($directionMap[$args['direction']] ?? []) : [];
-
-        $query = "SELECT * FROM transactions WHERE (senderid = :senderid OR recipientid = :recipientid)";
-
-        $params = [':senderid' => $userId, ':recipientid' => $userId];
-
-        // Handle TRANSACTION TYPE filter.
-        if (!empty($transactionTypes)) {
-            $typePlaceholders = [];
-            foreach ($transactionTypes as $i => $type) {
-                $ph = ":type$i";
-                $typePlaceholders[] = $ph;
-                $params[$ph] = $type;
-            }
-            $query .= " AND transactiontype IN (" . implode(',', $typePlaceholders) . ")";
-        }
-
-        // Handle TRANSFER ACTION filter.
-        if (!empty($transferActions)) {
-            $actionPlaceholders = [];
-            foreach ($transferActions as $i => $action) {
-                $ph = ":action$i";
-                $actionPlaceholders[] = $ph;
-                $params[$ph] = $action;
-            }
-            $query .= " AND transferaction IN (" . implode(',', $actionPlaceholders) . ")";
-        }
-
-        // Handle DATE filters.(accepting only date, appending time internally)
-        if (isset($args['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['start_date'])) {
-            $query .= " AND createdat >= :start_date";
+        // Date filters (YYYY-MM-DD)                                                                                                                                                                                                                                                                                
+        if (!empty($args['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $args['start_date'])) {
+            $query .= ' AND tt.createdat >= :start_date';
             $params[':start_date'] = $args['start_date'] . ' 00:00:00';
         }
-
-        if (isset($args['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['end_date'])) {
-            $query .= " AND createdat <= :end_date";
+        if (!empty($args['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $args['end_date'])) {
+            $query .= ' AND tt.createdat <= :end_date';
             $params[':end_date'] = $args['end_date'] . ' 23:59:59';
         }
 
-        // Handle SORT safely.(accept ASCENDING or DESCENDING)
-        $sortDirection = 'DESC'; // default
-        if (isset($args['sort'])) {
-            $sortValue = strtoupper(trim($args['sort']));
-            if ($sortValue === 'OLDEST') {
-                $sortDirection = 'ASC';
-            } elseif ($sortValue === 'NEWEST') {
-                $sortDirection = 'DESC';
-            }
+        // Sort                                                                                                                                                                                                                                                                                                     
+        $sortDirection = 'DESC';
+        if (!empty($args['sort'])) {
+            $sortValue = strtoupper(trim((string) $args['sort']));
+            $sortDirection = $sortValue === 'OLDEST' ? 'ASC' : ($sortValue === 'NEWEST' ? 'DESC' : 'DESC');
         }
-        $query .= " ORDER BY createdat $sortDirection";
+        $query .= " ORDER BY tt.createdat $sortDirection";
 
-        // Handle PAGINATION.(limit and offset)
+        // Pagination                                                                                                                                                                                                                                                                                               
         if (isset($args['limit']) && is_numeric($args['limit'])) {
-            $query .= " LIMIT :limit";
+            $query .= ' LIMIT :limit';
             $params[':limit'] = (int) $args['limit'];
         }
-
         if (isset($args['offset']) && is_numeric($args['offset'])) {
-            $query .= " OFFSET :offset";
+            $query .= ' OFFSET :offset';
             $params[':offset'] = (int) $args['offset'];
         }
 
@@ -477,27 +468,103 @@ class PeerTokenMapper
             foreach ($params as $key => $val) {
                 $stmt->bindValue($key, $val, is_int($val) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
             }
-
             $stmt->execute();
-            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            $data = array_map(
-                fn ($trans) => (new Transaction($trans, [], false))->getArrayCopy(),
-                $transactions
-            );
+            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $data = array_map(fn($t) => $this->mapTransaction($t), $transactions);
 
             return [
                 'status' => 'success',
-                'ResponseCode' => "11215",
-                'affectedRows' => $data
+                'ResponseCode' => '11215',
+                'affectedRows' => $data,
             ];
         } catch (\Throwable $th) {
-            $this->logger->error("Database error while fetching transactions - PeerTokenMapper.getTransactions", [
-                'error' => $th->getMessage()
+            $this->logger->error('Database error while fetching transactions - PeerTokenMapper.getTransactions', [
+                'error' => $th->getMessage(),
             ]);
-            throw new \RuntimeException("Database error while fetching transactions: " . $th->getMessage());
+            throw new \RuntimeException('Database error while fetching transactions: ' . $th->getMessage());
         }
     }
+
+
+    /**
+     * Resolve filters for transaction queries.
+     */
+    private function resolveFilters(array $args): array
+    {
+        $typeMap = [
+            'TRANSACTION' => ['transferSenderToRecipient', 'transferDeductSenderToRecipient'],
+            'AIRDROP' => ['airdrop'],
+            'MINT' => ['mint'],
+            'FEES' => ['transferSenderToBurnWallet', 'transferSenderToPeerWallet', 'transferSenderToPoolWallet', 'transferSenderToInviter'],
+        ];
+        $directionMap = [
+            'INCOME' => ['CREDIT'],
+            'DEDUCTION' => ['DEDUCT', 'BURN_FEE', 'POOL_FEE', 'PEER_FEE', 'INVITER_FEE'],
+        ];
+
+        $transactionTypes = [];
+        if (!empty($args['type'])) {
+            $key = strtoupper((string) $args['type']);
+            $transactionTypes = $typeMap[$key] ?? [];
+        }
+
+        $transferActions = [];
+        if (!empty($args['direction'])) {
+            $key = strtoupper((string) $args['direction']);
+            $transferActions = $directionMap[$key] ?? [];
+        }
+
+        return [$transactionTypes, $transferActions];
+    }
+
+    /**
+     * Append an IN filter to the query if values are provided.
+     */
+    private function appendInFilter(string $column, array $values, array &$params, string $prefix): string
+    {
+        if (empty($values)) {
+            return '';
+        }
+        $phs = [];
+        foreach ($values as $i => $val) {
+            $ph = ":{$prefix}{$i}";
+            $phs[] = $ph;
+            $params[$ph] = $val;
+        }
+        return ' AND ' . $column . ' IN (' . implode(',', $phs) . ')';
+    }
+
+    /**
+     * Map transaction with sender and recipient details.
+     */
+    private function mapTransaction(array $trans): array
+    {
+        $items = (new Transaction($trans, [], false))->getArrayCopy();
+        $items['sender'] = (new User([
+            'username' => $trans['sender_username'] ?? null,
+            'uid' => $trans['sender_userid'] ?? null,
+            'slug' => $trans['sender_slug'] ?? null,
+            'status' => $trans['sender_status'] ?? null,
+            'img' => $trans['sender_img'] ?? null,
+            'biography' => $trans['sender_biography'] ?? null,
+            'updatedat' => $trans['sender_updatedat'] ?? null,
+        ], [], false))->getArrayCopy();
+
+        $items['recipient'] = (new User([
+            'username' => $trans['recipient_username'] ?? null,
+            'uid' => $trans['recipient_userid'] ?? null,
+            'slug' => $trans['recipient_slug'] ?? null,
+            'status' => $trans['recipient_status'] ?? null,
+            'img' => $trans['recipient_img'] ?? null,
+            'biography' => $trans['recipient_biography'] ?? null,
+            'updatedat' => $trans['recipient_updatedat'] ?? null,
+        ], [], false))->getArrayCopy();
+        
+        return $items;
+    }
+
+    
     /**
      * Lock balances of both users to prevent race conditions
      * Also Includes Fees wallets

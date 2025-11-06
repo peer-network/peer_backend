@@ -1993,7 +1993,7 @@ class GraphQLSchemaBuilder
                     return $root['recipientid'] ?? '';
                 },
                 'tokenamount' => function (array $root): float {
-                    return $root['tokenamount'] ?? 0.0;
+                    return (float) ($root['tokenamount'] ?? 0.0);
                 },
                 'transferaction' => function (array $root): string {
                     return $root['transferaction'] ?? '';
@@ -2003,6 +2003,12 @@ class GraphQLSchemaBuilder
                 },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
+                },
+                'sender' => function (array $root): array {
+                    return $root['sender'] ?? [];
+                },
+                'recipient' => function (array $root): array {
+                    return $root['recipient'] ?? [];
                 },
             ],
             'PostInteractionResponse' => [
