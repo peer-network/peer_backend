@@ -116,7 +116,7 @@ class ModerationService
             }
 
             $report = $this->moderationMapper->findModerationAction($targetContentId);
-            if ($report === false) {
+            if (empty($report)) {
                 return self::respondWithError(22103); // Report not found
             }
 
