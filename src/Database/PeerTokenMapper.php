@@ -96,6 +96,28 @@ class PeerTokenMapper
             return self::respondWithError(41222);
         }
 
+        try {
+            $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':uid', $recipient);
+            $stmt->bindValue(':status', Status::DELETED);
+            $stmt->execute();
+            $row = $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            $this->logger->error('Database error while fetching recipient user', [
+                'error' => $e->getMessage(),
+                'recipient' => $recipient
+            ]);
+            return self::respondWithError(31007);
+        }
+        $inviterId = $this->getInviterID($userId);
+
+        // Lock both users' balances to prevent race conditions
+        if ($inviterId && !empty($inviterId)) {
+            $this->lockBalances([$inviterId, $userId, $recipient]);
+        }else{
+            $this->lockBalances([$userId, $recipient]);
+        }
         $currentBalance = $this->getUserWalletBalance($userId);
 
         if (empty($currentBalance)) {
@@ -130,21 +152,6 @@ class PeerTokenMapper
             return self::respondWithError(30210); // message length is too high.
         }
 
-        try {
-            $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':uid', $recipient);
-            $stmt->bindValue(':status', Status::DELETED);
-            $stmt->execute();
-            $row = $stmt->fetchColumn();
-        } catch (\Throwable $e) {
-            $this->logger->error('Database error while fetching recipient user', [
-                'error' => $e->getMessage(),
-                'recipient' => $recipient
-            ]);
-            return self::respondWithError(31007);
-        }
-
         if (empty($row)) {
             $this->logger->warning('Unknown Id Exception.');
             return self::respondWithError(31007);
@@ -163,7 +170,6 @@ class PeerTokenMapper
         $inviteFee = (float)$fees['INVITATION'];
         $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, $peerFee, $poolFee, $burnFee);
 
-        $inviterId = $this->getInviterID($userId);
         try {
             if ($inviterId && !empty($inviterId)) {
                 $inviterWin = TokenHelper::mulRc($numberoftokens, $inviteFee);
@@ -393,7 +399,7 @@ class PeerTokenMapper
 
         $query = "SELECT liquidity AS balance 
                   FROM wallett 
-                  WHERE userid = :userId";
+                  WHERE userid = :userId FOR UPDATE";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -532,4 +538,55 @@ class PeerTokenMapper
             throw new \RuntimeException("Database error while fetching transactions: " . $th->getMessage());
         }
     }
+    /**
+     * Lock balances of both users to prevent race conditions
+     * Also Includes Fees wallets
+     */
+    private function lockBalances(array $userIds): void
+    {
+        $walletsToLock = [...$userIds];
+
+        $fees = ConstantsConfig::tokenomics()['FEES'];
+        if (isset($fees['PEER']) && (float)$fees['PEER'] > 0) {
+            $walletsToLock[] = $this->peerWallet;
+        }
+        if (isset($fees['POOL']) && (float)$fees['POOL'] > 0) {
+            $walletsToLock[] = $this->poolWallet;
+        }
+        if (isset($fees['BURN']) && (float)$fees['BURN'] > 0) {
+            $walletsToLock[] = $this->burnWallet;
+        }
+        if (isset($this->btcpool) && !empty($this->btcpool)) {
+            $walletsToLock[] = $this->btcpool;
+        }
+        // Remove duplicates
+        $walletsToLock = array_unique($walletsToLock);
+
+        // Sort to ensure consistent locking order
+        sort($walletsToLock);
+
+        foreach ($walletsToLock as $walletId) {
+            if (!self::isValidUUID($walletId)) {
+                $this->logger->debug('Invalid wallet UUID for locking', ['walletId' => $walletId]);
+                throw new \RuntimeException('Invalid wallet UUID for locking: ' . $walletId);
+            }
+            $this->lockWalletBalance($walletId);
+        }
+    }
+
+    /**
+     * Lock a single wallet balance for update.
+     */
+    private function lockWalletBalance(string $walletId): void
+    {
+        $this->logger->debug('Locking wallet balance', ['walletId' => $walletId]);
+        $query = "SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':userid', $walletId, \PDO::PARAM_STR);
+        $stmt->execute();
+        // Fetching the row to ensure the lock is acquired
+        $stmt->fetch(\PDO::FETCH_ASSOC);
+        $this->logger->debug('Wallet balance locked', ['walletId' => $walletId]);
+    }
+
 }
