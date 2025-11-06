@@ -19,7 +19,7 @@ enum ContentReplacementPattern: string
             self::illegal => null,
         };
     }
-    public function postTitle(): ?string
+    public function postTitle(): string
     {
         return match ($this) {
             self::hidden => "this post is hidden",
@@ -28,7 +28,7 @@ enum ContentReplacementPattern: string
         };
     }
 
-    public function postDescription(): ?string
+    public function postDescription(): string
     {
         return match ($this) {
             self::hidden   => "",
@@ -37,7 +37,7 @@ enum ContentReplacementPattern: string
         };
     }
 
-    public function postMedia(): ?string
+    public function postMedia(): string
     {
         return match ($this) {
             self::hidden   => "some_pic_to_be_here_some_text_to_pass_validation",
@@ -46,7 +46,7 @@ enum ContentReplacementPattern: string
         };
     }
 
-    public function commentContent(): ?string
+    public function commentContent(): string
     {
         return match ($this) {
             self::hidden   => "this comment is hidden",
@@ -55,7 +55,7 @@ enum ContentReplacementPattern: string
         };
     }
 
-    public function username(): ?string
+    public function username(): string
     {
         return match ($this) {
             self::hidden   => "hidden_account",
@@ -64,7 +64,7 @@ enum ContentReplacementPattern: string
         };
     }
 
-    public function userBiography(): ?string
+    public function userBiography(): string
     {
         return match ($this) {
             self::hidden   => "/userData/00000000-0000-0000-0000-000000000000.txt",
@@ -73,7 +73,7 @@ enum ContentReplacementPattern: string
         };
     }
 
-    public function profilePicturePath(): ?string
+    public function profilePicturePath(): string
     {
         return match ($this) {
             self::hidden   => "/profile/00000000-0000-0000-0000-000000000000.jpeg",
