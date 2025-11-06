@@ -56,7 +56,11 @@ abstract class Model
 
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        return $result[0] ?: [];
+        if(count($result) > 0) {
+            return $result[0];
+        } else {
+            return [];
+        }
     }
 
     /**

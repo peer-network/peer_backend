@@ -186,9 +186,9 @@ class ModerationMapper
     /**
      * Check if Moderation Action Already Performed
      */
-    public function findModerationAction(string $targetContentId): array|bool
+    public function findModerationAction(string $moderationTicketId): array|bool
     {
-        return UserReport::query()->where('moderationticketid', $targetContentId)->first();
+        return UserReport::query()->where('moderationticketid', $moderationTicketId)->first();
     }
 
     /**
@@ -200,17 +200,17 @@ class ModerationMapper
      *  3. restored
      *  4. illegal
      */
-    public function performModerationAction(string $targetContentId, string $moderationAction, string $currentUserId): bool
+    public function performModerationAction(string $moderationTicketId, string $moderationAction, string $currentUserId): bool
     {
         try{
             $moderationId = self::generateUUID();
             $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
 
-            $report = UserReport::query()->where('moderationticketid', $targetContentId)->first();
+            $report = UserReport::query()->where('moderationticketid', $moderationTicketId)->first();
 
             Moderation::insert([
                 'uid' => $moderationId,
-                'moderationticketid' => $targetContentId,
+                'moderationticketid' => $moderationTicketId,
                 'moderatorid' => $currentUserId,
                 'status' => $moderationAction,
                 'createdat' => $createdat,
@@ -220,7 +220,7 @@ class ModerationMapper
                 'moderationid' => $moderationId
             ]);
 
-            ModerationTicket::query()->where('uid', $targetContentId)->updateColumns([
+            ModerationTicket::query()->where('uid', $moderationTicketId)->updateColumns([
                 'status' => $moderationAction,
                 'updatedat' => $createdat
             ]);

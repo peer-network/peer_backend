@@ -488,6 +488,7 @@ type ModerationItemListResponse {
   meta: DefaultResponse
 }
 type ModerationItem {
+  moderationTicketId: ID!
   targetContentId: ID!
   targettype: String!
   reportscount: Int!

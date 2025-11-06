@@ -10,7 +10,6 @@ use Fawaz\Utils\ReportTargetType;
 use DateTime;
 use Fawaz\App\Models\UserReport;
 use Fawaz\App\Models\ModerationTicket;
-use Fawaz\App\Models\Moderation;
 use Fawaz\config\constants\ConstantsModeration;
 
 class ReportsMapper
@@ -168,6 +167,7 @@ class ReportsMapper
                 'status' => $status,
                 'reportscount' => 1,
                 'contenttype' => $targettype,
+                'targetcontentid' => $targetid,
                 'createdat' => $createdat
             ];
 

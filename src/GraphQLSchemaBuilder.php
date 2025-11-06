@@ -2300,11 +2300,14 @@ class GraphQLSchemaBuilder
                 },
             ],
             'ModerationItem' => [
-                'targetContentId' => function (array $root): string {
+                'moderationTicketId' => function (array $root): string {
                     return $root['uid'] ?? '';
                 },
                 'targettype' => function (array $root): string {
                     return $root['targettype'] ?? '';
+                },
+                'targetContentId' => function (array $root): string {
+                    return $root['targetcontentid'] ?? '';
                 },
                 'status' => function (array $root): string {
                     return $root['status'] ?? '';
