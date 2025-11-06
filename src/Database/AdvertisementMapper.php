@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\Utils\ContentFilterHelper;
 use PDO;
 use Fawaz\App\Advertisements;
@@ -814,9 +815,15 @@ class AdvertisementMapper
     //     return $response;
     // }
 
-    public function findAdvertiser(string $currentUserId, ?array $args = []): array
+    public function findAdvertiser(string $currentUserId, array $specifications, ?array $args = []): array
     {
         $this->logger->debug("AdvertisementMapper.findAdvertiser started");
+        
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
+
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit  = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -830,8 +837,8 @@ class AdvertisementMapper
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
 
-        $whereClauses = ["p.feedid IS NULL"];
-        $params = ['currentUserId' => $currentUserId];
+        $whereClauses[] = "p.feedid IS NULL";
+        $params['currentUserId'] = $currentUserId;
 
         // Show only Valid Content
         $whereClauses[] = "p.status IN (:postNormalStatus, :postAdvertisementStatus)";
@@ -877,7 +884,7 @@ class AdvertisementMapper
 
         $baseSelect = "
             SELECT 
-                p.postid, p.userid, p.contenttype, p.title, p.media, p.cover, p.mediadescription, p.createdat,
+                p.postid, p.userid, p.contenttype, p.title, p.media, p.cover, p.mediadescription, p.createdat, p.visibility_status,
                 a.advertisementid, a.userid AS tuserid, a.status AS ad_type,
                 a.timestart AS ad_order, a.timeend AS end_order, a.createdat AS tcreatedat,
                 ut.username AS tusername, ut.slug AS tslug, ut.img AS timg,
@@ -1005,15 +1012,8 @@ class AdvertisementMapper
             'isdisliked' => (bool)$row['isdisliked'],
             'issaved' => (bool)$row['issaved'],
             'tags' => $row['tags'],
-            'user' => [
-                'uid' => (string)$row['userid'],
-                'username' => (string)$row['username'],
-                'slug' => (int)$row['slug'],
-                'img' => (string)$row['img'],
-                'isfollowed' => (bool)$row['isfollowed'],
-                'isfollowing' => (bool)$row['isfollowing'],
-                'isfriend' => (bool)((int)$row['isfollowed'] && (int)$row['isfollowing']),
-            ],
+            'visibility_status' => $row['visibility_status'],
+            'reports' => $row['post_reports'],
         ]);
     }
 
@@ -1026,16 +1026,7 @@ class AdvertisementMapper
             'status' => (string)$row['ad_type'],
             'timestart' => (string)$row['ad_order'],
             'timeend' => (string)$row['end_order'],
-            'createdat' => (string)$row['tcreatedat'],
-            'user' => [
-                'uid' => (string)$row['tuserid'],
-                'username' => (string)$row['tusername'],
-                'slug' => (int)$row['tslug'],
-                'img' => (string)$row['timg'],
-                'isfollowed' => (bool)$row['tisfollowed'],
-                'isfollowing' => (bool)$row['tisfollowing'],
-                'isfriend' => (bool)((int)$row['tisfollowed'] && (int)$row['tisfollowing']),
-            ],
+            'createdat' => (string)$row['tcreatedat']
         ]);
     }
 }

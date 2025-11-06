@@ -3507,11 +3507,6 @@ class GraphQLSchemaBuilder
             return $posts;
         }
 
-        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
-        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
-
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-
         $data = array_map(
             fn (PostAdvanced $post) => $post->getArrayCopy(),
             $posts
@@ -3537,35 +3532,23 @@ class GraphQLSchemaBuilder
 
         $this->logger->debug('Query.resolveAdvertisementsPosts started');
 
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-
         $posts = $this->advertisementService->findAdvertiser($args);
         if (isset($posts['status']) && $posts['status'] === 'error') {
             return $posts;
         }
 
-        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
-        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
-
         $data = array_map(
-            function (array $row) use ($commentOffset, $commentLimit, $contentFilterBy) {
-                $postWithComments = $this->mapPostWithComments(
-                    $row['post'],
-                    $commentOffset,
-                    $commentLimit,
-                    $contentFilterBy
-                );
-
-                return [
+            function (array $row)  {
+                $elem = [
                     // PostAdvanced Objekt
-                    'post' => $postWithComments,
+                    'post' => $row['post']->getArrayCopy(),
                     // Advertisements Objekt
-                    'advertisement' => $this->mapPostWithAdvertisement($row['advertisement']),
+                    'advertisement' => $row['advertisement']->getArrayCopy()
                 ];
+                return $elem;
             },
             $posts
         );
-
         $this->logger->info('findAdvertiser', ['data' => $data]);
 
         return self::createSuccessResponse(
