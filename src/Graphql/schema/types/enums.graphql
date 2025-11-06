@@ -119,8 +119,6 @@ enum DayFilterType {
   D3
   D4
   D5
-  D6
-  D7
   W0
   M0
   Y0

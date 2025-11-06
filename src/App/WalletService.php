@@ -160,7 +160,7 @@ class WalletService
             return $this::respondWithError(60501);
         }
 
-        $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'W0', 'M0', 'Y0'];
+        $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {

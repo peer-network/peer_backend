@@ -296,8 +296,6 @@ type DailyGemStatusData {
   d3: Decimal
   d4: Decimal
   d5: Decimal
-  d6: Decimal
-  d7: Decimal
   w0: Decimal
   m0: Decimal
   y0: Decimal
