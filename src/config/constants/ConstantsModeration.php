@@ -84,12 +84,6 @@ class ConstantsModeration
      */
     public const POST_STATUS_ADVERTISED = 1;
 
-    /**
-     * Post Status: illegal
-     * Applies same as in ConstantsConfig::post()['STATUS']['ILLEGAL']
-     */
-    public const POST_STATUS_ILLEGAL = 2;
-
 
     /**
      * Entity VisibilityStatuses

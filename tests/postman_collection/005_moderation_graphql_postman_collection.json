@@ -13907,7 +13907,7 @@
 							"    pm.expect(pm.response.text()).to.include(\"31513\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
 							"});"
 						],
 						"type": "text/javascript",
@@ -13961,7 +13961,7 @@
 							"    pm.expect(pm.response.text()).to.include(\"31513\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
 							"});"
 						],
 						"type": "text/javascript",
@@ -14015,7 +14015,7 @@
 							"    pm.expect(pm.response.text()).to.include(\"31513\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
 							"});"
 						],
 						"type": "text/javascript",
@@ -14069,7 +14069,7 @@
 							"    pm.expect(pm.response.text()).to.include(\"31513\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
 							"});"
 						],
 						"type": "text/javascript",
@@ -15595,7 +15595,7 @@
 							"    pm.expect(pm.response.text()).to.include(\"31513\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
 							"});"
 						],
 						"type": "text/javascript",
@@ -15649,7 +15649,7 @@
 							"    pm.expect(pm.response.text()).to.include(\"31513\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
 							"});"
 						],
 						"type": "text/javascript",
@@ -15703,7 +15703,7 @@
 							"    pm.expect(pm.response.text()).to.include(\"31513\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
 							"});"
 						],
 						"type": "text/javascript",
@@ -15757,7 +15757,7 @@
 							"    pm.expect(pm.response.text()).to.include(\"31513\");",
 							"});",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
 							"});"
 						],
 						"type": "text/javascript",
@@ -16717,7 +16717,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"21501\");",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
@@ -16799,7 +16799,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"21501\");",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
