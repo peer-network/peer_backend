@@ -104,18 +104,18 @@ class ModerationService
                 return self::respondWithError(62101); // Unauthorized access attempt to perform moderation action
             }
             
-            if(empty($args['targetContentId']) || empty($args['moderationAction'])){
+            if(empty($args['moderationTicketId']) || empty($args['moderationAction'])){
                 return self::respondWithError(30101); // Missing required fields
             }
 
-            $targetContentId = $args['targetContentId'];
+            $moderationTicketId = $args['moderationTicketId'];
             $moderationAction = $args['moderationAction'];
 
-            if (!$targetContentId || !self::isValidUUID($targetContentId) || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
+            if (!$moderationTicketId || !self::isValidUUID($moderationTicketId) || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
                 return self::respondWithError(32101); // Invalid input
             }
 
-            $report = $this->moderationMapper->findModerationAction($targetContentId);
+            $report = $this->moderationMapper->findModerationAction($moderationTicketId);
             if (empty($report)) {
                 return self::respondWithError(22103); // Report not found
             }
@@ -128,7 +128,7 @@ class ModerationService
             $this->transactionManager->beginTransaction();
             
             // Create Moderation Record
-            $result = $this->moderationMapper->performModerationAction($targetContentId, $moderationAction, $this->currentUserId);
+            $result = $this->moderationMapper->performModerationAction($moderationTicketId, $moderationAction, $this->currentUserId);
 
             if(!$result){
                 $this->transactionManager->rollBack();
