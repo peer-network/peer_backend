@@ -9184,7 +9184,7 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Save targetContentIds by env IDs\", function () {",
+							"pm.test(\"Save moderationTicketIds by env IDs\", function () {",
 							"    const response = pm.response.json();",
 							"    const items = response.data?.moderationItems?.affectedRows || [];",
 							"",
@@ -9199,20 +9199,20 @@
 							"",
 							"    items.forEach(item => {",
 							"        const type = item.targettype;",
-							"        const id = item.targetContentId;",
+							"        const id = item.moderationTicketId;",
 							"",
 							"        if (!id) return;",
 							"",
 							"        if (type === \"post\" && item.targetcontent?.post?.id === postIdEnv) {",
-							"            pm.environment.set(\"targetContentIdPost\", id);",
+							"            pm.environment.set(\"moderationTicketIdPost\", id);",
 							"        } else if (type === \"comment\" && item.targetcontent?.comment?.commentid === commentIdEnv) {",
-							"            pm.environment.set(\"targetContentIdComment\", id);",
+							"            pm.environment.set(\"moderationTicketIdComment\", id);",
 							"        } else if (type === \"user\") {",
 							"            const userId = item.targetcontent?.user?.userid;",
 							"            if (userId === userIdT2) {",
-							"                pm.environment.set(\"targetContentIdT02\", id);",
+							"                pm.environment.set(\"moderationTicketIdT02\", id);",
 							"            } else if (userId === userIdT3) {",
-							"                pm.environment.set(\"targetContentIdT03\", id);",
+							"                pm.environment.set(\"moderationTicketIdT03\", id);",
 							"            }",
 							"        }",
 							"    });",
@@ -9229,7 +9229,7 @@
 							"",
 							"    items.forEach(item => {",
 							"        const type = item.targettype;",
-							"        const id = item.targetContentId;",
+							"        const id = item.moderationTicketId;",
 							"",
 							"        if (type === \"post\" && item.targetcontent?.post?.id === postIdEnv) {",
 							"            pm.expect(item.status, `Post ${postIdEnv} status`).to.eql(\"waiting_for_review\");",
@@ -9279,7 +9279,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ModerationItems {\n    moderationItems {\n        status\n        ResponseCode\n        affectedRows {\n            targetContentId\n            targettype\n            reportscount\n            status\n            createdat\n            targetcontent {\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            isfollowed\n                            isfollowing\n                            isfriend\n                        }\n                    }\n                }\n                comment {\n                    commentid\n                    userid\n                    postid\n                    parentid\n                    content\n                    createdat\n                    amountlikes\n                    amountreplies\n                    amountreports\n                    isliked\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n                user {\n                    userid\n                    img\n                    username\n                    slug\n                    biography\n                    updatedat\n                }\n            }\n            reporters {\n                userid\n                img\n                username\n                slug\n                biography\n                updatedat\n            }\n        }\n    }\n}\n",
+						"query": "query ModerationItems {\n    moderationItems {\n        status\n        ResponseCode\n        affectedRows {\n            targetContentId\n            moderationTicketId\n            moderationTicketId\n            targettype\n            reportscount\n            status\n            createdat\n            targetcontent {\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            isfollowed\n                            isfollowing\n                            isfriend\n                        }\n                    }\n                }\n                comment {\n                    commentid\n                    userid\n                    postid\n                    parentid\n                    content\n                    createdat\n                    amountlikes\n                    amountreplies\n                    amountreports\n                    isliked\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n                user {\n                    userid\n                    img\n                    username\n                    slug\n                    biography\n                    updatedat\n                }\n            }\n            reporters {\n                userid\n                img\n                username\n                slug\n                biography\n                updatedat\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9345,7 +9345,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdT03}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdT03}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9411,7 +9411,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdT03}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdT03}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9477,7 +9477,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdT03}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdT03}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9543,7 +9543,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdT03}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdT03}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -10438,7 +10438,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdComment}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdComment}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -10504,7 +10504,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdPost}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdPost}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -10570,7 +10570,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdT02}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdT02}}\", moderationAction: restored) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -12258,7 +12258,7 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Save targetContentIds by env IDs\", function () {",
+							"pm.test(\"Save moderationTicketIds by env IDs\", function () {",
 							"    const r = pm.response.json();",
 							"    const items = r.data?.moderationItems?.affectedRows || [];",
 							"",
@@ -12282,34 +12282,34 @@
 							"",
 							"    items.forEach(i => {",
 							"        const t = i.targettype;",
-							"        const id = i.targetContentId;",
+							"        const id = i.moderationTicketId;",
 							"        if (!id) return;",
 							"",
 							"        if (t === \"post\" && i.targetcontent?.post?.id === postId) {",
-							"            pm.environment.set(\"targetContentIdPost2\", id);",
+							"            pm.environment.set(\"moderationTicketIdPost2\", id);",
 							"            foundPost2 = true;",
 							"        }",
 							"",
 							"        if (t === \"comment\" && i.targetcontent?.comment?.commentid === commentId) {",
-							"            pm.environment.set(\"targetContentIdComment2\", id);",
+							"            pm.environment.set(\"moderationTicketIdComment2\", id);",
 							"            foundComment2 = true;",
 							"        }",
 							"",
 							"        if (t === \"post\" && i.targetcontent?.post?.id === exPost1) {",
-							"            pm.environment.set(\"targetContentIdAdvPost\", id);",
+							"            pm.environment.set(\"moderationTicketIdAdvPost\", id);",
 							"            foundAdvPost1 = true;",
 							"        }",
 							"",
 							"        if (t === \"post\" && i.targetcontent?.post?.id === exPost2) {",
-							"            pm.environment.set(\"targetContentIdAdvPost2\", id);",
+							"            pm.environment.set(\"moderationTicketIdAdvPost2\", id);",
 							"            foundAdvPost2 = true;",
 							"        }",
 							"",
 							"        if (t === \"user\") {",
 							"            const uid = i.targetcontent?.user?.userid;",
-							"            if (uid === u2) { pm.environment.set(\"targetContentIdT02\", id); foundT02 = true; }",
-							"            if (uid === u3) { pm.environment.set(\"targetContentIdT03\", id); foundT03 = true; }",
-							"            if (uid === u6) { pm.environment.set(\"targetContentIdt6\", id); foundT06 = true; }",
+							"            if (uid === u2) { pm.environment.set(\"moderationTicketIdT02\", id); foundT02 = true; }",
+							"            if (uid === u3) { pm.environment.set(\"moderationTicketIdT03\", id); foundT03 = true; }",
+							"            if (uid === u6) { pm.environment.set(\"moderationTicketIdt6\", id); foundT06 = true; }",
 							"        }",
 							"    });",
 							"",
@@ -12333,7 +12333,7 @@
 							"",
 							"    items.forEach(item => {",
 							"        const type = item.targettype;",
-							"        const id = item.targetContentId;",
+							"        const id = item.moderationTicketId;",
 							"",
 							"        if (type === \"post\" && item.targetcontent?.post?.id === postIdEnv) {",
 							"            pm.expect(item.status, `Post ${postIdEnv} status`).to.eql(\"waiting_for_review\");",
@@ -12383,7 +12383,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ModerationItems {\n    moderationItems {\n        status\n        ResponseCode\n        affectedRows {\n            targetContentId\n            targettype\n            reportscount\n            status\n            createdat\n            targetcontent {\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            isfollowed\n                            isfollowing\n                            isfriend\n                        }\n                    }\n                }\n                comment {\n                    commentid\n                    userid\n                    postid\n                    parentid\n                    content\n                    createdat\n                    amountlikes\n                    amountreplies\n                    amountreports\n                    isliked\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n                user {\n                    userid\n                    img\n                    username\n                    slug\n                    biography\n                    updatedat\n                }\n            }\n            reporters {\n                userid\n                img\n                username\n                slug\n                biography\n                updatedat\n            }\n        }\n    }\n}\n",
+						"query": "query ModerationItems {\n    moderationItems {\n        status\n        ResponseCode\n        affectedRows {\n            targetContentId\n            moderationTicketId\n            targettype\n            reportscount\n            status\n            createdat\n            targetcontent {\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            isfollowed\n                            isfollowing\n                            isfriend\n                        }\n                    }\n                }\n                comment {\n                    commentid\n                    userid\n                    postid\n                    parentid\n                    content\n                    createdat\n                    amountlikes\n                    amountreplies\n                    amountreports\n                    isliked\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n                user {\n                    userid\n                    img\n                    username\n                    slug\n                    biography\n                    updatedat\n                }\n            }\n            reporters {\n                userid\n                img\n                username\n                slug\n                biography\n                updatedat\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -12524,7 +12524,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdAdvPost}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdAdvPost}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -12590,7 +12590,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdAdvPost2}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdAdvPost2}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -14678,7 +14678,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdComment2}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdComment2}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -15039,7 +15039,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdPost2}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdPost2}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -15924,7 +15924,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{targetContentIdt6}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdt6}}\", moderationAction: illegal) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -15967,7 +15967,7 @@
 							"",
 							"    items.forEach(item => {",
 							"        const type = item.targettype;",
-							"        const id = item.targetContentId;",
+							"        const id = item.moderationTicketId;",
 							"",
 							"        if (type === \"post\" && item.targetcontent?.post?.id === postIdEnv) {",
 							"            pm.expect(item.status, `Post ${postIdEnv} status`).to.eql(\"illegal\");",
@@ -16017,7 +16017,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ModerationItems {\n    moderationItems {\n        status\n        ResponseCode\n        affectedRows {\n            targetContentId\n            targettype\n            reportscount\n            status\n            createdat\n            targetcontent {\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            isfollowed\n                            isfollowing\n                            isfriend\n                        }\n                    }\n                }\n                comment {\n                    commentid\n                    userid\n                    postid\n                    parentid\n                    content\n                    createdat\n                    amountlikes\n                    amountreplies\n                    amountreports\n                    isliked\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n                user {\n                    userid\n                    img\n                    username\n                    slug\n                    biography\n                    updatedat\n                }\n            }\n            reporters {\n                userid\n                img\n                username\n                slug\n                biography\n                updatedat\n            }\n        }\n    }\n}\n",
+						"query": "query ModerationItems {\n    moderationItems {\n        status\n        ResponseCode\n        affectedRows {\n            targetContentId\n            moderationTicketId\n            targettype\n            reportscount\n            status\n            createdat\n            targetcontent {\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            isfollowed\n                            isfollowing\n                            isfriend\n                        }\n                    }\n                }\n                comment {\n                    commentid\n                    userid\n                    postid\n                    parentid\n                    content\n                    createdat\n                    amountlikes\n                    amountreplies\n                    amountreports\n                    isliked\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n                user {\n                    userid\n                    img\n                    username\n                    slug\n                    biography\n                    updatedat\n                }\n            }\n            reporters {\n                userid\n                img\n                username\n                slug\n                biography\n                updatedat\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
