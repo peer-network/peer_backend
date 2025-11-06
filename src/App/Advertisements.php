@@ -152,6 +152,14 @@ class Advertisements
         $this->eurocost = $eurocost;
     }
 
+    public function getOperationId(): string
+    {
+        return $this->operationid;
+    }
+    public function setOperationId(string $operationid): void
+    {
+        $this->operationid = $operationid;
+    }
     // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array
     {

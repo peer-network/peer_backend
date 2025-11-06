@@ -690,9 +690,9 @@ class AdvertisementMapper
                    (:advertisementid, :operationid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost, :createdat)";
 
         $query3 = "INSERT INTO advertisements_info 
-                   (advertisementid, operationid, postid, userid, updatedat, createdat)
+                   (advertisementid, postid, userid, updatedat, createdat)
                    VALUES 
-                   (:advertisementid, :operationid, :postid, :userid, :updatedat, :createdat) ON CONFLICT (advertisementid) DO NOTHING";
+                   (:advertisementid, :postid, :userid, :updatedat, :createdat) ON CONFLICT (advertisementid) DO NOTHING";
 
         try {
             $this->db->beginTransaction();
@@ -727,7 +727,7 @@ class AdvertisementMapper
                 throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
             }
 
-            foreach (['advertisementid', 'operationid', 'postid', 'userid', 'updatedat', 'createdat'] as $key) {
+            foreach (['advertisementid', 'postid', 'userid', 'updatedat', 'createdat'] as $key) {
                 $stmt3->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
             }
 
@@ -757,8 +757,8 @@ class AdvertisementMapper
                     WHERE postid = :postid AND status = :status";
 
         $query2 = "INSERT INTO advertisements_log 
-                    (advertisementid, postid, userid, status, timestart, timeend, tokencost, eurocost,createdat) 
-                    VALUES (:advertisementid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost,:createdat)";
+                    (advertisementid, operationid, postid, userid, status, timestart, timeend, tokencost, eurocost,createdat) 
+                    VALUES (:advertisementid, :operationid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost,:createdat)";
 
         try {
             $this->db->beginTransaction();
@@ -773,7 +773,7 @@ class AdvertisementMapper
             $stmt1->execute();
 
             $stmt2 = $this->db->prepare($query2);
-            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost', 'createdat'] as $key) {
+            foreach (['advertisementid', 'operationid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost', 'createdat'] as $key) {
                 $stmt2->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
             }
             $stmt2->execute();

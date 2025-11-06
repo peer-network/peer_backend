@@ -445,6 +445,7 @@ class AdvertisementService
                     $data->setTimeend($timeend);
                     $data->setTokencost($tokencost);
                     $data->setEurocost($eurocost);
+                    $data->setOperationId($operationId);
                     $this->logger->info('Befor Update Get Advertisement Data', ['data' => $data->getArrayCopy()]);
                     $resp = $this->advertisementMapper->update($data);
                     $this->logger->info('Update Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
