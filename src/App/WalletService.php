@@ -273,17 +273,15 @@ class WalletService
     }
 
     /**
-     * Deducts the specified amount from the user's wallet for advertisement actions.
+     * Transfer Tokens from User Wallet for Advertisement Actions
+     * Add logwins entry
      */
-    public function deductFromWalletForAds(string $userId, TransferStrategy $transferStrategy, ?array $args = []): ?array
+    public function payForAdvertisement(string $userId, TransferStrategy $transferStrategy, ?array $args = []): ?array
     {
-        $this->logger->debug('WalletService.deductFromWalletForAds started');
+        $this->logger->debug('WalletService.payForAdvertisement started');
 
         try {
             $this->transactionManager->beginTransaction();
-
-            $this->logger->debug('WalletMapper.deductFromWalletsForAds started');
-            $this->logger->info('WalletMapper.deductFromWalletsForAds', ['args' => $args]);
 
             $postId = $args['postid'] ?? null;
             $art = $args['art'] ?? null;
@@ -301,6 +299,7 @@ class WalletService
 
             if (!isset($mapping[$art])) {
                 $this->logger->warning('Invalid art type provided.', ['art' => $art]);
+                $this->transactionManager->rollback();
                 return self::respondWithError(30105);
             }
 
@@ -309,15 +308,6 @@ class WalletService
             $text = $mapping[$art]['text'];
 
             $currentBalance = $this->getUserWalletBalance($userId);
-
-            if ($currentBalance < $price) {
-                $this->logger->warning('Insufficient balance.', [
-                    'userId' => $userId,
-                    'Balance' => $currentBalance,
-                    'requiredAmount' => $price,
-                ]);
-                return self::respondWithError(51301);
-            }
             $price = (string) $price;
 
             $requiredAmount = $this->peerTokenMapper->calculateRequiredAmount($userId, (string) $price);
@@ -348,13 +338,13 @@ class WalletService
             $args['gemid'] = $transferStrategy->getOperationId();
             $results = $this->walletMapper->insertWinToLog($userId, $args);
             if ($results === false) {
-                $this->logger->warning("Error occurred in deductFromWalletsForAds.insertWinToLog", [
+                $this->transactionManager->rollBack();
+                $this->logger->warning("Error occurred in payForAdvertisement.insertWinToLog", [
                     'userId' => $userId,
                     'args' => $args,
                 ]);
                 return self::respondWithError(41205);
             }
-            // $response = $this->walletMapper->deductFromWalletsForAds($userId, $args);
 
             if ($response['status'] === 'success') {
                 $this->transactionManager->commit();
@@ -365,6 +355,7 @@ class WalletService
             }
 
         } catch (\Exception $e) {
+            $this->logger->error('Error while paying for advertisement WalletService.payForAdvertisement', ['exception' => $e->getMessage()]);
             $this->transactionManager->rollBack();
             return $this::respondWithError(40301);
         }

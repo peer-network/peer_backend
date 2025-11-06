@@ -26,8 +26,6 @@ class PeerTokenService
         $this->currentUserId = $userId;
     }
 
-
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -36,30 +34,6 @@ class PeerTokenService
         }
         return true;
     }
-    
-    /**
-     * Validation for Offset and Limit values
-     * 
-     */
-    protected function validateOffsetAndLimit(array $args = []): ?array
-    {
-        $offset = isset($args['offset']) ? (int)$args['offset'] : null;
-        $limit = isset($args['limit']) ? (int)$args['limit'] : null;
-
-        if ($offset !== null) {
-            if ($offset < 0 || $offset > 200) {
-                return $this->respondWithError(30203);
-            }
-        }
-
-        if ($limit !== null) {
-            if ($limit < 1 || $limit > 20) {  
-                return $this->respondWithError(30204);
-            }
-        }
-        return null;
-    }
-    
 
     /**
      * Make Transfer token to receipients
@@ -184,10 +158,6 @@ class PeerTokenService
             return $this->respondWithError(60501);
         }
 
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
-        }
         $this->logger->debug('PeerTokenService.transactionsHistory started');
 
         try {
