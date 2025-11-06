@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use Fawaz\App\Models\Transaction;
-use Fawaz\App\Repositories\TransactionRepository;
 use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
@@ -23,8 +21,9 @@ class WalletMapper
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
+    private string $poolWallet;
     private string $burnWallet;
-    private string $companyWallet;
+    private string $peerWallet;
 
     public const STATUS_DELETED = 6;
 
@@ -32,27 +31,252 @@ class WalletMapper
     {
     }
 
-    /**
-     * Initialize and validates the liquidity pool wallets.
-     *
-     * @throws \RuntimeException if accounts are missing or invalid
-     */
-    private function initializeLiquidityPool(): void
+    // Transfer Token From Wallet To Wallets
+    public function transferToken(string $userId, array $args = []): ?array
     {
-        $accounts = $this->pool->returnAccounts();
-        if (($accounts['status'] ?? '') === 'error') {
-            throw new \RuntimeException("Failed to load pool accounts");
+        \ignore_user_abort(true);
+
+        $this->logger->debug('WalletMapper.transferToken started');
+
+        $accountsResult = $this->pool->returnAccounts();
+
+        if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
+            $this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
+            return self::respondWithError(40701);
         }
 
-        $data = $accounts['response'] ?? [];
-        if (!isset($data['pool'], $data['burn'], $data['peer'])) {
-            throw new \RuntimeException("Liquidity pool wallets incomplete");
+        $liqpool = $accountsResult['response'] ?? null;
+
+        if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
+            $this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
+            return self::respondWithError(30102);
         }
 
-        $this->burnWallet = $data['burn'];
-        $this->companyWallet = $data['peer'];
+        $this->poolWallet = $liqpool['pool'];
+        $this->burnWallet = $liqpool['burn'];
+        $this->peerWallet = $liqpool['peer'];
+
+        $this->logger->info('LiquidityPool', ['liquidity' => $liqpool,]);
+
+        $currentBalance = $this->getUserWalletBalance($userId);
+        if (empty($currentBalance)) {
+            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+                'Balance' => $currentBalance,
+            ]);
+            return self::respondWithError(51301);
+        }
+
+        $recipient = (string) $args['recipient'];
+        if (!self::isValidUUID($recipient)) {
+            $this->logger->warning('Incorrect recipientId Exception.', [
+                'recipient' => $recipient,
+                'Balance' => $currentBalance,
+            ]);
+            return self::respondWithError(30201);
+        }
+
+        $numberoftokens = (float) $args['numberoftokens'];
+        if ($numberoftokens <= 0) {
+            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
+                'numberoftokens' => $numberoftokens,
+                'Balance' => $currentBalance,
+            ]);
+            return self::respondWithError(30264);
+        }
+
+        try {
+            $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':uid', $recipient);
+            $stmt->bindValue(':status', self::STATUS_DELETED);
+            $stmt->execute();
+            $row = $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            $this->logger->error('WalletMapper.transferToken exception during recipient validation query', [
+               'message' => $e->getMessage(),
+               'trace' => $e->getTraceAsString()
+            ]);
+            return self::respondWithError(40301);
+        }
+
+        if (empty($row)) {
+            $this->logger->warning('Unknown Id Exception.');
+            return self::respondWithError(31007);
+        }
+
+        if ((string)$row === $userId) {
+            $this->logger->warning('Send and Receive Same Wallet Error.');
+            return self::respondWithError(31202);
+        }
+        $fees = ConstantsConfig::tokenomics()['FEES'];
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
+        $peerFee = (float)$fees['PEER'];
+        $poolFee = (float)$fees['POOL'];
+        $burnFee = (float)$fees['BURN'];
+        $inviteFee = (float)$fees['INVITATION'];
+
+        $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee);
+        $feeAmount = round((float)$numberoftokens * $poolFee, 2);
+        $peerAmount = round((float)$numberoftokens * $peerFee, 2);
+        $burnAmount = round((float)$numberoftokens * $burnFee, 2);
+        $countAmount = $feeAmount + $peerAmount + $burnAmount;
+        $inviterId = null;
+        $inviterWin = 0.0;
+
+        try {
+            $query = "SELECT ui.invited, u.status FROM users_info ui LEFT JOIN users u ON ui.invited = u.uid WHERE ui.userid = :userid AND ui.invited IS NOT NULL";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['userid' => $userId]);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != 6) {
+                $inviterId = $result['invited'];
+                $inviterWin = round((float)$numberoftokens * $inviteFee, 2);
+                $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
+                $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnAmount + $inviteFee);
+                $this->logger->info('Invited By', [
+                    'invited' => $inviterId,
+                ]);
+            }
+
+            // If user's account deleted then we will send that percentage amount to PEER
+            if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == 6) {
+                $peerAmount = $peerAmount + round((float)$numberoftokens * $inviteFee, 2);
+                $countAmount = $feeAmount + $peerAmount + $burnAmount;
+                $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee + $inviteFee);
+            }
+
+
+        } catch (\Throwable $e) {
+            $this->logger->error('WalletMapper.transferToken unexpected exception during token transfer execution', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return self::respondWithError(40301);
+        }
+
+        if ($currentBalance < $requiredAmount) {
+            $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
+                'userId' => $userId,
+                'Balance' => $currentBalance,
+                'requiredAmount' => $requiredAmount,
+            ]);
+            return self::respondWithError(51301);
+        }
+
+        try {
+            // 1. SENDER: Debit From Account
+            if ($numberoftokens) {
+                $id = self::generateUUID();
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => -abs($numberoftokens),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+
+                $this->insertWinToLog($userId, $args);
+                $this->insertWinToPool($userId, $args);
+            }
+
+            // 2. RECIPIENT: Credit To Account
+            if ($numberoftokens) {
+                $id = self::generateUUID();
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($numberoftokens),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+
+                $this->insertWinToLog($row, $args);
+                $this->insertWinToPool($row, $args);
+            }
+
+            if (isset($result['invited']) && !empty($result['invited'])) {
+                // 3 . INVITER: Fees To inviter Account (if exist)
+                if ($inviterWin) {
+                    $id = self::generateUUID();
+
+                    $args = [
+                        'token' => $id,
+                        'fromid' => $userId,
+                        'numbers' => abs($inviterWin),
+                        'whereby' => $actions['TRANSFER'],
+                    ];
+
+                    $this->insertWinToLog($inviterId, $args);
+                    $this->insertWinToPool($inviterId, $args);
+                }
+            }
+
+            // 4. SENDER: Deduct Fees From Sender
+            if ($countAmount) {
+                $id = self::generateUUID();
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => -abs($countAmount),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+
+                $this->insertWinToLog($userId, $args);
+                $this->insertWinToPool($userId, $args);
+            }
+
+            // 5. POOLWALLET: Fee To Account
+            if ($feeAmount) {
+                $id = self::generateUUID();
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($feeAmount),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+
+                $this->insertWinToLog($this->poolWallet, $args);
+                $this->insertWinToPool($this->poolWallet, $args);
+            }
+
+            // 6. PEERWALLET: Fee To Account
+            if ($peerAmount) {
+                $id = self::generateUUID();
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($peerAmount),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+
+                $this->insertWinToLog($this->peerWallet, $args);
+                $this->insertWinToPool($this->peerWallet, $args);
+            }
+
+            // 7. BURNWALLET: Fee Burning Tokens
+            if ($burnAmount) {
+                $id = self::generateUUID();
+
+                $args = [
+                    'token' => $id,
+                    'fromid' => $userId,
+                    'numbers' => abs($burnAmount),
+                    'whereby' => $actions['TRANSFER'],
+                ];
+
+                $this->insertWinToLog($this->burnWallet, $args);
+                $this->insertWinToPool($this->burnWallet, $args);
+            }
+            return ['status' => 'success', 'ResponseCode' => 'Successfully added to wallet.'];
+
+        } catch (\Throwable $e) {
+            return self::respondWithError((int)$e->getMessage());
+        }
     }
-
 
     public function fetchPool(array $args = []): array
     {
@@ -101,11 +325,11 @@ class WalletMapper
             try {
                 if ($results['overall_total_numbers'] === 0) {
                     $results['overall_total_numbers'] = (float)($row['overall_total_numbers'] ?? 0);
-                    $results['overall_total_numbersq'] = (int)$this->decimalToQ64_96($results['overall_total_numbers']);
+                    $results['overall_total_numbersq'] = (int)$this->decimalToQ64_96((string) $results['overall_total_numbers']);
                 }
 
                 $totalNumbers = (float)$row['total_numbers'];
-                $totalNumbersQ = (int)$this->decimalToQ64_96($totalNumbers);
+                $totalNumbersQ = (int)$this->decimalToQ64_96((string) $totalNumbers);
 
                 $results['posts'][] = [
                     'postid' => $row['postid'],
@@ -468,24 +692,6 @@ class WalletMapper
         }
     }
 
-    /**
-     * Records Paid Actions such Post Creation, Like, Dislike, Views, Comment
-     * 
-     * Used for Peer Token transfer to Receipient (Peer-to-Peer transfer).  @deprecated
-     * 
-     * Now Peer-to-Peer transfer will be stored on `transactions` table, Refers to PeerTokenMapper->transferToken
-     * 
-     * Used for Actions records:
-     * whereby = 1  -> Post Views
-     * whereby = 2  -> Post Like
-     * whereby = 3  -> Post Dislike
-     * whereby = 4  -> Post Comment
-     * whereby = 5  -> Post Creation
-     * whereby = 18 -> Token transfer @deprecated
-     * 
-     * Records `Transactions` as well, for each above mentioned Actions.
-     * Table `Transactions` has Foreign key on `operationsid`, which refers to `logWins`'s `token` PK. 
-     */
     public function insertWinToLog(string $userId, array $args): array|bool
     {
         \ignore_user_abort(true);
@@ -508,77 +714,19 @@ class WalletMapper
         try {
             $stmt = $this->db->prepare($sql);
 
-            $tokenId = $args['gemid'] ?? $id;
-            $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
+            $stmt->bindValue(':token', $args['gemid'] ?? $id, \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
             $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
             $stmt->bindValue(':gems', $gems, \PDO::PARAM_STR);
             $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':numbersq', $this->decimalToQ64_96((string) $numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
             $stmt->execute();
+            //$this->saveWalletEntry($userId, $numBers);
 
-            
-            $this->initializeLiquidityPool();
-            $transRepo = new TransactionRepository($this->logger, $this->db);
-
-            $transactionType = '';
-            if($args['whereby'] == 1){
-                $transactionType = 'postViewed';
-            }elseif ($args['whereby'] == 2) {
-                $transactionType = 'postLiked';
-            }elseif ($args['whereby'] == 3) {
-                $transactionType = 'postDisLiked';
-            }elseif ($args['whereby'] == 4) {
-                $transactionType = 'postComment';
-            }elseif ($args['whereby'] == 5) {
-                $transactionType = 'postCreated';
-            }
-
-            /**
-             * PENDING FOR API: `getpercentbeforetransaction`, 
-             * Need to check first, is this API in co-operation or not, and if it is than, what is it for?
-             * 
-             * Determine the transfer type based on the number of gems.
-             * If the number of gems is negative, it's a burn operation.
-             * If the number of gems is positive, it's a mint operation.
-             */
-            $actions = ConstantsConfig::wallet()['ACTIONS'];
-
-            if($args['whereby'] != $actions['TRANSFER']){
-                $senderid = $userId;
-                if ($numBers < 0) {
-                    $transferType = 'BURN';
-                    $recipientid = $this->burnWallet;
-                } else {
-                    $transferType = 'MINT';
-                    $recipientid = $userId;
-                    $senderid = $this->companyWallet;
-                }
-                $positiveNumBers = abs($numBers);
-                $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $tokenId,
-                    'transactiontype' => $transactionType,
-                    'senderid' => $senderid,
-                    'recipientid' => $recipientid,
-                    'tokenamount' => $positiveNumBers,
-                    'transferaction' => $transferType
-                ]);
-            }
-            
-            if(isset($transferType) && $transferType == 'BURN'){
-                /**
-                 * Add Amount to Burn account
-                 *
-                 * Reason behind keeping -$numBers is to, Add to Burn Account Positively
-                 */
-                $this->saveWalletEntry($this->burnWallet, -$numBers);
-            }
-            
-            
             $this->logger->info('Inserted into logwins successfully', [
                 'userId' => $userId,
                 'postid' => $postId
@@ -595,15 +743,6 @@ class WalletMapper
         }
     }
 
-    /**
-     * Helper to create and save a transaction
-     */
-    private function createAndSaveTransaction($transRepo, array $transObj): void
-    {
-        $transaction = new Transaction($transObj, ['operationid', 'senderid', 'tokenamount'], false);
-        $transRepo->saveTransaction($transaction);
-    }
-
     public function insertWinToPool(string $userId, array $args): bool
     {
         \ignore_user_abort(true);
@@ -612,7 +751,7 @@ class WalletMapper
 
         $postId = $args['postid'] ?? null;
         $fromId = $args['fromid'] ?? null;
-        $numBers = $args['numbers'] ?? 0;
+        $numBers = $args['numbers'] ?? '0';
         $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
 
         $sql = "INSERT INTO wallet 
@@ -628,13 +767,13 @@ class WalletMapper
             $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
             $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':numbersq', $this->decimalToQ64_96((string) $numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
             $stmt->execute();
 
-            $this->saveWalletEntry($userId, $numBers);
+            $this->saveWalletEntry($userId, (string) $numBers);
 
             $this->logger->info('Inserted into wallet successfully', [
                 'userId' => $userId,
@@ -872,17 +1011,13 @@ class WalletMapper
             return self::createSuccessResponse(21206);
         }
 
-        $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
-        $dailyToken = (float)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
+        $totalGems = isset($data[0]['overall_total']) ? (string) $data[0]['overall_total'] : '0';
+        $dailyToken = (string)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
         // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
-        /**
-         * Still We are facing with digital precision issues
-         * If we use till 9 Digit here, it coming right.
-         */
-        $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
+        $gemsintoken = TokenHelper::divRc($dailyToken, $totalGems);
 
-        $bestatigungInitial = TokenHelper::mulRc((float) $totalGems, (float) $gemsintoken);
+        $bestatigungInitial = TokenHelper::mulRc($totalGems, $gemsintoken);
 
         $args = [
             'winstatus' => [
@@ -897,17 +1032,18 @@ class WalletMapper
 
             if (!isset($args[$userId])) {
 
-                $totalTokenNumber = TokenHelper::mulRc((float) $row['total_numbers'], (float) $gemsintoken);
+                $total_numbers = (string) $row['total_numbers'];
+                $totalTokenNumber = TokenHelper::mulRc($total_numbers, $gemsintoken);
                 $args[$userId] = [
                     'userid' => $userId,
-                    'gems' => (float)$row['total_numbers'],
-                    'tokens' => $totalTokenNumber,
+                    'gems' => (float) $row['total_numbers'],
+                    'tokens' => (float) $totalTokenNumber,
                     'percentage' => (float)$row['percentage'],
                     'details' => []
                 ];
             }
 
-            $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
+            $rowgems2token = TokenHelper::mulRc((string) $row['gems'], (string) $gemsintoken);
 
             $args[$userId]['details'][] = [
                 'gemid' => (string)$row['gemid'],
@@ -1072,7 +1208,7 @@ class WalletMapper
         }
     }
 
-    public function updateUserLiquidity(string $userId, float $liquidity): bool
+    public function updateUserLiquidity(string $userId, string $liquidity): bool
     {
         try {
 
@@ -1091,7 +1227,7 @@ class WalletMapper
         }
     }
 
-    public function saveWalletEntry(string $userId, float $liquidity): float
+    public function saveWalletEntry(string $userId, string $liquidity, string $type = 'CREDIT'): string
     {
         \ignore_user_abort(true);
         $this->logger->debug('WalletMapper.saveWalletEntry started');
@@ -1104,7 +1240,7 @@ class WalletMapper
 
             if (!$row) {
                 // User does not exist, insert new wallet entry
-                $newLiquidity = abs($liquidity);
+                $newLiquidity = ($liquidity);
                 $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
 
                 $stmt = $this->db->prepare(
@@ -1118,9 +1254,20 @@ class WalletMapper
                 $stmt->execute();
             } else {
                 // User exists, safely calculate new liquidity
-                $currentBalance = (float)$row['liquidity'];
-                $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
-                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
+                $currentBalance = (string)$row['liquidity'];
+
+                if($liquidity < 0){
+                    $liquidity = (string) (abs((float)$liquidity));
+                    $type = 'DEBIT';
+                }
+
+                if($type === 'CREDIT'){
+                    $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
+                } else {
+                    $newLiquidity = TokenHelper::subRc($currentBalance, $liquidity);
+                }
+
+                $liquiditq = (float)$this->decimalToQ64_96((string)$newLiquidity);
 
                 $stmt = $this->db->prepare(
                     "UPDATE wallett
@@ -1266,12 +1413,12 @@ class WalletMapper
         ];
     }
 
-    private function decimalToQ64_96(float $value): string
+    private function decimalToQ64_96(string $value): string
     {
         $scaleFactor = \bcpow('2', '96');
 
         // Convert float to plain decimal string
-        $decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
+        $decimalString = \number_format((float) $value, 30, '.', ''); // 30 decimal places should be enough
 
         $scaledValue = \bcmul($decimalString, $scaleFactor, 0);
 
@@ -1290,5 +1437,63 @@ class WalletMapper
     private function addQ64_96(string $qValue1, string $qValue2): string
     {
         return \bcadd($qValue1, $qValue2);
+    }
+
+
+    /**
+     * To Defend against Atomicity issues in concurrent debit operations
+     * This function debits the user's wallet only if sufficient funds are available.
+     */
+    public function debitIfSufficient(string $userId, string $amount): ?string
+    {
+        $sql = "UPDATE wallett                                                                                                                                                                                                                                                             
+                SET liquidity = liquidity - :amt,                                                                                                                                                                                                                                                  
+                updatedat = now()                                                                                                                                                                                                                                                                  
+                WHERE userid = :uid AND liquidity >= :amt                                                                                                                                                                                                                                          
+                RETURNING liquidity";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $stmt->bindValue(':amt', $amount, PDO::PARAM_STR);
+        $stmt->execute();
+        $newBal = $stmt->fetchColumn();
+        if ($newBal === false) {
+            throw new \RuntimeException('Insufficient funds or user not found', 51301);
+        }
+        // Update liquidity using returned balance
+        $liquiditq = (float)$this->decimalToQ64_96((string)$newBal);
+
+        $q = $this->db->prepare("UPDATE wallett SET liquiditq = :liq_q96 WHERE userid = :uid");
+        $q->bindValue(':liq_q96', $liquiditq, PDO::PARAM_STR);
+        $q->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $q->execute();
+
+        return (string) $newBal;
+    }
+
+    /**
+     * Credits the user's wallet and updates with Atomicity in mind
+     */
+    public function credit(string $userId, string $amount): string
+    {
+        $sql = "UPDATE wallett                                                                                                                                                                                                                                                             
+                SET liquidity = liquidity + :amt,                                                                                                                                                                                                                                                  
+                updatedat = now()                                                                                                                                                                                                                                                                  
+                WHERE userid = :uid                                                                                                                                                                                                                                                                
+                RETURNING liquidity";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $stmt->bindValue(':amt', $amount, PDO::PARAM_STR);
+        $stmt->execute();
+        $newBal = $stmt->fetchColumn();
+
+        // Should not be false if userid exists; you may validate existence separately
+        $liquiditq = (float)$this->decimalToQ64_96((string)$newBal);
+
+        $q = $this->db->prepare("UPDATE wallett SET liquiditq = :liq_q96 WHERE userid = :uid");
+        $q->bindValue(':liq_q96', $liquiditq, PDO::PARAM_STR);
+        $q->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $q->execute();
+
+        return (string)$newBal;
     }
 }

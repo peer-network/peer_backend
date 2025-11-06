@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\App\Models\BtcSwapTransaction;
 use Fawaz\App\Models\Transaction;
+use Fawaz\App\Repositories\BtcSwapTransactionRepository;
 use Fawaz\App\Repositories\TransactionRepository;
 use PDO;
 use Fawaz\Services\LiquidityPool;
@@ -13,7 +15,13 @@ use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use RuntimeException;
 use Fawaz\App\Status;
+use Fawaz\App\User;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\BtcService;
+use Fawaz\Utils\TokenCalculations\SwapTokenHelper;
+use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\SwapToPoolTransferStrategy;
 
 class PeerTokenMapper
 {
@@ -22,17 +30,19 @@ class PeerTokenMapper
     private string $burnWallet;
     private string $peerWallet;
     private string $btcpool;
+    private string $senderId;
+    private string $inviterId;
 
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper, protected UserMapper $userMapper)
     {
     }
 
     /**
-     * Loads and validates the liquidity pool wallets.
+     * Loads and validates the liquidity pool and FEE's wallets.
      *
      * @throws \RuntimeException if accounts are missing or invalid
      */
-    private function initializeLiquidityPool(): void
+    public function initializeLiquidityPool(): void
     {
         $accounts = $this->pool->returnAccounts();
         if (($accounts['status'] ?? '') === 'error') {
@@ -50,7 +60,63 @@ class PeerTokenMapper
         $this->btcpool = $data['btcpool'];
     }
 
+
     /**
+     * Receipient should not be any of the fee wallets.
+     */
+    public function recipientShouldNotBeFeesAccount(string $recipientId): bool
+    {
+        $this->initializeLiquidityPool();
+
+        return $recipientId !== $this->poolWallet
+            && $recipientId !== $this->burnWallet
+            && $recipientId !== $this->peerWallet
+            && $recipientId !== $this->btcpool;
+    }
+
+    /**
+     * get LP account tokens amount.
+     * 
+     */
+    public function getLpToken(): string
+    {
+        $this->logger->debug("PeerTokenMapper.getLpToken started");
+
+        $query = "SELECT * from wallett WHERE userid = :userId";
+
+        $accounts = $this->pool->returnAccounts();
+        $liqpool = $accounts['response'] ?? null;
+        $this->poolWallet = $liqpool['pool'];
+
+        try {
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindValue(':userId', $this->poolWallet, \PDO::PARAM_STR);
+            $stmt->execute();
+            $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            return (string) $walletInfo['liquidity'];
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "PeerTokenMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error(
+                "PeerTokenMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage()
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        }
+    }
+
+    /*
      * Validate fees wallet UUID.
      *
      * @param $inputPassword string
@@ -58,7 +124,7 @@ class PeerTokenMapper
      *
      * @return bool value
      */
-    private function validateFeesWalletUUIDs(): bool
+    public function validateFeesWalletUUIDs(): bool
     {
         return self::isValidUUID($this->poolWallet)
             && self::isValidUUID($this->burnWallet)
@@ -67,326 +133,347 @@ class PeerTokenMapper
     }
 
     /**
-     * Make peer token transfer to recipient.
+     * 
+     */
+    public function setSenderId(string $senderId): void
+    {
+        $this->senderId = $senderId;
+    }
+
+    /**
+     * Includes fees while calculating required amount for transfer.
+     */
+    public function calculateRequiredAmount(string $numberOfTokens): string
+    {
+        [$peerFee, $poolFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
+
+        return TokenHelper::calculateTokenRequiredAmount($numberOfTokens, $peerFee, $poolFee, $burnFee, $inviteFee);
+    }
+
+    /**
+     * Each Fees Amount
+     */
+    private function getEachFeesAmount(): array
+    {
+        $fees = ConstantsConfig::tokenomics()['FEES'];
+        $peerFee = (string) $fees['PEER'];
+        $poolFee = (string) $fees['POOL'];
+        $burnFee = (string) $fees['BURN'];
+
+        // Check for Inviter Fee
+        $inviteFee = '0';
+        $inviterId = $this->userMapper->getInviterID($this->senderId);
+
+        if(!empty($inviterId) && self::isValidUUID($inviterId)){
+            $this->inviterId = $inviterId;
+            $inviteFee = (string) $fees['INVITATION'];
+        }
+        return [$peerFee, $poolFee, $burnFee, $inviteFee];
+    }
+
+    /**
+     * Each Fees Amount Calculation. 
+     */
+    public function calculateEachFeesAmount(string $numberOfTokens): array
+    {
+        [$peerFee, $poolFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
+
+        return [
+            TokenHelper::mulRc($numberOfTokens, $peerFee), // Peer Fee Amount
+            TokenHelper::mulRc($numberOfTokens, $poolFee), // Pool Fee Amount
+            TokenHelper::mulRc($numberOfTokens, $burnFee), // Burn Fee Amount
+            TokenHelper::mulRc($numberOfTokens, $inviteFee), // Invite Fee Amount
+        ];
+    }
+
+    /**
+     * Make PEER to PEER Token Transfer.
+     * 
+     * This function handles the transfer of tokens between users, applying necessary fees and ensuring all validations.
+     * It also stores the transaction details.
+     * Different fees are stored individually for transparency.
+     * 
+     * @param string $numberOfTokens Number of tokens to transfer to Receipient's wallet, Without any Fees.
      *
      */
-    public function transferToken(string $userId, array $args = []): ?array
+    public function transferToken(
+        string $senderId,
+        string $recipientId,
+        string $numberOfTokens,
+        ?string $message = null,
+        bool $isWithFees = true,
+        ?TransferStrategy $strategy = null
+    ): ?array
     {
         \ignore_user_abort(true);
 
-        $this->logger->debug('PeerTokenMapper.transferToken started');
-
-        $recipient = (string) $args['recipient'];
-
-        if ((string) $recipient === $userId) {
-            $this->logger->warning('Send and Receive Same Wallet Error.');
-            return self::respondWithError(31202);
-        }
-
-        if (!self::isValidUUID($recipient)) {
-            $this->logger->warning('Incorrect recipientid Exception.', [
-                'recipient' => $recipient,
-            ]);
-            return self::respondWithError(30201);
-        }
-
         $this->initializeLiquidityPool();
+        $strategy = $strategy ?? new DefaultTransferStrategy();
 
         if (!$this->validateFeesWalletUUIDs()) {
             return self::respondWithError(41222);
         }
 
-        try {
-            $sql = "SELECT uid FROM users WHERE uid = :uid AND status != :status";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':uid', $recipient);
-            $stmt->bindValue(':status', Status::DELETED);
-            $stmt->execute();
-            $row = $stmt->fetchColumn();
-        } catch (\Throwable $e) {
-            $this->logger->error('Database error while fetching recipient user', [
-                'error' => $e->getMessage(),
-                'recipient' => $recipient
-            ]);
-            return self::respondWithError(31007);
-        }
-        $inviterId = $this->getInviterID($userId);
-
-        // Lock both users' balances to prevent race conditions
-        if ($inviterId && !empty($inviterId)) {
-            $this->lockBalances([$inviterId, $userId, $recipient]);
-        }else{
-            $this->lockBalances([$userId, $recipient]);
-        }
-        $currentBalance = $this->getUserWalletBalance($userId);
-
-        if (empty($currentBalance)) {
-            $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(51301);
-        }
-
-        if ($this->poolWallet == $recipient || $this->burnWallet == $recipient || $this->peerWallet == $recipient || $this->btcpool == $recipient) {
-            $this->logger->warning('Unauthorized to send token');
-            return self::respondWithError(31203);
-        }
-
-        if (!isset($args['numberoftokens']) || !is_numeric($args['numberoftokens']) || (float) $args['numberoftokens'] != $args['numberoftokens']) {
-            return self::respondWithError(30264);
-        }
-
-        $numberoftokens = (float) $args['numberoftokens'];
-        if ($numberoftokens <= 0) {
-            $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
-                'numberoftokens' => $numberoftokens,
-                'Balance' => $currentBalance,
-            ]);
-            return self::respondWithError(30264);
-        }
-        $message = isset($args['message']) ? (string) $args['message'] : null;
-
-
-        if ($message !== null && strlen($message) > 200) {
-            $this->logger->warning('message length is too high');
-            return self::respondWithError(30210); // message length is too high.
-        }
-
-        if (empty($row)) {
-            $this->logger->warning('Unknown Id Exception.');
-            return self::respondWithError(31007);
-        }
-
-        if ((string)$row === $userId) {
-            $this->logger->warning('Send and Receive Same Wallet Error.');
-            return self::respondWithError(31202);
-        }
-
-        $fees = ConstantsConfig::tokenomics()['FEES'];
-        $actions = ConstantsConfig::wallet()['ACTIONS'];
-        $peerFee = (float) $fees['PEER'];
-        $poolFee = (float) $fees['POOL'];
-        $burnFee = (float) $fees['BURN'];
-        $inviteFee = (float)$fees['INVITATION'];
-        $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, $peerFee, $poolFee, $burnFee);
+        $this->senderId = $senderId;
+        $requiredAmount = $this->calculateRequiredAmount($numberOfTokens);
 
         try {
-            if ($inviterId && !empty($inviterId)) {
-                $inviterWin = TokenHelper::mulRc($numberoftokens, $inviteFee);
-
-                $requiredAmount = TokenHelper::calculateTokenRequiredAmount($numberoftokens, $peerFee, $poolFee, $burnFee, $inviteFee);
-
-                $this->logger->info('Invited By', [
-                    'invited' => $inviterId,
-                ]);
+            // Lock both users' balances to prevent race conditions
+            if (!empty($this->inviterId)) {
+                $this->lockBalances([$this->inviterId, $senderId, $recipientId]);
+            }else{
+                $this->lockBalances([$senderId, $recipientId]);
             }
-        } catch (\Throwable $e) {
-            $this->logger->error('Error while fetching inviter ID', [
-                'error' => $e->getMessage(),
-                'userId' => $userId
-            ]);
-            return self::respondWithError(31007);
-        }
-
-        if ($currentBalance < $requiredAmount) {
-            $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
-                'userId' => $userId,
-                'Balance' => $currentBalance,
-                'requiredAmount' => $requiredAmount,
-            ]);
-            return self::respondWithError(51301);
-        }
-
-        try {
-
-            $transUniqueId = self::generateUUID();
+            if($isWithFees){
+                // Fees Amount Calculation
+                [$peerFeeAmount, $poolFeeAmount, $burnFeeAmount, $inviteFeeAmount] = $this->calculateEachFeesAmount($numberOfTokens);
+            }
+            
+            $operationid = $strategy->getOperationId();
             $transRepo = new TransactionRepository($this->logger, $this->db);
-
-
+            
             // 1. SENDER: Debit From Account
             if ($requiredAmount) {
-                // Remove this records we don't need it anymore.
-                // $this->createAndSaveTransaction($transRepo, [
-                //     'operationid' => $transUniqueId,
-                //     'transactiontype' => 'transferDeductSenderToRecipient',
-                //     'senderid' => $userId,
-                //     'tokenamount' => -$requiredAmount,
-                //     'message' => $message
-                // ]);
-
-                $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => -abs($requiredAmount),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-
-                $this->walletMapper->insertWinToLog($userId, $args);
-                $this->walletMapper->insertWinToPool($userId, $args);
+                // To defend against atomoicity issues, we will debit first and then create transaction record. $this->walletMapper->saveWalletEntry($senderId, $requiredAmount, 'DEDUCT');
+                $this->walletMapper->debitIfSufficient($senderId, $requiredAmount);
 
             }
 
             // 2. RECIPIENT: Credit To Account
-            if ($numberoftokens) {
-                $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $transUniqueId,
-                    'transactiontype' => 'transferSenderToRecipient',
-                    'senderid' => $userId,
-                    'recipientid' => $recipient,
-                    'tokenamount' => $numberoftokens,
+            if ($numberOfTokens) {
+                $payload = [
+                    'operationid' => $operationid,
+                    'transactiontype' => $strategy->getRecipientTransactionType(),
+                    'senderid' => $senderId,
+                    'recipientid' => $recipientId,
+                    'tokenamount' => $numberOfTokens,
                     'message' => $message,
                     'transferaction' => 'CREDIT'
-                ]);
-
-                $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($numberoftokens),
-                    'whereby' => $actions['TRANSFER'],
                 ];
+                $transactionid = $strategy->getTransactionId();
+                if (!empty($transactionid)) {
+                    $payload['transactionid'] = $transactionid;
+                }
+                $this->createAndSaveTransaction($transRepo, $payload);
 
-                $this->walletMapper->insertWinToLog($recipient, $args);
-                $this->walletMapper->insertWinToPool($recipient, $args);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($recipientId, $numberOfTokens);
+                $this->walletMapper->credit($recipientId, $numberOfTokens);
             }
 
             // 3. INVITER: Fees To Inviter (if applicable)
-            if (!empty($inviterId) && $inviterWin) {
+            if (!empty($this->inviterId) && isset($inviteFeeAmount) && $inviteFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $transUniqueId,
-                    'transactiontype' => 'transferSenderToInviter',
-                    'senderid' => $userId,
-                    'recipientid' => $inviterId,
-                    'tokenamount' => $inviterWin,
+                    'operationid' => $operationid,
+                    'transactiontype' => $strategy->getInviterFeeTransactionType(),
+                    'senderid' => $senderId,
+                    'recipientid' => $this->inviterId,
+                    'tokenamount' => $inviteFeeAmount,
                     'transferaction' => 'INVITER_FEE'
                 ]);
-                $id = self::generateUUID();
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->inviterId, $inviteFeeAmount);
+                $this->walletMapper->credit($this->inviterId, $inviteFeeAmount);
 
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($inviterWin),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-
-                $this->walletMapper->insertWinToLog($inviterId, $args);
-                $this->walletMapper->insertWinToPool($inviterId, $args);
             }
 
             // 4. POOLWALLET: Fee To Pool Wallet
-            $feeAmount = TokenHelper::mulRc($numberoftokens, $poolFee);
-            if ($feeAmount) {
+            if (isset($poolFeeAmount) && $poolFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $transUniqueId,
-                    'transactiontype' => 'transferSenderToPoolWallet',
-                    'senderid' => $userId,
+                    'operationid' => $operationid,
+                    'transactiontype' => $strategy->getPoolFeeTransactionType(),
+                    'senderid' => $senderId,
                     'recipientid' => $this->poolWallet,
-                    'tokenamount' => $feeAmount,
+                    'tokenamount' => $poolFeeAmount,
                     'transferaction' => 'POOL_FEE'
                 ]);
-                $id = self::generateUUID();
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->poolWallet, $poolFeeAmount);
+                $this->walletMapper->credit($this->poolWallet, ($poolFeeAmount));
 
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($feeAmount),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-
-                $this->walletMapper->insertWinToLog($this->poolWallet, $args);
-                $this->walletMapper->insertWinToPool($this->poolWallet, $args);
             }
 
             // 5. PEERWALLET: Fee To Peer Wallet
-            $peerAmount = TokenHelper::mulRc($numberoftokens, $peerFee);
-            if ($peerAmount) {
+            if (isset($peerFeeAmount) && $peerFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $transUniqueId,
-                    'transactiontype' => 'transferSenderToPeerWallet',
-                    'senderid' => $userId,
+                    'operationid' => $operationid,
+                    'transactiontype' => $strategy->getPeerFeeTransactionType(),
+                    'senderid' => $senderId,
                     'recipientid' => $this->peerWallet,
-                    'tokenamount' => $peerAmount,
+                    'tokenamount' => $peerFeeAmount,
                     'transferaction' => 'PEER_FEE'
                 ]);
-                $id = self::generateUUID();
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->peerWallet, $peerFeeAmount);
+                $this->walletMapper->credit($this->peerWallet, $peerFeeAmount);
 
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($peerAmount),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-
-                $this->walletMapper->insertWinToLog($this->peerWallet, $args);
-                $this->walletMapper->insertWinToPool($this->peerWallet, $args);
             }
 
             // 6. BURNWALLET: Burn Tokens
-            $burnAmount = TokenHelper::mulRc($numberoftokens, $burnFee);
-            if ($burnAmount) {
+            if (isset($burnFeeAmount) && $burnFeeAmount > 0) {
                 $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $transUniqueId,
-                    'transactiontype' => 'transferSenderToBurnWallet',
-                    'senderid' => $userId,
+                    'operationid' => $operationid,
+                    'transactiontype' => $strategy->getBurnFeeTransactionType(),
+                    'senderid' => $senderId,
                     'recipientid' => $this->burnWallet,
-                    'tokenamount' => $burnAmount,
+                    'tokenamount' => $burnFeeAmount,
                     'transferaction' => 'BURN_FEE'
                 ]);
-                $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($burnAmount),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-                $this->walletMapper->insertWinToLog($this->burnWallet, $args);
-                $this->walletMapper->insertWinToPool($this->burnWallet, $args);
+                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->burnWallet, $burnFeeAmount);
+                $this->walletMapper->credit($this->burnWallet, $burnFeeAmount);
             }
 
-            $this->logger->info('Token transfer completed successfully');
+            $this->logger->debug('Token transfer completed successfully');
 
             return [
                 'status' => 'success',
                 'ResponseCode' => "11212",
-                'tokenSend' => $numberoftokens,
+                'tokenSend' => $numberOfTokens,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'createdat' => date('Y-m-d H:i:s.u')
             ];
         } catch (\Throwable $e) {
-            $this->logger->error('Error during token transfer', [
+            $this->logger->error('PeerTokenMapper.transferToken failed', [
                 'error' => $e->getMessage(),
-                'userId' => $userId,
-                'recipient' => $recipient,
-                'numberoftokens' => $numberoftokens
+                'senderId' => $senderId,
+                'recipientId' => $recipientId,
+                'numberOfTokens' => $numberOfTokens,
+                'trace' => $e->getTraceAsString(),
             ]);
             return self::respondWithError(40301);
         }
     }
 
-    private function getInviterID(string $userId): ?string
-    {
-        try {
-            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
-            $stmt = $this->db->prepare($query);
-            $stmt->execute(['userid' => $userId]);
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if (isset($result['invited']) && !empty($result['invited'])) {
-                return $result["invited"];
-            }
-            return null;
-        } catch (\Throwable $e) {
-            throw new RuntimeException($e->getMessage());
+    /**
+     * Admin Function Only
+     * Get Transactions of Cash-Out Requests (BTC SWAP).
+     * In this function we are fetching all the transactions where user has swapped their PEER tokens for BTC.
+     * 
+     * Admin will get all the transactions where transaction type is 'btcSwap'.
+     * They can see all the details of the transaction and can process the BTC payment manually.
+     * 
+     * @param $userId string
+     * @param $offset int
+     * @param $limit int
+     * 
+     */
+    public function getLiquidityPoolHistory(string $userId, int $offset, int $limit): ?array
+    {
+        $this->logger->debug('Fetching transaction history - PeerTokenMapper.getLiquidityPoolHistory', ['userId' => $userId]);
+
+        $query = "
+                    SELECT 
+                        *
+                    FROM transactions AS tt
+                    LEFT JOIN btc_swap_transactions AS bt ON tt.transactionid = bt.operationid
+                    WHERE 
+                        tt.transactiontype = :transactiontype
+                    ORDER BY tt.createdat DESC
+                    LIMIT :limit OFFSET :offset
+                ";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':transactiontype', "btcSwapToPool", \PDO::PARAM_STR);
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->execute();
+
+            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => '11213', // Liquidity Pool History retrived
+                'affectedRows' => $transactions
+            ];
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error while fetching transactions - PeerTokenMapper.getLiquidityPoolHistory", ['error' => $e->getMessage()]);
         }
+        return [
+            'status' => 'error',
+            'ResponseCode' => '41223', // Error while retriveing Liquidity Pool History
+            'affectedRows' => []
+        ];
     }
 
 
     /**
-     * get Liquidity in Q96.
+     * Admin Function Only
+     * Update BTC swap transaction status to PAID.
+     * 
+     * @param string $swapId
+     * @return array|null
+     */
+    public function updateSwapTranStatus(string $swapId): ?array
+    {
+        \ignore_user_abort(true);
+        $this->logger->debug('PeerTokenMapper.updateSwapTranStatus started', ['swapId' => $swapId]);
+
+        try {
+
+            // 1. Check if transaction exists and is PENDING
+            $query = "SELECT 1 FROM btc_swap_transactions WHERE swapid = :swapid AND status = :status";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':swapid', $swapId, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', 'PENDING', \PDO::PARAM_STR);
+            $stmt->execute();
+
+            if (!$stmt->fetchColumn()) {
+                $this->logger->warning('No matching PENDING transaction found for swapId.', ['swapId' => $swapId]);
+                return [
+                    'status' => 'error',
+                    'ResponseCode' => '41224', // No Transaction Found with Pending Status
+                ];
+            }
+
+            // 2. Update status to PAID
+            $updateQuery = "UPDATE btc_swap_transactions SET status = :status WHERE swapid = :swapid";
+            $updateStmt = $this->db->prepare($updateQuery);
+            $updateStmt->bindValue(':swapid', $swapId, \PDO::PARAM_STR);
+            $updateStmt->bindValue(':status', 'PAID', \PDO::PARAM_STR);
+            $updateStmt->execute();
+
+
+            $this->logger->debug('Transaction marked as PAID', ['swapId' => $swapId]);
+
+            $query = "SELECT BTC_T.swapid, TNX.transactionid, BTC_T.transactiontype, TNX.senderid, BTC_T.tokenamount, BTC_T.btcamount, BTC_T.status, BTC_T.message, BTC_T.createdat FROM btc_swap_transactions AS BTC_T LEFT JOIN transactions AS TNX ON TNX.transactionid = BTC_T.operationid WHERE BTC_T.swapid = :swapid";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':swapid', $swapId, \PDO::PARAM_STR);
+            $stmt->execute();
+            $swapTnx = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => '11214',
+                'affectedRows' => $swapTnx
+            ];
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "PeerTokenMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            return [
+                'status' => 'error',
+                'ResponseCode' => '40302',
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('PeerTokenMapper.updateSwapTranStatus failed', [
+                'error' => $e->getMessage(),
+                'swapId' => $swapId,
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'status' => 'error',
+                'ResponseCode' => '41225', // Failed to update transaction status
+            ];
+        }
+    }
+
+
+
+    /**
+     * Get User balance
      *
      * @param $userId string
      * @param $hashedPassword string
@@ -407,7 +494,7 @@ class PeerTokenMapper
             $stmt->execute();
             $balance = $stmt->fetchColumn();
 
-            $this->logger->info('Fetched wallet balance', ['balance' => $balance]);
+            $this->logger->debug('Fetched wallet balance', ['balance' => $balance]);
 
             return $balance;
         } catch (\PDOException $e) {
@@ -430,85 +517,69 @@ class PeerTokenMapper
      * get transcations history of current user.
      *
      */
-    // DONE
     public function getTransactions(string $userId, array $args): ?array
     {
-        $this->logger->debug("PeerTokenMapper.getTransactions started");
+        $this->logger->debug('PeerTokenMapper.getTransactions started');
 
-        // Define FILTER mappings.
-        $typeMap = [
-            'TRANSACTION' => ['transferSenderToRecipient', 'transferDeductSenderToRecipient'],
-            'AIRDROP' => ['airdrop'],
-            'MINT' => ['mint'],
-            'FEES' => ['transferSenderToBurnWallet', 'transferSenderToPeerWallet', 'transferSenderToPoolWallet', 'transferSenderToInviter']
+        // Resolve filters from simple enums to actual DB values                                                                                                                                                                                                                                                    
+        [$transactionTypes, $transferActions] = $this->resolveFilters($args);
+
+        // Base select with sender/recipient user details                                                                                                                                                                                                                                                           
+        $query =
+            "SELECT tt.*,
+                us.username AS sender_username, 
+                us.uid AS sender_userid, 
+                us.slug AS sender_slug,
+                us.status AS sender_status, 
+                us.img AS sender_img, 
+                us.biography AS sender_biography, 
+                us.updatedat AS sender_updatedat,
+                ur.username AS recipient_username, 
+                ur.uid AS recipient_userid, 
+                ur.slug AS recipient_slug,
+                ur.status AS recipient_status, 
+                ur.img AS recipient_img, 
+                ur.biography AS recipient_biography, 
+                ur.updatedat AS recipient_updatedat
+                FROM transactions tt
+                LEFT JOIN users AS us ON us.uid = tt.senderid
+                LEFT JOIN users AS ur ON ur.uid = tt.recipientid
+                WHERE (tt.senderid = :senderid OR tt.recipientid = :recipientid)";
+
+        $params = [
+            ':senderid' => $userId,
+            ':recipientid' => $userId,
         ];
 
-        // Define DIRECTION FILTER mappings.
-        $directionMap = [
-            'INCOME' => ['CREDIT'],
-            'DEDUCTION' => ['DEDUCT', 'BURN_FEE', 'POOL_FEE', 'PEER_FEE', 'INVITER_FEE']
-        ];
+        // Apply type and action filters                                                                                                                                                                                                                                                                            
+        $query .= $this->appendInFilter('tt.transactiontype', $transactionTypes, $params, 'type');
+        $query .= $this->appendInFilter('tt.transferaction', $transferActions, $params, 'action');
 
-        $transactionTypes = isset($args['type']) ? ($typeMap[$args['type']] ?? []) : [];
-        $transferActions = isset($args['direction']) ? ($directionMap[$args['direction']] ?? []) : [];
-
-        $query = "SELECT * FROM transactions WHERE (senderid = :senderid OR recipientid = :recipientid)";
-
-        $params = [':senderid' => $userId, ':recipientid' => $userId];
-
-        // Handle TRANSACTION TYPE filter.
-        if (!empty($transactionTypes)) {
-            $typePlaceholders = [];
-            foreach ($transactionTypes as $i => $type) {
-                $ph = ":type$i";
-                $typePlaceholders[] = $ph;
-                $params[$ph] = $type;
-            }
-            $query .= " AND transactiontype IN (" . implode(',', $typePlaceholders) . ")";
-        }
-
-        // Handle TRANSFER ACTION filter.
-        if (!empty($transferActions)) {
-            $actionPlaceholders = [];
-            foreach ($transferActions as $i => $action) {
-                $ph = ":action$i";
-                $actionPlaceholders[] = $ph;
-                $params[$ph] = $action;
-            }
-            $query .= " AND transferaction IN (" . implode(',', $actionPlaceholders) . ")";
-        }
-
-        // Handle DATE filters.(accepting only date, appending time internally)
-        if (isset($args['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['start_date'])) {
-            $query .= " AND createdat >= :start_date";
+        // Date filters (YYYY-MM-DD)                                                                                                                                                                                                                                                                                
+        if (!empty($args['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $args['start_date'])) {
+            $query .= ' AND tt.createdat >= :start_date';
             $params[':start_date'] = $args['start_date'] . ' 00:00:00';
         }
-
-        if (isset($args['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $args['end_date'])) {
-            $query .= " AND createdat <= :end_date";
+        if (!empty($args['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $args['end_date'])) {
+            $query .= ' AND tt.createdat <= :end_date';
             $params[':end_date'] = $args['end_date'] . ' 23:59:59';
         }
 
-        // Handle SORT safely.(accept ASCENDING or DESCENDING)
-        $sortDirection = 'DESC'; // default
-        if (isset($args['sort'])) {
-            $sortValue = strtoupper(trim($args['sort']));
-            if ($sortValue === 'OLDEST') {
-                $sortDirection = 'ASC';
-            } elseif ($sortValue === 'NEWEST') {
-                $sortDirection = 'DESC';
-            }
+        // Sort                                                                                                                                                                                                                                                                                                     
+        $sortDirection = 'DESC';
+        if (!empty($args['sort'])) {
+            $sortValue = strtoupper(trim((string) $args['sort']));
+            $sortDirection = $sortValue === 'OLDEST' ? 'ASC' : ($sortValue === 'NEWEST' ? 'DESC' : 'DESC');
         }
-        $query .= " ORDER BY createdat $sortDirection";
+        $query .= " ORDER BY tt.createdat $sortDirection";
 
-        // Handle PAGINATION.(limit and offset)
+        // Pagination                                                                                                                                                                                                                                                                                               
         if (isset($args['limit']) && is_numeric($args['limit'])) {
-            $query .= " LIMIT :limit";
+            $query .= ' LIMIT :limit';
             $params[':limit'] = (int) $args['limit'];
         }
-
         if (isset($args['offset']) && is_numeric($args['offset'])) {
-            $query .= " OFFSET :offset";
+            $query .= ' OFFSET :offset';
             $params[':offset'] = (int) $args['offset'];
         }
 
@@ -517,27 +588,521 @@ class PeerTokenMapper
             foreach ($params as $key => $val) {
                 $stmt->bindValue($key, $val, is_int($val) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
             }
-
             $stmt->execute();
-            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            $data = array_map(
-                fn ($trans) => (new Transaction($trans, [], false))->getArrayCopy(),
-                $transactions
-            );
+            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $data = array_map(fn($t) => $this->mapTransaction($t), $transactions);
 
             return [
                 'status' => 'success',
-                'ResponseCode' => "11215",
-                'affectedRows' => $data
+                'ResponseCode' => '11215',
+                'affectedRows' => $data,
             ];
         } catch (\Throwable $th) {
-            $this->logger->error("Database error while fetching transactions - PeerTokenMapper.getTransactions", [
-                'error' => $th->getMessage()
+            $this->logger->error('Database error while fetching transactions - PeerTokenMapper.getTransactions', [
+                'error' => $th->getMessage(),
             ]);
-            throw new \RuntimeException("Database error while fetching transactions: " . $th->getMessage());
+            throw new \RuntimeException('Database error while fetching transactions: ' . $th->getMessage());
         }
     }
+
+
+    /**
+     * Resolve filters for transaction queries.
+     */
+    private function resolveFilters(array $args): array
+    {
+        $typeMap = [
+            'TRANSACTION' => ['transferSenderToRecipient', 'transferDeductSenderToRecipient'],
+            'AIRDROP' => ['airdrop'],
+            'MINT' => ['mint'],
+            'FEES' => ['transferSenderToBurnWallet', 'transferSenderToPeerWallet', 'transferSenderToPoolWallet', 'transferSenderToInviter'],
+        ];
+        $directionMap = [
+            'INCOME' => ['CREDIT'],
+            'DEDUCTION' => ['DEDUCT', 'BURN_FEE', 'POOL_FEE', 'PEER_FEE', 'INVITER_FEE'],
+        ];
+
+        $transactionTypes = [];
+        if (!empty($args['type'])) {
+            $key = strtoupper((string) $args['type']);
+            $transactionTypes = $typeMap[$key] ?? [];
+        }
+
+        $transferActions = [];
+        if (!empty($args['direction'])) {
+            $key = strtoupper((string) $args['direction']);
+            $transferActions = $directionMap[$key] ?? [];
+        }
+
+        return [$transactionTypes, $transferActions];
+    }
+
+    /**
+     * Append an IN filter to the query if values are provided.
+     */
+    private function appendInFilter(string $column, array $values, array &$params, string $prefix): string
+    {
+        if (empty($values)) {
+            return '';
+        }
+        $phs = [];
+        foreach ($values as $i => $val) {
+            $ph = ":{$prefix}{$i}";
+            $phs[] = $ph;
+            $params[$ph] = $val;
+        }
+        return ' AND ' . $column . ' IN (' . implode(',', $phs) . ')';
+    }
+
+    /**
+     * Map transaction with sender and recipient details.
+     */
+    private function mapTransaction(array $trans): array
+    {
+        $items = (new Transaction($trans, [], false))->getArrayCopy();
+        $items['sender'] = (new User([
+            'username' => $trans['sender_username'] ?? null,
+            'uid' => $trans['sender_userid'] ?? null,
+            'slug' => $trans['sender_slug'] ?? null,
+            'status' => $trans['sender_status'] ?? null,
+            'img' => $trans['sender_img'] ?? null,
+            'biography' => $trans['sender_biography'] ?? null,
+            'updatedat' => $trans['sender_updatedat'] ?? null,
+        ], [], false))->getArrayCopy();
+
+        $items['recipient'] = (new User([
+            'username' => $trans['recipient_username'] ?? null,
+            'uid' => $trans['recipient_userid'] ?? null,
+            'slug' => $trans['recipient_slug'] ?? null,
+            'status' => $trans['recipient_status'] ?? null,
+            'img' => $trans['recipient_img'] ?? null,
+            'biography' => $trans['recipient_biography'] ?? null,
+            'updatedat' => $trans['recipient_updatedat'] ?? null,
+        ], [], false))->getArrayCopy();
+        
+        return $items;
+    }
+
+    /**
+     * Get token price.
+     * 
+     * @return array|null
+     */
+    public function getTokenPrice(): ?array
+    {
+        $this->logger->debug('PeerTokenMapper.getTokenPrice');
+
+        try {
+            $getLpToken = $this->getLpInfo();
+            $getLpTokenBtcLP = $this->getLpTokenBtcLP();
+
+            if (empty($getLpToken) || !isset($getLpToken['liquidity'])) {
+                throw new \RuntimeException("Invalid LP token data retrieved.");
+            }
+
+            // Ensure both values are strings
+            $liquidity = (string) $getLpToken['liquidity'];
+
+            if ($liquidity == 0) {
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => '11202', // Successfully retrieved Peer token price
+                    'currentTokenPrice' => 0,
+                    'updatedAt' => $getLpToken['updatedat'] ?? '',
+                ];
+            }
+
+            $tokenPrice = TokenHelper::calculatePeerTokenPriceValue($getLpTokenBtcLP, $liquidity);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => '11202', // Successfully retrieved Peer token price
+                'affectedRows' => [
+                    'currentTokenPrice' => $tokenPrice,
+                    'updatedAt' => $getLpToken['updatedat'] ?? '',
+                ],
+            ];
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error while fetching transactions - PeerTokenMapper.transactionsHistory", ['error' => $e->getMessage()]);
+            return [
+                'status' => 'error',
+                'ResponseCode' => '40302',
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                "PeerTokenMapper.getTokenPrice: Exception occurred while calculating token price",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            return [
+                'status' => 'error',
+                'ResponseCode' => '41203', // Failed to retrieve Peer token price
+            ];
+        }
+    }
+
+    /**
+     * Get Token Price Value.
+     */
+    public function getTokenPriceValue(): string
+    {
+        $this->logger->debug('PeerTokenMapper.getTokenPriceValue');
+
+        try {
+            $liqPool = $this->getLpInfo();
+            $btcPoolBTCAmount = $this->getLpTokenBtcLP();
+
+            if (empty($liqPool) || !isset($liqPool['liquidity'])) {
+                $this->logger->error("Invalid LP data retrieved");
+                throw new \RuntimeException("Invalid LP data retrieved.");
+            }
+
+            // Ensure both values are floats
+            $liqPoolTokenAmount = (string) $liqPool['liquidity'];
+
+            if ($liqPoolTokenAmount == 0 || $btcPoolBTCAmount == 0) {
+                $this->logger->error("liqudityPool or btcPool liquidity is 0");
+                return '0';
+            }
+
+            $tokenPrice = TokenHelper::calculatePeerTokenPriceValue($btcPoolBTCAmount, $liqPoolTokenAmount);
+
+            return (string) $tokenPrice;
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error while fetching transactions - PeerTokenMapper.transactionsHistory", ['error' => $e->getMessage()]);
+            return '0';
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                "PeerTokenMapper.getTokenPrice: Exception occurred while calculating token price",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            return '0';
+        }
+    }
+
+    /**
+     * Swap Peer Tokens for BTC.
+     * 
+     * This will counts applicable fees and ensure user has enough balance.
+     * With Peer Tokens, user will receive BTC in their provided BTC address.
+     * 
+     * Transactions are stored with all fee details for transparency.
+     * One more Transaction will be created in btc_swap_transactions table to track BTC swap requests to Admin.
+     * 
+     * After Admin marks the request as PAID, user will receive BTC in their provided BTC address.
+     * 
+     */
+    public function swapTokens(string $userId, string $btcAddress, string $numberoftokensToSwap, ?string $message = '', bool $isWithFees = true): ?array
+    {
+        \ignore_user_abort(true);
+
+        $this->initializeLiquidityPool();
+        
+        $recipient = (string) $this->poolWallet;
+        
+        [$peerFee, $poolFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
+
+        try {
+            // Calculate BTC amount upfront based on current LP state
+            $btcLpState =  $this->getLpTokenBtcLP();
+            $lpState = $this->getLpToken();
+            $btcAmountToUser = SwapTokenHelper::calculateBtc($btcLpState, $lpState, $numberoftokensToSwap, $poolFee);
+
+            // Perform token transfer to LP and fees via reusable method
+            $strategy = new SwapToPoolTransferStrategy();
+            $transactionId = $strategy->getTransactionId();
+            $transferRes = $this->transferToken(
+                $userId,
+                $recipient,
+                $numberoftokensToSwap,
+                $message,
+                $isWithFees,
+                $strategy
+            );
+
+            if (!is_array($transferRes) || ($transferRes['status'] ?? 'error') === 'error') {
+                return is_array($transferRes) ? $transferRes : self::respondWithError(40301);
+            }
+
+            // Link swap request to the transfer transaction
+            $transObj = [
+                'operationid' => $transactionId,
+                'transactiontype' => 'btcSwapToPool',
+                'userId' => $userId,
+                'btcAddress' => $btcAddress,
+                'tokenamount' => $numberoftokensToSwap,
+                'btcAmount' => $btcAmountToUser,
+                'message' => $message,
+                'transferaction' => 'CREDIT'
+            ];
+            $btcTransactions = new BtcSwapTransaction($transObj);
+            $btcTransRepo = new BtcSwapTransactionRepository($this->logger, $this->db);
+            $btcTransRepo->saveTransaction($btcTransactions);
+
+            // Debit BTC pool for the payable BTC
+            if ($btcAmountToUser) {
+                $this->walletMapper->debitIfSufficient($this->btcpool, $btcAmountToUser);
+            }
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => '11217',
+                'affectedRows' => [
+                    'tokenSend' => $numberoftokensToSwap,
+                    'tokensSubstractedFromWallet' => $transferRes['tokensSubstractedFromWallet'] ?? null,
+                    'expectedBtcReturn' => $btcAmountToUser
+                ],
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Error during token swap', [
+                'error' => $e->getMessage(),
+                'userId' => $userId,
+                'btcAddress' => $btcAddress,
+                'numberoftokens' => $numberoftokensToSwap
+            ]);
+            return self::respondWithError(40301);
+        }
+    }
+
+
+
+    /**
+     * get LP account info.
+     * 
+     */
+    public function getLpInfo()
+    {
+
+        $this->logger->debug("PeerTokenMapper.getLpToken started");
+
+        $query = "SELECT * from wallett WHERE userid = :userId";
+
+        $accounts = $this->pool->returnAccounts();
+        $liqpool = $accounts['response'] ?? null;
+        $this->poolWallet = $liqpool['pool'];
+
+        try {
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindValue(':userId', $this->poolWallet, \PDO::PARAM_STR);
+            $stmt->execute();
+            $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            return $walletInfo;
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "PeerTokenMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error(
+                "PeerTokenMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage()
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * get BTC LP.
+     * 
+     * @returns float BTC Liquidity in account
+     */
+    public function getLpTokenBtcLP(): string
+    {
+
+        $this->logger->debug("PeerTokenMapper.getLpToken started");
+
+        $query = "SELECT * from wallett WHERE userid = :userId";
+
+        $accounts = $this->pool->returnAccounts();
+
+        $liqpool = $accounts['response'] ?? null;
+        $this->btcpool = $liqpool['btcpool'];
+
+        try {
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindValue(':userId', $this->btcpool, \PDO::PARAM_STR);
+            $stmt->execute();
+            $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            $this->logger->debug("Fetched btcPool data");
+
+            if (!isset($walletInfo['liquidity']) || empty($walletInfo['liquidity'])) {
+                throw new \RuntimeException("Failed to get accounts: " . "btcPool liquidity amount is invalid");
+            }
+            $liquidity = $walletInfo['liquidity'];
+
+            return (string) $liquidity;
+        } catch (\PDOException $e) {
+            $this->logger->error(
+                "PeerTokenMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->logger->error(
+                "PeerTokenMapper.getLpToken: Exception occurred while getting loop accounts",
+                [
+                    'error' => $e->getMessage()
+                ]
+            );
+            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+        }
+    }
+
+
+    /**
+     * Admin Function Only
+     * 
+     * Add Liquidity to Pool with respect to Liquidity and BTC.
+     * 
+     * Admin should be careful while adding liquidity as it will impact token price.
+     * 
+     * Liquidity and BTC both should be added in the same proportion as they exist in the pool. 
+     * For example, 100000 PeerTokens and 1 BTC.
+     */
+    public function addLiquidity(string $userId, array $args): array
+    {
+        $this->logger->debug("PeerTokenMapper.addLiquidity (DB only) started");
+
+        try {
+            if (!isset($args['amountToken']) || !isset($args['amountBtc'])) {
+                return self::respondWithError(30101);
+            }
+
+            // Assume inputs are validated in service layer
+            $amountPeerToken = (string)$args['amountToken'];
+            $amountBtc = (string)$args['amountBtc'];
+
+            // Ensure wallets are loaded
+            $this->initializeLiquidityPool();
+
+            // Save PeerToken liquidity
+            $this->saveLiquidity(
+                $userId,
+                $this->poolWallet,
+                $amountPeerToken,
+                'addPeerTokenLiquidity',
+                'ADD_PEER_LIQUIDITY'
+            );
+
+            // Save BTC liquidity
+            $this->saveLiquidity(
+                $userId,
+                $this->btcpool,
+                $amountBtc,
+                'addBtcTokenLiquidity',
+                'ADD_BTC_LIQUIDITY'
+            );
+
+            // DB-only method now returns a minimal success
+            return [
+                'status' => 'success',
+                'ResponseCode' => '11218',
+                'affectedRows' => [],
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Liquidity error', ['exception' => $e]);
+            return self::respondWithError(40301);
+        }
+    }
+
+    /**
+     * DB-only method used by service to add liquidity records.
+     */
+    public function addLiquidityDb(string $userId, string $poolWallet, string $btcPool, string $amountPeerToken, string $amountBtc): void
+    {
+        // Save PeerToken liquidity
+        $this->saveLiquidity(
+            $userId,
+            $poolWallet,
+            $amountPeerToken,
+            'addPeerTokenLiquidity',
+            'ADD_PEER_LIQUIDITY'
+        );
+
+        // Save BTC liquidity
+        $this->saveLiquidity(
+            $userId,
+            $btcPool,
+            $amountBtc,
+            'addBtcTokenLiquidity',
+            'ADD_BTC_LIQUIDITY'
+        );
+    }
+
+    /**
+     * Expose pool wallet IDs (pool and btcpool) already loaded via initializeLiquidityPool().
+     */
+    public function getPoolWalletIds(): array
+    {
+        return [
+            'pool' => $this->poolWallet ?? null,
+            'btcpool' => $this->btcpool ?? null,
+        ];
+    }
+
+    /**
+     * Validate BTC address format (basic check).
+     * 
+     */
+    public function isValidBTCAddress($address)
+    {
+        // Legacy and P2SH addresses
+        if (preg_match('/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/', $address)) {
+            return true;
+        }
+
+        // Bech32 (SegWit) addresses
+        if (preg_match('/^(bc1|BC1)[0-9a-z]{25,39}$/', $address)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Save wallet entry and log transaction.
+     *
+     * @params int|string $userId
+     * @params string $recipientWallet
+     * @params float $amount
+     * @params string $transactiontype
+     * @params string $transferaction
+     */
+    private function saveLiquidity(string $userId, string $recipientWallet, string $amount, string $transactiontype, string $transferaction): void
+    {
+        $this->walletMapper->saveWalletEntry($recipientWallet, $amount);
+
+        $transaction = new Transaction([
+            'operationid' => self::generateUUID(),
+            'transactiontype' => $transactiontype,
+            'senderid' => $userId,
+            'recipientid' => $recipientWallet,
+            'tokenamount' => $amount,
+            'transferaction' => $transferaction,
+        ], ['operationid', 'senderid', 'tokenamount'], false);
+
+        $repo = new TransactionRepository($this->logger, $this->db);
+        $repo->saveTransaction($transaction);
+    }
+
     /**
      * Lock balances of both users to prevent race conditions
      * Also Includes Fees wallets
@@ -589,4 +1154,11 @@ class PeerTokenMapper
         $this->logger->debug('Wallet balance locked', ['walletId' => $walletId]);
     }
 
+     /**
+     * Returns the current BTC/EUR price, updating the DB if needed.
+     */
+    public function getOrUpdateBitcoinPrice(): string
+    {
+        return BtcService::getOrUpdateBitcoinPrice($this->logger, $this->db);
+    }
 }
