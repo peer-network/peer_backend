@@ -66,10 +66,10 @@ final class ProfileServiceImpl implements ProfileService
         );
 
         $specs = [
-            $deletedUserSpec,
+            $illegalContentSpec,
             $systemUserSpec,
-            $hiddenContentFilterSpec,
-            $illegalContentSpec
+            $deletedUserSpec,
+            $hiddenContentFilterSpec
         ];
 
         try {
@@ -208,10 +208,10 @@ final class ProfileServiceImpl implements ProfileService
             ContentType::user
         );
         $specs = [
-            $deletedUserSpec,
+            $illegalContentSpec,
             $systemUserSpec,
-            $hiddenContentFilterSpec,
-            $illegalContentSpec
+            $deletedUserSpec,
+            $hiddenContentFilterSpec
         ];
 
 

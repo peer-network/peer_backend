@@ -2662,9 +2662,9 @@ class GraphQLSchemaBuilder
             );
 
             $specs = [
-                $deletedUserSpec,
+                $illegalContentFilterSpec,
                 $systemUserSpec,
-                $illegalContentFilterSpec
+                $deletedUserSpec,
             ];
 
             
@@ -2832,9 +2832,9 @@ class GraphQLSchemaBuilder
             );
 
             $specs = [
-                $deletedUserSpec,
-                $systemUserSpec,
                 $illegalContentSpec,
+                $systemUserSpec,
+                $deletedUserSpec,
             ];
 
             if($this->interactionsPermissionsMapper->isInteractionAllowed(
@@ -3248,10 +3248,10 @@ class GraphQLSchemaBuilder
             ContentType::user
         );
         $specs = [
-            $deletedUserSpec,
+            $illegalContentFilterSpec,
             $systemUserSpec,
+            $deletedUserSpec,
             $hiddenContentFilterSpec,
-            $illegalContentFilterSpec
         ];
 
 

@@ -797,10 +797,10 @@ class UserService
         );
 
         $specs = [
-            $deletedUserSpec,
+            $illegalContentFilterSpec,
             $systemUserSpec,
+            $deletedUserSpec,
             $usersHiddenContentFilterSpec,
-            $illegalContentFilterSpec
         ];
 
         try {
@@ -892,10 +892,10 @@ class UserService
         );
 
         $specs = [
-            $deletedUserSpec,
+            $illegalContentSpec,
             $systemUserSpec,
+            $deletedUserSpec,
             $hiddenContentFilterSpec,
-            $illegalContentSpec
         ];
 
         $this->logger->info('Fetching friends list', ['currentUserId' => $this->currentUserId, 'offset' => $offset, 'limit' => $limit]);
@@ -1018,10 +1018,10 @@ class UserService
             ContentType::user
         );
         $specs = [
-            $deletedUserSpec,
+            $illegalContentFilterSpec,
             $systemUserSpec,
+            $deletedUserSpec,
             $hiddenContentFilterSpec,
-            $illegalContentFilterSpec
         ];
 
         try {

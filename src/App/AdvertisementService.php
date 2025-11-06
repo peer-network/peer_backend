@@ -107,8 +107,8 @@ class AdvertisementService
         );
 
         $specs = [
-            $systemUserSpec,
             $illegalContentSpec,
+            $systemUserSpec,
         ];
 
         if($this->interactionsPermissionsMapper->isInteractionAllowed(
@@ -716,10 +716,10 @@ class AdvertisementService
         );
 
         $specs = [
-            $deletedUserSpec,
+            $illegalContentSpec,
             $systemUserSpec,
-            $hiddenContentFilterSpec,
-            $illegalContentSpec
+            $deletedUserSpec,
+            $hiddenContentFilterSpec
         ];
 
         $results = $this->advertisementMapper->findAdvertiser($this->currentUserId, $specs, $args);
@@ -759,6 +759,33 @@ class AdvertisementService
                     }
                 }
             }
+
+             // Enrich Advertisements with user profiles
+            $adUserIds = [];
+            $adUserIds = [];
+            foreach ($results as $item) {
+                if (isset($item['advertisement']) && $item['advertisement'] instanceof Advertisements) {
+                    $uid = $item['advertisement']->getUserId();
+                    if (!empty($uid)) {
+                        $adUserIds[$uid] = $uid;
+                    }
+                }
+            }
+
+            if (!empty($adUserIds)) {
+                $adProfiles = $this->profileRepository->fetchByIds(array_values($adUserIds), $this->currentUserId, $specs);
+
+                foreach ($results as $key => $item) {
+                    if (isset($item['advertisement']) && $item['advertisement'] instanceof Advertisements) {
+                        $ad = $item['advertisement'];
+                        $adData = $ad->getArrayCopy();
+                        $profile = $adProfiles[$ad->getUserId()] ?? null;
+                        $adEnriched = $this->enrichAndPlaceholderWithProfile($adData, $profile, $specs);
+                        $results[$key]['advertisement'] = new Advertisements($adEnriched, [], false);
+                    }
+                }
+            }
+
         }
 
         return $results;
