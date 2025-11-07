@@ -915,7 +915,6 @@ class UserMapper
         array $specifications,
         int $offset = 0,
         int $limit = 10,
-        ?string $contentFilterBy = null
     ): array {
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
