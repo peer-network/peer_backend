@@ -1583,7 +1583,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"hi\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"hi\"\n        advertisePlan: PINNED\n        ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1647,7 +1647,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{uuid}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{uuid}}\"\n        advertisePlan: PINNED\n        ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1710,7 +1710,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd1}}\"\n        advertisePlan: PINED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd1}}\"\n        advertisePlan: PINED\n        ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -2795,7 +2795,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3342,7 +3342,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4574,7 +4574,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd1}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd1}}\"\n        advertisePlan: PINNED\n        ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5585,7 +5585,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{existing_postid}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{existing_postid}}\"\n        advertisePlan: PINNED\n        ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6028,7 +6028,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{existing_postid_2}}\"\n        advertisePlan: PINNED\n        forceUpdate: true\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{existing_postid_2}}\"\n        advertisePlan: PINNED\n        ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
