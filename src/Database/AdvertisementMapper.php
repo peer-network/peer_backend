@@ -840,10 +840,6 @@ class AdvertisementMapper
         $whereClauses[] = "p.feedid IS NULL";
         $params['currentUserId'] = $currentUserId;
 
-        // Show only Valid Content
-        $whereClauses[] = "p.status IN (:postNormalStatus, :postAdvertisementStatus)";
-        $params['postNormalStatus'] = ConstantsConfig::post()['STATUS']['PUBLISHED'];
-        $params['postAdvertisementStatus'] = ConstantsConfig::post()['STATUS']['ADVERTISED'];
 
 
         if ($postId !== null) {
@@ -887,8 +883,6 @@ class AdvertisementMapper
                 p.postid, p.userid, p.contenttype, p.title, p.media, p.cover, p.mediadescription, p.createdat, p.visibility_status,
                 a.advertisementid, a.userid AS tuserid, a.status AS ad_type,
                 a.timestart AS ad_order, a.timeend AS end_order, a.createdat AS tcreatedat,
-                ut.username AS tusername, ut.slug AS tslug, ut.img AS timg,
-                u.username, u.slug, u.img,
                 COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]'::json) AS tags,
                 (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) AS amountlikes,
                 (SELECT COUNT(*) FROM user_post_dislikes WHERE postid = p.postid) AS amountdislikes,
@@ -904,21 +898,16 @@ class AdvertisementMapper
                 EXISTS (SELECT 1 FROM follows WHERE followerid = a.userid AND followedid = :currentUserId) AS tisfollowing,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = p.userid AND followerid = :currentUserId) AS isfollowed,
                 EXISTS (SELECT 1 FROM follows WHERE followerid = p.userid AND followedid = :currentUserId) AS isfollowing,
-                MAX(ui.reports) AS user_reports,
                 MAX(pi.reports) AS post_reports
             FROM posts p
-            JOIN users u ON p.userid = u.uid
-            LEFT JOIN post_tags pt ON p.postid = pt.postid
-            LEFT JOIN tags t ON pt.tagid = t.tagid
-            LEFT JOIN advertisements a ON p.postid = a.postid
-            LEFT JOIN users ut ON a.userid = ut.uid
             LEFT JOIN post_info pi ON pi.postid = p.postid AND pi.userid = p.userid
-            LEFT JOIN users_info ui ON ui.userid = p.userid
+            LEFT JOIN post_tags pt ON p.postid = pt.postid
+            LEFT JOIN advertisements a ON p.postid = a.postid
+            LEFT JOIN tags t ON pt.tagid = t.tagid
             WHERE " . implode(" AND ", $whereClauses) . "
             GROUP BY p.postid, a.advertisementid,
                      tuserid, ad_type, ad_order, end_order,
-                     tcreatedat, tusername, tslug, timg,
-                     u.username, u.slug, u.img
+                     tcreatedat
         ";
 
         $params['limit'] = $limit;

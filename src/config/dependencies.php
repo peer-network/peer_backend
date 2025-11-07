@@ -11,7 +11,7 @@ use Fawaz\Services\JWTService;
 use Fawaz\Services\Mailer;
 use Fawaz\Services\LiquidityPool;
 use DI\ContainerBuilder;
-use Fawaz\App\Interfaces\ProfileServiceImpl;
+use Fawaz\App\ProfileServiceImpl;
 use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\Models\Core\Model;
 use Fawaz\Utils\PeerLogger;

@@ -7,16 +7,10 @@ namespace Fawaz\Database;
 use Fawaz\App\Profile;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use PDO;
 use Fawaz\App\Comment;
 use Fawaz\App\CommentAdvanced;
 use Fawaz\App\Commented;
-use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\config\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\User;
@@ -262,7 +256,6 @@ class CommentMapper
 
     private function fetchSubComments(string $parentId): array
     {
-        // $sql = "SELECT * FROM comments WHERE parentid = :parentid ORDER BY createdat ASC";
         $sql = "SELECT 
             c.*, 
             u.*

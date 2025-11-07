@@ -1,7 +1,8 @@
 <?php
 
-namespace Fawaz\App\Interfaces;
+namespace Fawaz\App;
 
+use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\Profile;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
