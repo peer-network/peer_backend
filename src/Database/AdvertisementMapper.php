@@ -10,9 +10,7 @@ use Fawaz\Utils\ContentFilterHelper;
 use PDO;
 use Fawaz\App\Advertisements;
 use Fawaz\App\PostAdvanced;
-use Fawaz\App\Role;
-use Fawaz\App\Status;
-use Fawaz\config\constants\ConstantsConfig;
+
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\PeerLoggerInterface;
 

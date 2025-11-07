@@ -7,19 +7,11 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\CommentInfo;
 use Fawaz\Utils\PeerLoggerInterface;
-use Fawaz\App\Status;
 
 class CommentInfoMapper
 {
-    public const STATUS_DELETED = 6;
-
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
-    }
-
-    public function isSameUser(string $userid, string $currentUserId): bool
-    {
-        return $userid === $currentUserId;
     }
 
     public function loadById(string $commentid): CommentInfo|false
@@ -36,19 +28,6 @@ class CommentInfoMapper
         }
 
         return false;
-    }
-
-    public function isUserExistById(string $id): bool
-    {
-        $this->logger->debug("CommentInfoMapper.isUserExistById started");
-
-        $status = Status::DELETED;
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE status != :status AND uid = :id");
-        $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':status', $status, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchColumn() > 0;
     }
 
     public function insert(CommentInfo $commentInfo): bool
