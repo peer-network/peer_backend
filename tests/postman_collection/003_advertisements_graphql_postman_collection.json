@@ -2741,152 +2741,6 @@
 			"response": []
 		},
 		{
-			"name": "Pin other's post",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"12001\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"let adId = response?.data?.advertisePostPinned?.affectedRows?.[0]?.id;",
-							"",
-							"if (adId) {",
-							"    pm.environment.set(\"advertisementId_3\", adId);",
-							"    console.log(\"Saved advertisementId:\", adId);",
-							"} else {",
-							"    console.warn(\"advertisementId not found in response.\");",
-							"}"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Check current liquidity",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11204\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"let newLiquidity = response.data.balance.currentliquidity;",
-							"let oldLiquidity = pm.environment.get(\"liquidity\");",
-							"",
-							"pm.test(\"Previous liquidity exists\", function () {",
-							"    pm.expect(oldLiquidity).to.not.be.undefined;",
-							"    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
-							"});",
-							"",
-							"let expectedDifference = 200;",
-							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
-							"",
-							"pm.test(\"Liquidity should decrease exactly by 200\", function () {",
-							"    pm.expect(actualDifference).to.equal(expectedDifference);",
-							"});",
-							"",
-							"pm.environment.set(\"liquidity\", newLiquidity);",
-							"",
-							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Advertisement history 5",
 			"event": [
 				{
@@ -2926,11 +2780,6 @@
 							"            postId: pm.environment.get(\"postidadd\"),",
 							"            type: \"BASIC\"",
 							"        },",
-							"        {",
-							"            adId: pm.environment.get(\"advertisementId_3\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        }",
 							"    ];",
 							"",
 							"    pm.expect(ads.length, \"Advertisements length mismatch\").to.eql(amountAds);",
@@ -2996,78 +2845,6 @@
 			"response": []
 		},
 		{
-			"name": "Check if post is boosted",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11501\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let res = pm.response.json();",
-							"let posts = res?.data?.listPosts?.affectedRows ?? [];",
-							"let expectedPostId = pm.environment.get(\"postidadd\");",
-							"",
-							"pm.test(\"Created post does not exist in listPosts\", function () {",
-							"    let exists = posts.some(p => p.id === expectedPostId);",
-							"    pm.expect(exists).to.be.false;",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "List boosted posts",
 			"event": [
 				{
@@ -3084,25 +2861,19 @@
 							"pm.test(\"Check advertisement posts order with pinned first\", function () {",
 							"    const rows = pm.response.json()?.data?.listAdvertisementPosts?.affectedRows || [];",
 							"",
-							"    pm.expect(rows.length).to.be.at.least(3);",
+							"    pm.expect(rows.length).to.be.at.least(2);",
 							"",
-							"    const postidadd = pm.environment.get(\"postidadd\");",
 							"    const existing_postid = pm.environment.get(\"existing_postid\");",
 							"    const existing_postid_2 = pm.environment.get(\"existing_postid_2\");",
 							"",
-							"    pm.expect(rows[0].post.id, \"First postid should be postidadd\")",
-							"        .to.eql(postidadd);",
-							"    pm.expect(rows[0].advertisement.advertisementtype, \"First post type should be PINNED\")",
-							"        .to.eql(\"PINNED\");",
-							"",
-							"    pm.expect(rows[1].post.id, \"Second postid should be existing_postid\")",
+							"    pm.expect(rows[0].post.id, \"Second postid should be existing_postid\")",
 							"        .to.eql(existing_postid);",
-							"    pm.expect(rows[1].advertisement.advertisementtype, \"Second post type should be BASIC\")",
+							"    pm.expect(rows[0].advertisement.advertisementtype, \"Second post type should be BASIC\")",
 							"        .to.eql(\"BASIC\");",
 							"",
-							"    pm.expect(rows[2].post.id, \"Third postid should be existing_postid_2\")",
+							"    pm.expect(rows[1].post.id, \"Third postid should be existing_postid_2\")",
 							"        .to.eql(existing_postid_2);",
-							"    pm.expect(rows[2].advertisement.advertisementtype, \"Third post type should be BASIC\")",
+							"    pm.expect(rows[1].advertisement.advertisementtype, \"Third post type should be BASIC\")",
 							"        .to.eql(\"BASIC\");",
 							"});"
 						],
@@ -3138,284 +2909,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Pin twice not forcing (fail)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"32018\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
-							"});",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        forceUpdate: false\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Check current liquidity",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11204\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"let newLiquidity = response.data.balance.currentliquidity;",
-							"let oldLiquidity = Number(pm.environment.get(\"liquidity\"));",
-							"",
-							"pm.test(\"Previous liquidity exists\", function () {",
-							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
-							"});",
-							"",
-							"pm.test(\"Liquidity should remain the same\", function () {",
-							"    pm.expect(newLiquidity).to.eql(oldLiquidity);",
-							"});",
-							"",
-							"pm.environment.set(\"liquidity\", newLiquidity);",
-							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Pin twice forcing",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"12005\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"let adId = response?.data?.advertisePostPinned?.affectedRows?.[0]?.id;",
-							"",
-							"if (adId) {",
-							"    pm.environment.set(\"advertisementId_4\", adId);",
-							"    console.log(\"Saved advertisementId:\", adId);",
-							"} else {",
-							"    console.warn(\"advertisementId not found in response.\");",
-							"}"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n        ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Check current liquidity",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11204\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"let newLiquidity = response.data.balance.currentliquidity;",
-							"let oldLiquidity = pm.environment.get(\"liquidity\");",
-							"",
-							"pm.test(\"Previous liquidity exists\", function () {",
-							"    pm.expect(oldLiquidity).to.not.be.undefined;",
-							"    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
-							"});",
-							"",
-							"let expectedDifference = 200;",
-							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
-							"",
-							"pm.test(\"Liquidity should decrease exactly by 200\", function () {",
-							"    pm.expect(actualDifference).to.equal(expectedDifference);",
-							"});",
-							"",
-							"pm.environment.set(\"liquidity\", newLiquidity);",
-							"",
-							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3473,16 +2966,6 @@
 							"            postId: pm.environment.get(\"postidadd\"),",
 							"            type: \"BASIC\"",
 							"        },",
-							"        {",
-							"            adId: pm.environment.get(\"advertisementId_3\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        },",
-							"        {",
-							"            adId: pm.environment.get(\"advertisementId_4\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        }",
 							"    ];",
 							"",
 							"    pm.expect(ads.length, \"Advertisements length mismatch\").to.eql(amountAds);",
@@ -3548,78 +3031,6 @@
 			"response": []
 		},
 		{
-			"name": "Check if post is boosted",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11501\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let res = pm.response.json();",
-							"let posts = res?.data?.listPosts?.affectedRows ?? [];",
-							"let expectedPostId = pm.environment.get(\"postidadd\");",
-							"",
-							"pm.test(\"Created post does not exist in listPosts\", function () {",
-							"    let exists = posts.some(p => p.id === expectedPostId);",
-							"    pm.expect(exists).to.be.false;",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "List boosted posts",
 			"event": [
 				{
@@ -3636,20 +3047,16 @@
 							"pm.test(\"Check advertisement posts order with pinned first\", function () {",
 							"    const rows = pm.response.json()?.data?.listAdvertisementPosts?.affectedRows || [];",
 							"",
-							"    pm.expect(rows.length).to.be.at.least(3);",
+							"    pm.expect(rows.length).to.be.at.least(2);",
 							"",
-							"    const postidadd = pm.environment.get(\"postidadd\");",
 							"    const existing_postid = pm.environment.get(\"existing_postid\");",
 							"    const existing_postid_2 = pm.environment.get(\"existing_postid_2\");",
 							"",
-							"    pm.expect(rows[0].post.id).to.eql(postidadd);",
-							"    pm.expect(rows[0].advertisement.advertisementtype).to.eql(\"PINNED\");",
+							"    pm.expect(rows[0].post.id).to.eql(existing_postid);",
+							"    pm.expect(rows[0].advertisement.advertisementtype).to.eql(\"BASIC\");",
 							"",
-							"    pm.expect(rows[1].post.id).to.eql(existing_postid);",
+							"    pm.expect(rows[1].post.id).to.eql(existing_postid_2);",
 							"    pm.expect(rows[1].advertisement.advertisementtype).to.eql(\"BASIC\");",
-							"",
-							"    pm.expect(rows[2].post.id).to.eql(existing_postid_2);",
-							"    pm.expect(rows[2].advertisement.advertisementtype).to.eql(\"BASIC\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -3886,16 +3293,6 @@
 							"            adId: pm.environment.get(\"advertisementId_2\"),",
 							"            postId: pm.environment.get(\"postidadd\"),",
 							"            type: \"BASIC\"",
-							"        },",
-							"        {",
-							"            adId: pm.environment.get(\"advertisementId_3\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        },",
-							"        {",
-							"            adId: pm.environment.get(\"advertisementId_4\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
 							"        },",
 							"        {",
 							"            adId: pm.environment.get(\"advertisementId_5\"),",
@@ -4230,16 +3627,6 @@
 							"            adId: pm.environment.get(\"advertisementId_2\"),",
 							"            postId: pm.environment.get(\"postidadd\"),",
 							"            type: \"BASIC\"",
-							"        },",
-							"        {",
-							"            adId: pm.environment.get(\"advertisementId_3\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        },",
-							"        {",
-							"            adId: pm.environment.get(\"advertisementId_4\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
 							"        },",
 							"        {",
 							"            adId: pm.environment.get(\"advertisementId_5\"),",
@@ -4706,16 +4093,6 @@
 							"            type: \"BASIC\"",
 							"        },",
 							"        {",
-							"            adId: pm.environment.get(\"advertisementId_3\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        },",
-							"        {",
-							"            adId: pm.environment.get(\"advertisementId_4\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        },",
-							"        {",
 							"            adId: pm.environment.get(\"advertisementId_5\"),",
 							"            postId: pm.environment.get(\"postidadd1\"),",
 							"            type: \"BASIC\"",
@@ -4883,24 +4260,20 @@
 							"pm.test(\"Check advertisement posts order with two pinned first\", function () {",
 							"    const rows = pm.response.json()?.data?.listAdvertisementPosts?.affectedRows || [];",
 							"",
-							"    pm.expect(rows.length).to.be.at.least(4);",
+							"    pm.expect(rows.length).to.be.at.least(3);",
 							"",
 							"    const postidadd1 = pm.environment.get(\"postidadd1\");",
-							"    const postidadd = pm.environment.get(\"postidadd\");",
 							"    const existing_postid = pm.environment.get(\"existing_postid\");",
 							"    const existing_postid_2 = pm.environment.get(\"existing_postid_2\");",
 							"",
 							"    pm.expect(rows[0].post.id).to.eql(postidadd1);",
 							"    pm.expect(rows[0].advertisement.advertisementtype).to.eql(\"PINNED\");",
 							"",
-							"    pm.expect(rows[1].post.id).to.eql(postidadd);",
-							"    pm.expect(rows[1].advertisement.advertisementtype).to.eql(\"PINNED\");",
+							"    pm.expect(rows[1].post.id).to.eql(existing_postid);",
+							"    pm.expect(rows[1].advertisement.advertisementtype).to.eql(\"BASIC\");",
 							"",
-							"    pm.expect(rows[2].post.id).to.eql(existing_postid);",
+							"    pm.expect(rows[2].post.id).to.eql(existing_postid_2);",
 							"    pm.expect(rows[2].advertisement.advertisementtype).to.eql(\"BASIC\");",
-							"",
-							"    pm.expect(rows[3].post.id).to.eql(existing_postid_2);",
-							"    pm.expect(rows[3].advertisement.advertisementtype).to.eql(\"BASIC\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -5146,16 +4519,6 @@
 							"            type: \"BASIC\"",
 							"        },",
 							"        {",
-							"            adId: pm.environment.get(\"advertisementId_3\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        },",
-							"        {",
-							"            adId: pm.environment.get(\"advertisementId_4\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        },",
-							"        {",
 							"            adId: pm.environment.get(\"advertisementId_5\"),",
 							"            postId: pm.environment.get(\"postidadd1\"),",
 							"            type: \"BASIC\"",
@@ -5328,24 +4691,20 @@
 							"pm.test(\"Check advertisement posts order with two pinned first\", function () {",
 							"    const rows = pm.response.json()?.data?.listAdvertisementPosts?.affectedRows || [];",
 							"",
-							"    pm.expect(rows.length).to.be.at.least(4);",
+							"    pm.expect(rows.length).to.be.at.least(3);",
 							"",
 							"    const postidadd1 = pm.environment.get(\"postidadd1\");",
-							"    const postidadd = pm.environment.get(\"postidadd\");",
 							"    const existing_postid = pm.environment.get(\"existing_postid\");",
 							"    const existing_postid_2 = pm.environment.get(\"existing_postid_2\");",
 							"",
 							"    pm.expect(rows[0].post.id).to.eql(postidadd1);",
 							"    pm.expect(rows[0].advertisement.advertisementtype).to.eql(\"PINNED\");",
 							"",
-							"    pm.expect(rows[1].post.id).to.eql(postidadd);",
-							"    pm.expect(rows[1].advertisement.advertisementtype).to.eql(\"PINNED\");",
+							"    pm.expect(rows[1].post.id).to.eql(existing_postid);",
+							"    pm.expect(rows[1].advertisement.advertisementtype).to.eql(\"BASIC\");",
 							"",
-							"    pm.expect(rows[2].post.id).to.eql(existing_postid);",
+							"    pm.expect(rows[2].post.id).to.eql(existing_postid_2);",
 							"    pm.expect(rows[2].advertisement.advertisementtype).to.eql(\"BASIC\");",
-							"",
-							"    pm.expect(rows[3].post.id).to.eql(existing_postid_2);",
-							"    pm.expect(rows[3].advertisement.advertisementtype).to.eql(\"BASIC\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -5398,140 +4757,7 @@
 			"response": []
 		},
 		{
-			"name": "Pin advertised post not forcing (fail)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"32018\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
-							"});",
-							"",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{existing_postid}}\"\n        advertisePlan: PINNED\n        forceUpdate: false\n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Check current liquidity",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11204\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = pm.response.json();",
-							"let newLiquidity = response.data.balance.currentliquidity;",
-							"let oldLiquidity = Number(pm.environment.get(\"liquidity\"));",
-							"",
-							"pm.test(\"Previous liquidity exists\", function () {",
-							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
-							"});",
-							"",
-							"pm.test(\"Liquidity should remain the same\", function () {",
-							"    pm.expect(newLiquidity).to.eql(oldLiquidity);",
-							"});",
-							"",
-							"pm.environment.set(\"liquidity\", newLiquidity);",
-							"console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Pin advertised post forcing",
+			"name": "Pin advertised post",
 			"event": [
 				{
 					"listen": "test",
@@ -5717,16 +4943,6 @@
 							"            type: \"BASIC\"",
 							"        },",
 							"        {",
-							"            adId: pm.environment.get(\"advertisementId_3\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        },",
-							"        {",
-							"            adId: pm.environment.get(\"advertisementId_4\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        },",
-							"        {",
 							"            adId: pm.environment.get(\"advertisementId_5\"),",
 							"            postId: pm.environment.get(\"postidadd1\"),",
 							"            type: \"BASIC\"",
@@ -5904,11 +5120,10 @@
 							"pm.test(\"Check advertisement posts order with existing_postid pinned first\", function () {",
 							"    const rows = pm.response.json()?.data?.listAdvertisementPosts?.affectedRows || [];",
 							"",
-							"    pm.expect(rows.length).to.be.at.least(4);",
+							"    pm.expect(rows.length).to.be.at.least(3);",
 							"",
 							"    const existing_postid = pm.environment.get(\"existing_postid\");",
 							"    const postidadd1 = pm.environment.get(\"postidadd1\");",
-							"    const postidadd = pm.environment.get(\"postidadd\");",
 							"    const existing_postid_2 = pm.environment.get(\"existing_postid_2\");",
 							"",
 							"    pm.expect(rows[0].post.id).to.eql(existing_postid);",
@@ -5917,11 +5132,8 @@
 							"    pm.expect(rows[1].post.id).to.eql(postidadd1);",
 							"    pm.expect(rows[1].advertisement.advertisementtype).to.eql(\"PINNED\");",
 							"",
-							"    pm.expect(rows[2].post.id).to.eql(postidadd);",
-							"    pm.expect(rows[2].advertisement.advertisementtype).to.eql(\"PINNED\");",
-							"",
-							"    pm.expect(rows[3].post.id).to.eql(existing_postid_2);",
-							"    pm.expect(rows[3].advertisement.advertisementtype).to.eql(\"BASIC\");",
+							"    pm.expect(rows[2].post.id).to.eql(existing_postid_2);",
+							"    pm.expect(rows[2].advertisement.advertisementtype).to.eql(\"BASIC\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -6160,16 +5372,6 @@
 							"            type: \"BASIC\"",
 							"        },",
 							"        {",
-							"            adId: pm.environment.get(\"advertisementId_3\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        },",
-							"        {",
-							"            adId: pm.environment.get(\"advertisementId_4\"),",
-							"            postId: pm.environment.get(\"postidadd\"),",
-							"            type: \"PINNED\"",
-							"        },",
-							"        {",
 							"            adId: pm.environment.get(\"advertisementId_5\"),",
 							"            postId: pm.environment.get(\"postidadd1\"),",
 							"            type: \"BASIC\"",
@@ -6352,12 +5554,11 @@
 							"pm.test(\"Check advertisement posts order with existing_postid_2 pinned first\", function () {",
 							"    const rows = pm.response.json()?.data?.listAdvertisementPosts?.affectedRows || [];",
 							"",
-							"    pm.expect(rows.length).to.be.at.least(5);",
+							"    pm.expect(rows.length).to.be.at.least(4);",
 							"",
 							"    const existing_postid = pm.environment.get(\"existing_postid\");",
 							"    const existing_postid_2 = pm.environment.get(\"existing_postid_2\");",
 							"    const postidadd1 = pm.environment.get(\"postidadd1\");",
-							"    const postidadd = pm.environment.get(\"postidadd\");",
 							"",
 							"    pm.expect(rows[0].post.id).to.eql(existing_postid_2);",
 							"    pm.expect(rows[0].advertisement.advertisementtype).to.eql(\"PINNED\");",
@@ -6368,11 +5569,8 @@
 							"    pm.expect(rows[2].post.id).to.eql(postidadd1);",
 							"    pm.expect(rows[2].advertisement.advertisementtype).to.eql(\"PINNED\");",
 							"",
-							"    pm.expect(rows[3].post.id).to.eql(postidadd);",
-							"    pm.expect(rows[3].advertisement.advertisementtype).to.eql(\"PINNED\");",
-							"",
-							"    pm.expect(rows[4].post.id).to.eql(existing_postid_2);",
-							"    pm.expect(rows[4].advertisement.advertisementtype).to.eql(\"BASIC\");",
+							"    pm.expect(rows[3].post.id).to.eql(existing_postid_2);",
+							"    pm.expect(rows[3].advertisement.advertisementtype).to.eql(\"BASIC\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -6513,8 +5711,6 @@
 							"        { adId: pm.environment.get(\"existing_advertisementId_2\"), postId: pm.environment.get(\"existing_postid_2\"), type: \"BASIC\" },",
 							"        { adId: pm.environment.get(\"advertisementId\"),            postId: pm.environment.get(\"postidadd\"),         type: \"BASIC\" },",
 							"        { adId: pm.environment.get(\"advertisementId_2\"),          postId: pm.environment.get(\"postidadd\"),         type: \"BASIC\" },",
-							"        { adId: pm.environment.get(\"advertisementId_3\"),          postId: pm.environment.get(\"postidadd\"),         type: \"PINNED\" },",
-							"        { adId: pm.environment.get(\"advertisementId_4\"),          postId: pm.environment.get(\"postidadd\"),         type: \"PINNED\" },",
 							"        { adId: pm.environment.get(\"advertisementId_5\"),          postId: pm.environment.get(\"postidadd1\"),        type: \"BASIC\" },",
 							"        { adId: pm.environment.get(\"advertisementId_6\"),          postId: pm.environment.get(\"postidadd1\"),        type: \"BASIC\" },",
 							"        { adId: pm.environment.get(\"advertisementId_7\"),          postId: pm.environment.get(\"postidadd1\"),        type: \"PINNED\" },",
@@ -6933,8 +6129,6 @@
 							"        { adId: pm.environment.get(\"existing_advertisementId_2\"), postId: pm.environment.get(\"existing_postid_2\"), type: \"BASIC\" },",
 							"        { adId: pm.environment.get(\"advertisementId\"),            postId: pm.environment.get(\"postidadd\"),         type: \"BASIC\" },",
 							"        { adId: pm.environment.get(\"advertisementId_2\"),          postId: pm.environment.get(\"postidadd\"),         type: \"BASIC\" },",
-							"        { adId: pm.environment.get(\"advertisementId_3\"),          postId: pm.environment.get(\"postidadd\"),         type: \"PINNED\" },",
-							"        { adId: pm.environment.get(\"advertisementId_4\"),          postId: pm.environment.get(\"postidadd\"),         type: \"PINNED\" },",
 							"        { adId: pm.environment.get(\"advertisementId_5\"),          postId: pm.environment.get(\"postidadd1\"),        type: \"BASIC\" },",
 							"        { adId: pm.environment.get(\"advertisementId_6\"),          postId: pm.environment.get(\"postidadd1\"),        type: \"BASIC\" },",
 							"        { adId: pm.environment.get(\"advertisementId_7\"),          postId: pm.environment.get(\"postidadd1\"),        type: \"PINNED\" },",
