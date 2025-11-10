@@ -2133,4 +2133,26 @@ class UserMapper
 
         return $result ?: null;
     }
+
+     /**
+     * Get Inviter ID of a user.
+     * This method retrieves the inviter ID for a given user ID from the users_info table. 
+     *
+     */
+    public function getInviterID(string $userId): ?string
+    {
+        try {
+            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['userid' => $userId]);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (isset($result['invited']) && !empty($result['invited'])) {
+                return $result["invited"];
+            }
+            return null;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException($e->getMessage());
+        }
+    }
 }

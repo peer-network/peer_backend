@@ -9,6 +9,8 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\AdvertisementMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Services\TokenTransfer\Strategies\AdsTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 use Fawaz\Utils\ContentFilterHelper;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -199,12 +201,15 @@ class AdvertisementService
             }
 
             // Werbeanzeige erstellen
+            $transferStrategy = new AdsTransferStrategy();
+            $args['operationid'] = $transferStrategy->getOperationId();
+            
             $response = $this->createAdvertisement($args);
             if (isset($response['status']) && $response['status'] === 'success') {
                 $args['art'] = ($advertisePlan === $this::PLAN_BASIC) ? 6 : (($advertisePlan === $this::PLAN_PINNED) ? 7 : null);
                 $args['price'] = $CostPlan;
 
-                $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
+                $deducted = $this->walletService->payForAdvertisement($this->currentUserId, $transferStrategy, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
                     return $deducted;
                 }
@@ -347,10 +352,11 @@ class AdvertisementService
         $advertisementId = self::generateUUID();
 
         $postId = $args['postid'] ?? null;
+        $operationId = $args['operationid'] ?? '';
         $date = $args['durationInDays'] ?? null;
         $startday = $args['startday'] ?? null;
         $CostPlan = $args['advertisePlan'] ?? null;
-        $forcing = $args['forceUpdate'] ?? false;
+        // $forcing = $args['forceUpdate'] ?? false;
         $eurocost = $args['eurocost'] ?? 0.0;
         $tokencost = $args['tokencost'] ?? 0.0;
 
@@ -386,7 +392,7 @@ class AdvertisementService
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
             } elseif ($CostPlan !== null && $CostPlan === self::PLAN_PINNED) {
-                if ($this->advertisementMapper->hasActiveAdvertisement($postId, \strtolower($CostPlan)) === true && empty($forcing)) {
+                if ($this->advertisementMapper->hasActiveAdvertisement($postId, \strtolower($CostPlan)) === true ) {
                     $this->logger->warning('Pinned Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).
                 }
@@ -394,7 +400,7 @@ class AdvertisementService
                 $timestart = (new \DateTime())->format('Y-m-d H:i:s.u'); // Setze timestart
                 $timeend = (new \DateTime('+1 days'))->format('Y-m-d H:i:s.u'); // Setze Timeend
 
-                if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower('BASIC'), $timestart, $timeend, $this->currentUserId) === true && empty($forcing)) {
+                if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend, $this->currentUserId) === true ) {
                     $this->logger->warning('Pinned.Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
@@ -407,6 +413,7 @@ class AdvertisementService
 
             $advertisementData = [
                 'advertisementid' => $advertisementId,
+                'operationid' => $operationId,
                 'postid' => $postId,
                 'userid' => $this->currentUserId,
                 'status' => \strtolower($CostPlan),
@@ -430,23 +437,30 @@ class AdvertisementService
                 $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                 $rescode = 12001; // Advertisement post erfolgreich erstellt.
             } elseif ($CostPlan === self::PLAN_PINNED) {
-                if ($this->advertisementMapper->isAdvertisementIdExist($postId, \strtolower($CostPlan)) === true) {
-                    $advertData = $this->advertisementMapper->fetchByAdvID($postId, \strtolower($CostPlan));
-                    $data = $advertData[0];
-                    $data->setUserId($this->currentUserId);
-                    $data->setTimestart($timestart);
-                    $data->setTimeend($timeend);
-                    $data->setTokencost($tokencost);
-                    $data->setEurocost($eurocost);
-                    $this->logger->info('Befor Update Get Advertisement Data', ['data' => $data->getArrayCopy()]);
-                    $resp = $this->advertisementMapper->update($data);
-                    $this->logger->info('Update Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
-                    $rescode = 12005; // Advertisement post erfolgreich aktualisiert.
-                } else {
-                    $resp = $this->advertisementMapper->insert($advertisement);
-                    $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
-                    $rescode = 12001; // Advertisement post erfolgreich erstellt.
-                }
+                // NOTE: Repinning functionality commented out (not in current feature scope)
+                // if ($this->advertisementMapper->isAdvertisementIdExist($postId, \strtolower($CostPlan)) === true) {
+                //     $advertData = $this->advertisementMapper->fetchByAdvID($postId, \strtolower($CostPlan));
+                //     $data = $advertData[0];
+                //     $data->setUserId($this->currentUserId);
+                //     $data->setTimestart($timestart);
+                //     $data->setTimeend($timeend);
+                //     $data->setTokencost($tokencost);
+                //     $data->setEurocost($eurocost);
+                //     $this->logger->info('Befor Update Get Advertisement Data', ['data' => $data->getArrayCopy()]);
+                //     $resp = $this->advertisementMapper->update($data);
+                //     $this->logger->info('Update Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
+                //     $rescode = 12005; // Advertisement post erfolgreich aktualisiert.
+                // } else {
+                //     $resp = $this->advertisementMapper->insert($advertisement);
+                //     $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
+                //     $rescode = 12001; // Advertisement post erfolgreich erstellt.
+                // }
+                
+                
+                // Always create new advertisement with unique ID and current timestamp
+                $resp = $this->advertisementMapper->insert($advertisement);
+                $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
+                $rescode = 12001; // Advertisement post erfolgreich erstellt.
             } else {
                 $this->logger->warning('Fehler, Falsche CostPlan angegeben.');
                 return self::respondWithError(32005); // Fehler, Falsche CostPlan angegeben.
@@ -516,15 +530,22 @@ class AdvertisementService
             return $this->respondWithError(31007);
         }
 
-        $sortBy = $args['sort'] ?? [];
-        if (!empty($sortBy) && is_array($sortBy)) {
-            $allowedTypes = ['NEWEST', 'OLDEST', 'BIGGEST_COST', 'SMALLEST_COST'];
-
-            $invalidTypes = array_diff(array_map('strtoupper', $sortBy), $allowedTypes);
-
-            if (!empty($invalidTypes)) {
+        // Normalize sort to a single uppercase string for mapper
+        $allowedSortTypes = ['NEWEST', 'OLDEST', 'BIGGEST_COST', 'SMALLEST_COST'];
+        if (array_key_exists('sort', $args)) {
+            $sortByInput = $args['sort'];
+            if (is_array($sortByInput)) {
+                $sortKey = strtoupper((string)($sortByInput[0] ?? 'NEWEST'));
+            } elseif (is_string($sortByInput)) {
+                $sortKey = strtoupper($sortByInput);
+            } else {
                 return $this->respondWithError(30103);
             }
+
+            if (!in_array($sortKey, $allowedSortTypes, true)) {
+                return $this->respondWithError(30103);
+            }
+            $args['sort'] = $sortKey;
         }
 
         try {
