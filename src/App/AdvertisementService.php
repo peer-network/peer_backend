@@ -514,8 +514,10 @@ class AdvertisementService
         $to = $filter['to'] ?? null;
         $advertisementtype = $filter['type'] ?? null;
         $advertisementId = $filter['advertisementId'] ?? null;
+        $contentFilterBy = $filter['contentFilterBy'] ?? null;
         $postId = $filter['postId'] ?? null;
         $userId = $filter['userId'] ?? null;
+        $sortBy = $args['sort'] ?? [];
 
 
         if ($from !== null && !self::validateDate($from)) {
@@ -554,7 +556,36 @@ class AdvertisementService
             return $this->respondWithError(31007);
         }
 
-        $sortBy = $args['sort'] ?? [];
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::post,
+            $this->currentUserId,
+        );
+        
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+
+        $specs = [
+            $illegalContentSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
+            $hiddenContentFilterSpec
+        ];
+
         if (!empty($sortBy) && is_array($sortBy)) {
             $allowedTypes = ['NEWEST', 'OLDEST', 'BIGGEST_COST', 'SMALLEST_COST'];
 
@@ -566,7 +597,7 @@ class AdvertisementService
         }
 
         try {
-            $result = $this->advertisementMapper->fetchAllWithStats($args);
+            $result = $this->advertisementMapper->fetchAllWithStats($specs,$args);
 
             return self::createSuccessResponse(12002, $result['affectedRows'], false);
         } catch (\Throwable $e) {
@@ -577,7 +608,6 @@ class AdvertisementService
 
     public function isAdvertisementDurationValid(string $postId): bool
     {
-
         $this->logger->debug('AdvertisementService.isAdvertisementDurationValid started');
 
         try {
