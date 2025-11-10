@@ -1,7 +1,8 @@
 <?php
 
-namespace Fawaz\App\Interfaces;
+namespace Fawaz\App;
 
+use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\Profile;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
@@ -66,10 +67,10 @@ final class ProfileServiceImpl implements ProfileService
         );
 
         $specs = [
-            $deletedUserSpec,
+            $illegalContentSpec,
             $systemUserSpec,
-            $hiddenContentFilterSpec,
-            $illegalContentSpec
+            $deletedUserSpec,
+            $hiddenContentFilterSpec
         ];
 
         try {
@@ -208,10 +209,10 @@ final class ProfileServiceImpl implements ProfileService
             ContentType::user
         );
         $specs = [
-            $deletedUserSpec,
+            $illegalContentSpec,
             $systemUserSpec,
-            $hiddenContentFilterSpec,
-            $illegalContentSpec
+            $deletedUserSpec,
+            $hiddenContentFilterSpec
         ];
 
 

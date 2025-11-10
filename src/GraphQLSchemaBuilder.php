@@ -402,6 +402,13 @@ class GraphQLSchemaBuilder
                     $this->logger->debug('Query.User Resolvers');
                     return $root['uid'] ?? '';
                 },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
+                },
                 'situation' => function (array $root): string {
                     $status = $root['status'] ?? 0;
                     return $this->getStatusNameByID($status) ?? '';
@@ -493,6 +500,13 @@ class GraphQLSchemaBuilder
                 'id' => function (array $root): string {
                     $this->logger->debug('Query.User Resolvers');
                     return $root['uid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'situation' => function (array $root): string {
                     $status = $root['status'] ?? 0;
@@ -596,6 +610,13 @@ class GraphQLSchemaBuilder
                     $this->logger->debug('Query.ProfileUser Resolvers');
                     return $root['uid'] ?? '';
                 },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
+                },
                 'username' => function (array $root): string {
                     return $root['username'] ?? '';
                 },
@@ -619,6 +640,13 @@ class GraphQLSchemaBuilder
                 'userid' => function (array $root): string {
                     $this->logger->debug('Query.BasicUserInfo Resolvers');
                     return $root['uid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'img' => function (array $root): string {
                     return $root['img'] ?? '';
@@ -782,6 +810,13 @@ class GraphQLSchemaBuilder
                 'id' => function (array $root): string {
                     $this->logger->debug('Query.Post Resolvers');
                     return $root['postid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'contenttype' => function (array $root): string {
                     return $root['contenttype'] ?? '';
@@ -961,6 +996,13 @@ class GraphQLSchemaBuilder
                 'commentid' => function (array $root): string {
                     $this->logger->debug('Query.Comment Resolvers');
                     return $root['commentid'] ?? '';
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? '');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
                 'userid' => function (array $root): string {
                     return $root['userid'] ?? '';
@@ -2623,9 +2665,9 @@ class GraphQLSchemaBuilder
             );
 
             $specs = [
-                $deletedUserSpec,
+                $illegalContentFilterSpec,
                 $systemUserSpec,
-                $illegalContentFilterSpec
+                $deletedUserSpec,
             ];
 
             
@@ -2793,9 +2835,9 @@ class GraphQLSchemaBuilder
             );
 
             $specs = [
-                $deletedUserSpec,
-                $systemUserSpec,
                 $illegalContentSpec,
+                $systemUserSpec,
+                $deletedUserSpec,
             ];
 
             if($this->interactionsPermissionsMapper->isInteractionAllowed(
@@ -3209,10 +3251,10 @@ class GraphQLSchemaBuilder
             ContentType::user
         );
         $specs = [
-            $deletedUserSpec,
+            $illegalContentFilterSpec,
             $systemUserSpec,
+            $deletedUserSpec,
             $hiddenContentFilterSpec,
-            $illegalContentFilterSpec
         ];
 
 
@@ -3468,11 +3510,6 @@ class GraphQLSchemaBuilder
             return $posts;
         }
 
-        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
-        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
-
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-
         $data = array_map(
             fn (PostAdvanced $post) => $post->getArrayCopy(),
             $posts
@@ -3498,35 +3535,23 @@ class GraphQLSchemaBuilder
 
         $this->logger->debug('Query.resolveAdvertisementsPosts started');
 
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-
         $posts = $this->advertisementService->findAdvertiser($args);
         if (isset($posts['status']) && $posts['status'] === 'error') {
             return $posts;
         }
 
-        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
-        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
-
         $data = array_map(
-            function (array $row) use ($commentOffset, $commentLimit, $contentFilterBy) {
-                $postWithComments = $this->mapPostWithComments(
-                    $row['post'],
-                    $commentOffset,
-                    $commentLimit,
-                    $contentFilterBy
-                );
-
-                return [
+            function (array $row)  {
+                $elem = [
                     // PostAdvanced Objekt
-                    'post' => $postWithComments,
+                    'post' => $row['post']->getArrayCopy(),
                     // Advertisements Objekt
-                    'advertisement' => $this->mapPostWithAdvertisement($row['advertisement']),
+                    'advertisement' => $row['advertisement']->getArrayCopy()
                 ];
+                return $elem;
             },
             $posts
         );
-
         $this->logger->info('findAdvertiser', ['data' => $data]);
 
         return self::createSuccessResponse(

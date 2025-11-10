@@ -19,7 +19,7 @@ class UserInfo extends Model
     protected int $amountfriends;
     protected int $amountblocked;
     protected int $isprivate;
-    protected int $reports;
+    protected int $activeReports;
     protected int $totalreports;
     protected ?string $invited;
     protected ?string $phone;
@@ -41,7 +41,7 @@ class UserInfo extends Model
         $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->isprivate = $data['isprivate'] ?? 0;
-        $this->reports = $data['reports'] ?? 0;
+        $this->activeReports= $data['reports'] ?? 0;
         $this->totalreports = $data['totalreports'] ?? 0;
         $this->invited = $data['invited'] ?? null;
         $this->phone = $data['phone'] ?? null;
@@ -61,7 +61,7 @@ class UserInfo extends Model
             'amountfriends' => $this->amountfriends,
             'amountblocked' => $this->amountblocked,
             'isprivate' => $this->isprivate,
-            'reports' => $this->reports,
+            'reports' => $this->activeReports,
             'totalreports' => $this->totalreports,
             'invited' => $this->invited,
             'phone' => $this->phone,
@@ -186,14 +186,14 @@ class UserInfo extends Model
         $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
-    public function getReports(): int
+    public function getActiveReports(): int
     {
-        return $this->reports;
+        return $this->activeReports;
     }
 
     public function setReports(int $reports): void
     {
-        $this->reports = $reports;
+        $this->activeReports= $reports;
     }
 
     public function getTotalReports(): int

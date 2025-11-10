@@ -2,11 +2,8 @@
 
 namespace Fawaz\Services\ContentFiltering\Specs;
 
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-use function PHPUnit\Framework\returnArgument;
 
 
 /**

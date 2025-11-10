@@ -27,7 +27,7 @@ class Profile implements ProfileReplaceable
     protected ?int $amountblocked;
     protected ?int $amountreports;
     protected ?int $rolesmask;
-    protected ?int $reports;
+    protected ?int $activeReports;
     protected ?string $visibilityStatus;
 
 
@@ -55,7 +55,7 @@ class Profile implements ProfileReplaceable
         $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->amountreports = $data['amountreports'] ?? 0;
-        $this->reports = $data['user_reports'] ?? 0;
+        $this->activeReports= $data['user_reports'] ?? 0;
         $this->visibilityStatus = $data['visibility_status'] ?? '';
     }
 
@@ -79,7 +79,7 @@ class Profile implements ProfileReplaceable
             'amountfriends' => $this->amountfriends,
             'amountblocked' => $this->amountblocked,
             'amountreports' => $this->amountreports,
-            'user_reports' => $this->reports,
+            'reports' => $this->activeReports,
             'visibility_status' => $this->visibilityStatus,
             'roles_mask' => $this->rolesmask
         ];
@@ -119,6 +119,11 @@ class Profile implements ProfileReplaceable
     public function visibilityStatus(): string
     {
         return $this->visibilityStatus;
+    }
+
+    public function setVisibilityStatus(?string $status): void
+    {
+        $this->visibilityStatus = $status;
     }
 
     public function isVerified(): int
@@ -266,14 +271,14 @@ class Profile implements ProfileReplaceable
         $this->amountreports = $amountreports;
     }
 
-    public function getReports(): int
+    public function getActiveReports(): int
     {
-        return $this->reports;
+        return $this->activeReports;
     }
 
     public function setReports(?int $reports): void
     {
-        $this->reports = $reports;
+        $this->activeReports= $reports;
     }
 
     // Validation and Array Filtering methods

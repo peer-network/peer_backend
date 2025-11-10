@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use PDO;
-use Fawaz\App\User;
 use Fawaz\App\Profile;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
-use Fawaz\App\UserAdvanced;
 use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Utils\PeerLoggerInterface;
-use Fawaz\App\Status;
+
 
 class ProfileRepositoryImpl implements ProfileRepository
 {

@@ -88,6 +88,8 @@ type Post {
   cover: String!
   mediadescription: String!
   createdat: Date!
+  visibilityStatus: ContentVisibilityStatus
+  hasActiveReports: Boolean!
   amountreports: Int!
   amountlikes: Int!
   amountviews: Int!
@@ -112,6 +114,8 @@ type Comment {
   parentid: ID
   content: String!
   createdat: Date!
+  visibilityStatus: ContentVisibilityStatus
+  hasActiveReports: Boolean!
   amountlikes: Int!
   amountreplies: Int!
   amountreports: Int!
@@ -124,6 +128,8 @@ type ProfileUser {
   username: String
   slug: Int
   img: String
+  visibilityStatus: ContentVisibilityStatus
+  hasActiveReports: Boolean!
   isfollowed: Boolean
   isfollowing: Boolean
   isfriend: Boolean
@@ -221,6 +227,8 @@ type Profile {
   slug: Int
   img: String
   biography: String
+  visibilityStatus: ContentVisibilityStatus
+  hasActiveReports: Boolean!
   isfollowed: Boolean
   isfollowing: Boolean
   amountposts: Int
@@ -252,6 +260,7 @@ type BlockedUser {
   img: String
   username: String
   slug: Int
+  visibilityStatus: ContentVisibilityStatus
 }
 
 type BlockedUsers {
@@ -367,6 +376,7 @@ type ProfilePostMedia {
   contenttype: String!
   media: String!
   createdat: String
+  visibilityStatus: ContentVisibilityStatus
 }
 
 type PostCommentsData {
@@ -380,6 +390,7 @@ type PostCommentsData {
   isliked: Boolean
   user: BasicUserInfo
   subcomments: [PostSubCommentsData]
+  visibilityStatus: ContentVisibilityStatus
 }
 
 type PostSubCommentsData {
@@ -393,6 +404,7 @@ type PostSubCommentsData {
   amountreplies: Decimal,
   isliked: Boolean
   user: BasicUserInfo
+  visibilityStatus: ContentVisibilityStatus
 }
 
 type BasicUserInfo {
@@ -401,6 +413,8 @@ type BasicUserInfo {
   username: String
   slug: Int
   biography: String
+  visibilityStatus: ContentVisibilityStatus
+  hasActiveReports: Boolean!
   updatedat: Date!
 }
 
@@ -411,6 +425,8 @@ type User {
   slug: Int
   img: String
   biography: String
+  visibilityStatus: ContentVisibilityStatus
+  hasActiveReports: Boolean!
   createdat: Date
   updatedat: Date
 }

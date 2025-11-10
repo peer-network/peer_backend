@@ -205,7 +205,7 @@ class PostInfoService
             $postInfo = $this->postInfoMapper->loadById($postId);
             if ($postInfo === null) {
                 $this->logger->warning('PostInfoService: reportPost: Error while fetching comment data from db');
-                return $this->respondWithError(31602);
+                return $this->respondWithError(responseCode: 31602);
             }
         } catch (\Exception $e) {
             $this->logger->error('PostInfoService: reportPost: Error while fetching data for report generation ', ['exception' => $e]);
@@ -251,7 +251,7 @@ class PostInfoService
                 return $this::respondWithError(31503);
             }
 
-            $postInfo->setReports($postInfo->getReports() + 1);
+            $postInfo->setReports($postInfo->getActiveReports() + 1);
             $postInfo->setTotalReports($postInfo->getTotalReports() + 1);
             $this->postInfoMapper->update($postInfo);
 

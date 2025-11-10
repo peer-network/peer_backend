@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Specs\ContentFilteringSpecsFactory;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\PlaceholderIllegalContentFilterSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
@@ -18,12 +16,9 @@ use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Mail\UserWelcomeMail;
 use Fawaz\Services\Base64FileHandler;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringStrategies;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ErrorResponse;
@@ -797,10 +792,10 @@ class UserService
         );
 
         $specs = [
-            $deletedUserSpec,
+            $illegalContentFilterSpec,
             $systemUserSpec,
+            $deletedUserSpec,
             $usersHiddenContentFilterSpec,
-            $illegalContentFilterSpec
         ];
 
         try {
@@ -892,10 +887,10 @@ class UserService
         );
 
         $specs = [
-            $deletedUserSpec,
+            $illegalContentSpec,
             $systemUserSpec,
+            $deletedUserSpec,
             $hiddenContentFilterSpec,
-            $illegalContentSpec
         ];
 
         $this->logger->info('Fetching friends list', ['currentUserId' => $this->currentUserId, 'offset' => $offset, 'limit' => $limit]);
@@ -1018,10 +1013,10 @@ class UserService
             ContentType::user
         );
         $specs = [
-            $deletedUserSpec,
+            $illegalContentFilterSpec,
             $systemUserSpec,
+            $deletedUserSpec,
             $hiddenContentFilterSpec,
-            $illegalContentFilterSpec
         ];
 
         try {

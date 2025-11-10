@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\Utils\ContentFilterHelper;
 use PDO;
 use Fawaz\App\Advertisements;
 use Fawaz\App\PostAdvanced;
-use Fawaz\App\Role;
-use Fawaz\App\Status;
-use Fawaz\config\constants\ConstantsConfig;
+
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\PeerLoggerInterface;
 
@@ -21,7 +20,7 @@ class AdvertisementMapper
     {
     }
 
-    public function fetchAllWithStats(?array $args = []): array
+    public function fetchAllWithStats(array $specifications,?array $args = []): array
     {
         $this->logger->debug("AdvertisementMapper.fetchAllWithStats started");
 
@@ -35,39 +34,44 @@ class AdvertisementMapper
             ->modify("-{$trendDays} days")
             ->format('Y-m-d H:i:s');
 
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $conditions = $allSpecs->whereClauses;
+        $paramsCommon = $allSpecs->paramsToPrepare;
+
         // ---- Filterbedingungen + gemeinsame Parameter
         $conditions   = [];
-        $paramsCommon = [];
+        // $paramsCommon = [];
 
         if (!empty($filterBy['from'])) {
             $conditions[] = "al.createdat >= :from";
-            $paramsCommon[':from'] = $filterBy['from'];
+            $paramsCommon['from'] = $filterBy['from'];
         }
         if (!empty($filterBy['to'])) {
             $conditions[] = "al.createdat <= :to";
-            $paramsCommon[':to'] = $filterBy['to'];
+            $paramsCommon['to'] = $filterBy['to'];
         }
         if (!empty($filterBy['type'])) {
             $typeMap = ['PINNED' => 'pinned', 'BASIC' => 'basic'];
             if (isset($typeMap[$filterBy['type']])) {
                 $conditions[] = "al.status = :type";
-                $paramsCommon[':type'] = $typeMap[$filterBy['type']];
+                $paramsCommon['type'] = $typeMap[$filterBy['type']];
             }
         }
         if (!empty($filterBy['advertisementId'])) {
             $conditions[] = "al.advertisementid = :advertisementId";
-            $paramsCommon[':advertisementId'] = $filterBy['advertisementId'];
+            $paramsCommon['advertisementId'] = $filterBy['advertisementId'];
         }
         if (!empty($filterBy['postId'])) {
             $conditions[] = "al.postid = :postId";
-            $paramsCommon[':postId'] = $filterBy['postId'];
+            $paramsCommon['postId'] = $filterBy['postId'];
         }
         if (!empty($filterBy['userId'])) {
             $conditions[] = "al.userid = :userId";
-            $paramsCommon[':userId'] = $filterBy['userId'];
+            $paramsCommon['userId'] = $filterBy['userId'];
         }
-
-        $whereClause = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+        $conditionsString = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+        // $whereClause = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
 
         // ---- Sortierung
         $orderByMap = [
@@ -81,9 +85,10 @@ class AdvertisementMapper
         // ---- STATS: distinct Ads + Gems pro Ad-Zeitfenster
         $sSql = "
             WITH al_filtered AS (
-                SELECT *
+                SELECT al.*
                 FROM advertisements_log al
-                $whereClause
+                LEFT JOIN posts p ON p.postid = al.postid
+                $conditionsString
             ),
             ad_gems AS (
                 SELECT
@@ -98,7 +103,7 @@ class AdvertisementMapper
             ),
             -- für Post-weite Summen (Likes/Views/...)
             post_set AS (
-                SELECT DISTINCT postid FROM al_filtered
+                SELECT DISTINCT al.postid AS postid FROM al_filtered al
             ),
             likes_by_post AS (
                 SELECT postid, SUM(likes) AS cnt
@@ -141,10 +146,10 @@ class AdvertisementMapper
         // ---- DATA: 1 Row je Anzeige (neueste Log-Zeile), gemsearned pro Anzeige-Zeitfenster
         $dSql = "
 			WITH al_filtered AS (
-			  SELECT *
+			  SELECT al.*
 			  FROM advertisements_log al
-			  $whereClause
-			),
+			  $conditionsString
+    			),
 			-- HIER der einzige Change: latest_al ist jetzt einfach al_filtered (keine ROW_NUMBER/DISTINCT mehr)
 			latest_al AS (
 			  SELECT * FROM al_filtered
@@ -190,6 +195,7 @@ class AdvertisementMapper
 			  p.media                          AS media,
 			  p.cover                          AS cover,
 			  p.mediadescription               AS mediadescription,
+              p.visibility_status              AS post_visibility_status,
 
 			  m.amountlikes                    AS amountlikes,
 			  m.amountviews                    AS amountviews,
@@ -209,10 +215,12 @@ class AdvertisementMapper
 			  u.username                       AS creator_username,
 			  u.slug                           AS creator_slug,
 			  u.img                            AS creator_img,
+              u.visibility_status              AS creator_visibility_status,
 
 			  pu.username                      AS post_username,
 			  pu.slug                          AS post_slug,
 			  pu.img                           AS post_userimg,
+              pu.visibility_status             AS post_user_visibility_status,
 
 			  (m.isfollowed   )::int           AS isfollowed,
 			  (m.isfollowing  )::int           AS isfollowing,
@@ -292,6 +300,7 @@ class AdvertisementMapper
 							  'username',  cu.username,
 							  'slug',      cu.slug,
 							  'img',       cu.img,
+                              'user_visibility_status',       cu.visibility_status,
 							  'isfollowed',  EXISTS (SELECT 1 FROM follows f WHERE f.followedid = cu.uid AND f.followerid = al.userid),
 							  'isfollowing', EXISTS (SELECT 1 FROM follows f WHERE f.followerid = cu.uid AND f.followedid = al.userid),
 							  'isfriend',    EXISTS (
@@ -315,35 +324,37 @@ class AdvertisementMapper
 			  LEFT JOIN comment_info ci ON ci.commentid = c.commentid
 			  WHERE c.postid = p.postid
 			) cm ON TRUE
-
+            $conditionsString
 			ORDER BY $orderByClause, al.id DESC
 			LIMIT :limit OFFSET :offset";
 
         $paramsStats = $paramsCommon;
-        $paramsData  = $paramsCommon + [':trend_since' => $trendSince];
+        $paramsData  = $paramsCommon + ['trend_since' => $trendSince];
 
         try {
             // Stats
             $statsStmt = $this->db->prepare($sSql);
-            foreach ($paramsStats as $k => $v) {
-                if ($v !== null) {
-                    $statsStmt->bindValue($k, $v);
-                }
-            }
-            $statsStmt->execute();
+            // foreach ($paramsStats as $k => $v) {
+            //     if ($v !== null) {
+            //         $statsStmt->bindValue($k, $v);
+            //     }
+            // }
+            $statsStmt->execute($paramsStats);
             $stats = $statsStmt->fetch(\PDO::FETCH_ASSOC) ?: [];
             $this->logger->info('fetchAllWithStats.statsStmt', ['statsStmt' => $stats]);
 
             // Data
             $dataStmt = $this->db->prepare($dSql);
-            foreach ($paramsData as $k => $v) {
-                if ($v !== null) {
-                    $dataStmt->bindValue($k, $v);
-                }
-            }
-            $dataStmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $dataStmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-            $dataStmt->execute();
+            $paramsData['limit'] = $limit;
+            $paramsData['offset'] = $offset;
+            // foreach ($paramsData as $k => $v) {
+            //     if ($v !== null) {
+            //         $dataStmt->bindValue($k, $v);
+            //     }
+            // }
+            // $dataStmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            // $dataStmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $dataStmt->execute($paramsData);
             $rows = $dataStmt->fetchAll(\PDO::FETCH_ASSOC);
             $this->logger->info('fetchAllWithStats.dataStmt', ['dataStmt' => $rows]);
 
@@ -414,6 +425,7 @@ class AdvertisementMapper
                 'username'    => (string)$row['creator_username'],
                 'slug'        => (int)$row['creator_slug'],
                 'img'         => (string)$row['creator_img'],
+                'visibility_status' => (string)$row['creator_visibility_status'],
                 'isfollowed'  => (bool)$row['isfollowed'],
                 'isfollowing' => (bool)$row['isfollowing'],
                 'isfriend'    => (bool)$row['isfriend'],
@@ -439,6 +451,7 @@ class AdvertisementMapper
                 'issaved'         => (bool)$row['issaved'],
                 'url'             => (string)$_ENV['WEB_APP_URL'] . '/post/' . $row['postid'],
                 'tags'            => $tags,
+                'visibility_status' => (string)$row['post_visibility_status'],
                 'user' => [
                     'uid'         => (string)$row['post_owner_id'],
                     'username'    => (string)$row['post_username'],
@@ -814,9 +827,15 @@ class AdvertisementMapper
     //     return $response;
     // }
 
-    public function findAdvertiser(string $currentUserId, ?array $args = []): array
+    public function findAdvertiser(string $currentUserId, array $specifications, ?array $args = []): array
     {
         $this->logger->debug("AdvertisementMapper.findAdvertiser started");
+        
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
+
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit  = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -830,13 +849,9 @@ class AdvertisementMapper
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
 
-        $whereClauses = ["p.feedid IS NULL"];
-        $params = ['currentUserId' => $currentUserId];
+        $whereClauses[] = "p.feedid IS NULL";
+        $params['currentUserId'] = $currentUserId;
 
-        // Show only Valid Content
-        $whereClauses[] = "p.status IN (:postNormalStatus, :postAdvertisementStatus)";
-        $params['postNormalStatus'] = ConstantsConfig::post()['STATUS']['PUBLISHED'];
-        $params['postAdvertisementStatus'] = ConstantsConfig::post()['STATUS']['ADVERTISED'];
 
 
         if ($postId !== null) {
@@ -877,11 +892,9 @@ class AdvertisementMapper
 
         $baseSelect = "
             SELECT 
-                p.postid, p.userid, p.contenttype, p.title, p.media, p.cover, p.mediadescription, p.createdat,
+                p.postid, p.userid, p.contenttype, p.title, p.media, p.cover, p.mediadescription, p.createdat, p.visibility_status,
                 a.advertisementid, a.userid AS tuserid, a.status AS ad_type,
                 a.timestart AS ad_order, a.timeend AS end_order, a.createdat AS tcreatedat,
-                ut.username AS tusername, ut.slug AS tslug, ut.img AS timg,
-                u.username, u.slug, u.img,
                 COALESCE(JSON_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), '[]'::json) AS tags,
                 (SELECT COUNT(*) FROM user_post_likes WHERE postid = p.postid) AS amountlikes,
                 (SELECT COUNT(*) FROM user_post_dislikes WHERE postid = p.postid) AS amountdislikes,
@@ -897,21 +910,16 @@ class AdvertisementMapper
                 EXISTS (SELECT 1 FROM follows WHERE followerid = a.userid AND followedid = :currentUserId) AS tisfollowing,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = p.userid AND followerid = :currentUserId) AS isfollowed,
                 EXISTS (SELECT 1 FROM follows WHERE followerid = p.userid AND followedid = :currentUserId) AS isfollowing,
-                MAX(ui.reports) AS user_reports,
                 MAX(pi.reports) AS post_reports
             FROM posts p
-            JOIN users u ON p.userid = u.uid
-            LEFT JOIN post_tags pt ON p.postid = pt.postid
-            LEFT JOIN tags t ON pt.tagid = t.tagid
-            LEFT JOIN advertisements a ON p.postid = a.postid
-            LEFT JOIN users ut ON a.userid = ut.uid
             LEFT JOIN post_info pi ON pi.postid = p.postid AND pi.userid = p.userid
-            LEFT JOIN users_info ui ON ui.userid = p.userid
+            LEFT JOIN post_tags pt ON p.postid = pt.postid
+            LEFT JOIN advertisements a ON p.postid = a.postid
+            LEFT JOIN tags t ON pt.tagid = t.tagid
             WHERE " . implode(" AND ", $whereClauses) . "
             GROUP BY p.postid, a.advertisementid,
                      tuserid, ad_type, ad_order, end_order,
-                     tcreatedat, tusername, tslug, timg,
-                     u.username, u.slug, u.img
+                     tcreatedat
         ";
 
         $params['limit'] = $limit;
@@ -1005,15 +1013,8 @@ class AdvertisementMapper
             'isdisliked' => (bool)$row['isdisliked'],
             'issaved' => (bool)$row['issaved'],
             'tags' => $row['tags'],
-            'user' => [
-                'uid' => (string)$row['userid'],
-                'username' => (string)$row['username'],
-                'slug' => (int)$row['slug'],
-                'img' => (string)$row['img'],
-                'isfollowed' => (bool)$row['isfollowed'],
-                'isfollowing' => (bool)$row['isfollowing'],
-                'isfriend' => (bool)((int)$row['isfollowed'] && (int)$row['isfollowing']),
-            ],
+            'visibility_status' => $row['visibility_status'],
+            'reports' => $row['post_reports'],
         ]);
     }
 
@@ -1026,16 +1027,7 @@ class AdvertisementMapper
             'status' => (string)$row['ad_type'],
             'timestart' => (string)$row['ad_order'],
             'timeend' => (string)$row['end_order'],
-            'createdat' => (string)$row['tcreatedat'],
-            'user' => [
-                'uid' => (string)$row['tuserid'],
-                'username' => (string)$row['tusername'],
-                'slug' => (int)$row['tslug'],
-                'img' => (string)$row['timg'],
-                'isfollowed' => (bool)$row['tisfollowed'],
-                'isfollowing' => (bool)$row['tisfollowing'],
-                'isfriend' => (bool)((int)$row['tisfollowed'] && (int)$row['tisfollowing']),
-            ],
+            'createdat' => (string)$row['tcreatedat']
         ]);
     }
 }

@@ -622,11 +622,11 @@ class PostService
         $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
 
         $specs = [
-            $deletedUserSpec,
-            $systemUserSpec,
-            $hiddenContentFilterSpec,
+            $excludeAdvertisementsForNormalFeedSpec,
             $illegalContentSpec,
-            $excludeAdvertisementsForNormalFeedSpec
+            $systemUserSpec,
+            $deletedUserSpec,
+            $hiddenContentFilterSpec,
         ];
 
         try {
@@ -858,10 +858,10 @@ class PostService
         );
 
         $specs = [
-            $deletedUserSpec,
+            $illegalContentSpec,
             $systemUserSpec,
-            $hiddenContentFilterSpec,
-            $illegalContentSpec
+            $deletedUserSpec,
+            $hiddenContentFilterSpec
         ];
 
         try {
@@ -924,9 +924,9 @@ class PostService
         $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
 
         $specs = [
-            $deletedUserSpec,
-            $systemUserSpec,
             $illegalContentSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
             $excludeAdvertisementsForNormalFeedSpec
         ];
 

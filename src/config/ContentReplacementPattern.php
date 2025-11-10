@@ -10,10 +10,19 @@ enum ContentReplacementPattern: string
     case hidden = "hidden";
     case illegal = "illegal";
 
+    // we are setting visibilityStatus as HIDDEN for the case when contetnt is NORMAL but activeReports > X(normally 5)
+    public function visibilityStatus(): ?string
+    {
+        return match ($this) {
+            self::hidden   => "hidden",
+            self::deleted => null,
+            self::illegal => null,
+        };
+    }
     public function postTitle(): string
     {
         return match ($this) {
-            self::hidden   => "this post is hidden",
+            self::hidden => "this post is hidden",
             self::deleted => "this post is deleted",
             self::illegal => "this post is illegal",
         };
@@ -51,25 +60,25 @@ enum ContentReplacementPattern: string
         return match ($this) {
             self::hidden   => "hidden_account",
             self::deleted => "Deleted_Account",
-            self::illegal => "Illegal_Account",
+            self::illegal => "illegal_account",
         };
     }
 
     public function userBiography(): string
     {
         return match ($this) {
-            self::hidden   => "/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt",
-            self::deleted => "/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt",
-            self::illegal => "/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt",
+            self::hidden   => "/userData/00000000-0000-0000-0000-000000000000.txt",
+            self::deleted => "/userData/00000000-0000-0000-0000-000000000000.txt",
+            self::illegal => "/userData/00000000-0000-0000-0000-000000000000.txt",
         };
     }
 
     public function profilePicturePath(): string
     {
         return match ($this) {
-            self::hidden   => "/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg",
-            self::deleted => "/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg",
-            self::illegal => "/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg",
+            self::hidden   => "/profile/00000000-0000-0000-0000-000000000000.jpeg",
+            self::deleted => "/profile/00000000-0000-0000-0000-000000000000.jpeg",
+            self::illegal => "/profile/00000000-0000-0000-0000-000000000000.jpeg",
         };
     }
 }

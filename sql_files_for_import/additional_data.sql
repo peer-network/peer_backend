@@ -117,7 +117,7 @@ VALUES (2.0, 0.30, 0.50, 0.05,'EUR');
 -- adv_post
 INSERT INTO posts (
     postid, userid, feedid, contenttype, title, mediadescription,
-    media, cover, options, status, createdat
+    media, cover, options, status, createdat, visibility_status
 ) VALUES (
     '4008c0dd-296c-46d3-811d-f90a2c077757',
     '6520ac47-f262-4f7e-b643-9dc5ee4cfa82',
@@ -129,7 +129,8 @@ INSERT INTO posts (
     NULL,
     NULL,
     1,
-    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 millisecons'
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 millisecons',
+    'normal'
 );
 
 -- adv_post_advertisement
@@ -164,7 +165,7 @@ INSERT INTO advertisements_log (
 -- adv_post_2
 INSERT INTO posts (
     postid, userid, feedid, contenttype, title, mediadescription,
-    media, cover, options, status, createdat
+    media, cover, options, status, createdat, visibility_status
 ) VALUES (
     '1008c0dd-296c-46d3-811d-f90a2c077757',
     'dbe72768-0d47-4d29-99e7-b6ec4eadfaa3',
@@ -176,7 +177,8 @@ INSERT INTO posts (
     NULL,
     NULL,
     1,
-    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 millisecons'
+    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 millisecons',
+    'normal'
 );
 
 -- adv_post_advertisement_2
@@ -206,4 +208,27 @@ INSERT INTO advertisements_log (
     2000.00000,
     200.00000,
     date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 millisecons'
+);
+
+-- post_info for advertisement posts
+INSERT INTO post_info (
+    postid, userid, likes, dislikes, reports, views, saves, shares, comments, createdat, count_content_moderation_dismissed, totalreports
+)
+SELECT
+    p.postid,
+    p.userid,
+    0 AS likes,
+    0 AS dislikes,
+    0 AS reports,
+    0 AS views,
+    0 AS saves,
+    0 AS shares,
+    0 AS comments,
+    p.createdat,
+    0 AS count_content_moderation_dismissed,
+    0 AS totalreports
+FROM posts p
+WHERE p.postid IN (
+    '4008c0dd-296c-46d3-811d-f90a2c077757',
+    '1008c0dd-296c-46d3-811d-f90a2c077757'
 );

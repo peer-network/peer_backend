@@ -6,7 +6,6 @@ namespace Fawaz\Database;
 
 use DateTime;
 use Fawaz\App\Profile;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use PDO;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\App\Post;
@@ -15,10 +14,6 @@ use Fawaz\App\PostMedia;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\App\User;
-use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
-use Fawaz\config\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\App\ValidationException;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -129,22 +124,12 @@ class PostMapper
         string $userid, 
         array $specifications,
         int $limitPerType = 5, 
-        ?string $contentFilterBy = null
     ): array {        
         $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
-
         $allSpecs = SpecificationSQLData::merge($specsSQL);
-
         $whereClauses = $allSpecs->whereClauses;
-
         $whereClauses[] = "sub.row_num <= :limit";
-
         $whereClausesString = implode(" AND ", $whereClauses);
-
-        $contentFilterService = new HiddenContentFilterServiceImpl(
-            ContentType::post,
-            $contentFilterBy
-        );
 
         $sql = sprintf(
             "SELECT 
@@ -180,18 +165,6 @@ class PostMapper
         $result = [];
 
         foreach ($unfidtered_result as $row) {
-            $post_reports = (int)$row['post_reports'];
-
-            // if ($contentFilterService->getContentFilterAction(
-            //     ContentType::post,
-            //     ContentType::post,
-            //     $post_reports,
-            //     $row['post_visibility_status']
-            // ) == ContentFilteringAction::replaceWithPlaceholder) {
-            //     $replacer = ContentReplacementPattern::hidden;
-            //     $row['title'] = $replacer->postTitle();
-            //     $row['media'] = $replacer->postMedia();
-            // }
             $result[] = $row;
         }
         return $result;
@@ -525,11 +498,6 @@ class PostMapper
 
         $params['currentUserId'] = $currentUserId;
         $whereClauses[] = "p.feedid IS NULL";
-
-        // Show only Valid Content
-        $whereClauses[] = "p.status IN (:postNormalStatus, :postAdvertisementStatus)";
-        $params['postNormalStatus'] = ConstantsConfig::post()['STATUS']['PUBLISHED'];
-        $params['postAdvertisementStatus'] = ConstantsConfig::post()['STATUS']['ADVERTISED'];
 
         if ($postId !== null) {
             $whereClauses[] = "p.postid = :postId";

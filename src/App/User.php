@@ -30,7 +30,7 @@ class User extends Model implements Hashable, ProfileReplaceable
     protected string $biography;
     protected string $createdat;
     protected string $updatedat;
-    protected ?int $reports = null;
+    protected ?int $activeReports = null;
     protected ?string $visibilityStatus = null;
 
     // Constructor
@@ -54,7 +54,7 @@ class User extends Model implements Hashable, ProfileReplaceable
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
-        $this->reports = $data['user_reports'] ?? ($data['reports'] ?? null);
+        $this->activeReports= $data['user_reports'] ?? ($data['reports'] ?? null);
         $this->visibilityStatus = $data['visibility_status'] ?? null;
     }
 
@@ -252,14 +252,19 @@ class User extends Model implements Hashable, ProfileReplaceable
     }
 
     // ContentFiltering capabilities
-    public function getReports(): ?int
+    public function getActiveReports(): ?int
     {
-        return $this->reports;
+        return $this->activeReports;
     }
 
     public function visibilityStatus(): string
     {
         return (string)($this->visibilityStatus ?? '');
+    }
+
+    public function setVisibilityStatus(?string $status): void
+    {
+        $this->visibilityStatus = $status;
     }
 
     public function updateBio(string $biography): void

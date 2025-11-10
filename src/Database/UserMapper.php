@@ -14,7 +14,6 @@ use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
-use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\DateService;
 use Fawaz\App\Status;
@@ -820,13 +819,7 @@ class UserMapper
 
 
             foreach ($friends as $row) {
-                $frdObj = new Profile($row, [], false);
-
-                // $row['username'] = $frdObj['username'];
-                // $row['img'] = $frdObj['img'];
-                // $row['biography'] = $frdObj['biography'];
-
-                $filtered_friends[] = $frdObj;
+                $filtered_friends[] = new Profile($row, [], false);
             }
 
             if ($filtered_friends) {
@@ -922,7 +915,6 @@ class UserMapper
         array $specifications,
         int $offset = 0,
         int $limit = 10,
-        ?string $contentFilterBy = null
     ): array {
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
@@ -1917,54 +1909,5 @@ class UserMapper
 
 
         return $result ?: null;
-    }
-
-    public function fetchProfileData(string $userid, string $currentUserId, array $specifications): ?Profile {
-        
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
-        $whereClauses = $allSpecs->whereClauses;
-        $whereClauses[] = "u.uid = :userid";
-        $whereClausesString = implode(" AND ", $whereClauses);
-        $params = $allSpecs->paramsToPrepare;
-
-        $sql = sprintf("
-            SELECT 
-                u.uid,
-                u.username,
-                u.slug,
-                u.status,
-                u.img,
-                u.biography,
-                u.visibility_status,
-                ui.amountposts,
-                ui.amountfollower,
-                ui.amountfollowed,
-                ui.amountfriends,
-                ui.amountblocked,
-                ui.reports AS user_reports,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
-                COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
-            FROM users u
-            LEFT JOIN users_info ui ON ui.userid = u.uid
-            WHERE %s",
-            $whereClausesString
-         );
-
-        $stmt = $this->db->prepare($sql);
-        $params['userid'] = $userid;
-        $params['currentUserId'] = $currentUserId;
-
-        $stmt->execute($params);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-
-        if ($data === false) {
-            $this->logger->warning("No user found with ID", ['userid' => $userid]);
-            return null;
-        }
-        return new Profile($data);
     }
 }

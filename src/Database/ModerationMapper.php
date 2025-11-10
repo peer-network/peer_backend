@@ -240,7 +240,6 @@ class ModerationMapper
                  */
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[3]) {
                     Post::query()->where('postid', $report['targetid'])->updateColumns([
-                        'status' => ConstantsModeration::POST_STATUS_ILLEGAL,
                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
                     ]);
 
@@ -411,6 +410,10 @@ class ModerationMapper
                 }
                 $media = $mediaItem['path'];
 
+                if(fopen($directoryPath.$media, 'r') === false){
+                    $this->logger->error("Unable to open media file for Post ID: $targetId");
+                    continue;
+                }
                 $stream = new \Slim\Psr7\Stream(fopen($directoryPath.$media, 'r'));
 
                 $uploadedFile = new \Slim\Psr7\UploadedFile(
