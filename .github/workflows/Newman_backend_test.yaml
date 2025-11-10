@@ -708,6 +708,9 @@ jobs:
             bipin1611)
               echo "discord_mention=<@1358723876883923075>" >> $GITHUB_OUTPUT
               ;;
+            devcrypt6)
+              echo "discord_mention=<@837718845330292766>" >> $GITHUB_OUTPUT
+              ;;
             *)
               echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
               ;;
