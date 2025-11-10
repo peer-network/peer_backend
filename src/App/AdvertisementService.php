@@ -516,15 +516,22 @@ class AdvertisementService
             return $this->respondWithError(31007);
         }
 
-        $sortBy = $args['sort'] ?? [];
-        if (!empty($sortBy) && is_array($sortBy)) {
-            $allowedTypes = ['NEWEST', 'OLDEST', 'BIGGEST_COST', 'SMALLEST_COST'];
-
-            $invalidTypes = array_diff(array_map('strtoupper', $sortBy), $allowedTypes);
-
-            if (!empty($invalidTypes)) {
+        // Normalize sort to a single uppercase string for mapper
+        $allowedSortTypes = ['NEWEST', 'OLDEST', 'BIGGEST_COST', 'SMALLEST_COST'];
+        if (array_key_exists('sort', $args)) {
+            $sortByInput = $args['sort'];
+            if (is_array($sortByInput)) {
+                $sortKey = strtoupper((string)($sortByInput[0] ?? 'NEWEST'));
+            } elseif (is_string($sortByInput)) {
+                $sortKey = strtoupper($sortByInput);
+            } else {
                 return $this->respondWithError(30103);
             }
+
+            if (!in_array($sortKey, $allowedSortTypes, true)) {
+                return $this->respondWithError(30103);
+            }
+            $args['sort'] = $sortKey;
         }
 
         try {
