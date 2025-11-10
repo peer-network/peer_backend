@@ -1,4 +1,4 @@
-name: Newman Test For Postman on the php Backend Directory
+name: CI
  
 on:
   pull_request:
