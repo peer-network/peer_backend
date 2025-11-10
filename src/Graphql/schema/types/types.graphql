@@ -157,6 +157,8 @@ type Transaction {
   transferaction: String!
   message: String!
   createdat: String!
+  sender: BasicUserInfo!
+  recipient: BasicUserInfo!
 }
 
 type TransferToken {

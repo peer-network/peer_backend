@@ -195,10 +195,10 @@ class ConstantsConfig implements ConstantsConfigInterface
      *         comment: float
      *     },
      *     FEES: array{
-     *         INVITATION: float,
-     *         POOL: float,
-     *         PEER: float,
-     *         BURN: float
+     *         INVITATION: string,
+     *         POOL: string,
+     *         PEER: string,
+     *         BURN: string
      *     }
      * }
      */
@@ -247,10 +247,10 @@ class ConstantsConfig implements ConstantsConfigInterface
             'comment' => 2.0,
         ],
         'FEES' => [
-            'INVITATION' => 0.01,
-            'POOL'       => 0.01,
-            'PEER'       => 0.02,
-            'BURN'       => 0.01,
+            'INVITATION' => '0.01',
+            'POOL'       => '0.01',
+            'PEER'       => '0.02',
+            'BURN'       => '0.01',
         ],
     ];
 
