@@ -48,7 +48,7 @@ class JWTService
             'exp' => $expirationTime
         ]);
 
-        $this->logger->info('Creating access token', ['data' => $data]);
+        $this->logger->info('Creating access token', ['uid' => $data['uid']]);
 
         return JWT::encode($payload, $this->privateKey, 'RS256');
     }
@@ -62,7 +62,7 @@ class JWTService
             'exp' => $expirationTime
         ]);
 
-        $this->logger->info('Creating refresh token.', ['data' => $data]);
+        $this->logger->info('Creating refresh token.', ['uid' => $data['uid']]);
 
         return JWT::encode($payload, $this->refreshPrivateKey, 'RS256');
     }
@@ -118,9 +118,10 @@ class JWTService
             'exp' => $expirationTime
         ];
 
-        $this->logger->info('Creating access token', ['data' => $payload]);
+        $this->logger->info('Creating access token', ['uid' => $userId]);
 
-        return JWT::encode($payload, $this->privateKey, 'RS256');
+        $token = JWT::encode($payload, $this->privateKey, 'RS256');
+        return $token;
     }
 
 }
