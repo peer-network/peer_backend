@@ -331,7 +331,7 @@ class UserService
         }
 
         $this->userMapper->logLoginDaten($id);
-        $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
+        $this->logger->info('User registered successfully.', ['username' => $username]);
 
         try {
             $data = [
@@ -641,7 +641,7 @@ class UserService
         $email = $args['email'] ?? null;
         $exPassword = $args['password'] ?? null;
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->warning('Invalid email format', ['email' => $email]);
+            $this->logger->warning('Invalid email format');
             return self::respondWithError(30224);
         }
 
@@ -651,7 +651,7 @@ class UserService
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
-            $this->logger->warning('Email already in use', ['email' => $email]);
+            $this->logger->warning('Email already in use');
             return self::respondWithError(31003);
         }
 
@@ -675,7 +675,7 @@ class UserService
             $data = $this->userMapper->updateProfil($user);
             $affectedRows = $data->getArrayCopy();
 
-            $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId, 'email' => $email]);
+            $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId]);
             $this->transactionManager->commit();
             return $this::createSuccessResponse(11006, $affectedRows, false);
         } catch (\Throwable $e) {
@@ -1007,7 +1007,7 @@ class UserService
         $expiresAt = $this->getFutureTimestamp('+1 hour');
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->warning('Invalid email format', ['email' => $email]);
+            $this->logger->warning('Invalid email format');
             return self::respondWithError(30104);
         }
 
@@ -1017,7 +1017,7 @@ class UserService
             $user = $this->userMapper->loadByEmail($email);
 
             if (!$user) {
-                $this->logger->warning('Invalid user', ['email' => $email]);
+                $this->logger->warning('Invalid user');
                 return $this->genericPasswordResetSuccessResponse();
             }
 
@@ -1097,7 +1097,7 @@ class UserService
         $this->logger->debug('UserService.resetPasswordTokenVerify started');
 
         if (empty($token)) {
-            $this->logger->warning('Invalid reset token', ['token' => $token]);
+            $this->logger->warning('Invalid reset token');
             return self::respondWithError(31904);
         }
 
@@ -1105,15 +1105,15 @@ class UserService
             $isValidToken = $this->userMapper->getPasswordResetRequest($token);
 
             if (!$isValidToken) {
-                $this->logger->warning('Invalid or expired reset token. ', ['token' => $token]);
+                $this->logger->warning('Invalid or expired reset token');
                 return self::respondWithError(31904);
             }
 
-            $this->logger->info('Token verified successfully', ['token' => $token]);
+            $this->logger->info('Token verified successfully');
 
             return self::createSuccessResponse(11902);
         } catch (\Throwable $e) {
-            $this->logger->error('Unexpected error during token verification', ['error' => $e->getMessage(), 'token' => $token]);
+            $this->logger->error('Unexpected error during token verification', ['error' => $e->getMessage()]);
             return self::respondWithError(41004);
         }
     }
