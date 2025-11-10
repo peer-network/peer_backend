@@ -246,10 +246,10 @@ jobs:
           MAIL_ENCRYPTION="${{ vars.MAIL_ENCRYPTION }}"
           MAIL_FROM_ADDRESS="${{ vars.MAIL_FROM_ADDRESS }}"
           MAIL_FROM_NAME="${{ vars.MAIL_FROM_NAME }}"
-          PEER_BANK="${{ vars.PEER_BANK }}"
-          BURN_ACCOUNT="${{ vars.BURN_ACCOUNT }}"
-          LIQUIDITY_POOL="${{ vars.LIQUIDITY_POOL }}"
-          BTC_POOL="${{ vars.BTC_POOL }}"
+          PEER_BANK="${{ secrets.PEER_BANK }}"
+          BURN_ACCOUNT="${{ secrets.BURN_ACCOUNT }}"
+          LIQUIDITY_POOL="${{ secrets.LIQUIDITY_POOL }}"
+          BTC_POOL="${{ secrets.BTC_POOL }}"
           EOF
  
       - name: Show .env File (excluding password)
