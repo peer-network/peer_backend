@@ -600,10 +600,6 @@ class AdvertisementService
             $hiddenContentFilterSpec
         ];
 
-        if (!empty($sortBy) && is_array($sortBy)) {
-            $allowedTypes = ['NEWEST', 'OLDEST', 'BIGGEST_COST', 'SMALLEST_COST'];
-
-            $invalidTypes = array_diff(array_map('strtoupper', $sortBy), $allowedTypes);
         // Normalize sort to a single uppercase string for mapper
         $allowedSortTypes = ['NEWEST', 'OLDEST', 'BIGGEST_COST', 'SMALLEST_COST'];
         if (array_key_exists('sort', $args)) {
