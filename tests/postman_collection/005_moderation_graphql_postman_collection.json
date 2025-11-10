@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "9cbdfc1a-6d2c-47e4-8632-a0131b4a7c7b",
+		"_postman_id": "c0cab769-2c23-4ed6-9852-e7f354f4687b",
 		"name": "005_moderation_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-9cbdfc1a-6d2c-47e4-8632-a0131b4a7c7b?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-c0cab769-2c23-4ed6-9852-e7f354f4687b?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -12671,7 +12671,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listAdPost (postid)",
+			"name": "Confirm listAdPost is placeholdered (postid)",
 			"event": [
 				{
 					"listen": "test",
@@ -12754,7 +12754,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listAdPost (postid)",
+			"name": "Confirm listAdPost is placeholdered (postid)",
 			"event": [
 				{
 					"listen": "test",
@@ -12861,7 +12861,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listAdPost (feed)",
+			"name": "Confirm listAdPost doesnt show (feed)",
 			"event": [
 				{
 					"listen": "test",
@@ -12875,9 +12875,9 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Counter is 3\", function () {",
+							"pm.test(\"Counter is 2\", function () {",
 							"    const json = pm.response.json();",
-							"    pm.expect(json.data.listAdvertisementPosts.counter).to.eql(3);",
+							"    pm.expect(json.data.listAdvertisementPosts.counter).to.eql(2);",
 							"});",
 							"",
 							"pm.test(\"Posts are not in listAdvertisementPosts\", function () {",
@@ -12945,7 +12945,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listAdPost (profile)",
+			"name": "Confirm listAdPost is placeholdered (profile)",
 			"event": [
 				{
 					"listen": "test",
@@ -13031,7 +13031,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listAdPost (profile)",
+			"name": "Confirm listAdPost is placeholdered (profile)",
 			"event": [
 				{
 					"listen": "test",
@@ -13045,8 +13045,22 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Post is not there\", function () {",
-							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"existing_postid_2\"));",
+							"pm.test(\"Post with existing_postid_2 has title 'this post is illegal'\", function () {",
+							"    const response = pm.response.json();",
+							"    const posts = response.data?.listAdvertisementPosts?.affectedRows || [];",
+							"    const expectedPostId = pm.environment.get(\"existing_postid_2\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'existing_postid_2' is not set.\");",
+							"    }",
+							"",
+							"    const post = posts.find(p => p.post?.id === expectedPostId);",
+							"",
+							"    if (!post) {",
+							"        throw new Error(`Post with ID ${expectedPostId} not found in listAdvertisementPosts.`);",
+							"    }",
+							"",
+							"    pm.expect(post.post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
 							"});",
 							"",
 							""
@@ -13103,96 +13117,6 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listPost (title)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11501\");",
-							"});",
-							"",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"pm.test(\"Post is not there\", function () {",
-							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"existing_postid_2\"));",
-							"});",
-							"",
-							"pm.test(\"Post title for existing_postid from env is 'this post is hidden'\", function () {",
-							"    const response = pm.response.json();",
-							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
-							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
-							"",
-							"    if (!expectedPostId) {",
-							"        throw new Error(\"Environment variable 'existing_postid' is not set.\");",
-							"    }",
-							"",
-							"    const found = items.find(i => i.post?.id === expectedPostId);",
-							"",
-							"    if (!found) {",
-							"        throw new Error(`Advertisement post with ID ${expectedPostId} not found.`);",
-							"    }",
-							"",
-							"    pm.expect(found.post.title, `Post ${expectedPostId} title`).to.eql(\"this post is hidden\");",
-							"});",
-							"",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query ListPosts {\n    listPosts(title: \"Test Advertisement Post\", contentFilterBy: MYGRANDMALIKES, limit:20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n            }\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Guest list post",
 			"event": [
 				{
@@ -13207,7 +13131,7 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Post title for existing_postid from env is 'this post is hidden'\", function () {",
+							"pm.test(\"Post title for existing_postid from env is 'Test Advertisement Post'\", function () {",
 							"    const response = pm.response.json();",
 							"    const post = response.data?.guestListPost?.affectedRows;",
 							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
@@ -13220,7 +13144,7 @@
 							"        throw new Error(`Guest list post with ID ${expectedPostId} not found.`);",
 							"    }",
 							"",
-							"    pm.expect(post.title, `Post ${expectedPostId} title`).to.eql(\"this post is hidden\");",
+							"    pm.expect(post.title, `Post ${expectedPostId} title`).to.eql(\"Test Advertisement Post\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -13298,7 +13222,7 @@
 							"    pm.expect(post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
 							"});",
 							"",
-							"pm.test(\"User w_userid_t3 username is 'hidden_account'\", function () {",
+							"pm.test(\"User w_userid_t3 username is 'tester03'\", function () {",
 							"    const response = pm.response.json();",
 							"    const post = response.data?.guestListPost?.affectedRows;",
 							"    const userIdT3 = pm.environment.get(\"w_userid_t3\");",
@@ -13312,7 +13236,7 @@
 							"        throw new Error(`User with ID ${userIdT3} not found in guestListPost`);",
 							"    }",
 							"",
-							"    pm.expect(user.username).to.eql(\"hidden_account\");",
+							"    pm.expect(user.username).to.eql(\"tester03\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -13531,9 +13455,9 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Counter is 4\", function () {",
+							"pm.test(\"Counter is 3\", function () {",
 							"    const json = pm.response.json();",
-							"    pm.expect(json.data.listAdvertisementPosts.counter).to.eql(4);",
+							"    pm.expect(json.data.listAdvertisementPosts.counter).to.eql(3);",
 							"});",
 							"",
 							"pm.test(\"Illegal post is not in listAdvertisementPosts but ur hidden there\", function () {",
@@ -13669,96 +13593,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(userid: \"{{w_userid_t2}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Confirm listPost (title) shows urself",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11501\");",
-							"});",
-							"",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"pm.test(\"Post is not there\", function () {",
-							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"existing_postid_2\"));",
-							"});",
-							"",
-							"pm.test(\"Post title for existing_postid from env is 'Test Advertisement Post'\", function () {",
-							"    const response = pm.response.json();",
-							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
-							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
-							"",
-							"    if (!expectedPostId) {",
-							"        throw new Error(\"Environment variable 'existing_postid' is not set.\");",
-							"    }",
-							"",
-							"    const found = items.find(i => i.post?.id === expectedPostId);",
-							"",
-							"    if (!found) {",
-							"        throw new Error(`Advertisement post with ID ${expectedPostId} not found.`);",
-							"    }",
-							"",
-							"    pm.expect(found.post.title, `Post ${expectedPostId} title`).to.eql(\"Test Advertisement Post\");",
-							"});",
-							"",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query ListPosts {\n    listPosts(title: \"Test Advertisement Post\", contentFilterBy: MYGRANDMALIKES, limit:20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -14189,7 +14023,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listAdPost (postid) urs",
+			"name": "Confirm listAdPost is placeholdered (postid) urs",
 			"event": [
 				{
 					"listen": "test",
@@ -14296,7 +14130,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listAdPost (feed) urs",
+			"name": "Confirm listAdPost doesnt show (feed) urs",
 			"event": [
 				{
 					"listen": "test",
@@ -14310,9 +14144,9 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Counter is 3\", function () {",
+							"pm.test(\"Counter is 2\", function () {",
 							"    const json = pm.response.json();",
-							"    pm.expect(json.data.listAdvertisementPosts.counter).to.eql(3);",
+							"    pm.expect(json.data.listAdvertisementPosts.counter).to.eql(2);",
 							"});",
 							"",
 							"pm.test(\"Posts are not in listAdvertisementPosts\", function () {",
@@ -14380,7 +14214,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listAdPost (profile) urs",
+			"name": "Confirm listAdPost is placeholdered (profile) urs",
 			"event": [
 				{
 					"listen": "test",
@@ -14447,96 +14281,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(userid: \"{{w_userid_t3}}\", contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Confirm listPost (title) urs",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11501\");",
-							"});",
-							"",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"pm.test(\"Post is not there\", function () {",
-							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"existing_postid_2\"));",
-							"});",
-							"",
-							"pm.test(\"Post title for existing_postid from env is 'this post is hidden'\", function () {",
-							"    const response = pm.response.json();",
-							"    const items = response.data?.listAdvertisementPosts?.affectedRows || [];",
-							"    const expectedPostId = pm.environment.get(\"existing_postid\");",
-							"",
-							"    if (!expectedPostId) {",
-							"        throw new Error(\"Environment variable 'existing_postid' is not set.\");",
-							"    }",
-							"",
-							"    const found = items.find(i => i.post?.id === expectedPostId);",
-							"",
-							"    if (!found) {",
-							"        throw new Error(`Advertisement post with ID ${expectedPostId} not found.`);",
-							"    }",
-							"",
-							"    pm.expect(found.post.title, `Post ${expectedPostId} title`).to.eql(\"this post is hidden\");",
-							"});",
-							"",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query ListPosts {\n    listPosts(title: \"Test Advertisement Post\", contentFilterBy: MYGRANDMALIKES, limit:20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -15180,22 +14924,47 @@
 			"response": []
 		},
 		{
-			"name": "Confirm post is not seen (profile)",
+			"name": "Confirm post is placeholdered (profile)",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"21501\");",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"Post is not there\", function () {",
-							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"postid\"));",
+							"pm.test(\"Post with postid has title 'this post is illegal' and comment with commentid has content 'this comment is illegal'\", function () {",
+							"    const response = pm.response.json();",
+							"    const posts = response.data?.listPosts?.affectedRows || [];",
+							"",
+							"    const expectedPostId = pm.environment.get(\"postid\");",
+							"    const expectedCommentId = pm.environment.get(\"commentid\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'postid' is not set.\");",
+							"    }",
+							"    if (!expectedCommentId) {",
+							"        throw new Error(\"Environment variable 'commentid' is not set.\");",
+							"    }",
+							"",
+							"    const post = posts.find(p => p.id === expectedPostId);",
+							"    if (!post) {",
+							"        throw new Error(`Post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    pm.expect(post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
+							"",
+							"    const comment = post.comments?.find(c => c.commentid === expectedCommentId);",
+							"    if (!comment) {",
+							"        throw new Error(`Comment with ID ${expectedCommentId} not found in post ${expectedPostId}.`);",
+							"    }",
+							"",
+							"    pm.expect(comment.content, `Comment ${expectedCommentId} content`).to.eql(\"this comment is illegal\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -15298,7 +15067,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm post is hidden (postid)",
+			"name": "Confirm post is placeholdered (postid)",
 			"event": [
 				{
 					"listen": "test",
@@ -16173,7 +15942,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listUsers is hidden",
+			"name": "Confirm listUsers is doesnt show",
 			"event": [
 				{
 					"listen": "test",
@@ -16232,7 +16001,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm searchUser is hidden",
+			"name": "Confirm searchUser is placeholdered",
 			"event": [
 				{
 					"listen": "test",
@@ -16305,7 +16074,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm searchUser is hidden",
+			"name": "Confirm searchUser is doesnt show",
 			"event": [
 				{
 					"listen": "test",
@@ -16364,7 +16133,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm getProfile is hidden",
+			"name": "Confirm getProfile is placeholdered",
 			"event": [
 				{
 					"listen": "test",
@@ -16391,7 +16160,7 @@
 							"        throw new Error(`Profile ID does not match userid_t6. Found: ${profile?.id}, Expected: ${expectedUserId}`);",
 							"    }",
 							"",
-							"    pm.expect(profile.username, `User ${profile.id} should have username 'illegal_account'`).to.eql(\"hidden_account\");",
+							"    pm.expect(profile.username, `User ${profile.id} should have username 'illegal_account'`).to.eql(\"illegal_account\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -16435,7 +16204,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listFollowRelations is hidden",
+			"name": "Confirm listFollowRelations is placeholdered",
 			"event": [
 				{
 					"listen": "test",
@@ -16515,7 +16284,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listFriends is hidden",
+			"name": "Confirm listFriends is placeholdered",
 			"event": [
 				{
 					"listen": "test",
@@ -16710,7 +16479,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listPosts doesnt show urself (postid)",
+			"name": "Confirm listPosts is placeholdered for urself (postid)",
 			"event": [
 				{
 					"listen": "test",
@@ -16726,29 +16495,33 @@
 							"",
 							"pm.test(\"Post title for postid from env is 'this post is illegal'\", function () {",
 							"    const response = pm.response.json();",
-							"    const post = response.data?.listPosts?.affectedRows;",
+							"    const posts = response.data?.listPosts?.affectedRows || [];",
 							"",
 							"    const expectedPostId = pm.environment.get(\"postid\");",
 							"    if (!expectedPostId) throw new Error(\"Environment variable 'postid' is not set.\");",
 							"",
-							"    if (!post || post.id !== expectedPostId) {",
-							"        throw new Error(`Post with ID ${expectedPostId} not found.`);",
-							"    }",
+							"    const post = posts.find(p => p.id === expectedPostId);",
+							"    if (!post) throw new Error(`Post with ID ${expectedPostId} not found.`);",
 							"",
 							"    pm.expect(post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
 							"});",
 							"",
 							"pm.test(\"Comment content for commentid from env is 'this comment is illegal'\", function () {",
 							"    const response = pm.response.json();",
-							"    const post = response.data?.listPosts?.affectedRows;",
+							"    const posts = response.data?.listPosts?.affectedRows || [];",
 							"",
 							"    const expectedCommentId = pm.environment.get(\"commentid\");",
 							"    if (!expectedCommentId) throw new Error(\"Environment variable 'commentid' is not set.\");",
 							"",
-							"    const comment = post?.comments?.find(c => c.commentid === expectedCommentId);",
-							"    if (!comment) throw new Error(`Comment with ID ${expectedCommentId} not found in the post.`);",
+							"    let foundComment = null;",
+							"    posts.forEach(post => {",
+							"        const comment = post.comments?.find(c => c.commentid === expectedCommentId);",
+							"        if (comment) foundComment = comment;",
+							"    });",
 							"",
-							"    pm.expect(comment.content, `Comment ${expectedCommentId} content`).to.eql(\"this comment is illegal\");",
+							"    if (!foundComment) throw new Error(`Comment with ID ${expectedCommentId} not found in response.`);",
+							"",
+							"    pm.expect(foundComment.content, `Comment ${expectedCommentId} content`).to.eql(\"this comment is illegal\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -16792,7 +16565,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm listPosts doesnt show urself (profile)",
+			"name": "Confirm listPosts is placeholdered for urself (profile)",
 			"event": [
 				{
 					"listen": "test",
@@ -16808,29 +16581,33 @@
 							"",
 							"pm.test(\"Post title for postid from env is 'this post is illegal'\", function () {",
 							"    const response = pm.response.json();",
-							"    const post = response.data?.listPosts?.affectedRows;",
+							"    const posts = response.data?.listPosts?.affectedRows || [];",
 							"",
 							"    const expectedPostId = pm.environment.get(\"postid\");",
 							"    if (!expectedPostId) throw new Error(\"Environment variable 'postid' is not set.\");",
 							"",
-							"    if (!post || post.id !== expectedPostId) {",
-							"        throw new Error(`Post with ID ${expectedPostId} not found.`);",
-							"    }",
+							"    const post = posts.find(p => p.id === expectedPostId);",
+							"    if (!post) throw new Error(`Post with ID ${expectedPostId} not found.`);",
 							"",
 							"    pm.expect(post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
 							"});",
 							"",
 							"pm.test(\"Comment content for commentid from env is 'this comment is illegal'\", function () {",
 							"    const response = pm.response.json();",
-							"    const post = response.data?.listPosts?.affectedRows;",
+							"    const posts = response.data?.listPosts?.affectedRows || [];",
 							"",
 							"    const expectedCommentId = pm.environment.get(\"commentid\");",
 							"    if (!expectedCommentId) throw new Error(\"Environment variable 'commentid' is not set.\");",
 							"",
-							"    const comment = post?.comments?.find(c => c.commentid === expectedCommentId);",
-							"    if (!comment) throw new Error(`Comment with ID ${expectedCommentId} not found in the post.`);",
+							"    let foundComment = null;",
+							"    posts.forEach(post => {",
+							"        const comment = post.comments?.find(c => c.commentid === expectedCommentId);",
+							"        if (comment) foundComment = comment;",
+							"    });",
 							"",
-							"    pm.expect(comment.content, `Comment ${expectedCommentId} content`).to.eql(\"this comment is illegal\");",
+							"    if (!foundComment) throw new Error(`Comment with ID ${expectedCommentId} not found in response.`);",
+							"",
+							"    pm.expect(foundComment.content, `Comment ${expectedCommentId} content`).to.eql(\"this comment is illegal\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -16947,22 +16724,8 @@
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
 							"",
-							"pm.test(\"User from userid_t6 in listUsers has username 'illegal_account'\", function () {",
-							"    const response = pm.response.json();",
-							"    const users = response.data?.listUsers?.affectedRows || [];",
-							"    const expectedUserId = pm.environment.get(\"userid_t6\");",
-							"",
-							"    if (!expectedUserId) {",
-							"        throw new Error(\"Environment variable 'userid_t6' is not set.\");",
-							"    }",
-							"",
-							"    const user = users.find(u => u.id === expectedUserId);",
-							"",
-							"    if (!user) {",
-							"        throw new Error(`User with ID ${expectedUserId} not found in listUsers response.`);",
-							"    }",
-							"",
-							"    pm.expect(user.username, `User ${user.id} should have username 'illegal_account'`).to.eql(\"illegal_account\");",
+							"pm.test(\"User is not there\", function () {",
+							"    pm.expect(pm.response.text()).not.to.include(pm.environment.get(\"userid_t6\"));",
 							"});"
 						],
 						"type": "text/javascript",
@@ -17006,7 +16769,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm searchUser doesnt show urself",
+			"name": "Confirm searchUser is placeholdered for urself",
 			"event": [
 				{
 					"listen": "test",
@@ -17138,7 +16901,7 @@
 			"response": []
 		},
 		{
-			"name": "Confirm getProfile doesnt show urself",
+			"name": "Confirm getProfile is placeholdered for urself",
 			"event": [
 				{
 					"listen": "test",
