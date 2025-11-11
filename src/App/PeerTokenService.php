@@ -128,8 +128,7 @@ class PeerTokenService
                 $recipientId, 
                 $numberOfTokens, 
                 $transferStrategy,
-                $message, 
-                true
+                $message
             );
             if ($response['status'] === 'error') {
                 $this->transactionManager->rollback();

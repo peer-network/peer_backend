@@ -16,6 +16,7 @@ use RuntimeException;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
+use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
 class PeerTokenMapper
 {
@@ -205,7 +206,6 @@ class PeerTokenMapper
         string $numberOfTokens,
         TransferStrategy $strategy,
         ?string $message = null,
-        bool $isWithFees = true,
     ): ?array
     {
         \ignore_user_abort(true);
@@ -225,14 +225,9 @@ class PeerTokenMapper
             }else{
                 $this->lockBalances([$senderId, $recipientId]);
             }
-            if($isWithFees){
-                $requiredAmount = $this->calculateRequiredAmount($senderId, $numberOfTokens);
-
-                // Fees Amount Calculation
-                [$peerFeeAmount, $poolFeeAmount, $burnFeeAmount, $inviteFeeAmount] = $this->calculateEachFeesAmount($numberOfTokens);
-            }else{
-                $requiredAmount = $numberOfTokens;
-            }
+            $mode = $strategy->getFeePolicyMode();
+            [$requiredAmount, $netRecipientAmount, $peerFeeAmount, $poolFeeAmount, $burnFeeAmount, $inviteFeeAmount] =
+                $this->calculateAmountsForMode($senderId, $numberOfTokens, $mode);
             
             $operationid = $strategy->getOperationId();
             $transRepo = new TransactionRepository($this->logger, $this->db);
@@ -245,13 +240,13 @@ class PeerTokenMapper
             }
 
             // 2. RECIPIENT: Credit To Account
-            if ($numberOfTokens) {
+            if ($netRecipientAmount) {
                 $payload = [
                     'operationid' => $operationid,
                     'transactiontype' => $strategy->getRecipientTransactionType(),
                     'senderid' => $senderId,
                     'recipientid' => $recipientId,
-                    'tokenamount' => $numberOfTokens,
+                    'tokenamount' => $netRecipientAmount,
                     'message' => $message,
                     'transferaction' => 'CREDIT'
                 ];
@@ -262,7 +257,7 @@ class PeerTokenMapper
                 $this->createAndSaveTransaction($transRepo, $payload);
 
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($recipientId, $numberOfTokens);
-                $this->walletMapper->credit($recipientId, $numberOfTokens);
+                $this->walletMapper->credit($recipientId, $netRecipientAmount);
             }
 
             // 3. INVITER: Fees To Inviter (if applicable)
@@ -329,7 +324,7 @@ class PeerTokenMapper
             return [
                 'status' => 'success',
                 'ResponseCode' => "11212",
-                'tokenSend' => $numberOfTokens,
+                'tokenSend' => $netRecipientAmount,
                 'tokensSubstractedFromWallet' => $requiredAmount,
                 'createdat' => date('Y-m-d H:i:s.u')
             ];
@@ -343,6 +338,47 @@ class PeerTokenMapper
             ]);
             return self::respondWithError(40301);
         }
+    }
+
+    /**
+     * Calculate required (debit) and net (recipient credit) amounts based on fee policy mode.
+     * Returns array: [required, net, peerFeeAmount, poolFeeAmount, burnFeeAmount, inviteFeeAmount]
+     */
+    private function calculateAmountsForMode(string $senderId, string $inputAmount, FeePolicyMode $mode): array
+    {
+        $this->senderId = $senderId;
+        [$peerFee, $poolFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
+
+        // Sum of fee rates
+        $sum1 = TokenHelper::addRc($peerFee, $poolFee);
+        $sum2 = TokenHelper::addRc($burnFee, $inviteFee);
+        $totalRate = TokenHelper::addRc($sum1, $sum2);
+
+        if ($mode === FeePolicyMode::ADDED) {
+            $net = $inputAmount;
+            $required = TokenHelper::calculateTokenRequiredAmount($net, $peerFee, $poolFee, $burnFee, $inviteFee);
+            [$peerAmt, $poolAmt, $burnAmt, $inviteAmt] = $this->calculateEachFeesAmount($net);
+            return [$required, $net, $peerAmt, $poolAmt, $burnAmt, $inviteAmt];
+        }
+
+        // INCLUDED mode: input is gross (required)
+        $required = $inputAmount;
+        $onePlus = TokenHelper::addRc('1', $totalRate);
+        $net = TokenHelper::divRc($required, $onePlus);
+        [$peerAmt, $poolAmt, $burnAmt, $inviteAmt] = $this->calculateEachFeesAmount($net);
+        return [$required, $net, $peerAmt, $poolAmt, $burnAmt, $inviteAmt];
+    }
+
+    /**
+     * Public helper to calculate only the required debit amount for a given mode.
+     */
+    public function calculateRequiredAmountByMode(string $senderId, string $inputAmount, FeePolicyMode $mode): string
+    {
+        if ($mode === FeePolicyMode::ADDED) {
+            return $this->calculateRequiredAmount($senderId, $inputAmount);
+        }
+        // INCLUDED: gross equals required
+        return $inputAmount;
     }
 
     /**

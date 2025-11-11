@@ -6389,7 +6389,7 @@
 							"pm.test(\"Previous liquidity exists\", function () {",
 							"    pm.expect(oldLiquidity).to.be.a(\"number\");",
 							"});",
-							"let expectedDecrease = 166.4;",
+							"let expectedDecrease = 160;",
 							"let actualDecrease = oldLiquidity - newLiquidity;",
 							"let tolerance = 0.1;",
 							"pm.test(`Liquidity should decrease by approximately ${expectedDecrease} ±${tolerance}`, function () {",
