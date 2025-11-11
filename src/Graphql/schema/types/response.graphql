@@ -217,6 +217,12 @@ type CommentResponse {
   affectedRows: [Comment]
 }
 
+type CommentListResponse {
+  meta: DefaultResponse
+  counter: Int!
+  affectedRows: [Comment!]
+}
+
 type ReferralInfoResponse {
   meta: DefaultResponse
   status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
