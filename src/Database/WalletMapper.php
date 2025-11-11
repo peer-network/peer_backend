@@ -324,12 +324,12 @@ class WalletMapper
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             try {
                 if ($results['overall_total_numbers'] === 0) {
-                    $results['overall_total_numbers'] = (float)($row['overall_total_numbers'] ?? 0);
-                    $results['overall_total_numbersq'] = (int)$this->decimalToQ64_96($results['overall_total_numbers']);
+                    $results['overall_total_numbers'] = ($row['overall_total_numbers'] ?? 0);
+                    $results['overall_total_numbersq'] = (int)$this->decimalToQ64_96((string) $results['overall_total_numbers']);
                 }
 
-                $totalNumbers = (float)$row['total_numbers'];
-                $totalNumbersQ = (int)$this->decimalToQ64_96($totalNumbers);
+                $totalNumbers = $row['total_numbers'];
+                $totalNumbersQ = (int)$this->decimalToQ64_96((string) $totalNumbers);
 
                 $results['posts'][] = [
                     'postid' => $row['postid'],
@@ -720,7 +720,7 @@ class WalletMapper
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
             $stmt->bindValue(':gems', $gems, \PDO::PARAM_STR);
             $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':numbersq', $this->decimalToQ64_96((string)$numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
@@ -751,7 +751,7 @@ class WalletMapper
 
         $postId = $args['postid'] ?? null;
         $fromId = $args['fromid'] ?? null;
-        $numBers = $args['numbers'] ?? 0;
+        $numBers = $args['numbers'] ?? '0';
         $createdat = $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
 
         $sql = "INSERT INTO wallet 
@@ -767,13 +767,13 @@ class WalletMapper
             $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
             $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
             $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':numbersq', $this->decimalToQ64_96((string)$numBers), \PDO::PARAM_STR); // 29 char precision
             $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
             $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
 
             $stmt->execute();
 
-            $this->saveWalletEntry($userId, $numBers);
+            $this->saveWalletEntry($userId, (string)$numBers);
 
             $this->logger->info('Inserted into wallet successfully', [
                 'userId' => $userId,
@@ -1012,12 +1012,12 @@ class WalletMapper
         }
 
         $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
-        $dailyToken = (float)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
+        $dailyToken = (string)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
         // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
-        $gemsintoken = TokenHelper::divRc((float) $dailyToken, (float) $totalGems);
+        $gemsintoken = TokenHelper::divRc( $dailyToken, $totalGems);
 
-        $bestatigungInitial = TokenHelper::mulRc((float) $totalGems, (float) $gemsintoken);
+        $bestatigungInitial = TokenHelper::mulRc( $totalGems, $gemsintoken);
 
         $args = [
             'winstatus' => [
@@ -1032,7 +1032,7 @@ class WalletMapper
 
             if (!isset($args[$userId])) {
 
-                $totalTokenNumber = TokenHelper::mulRc((float) $row['total_numbers'], (float) $gemsintoken);
+                $totalTokenNumber = TokenHelper::mulRc((string) $row['total_numbers'], $gemsintoken);
                 $args[$userId] = [
                     'userid' => $userId,
                     'gems' => (float)$row['total_numbers'],
@@ -1042,7 +1042,7 @@ class WalletMapper
                 ];
             }
 
-            $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
+            $rowgems2token = TokenHelper::mulRc((string) $row['gems'], $gemsintoken);
 
             $args[$userId]['details'][] = [
                 'gemid' => (string)$row['gemid'],
@@ -1207,7 +1207,7 @@ class WalletMapper
         }
     }
 
-    public function updateUserLiquidity(string $userId, float $liquidity): bool
+    public function updateUserLiquidity(string $userId, string $liquidity): bool
     {
         try {
 
@@ -1226,7 +1226,7 @@ class WalletMapper
         }
     }
 
-    public function saveWalletEntry(string $userId, float $liquidity): float
+    public function saveWalletEntry(string $userId, string $liquidity, string $type = 'CREDIT'): float
     {
         \ignore_user_abort(true);
         $this->logger->debug('WalletMapper.saveWalletEntry started');
@@ -1239,22 +1239,33 @@ class WalletMapper
 
             if (!$row) {
                 // User does not exist, insert new wallet entry
-                $newLiquidity = abs($liquidity);
-                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
+                $newLiquidity = $liquidity;
+                $liquiditq = (float)$this->decimalToQ64_96($liquidity);
 
                 $stmt = $this->db->prepare(
                     "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
                     VALUES (:userid, :liquidity, :liquiditq, :updatedat)"
                 );
                 $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
+                $stmt->bindValue(':liquidity', $liquidity, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
                 $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
                 $stmt->execute();
             } else {
                 // User exists, safely calculate new liquidity
-                $currentBalance = (float)$row['liquidity'];
-                $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
+                $currentBalance = (string)$row['liquidity'];
+
+                if($liquidity < 0){
+                    $liquidity = (string) (abs((float)$liquidity));
+                    $type = 'DEBIT';
+                }
+
+                if($type === 'CREDIT'){
+                    $newLiquidity = TokenHelper::addRc($currentBalance, (string) $liquidity);
+                } else {
+                    $newLiquidity = TokenHelper::subRc($currentBalance, (string) $liquidity);
+                }
+
                 $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
 
                 $stmt = $this->db->prepare(
@@ -1271,9 +1282,9 @@ class WalletMapper
             }
 
             $this->logger->info('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
-            $this->updateUserLiquidity($userId, $newLiquidity);
+            $this->updateUserLiquidity($userId,  $newLiquidity);
 
-            return $newLiquidity;
+            return  (float) $newLiquidity;
         } catch (\Throwable $e) {
             $this->logger->error('Database error in saveWalletEntry: ' . $e);
             throw new \RuntimeException('Unable to save wallet entry');
@@ -1401,12 +1412,12 @@ class WalletMapper
         ];
     }
 
-    private function decimalToQ64_96(float $value): string
+    private function decimalToQ64_96(string $value): string
     {
         $scaleFactor = \bcpow('2', '96');
 
         // Convert float to plain decimal string
-        $decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
+        $decimalString = \number_format((float)$value, 30, '.', ''); // 30 decimal places should be enough
 
         $scaledValue = \bcmul($decimalString, $scaleFactor, 0);
 
@@ -1425,5 +1436,64 @@ class WalletMapper
     private function addQ64_96(string $qValue1, string $qValue2): string
     {
         return \bcadd($qValue1, $qValue2);
+    }
+
+
+
+    /**
+     * To Defend against Atomicity issues in concurrent debit operations
+     * This function debits the user's wallet only if sufficient funds are available.
+     */
+    public function debitIfSufficient(string $userId, string $amount): ?string
+    {
+        $sql = "UPDATE wallett                                                                                                                                                                                                                                                             
+                SET liquidity = liquidity - :amt,                                                                                                                                                                                                                                                  
+                updatedat = now()                                                                                                                                                                                                                                                                  
+                WHERE userid = :uid AND liquidity >= :amt                                                                                                                                                                                                                                          
+                RETURNING liquidity";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $stmt->bindValue(':amt', $amount, PDO::PARAM_STR);
+        $stmt->execute();
+        $newBal = $stmt->fetchColumn();
+        if ($newBal === false) {
+            throw new \RuntimeException('Insufficient funds or user not found', 51301);
+        }
+        // Update liquidity using returned balance
+        $liquiditq = (float)$this->decimalToQ64_96((string)$newBal);
+
+        $q = $this->db->prepare("UPDATE wallett SET liquiditq = :liq_q96 WHERE userid = :uid");
+        $q->bindValue(':liq_q96', $liquiditq, PDO::PARAM_STR);
+        $q->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $q->execute();
+
+        return (string) $newBal;
+    }
+
+    /**
+     * Credits the user's wallet and updates with Atomicity in mind
+     */
+    public function credit(string $userId, string $amount): string
+    {
+        $sql = "UPDATE wallett                                                                                                                                                                                                                                                             
+                SET liquidity = liquidity + :amt,                                                                                                                                                                                                                                                  
+                updatedat = now()                                                                                                                                                                                                                                                                  
+                WHERE userid = :uid                                                                                                                                                                                                                                                                
+                RETURNING liquidity";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $stmt->bindValue(':amt', $amount, PDO::PARAM_STR);
+        $stmt->execute();
+        $newBal = $stmt->fetchColumn();
+
+        // Should not be false if userid exists; you may validate existence separately
+        $liquiditq = (float)$this->decimalToQ64_96((string)$newBal);
+
+        $q = $this->db->prepare("UPDATE wallett SET liquiditq = :liq_q96 WHERE userid = :uid");
+        $q->bindValue(':liq_q96', $liquiditq, PDO::PARAM_STR);
+        $q->bindValue(':uid', $userId, PDO::PARAM_STR);
+        $q->execute();
+
+        return (string)$newBal;
     }
 }
