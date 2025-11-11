@@ -15,7 +15,7 @@ enum ContentReplacementPattern: string
     {
         return match ($this) {
             self::hidden   => "hidden",
-            self::deleted => null,
+            self::deleted => "normal",
             self::illegal => null,
         };
     }
