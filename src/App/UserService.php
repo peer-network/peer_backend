@@ -877,14 +877,29 @@ class UserService
             return self::respondWithError(60501);
         }
 
+        $userId = $args['userid'] ?? $this->currentUserId;
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-        $this->logger->info('Fetching friends list', ['currentUserId' => $this->currentUserId, 'offset' => $offset, 'limit' => $limit]);
+        if (!self::isValidUUID($userId)) {
+            $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
+            return self::respondWithError(30201);
+        }
+        if (!$this->userMapper->isUserExistById($userId)) {
+            $this->logger->warning('User not found for Follows', ['userId' => $userId]);
+            return self::respondWithError(31007);
+        }
+
+        $this->logger->info('Fetching friends list', [
+            'currentUserId' => $this->currentUserId,
+            'targetUserId'  => $userId, 
+            'offset' => $offset, 
+            'limit' => $limit
+        ]);
 
         try {
-            $users = $this->userMapper->fetchFriends($this->currentUserId, $offset, $limit, $contentFilterBy);
+            $users = $this->userMapper->fetchFriends($userId, $offset, $limit, $contentFilterBy);
 
             if (!empty($users)) {
                 $this->logger->info('Friends list retrieved successfully', ['userCount' => count($users)]);
@@ -896,7 +911,7 @@ class UserService
                 ];
             }
 
-            $this->logger->info('No friends found for the user', ['currentUserId' => $this->currentUserId]);
+            $this->logger->info('No friends found for the user', ['targetUserId' => $userId]);
             return self::createSuccessResponse(21101);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
