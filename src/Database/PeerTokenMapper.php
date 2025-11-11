@@ -203,15 +203,14 @@ class PeerTokenMapper
         string $senderId,
         string $recipientId,
         string $numberOfTokens,
+        TransferStrategy $strategy,
         ?string $message = null,
         bool $isWithFees = true,
-        ?TransferStrategy $strategy = null
     ): ?array
     {
         \ignore_user_abort(true);
 
         $this->initializeLiquidityPool();
-        $strategy = $strategy ?? new DefaultTransferStrategy();
 
         if (!$this->validateFeesWalletUUIDs()) {
             return self::respondWithError(41222);
