@@ -206,7 +206,14 @@ class UserService
             'updatedat' => (new \DateTime())->format('Y-m-d H:i:s.u')
         ];
 
-        $this->logger->debug('UserService.createUser.verificationData started', ['verificationData' => $verificationData]);
+        // Mask token for logging (show first 6 chars, hide the rest)
+        $maskedToken = substr($verificationData['token'], 0, 6) . str_repeat('*', strlen($verificationData['token']) - 6);
+
+        $this->logger->debug('UserService.createUser.verificationData started', [
+            'userid' => $verificationData['userid'],
+            'token' => $maskedToken,
+            'expiresat' => $verificationData['expiresat']
+        ]);
 
         $userData = [
             'uid' => $id,
