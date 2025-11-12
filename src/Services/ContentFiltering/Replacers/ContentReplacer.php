@@ -70,7 +70,7 @@ class ContentReplacer
         if ($pattern->postMedia()) {
             $post->setMedia($pattern->postMedia());
         }
-        if ($post->visibilityStatus() === "normal") {
+        if ($post->visibilityStatus() !== "illegal") {
             $post->setVisibilityStatus($pattern->visibilityStatus());
         }
     }

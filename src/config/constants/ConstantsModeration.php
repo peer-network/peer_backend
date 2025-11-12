@@ -9,7 +9,7 @@ class ConstantsModeration
      /**
      * @return array{
      *     CONTENT_SEVERITY_LEVELS: array<int,string>,
-     *     REPORTS_COUNT_TO_HIDE_FROM_IOS: array<'POST'|'COMMENT'|'USER', int>,
+     *     REPORTS_COUNT_TO_HIDE_CONTENT: array<'POST'|'COMMENT'|'USER', int>,
      * }
      */
     public static function contentFiltering() {
@@ -31,7 +31,7 @@ class ConstantsModeration
             0 => 'MYGRANDMALIKES',
             10 => 'MYGRANDMAHATES'
         ],
-        'REPORTS_COUNT_TO_HIDE_FROM_IOS' => [
+        'REPORTS_COUNT_TO_HIDE_CONTENT' => [
             'POST' => 5,
             'COMMENT' => 5,
             'USER' => 5,

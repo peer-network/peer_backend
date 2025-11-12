@@ -268,7 +268,7 @@ class ModerationMapper
                  */
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
                     PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
-                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['POST']
+                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_CONTENT']['POST']
                     ]);
                     Post::query()->where('postid', $report['targetid'])->updateColumns([
                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
@@ -312,7 +312,7 @@ class ModerationMapper
                  */
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
                     UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
-                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['USER']
+                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_CONTENT']['USER']
                     ]);
                     User::query()->where('uid', $report['targetid'])->updateColumns([
                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
@@ -356,7 +356,7 @@ class ModerationMapper
                  */
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
                     CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
-                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_FROM_IOS']['COMMENT']
+                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_CONTENT']['COMMENT']
                     ]);
                     Comment::query()->where('commentid', $report['targetid'])->updateColumns([
                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]

@@ -134,7 +134,7 @@ class CommentInfoService
         $specs = [
             $illegalContentSpec,
             $systemUserSpec,
-            $deletedUserSpec,
+            $deletedUserSpec
         ];
 
         if($this->interactionsPermissionsMapper->isInteractionAllowed(

@@ -10,6 +10,7 @@ use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\config\constants\PeerUUID;
@@ -620,6 +621,7 @@ class PostService
         );
 
         $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
 
         $specs = [
             $excludeAdvertisementsForNormalFeedSpec,
@@ -627,6 +629,7 @@ class PostService
             $systemUserSpec,
             $deletedUserSpec,
             $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
         ];
 
         try {
@@ -856,12 +859,14 @@ class PostService
             $contentFilterCase,
             ContentType::user
         );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
 
         $specs = [
             $illegalContentSpec,
             $systemUserSpec,
             $deletedUserSpec,
-            $hiddenContentFilterSpec
+            $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
         ];
 
         try {
