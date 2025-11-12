@@ -202,6 +202,11 @@ class PostInfoService
                 return $this->respondWithError(31510);
             }
 
+            if ($this->reportMapper->wasContentRestored($postId, 'post')) {
+                $this->logger->warning('PostInfoService: reportPost: User tries to report a restored post');
+                return $this->respondWithError(31514);
+            }
+
             $postInfo = $this->postInfoMapper->loadById($postId);
             if ($postInfo === null) {
                 $this->logger->warning('PostInfoService: reportPost: Error while fetching comment data from db');
