@@ -113,6 +113,7 @@ type Comment {
   createdat: Date!
   amountlikes: Int!
   amountreplies: Int!
+  isreported: Boolean!
   isliked: Boolean!
   user: ProfileUser!
 }

@@ -952,6 +952,9 @@ class GraphQLSchemaBuilder
                 'amountreplies' => function (array $root): int {
                     return $root['amountreplies'] ?? 0;
                 },
+                'isreported' => function (array $root): bool {
+                    return $root['isreported'] ?? false;
+                },
                 'isliked' => function (array $root): bool {
                     return $root['isliked'] ?? false;
                 },
