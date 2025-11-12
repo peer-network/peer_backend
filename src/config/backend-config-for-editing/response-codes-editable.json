@@ -859,6 +859,10 @@
         "comment": "The 'userid' and 'username' fields cannot be used together in the same request",
         "userFriendlyComment": "Please provide either a user ID or a username, not both."
     },
+    "31014": {
+        "comment": "Not Allowed: This user has already been reviewed and restored by our moderation team",
+        "userFriendlyComment": "This user was already reviewed and found to comply with our guidelines."
+    },
     "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",
         "userFriendlyComment": "This action is only available for friends."
@@ -986,6 +990,10 @@
     "31608": {
         "comment": "It is forbidden to interact with this Comment(illegal Comment / illegal Post)",
         "userFriendlyComment": "It is forbidden to interact with this Comment(illegal Comment/ illegal Post)"
+    },
+    "31610": {
+        "comment": "Not Allowed: This comment has already been reviewed and restored by our moderation team",
+        "userFriendlyComment": "This comment was already reviewed and found to comply with our guidelines."
     },
     "31801": {
         "comment": "Forbidden: Access denied. You do not have the required permissions for this action",
