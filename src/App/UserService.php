@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
@@ -790,12 +791,14 @@ class UserService
             ContentFilteringCases::searchById,
             ContentType::user
         );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
 
         $specs = [
             $illegalContentFilterSpec,
             $systemUserSpec,
             $deletedUserSpec,
             $usersHiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
         ];
 
         try {
@@ -866,6 +869,8 @@ class UserService
         
         $contentFilterCase = ContentFilteringCases::searchById;
         
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
             ContentType::user
@@ -892,6 +897,7 @@ class UserService
             $systemUserSpec,
             $deletedUserSpec,
             $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
         ];
       
         if (!self::isValidUUID($userId)) {
@@ -1025,11 +1031,14 @@ class UserService
             $contentFilterCase,
             ContentType::user
         );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+        
         $specs = [
             $illegalContentFilterSpec,
             $systemUserSpec,
             $deletedUserSpec,
             $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
         ];
 
         try {
