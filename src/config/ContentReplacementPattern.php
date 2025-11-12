@@ -6,6 +6,7 @@ namespace Fawaz\config;
 
 enum ContentReplacementPattern: string
 {
+    case normal = "normal";
     case deleted = "deleted";
     case hidden = "hidden";
     case illegal = "illegal";
@@ -14,69 +15,77 @@ enum ContentReplacementPattern: string
     public function visibilityStatus(): ?string
     {
         return match ($this) {
+            self::normal   => "normal",
             self::hidden   => "hidden",
-            self::deleted => null,
+            self::deleted => "normal",
             self::illegal => null,
         };
     }
-    public function postTitle(): string
+    public function postTitle(): ?string
     {
         return match ($this) {
-            self::hidden => "this post is hidden",
+            self::normal   => null,
+            self::hidden   => null,
             self::deleted => "this post is deleted",
             self::illegal => "this post is illegal",
         };
     }
 
-    public function postDescription(): string
+    public function postDescription(): ?string
     {
         return match ($this) {
-            self::hidden   => "",
+            self::normal   => null,
+            self::hidden   => null,
             self::deleted => "",
             self::illegal => "",
         };
     }
 
-    public function postMedia(): string
+    public function postMedia(): ?string
     {
         return match ($this) {
-            self::hidden   => "some_pic_to_be_here_some_text_to_pass_validation",
-            self::deleted => "some_pic_to_be_here_some_text_to_pass_validation",
-            self::illegal => "some_pic_to_be_here_some_text_to_pass_validation",
+            self::normal   => null,
+            self::hidden   => null,
+            self::deleted => null,
+            self::illegal => "/image/00000000-0000-0000-0000-000000000000.jpeg",
         };
     }
 
-    public function commentContent(): string
+    public function commentContent(): ?string
     {
         return match ($this) {
-            self::hidden   => "this comment is hidden",
+            self::normal   => null,
+            self::hidden   => null,
             self::deleted => "this comment is deleted",
             self::illegal => "this comment is illegal",
         };
     }
 
-    public function username(): string
+    public function username(): ?string
     {
         return match ($this) {
-            self::hidden   => "hidden_account",
+            self::normal   => null,
+            self::hidden   => null,
             self::deleted => "Deleted_Account",
             self::illegal => "illegal_account",
         };
     }
 
-    public function userBiography(): string
+    public function userBiography(): ?string
     {
         return match ($this) {
-            self::hidden   => "/userData/00000000-0000-0000-0000-000000000000.txt",
+            self::normal   => null,
+            self::hidden   => null,
             self::deleted => "/userData/00000000-0000-0000-0000-000000000000.txt",
             self::illegal => "/userData/00000000-0000-0000-0000-000000000000.txt",
         };
     }
 
-    public function profilePicturePath(): string
+    public function profilePicturePath(): ?string
     {
         return match ($this) {
-            self::hidden   => "/profile/00000000-0000-0000-0000-000000000000.jpeg",
+            self::normal   => null,
+            self::hidden   => null,
             self::deleted => "/profile/00000000-0000-0000-0000-000000000000.jpeg",
             self::illegal => "/profile/00000000-0000-0000-0000-000000000000.jpeg",
         };

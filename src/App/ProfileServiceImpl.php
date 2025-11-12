@@ -7,6 +7,7 @@ use Fawaz\App\Profile;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
@@ -65,12 +66,14 @@ final class ProfileServiceImpl implements ProfileService
             $contentFilterCase,
             ContentType::user
         );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
 
         $specs = [
             $illegalContentSpec,
             $systemUserSpec,
             $deletedUserSpec,
-            $hiddenContentFilterSpec
+            $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
         ];
 
         try {
@@ -208,11 +211,14 @@ final class ProfileServiceImpl implements ProfileService
             $contentFilterCase,
             ContentType::user
         );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+        
         $specs = [
             $illegalContentSpec,
             $systemUserSpec,
             $deletedUserSpec,
-            $hiddenContentFilterSpec
+            $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
         ];
 
 

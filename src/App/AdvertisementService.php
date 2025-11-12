@@ -15,6 +15,7 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
@@ -110,7 +111,7 @@ class AdvertisementService
 
         $specs = [
             $illegalContentSpec,
-            $systemUserSpec,
+            $systemUserSpec
         ];
 
         if($this->interactionsPermissionsMapper->isInteractionAllowed(
@@ -592,12 +593,14 @@ class AdvertisementService
             $contentFilterCase,
             ContentType::post
         );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
 
         $specs = [
             $illegalContentSpec,
             $systemUserSpec,
             $deletedUserSpec,
-            $hiddenContentFilterSpec
+            $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
         ];
 
         // Normalize sort to a single uppercase string for mapper
@@ -766,12 +769,14 @@ class AdvertisementService
             $contentFilterCase,
             ContentType::post
         );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
 
         $specs = [
             $illegalContentSpec,
             $systemUserSpec,
             $deletedUserSpec,
-            $hiddenContentFilterSpec
+            $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
         ];
 
         $results = $this->advertisementMapper->findAdvertiser($this->currentUserId, $specs, $args);

@@ -28,7 +28,7 @@ class HiddenContentFilterServiceImpl  {
     ) {
         $contentFiltering = ConstantsConfig::contentFiltering();
         $this->contentSeverityLevels = $contentFiltering['CONTENT_SEVERITY_LEVELS'];
-        $this->reports_amount_to_hide_content = $contentFiltering['REPORTS_COUNT_TO_HIDE_FROM_IOS'];
+        $this->reports_amount_to_hide_content = $contentFiltering['REPORTS_COUNT_TO_HIDE_CONTENT'];
         $this->contentFilterBy = $contentFilterBy;
     }
 
