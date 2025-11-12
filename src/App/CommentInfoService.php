@@ -9,6 +9,7 @@ use Fawaz\Database\CommentMapper;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\ReportsMapper;
+use Fawaz\Database\ModerationMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
@@ -30,6 +31,7 @@ class CommentInfoService
         protected CommentMapper $commentMapper,
         protected TransactionManager $transactionManager,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected ModerationMapper $moderationMapper
     ) {
     }
 
@@ -182,6 +184,11 @@ class CommentInfoService
             if (!$comment) {
                 $this->logger->warning('Comment not found');
                 return $this->respondWithError(31601);
+            }
+
+            if ($this->moderationMapper->wasContentRestored($commentId, 'comment')) {
+                $this->logger->warning('CommentInfoService: reportComment: User tries to report a restored comment');
+                return $this->respondWithError(31610);
             }
 
             $commentInfo = $this->commentInfoMapper->loadById($commentId);
