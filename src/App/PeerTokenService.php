@@ -12,6 +12,7 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 
@@ -150,7 +151,15 @@ class PeerTokenService
                 return self::respondWithError(51301);
             }
 
-            $response = $this->peerTokenMapper->transferToken($this->currentUserId, $recipientId, $numberOfTokens, $message, true);
+            $transferStrategy = new DefaultTransferStrategy();
+
+            $response = $this->peerTokenMapper->transferToken(
+                $this->currentUserId, 
+                $recipientId, 
+                $numberOfTokens, 
+                $transferStrategy,
+                $message
+            );
             if ($response['status'] === 'error') {
                 $this->transactionManager->rollback();
                 return $response;
