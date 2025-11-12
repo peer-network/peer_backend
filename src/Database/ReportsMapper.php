@@ -177,6 +177,50 @@ class ReportsMapper
         return $moderationTicketId;
     }
 
+
+
+
+
+     public function wasContentRestored(string $targetid, string $targettype): bool
+    {
+        $this->logger->debug("ReportsMapper.wasContentRestored started", [
+            'targetid' => $targetid,
+            'targettype' => $targettype
+        ]);
+
+        try {
+            $sql = "SELECT m.status 
+                    FROM user_reports ur
+                    JOIN moderations m ON ur.moderationid = m.uid
+                    WHERE ur.targetid = :targetid 
+                    AND ur.targettype = :targettype
+                    AND m.status = 'restored'
+                    LIMIT 1";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                'targetid' => $targetid,
+                'targettype' => $targettype
+            ]);
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $wasRestored = !empty($result);
+            
+            $this->logger->debug("ReportsMapper.wasContentRestored result", [
+                'wasRestored' => $wasRestored
+            ]);
+            
+            return $wasRestored;
+            
+        } catch (\Exception $e) {
+            $this->logger->error("ReportsMapper.wasContentRestored error", [
+                'exception' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
     /**
      * Check if the target (post, comment, user) is already moderated
      * 
