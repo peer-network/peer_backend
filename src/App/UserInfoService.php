@@ -9,6 +9,7 @@ use Fawaz\Database\UserInfoMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\ReportsMapper;
+use Fawaz\Database\ModerationMapper;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
@@ -36,6 +37,7 @@ class UserInfoService
         protected ReportsMapper $reportsMapper,
         protected TransactionManager $transactionManager,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected ModerationMapper $moderationMapper
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -409,6 +411,11 @@ class UserInfoService
             if (!$user) {
                 $this->logger->warning('UserInfoService.reportUser: User not found');
                 return $this->respondWithError(31007);
+            }
+
+            if ($this->moderationMapper->wasContentRestored($reported_userid, 'user')) {
+                $this->logger->warning('UserInfoService: reportUser: User tries to report a restored user');
+                return $this->respondWithError(31014);
             }
 
             $userInfo = $this->userInfoMapper->loadInfoById($reported_userid);
