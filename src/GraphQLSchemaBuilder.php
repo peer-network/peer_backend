@@ -554,6 +554,9 @@ class GraphQLSchemaBuilder
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
                 },
+                'isreported' => function (array $root): bool {
+                    return $root['isreported'] ?? false;
+                },
                 'imageposts' => function (array $root): array {
                     return [];
                 },
@@ -634,6 +637,9 @@ class GraphQLSchemaBuilder
                 },
                 'isfriend' => function (array $root): bool {
                     return $root['isfriend'] ?? false;
+                },
+                'isreported' => function (array $root): bool {
+                    return $root['isreported'] ?? false;
                 },
             ],
             'BasicUserInfo' => [
@@ -1284,6 +1290,9 @@ class GraphQLSchemaBuilder
                 },
                 'isfollowing' => function (array $root): bool {
                     return $root['isfollowing'] ?? false;
+                },
+                'isreported' => function (array $root): bool {
+                    return $root['isreported'] ?? false;
                 },
                 'amountreports' => function (array $root): int {
                     return $root['reports'] ?? 0;

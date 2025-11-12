@@ -132,6 +132,7 @@ type ProfileUser {
   hasActiveReports: Boolean!
   isfollowed: Boolean
   isfollowing: Boolean
+  isreported: Boolean
   isfriend: Boolean
 }
 
@@ -233,6 +234,7 @@ type Profile {
   hasActiveReports: Boolean!
   isfollowed: Boolean
   isfollowing: Boolean
+  isreported: Boolean
   amountposts: Int
   amounttrending: Int
   amountfollowed: Int
