@@ -195,7 +195,7 @@ class ReportsMapper
                     WHERE ur.targetid = :targetid 
                     AND ur.targettype = :targettype
                     AND m.status = 'restored'
-                    LIMIT 1";
+                ";
             
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
