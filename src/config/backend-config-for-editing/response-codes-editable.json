@@ -951,6 +951,10 @@
         "comment": "It is forbidden to interact with this Post(illegal Post)",
         "userFriendlyComment": "It is forbidden to interact with this Post(illegal Post)"
     },
+    "31514": {
+        "comment": "Not Allowed: This post has already been reviewed and restored by our moderation team",
+        "userFriendlyComment": "This post was already reviewed and found to comply with our guidelines."
+    },
     "31601": {
         "comment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",
         "userFriendlyComment": "Comment not found. Check the ID and try again."
