@@ -52,6 +52,7 @@ type AdvertisementHistoryResult {
 type ListedAdvertisementData {
   status: String!
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: AdvertisementHistoryResult
 }
 
@@ -77,6 +78,7 @@ type ContactusResponsePayload {
 type ListAdvertisementData {
   status: String!
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: [AdvertisementRow]
 }
 
@@ -237,6 +239,7 @@ type Profile {
 type ProfileInfo {
   status: String
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: Profile
 }
 
@@ -448,5 +451,6 @@ type AllUserFriends {
   status: String!
   counter: Int!
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: [AllUserInfo]
 }
