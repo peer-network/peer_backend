@@ -119,6 +119,7 @@ type Comment {
   amountlikes: Int!
   amountreplies: Int!
   amountreports: Int!
+  isreported: Boolean!
   isliked: Boolean!
   user: ProfileUser!
 }

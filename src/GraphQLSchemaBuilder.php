@@ -1034,6 +1034,9 @@ class GraphQLSchemaBuilder
                 'amountreports' => function (array $root): int {
                     return $root['amountreports'] ?? 0;
                 },
+                'isreported' => function (array $root): bool {
+                    return $root['isreported'] ?? false;
+                },
                 'isliked' => function (array $root): bool {
                     return $root['isliked'] ?? false;
                 },

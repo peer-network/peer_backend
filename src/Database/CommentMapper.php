@@ -144,7 +144,8 @@ class CommentMapper
                 ui.reports AS user_reports,
                 u.status AS user_status,
                 c.visibility_status as visibility_status,
-                ci.reports AS comment_reports
+                ci.reports AS comment_reports,
+                EXISTS (SELECT 1 FROM user_reports  WHERE targetid = c.commentid AND reporter_userid = :currentUserId) AS isreported
                 FROM comments c
             LEFT JOIN %s
             WHERE %s
@@ -177,6 +178,7 @@ class CommentMapper
                 'amountlikes' => (int) $row['amountlikes'],
                 'amountreplies' => (int) $row['amountreplies'],
                 'amountreports' => (int) $row['comment_reports'],
+                'isreported' => (bool) ($row['isreported'] ?? false),
                 'isliked' => (bool) $row['isliked'],
                 'createdat' => $row['createdat'],
                 'visibility_status' => $row['visibility_status'],
@@ -337,7 +339,8 @@ class CommentMapper
 					u.status,
 					u.img,
 					(f1.followerid IS NOT NULL) AS isfollowing,
-					(f2.followerid IS NOT NULL) AS isfollowed
+					(f2.followerid IS NOT NULL) AS isfollowed,
+                    EXISTS (SELECT 1 FROM user_reports  WHERE targetid = c.commentid AND reporter_userid = :currentUserId) AS isreported
 				FROM 
 					comments c
 				LEFT JOIN 
@@ -397,6 +400,7 @@ class CommentMapper
                     'amountlikes' => (int) $row['amountlikes'],
                     'amountreplies' => (int) $row['amountreplies'],
                     'amountreports' => (int) $row['amountreports'],
+                    'isreported' => (bool) ($row['isreported'] ?? false),
                     'isliked' => (bool) $row['isliked'],
                     'createdat' => $row['createdat'],
                     'userstatus' => $userObj['status'],
