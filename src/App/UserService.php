@@ -206,7 +206,14 @@ class UserService
             'updatedat' => (new \DateTime())->format('Y-m-d H:i:s.u')
         ];
 
-        $this->logger->debug('UserService.createUser.verificationData started', ['verificationData' => $verificationData]);
+        // Mask token for logging (show first 6 chars, hide the rest)
+        $maskedToken = substr($verificationData['token'], 0, 6) . str_repeat('*', strlen($verificationData['token']) - 6);
+
+        $this->logger->debug('UserService.createUser.verificationData started', [
+            'userid' => $verificationData['userid'],
+            'token' => $maskedToken,
+            'expiresat' => $verificationData['expiresat']
+        ]);
 
         $userData = [
             'uid' => $id,
@@ -331,7 +338,7 @@ class UserService
         }
 
         $this->userMapper->logLoginDaten($id);
-        $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
+        $this->logger->info('User registered successfully.', ['userid' => $id]);
 
         try {
             $data = [
@@ -641,7 +648,7 @@ class UserService
         $email = $args['email'] ?? null;
         $exPassword = $args['password'] ?? null;
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->warning('Invalid email format', ['email' => $email]);
+            $this->logger->warning('Invalid email format');
             return self::respondWithError(30224);
         }
 
@@ -651,7 +658,7 @@ class UserService
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
-            $this->logger->warning('Email already in use', ['email' => $email]);
+            $this->logger->warning('Email already in use');
             return self::respondWithError(31003);
         }
 
@@ -675,7 +682,7 @@ class UserService
             $data = $this->userMapper->updateProfil($user);
             $affectedRows = $data->getArrayCopy();
 
-            $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId, 'email' => $email]);
+            $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId]);
             $this->transactionManager->commit();
             return $this::createSuccessResponse(11006, $affectedRows, false);
         } catch (\Throwable $e) {
@@ -1022,7 +1029,7 @@ class UserService
         $expiresAt = $this->getFutureTimestamp('+1 hour');
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->warning('Invalid email format', ['email' => $email]);
+            $this->logger->warning('Invalid email format');
             return self::respondWithError(30104);
         }
 
@@ -1032,7 +1039,7 @@ class UserService
             $user = $this->userMapper->loadByEmail($email);
 
             if (!$user) {
-                $this->logger->warning('Invalid user', ['email' => $email]);
+                $this->logger->warning('Invalid user');
                 return $this->genericPasswordResetSuccessResponse();
             }
 
@@ -1112,7 +1119,7 @@ class UserService
         $this->logger->debug('UserService.resetPasswordTokenVerify started');
 
         if (empty($token)) {
-            $this->logger->warning('Invalid reset token', ['token' => $token]);
+            $this->logger->warning('Invalid reset token');
             return self::respondWithError(31904);
         }
 
@@ -1120,15 +1127,15 @@ class UserService
             $isValidToken = $this->userMapper->getPasswordResetRequest($token);
 
             if (!$isValidToken) {
-                $this->logger->warning('Invalid or expired reset token. ', ['token' => $token]);
+                $this->logger->warning('Invalid or expired reset token');
                 return self::respondWithError(31904);
             }
 
-            $this->logger->info('Token verified successfully', ['token' => $token]);
+            $this->logger->info('Token verified successfully');
 
             return self::createSuccessResponse(11902);
         } catch (\Throwable $e) {
-            $this->logger->error('Unexpected error during token verification', ['error' => $e->getMessage(), 'token' => $token]);
+            $this->logger->error('Unexpected error during token verification', ['error' => $e->getMessage()]);
             return self::respondWithError(41004);
         }
     }
