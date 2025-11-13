@@ -669,7 +669,7 @@ class PostMapper
 
                     EXISTS (SELECT 1 FROM user_post_likes    WHERE postid = p.postid AND userid = :currentUserId) AS isliked,
                     EXISTS (SELECT 1 FROM user_post_views    WHERE postid = p.postid AND userid = :currentUserId) AS isviewed,
-                    EXISTS (SELECT 1 FROM user_post_reports  WHERE postid = p.postid AND userid = :currentUserId) AS isreported,
+                    EXISTS (SELECT 1 FROM user_reports ur  WHERE ur.targetid = p.postid AND ur.reporter_userid = :currentUserId) AS isreported,
                     EXISTS (SELECT 1 FROM user_post_dislikes WHERE postid = p.postid AND userid = :currentUserId) AS isdisliked,
                     EXISTS (SELECT 1 FROM user_post_saves    WHERE postid = p.postid AND userid = :currentUserId) AS issaved,
 
