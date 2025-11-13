@@ -242,7 +242,9 @@ class ModerationMapper
                     Post::query()->where('postid', $report['targetid'])->updateColumns([
                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
                     ]);
-
+                    PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
+                            'reports' => 0
+                        ]);
                     // Move file to illegal folder
                     $this->moveFileToIllegalFolder($report['targetid'], 'post');
                 }
@@ -268,7 +270,7 @@ class ModerationMapper
                  */
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
                     PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
-                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_CONTENT']['POST']
+                        'reports' => 0
                     ]);
                     Post::query()->where('postid', $report['targetid'])->updateColumns([
                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
