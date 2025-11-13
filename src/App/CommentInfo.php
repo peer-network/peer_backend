@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 
-class CommentInfo
+class CommentInfo extends Model
 {
     protected string $commentid;
     protected string $userid;
     protected int $likes;
-    protected int $reports;
+    protected int $activeReports;
+    protected int $totalreports;
     protected int $comments;
 
     // Constructor
@@ -25,7 +27,8 @@ class CommentInfo
         $this->commentid = $data['commentid'] ?? '';
         $this->userid = $data['userid'] ?? '';
         $this->likes = $data['likes'] ?? 0;
-        $this->reports = $data['reports'] ?? 0;
+        $this->activeReports = $data['reports'] ?? 0;
+        $this->totalreports = $data['totalreports'] ?? 0;
         $this->comments = $data['comments'] ?? 0;
     }
 
@@ -36,7 +39,8 @@ class CommentInfo
             'commentid' => $this->commentid,
             'userid' => $this->userid,
             'likes' => $this->likes,
-            'reports' => $this->reports,
+            'reports' => $this->activeReports,
+            'totalreports' => $this->totalreports,
             'comments' => $this->comments,
         ];
         return $att;
@@ -73,16 +77,24 @@ class CommentInfo
         $this->likes = $likes;
     }
 
-    public function getReports(): int
+    public function getActiveReports(): int
     {
-        return $this->reports;
+        return $this->activeReports;
     }
 
     public function setReports(int $reports): void
     {
-        $this->reports = $reports;
+        $this->activeReports = $reports;
     }
 
+    public function getTotalReports(): int
+    {
+        return $this->totalreports;
+    }
+    public function setTotalReports(int $totalreports): void
+    {
+        $this->totalreports = $totalreports;
+    }
     public function getComments(): int
     {
         return $this->comments;
@@ -150,5 +162,11 @@ class CommentInfo
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+    // Table name
+    public static function table(): string
+    {
+        return 'comment_info';
     }
 }

@@ -86,9 +86,10 @@ class TokenHelper
      */
     public static function truncateToTenDecimalPlaces(string $number): string
     {
-        $runtIns = self::initRc();
+		// Bind only the truncate symbol to avoid failing core ops
+		$ffi = self::initTruncateRc();
 
-        $result = $runtIns->truncate_decimal($number);
+		$result = $ffi->truncate_decimal($number);
 
         if (is_numeric($result) === false) {
             throw new \RuntimeException("Error in truncation operation, result is not numeric.");
@@ -170,16 +171,38 @@ class TokenHelper
         }
         
 
-        // Load FFI bindings
-        $ffi = FFI::cdef("
-            const char* add_decimal(const char* a, const char* b);
-            const char* subtract_decimal(const char* a, const char* b);
-            const char* multiply_decimal(const char* a, const char* b);
-            const char* divide_decimal(const char* a, const char* b);
-            const char* truncate_decimal(const char* a);
-        ", $relativePath);
+		// Load FFI bindings for core arithmetic only
+		$ffi = FFI::cdef("
+			const char* add_decimal(const char* a, const char* b);
+			const char* subtract_decimal(const char* a, const char* b);
+			const char* multiply_decimal(const char* a, const char* b);
+			const char* divide_decimal(const char* a, const char* b);
+		", $relativePath);
 
         return $ffi;
 
-    }
+	}
+
+	/**
+	 * Initialise FFI with just truncate symbol. Kept separate to avoid
+	 * failing core arithmetic when the deployed native library is older.
+	 */
+	private static function initTruncateRc()
+	{
+		if (PHP_OS_FAMILY === 'Windows') {
+			$relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/tokencalculation.dll';
+		} elseif (PHP_OS_FAMILY === 'Darwin') {
+			$relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.dylib';
+		} else {
+			$relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.so';
+		}
+
+		try {
+			return FFI::cdef("
+				const char* truncate_decimal(const char* a);
+			", $relativePath);
+		} catch (\FFI\Exception $e) {
+			throw new \RuntimeException('truncate_decimal not available in native library. Please rebuild and deploy tokencalculation with that export.', 0, $e);
+		}
+	}
 }

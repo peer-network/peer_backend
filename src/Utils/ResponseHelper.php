@@ -37,6 +37,19 @@ trait ResponseHelper
         );
     }
 
+    private static function createSuccessResponseObject(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): SuccessResponse
+    {
+        return new SuccessResponse(
+            self::createResponse(
+              $responseCode,
+                $data,
+                $countEnabled,
+                $countKey,
+                true
+            )
+        );
+    }
+
     private static function respondWithError(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
         return self::createResponse(
@@ -45,6 +58,19 @@ trait ResponseHelper
             $countEnabled,
             $countKey,
             true
+        );
+    }
+
+    private static function respondWithErrorObject(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): ErrorResponse
+    {
+        return new ErrorResponse(
+            self::createResponse(
+                $responseCode,
+                $data,
+                $countEnabled,
+                $countKey,
+                true
+            )
         );
     }
 

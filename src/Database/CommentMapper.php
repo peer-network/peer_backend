@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\App\Profile;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use PDO;
 use Fawaz\App\Comment;
 use Fawaz\App\CommentAdvanced;
 use Fawaz\App\Commented;
-use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\User;
@@ -93,17 +91,16 @@ class CommentMapper
         return $deleted;
     }
 
-    public function fetchAllByPostIdetaild(string $postId, string $currentUserId, int $offset = 0, int $limit = 10, ?string $contentFilterBy = null): array
+    public function fetchAllByPostIdetaild(string $postId, array $specifications, string $currentUserId, int $offset = 0, int $limit = 10): array
     {
         $this->logger->debug("CommentMapper.fetchAllByPostIdetaild started");
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            new ListPostsContentFilteringStrategy(),
-            null,
-            $contentFilterBy
-        );
-        $whereClauses = ["c.postid = :postId AND c.parentid IS NULL"];
-        // $whereClauses[] = 'u.status = 0 AND (u.roles_mask = 0 OR u.roles_mask = 16)';
+        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::comment), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
+        
+        $whereClauses[] = "c.postid = :postId AND c.parentid IS NULL";
 
         $joinClausesString = "
                 users u ON c.userid = u.uid
@@ -144,10 +141,9 @@ class CommentMapper
                 u.img,
                 CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
                 CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
-                ci.count_content_moderation_dismissed AS comment_count_content_moderation_dismissed,
                 ui.reports AS user_reports,
                 u.status AS user_status,
+                c.visibility_status as visibility_status,
                 ci.reports AS comment_reports
                 FROM comments c
             LEFT JOIN %s
@@ -158,64 +154,19 @@ class CommentMapper
             $joinClausesString,
             $whereClausesString
         );
-
+            
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':postId', $postId, PDO::PARAM_STR);
-        $stmt->bindValue(':currentUserId', $currentUserId, PDO::PARAM_STR);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
+        $params['postId']=$postId;
+        $params['currentUserId']=$currentUserId;
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
+
+        $stmt->execute($params);
 
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $this->logger->info("Fetched comments for post counter", ['row' => $row]);
             // here to decide if to replace comment/user content or not
-            $user_reports = (int)$row['user_reports'];
-            $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
-            $comment_reports = (int)$row['comment_reports'];
-            $comment_dismiss_moderation_amount = (int)$row['comment_count_content_moderation_dismissed'];
-
-
-            if ($row['user_status'] != 0) {
-                $replacer = ContentReplacementPattern::suspended;
-                $row['username'] = $replacer->username($row['username']);
-                $row['img'] = $replacer->profilePicturePath($row['img']);
-            }
-
-            if ($contentFilterService->getContentFilterAction(
-                ContentType::comment,
-                ContentType::user,
-                $user_reports,
-                $user_dismiss_moderation_amount,
-                $currentUserId,
-                $row['uid']
-            ) == ContentFilteringAction::replaceWithPlaceholder) {
-                $replacer = ContentReplacementPattern::flagged;
-                $row['username'] = $replacer->username($row['username']);
-                $row['img'] = $replacer->profilePicturePath($row['img']);
-            }
-
-            if ($contentFilterService->getContentFilterAction(
-                ContentType::comment,
-                ContentType::comment,
-                $comment_reports,
-                $comment_dismiss_moderation_amount,
-                $currentUserId,
-                $row['uid']
-            ) == ContentFilteringAction::replaceWithPlaceholder) {
-                $replacer = ContentReplacementPattern::flagged;
-                $row['content'] = $replacer->commentContent($row['content']);
-            }
-
-
-            $userObj = [
-                        'uid' => $row['uid'],
-                        'status' => $row['status'],
-                        'username' => $row['username'],
-                        'slug' => $row['slug'],
-                        'img' => $row['img'],
-                    ];
-            $userObj = (new User($userObj, [], false))->getArrayCopy();
 
             $results[] = new CommentAdvanced([
                 'commentid' => $row['commentid'],
@@ -225,47 +176,17 @@ class CommentMapper
                 'content' => $row['content'],
                 'amountlikes' => (int) $row['amountlikes'],
                 'amountreplies' => (int) $row['amountreplies'],
+                'amountreports' => (int) $row['comment_reports'],
                 'isliked' => (bool) $row['isliked'],
                 'createdat' => $row['createdat'],
-                'userstatus' => $userObj['status'],
-                'user' => [
-                    'uid' => $userObj['uid'],
-                    'username' => $userObj['username'],
-                    'status' => $userObj['status'],
-                    'slug' => $userObj['slug'],
-                    'img' => $userObj['img'],
-                    'isfollowed' => (bool) $row['isfollowed'],
-                    'isfollowing' => (bool) $row['isfollowing'],
-                ],
+                'visibility_status' => $row['visibility_status'],
+                'reports' => $row['comment_reports']
             ]);
         }
 
         $this->logger->info("Fetched comments for post", ['count' => count($results)]);
 
         return $results;
-    }
-
-    public function fetchAllByPostIdd(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
-    {
-        $this->logger->debug("CommentMapper.fetchAllByPostId started");
-
-        $sql = "SELECT c.*, u.status FROM comments c LEFT JOIN users u ON c.userid = u.uid WHERE c.postid = :postId AND c.parentid IS NULL ORDER BY c.createdat ASC LIMIT :limit OFFSET :offset";
-        $params = [
-            'postId' => $postId,
-            'limit' => $limit,
-            'offset' => $offset,
-        ];
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-
-        $comments = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $row['userstatus'] = $row['status'];
-            $comments[] = new Comment($row);
-        }
-
-        return $comments;
     }
 
     public function fetchAllByPostId(string $postId, string $currentUserId, int $offset = 0, int $limit = 10): array
@@ -312,7 +233,7 @@ class CommentMapper
                         'biography' => $row['biography'],
                         'updatedat' => $row['updatedat'],
                     ];
-            $userObj = (new User($userObj, [], false))->getArrayCopy();
+            $userObj = (new Profile($userObj, [], false))->getArrayCopy();
 
             $row['user'] = [
                 'uid' => $userObj['uid'] ?? '',
@@ -335,7 +256,6 @@ class CommentMapper
 
     private function fetchSubComments(string $parentId): array
     {
-        // $sql = "SELECT * FROM comments WHERE parentid = :parentid ORDER BY createdat ASC";
         $sql = "SELECT 
             c.*, 
             u.*
@@ -409,6 +329,7 @@ class CommentMapper
 					c.createdat,
 					COALESCE(like_counts.like_count, 0) AS amountlikes,
 					COALESCE(comment_counts.comment_count, 0) AS amountreplies,
+                    ci.reports AS amountreports,
 					(ul.userid IS NOT NULL) AS isliked,
 					u.uid,
 					u.username,
@@ -421,6 +342,9 @@ class CommentMapper
 					comments c
 				LEFT JOIN 
 					users u ON c.userid = u.uid
+                LEFT JOIN 
+                    comment_info ci
+                    ON c.commentid = ci.commentid
 				LEFT JOIN 
 					(SELECT commentid, COUNT(*) AS like_count FROM user_comment_likes GROUP BY commentid) like_counts 
 					ON c.commentid = like_counts.commentid
@@ -472,6 +396,7 @@ class CommentMapper
                     'content' => $row['content'],
                     'amountlikes' => (int) $row['amountlikes'],
                     'amountreplies' => (int) $row['amountreplies'],
+                    'amountreports' => (int) $row['amountreports'],
                     'isliked' => (bool) $row['isliked'],
                     'createdat' => $row['createdat'],
                     'userstatus' => $userObj['status'],
@@ -590,8 +515,6 @@ class CommentMapper
 				u.slug,
                 u.status,
                 u.img,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
-                ci.count_content_moderation_dismissed AS comment_count_content_moderation_dismissed,
                 ui.reports AS user_reports,
                 u.status AS user_status,
                 ci.reports AS comment_reports
@@ -630,6 +553,7 @@ class CommentMapper
                 'content' => $row['content'],
                 'amountlikes' => (int) $row['amountlikes'],
                 'amountreplies' => (int) $row['amountreplies'],
+                'amountreports' => (int) $row['amountreports'],
                 'isliked' => false,
                 'createdat' => $row['createdat'],
                 'userstatus' => $userObj['status'],

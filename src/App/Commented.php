@@ -40,10 +40,6 @@ class Commented
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->subcomments = isset($data['subcomments']) && is_array($data['subcomments']) ? $data['subcomments'] : [];
         $this->userstatus = $data['userstatus'] ?? 0;
-
-        if ($this->userstatus == 6) {
-            $this->content = "Comment by deleted Account";
-        }
     }
 
     // Array Copy methods

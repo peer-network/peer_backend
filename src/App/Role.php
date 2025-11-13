@@ -50,4 +50,21 @@ final class Role
     private function __construct()
     {
     }
+
+    /**
+     * Maps a roles mask to an array of role names.
+     * 
+     * Should only return valid roles.
+     */
+    public static function mapRolesMaskToNames(int $rolesMask): array
+    {
+        $map = self::getMap();
+
+        if (isset($map[$rolesMask])) {
+            return [$map[$rolesMask]];
+        }
+
+        return [];
+    }
+
 }

@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\App\Wallet;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -18,9 +21,13 @@ class PeerTokenService
 
     protected ?string $currentUserId = null;
 
-    public function __construct(protected PeerLoggerInterface $logger, protected PeerTokenMapper $peerTokenMapper, protected UserMapper $userMapper, protected TransactionManager $transactionManager)
-    {
-    }
+    public function __construct(
+        protected PeerLoggerInterface $logger, 
+        protected PeerTokenMapper $peerTokenMapper, 
+        protected TransactionManager $transactionManager,
+        protected UserMapper $userMapper,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper
+    ) {}
 
     public function setCurrentUserId(string $userId): void
     {
@@ -48,6 +55,28 @@ class PeerTokenService
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
+
+        $recipientid =  $args['recipient'];
+        
+        if (!$this->userMapper->isUserExistById($recipientid)) {
+            return $this::respondWithError(31007);
+        }
+
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $specs = [
+            $systemUserSpec
+        ];
+
+        if($this->interactionsPermissionsMapper->isInteractionAllowed($specs,$recipientid) === false) {
+            return $this::respondWithError(31203, ['recipientid'=> $recipientid]);
+        }
+
         try {
             $this->logger->debug('PeerTokenMapper.transferToken started');
 

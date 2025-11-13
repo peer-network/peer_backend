@@ -5,27 +5,31 @@
             "url" : "https://fourchan.fake/"
         },
         {
-            "version" : "1.8.0",
+            "version" : "1.9.0",
             "url" : "https://peernetwork.eu/graphql"
         },
         {
-            "version" : "1.8.0",
+            "version" : "1.10.0",
             "url" : "https://getpeer.eu/graphql"
         }
     ],
     "android" : [
         {
-            "version" : "1.8.4",
+            "version" : "1.9.0",
             "url" : "https://peernetwork.eu/graphql"
         },
         {
-            "version" : "1.8.4",
+            "version" : "1.10.0",
             "url" : "https://getpeer.eu/graphql"
         }
     ],
     "web" : [
         {
-            "version" : "1.8.1",
+            "version" : "1.9.0",
+            "url" : "https://peernetwork.eu/graphql"
+        },
+        {
+            "version" : "1.10.0",
             "url" : "https://getpeer.eu/graphql"
         }
     ]

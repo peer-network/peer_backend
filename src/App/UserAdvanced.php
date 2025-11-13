@@ -7,8 +7,9 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
-class UserAdvanced
+class UserAdvanced implements ProfileReplaceable
 {
     protected string $uid;
     protected string $email;
@@ -32,6 +33,8 @@ class UserAdvanced
     protected ?float $liquidity;
     protected ?string $createdat;
     protected ?string $updatedat;
+    protected ?int $activeReports;
+    protected ?string $visibilityStatus;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -62,12 +65,8 @@ class UserAdvanced
         $this->liquidity = $data['liquidity'] ?? 0.0;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-
-        if ($this->status == 6) {
-            $this->username = 'Deleted_Account';
-            $this->img = '/profile/00000000-0000-0000-0000-000000000000.jpeg';
-            $this->biography = '/userData/00000000-0000-0000-0000-000000000000.txt';
-        }
+        $this->activeReports= $data['user_reports'] ?? 0;
+        $this->visibilityStatus = $data['visibility_status'] ?? '';
     }
 
     // Array Copy methods
@@ -96,6 +95,8 @@ class UserAdvanced
             'liquidity' => $this->liquidity,
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
+            'reports' => $this->activeReports,
+            'visibility_status' => $this->visibilityStatus
         ];
         return $att;
     }
@@ -277,6 +278,16 @@ class UserAdvanced
         $this->img = $imgPath;
     }
 
+    public function visibilityStatus(): string
+    {
+        return (string)($this->visibilityStatus ?? '');
+    }
+
+    public function setVisibilityStatus(?string $status): void
+    {
+        $this->visibilityStatus = $status;
+    }
+
     public function getAmountPosts(): int|null
     {
         return $this->amountposts;
@@ -356,6 +367,18 @@ class UserAdvanced
     {
         $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
     }
+
+    public function getActiveReports(): int
+    {
+        return $this->activeReports;
+    }
+
+    public function getRolesmask(): int
+    {
+        return $this->roles_mask;
+    }
+
+    
 
     // Password Verify methods
     public function verifyPassword(string $password): bool
