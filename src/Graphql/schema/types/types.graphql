@@ -119,6 +119,7 @@ type Comment {
   amountlikes: Int!
   amountreplies: Int!
   amountreports: Int!
+  isreported: Boolean!
   isliked: Boolean!
   user: ProfileUser!
 }
@@ -132,6 +133,7 @@ type ProfileUser {
   hasActiveReports: Boolean!
   isfollowed: Boolean
   isfollowing: Boolean
+  isreported: Boolean
   isfriend: Boolean
 }
 
@@ -233,6 +235,7 @@ type Profile {
   hasActiveReports: Boolean!
   isfollowed: Boolean
   isfollowing: Boolean
+  isreported: Boolean
   amountposts: Int
   amounttrending: Int
   amountfollowed: Int

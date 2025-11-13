@@ -113,7 +113,8 @@ class ProfileRepositoryImpl implements ProfileRepository
                 ui.reports AS user_reports,
                 COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
+                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed,
+                EXISTS (SELECT 1 FROM user_reports  WHERE targetid = u.uid AND reporter_userid = :currentUserId) AS isreported
             FROM users u
             LEFT JOIN users_info ui ON ui.userid = u.uid
             WHERE %s",
