@@ -338,7 +338,7 @@ class UserService
         }
 
         $this->userMapper->logLoginDaten($id);
-        $this->logger->info('User registered successfully.', ['username' => $username]);
+        $this->logger->info('User registered successfully.', ['userid' => $id]);
 
         try {
             $data = [
