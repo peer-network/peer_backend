@@ -39,7 +39,7 @@ class ContentReplacer
         if ($pattern->profilePicturePath()) {
             $profile->setImg($pattern->profilePicturePath());
         }
-        if ($profile->visibilityStatus() === "normal") {
+        if ($profile->visibilityStatus() !== "illegal") {
             $profile->setVisibilityStatus($pattern->visibilityStatus());
         }
     }
@@ -95,7 +95,7 @@ class ContentReplacer
         if ($pattern->commentContent()) {
             $comment->setContent($pattern->commentContent());
         }
-        if ($comment->visibilityStatus() === "normal") {
+        if ($comment->visibilityStatus() !== "illegal") {
             $comment->setVisibilityStatus($pattern->visibilityStatus());
         }
     }

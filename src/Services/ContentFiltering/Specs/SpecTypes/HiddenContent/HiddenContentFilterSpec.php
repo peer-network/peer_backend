@@ -124,7 +124,7 @@ final class HiddenContentFilterSpec implements Specification
         );
 
         if ($subject->getUserId() === $this->currentUserId) {
-            return null;    
+            return ContentReplacementPattern::normal;
         }
         if ($action === ContentFilteringAction::replaceWithPlaceholder) {
             return ContentReplacementPattern::hidden;

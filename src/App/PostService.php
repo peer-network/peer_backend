@@ -927,12 +927,14 @@ class PostService
             ContentType::post
         );
         $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec(null);
 
         $specs = [
             $illegalContentSpec,
             $systemUserSpec,
             $deletedUserSpec,
-            $excludeAdvertisementsForNormalFeedSpec
+            $excludeAdvertisementsForNormalFeedSpec,
+            $normalVisibilityStatusSpec
         ];
 
         try {
