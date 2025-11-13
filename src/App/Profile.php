@@ -21,6 +21,7 @@ class Profile implements ProfileReplaceable
     protected ?int $amounttrending;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
+    protected ?bool $isreported;
     protected ?int $amountfollower;
     protected ?int $amountfollowed;
     protected ?int $amountfriends;
@@ -47,6 +48,7 @@ class Profile implements ProfileReplaceable
         $this->img = $data['img'] ?? '';
         $this->biography = $data['biography'] ?? '';
         $this->amountposts = $data['amountposts'] ?? 0;
+        $this->isreported = $data['isreported'] ?? false;
         $this->amounttrending = $data['amounttrending'] ?? 0;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
@@ -74,6 +76,7 @@ class Profile implements ProfileReplaceable
             'amounttrending' => $this->amounttrending,
             'isfollowed' => $this->isfollowed,
             'isfollowing' => $this->isfollowing,
+            'isreported' => $this->isreported,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
             'amountfriends' => $this->amountfriends,

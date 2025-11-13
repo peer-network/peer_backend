@@ -26,6 +26,7 @@ class UserAdvanced implements ProfileReplaceable
     protected ?int $amounttrending;
     protected ?int $isprivate;
     protected ?bool $isfollowed;
+    protected ?bool $isreported;
     protected ?bool $isfollowing;
     protected ?int $amountfollower;
     protected ?int $amountfollowed;
@@ -57,6 +58,7 @@ class UserAdvanced implements ProfileReplaceable
         $this->amountposts = $data['amountposts'] ?? 0;
         $this->amounttrending = $data['amounttrending'] ?? 0;
         $this->isprivate = $data['isprivate'] ?? 0;
+        $this->isreported = $data['isreported'] ?? false;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
         $this->amountfollower = $data['amountfollower'] ?? 0;
@@ -88,6 +90,7 @@ class UserAdvanced implements ProfileReplaceable
             'amounttrending' => $this->amounttrending,
             'isprivate' => $this->isprivate,
             'isfollowed' => $this->isfollowed,
+            'isreported' => $this->isreported,
             'isfollowing' => $this->isfollowing,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,

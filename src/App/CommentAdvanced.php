@@ -20,6 +20,7 @@ class CommentAdvanced implements CommentReplaceable
     protected ?int $amountlikes;
     protected ?int $amountreports;
     protected ?int $amountreplies;
+    protected ?bool $isreported;
     protected ?bool $isliked;
     protected ?int $activeReports = null;
     protected ?string $visibilityStatus = null;
@@ -42,6 +43,7 @@ class CommentAdvanced implements CommentReplaceable
         $this->amountlikes = $data['amountlikes'] ?? 0;
         $this->amountreplies = $data['amountreplies'] ?? 0;
         $this->amountreports = $data['amountreports'] ?? 0;
+        $this->isreported = $data['isreported'] ?? false;
         $this->isliked = $data['isliked'] ?? false;
         $this->activeReports = $data['reports'] ?? null;
         $this->visibilityStatus = $data['visibility_status']?? null;
@@ -61,6 +63,7 @@ class CommentAdvanced implements CommentReplaceable
             'amountlikes' => $this->amountlikes,
             'amountreplies' => $this->amountreplies,
             'amountreports' => $this->amountreports,
+            'isreported' => $this->isreported,
             'isliked' => $this->isliked,
             'visibility_status' => $this->visibilityStatus,
             'reports' => $this->activeReports,
