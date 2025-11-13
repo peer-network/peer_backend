@@ -51,7 +51,6 @@ use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalConten
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 
-
 class GraphQLSchemaBuilder
 {
     use ResponseHelper;
@@ -154,22 +153,22 @@ class GraphQLSchemaBuilder
         if ($bearerToken !== null && $bearerToken !== '') {
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
-                    // Validate that the provided bearer access token exists in DB and is not expired
-                    // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
-                    //     $this->logger->warning('Access token not found or expired for user', [
-                    //         'userId' => $decodedToken->uid,
-                    //     ]);
-                    //     $this->currentUserId = null;
-                    //     return;
-                    // }
+                // Validate that the provided bearer access token exists in DB and is not expired
+                // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
+                //     $this->logger->warning('Access token not found or expired for user', [
+                //         'userId' => $decodedToken->uid,
+                //     ]);
+                //     $this->currentUserId = null;
+                //     return;
+                // }
 
-                    $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
-                    if ($user) {
-                        $this->currentUserId = $decodedToken->uid;
-                        $this->userRoles = $decodedToken->rol;
-                        $this->setCurrentUserIdForServices($this->currentUserId);
-                        $this->logger->debug('Query.setCurrentUserId started');
-                    }
+                $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
+                if ($user) {
+                    $this->currentUserId = $decodedToken->uid;
+                    $this->userRoles = $decodedToken->rol;
+                    $this->setCurrentUserIdForServices($this->currentUserId);
+                    $this->logger->debug('Query.setCurrentUserId started');
+                }
 
                 $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
                 if ($user) {
@@ -2357,7 +2356,8 @@ class GraphQLSchemaBuilder
         ];
     }
 
-    protected function buildSubscriptionResolvers(): array {
+    protected function buildSubscriptionResolvers(): array
+    {
         return [];
     }
     protected function buildQueryResolvers(): array
@@ -2448,9 +2448,9 @@ class GraphQLSchemaBuilder
         $lastMergedPullRequestNumber = LastGithubPullRequestNumberProvider::getValue();
 
         /**
-         * Map Role Mask 
+         * Map Role Mask
          */
-        if(Role::mapRolesMaskToNames($this->userRoles)[0]){
+        if (Role::mapRolesMaskToNames($this->userRoles)[0]) {
             $userRole = Role::mapRolesMaskToNames($this->userRoles)[0];
         }
         $userRoleString = $userRole ?? 'USER';
@@ -2646,7 +2646,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(41013);
         }
     }
-    
+
     protected function resolveReferralList(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
@@ -2667,7 +2667,7 @@ class GraphQLSchemaBuilder
                 'invitedBy' => [],
                 'iInvited' => [],
             ];
-        
+
             $deletedUserSpec = new DeletedUserSpec(
                 ContentFilteringCases::searchById,
                 ContentType::user
@@ -2676,7 +2676,7 @@ class GraphQLSchemaBuilder
                 ContentFilteringCases::searchById,
                 ContentType::user
             );
-            
+
             $illegalContentFilterSpec = new IllegalContentFilterSpec(
                 ContentFilteringCases::searchById,
                 ContentType::user
@@ -2688,8 +2688,8 @@ class GraphQLSchemaBuilder
                 $deletedUserSpec,
             ];
 
-            
-            $inviter = $this->userMapper->getInviterByInvitee($userId,$specs);
+
+            $inviter = $this->userMapper->getInviterByInvitee($userId, $specs);
             $referralUsers['invitedBy'] = null;
             if (!empty($inviter)) {
                 $this->logger->info('Inviter data', ['inviter' => $inviter->getUserId()]);
@@ -2700,7 +2700,7 @@ class GraphQLSchemaBuilder
             $offset = $args['offset'] ?? 0;
             $limit = $args['limit'] ?? 20;
 
-            $invited= $this->userMapper->getReferralRelations($userId, $specs, $offset, $limit);
+            $invited = $this->userMapper->getReferralRelations($userId, $specs, $offset, $limit);
 
             if (!empty($invited)) {
                 foreach ($invited as $user) {
@@ -2846,7 +2846,7 @@ class GraphQLSchemaBuilder
                 $contentFilterCase,
                 ContentType::post
             );
-            
+
             $illegalContentSpec = new IllegalContentFilterSpec(
                 $contentFilterCase,
                 ContentType::post
@@ -2858,11 +2858,11 @@ class GraphQLSchemaBuilder
                 $deletedUserSpec,
             ];
 
-            if($this->interactionsPermissionsMapper->isInteractionAllowed(
+            if ($this->interactionsPermissionsMapper->isInteractionAllowed(
                 $specs,
                 $postId
             ) === false) {
-                return $this::respondWithError(31513, ['postid'=> $postId]);
+                return $this::respondWithError(31513, ['postid' => $postId]);
             }
         }
 
@@ -2898,7 +2898,7 @@ class GraphQLSchemaBuilder
             'dislike' => $actions['DISLIKE'],
         ];
 
-        // Validations  
+        // Validations
         if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
             $this->logger->warning('Invalid action parameter', ['action' => $action]);
             return $this::respondWithError(30105);
@@ -3242,14 +3242,14 @@ class GraphQLSchemaBuilder
         if (!empty($userId)) {
             $contentFilterCase = ContentFilteringCases::searchById;
             if ($userId == $this->currentUserId) {
-                
+
                 $contentFilterCase = ContentFilteringCases::myprofile;
             }
             $args['uid'] = $userId;
         }
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        
+
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
             ContentType::user
@@ -3293,7 +3293,7 @@ class GraphQLSchemaBuilder
                     'counter' => count($usersArray),
                     'ResponseCode' => "11009",
                     'affectedRows' => $usersArray,
-                ]; 
+                ];
             } else {
                 if ($userId) {
                     return self::respondWithError(31007);
@@ -3315,19 +3315,19 @@ class GraphQLSchemaBuilder
 
         $validation = RequestValidator::validate($args, []);
 
-        if ($validation instanceof ValidatorErrors) { 
+        if ($validation instanceof ValidatorErrors) {
             return $this::respondWithError(
                 $validation->errors[0]
             );
         }
-        
+
         $results = $this->userService->Follows($validation);
-        
-        
+
+
         if ($results instanceof ErrorResponse) {
             return $results->response;
-        } 
-        
+        }
+
         $this->logger->info('Query.resolveProfile successful');
         return $results;
     }
@@ -3342,17 +3342,17 @@ class GraphQLSchemaBuilder
 
         $validation = RequestValidator::validate($args);
 
-        if ($validation instanceof ValidatorErrors) { 
+        if ($validation instanceof ValidatorErrors) {
             return $this::respondWithError(
                 $validation->errors[0]
             );
         }
 
         $result = $this->profileService->profile($validation);
-        
+
         if ($result instanceof ErrorResponse) {
             return $result->response;
-        } 
+        }
 
         $this->logger->info('Query.resolveProfile successful');
         return $this::createSuccessResponse(
@@ -3362,7 +3362,8 @@ class GraphQLSchemaBuilder
         );
     }
 
-    protected function resolveVerifyReferral(array $args): array {
+    protected function resolveVerifyReferral(array $args): array
+    {
 
         $this->logger->debug('Query.resolveVerifyReferral started');
         $referralString = $args['referralString'];
@@ -3372,7 +3373,7 @@ class GraphQLSchemaBuilder
         }
 
         $result = $this->userService->verifyReferral($referralString);
-        
+
         return $result;
     }
 
@@ -3559,7 +3560,7 @@ class GraphQLSchemaBuilder
         }
 
         $data = array_map(
-            function (array $row)  {
+            function (array $row) {
                 $elem = [
                     // PostAdvanced Objekt
                     'post' => $row['post']->getArrayCopy(),

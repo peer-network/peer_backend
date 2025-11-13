@@ -11,8 +11,8 @@ use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
-final class NormalVisibilityStatusSpec implements Specification {
-
+final class NormalVisibilityStatusSpec implements Specification
+{
     private array $contentSeverityLevels;
     public function __construct(
         private ?string $contentFilterBy
@@ -28,14 +28,15 @@ final class NormalVisibilityStatusSpec implements Specification {
 
     public function toReplacer(
         ProfileReplaceable|PostReplaceable|CommentReplaceable $subject
-    ): ?ContentReplacementPattern  {
+    ): ?ContentReplacementPattern {
         if ($subject->visibilityStatus() === 'hidden' && ($this->contentFilterBy === null || $this->contentFilterBy !== $this->contentSeverityLevels[0])) {
             return ContentReplacementPattern::normal;
         }
         return null;
     }
 
-    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData {
+    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData
+    {
         return null;
     }
 }

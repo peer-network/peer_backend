@@ -41,7 +41,7 @@ class UserInfo extends Model
         $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->isprivate = $data['isprivate'] ?? 0;
-        $this->activeReports= $data['reports'] ?? 0;
+        $this->activeReports = $data['reports'] ?? 0;
         $this->totalreports = $data['totalreports'] ?? 0;
         $this->invited = $data['invited'] ?? null;
         $this->phone = $data['phone'] ?? null;
@@ -193,7 +193,7 @@ class UserInfo extends Model
 
     public function setReports(int $reports): void
     {
-        $this->activeReports= $reports;
+        $this->activeReports = $reports;
     }
 
     public function getTotalReports(): int

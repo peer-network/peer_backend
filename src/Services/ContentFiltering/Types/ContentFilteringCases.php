@@ -7,7 +7,7 @@ namespace Fawaz\Services\ContentFiltering\Types;
 enum ContentFilteringCases
 {
     case postFeed;
-    case searchById; 
+    case searchById;
     case searchByMeta;
     case myprofile;
     case hideAll;

@@ -54,7 +54,7 @@ class User extends Model implements Hashable, ProfileReplaceable
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
-        $this->activeReports= $data['user_reports'] ?? ($data['reports'] ?? null);
+        $this->activeReports = $data['user_reports'] ?? ($data['reports'] ?? null);
         $this->visibilityStatus = $data['visibility_status'] ?? null;
     }
 

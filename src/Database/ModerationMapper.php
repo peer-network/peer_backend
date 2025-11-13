@@ -30,7 +30,7 @@ class ModerationMapper
     ) {
 
     }
-    
+
 
     /**
      * Get Moderation Stats
@@ -56,7 +56,7 @@ class ModerationMapper
     public function getModerationItems(int $offset, int $limit, array $args): array
     {
         $statuses = array_keys(ConstantsModeration::contentModerationStatus());
-            
+
         $items = ModerationTicket::query();
 
         // Apply Status filters
@@ -204,7 +204,7 @@ class ModerationMapper
      */
     public function performModerationAction(string $moderationTicketId, string $moderationAction, string $currentUserId): bool
     {
-        try{
+        try {
             $moderationId = self::generateUUID();
             $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
 
@@ -375,7 +375,7 @@ class ModerationMapper
             }
 
             return true; // Moderation action performed successfully
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             // $this->transactionManager->rollBack();
             $this->logger->error("Error performing moderation action: " . $e->getMessage());
             return false;
@@ -385,8 +385,8 @@ class ModerationMapper
     /**
      * Move File to Illegal Folder
      * Placeholder function for moving files to an illegal folder
-     * 
-     * 
+     *
+     *
      * Example:
      * $sourcePath = "/path/to/media/{childMedia}/{$targetType}/{$targetId}";
      * $destinationPath = "/path/to/media/illegal/{$targetType}/{$targetId}";
@@ -394,7 +394,7 @@ class ModerationMapper
     private function moveFileToIllegalFolder(string $targetId, string $targetType): void
     {
         $this->logger->info("Moving {$targetType} with ID {$targetId} to illegal folder.");
-        
+
         $illegalDirectoryPath = __DIR__ . "/../../runtime-data/media/illegal";
         $directoryPath = __DIR__ . "/../../runtime-data/media";
         if (!is_dir($illegalDirectoryPath)) {
@@ -406,9 +406,9 @@ class ModerationMapper
         }
 
         // Target Media File for Post
-        if($targetType == 'post'){
+        if ($targetType == 'post') {
             $mediaRecord = Post::query()->where('postid', $targetId)->first();
-            if(!$mediaRecord || !$mediaRecord['media']){
+            if (!$mediaRecord || !$mediaRecord['media']) {
                 $this->logger->error("Media not found for Post ID: $targetId");
             }
             $media = json_decode($mediaRecord['media'], true);
@@ -420,7 +420,7 @@ class ModerationMapper
                 }
                 $media = $mediaItem['path'];
 
-                if(fopen($directoryPath.$media, 'r') === false){
+                if (fopen($directoryPath.$media, 'r') === false) {
                     $this->logger->error("Unable to open media file for Post ID: $targetId");
                     continue;
                 }
@@ -434,9 +434,9 @@ class ModerationMapper
 
                 $mediaDetails = explode('/', $media);
                 $mediaUrl = end($mediaDetails);
-                
+
                 $filePath = $illegalDirectoryPath.'/'.$mediaUrl;
-                
+
                 try {
                     $uploadedFile->moveTo($filePath);
                 } catch (\RuntimeException $e) {
@@ -448,7 +448,7 @@ class ModerationMapper
 
     /**
      * Check if content was previously moderated and restored
-     * 
+     *
      */
     public function wasContentRestored(string $targetid, string $targettype): bool
     {
@@ -489,5 +489,5 @@ class ModerationMapper
             return false;
         }
     }
-    
+
 }

@@ -8,5 +8,6 @@ class ValidatorErrors
 {
     public function __construct(
         public array $errors
-    ){}
+    ) {
+    }
 }

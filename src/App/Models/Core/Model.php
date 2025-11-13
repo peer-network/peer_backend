@@ -56,7 +56,7 @@ abstract class Model
 
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if(count($result) > 0) {
+        if (count($result) > 0) {
             return $result[0];
         } else {
             return [];
@@ -78,14 +78,14 @@ abstract class Model
         $sql = "SELECT COUNT(*) as count FROM " . static::table() . " {$joinsSql} {$whereSql}";
 
         try {
-          $stmt = $db->prepare($sql);                                                                                                                                                                                                                                                  
-          $stmt->execute($params);                                                                                                                                                                                                                                                     
-          $result = $stmt->fetch(PDO::FETCH_ASSOC);                                                                                                                                                                                                                                    
-          return (int)($result['count'] ?? 0);                                                                                                                                                                                                                                         
-        } catch (\PDOException $e) {                                                                                                                                                                                                                                                     
-            throw new \PDOException('Failed to count() . error:' . $e->getMessage(), 40302);                                                                                                                                                                                                                
-        }  
-        
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($result['count'] ?? 0);
+        } catch (\PDOException $e) {
+            throw new \PDOException('Failed to count() . error:' . $e->getMessage(), 40302);
+        }
+
     }
 
     /**
@@ -396,7 +396,7 @@ abstract class Model
 
         $sql = "UPDATE " . static::table() . " SET " . implode(", ", $setClauses) . " {$whereSql}";
 
-        try{
+        try {
             $stmt = $db->prepare($sql);
 
             return $stmt->execute($params);

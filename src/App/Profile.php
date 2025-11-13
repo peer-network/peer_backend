@@ -57,7 +57,7 @@ class Profile implements ProfileReplaceable
         $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->amountreports = $data['amountreports'] ?? 0;
-        $this->activeReports= $data['user_reports'] ?? 0;
+        $this->activeReports = $data['user_reports'] ?? 0;
         $this->visibilityStatus = $data['visibility_status'] ?? '';
     }
 
@@ -281,7 +281,7 @@ class Profile implements ProfileReplaceable
 
     public function setReports(?int $reports): void
     {
-        $this->activeReports= $reports;
+        $this->activeReports = $reports;
     }
 
     // Validation and Array Filtering methods

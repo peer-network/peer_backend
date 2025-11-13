@@ -32,7 +32,7 @@ class PostInfo extends Model
         $this->userid = $data['userid'] ?? '';
         $this->likes = $data['likes'] ?? 0;
         $this->dislikes = $data['dislikes'] ?? 0;
-        $this->activeReports= $data['reports'] ?? 0;
+        $this->activeReports = $data['reports'] ?? 0;
         $this->totalreports = $data['totalreports'] ?? 0;
         $this->views = $data['views'] ?? 0;
         $this->saves = $data['saves'] ?? 0;
@@ -106,7 +106,7 @@ class PostInfo extends Model
 
     public function setReports(int $reports): void
     {
-        $this->activeReports= $reports;
+        $this->activeReports = $reports;
     }
 
     public function getTotalReports(): int

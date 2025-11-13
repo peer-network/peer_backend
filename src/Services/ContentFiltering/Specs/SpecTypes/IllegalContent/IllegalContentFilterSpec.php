@@ -19,8 +19,8 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
-final class IllegalContentFilterSpec implements Specification {
-
+final class IllegalContentFilterSpec implements Specification
+{
     private ContentFilterServiceImpl $contentFilterService;
     private ContentFilteringStrategy $contentFilterStrategy;
 
@@ -107,13 +107,14 @@ final class IllegalContentFilterSpec implements Specification {
     }
 
     // on input we have only targetId
-    // we need to forbid interactions 
+    // we need to forbid interactions
     // with system/deleted accounts and
     // illegal targets
     // and illegal post comments
 
     // also resolve action post
-    public function forbidInteractions(string $targetContentId): SpecificationSQLData {
+    public function forbidInteractions(string $targetContentId): SpecificationSQLData
+    {
         return match ($this->targetContent) {
             ContentType::user => new SpecificationSQLData([
                 "NOT EXISTS (
@@ -139,7 +140,8 @@ final class IllegalContentFilterSpec implements Specification {
             ], [
                     "IllegalContentFilterSpec_postid" => $targetContentId
             ]),
-            ContentType::comment => new SpecificationSQLData([
+            ContentType::comment => new SpecificationSQLData(
+                [
                     "NOT EXISTS (
                     SELECT 1
                         FROM 
@@ -151,9 +153,11 @@ final class IllegalContentFilterSpec implements Specification {
                             (IllegalContentFilterSpec_comments.visibility_status = 'illegal' OR
                             IllegalContentFilterSpec_posts.visibility_status = 'illegal')
                     )"
-                ], [
+                ],
+                [
                     "IllegalContentFilterSpec_commentid" => $targetContentId
                 ]
-            )};
+            )
+        };
     }
 }

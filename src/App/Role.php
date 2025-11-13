@@ -53,7 +53,7 @@ final class Role
 
     /**
      * Maps a roles mask to an array of role names.
-     * 
+     *
      * Should only return valid roles.
      */
     public static function mapRolesMaskToNames(int $rolesMask): array

@@ -32,20 +32,23 @@ final class ProfileServiceImpl implements ProfileService
         protected ProfileRepository $profileRepository,
         protected UserService $userService,
         protected UserMapper $userMapper,
-    ) {}
+    ) {
+    }
 
-    public function setCurrentUserId(string $userId): void {
+    public function setCurrentUserId(string $userId): void
+    {
         $this->currentUserId = $userId;
     }
 
-    public function profile(array $args): Profile | ErrorResponse {
+    public function profile(array $args): Profile | ErrorResponse
+    {
         $this->logger->info('ProfileService.Profile started');
-        
+
         $userId = $args['userid'] ?? $this->currentUserId;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        
+
         $contentFilterCase = $userId === $this->currentUserId ? ContentFilteringCases::myprofile : ContentFilteringCases::searchById;
-        
+
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
             ContentType::user
@@ -61,7 +64,7 @@ final class ProfileServiceImpl implements ProfileService
             ContentType::user,
             $this->currentUserId,
         );
-        
+
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
             ContentType::user
@@ -186,7 +189,7 @@ final class ProfileServiceImpl implements ProfileService
         if (!empty($userId)) {
             $contentFilterCase = ContentFilteringCases::searchById;
             $args['uid'] = $userId;
-        }        
+        }
 
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
@@ -207,7 +210,7 @@ final class ProfileServiceImpl implements ProfileService
             ContentType::user
         );
         $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
-        
+
         $specs = [
             $illegalContentSpec,
             $systemUserSpec,

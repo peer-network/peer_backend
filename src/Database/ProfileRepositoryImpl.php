@@ -12,21 +12,23 @@ use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Utils\PeerLoggerInterface;
 
-
 class ProfileRepositoryImpl implements ProfileRepository
 {
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db) {
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
+    {
     }
 
-    public function fetchProfileData(string $userid, string $currentUserId, array $specifications): ?Profile {
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+    public function fetchProfileData(string $userid, string $currentUserId, array $specifications): ?Profile
+    {
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = "u.uid = :userid";
         $whereClausesString = implode(" AND ", $whereClauses);
         $params = $allSpecs->paramsToPrepare;
 
-        $sql = sprintf("
+        $sql = sprintf(
+            "
             SELECT 
                 u.uid,
                 u.username,
@@ -48,7 +50,7 @@ class ProfileRepositoryImpl implements ProfileRepository
             LEFT JOIN users_info ui ON ui.userid = u.uid
             WHERE %s",
             $whereClausesString
-         );
+        );
 
         $stmt = $this->db->prepare($sql);
         $params['userid'] = $userid;
@@ -82,15 +84,15 @@ class ProfileRepositoryImpl implements ProfileRepository
         if (empty($userIds)) {
             return [];
         }
-        
+
         // Merge specification SQL parts (WHERE/params) similar to fetchProfileData
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
 
         // Build positional placeholders for the IN clause
         $params = $allSpecs->paramsToPrepare;
-        $userIdsForInStatement = array_map(fn($id) => "'$id'", $userIds);
+        $userIdsForInStatement = array_map(fn ($id) => "'$id'", $userIds);
 
         $userIdsString = implode(',', $userIdsForInStatement);
         $whereClauses[] = "u.uid IN ($userIdsString)";

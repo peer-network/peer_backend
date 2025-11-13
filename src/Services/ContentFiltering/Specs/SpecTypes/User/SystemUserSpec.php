@@ -14,6 +14,7 @@ use Fawaz\Services\ContentFiltering\Strategies\Implementations\HideEverythingCon
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+
 final class SystemUserSpec implements Specification
 {
     private ContentFilterServiceImpl $contentFilterService;
@@ -39,38 +40,45 @@ final class SystemUserSpec implements Specification
         ) === ContentFilteringAction::hideContent) {
             return match ($showingContent) {
                 ContentType::user => new SpecificationSQLData(
-                [
+                    [
                     "EXISTS (
                         SELECT 1
                         FROM users SystemUserSpec_users
                         WHERE SystemUserSpec_users.uid = u.uid AND
                         SystemUserSpec_users.roles_mask IN (0,2,16,256) AND
                         SystemUserSpec_users.verified = 1
-                    )" ],[]),
+                    )" ],
+                    []
+                ),
                 ContentType::post => new SpecificationSQLData(
-                [
+                    [
                     "EXISTS (
                         SELECT 1
                         FROM users SystemUserSpec_users
                         WHERE SystemUserSpec_users.uid = p.userid AND
                         SystemUserSpec_users.roles_mask IN (0,2,16,256) AND
                         SystemUserSpec_users.verified = 1
-                    )" ],[]),
+                    )" ],
+                    []
+                ),
                 ContentType::comment => new SpecificationSQLData(
-                [
+                    [
                     "EXISTS (
                         SELECT 1
                         FROM users SystemUserSpec_users
                         WHERE SystemUserSpec_users.uid = c.userid AND
                         SystemUserSpec_users.roles_mask IN (0,2,16,256) AND
                         SystemUserSpec_users.verified = 1
-                    )" ],[]),
+                    )" ],
+                    []
+                ),
             };
         }
         return null;
     }
 
-    public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern {
+    public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern
+    {
         return null;
     }
 
@@ -81,7 +89,8 @@ final class SystemUserSpec implements Specification
         return new HideEverythingContentFilteringStrategy();
     }
 
-    public function forbidInteractions(string $targetContentId): SpecificationSQLData {
+    public function forbidInteractions(string $targetContentId): SpecificationSQLData
+    {
         return match ($this->targetContent) {
             ContentType::user => new SpecificationSQLData([
                 "EXISTS (

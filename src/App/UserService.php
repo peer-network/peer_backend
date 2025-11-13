@@ -337,7 +337,7 @@ class UserService
                     ContentType::user
                 ),
             ];
-        
+
             $users = $this->userMapper->getValidReferralInfoByLink($referralString, $specs);
 
             if (!$users) {
@@ -358,7 +358,7 @@ class UserService
 
     public function referralList(string $userId, int $offset = 0, int $limit = 20): array
     {
-        $data = $this->userMapper->getReferralRelations($userId, [],  $offset, $limit);
+        $data = $this->userMapper->getReferralRelations($userId, [], $offset, $limit);
 
         return [
             'status' => 'success',
@@ -779,14 +779,14 @@ class UserService
             ContentType::user
         );
 
-        
+
         $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
             ContentFilteringCases::searchById,
             $contentFilterBy,
             ContentType::user,
             $this->currentUserId,
         );
-        
+
         $illegalContentFilterSpec = new IllegalContentFilterSpec(
             ContentFilteringCases::searchById,
             ContentType::user
@@ -803,19 +803,18 @@ class UserService
 
         try {
             $followers = $this->userMapper->fetchFollowers(
-                $userId, 
-                $this->currentUserId, 
+                $userId,
+                $this->currentUserId,
                 $specs,
-                $offset, 
+                $offset,
                 $limit
-                
             );
             $following = $this->userMapper->fetchFollowing(
-                $userId, 
-                $this->currentUserId, 
+                $userId,
+                $this->currentUserId,
                 $specs,
-                $offset, 
-                $limit, 
+                $offset,
+                $limit,
             );
 
             foreach ($followers as $profile) {
@@ -866,9 +865,9 @@ class UserService
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        
+
         $contentFilterCase = ContentFilteringCases::searchById;
-        
+
         $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
 
         $deletedUserSpec = new DeletedUserSpec(
@@ -886,7 +885,7 @@ class UserService
             ContentType::user,
             $this->currentUserId,
         );
-        
+
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
             ContentType::user
@@ -899,7 +898,7 @@ class UserService
             $hiddenContentFilterSpec,
             $normalVisibilityStatusSpec
         ];
-      
+
         if (!self::isValidUUID($userId)) {
             $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
             return self::respondWithError(30201);
@@ -911,13 +910,13 @@ class UserService
 
         $this->logger->info('Fetching friends list', [
             'currentUserId' => $this->currentUserId,
-            'targetUserId'  => $userId, 
-            'offset' => $offset, 
+            'targetUserId'  => $userId,
+            'offset' => $offset,
             'limit' => $limit
         ]);
 
         try {
-            $users = $this->userMapper->fetchFriends($userId, $specs,$offset, $limit);
+            $users = $this->userMapper->fetchFriends($userId, $specs, $offset, $limit);
 
             if (!empty($users)) {
                 foreach ($users as $profile) {
@@ -926,7 +925,7 @@ class UserService
                     }
                     $usersArray[] = $profile->getArrayCopy();
                 }
-                
+
                 $this->logger->info('Friends list retrieved successfully', ['userCount' => count($usersArray)]);
                 return [
                     'status' => 'success',
@@ -982,11 +981,11 @@ class UserService
         $this->logger->debug('UserService.fetchAllAdvance started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        
+
         $specs = [];
 
         try {
-            $users = $this->userMapper->fetchAllAdvance($args,$specs, $this->currentUserId);
+            $users = $this->userMapper->fetchAllAdvance($args, $specs, $this->currentUserId);
             $fetchAll = array_map(fn (UserAdvanced $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {
@@ -1012,7 +1011,7 @@ class UserService
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $contentFilterCase = ContentFilteringCases::searchById;
-        
+
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
             ContentType::user
@@ -1032,7 +1031,7 @@ class UserService
             ContentType::user
         );
         $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
-        
+
         $specs = [
             $illegalContentFilterSpec,
             $systemUserSpec,
@@ -1200,7 +1199,7 @@ class UserService
     {
 
         $nextAttemptAt = $this->calculateNextAttemptDelay($passwordAttempt);
-        
+
         return [
             'status' => 'success',
             'ResponseCode' => "11901",
@@ -1219,16 +1218,16 @@ class UserService
         if (empty($passwordAttempt) || !isset($passwordAttempt['attempt_count'])) {
             return $nextAttemptAt;
         }
-        if($passwordAttempt['attempt_count'] === 1){
+        if ($passwordAttempt['attempt_count'] === 1) {
             $nextAttemptAtArray = $this->userMapper->rateLimitResponse(60, $passwordAttempt['last_attempt']);
-        } elseif($passwordAttempt['attempt_count'] === 2){
+        } elseif ($passwordAttempt['attempt_count'] === 2) {
             $nextAttemptAtArray = $this->userMapper->rateLimitResponse(600, $passwordAttempt['last_attempt']);
         }
-        
-        if(isset($nextAttemptAtArray['nextAttemptAt'])){
+
+        if (isset($nextAttemptAtArray['nextAttemptAt'])) {
             return $nextAttemptAtArray['nextAttemptAt'];
         }
-        
+
         return $nextAttemptAt;
     }
 

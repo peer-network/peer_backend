@@ -192,7 +192,7 @@ class UserMapper
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $trendlimit = 4;
 
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $params = $allSpecs->paramsToPrepare;
@@ -214,7 +214,7 @@ class UserMapper
         $params['limit'] = $limit;
         $params['offset'] = $offset;
         $params['trendlimit'] = $trendlimit;
-        
+
         $whereClausesString = implode(' AND ', $whereClauses);
 
         $sql = sprintf(
@@ -332,7 +332,7 @@ class UserMapper
         }
     }
 
-    public function fetchAllAdvance(array $args,array $specifications, ?string $currentUserId = null): array
+    public function fetchAllAdvance(array $args, array $specifications, ?string $currentUserId = null): array
     {
         $this->logger->debug("UserMapper.fetchAll started");
 
@@ -340,12 +340,12 @@ class UserMapper
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $trendlimit = 4;
         $trenddays = 7;
-        
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $params = $allSpecs->paramsToPrepare;
-    
+
         $includeDeleted = !empty($args['includeDeleted']);
         if ($includeDeleted) {
             unset($args['includeDeleted']);
@@ -778,7 +778,7 @@ class UserMapper
     ): ?array {
         $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
 
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = "f1.followerid = :userId AND f2.followedid = :userId";
@@ -809,8 +809,8 @@ class UserMapper
             $stmt = $this->db->prepare($sql);
 
             $params['userId'] = $userId;
-            $params['limit']= $limit;
-            $params['offset']= $offset;
+            $params['limit'] = $limit;
+            $params['offset'] = $offset;
 
             $stmt->execute($params);
 
@@ -845,7 +845,7 @@ class UserMapper
     ): array {
         $this->logger->debug("UserMapper.fetchFollowers started", ['userId' => $userId]);
 
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = 'f.followedid = :userId';
@@ -918,7 +918,7 @@ class UserMapper
     ): array {
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = 'f.followerid = :userId';
@@ -1156,7 +1156,7 @@ class UserMapper
         $this->logger->debug("UserMapper.getInviterByInvitee started", [
             'invitee_uuid' => $userId,
         ]);
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specs);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specs);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = "ui.userid = :invitee_uuid";
@@ -1173,17 +1173,17 @@ class UserMapper
         $stmt->execute($params);
 
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-        
+
         if (!empty($result)) {
             return new Profile($result, [], false);
         }
-        
+
         return null;
     }
 
     public function getReferralRelations(string $userId, array $specs, int $offset = 0, int $limit = 20): ?array
     {
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specs);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specs);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = "ui.invited = :userId";
@@ -1200,9 +1200,9 @@ class UserMapper
         ";
 
         $stmt = $this->db->prepare($query);
-        $params['userId']= $userId;
-        $params['limit']= $limit;
-        $params['offset']= $offset;
+        $params['userId'] = $userId;
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
         $stmt->execute($params);
 
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -1870,7 +1870,7 @@ class UserMapper
 
     public function getValidReferralInfoByLink(string $referralLink, array $specifications): array|null
     {
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $params = $allSpecs->paramsToPrepare;
@@ -1881,8 +1881,9 @@ class UserMapper
         ]);
 
         $whereClausesString = implode(" AND ", $whereClauses);
-        
-        $query = sprintf("SELECT 
+
+        $query = sprintf(
+            "SELECT 
                 ur.referral_uuid,
                 ur.referral_link, 
                 u.username, 
@@ -1900,9 +1901,9 @@ class UserMapper
         $stmt = $this->db->prepare($query);
 
         $params['referral_uuid'] = $referralLink;
-    
+
         $stmt->execute($params);
-    
+
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         $this->logger->info("Referral info query result", ['result' => $result]);
@@ -1911,11 +1912,11 @@ class UserMapper
         return $result ?: null;
     }
 
-     /**
-     * Get Inviter ID of a user.
-     * This method retrieves the inviter ID for a given user ID from the users_info table. 
-     *
-     */
+    /**
+    * Get Inviter ID of a user.
+    * This method retrieves the inviter ID for a given user ID from the users_info table.
+    *
+    */
     public function getInviterID(string $userId): ?string
     {
         try {

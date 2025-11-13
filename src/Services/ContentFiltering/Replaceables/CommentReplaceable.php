@@ -11,7 +11,7 @@ use Fawaz\Services\ContentFiltering\Capabilities\HasVisibilityStatus;
 /**
  * Marker interface for comment-like subjects that can be replaced/masked.
  */
-interface CommentReplaceable extends HasVisibilityStatus, HasActiveReports, HasUserId {
+interface CommentReplaceable extends HasVisibilityStatus, HasActiveReports, HasUserId
+{
     public function setContent(string $content);
 }
-

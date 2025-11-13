@@ -2,11 +2,13 @@
 
 namespace Fawaz\Services\ContentFiltering\Specs;
 
-final class SpecificationSQLData {
+final class SpecificationSQLData
+{
     public function __construct(
         public array $whereClauses,
         public array $paramsToPrepare
-    ) {}
+    ) {
+    }
 
     /**
      * Merge an array of SpecificationSQLData into one.

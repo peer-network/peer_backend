@@ -67,7 +67,7 @@ class UserAdvanced implements ProfileReplaceable
         $this->liquidity = $data['liquidity'] ?? 0.0;
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->activeReports= $data['user_reports'] ?? 0;
+        $this->activeReports = $data['user_reports'] ?? 0;
         $this->visibilityStatus = $data['visibility_status'] ?? '';
     }
 
@@ -381,7 +381,7 @@ class UserAdvanced implements ProfileReplaceable
         return $this->roles_mask;
     }
 
-    
+
 
     // Password Verify methods
     public function verifyPassword(string $password): bool

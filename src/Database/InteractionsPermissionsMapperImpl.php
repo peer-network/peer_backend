@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Fawaz\Database;
+
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
@@ -11,7 +12,9 @@ use Fawaz\Utils\PeerLoggerInterface;
 
 class InteractionsPermissionsMapperImpl implements InteractionsPermissionsMapper
 {
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db) {}
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
+    {
+    }
 
     public function isInteractionAllowed(array $specs, string $targetContentId): bool
     {

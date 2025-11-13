@@ -16,7 +16,6 @@ use function filter_var;
 use function in_array;
 use function method_exists;
 
-
 class PeerInputGenericValidator
 {
     protected array $specification;
@@ -79,7 +78,7 @@ class PeerInputGenericValidator
                         throw new ValidationException("Validator method $validatorName does not exist.");
                     }
                 }
-            }   
+            }
         }
 
         return empty($this->errors);
@@ -137,7 +136,7 @@ class PeerInputGenericValidator
     {
         $fieldKey = $options['field'] ?? $defaultField;
         if ($options['errorCode'] !== 0) {
-            $code = (string)($options['errorCode']);    
+            $code = (string)($options['errorCode']);
         } else {
             $code = $defaultCode;
         }
@@ -166,7 +165,7 @@ class PeerInputGenericValidator
     {
         $fieldKey = $options['field'] ?? 'Date';
         // Type guard: must be string
-        
+
         $format = $options['format'] ?? 'Y-m-d H:i:s.u';
 
         if (preg_match('/\.\d+$/', $value, $matches)) {
@@ -201,7 +200,7 @@ class PeerInputGenericValidator
     {
         $fieldKey = $options['field'] ?? 'email';
         // Type guard: must be string
-        
+
         if (filter_var($value, FILTER_VALIDATE_EMAIL) == false) {
             $this->pushError($options, $fieldKey, '30224');
             return false;

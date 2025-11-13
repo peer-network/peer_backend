@@ -14,10 +14,11 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
-class HiddenContentFilterServiceImpl  {
+class HiddenContentFilterServiceImpl
+{
     /** @var string[] Severity levels in order of importance */
     private array $contentSeverityLevels;
-    
+
     /** @var array<string,int> Map of content type => reports amount to hide */
     private array $reports_amount_to_hide_content;
     private ?string $contentFilterBy;
@@ -55,7 +56,8 @@ class HiddenContentFilterServiceImpl  {
         return null;
     }
 
-    public function getReportsAmountToHideContent(ContentType $type): int {
+    public function getReportsAmountToHideContent(ContentType $type): int
+    {
         return $this->reports_amount_to_hide_content[$type->value];
     }
 
@@ -95,9 +97,9 @@ class HiddenContentFilterServiceImpl  {
                 return $strategy::getAction($this->targetContent, $showingContent);
             }
         } else {
-            if (( $visibilityStatus === "hidden" || ( $visibilityStatus === "normal" && $showingContentReportAmount >= $this->getReportsAmountToHideContent($showingContent))) && 
+            if (($visibilityStatus === "hidden" || ($visibilityStatus === "normal" && $showingContentReportAmount >= $this->getReportsAmountToHideContent($showingContent))) &&
                 $this->contentFilterBy === $this->contentSeverityLevels[0]
-            ) { 
+            ) {
                 if ($strategy === null) {
                     return null;
                 }

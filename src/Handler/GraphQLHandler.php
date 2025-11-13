@@ -56,10 +56,10 @@ class GraphQLHandler implements RequestHandlerInterface
                 $bearerToken = $parts[1];
             }
         }
-        
+
         if ($this->schemaBuilder->setCurrentUserId($bearerToken) === false) {
             return $this->errorResponse(
-                "Invalid Access Token", 
+                "Invalid Access Token",
                 401
             );
         }

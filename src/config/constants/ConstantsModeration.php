@@ -6,13 +6,14 @@ namespace Fawaz\config\constants;
 
 class ConstantsModeration
 {
-     /**
-     * @return array{
-     *     CONTENT_SEVERITY_LEVELS: array<int,string>,
-     *     REPORTS_COUNT_TO_HIDE_CONTENT: array<'POST'|'COMMENT'|'USER', int>,
-     * }
-     */
-    public static function contentFiltering() {
+    /**
+    * @return array{
+    *     CONTENT_SEVERITY_LEVELS: array<int,string>,
+    *     REPORTS_COUNT_TO_HIDE_CONTENT: array<'POST'|'COMMENT'|'USER', int>,
+    * }
+    */
+    public static function contentFiltering()
+    {
         return self::CONTENT_FILTERING;
     }
 
@@ -90,7 +91,7 @@ class ConstantsModeration
      */
     public const VISIBILITY_STATUS = [
         'normal',
-        'hidden', // Hidden logic of entity (post/user/comment) is not Handled/Defined through this Status flag, 
+        'hidden', // Hidden logic of entity (post/user/comment) is not Handled/Defined through this Status flag,
         'illegal' // It will apply the `illegal` status of the entity (post/user/comment) through Moderation.
     ];
 }

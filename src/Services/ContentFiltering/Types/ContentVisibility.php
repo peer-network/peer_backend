@@ -10,4 +10,3 @@ enum ContentVisibility: string
     case hidden = 'hidden';
     case illegal = 'illegal';
 }
-

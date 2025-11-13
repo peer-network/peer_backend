@@ -120,12 +120,12 @@ class PostMapper
     }
 
     public function fetchPostsByType(
-        string $currentUserId, 
-        string $userid, 
+        string $currentUserId,
+        string $userid,
         array $specifications,
-        int $limitPerType = 5, 
-    ): array {        
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
+        int $limitPerType = 5,
+    ): array {
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::post), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $whereClauses[] = "sub.row_num <= :limit";
@@ -461,7 +461,7 @@ class PostMapper
 
             throw new \RuntimeException("Failed to insert PostMedia into database: " . $e->getMessage());
         }
-    } 
+    }
 
     /**
      * Get GuestListPost based on Filter
@@ -478,7 +478,7 @@ class PostMapper
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit  = min(max((int)($args['limit']  ?? 10), 1), 20);
 
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::post), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $params = $allSpecs->paramsToPrepare;
@@ -568,7 +568,7 @@ class PostMapper
                 if (isset($mapping[$type])) {
                     $validTypes[] = $mapping[$type];
                 } elseif (isset($userMapping[$type])) {
-                     $userFilters[] = $userMapping[$type];
+                    $userFilters[] = $userMapping[$type];
                 }
             }
 
@@ -712,7 +712,7 @@ class PostMapper
             foreach ($params as $k => $v) {
                 $stmt->bindValue(':' . ltrim($k, ':'), $v);
             }
-            
+
             $params['limit'] = $limit;
             $params['offset'] = $offset;
             $stmt->execute($params);
@@ -837,9 +837,9 @@ class PostMapper
     /**
      * Get Interactions based on Filter
      */
-    public function getInteractions(array $specifications,string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit, ?string $contentFilterBy = null): array
+    public function getInteractions(array $specifications, string $getOnly, string $postOrCommentId, string $currentUserId, int $offset, int $limit, ?string $contentFilterBy = null): array
     {
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::post), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $params = $allSpecs->paramsToPrepare;
@@ -867,7 +867,8 @@ class PostMapper
 
             $whereClausesString = implode(" AND ", $whereClauses);
 
-            $sql = sprintf("SELECT 
+            $sql = sprintf(
+                "SELECT 
                         u.uid, 
                         u.username, 
                         u.slug, 
@@ -888,8 +889,8 @@ class PostMapper
                         ON u.uid = f2.followedid AND f2.followerid = :currentUserId
                     WHERE %s
                     LIMIT :limit OFFSET :offset",
-                    $whereClausesString
-                );
+                $whereClausesString
+            );
 
             $stmt = $this->db->prepare($sql);
             $params['postid'] =  $postOrCommentId;

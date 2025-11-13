@@ -8,16 +8,17 @@ use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
-class ContentFilterServiceImpl {
-
+class ContentFilterServiceImpl
+{
     public function __construct(
         private ContentType $targetContent
-    ) {}
+    ) {
+    }
 
-     /**
-     * @param ContentType $showingContent
-     * @return ContentFilteringAction|null
-     */
+    /**
+    * @param ContentType $showingContent
+    * @return ContentFilteringAction|null
+    */
     public function getContentFilterAction(
         ContentType $showingContent,
         ?ContentFilteringStrategy $strategy,

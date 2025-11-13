@@ -8,7 +8,8 @@ use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
-interface Specification {
+interface Specification
+{
     public function toSql(ContentType $showingContent): ?SpecificationSQLData;
     public function toReplacer(ProfileReplaceable|PostReplaceable|CommentReplaceable $subject): ?ContentReplacementPattern;
     public function forbidInteractions(string $targetContentId): ?SpecificationSQLData;

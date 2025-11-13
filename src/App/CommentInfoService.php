@@ -127,7 +127,7 @@ class CommentInfoService
             $contentFilterCase,
             ContentType::comment
         );
-        
+
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
             ContentType::comment
@@ -139,11 +139,11 @@ class CommentInfoService
             $deletedUserSpec
         ];
 
-        if($this->interactionsPermissionsMapper->isInteractionAllowed(
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
             $specs,
             $commentId
         ) === false) {
-            return $this::respondWithError(31608, ['commentid'=> $commentId]);
+            return $this::respondWithError(31608, ['commentid' => $commentId]);
         }
         try {
             $this->transactionManager->beginTransaction();

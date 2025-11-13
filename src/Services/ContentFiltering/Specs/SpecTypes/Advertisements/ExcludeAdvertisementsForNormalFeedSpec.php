@@ -42,8 +42,8 @@ final class ExcludeAdvertisementsForNormalFeedSpec implements Specification
     {
         return null;
     }
-    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData {
+    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData
+    {
         return null;
     }
 }
-

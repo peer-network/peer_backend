@@ -112,26 +112,26 @@ class ValidationSpec
 
         $map = [
             // UUID-like identifiers
-            'userid' => fn(string $f, bool $r) => self::uuid($f, $r),
-            'postid' => fn(string $f, bool $r) => self::uuid($f, $r),
-            'commentid' => fn(string $f, bool $r) => self::uuid($f, $r),
+            'userid' => fn (string $f, bool $r) => self::uuid($f, $r),
+            'postid' => fn (string $f, bool $r) => self::uuid($f, $r),
+            'commentid' => fn (string $f, bool $r) => self::uuid($f, $r),
 
             // Content filter
-            'contentFilterBy' => fn(string $f, bool $r) => self::contentFilter($f, $r),
+            'contentFilterBy' => fn (string $f, bool $r) => self::contentFilter($f, $r),
 
             // User credentials and profile
-            'email' => fn(string $f, bool $r) => self::email($f, $r),
-            'username' => fn(string $f, bool $r) => self::username($f, $r),
-            'password' => fn(string $f, bool $r) => self::password($f, $r),
+            'email' => fn (string $f, bool $r) => self::email($f, $r),
+            'username' => fn (string $f, bool $r) => self::username($f, $r),
+            'password' => fn (string $f, bool $r) => self::password($f, $r),
 
-            'offset' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'limit' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'postOffset' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'postLimit' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'commentOffset' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'commentLimit' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'messageOffset' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'messageLimit' => fn(string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'offset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'limit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'postOffset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'postLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'commentOffset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'commentLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'messageOffset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'messageLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
         ];
 
         $spec = [];

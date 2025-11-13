@@ -135,11 +135,11 @@ class UserInfoService
             $systemUserSpec
         ];
 
-        if($this->interactionsPermissionsMapper->isInteractionAllowed(
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
             $specs,
             $followedUserId
         ) === false) {
-            return $this::respondWithError(31107, ['followedUserId'=> $followedUserId]);
+            return $this::respondWithError(31107, ['followedUserId' => $followedUserId]);
         }
 
         $this->transactionManager->beginTransaction();
@@ -192,11 +192,11 @@ class UserInfoService
             $systemUserSpec
         ];
 
-        if($this->interactionsPermissionsMapper->isInteractionAllowed(
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
             $specs,
             $blockedUserId
         ) === false) {
-            return $this::respondWithError(31107, ['blockedUserId'=> $blockedUserId]);
+            return $this::respondWithError(31107, ['blockedUserId' => $blockedUserId]);
         }
 
         $this->transactionManager->beginTransaction();
@@ -236,45 +236,45 @@ class UserInfoService
             return $this::respondWithError(41008);
         }
     }
-/* ----- unused function --------
-    public function toggleProfilePrivacy(): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $this->logger->debug('UserInfoService.toggleProfilePrivacy started');
-
-        try {
-            $this->transactionManager->beginTransaction();
-
-            $user = $this->userInfoMapper->loadInfoById($this->currentUserId);
-            if (!$user) {
-                return $this::createSuccessResponse(21001);
+    /* ----- unused function --------
+        public function toggleProfilePrivacy(): array
+        {
+            if (!$this->checkAuthentication()) {
+                return $this::respondWithError(60501);
             }
 
+            $this->logger->debug('UserInfoService.toggleProfilePrivacy started');
 
-            $newIsPrivate = !$user->getIsPrivate();
-            $user->setIsPrivate((int) $newIsPrivate);
+            try {
+                $this->transactionManager->beginTransaction();
 
-            $updatedUser = $this->userInfoMapper->update($user);
+                $user = $this->userInfoMapper->loadInfoById($this->currentUserId);
+                if (!$user) {
+                    return $this::createSuccessResponse(21001);
+                }
 
-            $responseMessage = $newIsPrivate ? 'Profile privacy set to private' : 'Profile privacy set to public';
 
-            $this->logger->info('Profile privacy toggled', ['userId' => $this->currentUserId, 'newPrivacy' => $newIsPrivate]);
+                $newIsPrivate = !$user->getIsPrivate();
+                $user->setIsPrivate((int) $newIsPrivate);
 
-            $this->transactionManager->commit();
+                $updatedUser = $this->userInfoMapper->update($user);
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => $responseMessage,
-            ];
-        } catch (\Exception $e) {
-            $this->transactionManager->rollback();
-            return $this::respondWithError(00000);//'Failed to toggle profile privacy.'
+                $responseMessage = $newIsPrivate ? 'Profile privacy set to private' : 'Profile privacy set to public';
+
+                $this->logger->info('Profile privacy toggled', ['userId' => $this->currentUserId, 'newPrivacy' => $newIsPrivate]);
+
+                $this->transactionManager->commit();
+
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => $responseMessage,
+                ];
+            } catch (\Exception $e) {
+                $this->transactionManager->rollback();
+                return $this::respondWithError(00000);//'Failed to toggle profile privacy.'
+            }
         }
-    }
-*/
+    */
 
     public function updateBio(string $biography): array
     {

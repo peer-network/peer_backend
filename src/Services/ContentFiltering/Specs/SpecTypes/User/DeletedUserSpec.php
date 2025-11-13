@@ -19,8 +19,8 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
-final class DeletedUserSpec implements Specification {
-
+final class DeletedUserSpec implements Specification
+{
     private ContentFilterServiceImpl $contentFilterService;
     private ContentFilteringStrategy $contentFilterStrategy;
 
@@ -44,29 +44,35 @@ final class DeletedUserSpec implements Specification {
         ) === ContentFilteringAction::hideContent) {
             return match ($showingContent) {
                 ContentType::user => new SpecificationSQLData(
-                [
+                    [
                     "EXISTS (
                         SELECT 1
                             FROM users DeletedUserSpec_users
                             WHERE DeletedUserSpec_users.uid = u.uid
                             AND DeletedUserSpec_users.status IN (0)
-                    )" ],[]),
+                    )" ],
+                    []
+                ),
                 ContentType::post => new SpecificationSQLData(
-                [
+                    [
                     "EXISTS (
                         SELECT 1
                             FROM users DeletedUserSpec_users
                             WHERE DeletedUserSpec_users.uid = p.userid
                             AND DeletedUserSpec_users.status IN (0)
-                    )" ],[]),
+                    )" ],
+                    []
+                ),
                 ContentType::comment => new SpecificationSQLData(
-                [
+                    [
                     "EXISTS (
                         SELECT 1
                             FROM users DeletedUserSpec_users
                             WHERE DeletedUserSpec_users.uid = c.userid
                             AND DeletedUserSpec_users.status IN (0)
-                    )" ],[]),
+                    )" ],
+                    []
+                ),
             };
         }
         return null;
@@ -98,7 +104,8 @@ final class DeletedUserSpec implements Specification {
         return null;
     }
 
-    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData {
+    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData
+    {
         return match ($this->targetContent) {
             ContentType::user => new SpecificationSQLData([
                 "EXISTS (

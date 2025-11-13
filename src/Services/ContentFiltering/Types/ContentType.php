@@ -13,7 +13,8 @@ namespace Fawaz\Services\ContentFiltering\Types;
  * @method static self post()
  * @method static self comment()
  */
-enum ContentType: string {
+enum ContentType: string
+{
     case user = 'USER' ;
     case post = 'POST';
     case comment = 'COMMENT';

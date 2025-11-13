@@ -6,5 +6,7 @@ namespace Fawaz\Utils;
 
 class SuccessResponse
 {
-    public function __construct(public array $response) {}
+    public function __construct(public array $response)
+    {
+    }
 }

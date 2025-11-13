@@ -39,4 +39,3 @@ final class ContentFilterHelper
         return $result;
     }
 }
-

@@ -10,7 +10,6 @@ use Fawaz\Utils\ContentFilterHelper;
 use PDO;
 use Fawaz\App\Advertisements;
 use Fawaz\App\PostAdvanced;
-
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\PeerLoggerInterface;
 
@@ -20,7 +19,7 @@ class AdvertisementMapper
     {
     }
 
-    public function fetchAllWithStats(array $specifications,?array $args = []): array
+    public function fetchAllWithStats(array $specifications, ?array $args = []): array
     {
         $this->logger->debug("AdvertisementMapper.fetchAllWithStats started");
 
@@ -34,7 +33,7 @@ class AdvertisementMapper
             ->modify("-{$trendDays} days")
             ->format('Y-m-d H:i:s');
 
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::post), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $conditions = $allSpecs->whereClauses;
         $paramsCommon = $allSpecs->paramsToPrepare;
@@ -830,8 +829,8 @@ class AdvertisementMapper
     public function findAdvertiser(string $currentUserId, array $specifications, ?array $args = []): array
     {
         $this->logger->debug("AdvertisementMapper.findAdvertiser started");
-        
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::post), $specifications);
+
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::post), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $params = $allSpecs->paramsToPrepare;

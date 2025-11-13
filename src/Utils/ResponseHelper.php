@@ -41,7 +41,7 @@ trait ResponseHelper
     {
         return new SuccessResponse(
             self::createResponse(
-              $responseCode,
+                $responseCode,
                 $data,
                 $countEnabled,
                 $countKey,

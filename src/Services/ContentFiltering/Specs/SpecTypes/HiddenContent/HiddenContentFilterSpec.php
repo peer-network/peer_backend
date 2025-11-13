@@ -17,15 +17,15 @@ use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
-use function DI\string;
 
+use function DI\string;
 
 final class HiddenContentFilterSpec implements Specification
 {
     private HiddenContentFilterServiceImpl $contentFilterService;
     private ContentFilteringStrategy $contentFilterStrategy;
     public function __construct(
-        ContentFilteringCases $case, 
+        ContentFilteringCases $case,
         ?string $contentFilterBy,
         ContentType $contentTarget,
         private string $currentUserId
@@ -118,9 +118,9 @@ final class HiddenContentFilterSpec implements Specification
         }
         $action = $this->contentFilterService->getContentFilterAction(
             $showingContent,
-                $this->contentFilterStrategy,
-                $subject->getActiveReports(),
-                $subject->visibilityStatus()
+            $this->contentFilterStrategy,
+            $subject->getActiveReports(),
+            $subject->visibilityStatus()
         );
 
         if ($subject->getUserId() === $this->currentUserId) {
@@ -144,7 +144,8 @@ final class HiddenContentFilterSpec implements Specification
         };
     }
 
-    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData {
+    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData
+    {
         return null;
     }
 }

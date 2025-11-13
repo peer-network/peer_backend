@@ -95,11 +95,11 @@ class CommentMapper
     {
         $this->logger->debug("CommentMapper.fetchAllByPostIdetaild started");
 
-        $specsSQL = array_map(fn(Specification $spec) => $spec->toSql(ContentType::comment), $specifications);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::comment), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
         $params = $allSpecs->paramsToPrepare;
-        
+
         $whereClauses[] = "c.postid = :postId AND c.parentid IS NULL";
 
         $joinClausesString = "
@@ -155,10 +155,10 @@ class CommentMapper
             $joinClausesString,
             $whereClausesString
         );
-            
+
         $stmt = $this->db->prepare($sql);
-        $params['postId']=$postId;
-        $params['currentUserId']=$currentUserId;
+        $params['postId'] = $postId;
+        $params['currentUserId'] = $currentUserId;
         $params['limit'] = $limit;
         $params['offset'] = $offset;
 

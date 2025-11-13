@@ -30,7 +30,6 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
 use Fawaz\Services\JWTService;
-
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\Interfaces\ProfileRepository;
@@ -595,7 +594,7 @@ class PostService
         if ($userId || $postId) {
             $contentFilterCase = ContentFilteringCases::searchById;
         }
-        if ($userId && $userId === $this->currentUserId) { 
+        if ($userId && $userId === $this->currentUserId) {
             $contentFilterCase = ContentFilteringCases::myprofile;
         }
 
@@ -614,7 +613,7 @@ class PostService
             ContentType::post,
             $this->currentUserId,
         );
-        
+
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
             ContentType::post
@@ -633,19 +632,19 @@ class PostService
         ];
 
         try {
-            $results = $this->postMapper->findPostser($this->currentUserId,$specs, $args);
+            $results = $this->postMapper->findPostser($this->currentUserId, $specs, $args);
             if (empty($results) && $postId != null) {
                 return $this::respondWithError(31510);
             }
             $postsEnriched = $this->enrichWithProfileAndComment(
-                $results, 
-                $specs, 
+                $results,
+                $specs,
                 $this->currentUserId,
                 $commentOffset,
                 $commentLimit
             );
 
-            foreach($postsEnriched as $post) {
+            foreach ($postsEnriched as $post) {
                 ContentReplacer::placeholderPost($post, $specs);
             }
             return $postsEnriched;
@@ -854,7 +853,7 @@ class PostService
             ContentType::user,
             $this->currentUserId,
         );
-        
+
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
             ContentType::user
@@ -880,8 +879,8 @@ class PostService
             );
 
             $usersArray = [];
-            
-            foreach($result as $user) {
+
+            foreach ($result as $user) {
                 ContentReplacer::placeholderProfile($user, $specs);
                 $usersArray[] = $user->getArrayCopy();
             }
@@ -921,7 +920,7 @@ class PostService
             $contentFilterCase,
             ContentType::post
         );
-        
+
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
             ContentType::post
@@ -943,18 +942,18 @@ class PostService
                 $specs,
                 $args
             );
-            
+
             if (empty($results)) {
                 return $this::respondWithError(31510);
             }
             $postsEnriched = $this->enrichWithProfileAndComment(
-                $results, 
+                $results,
                 $specs,
                 PeerUUID::empty->value,
                 $commentOffset,
                 $commentLimit
             );
-            foreach($postsEnriched as $post) {
+            foreach ($postsEnriched as $post) {
                 ContentReplacer::placeholderPost($post, $specs);
             }
             return $postsEnriched;
@@ -980,17 +979,17 @@ class PostService
      * @return PostAdvanced[]
      */
     private function enrichWithProfileAndComment(
-        array $posts, 
+        array $posts,
         array $specs,
-        string $currentUserId, 
-        int $commentOffset, 
+        string $currentUserId,
+        int $commentOffset,
         int $commentLimit
     ): array {
 
         $userIdsFromPosts = array_values(
             array_unique(
                 array_filter(
-                    array_map(fn(PostAdvanced $post) => $post->getUserId(),$posts)
+                    array_map(fn (PostAdvanced $post) => $post->getUserId(), $posts)
                 )
             )
         );
@@ -1012,7 +1011,7 @@ class PostService
                 $commentLimit,
                 $currentUserId
             );
-            $post = new PostAdvanced($enrichedWithCommentsAndProfiles, [],false);
+            $post = new PostAdvanced($enrichedWithCommentsAndProfiles, [], false);
             $enriched[] = $post;
         }
 
@@ -1033,7 +1032,7 @@ class PostService
 
     private function enrichAndPlaceholderWithComments(array $data, array $specs, int $commentOffset, int $commentLimit, string $currentUserId): array
     {
-        $comments = $this->commentMapper->fetchAllByPostIdetaild($data['postid'],$specs,$currentUserId, $commentOffset, $commentLimit);
+        $comments = $this->commentMapper->fetchAllByPostIdetaild($data['postid'], $specs, $currentUserId, $commentOffset, $commentLimit);
         if (empty($comments)) {
             return $data;
         }
@@ -1041,7 +1040,7 @@ class PostService
         $userIdsFromComments = array_values(
             array_unique(
                 array_filter(
-                    array_map(fn(CommentAdvanced $c) => $c->getUserId(),$comments)
+                    array_map(fn (CommentAdvanced $c) => $c->getUserId(), $comments)
                 )
             )
         );
@@ -1049,11 +1048,11 @@ class PostService
         if (empty($userIdsFromComments)) {
             return $comments;
         }
-        
+
         $profiles = $this->profileRepository->fetchByIds($userIdsFromComments, $currentUserId, $specs);
         $commentsArray = [];
 
-        foreach($comments as $comment) {
+        foreach ($comments as $comment) {
             if ($comment instanceof CommentAdvanced) {
                 ContentReplacer::placeholderComments($comment, $specs);
                 $dataComment = $comment->getArrayCopy();

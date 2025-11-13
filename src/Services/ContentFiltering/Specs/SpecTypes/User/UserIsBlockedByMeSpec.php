@@ -15,9 +15,10 @@ final class UserIsBlockedByMeSpec implements Specification
     public function __construct(
         private string $userid,
         private string $blockedUserId,
-    ) {}
+    ) {
+    }
 
-    
+
     public function toSql(ContentType $showingContent): SpecificationSQLData
     {
         return new SpecificationSQLData(
@@ -28,7 +29,8 @@ final class UserIsBlockedByMeSpec implements Specification
                     WHERE UserIsBlockedByMeSpec_user_block_user.blockerid = :UserIsBlockedByMeSpec_user_block_user_userid
                     AND UserIsBlockedByMeSpec_user_block_user.blockedid = :UserIsBlockedByMeSpec_user_block_user_blockedUserId
                 )"
-            ],[
+            ],
+            [
                 "UserIsBlockedByMeSpec_user_block_user_userid" => $this->userid,
                 "UserIsBlockedByMeSpec_user_block_user_blockedUserId" => $this->blockedUserId
             ]
@@ -39,7 +41,8 @@ final class UserIsBlockedByMeSpec implements Specification
     {
         return null;
     }
-    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData {
+    public function forbidInteractions(string $targetContentId): ?SpecificationSQLData
+    {
         return null;
     }
 }

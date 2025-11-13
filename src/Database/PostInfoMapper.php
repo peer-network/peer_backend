@@ -285,7 +285,7 @@ class PostInfoMapper
             ]);
             return ['status' => 'error', 'ResponseCode' => "41502"];
         }
-    } 
+    }
 
     private function mapRowToActiveAdsInfo(
         string $postId,
