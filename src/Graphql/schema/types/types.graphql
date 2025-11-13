@@ -88,6 +88,9 @@ type Post {
   cover: String!
   mediadescription: String!
   createdat: Date!
+  visibilityStatus: ContentVisibilityStatus!
+  hasActiveReports: Boolean!
+  amountreports: Int!
   amountlikes: Int!
   amountviews: Int!
   amountcomments: Int!
@@ -111,8 +114,12 @@ type Comment {
   parentid: ID
   content: String!
   createdat: Date!
+  visibilityStatus: ContentVisibilityStatus!
+  hasActiveReports: Boolean!
   amountlikes: Int!
   amountreplies: Int!
+  amountreports: Int!
+  isreported: Boolean!
   isliked: Boolean!
   user: ProfileUser!
 }
@@ -122,8 +129,11 @@ type ProfileUser {
   username: String
   slug: Int
   img: String
+  visibilityStatus: ContentVisibilityStatus!
+  hasActiveReports: Boolean!
   isfollowed: Boolean
   isfollowing: Boolean
+  isreported: Boolean
   isfriend: Boolean
 }
 
@@ -198,6 +208,7 @@ type UserInfo {
   userid: ID!
   liquidity: Decimal!
   amountposts: Int!
+  amountreports: Int!
   amountblocked: Int!
   amountfollower: Int!
   amountfollowed: Int!
@@ -220,18 +231,22 @@ type Profile {
   slug: Int
   img: String
   biography: String
+  visibilityStatus: ContentVisibilityStatus!
+  hasActiveReports: Boolean!
   isfollowed: Boolean
   isfollowing: Boolean
+  isreported: Boolean
   amountposts: Int
   amounttrending: Int
   amountfollowed: Int
   amountfollower: Int
   amountfriends: Int
   amountblocked: Int
-  imageposts: [ProfilePostMedia!]
-  textposts: [ProfilePostMedia!]
-  videoposts: [ProfilePostMedia!]
-  audioposts: [ProfilePostMedia!]
+  amountreports: Int
+  imageposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
+  textposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
+  videoposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
+  audioposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
 }
 
 type ProfileInfo {
@@ -250,6 +265,7 @@ type BlockedUser {
   img: String
   username: String
   slug: Int
+  visibilityStatus: ContentVisibilityStatus!
 }
 
 type BlockedUsers {
@@ -365,6 +381,7 @@ type ProfilePostMedia {
   contenttype: String!
   media: String!
   createdat: String
+  visibilityStatus: ContentVisibilityStatus!
 }
 
 type PostCommentsData {
@@ -378,6 +395,7 @@ type PostCommentsData {
   isliked: Boolean
   user: BasicUserInfo
   subcomments: [PostSubCommentsData]
+  visibilityStatus: ContentVisibilityStatus!
 }
 
 type PostSubCommentsData {
@@ -391,6 +409,7 @@ type PostSubCommentsData {
   amountreplies: Decimal,
   isliked: Boolean
   user: BasicUserInfo
+  visibilityStatus: ContentVisibilityStatus!
 }
 
 type BasicUserInfo {
@@ -399,6 +418,8 @@ type BasicUserInfo {
   username: String
   slug: Int
   biography: String
+  visibilityStatus: ContentVisibilityStatus!
+  hasActiveReports: Boolean!
   updatedat: Date!
 }
 
@@ -409,6 +430,8 @@ type User {
   slug: Int
   img: String
   biography: String
+  visibilityStatus: ContentVisibilityStatus!
+  hasActiveReports: Boolean!
   createdat: Date
   updatedat: Date
 }
@@ -449,4 +472,39 @@ type AllUserFriends {
   counter: Int!
   ResponseCode: String
   affectedRows: [AllUserInfo]
+}
+
+type ModerationStatsResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: ModerationStats
+  meta: DefaultResponse
+}
+type ModerationStats {
+  AmountAwaitingReview: Int!
+  AmountHidden: Int!
+  AmountRestored: Int!
+  AmountIllegal: Int!
+}
+type ModerationItemListResponse {
+  status: String!
+  ResponseCode: String
+  affectedRows: [ModerationItem!]!
+  meta: DefaultResponse
+}
+type ModerationItem {
+  moderationTicketId: ID!
+  targetContentId: ID!
+  targettype: String!
+  reportscount: Int!
+  status: String!
+  createdat: String!
+  targetcontent: TargetContent!
+  reporters: [BasicUserInfo!]!
+}
+
+type TargetContent {
+  post: Post
+  comment: Comment
+  user: BasicUserInfo
 }

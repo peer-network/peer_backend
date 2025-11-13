@@ -6,8 +6,9 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
 
-class Advertisements
+class Advertisements implements HasUserId
 {
     protected string $advertisementid;
     protected string $operationid;

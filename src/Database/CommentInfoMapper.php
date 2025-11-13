@@ -7,19 +7,11 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\CommentInfo;
 use Fawaz\Utils\PeerLoggerInterface;
-use Fawaz\App\Status;
 
 class CommentInfoMapper
 {
-    public const STATUS_DELETED = 6;
-
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
-    }
-
-    public function isSameUser(string $userid, string $currentUserId): bool
-    {
-        return $userid === $currentUserId;
     }
 
     public function loadById(string $commentid): CommentInfo|false
@@ -38,27 +30,14 @@ class CommentInfoMapper
         return false;
     }
 
-    public function isUserExistById(string $id): bool
-    {
-        $this->logger->debug("CommentInfoMapper.isUserExistById started");
-
-        $status = Status::DELETED;
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE status != :status AND uid = :id");
-        $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':status', $status, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchColumn() > 0;
-    }
-
     public function insert(CommentInfo $commentInfo): bool
     {
         $this->logger->debug("CommentInfoMapper.insert started");
 
         $data = $commentInfo->getArrayCopy();
 
-        $query = "INSERT INTO comment_info (commentid, userid, likes, reports, comments) 
-                  VALUES (:commentid, :userid, :likes, :reports, :comments)";
+        $query = "INSERT INTO comment_info (commentid, userid, likes, reports, totalreports, comments) 
+                  VALUES (:commentid, :userid, :likes, :reports, :totalreports, :comments)";
 
         $stmt = $this->db->prepare($query);
 
@@ -77,7 +56,7 @@ class CommentInfoMapper
 
         $data = $commentInfo->getArrayCopy();
 
-        $sql = "UPDATE comment_info SET likes = :likes, reports = :reports, comments = :comments WHERE commentid = :commentid AND userid = :userid";
+        $sql = "UPDATE comment_info SET likes = :likes, reports = :reports, totalreports = :totalreports, comments = :comments WHERE commentid = :commentid AND userid = :userid";
         $stmt = $this->db->prepare($sql);
 
         if ($stmt->execute($data)) {

@@ -53,9 +53,9 @@ class PostInfoMapper
         $data = $postInfo->getArrayCopy();
 
         $query = "INSERT INTO post_info 
-                  (postid, userid, likes, dislikes, reports, views, saves, shares, comments) 
+                  (postid, userid, likes, dislikes, reports, totalreports, views, saves, shares, comments) 
                   VALUES 
-                  (:postid, :userid, :likes, :dislikes, :reports, :views, :saves, :shares, :comments)";
+                  (:postid, :userid, :likes, :dislikes, :reports, :totalreports, :views, :saves, :shares, :comments)";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -66,6 +66,7 @@ class PostInfoMapper
             $stmt->bindValue(':likes', $data['likes'], \PDO::PARAM_INT);
             $stmt->bindValue(':dislikes', $data['dislikes'], \PDO::PARAM_INT);
             $stmt->bindValue(':reports', $data['reports'], \PDO::PARAM_INT);
+            $stmt->bindValue(':totalreports', $data['totalreports'], \PDO::PARAM_INT);
             $stmt->bindValue(':views', $data['views'], \PDO::PARAM_INT);
             $stmt->bindValue(':saves', $data['saves'], \PDO::PARAM_INT);
             $stmt->bindValue(':shares', $data['shares'], \PDO::PARAM_INT);
@@ -114,13 +115,14 @@ class PostInfoMapper
             $stmtSel->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
             $stmtSel->execute();
             $old = $stmtSel->fetch(\PDO::FETCH_ASSOC) ?: [
-                'likes' => 0,'dislikes' => 0,'reports' => 0,'views' => 0,'saves' => 0,'shares' => 0,'comments' => 0
+                'likes' => 0,'dislikes' => 0,'reports' => 0,'totalreports' => 0,'views' => 0,'saves' => 0,'shares' => 0,'comments' => 0
             ];
 
             // Bereit (positiv clampen Logik erweitern)
             $dLikes    = max(0, (int)$data['likes']    - (int)$old['likes']);
             $dDislikes = max(0, (int)$data['dislikes'] - (int)$old['dislikes']);
             $dReports  = max(0, (int)$data['reports']  - (int)$old['reports']);
+            $dTotalReports  = max(0, (int)$data['totalreports']  - (int)$old['totalreports']);
             $dViews    = max(0, (int)$data['views']    - (int)$old['views']);
             $dSaves    = max(0, (int)$data['saves']    - (int)$old['saves']);
             $dShares   = max(0, (int)$data['shares']   - (int)$old['shares']);
@@ -129,7 +131,7 @@ class PostInfoMapper
             // post_info auf absolute Werte setzen
             $stmtUpd = $this->db->prepare("
                 UPDATE post_info
-                SET likes=:likes, dislikes=:dislikes, reports=:reports,
+                SET likes=:likes, dislikes=:dislikes, reports=:reports, totalreports=:totalreports,
                     views=:views, saves=:saves, shares=:shares, comments=:comments
                 WHERE postid=:postid
             ");
@@ -137,6 +139,7 @@ class PostInfoMapper
             $stmtUpd->bindValue(':likes', (int)$data['likes'], \PDO::PARAM_INT);
             $stmtUpd->bindValue(':dislikes', (int)$data['dislikes'], \PDO::PARAM_INT);
             $stmtUpd->bindValue(':reports', (int)$data['reports'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':totalreports', (int)$data['totalreports'], \PDO::PARAM_INT);
             $stmtUpd->bindValue(':views', (int)$data['views'], \PDO::PARAM_INT);
             $stmtUpd->bindValue(':saves', (int)$data['saves'], \PDO::PARAM_INT);
             $stmtUpd->bindValue(':shares', (int)$data['shares'], \PDO::PARAM_INT);
@@ -148,12 +151,13 @@ class PostInfoMapper
             }
 
             // Bereit auf eine aktive Anzeige buchen
-            if (($dLikes + $dDislikes + $dReports + $dViews + $dSaves + $dShares + $dComments) > 0) {
+            if (($dLikes + $dDislikes + $dReports + $dTotalReports + $dViews + $dSaves + $dShares + $dComments) > 0) {
                 $affected = $this->mapRowToActiveAdsInfo(
                     $data['postid'],
                     $dLikes,
                     $dDislikes,
                     $dReports,
+                    $dTotalReports,
                     $dViews,
                     $dSaves,
                     $dShares,
@@ -283,56 +287,12 @@ class PostInfoMapper
         }
     }
 
-    public function toggleUserFollow(string $followerid, string $followeduserid): array
-    {
-        $this->logger->debug("PostInfoMapper.toggleUserFollow started");
-
-        try {
-
-            // Check if the follow relationship already exists
-            $query = "SELECT COUNT(*) FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-            $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
-            $stmt->execute();
-
-            $isFollowing = $stmt->fetchColumn() > 0;
-
-            if ($isFollowing) {
-                // Unfollow: delete the relationship
-                $query = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
-                $action = "11103";
-                $isfollowing = false;
-            } else {
-                // Follow: insert the relationship
-                $query = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid)";
-                $action = "11104";
-                $isfollowing = true;
-            }
-
-            // Execute the toggle action
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-            $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
-            $stmt->execute();
-
-
-            return ['status' => 'success', 'isfollowing' => $isfollowing, 'ResponseCode' => $action];
-        } catch (\Exception $e) {
-            $this->logger->error('Failed to toggle user follow', [
-                'followerid' => $followerid,
-                'followeduserid' => $followeduserid,
-                'exception' => $e->getMessage(),
-            ]);
-            return ['status' => 'error', 'ResponseCode' => "41103"];
-        }
-    }
-
     private function mapRowToActiveAdsInfo(
         string $postId,
         int $dLikes,
         int $dDislikes,
         int $dReports,
+        int $dTotalReports,
         int $dViews,
         int $dSaves,
         int $dShares,
@@ -352,6 +312,7 @@ class PostInfoMapper
             SET likes    = ai.likes    + :dLikes,
                 dislikes = ai.dislikes + :dDislikes,
                 reports  = ai.reports  + :dReports,
+                totalreports  = ai.totalreports  + :dTotalReports,
                 views    = ai.views    + :dViews,
                 saves    = ai.saves    + :dSaves,
                 shares   = ai.shares   + :dShares,
@@ -367,6 +328,7 @@ class PostInfoMapper
         $stmt->bindValue(':dLikes', $dLikes, \PDO::PARAM_INT);
         $stmt->bindValue(':dDislikes', $dDislikes, \PDO::PARAM_INT);
         $stmt->bindValue(':dReports', $dReports, \PDO::PARAM_INT);
+        $stmt->bindValue(':dTotalReports', $dTotalReports, \PDO::PARAM_INT);
         $stmt->bindValue(':dViews', $dViews, \PDO::PARAM_INT);
         $stmt->bindValue(':dSaves', $dSaves, \PDO::PARAM_INT);
         $stmt->bindValue(':dShares', $dShares, \PDO::PARAM_INT);

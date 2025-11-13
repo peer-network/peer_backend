@@ -55,9 +55,9 @@ class PeerTokenMapper
         $this->btcpool = $data['btcpool'];
 
         return [
-            $this->poolWallet, 
-            $this->burnWallet, 
-            $this->peerWallet, 
+            $this->poolWallet,
+            $this->burnWallet,
+            $this->peerWallet,
             $this->btcpool
         ];
     }
@@ -78,7 +78,7 @@ class PeerTokenMapper
 
     /**
      * get LP account tokens amount.
-     * 
+     *
      */
     public function getLpToken(): string
     {
@@ -135,7 +135,7 @@ class PeerTokenMapper
     }
 
     /**
-     * 
+     *
      */
     public function setSenderId(string $senderId): void
     {
@@ -168,7 +168,7 @@ class PeerTokenMapper
         $inviteFee = '0';
         $inviterId = $this->userMapper->getInviterID($this->senderId);
 
-        if(!empty($inviterId) && self::isValidUUID($inviterId)){
+        if (!empty($inviterId) && self::isValidUUID($inviterId)) {
             $this->inviterId = $inviterId;
             $inviteFee = (string) $fees['INVITATION'];
         }
@@ -176,7 +176,7 @@ class PeerTokenMapper
     }
 
     /**
-     * Each Fees Amount Calculation. 
+     * Each Fees Amount Calculation.
      */
     public function calculateEachFeesAmount(string $numberOfTokens): array
     {
@@ -192,11 +192,11 @@ class PeerTokenMapper
 
     /**
      * Make PEER to PEER Token Transfer.
-     * 
+     *
      * This function handles the transfer of tokens between users, applying necessary fees and ensuring all validations.
      * It also stores the transaction details.
      * Different fees are stored individually for transparency.
-     * 
+     *
      * @param string $numberOfTokens Number of tokens to transfer to Receipient's wallet, Without any Fees.
      *
      */
@@ -206,8 +206,7 @@ class PeerTokenMapper
         string $numberOfTokens,
         TransferStrategy $strategy,
         ?string $message = null,
-    ): ?array
-    {
+    ): ?array {
         \ignore_user_abort(true);
 
         $this->initializeLiquidityPool();
@@ -222,16 +221,16 @@ class PeerTokenMapper
             // Lock both users' balances to prevent race conditions
             if (!empty($this->inviterId)) {
                 $this->lockBalances([$this->inviterId, $senderId, $recipientId]);
-            }else{
+            } else {
                 $this->lockBalances([$senderId, $recipientId]);
             }
             $mode = $strategy->getFeePolicyMode();
             [$requiredAmount, $netRecipientAmount, $peerFeeAmount, $poolFeeAmount, $burnFeeAmount, $inviteFeeAmount] =
                 $this->calculateAmountsForMode($senderId, $numberOfTokens, $mode);
-            
+
             $operationid = $strategy->getOperationId();
             $transRepo = new TransactionRepository($this->logger, $this->db);
-            
+
             // 1. SENDER: Debit From Account
             if ($requiredAmount) {
                 // To defend against atomoicity issues, we will debit first and then create transaction record. $this->walletMapper->saveWalletEntry($senderId, $requiredAmount, 'DEDUCT');
@@ -427,7 +426,7 @@ class PeerTokenMapper
      *
      */
     // DONE
-      /**
+    /**
      *
      * get transcations history of current user.
      *
@@ -436,10 +435,10 @@ class PeerTokenMapper
     {
         $this->logger->debug('PeerTokenMapper.getTransactions started');
 
-        // Resolve filters from simple enums to actual DB values                                                                                                                                                                                                                                                    
+        // Resolve filters from simple enums to actual DB values
         [$transactionTypes, $transferActions] = $this->resolveFilters($args);
 
-        // Base select with sender/recipient user details                                                                                                                                                                                                                                                           
+        // Base select with sender/recipient user details
         $query =
             "SELECT tt.*,
                 us.username AS sender_username, 
@@ -466,11 +465,11 @@ class PeerTokenMapper
             ':recipientid' => $userId,
         ];
 
-        // Apply type and action filters                                                                                                                                                                                                                                                                            
+        // Apply type and action filters
         $query .= $this->appendInFilter('tt.transactiontype', $transactionTypes, $params, 'type');
         $query .= $this->appendInFilter('tt.transferaction', $transferActions, $params, 'action');
 
-        // Date filters (YYYY-MM-DD)                                                                                                                                                                                                                                                                                
+        // Date filters (YYYY-MM-DD)
         if (!empty($args['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $args['start_date'])) {
             $query .= ' AND tt.createdat >= :start_date';
             $params[':start_date'] = $args['start_date'] . ' 00:00:00';
@@ -480,7 +479,7 @@ class PeerTokenMapper
             $params[':end_date'] = $args['end_date'] . ' 23:59:59';
         }
 
-        // Sort                                                                                                                                                                                                                                                                                                     
+        // Sort
         $sortDirection = 'DESC';
         if (!empty($args['sort'])) {
             $sortValue = strtoupper(trim((string) $args['sort']));
@@ -488,7 +487,7 @@ class PeerTokenMapper
         }
         $query .= " ORDER BY tt.createdat $sortDirection";
 
-        // Pagination                                                                                                                                                                                                                                                                                               
+        // Pagination
         if (isset($args['limit']) && is_numeric($args['limit'])) {
             $query .= ' LIMIT :limit';
             $params[':limit'] = (int) $args['limit'];
@@ -506,7 +505,7 @@ class PeerTokenMapper
             $stmt->execute();
 
             $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            $data = array_map(fn($t) => $this->mapTransaction($t), $transactions);
+            $data = array_map(fn ($t) => $this->mapTransaction($t), $transactions);
 
             return [
                 'status' => 'success',
@@ -595,11 +594,11 @@ class PeerTokenMapper
             'biography' => $trans['recipient_biography'] ?? null,
             'updatedat' => $trans['recipient_updatedat'] ?? null,
         ], [], false))->getArrayCopy();
-        
+
         return $items;
     }
 
-    
+
     /**
      * Lock balances of both users to prevent race conditions
      * Also Includes Fees wallets

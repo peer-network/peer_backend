@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Database\Interfaces\Hashable;
 use Fawaz\Utils\HashObject;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
-class User implements Hashable
+class User extends Model implements Hashable, ProfileReplaceable
 {
     use HashObject;
 
@@ -28,6 +30,8 @@ class User implements Hashable
     protected string $biography;
     protected string $createdat;
     protected string $updatedat;
+    protected ?int $activeReports = null;
+    protected ?string $visibilityStatus = null;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -50,12 +54,8 @@ class User implements Hashable
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
-
-        if ($this->status == 6) {
-            $this->username = 'Deleted_Account';
-            $this->img = '/profile/00000000-0000-0000-0000-000000000000.jpeg';
-            $this->biography = '/userData/00000000-0000-0000-0000-000000000000.txt';
-        }
+        $this->activeReports = $data['user_reports'] ?? ($data['reports'] ?? null);
+        $this->visibilityStatus = $data['visibility_status'] ?? null;
     }
 
     // Array Copy methods
@@ -205,6 +205,12 @@ class User implements Hashable
         $this->verified = $verified;
     }
 
+    // ProfileReplaceable: roles mask accessor with expected name
+    public function getRolesmask(): int
+    {
+        return (int)$this->roles_mask;
+    }
+
     public function getRoles(): int|null
     {
         return $this->roles_mask;
@@ -243,6 +249,22 @@ class User implements Hashable
     public function setBiography(?string $biography): void
     {
         $this->biography = $biography;
+    }
+
+    // ContentFiltering capabilities
+    public function getActiveReports(): ?int
+    {
+        return $this->activeReports;
+    }
+
+    public function visibilityStatus(): string
+    {
+        return (string)($this->visibilityStatus ?? '');
+    }
+
+    public function setVisibilityStatus(?string $status): void
+    {
+        $this->visibilityStatus = $status;
     }
 
     public function updateBio(string $biography): void
@@ -449,4 +471,11 @@ class User implements Hashable
     {
         return $this->hashObject($this);
     }
+
+    // Table name for the model
+    protected static function table(): string
+    {
+        return 'users';
+    }
+
 }

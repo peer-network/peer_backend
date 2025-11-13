@@ -215,7 +215,7 @@ class Transaction
     /**
      * Getter method for tokenamount
      */
-    public function getTokenAmount(): string 
+    public function getTokenAmount(): string
     {
         return $this->tokenamount;
     }

@@ -1,0 +1,34 @@
+@startuml name
+title Profile Flow – Sequence Diagram
+
+actor Client
+participant ProfileServiceImpl as Service
+participant ProfileSpecsFactory as SpecsFactory
+participant ProfileRepositoryInterface as Repo
+participant ProfileReplacer as Replacer
+
+Client -> Service: profile(args)
+activate Service
+Service -> SpecsFactory: build(currentUserId, targetUserId, contentFilterBy)
+activate SpecsFactory
+SpecsFactory --> Service: specs[]
+deactivate SpecsFactory
+
+Service -> Repo: fetchProfileData(userId, currentUserId, specs)
+activate Repo
+Repo --> Service: Profile|null
+deactivate Repo
+
+alt Profile found
+  Service -> Replacer: placeholderProfile(profile, specs)
+  activate Replacer
+  Replacer --> Service: maskedProfile
+  deactivate Replacer
+  Service --> Client: Profile (masked)
+else Not found
+  Service --> Client: ErrorResponse(21001)
+end
+deactivate Service
+
+@enduml
+

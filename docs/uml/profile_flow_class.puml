@@ -1,0 +1,82 @@
+@startuml name
+skinparam packageStyle rectangle
+title Profile Flow – Class Diagram
+
+package "App::Interfaces" {
+  interface ProfileService
+  class ProfileServiceImpl {
+    - currentUserId: ?string
+    + setCurrentUserId(userId: string): void
+    + profile(args: array): Profile|ErrorResponse
+  }
+}
+
+package "App::Specs" {
+  interface Specification {
+    + toSql(): ?SpecificationSQLData
+    + toReplacer(subject): ?ContentReplacementPattern
+  }
+  class ProfileSpecsFactory {
+    + build(currentUserId: string, targetUserId: string, contentFilterBy: ?string): Specification[]
+  }
+  class SpecificationSQLData
+  class ActiveUserSpec
+  class BasicUserSpec
+  class HiddenContentFilterSpec
+  class IllegalContentFilterSpec
+}
+
+package "Services::ContentFiltering" {
+  enum ContentReplacementPattern
+  class ContentFilterServiceImpl
+  interface ContentFilteringStrategy
+  abstract class AContentFilteringStrategy {
+    {static} strategy: array
+    {static} + getAction(contentTarget, showingContent): ?ContentFilteringAction
+  }
+  class ContentFilteringStrategyFactory
+}
+
+package "Services::ContentFiltering::Replacers" {
+  class ProfileReplacer {
+    {static} + placeholderProfile(profile: ProfileReplaceable, specs: array): Profile
+  }
+}
+
+package "Database" {
+  interface ProfileRepositoryInterface {
+    + fetchProfileData(userid: string, currentUserId: string, specs: array): ?Profile
+  }
+  class ProfileRepositoryImpl
+}
+
+package "App::Models" {
+  class Profile implements ProfileReplaceable {
+    + getName(): string
+    + setName(string): void
+    + getImg(): ?string
+    + setImg(?string): void
+    + getBiography(): ?string
+    + setBiography(?string): void
+    + getStatus(): int
+    + getVerified(): int
+    + getReports(): ?int
+    + visibilityStatus(): string
+  }
+  interface ProfileReplaceable
+}
+
+ProfileServiceImpl ..> ProfileSpecsFactory
+ProfileServiceImpl ..> ProfileRepositoryInterface
+ProfileServiceImpl ..> ProfileReplacer
+ProfileSpecsFactory ..> Specification
+HiddenContentFilterSpec ..> ContentFilterServiceImpl
+IllegalContentFilterSpec ..> ContentFilterServiceImpl
+ContentFilterServiceImpl ..> ContentFilteringStrategyFactory
+ContentFilteringStrategyFactory ..> ContentFilteringStrategy
+AContentFilteringStrategy <|-- ContentFilteringStrategy
+ProfileReplacer ..> ProfileReplaceable
+ProfileRepositoryImpl ..|> ProfileRepositoryInterface
+
+@enduml
+

@@ -336,9 +336,9 @@ class WalletService
             ];
 
             $response = $this->peerTokenMapper->transferToken(
-                $userId, 
-                $fromId, 
-                $price, 
+                $userId,
+                $fromId,
+                $price,
                 $transferStrategy,
                 $text
             );
