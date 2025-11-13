@@ -176,7 +176,6 @@ class ReportsMapper
 
         return $moderationTicketId;
     }
-
     /**
      * Check if the target (post, comment, user) is already moderated
      * 

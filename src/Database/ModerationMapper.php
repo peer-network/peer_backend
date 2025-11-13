@@ -18,13 +18,15 @@ use Fawaz\App\Role;
 use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\Utils\PeerLoggerInterface;
+use PDO;
 
 class ModerationMapper
 {
     use ResponseHelper;
 
     public function __construct(
-        protected PeerLoggerInterface $logger
+        protected PeerLoggerInterface $logger,
+        protected PDO $db
     ) {
 
     }
@@ -441,6 +443,50 @@ class ModerationMapper
                     $this->logger->error("Failed to move file: $filePath");
                 }
             }
+        }
+    }
+
+    /**
+     * Check if content was previously moderated and restored
+     * 
+     */
+    public function wasContentRestored(string $targetid, string $targettype): bool
+    {
+        $this->logger->debug("ModerationMapper.wasContentRestored started", [
+            'targetid' => $targetid,
+            'targettype' => $targettype
+        ]);
+
+        try {
+            $sql = "SELECT 1 
+                    FROM moderations m
+                    INNER JOIN moderation_tickets mt ON mt.uid = m.moderationticketid
+                    WHERE mt.targetcontentid = :targetid
+                    AND mt.contenttype = :targettype
+                    AND m.status = 'restored'
+                    LIMIT 1";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                'targetid' => $targetid,
+                'targettype' => $targettype
+            ]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $wasRestored = !empty($result);
+
+            $this->logger->debug("ModerationMapper.wasContentRestored result", [
+                'wasRestored' => $wasRestored
+            ]);
+
+            return $wasRestored;
+
+        } catch (\Exception $e) {
+            $this->logger->error("ModerationMapper.wasContentRestored error", [
+                'exception' => $e->getMessage()
+            ]);
+            return false;
         }
     }
     

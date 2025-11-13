@@ -11,6 +11,7 @@ use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Database\PostMapper;
+use Fawaz\Database\ModerationMapper;
 use Fawaz\Utils\ResponseHelper;
 
 class PostInfoService
@@ -24,7 +25,8 @@ class PostInfoService
         protected CommentMapper $commentMapper,
         protected ReportsMapper $reportMapper,
         protected PostMapper $postMapper,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected ModerationMapper $moderationMapper
     ) {
     }
 
@@ -200,6 +202,11 @@ class PostInfoService
             if (!$post) {
                 $this->logger->warning('PostInfoService: reportPost: Post not found');
                 return $this->respondWithError(31510);
+            }
+
+            if ($this->moderationMapper->wasContentRestored($postId, 'post')) {
+                $this->logger->warning('PostInfoService: reportPost: User tries to report a restored post');
+                return $this->respondWithError(31514);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
