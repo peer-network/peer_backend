@@ -238,7 +238,7 @@ if (php_sapi_name() !== 'cli') {
 
 $logDir = $argv[1];
 
-// Convert relative paths to absolute
+
 if ($logDir[0] !== '/') {
     $logDir = getcwd() . DIRECTORY_SEPARATOR . $logDir;
 }
