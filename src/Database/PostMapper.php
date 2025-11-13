@@ -229,7 +229,9 @@ class PostMapper
     {
         $this->logger->debug("PostMapper.fetchReports started");
 
-        $sql = "SELECT * FROM user_post_reports WHERE postid = :postid";
+        $sql = "SELECT targetid AS postid, reporter_userid AS userid, createdat
+        FROM user_reports
+        WHERE targetid = :postid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
@@ -300,7 +302,7 @@ class PostMapper
     {
         $this->logger->debug("PostMapper.isReported started");
 
-        $sql = "SELECT COUNT(*) FROM user_post_reports WHERE postid = :postid AND userid = :userid";
+        $sql = "SELECT COUNT(*) FROM user_reports WHERE targetid = :postid AND reporter_userid = :userid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid, 'userid' => $userid]);
         return (bool) $stmt->fetchColumn();
@@ -669,7 +671,7 @@ class PostMapper
 
                     EXISTS (SELECT 1 FROM user_post_likes    WHERE postid = p.postid AND userid = :currentUserId) AS isliked,
                     EXISTS (SELECT 1 FROM user_post_views    WHERE postid = p.postid AND userid = :currentUserId) AS isviewed,
-                    EXISTS (SELECT 1 FROM user_post_reports  WHERE postid = p.postid AND userid = :currentUserId) AS isreported,
+                    EXISTS (SELECT 1 FROM user_reports WHERE targetid = p.postid AND reporter_userid = :currentUserId) AS isreported,
                     EXISTS (SELECT 1 FROM user_post_dislikes WHERE postid = p.postid AND userid = :currentUserId) AS isdisliked,
                     EXISTS (SELECT 1 FROM user_post_saves    WHERE postid = p.postid AND userid = :currentUserId) AS issaved,
 
