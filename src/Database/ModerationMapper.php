@@ -244,7 +244,7 @@ class ModerationMapper
                     ]);
                     PostInfo::query()->where('postid', $report['targetid'])->updateColumns([
                             'reports' => 0
-                        ]);
+                    ]);
                     // Move file to illegal folder
                     $this->moveFileToIllegalFolder($report['targetid'], 'post');
                 }
@@ -294,6 +294,9 @@ class ModerationMapper
                     User::query()->where('uid', $report['targetid'])->updateColumns([
                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
                     ]);
+                    UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
+                        'reports' => 0
+                    ]);
                 }
 
                 /**
@@ -314,7 +317,7 @@ class ModerationMapper
                  */
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
                     UserInfo::query()->where('userid', $report['targetid'])->updateColumns([
-                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_CONTENT']['USER']
+                        'reports' => 0
                     ]);
                     User::query()->where('uid', $report['targetid'])->updateColumns([
                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]
@@ -338,6 +341,9 @@ class ModerationMapper
                     Comment::query()->where('commentid', $report['targetid'])->updateColumns([
                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[2]
                     ]);
+                    CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
+                        'reports' => 0
+                    ]);
                 }
 
                 /**
@@ -358,7 +364,7 @@ class ModerationMapper
                  */
                 if ($moderationAction === array_keys(ConstantsModeration::contentModerationStatus())[1]) {
                     CommentInfo::query()->where('commentid', $report['targetid'])->updateColumns([
-                        'reports' => ConstantsModeration::contentFiltering()['REPORTS_COUNT_TO_HIDE_CONTENT']['COMMENT']
+                        'reports' => 0
                     ]);
                     Comment::query()->where('commentid', $report['targetid'])->updateColumns([
                         'visibility_status' => ConstantsModeration::VISIBILITY_STATUS[1]

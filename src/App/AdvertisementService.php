@@ -737,7 +737,7 @@ class AdvertisementService
 
         $this->logger->debug("AdvertisementService.findAdvertiser started");
 
-         $contentFilterCase = ContentFilteringCases::postFeed;
+        $contentFilterCase = ContentFilteringCases::postFeed;
 
         if ($tag) {
             $contentFilterCase = ContentFilteringCases::searchByMeta;
@@ -745,7 +745,7 @@ class AdvertisementService
         if ($userId || $postId) {
             $contentFilterCase = ContentFilteringCases::searchById;
         }
-        if ($userId && $userId === $this->currentUserId) { 
+        if ($userId && $userId === $this->currentUserId) {
             $contentFilterCase = ContentFilteringCases::myprofile;
         }
 
