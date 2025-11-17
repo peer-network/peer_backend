@@ -93,7 +93,7 @@ class CommentInfoMapper
 
         $table = match ($action) {
             'likeComment' => 'user_comment_likes',
-            'reportComment' => 'user_comment_reports',
+            'reportComment' => 'user_reports',
             default => null,
         };
 

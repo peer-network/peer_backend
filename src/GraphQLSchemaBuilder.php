@@ -4,9 +4,6 @@ namespace Fawaz;
 
 const INT32_MAX = 2147483647;
 
-const BASIC = 50;
-const PINNED = 200;
-
 use Fawaz\App\Advertisements;
 use Fawaz\App\AdvertisementService;
 use Fawaz\App\CommentAdvanced;
@@ -1411,6 +1408,12 @@ class GraphQLSchemaBuilder
                 'd5' => function (array $root): int {
                     return $root['d5'] ?? 0;
                 },
+                'd6' => function (array $root): int {
+                    return $root['d6'] ?? 0;
+                },
+                'd7' => function (array $root): int {
+                    return $root['d7'] ?? 0;
+                },
                 'w0' => function (array $root): int {
                     return $root['q0'] ?? 0;
                 },
@@ -2012,7 +2015,7 @@ class GraphQLSchemaBuilder
                     return $root['recipientid'] ?? '';
                 },
                 'tokenamount' => function (array $root): float {
-                    return $root['tokenamount'] ?? 0.0;
+                    return (float) ($root['tokenamount'] ?? 0.0);
                 },
                 'transferaction' => function (array $root): string {
                     return $root['transferaction'] ?? '';
@@ -2022,6 +2025,12 @@ class GraphQLSchemaBuilder
                 },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
+                },
+                'sender' => function (array $root): array {
+                    return $root['sender'] ?? [];
+                },
+                'recipient' => function (array $root): array {
+                    return $root['recipient'] ?? [];
                 },
             ],
             'PostInteractionResponse' => [
@@ -2048,6 +2057,14 @@ class GraphQLSchemaBuilder
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.ListAdvertisementData Resolvers');
                     return $root['status'] ?? '';
+                },
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
                 },
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
@@ -2087,6 +2104,14 @@ class GraphQLSchemaBuilder
                 },
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
+                },
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
                 },
                 'affectedRows' => function (array $root): ?array {
                     return $root['affectedRows'] ?? null;
@@ -2381,208 +2406,6 @@ class GraphQLSchemaBuilder
             'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
             'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
         ];
-    }
-
-    // Berechne den Basispreis des Beitrags
-    protected function advertisePostBasicResolver(?array $args = []): int
-    {
-        try {
-            $this->logger->debug('Query.advertisePostBasicResolver started');
-
-            $postId = $args['postid'];
-            $duration = $args['durationInDays'];
-
-            $price = $this->advertisementService::calculatePrice($this->advertisementService::PLAN_BASIC, $duration);
-
-            return $price;
-        } catch (\Throwable $e) {
-            $this->logger->warning('Invalid price provided.', ['Error' => $e]);
-            return 0;
-        }
-    }
-
-    // Berechne den Preis für angehefteten Beitrag
-    protected function advertisePostPinnedResolver(?array $args = []): int
-    {
-        try {
-            $this->logger->debug('Query.advertisePostPinnedResolver started');
-
-            $postId = $args['postid'];
-
-            $price = $this->advertisementService::calculatePrice($this->advertisementService::PLAN_PINNED);
-
-            return $price;
-        } catch (\Throwable $e) {
-            $this->logger->warning('Invalid price provided.', ['Error' => $e]);
-            return 0;
-        }
-    }
-
-    // Werbeanzeige prüfen, validieren und freigeben
-    protected function resolveAdvertisePost(?array $args = []): ?array
-    {
-        // Authentifizierung prüfen
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
-        }
-
-        //$this->logger->info('Query.resolveAdvertisePost gestartet');
-
-        $postId = $args['postid'] ?? null;
-        $durationInDays = $args['durationInDays'] ?? null;
-        $startdayInput = $args['startday'] ?? null;
-        $advertisePlan = $args['advertisePlan'] ?? null;
-        $reducePrice = false;
-        $CostPlan = 0;
-
-        // postId validieren
-        if ($postId !== null && !self::isValidUUID($postId)) {
-            return $this->respondWithError(30209);
-        }
-
-        if ($this->postService->postExistsById($postId) === false) {
-            return $this->respondWithError(31510);
-        }
-
-        $advertiseActions = ['BASIC', 'PINNED'];
-
-        // Werbeplan validieren
-        if (!in_array($advertisePlan, $advertiseActions, true)) {
-            $this->logger->warning('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
-            return $this->respondWithError(32006);
-        }
-
-        $actionPrices = [
-            'BASIC' => BASIC,
-            'PINNED' => PINNED,
-        ];
-
-        // Preisvalidierung
-        if (!isset($actionPrices[$advertisePlan])) {
-            $this->logger->warning('Ungültiger Preisplan', ['advertisePlan' => $advertisePlan]);
-            return $this->respondWithError(32005);
-        }
-
-        if ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
-            // Startdatum validieren
-            if (isset($startdayInput) && empty($startdayInput)) {
-                $this->logger->warning('Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
-                return $this->respondWithError(32007);
-            }
-
-            // Startdatum prüfen und Format validieren
-            $startday = DateTimeImmutable::createFromFormat('Y-m-d', $startdayInput);
-            $errors = DateTimeImmutable::getLastErrors();
-
-            if (!$startday) {
-                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
-                return $this->respondWithError(32008);
-            }
-
-            if (isset($errors['warning_count']) && $errors['warning_count'] > 0 || isset($errors['error_count']) && $errors['error_count'] > 0) {
-                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
-                return $this->respondWithError(42004);
-            }
-
-            // Prüfen, ob das Startdatum in der Vergangenheit liegt
-            $tomorrow = new DateTimeImmutable('tomorrow');
-            if ($startday < $tomorrow) {
-                $this->logger->warning('Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
-                return $this->respondWithError(32008);
-            }
-
-            $durationActions = ['ONE_DAY', 'TWO_DAYS', 'THREE_DAYS', 'FOUR_DAYS', 'FIVE_DAYS', 'SIX_DAYS', 'SEVEN_DAYS'];
-
-            // Laufzeit validieren
-            if ($durationInDays !== null && !in_array($durationInDays, $durationActions, true)) {
-                $this->logger->warning('Ungültige Laufzeit', ['durationInDays' => $durationInDays]);
-                return $this->respondWithError(32009);
-            }
-        }
-
-        if ($this->advertisementService->isAdvertisementDurationValid($postId) === true) {
-            $reducePrice = true;
-        }
-
-        if ($reducePrice === false) {
-            if ($this->advertisementService->hasShortActiveAdWithUpcomingAd($postId) === true) {
-                $reducePrice = true;
-            }
-        }
-
-        // Kosten berechnen je nach Plan (BASIC oder PINNED)
-        if ($advertisePlan === $this->advertisementService::PLAN_PINNED) {
-            $CostPlan = $this->advertisePostPinnedResolver($args); // PINNED Kosten berechnen
-
-            // 20% discount weil advertisement >= 24 stunde aktive noch
-            if ($reducePrice === true) {
-                $CostPlan = $CostPlan - ($CostPlan * 0.20); // 80% vom ursprünglichen Wert
-                //$CostPlan *= 0.80; // 80% vom ursprünglichen Wert
-                $this->logger->info('20% Discount Exestiert:', ['CostPlan' => $CostPlan]);
-            }
-
-            $this->logger->info('Werbeanzeige PINNED', ['CostPlan' => $CostPlan]);
-            $rescode = 12003;
-        } elseif ($advertisePlan === $this->advertisementService::PLAN_BASIC) {
-            $CostPlan = $this->advertisePostBasicResolver($args); // BASIC Kosten berechnen
-            $this->logger->info('Werbeanzeige BASIC', ["Kosten für $durationInDays Tage: " => $CostPlan]);
-            $rescode = 12004;
-        } else {
-            $this->logger->warning('Ungültige Ads Plan', ['CostPlan' => $CostPlan]);
-            return $this->respondWithError(32005);
-        }
-
-        // Wenn Kosten leer oder 0 sind, Fehler zurückgeben
-        $args['eurocost'] = $CostPlan;
-        if (empty($CostPlan) || (int)$CostPlan === 0) {
-            $this->logger->warning('Kostenprüfung fehlgeschlagen', ['CostPlan' => $CostPlan]);
-            return $this->respondWithError(42005);
-        }
-
-        // Euro in PeerTokens umrechnen
-        $results = $this->advertisementService->convertEuroToTokens($CostPlan, $rescode);
-        if (isset($results['status']) && $results['status'] === 'error') {
-            $this->logger->warning('Fehler bei convertEuroToTokens', ['results' => $results]);
-            return $results;
-        }
-        if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Umrechnung erfolgreich', ["€$CostPlan in PeerTokens: " => $results['affectedRows']['TokenAmount']]);
-            $CostPlan = $results['affectedRows']['TokenAmount'];
-            $args['tokencost'] = $CostPlan;
-        }
-
-        try {
-            // Wallet prüfen
-            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
-            if ($balance < $CostPlan) {
-                $this->logger->warning('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
-                return $this->respondWithError(51301);
-            }
-
-            // Werbeanzeige erstellen
-            $response = $this->advertisementService->createAdvertisement($args);
-            if (isset($response['status']) && $response['status'] === 'success') {
-                $args['art'] = ($advertisePlan === $this->advertisementService::PLAN_BASIC) ? 6 : (($advertisePlan === $this->advertisementService::PLAN_PINNED) ? 7 : null);
-                $args['price'] = $CostPlan ?? null;
-
-                $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
-                if (isset($deducted['status']) && $deducted['status'] === 'error') {
-                    return $deducted;
-                }
-
-                if (!$deducted) {
-                    $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
-                    return $this->respondWithError($deducted['ResponseCode']);
-                }
-
-                return $response;
-            }
-
-            return $response;
-
-        } catch (\Throwable $e) {
-            return $this->respondWithError(40301);
-        }
     }
 
     // Werbeanzeige historie abrufen
@@ -3951,34 +3774,34 @@ class GraphQLSchemaBuilder
 
         try {
             if (empty($email) || empty($password)) {
-                $this->logger->warning('Email and password are required', ['email' => $email]);
+                $this->logger->warning('Email and password are required');
                 return $this::respondWithError(30801);
             }
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $this->logger->warning('Invalid email format', ['email' => $email]);
+                $this->logger->warning('Invalid email format');
                 return $this::respondWithError(30801);
             }
 
             $user = $this->userMapper->loadByEmail($email);
 
             if (!$user) {
-                $this->logger->warning('Invalid email or password', ['email' => $email]);
+                $this->logger->warning('Invalid email or password');
                 return $this::respondWithError(30801);
             }
 
             if (!$user->getVerified()) {
-                $this->logger->warning('Account not verified', ['email' => $email]);
+                $this->logger->warning('Account not verified', ['userId' => $user->getUserId()]);
                 return $this::respondWithError(60801);
             }
 
             if ($user->getStatus() == 6) {
-                $this->logger->warning('Account has been deleted', ['email' => $email]);
+                $this->logger->warning('Account has been deleted', ['userId' => $user->getUserId()]);
                 return $this::respondWithError(30801);
             }
 
             if (!$user->verifyPassword($password)) {
-                $this->logger->warning('Invalid password', ['email' => $email]);
+                $this->logger->warning('Invalid password', ['userId' => $user->getUserId()]);
                 return $this::respondWithError(30801);
             }
 
@@ -3999,7 +3822,7 @@ class GraphQLSchemaBuilder
 
             $this->userMapper->logLoginData($user->getUserId());
 
-            $this->logger->info('Login successful', ['email' => $email]);
+            $this->logger->info('Login successful', ['userId' => $user->getUserId()]);
 
             return [
                 'status' => 'success',

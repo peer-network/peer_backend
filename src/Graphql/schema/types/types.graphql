@@ -52,6 +52,7 @@ type AdvertisementHistoryResult {
 type ListedAdvertisementData {
   status: String!
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: AdvertisementHistoryResult
 }
 
@@ -77,6 +78,7 @@ type ContactusResponsePayload {
 type ListAdvertisementData {
   status: String!
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: [AdvertisementRow]
 }
 
@@ -151,6 +153,8 @@ type Transaction {
   transferaction: String!
   message: String!
   createdat: String!
+  sender: BasicUserInfo!
+  recipient: BasicUserInfo!
 }
 
 type TransferToken {
@@ -239,6 +243,7 @@ type Profile {
 type ProfileInfo {
   status: String
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: Profile
 }
 
@@ -300,6 +305,8 @@ type DailyGemStatusData {
   d3: Decimal
   d4: Decimal
   d5: Decimal
+  d6: Decimal
+  d7: Decimal
   w0: Decimal
   m0: Decimal
   y0: Decimal
@@ -448,6 +455,7 @@ type AllUserFriends {
   status: String!
   counter: Int!
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: [AllUserInfo]
 }
 

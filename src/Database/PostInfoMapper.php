@@ -186,7 +186,7 @@ class PostInfoMapper
         $table = match ($action) {
             'likePost' => 'user_post_likes',
             'dislikePost' => 'user_post_dislikes',
-            'reportPost' => 'user_post_reports',
+            'reportPost' => 'user_reports',
             'savePost' => 'user_post_saves',
             'sharePost' => 'user_post_shares',
             'viewPost' => 'user_post_views',
