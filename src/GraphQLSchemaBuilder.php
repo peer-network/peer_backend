@@ -2040,6 +2040,14 @@ class GraphQLSchemaBuilder
                     $this->logger->debug('Query.ListAdvertisementData Resolvers');
                     return $root['status'] ?? '';
                 },
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
                 },
@@ -2078,6 +2086,14 @@ class GraphQLSchemaBuilder
                 },
                 'ResponseCode' => function (array $root): string {
                     return $root['ResponseCode'] ?? '';
+                },
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
                 },
                 'affectedRows' => function (array $root): ?array {
                     return $root['affectedRows'] ?? null;
@@ -3642,34 +3658,34 @@ class GraphQLSchemaBuilder
 
         try {
             if (empty($email) || empty($password)) {
-                $this->logger->warning('Email and password are required', ['email' => $email]);
+                $this->logger->warning('Email and password are required');
                 return $this::respondWithError(30801);
             }
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $this->logger->warning('Invalid email format', ['email' => $email]);
+                $this->logger->warning('Invalid email format');
                 return $this::respondWithError(30801);
             }
 
             $user = $this->userMapper->loadByEmail($email);
 
             if (!$user) {
-                $this->logger->warning('Invalid email or password', ['email' => $email]);
+                $this->logger->warning('Invalid email or password');
                 return $this::respondWithError(30801);
             }
 
             if (!$user->getVerified()) {
-                $this->logger->warning('Account not verified', ['email' => $email]);
+                $this->logger->warning('Account not verified', ['userId' => $user->getUserId()]);
                 return $this::respondWithError(60801);
             }
 
             if ($user->getStatus() == 6) {
-                $this->logger->warning('Account has been deleted', ['email' => $email]);
+                $this->logger->warning('Account has been deleted', ['userId' => $user->getUserId()]);
                 return $this::respondWithError(30801);
             }
 
             if (!$user->verifyPassword($password)) {
-                $this->logger->warning('Invalid password', ['email' => $email]);
+                $this->logger->warning('Invalid password', ['userId' => $user->getUserId()]);
                 return $this::respondWithError(30801);
             }
 
@@ -3690,7 +3706,7 @@ class GraphQLSchemaBuilder
 
             $this->userMapper->logLoginData($user->getUserId());
 
-            $this->logger->info('Login successful', ['email' => $email]);
+            $this->logger->info('Login successful', ['userId' => $user->getUserId()]);
 
             return [
                 'status' => 'success',
