@@ -41,7 +41,7 @@ class WalletMapper
         $accountsResult = $this->pool->returnAccounts();
 
         if (isset($accountsResult['status']) && $accountsResult['status'] === 'error') {
-            $this->logger->warning('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
+            $this->logger->error('Incorrect returning Accounts', ['Error' => $accountsResult['status']]);
             return self::respondWithError(40701);
         }
 
@@ -1131,7 +1131,7 @@ class WalletMapper
         try {
             $results = $this->insertWinToLog($userId, $args);
             if ($results === false) {
-                $this->logger->warning("Error occurred in deductFromWallets.insertWinToLog", [
+                $this->logger->error("Error occurred in deductFromWallets.insertWinToLog", [
                     'userId' => $userId,
                     'args' => $args,
                 ]);
@@ -1140,7 +1140,7 @@ class WalletMapper
 
             $results = $this->insertWinToPool($userId, $args);
             if ($results === false) {
-                $this->logger->warning("Error occurred in deductFromWallets.insertWinToPool", [
+                $this->logger->error("Error occurred in deductFromWallets.insertWinToPool", [
                     'userId' => $userId,
                     'args' => $args,
                 ]);
@@ -1176,7 +1176,7 @@ class WalletMapper
                     'whereby' => $whereby,
                 ],
             ]);
-            $this->logger->warning("Error occurred in deductFromWallets.Throwable", [
+            $this->logger->error("Error occurred in deductFromWallets.Throwable", [
                 'userId' => $userId,
                 'args' => $args,
             ]);

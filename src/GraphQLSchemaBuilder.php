@@ -2330,7 +2330,7 @@ class GraphQLSchemaBuilder
             return $response;
         }
 
-        $this->logger->warning('Query.createUser No data found');
+        $this->logger->error('Query.createUser No data found');
         return $this::respondWithError(41105);
     }
 
@@ -2360,7 +2360,7 @@ class GraphQLSchemaBuilder
             return $response;
         }
 
-        $this->logger->warning('Query.resolveBlocklist No data found');
+        $this->logger->error('Query.resolveBlocklist No data found');
         return $this::respondWithError(41105);
     }
 
@@ -2918,7 +2918,7 @@ class GraphQLSchemaBuilder
             return $results;
         }
 
-        $this->logger->warning('Query.resolveLiquidity Failed to find liquidity');
+        $this->logger->error('Query.resolveLiquidity Failed to find liquidity');
         return $this::respondWithError(41201);
     }
 
@@ -2941,7 +2941,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError($results['ResponseCode']);
         }
 
-        $this->logger->warning('Query.resolveUserInfo Failed to find INFO');
+        $this->logger->error('Query.resolveUserInfo Failed to find INFO');
         return $this::respondWithError(41001);
     }
 
