@@ -3,8 +3,8 @@
 		"_postman_id": "fce27c87-89e9-481c-ac90-05d0343df0db",
 		"name": "002_posts_wallet_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-fce27c87-89e9-481c-ac90-05d0343df0db?action=share&source=collection_link&creator=43606001"
+		"_exporter_id": "32542010",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-fce27c87-89e9-481c-ac90-05d0343df0db?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -8417,60 +8417,6 @@
 			"response": []
 		},
 		{
-			"name": "Get post info",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11502\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query GetPostInfo {\n    getPostInfo(postid: \"{{postid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            likes\n            dislikes\n            reports\n            views\n            saves\n            shares\n            comments\n        }\n    }\n}",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Get all posts",
 			"event": [
 				{
@@ -8516,6 +8462,97 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listfriends",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"let response = pm.response.json();",
+							"let listFriends = response.data && response.data.listFriends;",
+							"let affectedRows = listFriends && listFriends.affectedRows ? listFriends.affectedRows : [];",
+							"",
+							"pm.test(\"ResponseCode is correct (11102)\", function () {",
+							"    pm.expect(listFriends.ResponseCode).to.eql(\"11102\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct (success)\", function () {",
+							"    pm.expect(listFriends.status).to.eql(\"success\");",
+							"});",
+							"",
+							"pm.test(\"Exactly one record is returned\", function () {",
+							"    pm.expect(affectedRows).to.be.an(\"array\");",
+							"    pm.expect(affectedRows.length, \"There should be exactly 1 record\").to.eql(1);",
+							"});",
+							"",
+							"let expectedUserId = pm.environment.get(\"w_userid_t3\");",
+							"",
+							"pm.test(\"Single record userid equals w_userid_t3\", function () {",
+							"    pm.expect(expectedUserId, \"Environment variable w_userid_t3 must be set\").to.be.a(\"string\");",
+							"    ",
+							"    let record = affectedRows[0];",
+							"    pm.expect(record).to.have.property(\"userid\");",
+							"    pm.expect(record.userid, \"Record userid should match w_userid_t3\").to.eql(expectedUserId);",
+							"});",
+							"",
+							"pm.test(\"No 'error' text in response body\", function () {",
+							"    pm.expect(pm.response.text().toLowerCase()).to.not.include(\"error\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListFriends {\n    listFriends(userid: \"{{w_userid_t2}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            visibilityStatus\n            hasActiveReports\n            updatedat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -14795,7 +14832,7 @@
 			"response": []
 		},
 		{
-			"name": "showOnboardings",
+			"name": "Update preferences",
 			"event": [
 				{
 					"listen": "test",
@@ -14858,7 +14895,7 @@
 			"response": []
 		},
 		{
-			"name": "verify getUserinfo",
+			"name": "Check preferences",
 			"event": [
 				{
 					"listen": "test",
@@ -14903,85 +14940,6 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query GetUserInfo {\n    getUserInfo {\n        status\n        ResponseCode\n        affectedRows {\n            userid\n            liquidity\n            amountposts\n            amountblocked\n            amountfollower\n            amountfollowed\n            amountfriends\n            invited\n            updatedat\n            userPreferences {\n                contentFilteringSeverityLevel\n                onboardingsWereShown\n            }\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get comment info",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11602\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"let response = {};",
-							"try {",
-							"    response = pm.response.json();",
-							"} catch (e) {",
-							"    console.log(\"Failed to parse JSON:\", e);",
-							"}",
-							"",
-							"let affectedRows = response?.data?.getCommentInfo?.affectedRows || {};",
-							"let likes = affectedRows.likes;",
-							"let reports = affectedRows.reports;",
-							"let comments = affectedRows.comments;",
-							"",
-							"pm.test(\"Likes count is exactly 1\", function () {",
-							"    pm.expect(likes).to.eql(1);",
-							"});",
-							"",
-							"pm.test(\"Reports count is exactly 1\", function () {",
-							"    pm.expect(reports).to.eql(1);",
-							"});",
-							"",
-							"pm.test(\"Comments count is exactly 1\", function () {",
-							"    pm.expect(comments).to.eql(1);",
-							"});",
-							"",
-							"console.log(`Likes: ${likes}, Reports: ${reports}, Comments: ${comments}`);"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "query GetCommentInfo {\n    getCommentInfo(commentId: \"{{commentid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            likes\n            reports\n            comments\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
