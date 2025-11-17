@@ -23,6 +23,10 @@ use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\TokenTransfer\Strategies\PostTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\LikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\CommentTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\DislikeTransferStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
@@ -2745,13 +2749,21 @@ class GraphQLSchemaBuilder
             }
 
             if (isset($response['status']) && $response['status'] === 'success') {
-                $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
+                $transferStrategy = match($action) {
+                    'post' => new PostTransferStrategy(),
+                    'like' => new LikeTransferStrategy(),
+                    'comment' => new CommentTransferStrategy(),
+                    'dislike' => new DislikeTransferStrategy(),
+                    default => throw new \Exception("Invalid action type: {$action}")
+                };
+
+                $deducted = $this->walletService->performPayment($this->currentUserId, $transferStrategy, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
                     return $deducted;
                 }
 
                 if (!$deducted) {
-                    $this->logger->error('Failed to deduct from wallet', ['userId' => $this->currentUserId]);
+                    $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
                     return $this::respondWithError($deducted['ResponseCode']);
                 }
 
