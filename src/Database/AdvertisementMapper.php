@@ -459,6 +459,7 @@ class AdvertisementMapper
                     'isfollowed'  => (bool)$row['isfollowed'],
                     'isfollowing' => (bool)$row['isfollowing'],
                     'isfriend'    => (bool)$row['isfriend'],
+                    'visibility_status' => (string)$row['post_user_visibility_status'],
                 ],
                 'comments'        => $comments,
             ],
