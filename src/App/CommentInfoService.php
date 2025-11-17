@@ -188,7 +188,7 @@ class CommentInfoService
 
             if ($this->moderationMapper->wasContentRestored($commentId, 'comment')) {
                 $this->logger->warning('CommentInfoService: reportComment: User tries to report a restored comment');
-                return $this->respondWithError(31610);
+                return $this->respondWithError(32104);
             }
 
             $commentInfo = $this->commentInfoMapper->loadById($commentId);
@@ -214,10 +214,10 @@ class CommentInfoService
         }
 
         try {
-            // Moderator Should NOT be possible to report the same
+            // User Should NOT be possible to report the same
             if ($this->reportsMapper->isModerated($commentId, ReportTargetType::COMMENT->value)) {
                 $this->logger->warning("PostInfoService: reportComment: User tries to report a moderated comment");
-                return $this::respondWithError(32102); // This content has already been reviewed and restored by our team.
+                return $this::respondWithError(32102); // This content has already been reviewed and moderated by our team.
             }
 
             $this->transactionManager->beginTransaction();

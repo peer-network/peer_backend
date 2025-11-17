@@ -415,7 +415,7 @@ class UserInfoService
 
             if ($this->moderationMapper->wasContentRestored($reported_userid, 'user')) {
                 $this->logger->warning('UserInfoService: reportUser: User tries to report a restored user');
-                return $this->respondWithError(31014);
+                return $this->respondWithError(32104);
             }
 
             $userInfo = $this->userInfoMapper->loadInfoById($reported_userid);
@@ -439,7 +439,7 @@ class UserInfoService
             // Moderated items should not be reported again
             if ($this->reportsMapper->isModerated($reported_userid, ReportTargetType::USER->value)) {
                 $this->logger->warning("UserInfoService.reportUser: User report already exists");
-                return $this::respondWithError(32102); // This content has already been reviewed and restored by our team.
+                return $this::respondWithError(32102); // This content has already been reviewed and noderated by our team.
             }
 
             $this->transactionManager->beginTransaction();
