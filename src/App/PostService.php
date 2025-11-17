@@ -536,7 +536,7 @@ class PostService
         $title = $args['title'] ?? null;
         $tag = $args['tag'] ?? null;
         $postId = $args['postid'] ?? null;
-        $titleConfig = ConstantsConfig::post()['TITLE'];
+        $tagConfig = ConstantsConfig::post()['TAG'];
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
@@ -549,7 +549,7 @@ class PostService
             return $this::respondWithError(30201);
         }
 
-        if ($title !== null && (strlen((string)$title) < $titleConfig['MIN_LENGTH'] || strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
+        if ($title !== null && (strlen((string)$title) < $tagConfig['MIN_LENGTH'] || strlen((string)$title) > $tagConfig['MAX_LENGTH'])) {
             return $this::respondWithError(30210);
         }
 
@@ -562,7 +562,7 @@ class PostService
         }
 
         if ($tag !== null) {
-            if (!preg_match('/' . $titleConfig['PATTERN'] . '/u', $tag)) {
+            if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $tag)) {
                 $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }

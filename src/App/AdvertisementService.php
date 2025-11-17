@@ -686,7 +686,7 @@ class AdvertisementService
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $titleConfig = ConstantsConfig::post()['TITLE'];
+        $tagConfig = ConstantsConfig::post()['TAG'];
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
@@ -707,7 +707,7 @@ class AdvertisementService
         }
 
         if ($tag !== null) {
-            if (!preg_match('/' . $titleConfig['PATTERN'] . '/u', $tag)) {
+            if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $tag)) {
                 $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }

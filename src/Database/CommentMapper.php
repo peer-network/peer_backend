@@ -329,6 +329,7 @@ class CommentMapper
 					c.parentid,
 					c.content,
 					c.createdat,
+                    c.visibility_status as comment_visibility_status,
 					COALESCE(like_counts.like_count, 0) AS amountlikes,
 					COALESCE(comment_counts.comment_count, 0) AS amountreplies,
                     ci.reports AS amountreports,
@@ -338,6 +339,7 @@ class CommentMapper
 					u.slug,
 					u.status,
 					u.img,
+                    u.visibility_status as user_visibility_status,
 					(f1.followerid IS NOT NULL) AS isfollowing,
 					(f2.followerid IS NOT NULL) AS isfollowed,
                     EXISTS (SELECT 1 FROM user_reports  WHERE targetid = c.commentid AND reporter_userid = :currentUserId) AS isreported
@@ -404,6 +406,7 @@ class CommentMapper
                     'isliked' => (bool) $row['isliked'],
                     'createdat' => $row['createdat'],
                     'userstatus' => $userObj['status'],
+                    'visibility_status' => $row['comment_visibility_status'],
                     'user' => [
                         'uid' => $userObj['uid'],
                         'username' => $userObj['username'],
@@ -412,6 +415,7 @@ class CommentMapper
                         'img' => $userObj['img'],
                         'isfollowed' => (bool) $row['isfollowed'],
                         'isfollowing' => (bool) $row['isfollowing'],
+                        'visibility_status' => $row['user_visibility_status'],
                     ],
                 ]);
             }, $results);
