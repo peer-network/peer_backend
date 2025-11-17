@@ -12,7 +12,7 @@ use Fawaz\Database\Interfaces\Hashable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Utils\HashObject;
 
-class Comment extends Model implements Hashable, CommentReplaceable
+class Comment extends Model implements Hashable
 {
     use HashObject;
 
@@ -23,8 +23,6 @@ class Comment extends Model implements Hashable, CommentReplaceable
     protected string $content;
     protected string $createdat;
     protected ?int $userstatus;
-    protected ?int $activeReports = null;
-    protected ?string $visibilityStatus = null;
 
 
     // Constructor
@@ -41,8 +39,6 @@ class Comment extends Model implements Hashable, CommentReplaceable
         $this->content = $data['content'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->userstatus = $data['userstatus'] ?? 0;
-        $this->activeReports = $data['reports'] ?? null;
-        $this->visibilityStatus = $data['visibility_status'] ?? null;
     }
 
     // Array Copy methods
@@ -54,9 +50,7 @@ class Comment extends Model implements Hashable, CommentReplaceable
             'postid' => $this->postid,
             'parentid' => $this->parentid,
             'content' => $this->content,
-            'createdat' => $this->createdat,
-            'visibility_status' => $this->visibilityStatus,
-            'reports' => $this->activeReports,
+            'createdat' => $this->createdat
         ];
         return $att;
     }
@@ -116,20 +110,7 @@ class Comment extends Model implements Hashable, CommentReplaceable
     {
         $this->content = $content;
     }
-    public function visibilityStatus(): string
-    {
-        return $this->visibilityStatus ?? '';
-    }
 
-    public function setVisibilityStatus(?string $status): void
-    {
-        $this->visibilityStatus = $status;
-    }
-
-    public function getActiveReports(): ?int
-    {
-        return $this->activeReports;
-    }
     // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array|false
     {
