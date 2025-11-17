@@ -230,7 +230,9 @@ class PostMapper
     {
         $this->logger->debug("PostMapper.fetchReports started");
 
-        $sql = "SELECT * FROM user_post_reports WHERE postid = :postid";
+        $sql = "SELECT targetid AS postid, reporter_userid AS userid, createdat
+        FROM user_reports
+        WHERE targetid = :postid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
@@ -301,7 +303,7 @@ class PostMapper
     {
         $this->logger->debug("PostMapper.isReported started");
 
-        $sql = "SELECT COUNT(*) FROM user_post_reports WHERE postid = :postid AND userid = :userid";
+        $sql = "SELECT COUNT(*) FROM user_reports WHERE targetid = :postid AND reporter_userid = :userid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid, 'userid' => $userid]);
         return (bool) $stmt->fetchColumn();
@@ -464,15 +466,45 @@ class PostMapper
         }
     }
 
-    /**
-     * Get GuestListPost based on Filter
-     *
-     * @param string $currentUserId
-     * @param array $args
-     * @param Specification[] $specifications
-     * @return PostAdvanced[]
-     */
-    public function findPostser(string $currentUserId, array $specifications, ?array $args = []): array
+    // public function delete(string $postid): bool
+    // {
+    //     $this->logger->debug("PostMapper.delete started");
+
+    //     try {
+    //         $this->db->beginTransaction();
+
+    //         $tables = [
+    //             'user_post_likes',
+    //             'user_post_dislikes',
+    //             'user_reports',
+    //             'user_post_saves',
+    //             'user_post_shares',
+    //             'user_post_views',
+    //             'post_info',
+    //             'posts'
+    //         ];
+
+    //         foreach ($tables as $table) {
+    //             $sql = "DELETE FROM $table WHERE postid = :postid";
+    //             $stmt = $this->db->prepare($sql);
+    //             $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
+    //             $stmt->execute();
+    //         }
+
+    //         $this->db->commit();
+    //         $this->logger->info("Deleted post and related user activities successfully", ['postid' => $postid]);
+    //         return true;
+    //     } catch (\Exception $e) {
+    //         $this->db->rollBack();
+    //         $this->logger->error("Failed to delete post and related user activities", [
+    //             'postid' => $postid,
+    //             'exception' => $e->getMessage()
+    //         ]);
+    //         return false;
+    //     }
+    // }
+
+    public function findPostser(string $currentUserId, ?array $args = []): array
     {
         $this->logger->debug("PostMapper.findPostser started");
 
@@ -670,7 +702,7 @@ class PostMapper
 
                     EXISTS (SELECT 1 FROM user_post_likes    WHERE postid = p.postid AND userid = :currentUserId) AS isliked,
                     EXISTS (SELECT 1 FROM user_post_views    WHERE postid = p.postid AND userid = :currentUserId) AS isviewed,
-                    EXISTS (SELECT 1 FROM user_post_reports  WHERE postid = p.postid AND userid = :currentUserId) AS isreported,
+                    EXISTS (SELECT 1 FROM user_reports WHERE targetid = p.postid AND reporter_userid = :currentUserId) AS isreported,
                     EXISTS (SELECT 1 FROM user_post_dislikes WHERE postid = p.postid AND userid = :currentUserId) AS isdisliked,
                     EXISTS (SELECT 1 FROM user_post_saves    WHERE postid = p.postid AND userid = :currentUserId) AS issaved,
 
