@@ -48,7 +48,7 @@ class JWTService
             'exp' => $expirationTime
         ]);
 
-        $this->logger->info('Creating access token', ['data' => $data]);
+        $this->logger->info('Creating access token', ['uid' => $data['uid']]);
 
         return JWT::encode($payload, $this->privateKey, 'RS256');
     }
@@ -62,7 +62,7 @@ class JWTService
             'exp' => $expirationTime
         ]);
 
-        $this->logger->info('Creating refresh token.', ['data' => $data]);
+        $this->logger->info('Creating refresh token.', ['uid' => $data['uid']]);
 
         return JWT::encode($payload, $this->refreshPrivateKey, 'RS256');
     }
@@ -74,23 +74,23 @@ class JWTService
             $decodedToken = JWT::decode($token, new Key($key, 'RS256'));
 
             if (isset($decodedToken->iss) && $decodedToken->iss !== 'peerapp.de') {
-                $this->logger->warning('Invalid token issuer', ['token' => $token]);
+                $this->logger->warning('Invalid token issuer');
                 throw new \Exception('Invalid token issuer');
             }
 
             if (isset($decodedToken->aud) && $decodedToken->aud !== 'peerapp.de') {
-                $this->logger->warning('Invalid token audience', ['token' => $token]);
+                $this->logger->warning('Invalid token audience');
                 throw new \Exception('Invalid token audience');
             }
 
             return $decodedToken;
 
         } catch (ExpiredException $e) {
-            $this->logger->info('Token has expired', ['exception' => $e->getMessage(), 'token' => $token]);
+            $this->logger->info('Token has expired', ['exception' => $e->getMessage()]);
             throw new ValidationException('Token validation failed');
 
         } catch (\Exception $e) {
-            $this->logger->error('Token validation failed', ['exception' => $e->getMessage(), 'token' => $token]);
+            $this->logger->error('Token validation failed', ['exception' => $e->getMessage()]);
             throw new ValidationException('Token validation failed');
         }
     }
@@ -118,9 +118,10 @@ class JWTService
             'exp' => $expirationTime
         ];
 
-        $this->logger->info('Creating access token', ['data' => $payload]);
+        $this->logger->info('Creating access token', ['uid' => $userId]);
 
-        return JWT::encode($payload, $this->privateKey, 'RS256');
+        $token = JWT::encode($payload, $this->privateKey, 'RS256');
+        return $token;
     }
 
 }
