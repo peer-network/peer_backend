@@ -23,4 +23,3 @@ interface ConstantsConfigInterface
     public static function tokenomics();
     public static function minting();
 }
-

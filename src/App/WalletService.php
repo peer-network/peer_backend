@@ -276,9 +276,9 @@ class WalletService
      * Transfer Tokens from User Wallet for Advertisement Actions
      * Add logwins entry
      */
-    public function payForAdvertisement(string $userId, TransferStrategy $transferStrategy, ?array $args = []): ?array
+    public function performPayment(string $userId, TransferStrategy $transferStrategy, ?array $args = []): ?array
     {
-        $this->logger->debug('WalletService.payForAdvertisement started');
+        $this->logger->debug('WalletService.performPayment started');
 
         try {
             $this->transactionManager->beginTransaction();
@@ -310,7 +310,9 @@ class WalletService
             $currentBalance = $this->getUserWalletBalance($userId);
             $price = (string) $price;
 
-            $requiredAmount = $this->peerTokenMapper->calculateRequiredAmount($userId, (string) $price);
+            // Determine required amount per fee policy mode
+            $mode = $transferStrategy->getFeePolicyMode();
+            $requiredAmount = $this->peerTokenMapper->calculateRequiredAmountByMode($userId, (string)$price, $mode);
             if ($currentBalance < $requiredAmount) {
                 $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
                     'senderId' => $this->currentUserId,
@@ -333,13 +335,19 @@ class WalletService
                 'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
             ];
 
-            $response = $this->peerTokenMapper->transferToken($userId, $fromId, $price, $text, true, $transferStrategy);
+            $response = $this->peerTokenMapper->transferToken(
+                $userId,
+                $fromId,
+                $price,
+                $transferStrategy,
+                $text
+            );
 
             $args['gemid'] = $transferStrategy->getOperationId();
             $results = $this->walletMapper->insertWinToLog($userId, $args);
             if ($results === false) {
                 $this->transactionManager->rollBack();
-                $this->logger->warning("Error occurred in payForAdvertisement.insertWinToLog", [
+                $this->logger->warning("Error occurred in performPayment.insertWinToLog", [
                     'userId' => $userId,
                     'args' => $args,
                 ]);
@@ -355,7 +363,7 @@ class WalletService
             }
 
         } catch (\Exception $e) {
-            $this->logger->error('Error while paying for advertisement WalletService.payForAdvertisement', ['exception' => $e->getMessage()]);
+            $this->logger->error('Error while paying for advertisement WalletService.performPayment', ['exception' => $e->getMessage()]);
             $this->transactionManager->rollBack();
             return $this::respondWithError(40301);
         }

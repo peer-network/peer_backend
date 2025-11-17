@@ -7,8 +7,20 @@ namespace Fawaz\App;
 use DateTimeImmutable;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\AdvertisementMapper;
+use Fawaz\Database\CommentMapper;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
+use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\TokenTransfer\Strategies\AdsTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 use Fawaz\Utils\ContentFilterHelper;
@@ -38,6 +50,9 @@ class AdvertisementService
         protected PostMapper $postMapper,
         protected PostService $postService,
         protected WalletService $walletService,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected CommentMapper $commentMapper,
+        protected ProfileRepository $profileRepository,
     ) {
     }
 
@@ -82,6 +97,30 @@ class AdvertisementService
             return $this->respondWithError(31510);
         }
 
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+
+        $specs = [
+            $illegalContentSpec,
+            $systemUserSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $postId
+        ) === false) {
+            return $this::respondWithError(32020, ['postid' => $postId]);
+        }
+
         $advertiseActions = ['BASIC', 'PINNED'];
 
         // Werbeplan validieren
@@ -89,7 +128,7 @@ class AdvertisementService
             $this->logger->warning('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
             return $this->respondWithError(32006);
         }
-        
+
         $prices = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
 
         $actionPrices = [
@@ -174,7 +213,7 @@ class AdvertisementService
 
         $args['tokencost'] = $CostPlan;
         // Wenn Kosten leer oder 0 sind, Fehler zurückgeben
-        $args['eurocost'] = $CostPlan/ 10;
+        $args['eurocost'] = $CostPlan / 10;
         if (empty($CostPlan) || (int)$CostPlan === 0) {
             $this->logger->warning('Kostenprüfung fehlgeschlagen', ['CostPlan' => $CostPlan]);
             return $this->respondWithError(42005);
@@ -203,13 +242,13 @@ class AdvertisementService
             // Werbeanzeige erstellen
             $transferStrategy = new AdsTransferStrategy();
             $args['operationid'] = $transferStrategy->getOperationId();
-            
+
             $response = $this->createAdvertisement($args);
             if (isset($response['status']) && $response['status'] === 'success') {
                 $args['art'] = ($advertisePlan === $this::PLAN_BASIC) ? 6 : (($advertisePlan === $this::PLAN_PINNED) ? 7 : null);
                 $args['price'] = $CostPlan;
 
-                $deducted = $this->walletService->payForAdvertisement($this->currentUserId, $transferStrategy, $args);
+                $deducted = $this->walletService->performPayment($this->currentUserId, $transferStrategy, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
                     return $deducted;
                 }
@@ -270,7 +309,7 @@ class AdvertisementService
         $priceBasic = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES']['advertisementBasic'];
         $pricePinned = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES']['advertisementPinned'];
 
-        
+
         if ($plan === self::PLAN_PINNED) {
             return (int)$pricePinned;
         }
@@ -392,7 +431,7 @@ class AdvertisementService
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
             } elseif ($CostPlan !== null && $CostPlan === self::PLAN_PINNED) {
-                if ($this->advertisementMapper->hasActiveAdvertisement($postId, \strtolower($CostPlan)) === true ) {
+                if ($this->advertisementMapper->hasActiveAdvertisement($postId, \strtolower($CostPlan)) === true) {
                     $this->logger->warning('Pinned Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).
                 }
@@ -400,7 +439,7 @@ class AdvertisementService
                 $timestart = (new \DateTime())->format('Y-m-d H:i:s.u'); // Setze timestart
                 $timeend = (new \DateTime('+1 days'))->format('Y-m-d H:i:s.u'); // Setze Timeend
 
-                if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend, $this->currentUserId) === true ) {
+                if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend, $this->currentUserId) === true) {
                     $this->logger->warning('Pinned.Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
@@ -455,8 +494,8 @@ class AdvertisementService
                 //     $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                 //     $rescode = 12001; // Advertisement post erfolgreich erstellt.
                 // }
-                
-                
+
+
                 // Always create new advertisement with unique ID and current timestamp
                 $resp = $this->advertisementMapper->insert($advertisement);
                 $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
@@ -490,8 +529,10 @@ class AdvertisementService
         $to = $filter['to'] ?? null;
         $advertisementtype = $filter['type'] ?? null;
         $advertisementId = $filter['advertisementId'] ?? null;
+        $contentFilterBy = $filter['contentFilterBy'] ?? null;
         $postId = $filter['postId'] ?? null;
         $userId = $filter['userId'] ?? null;
+        $sortBy = $args['sort'] ?? [];
 
 
         if ($from !== null && !self::validateDate($from)) {
@@ -530,6 +571,38 @@ class AdvertisementService
             return $this->respondWithError(31007);
         }
 
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::post,
+            $this->currentUserId,
+        );
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+
+        $specs = [
+            $illegalContentSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
+            $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
+        ];
+
         // Normalize sort to a single uppercase string for mapper
         $allowedSortTypes = ['NEWEST', 'OLDEST', 'BIGGEST_COST', 'SMALLEST_COST'];
         if (array_key_exists('sort', $args)) {
@@ -549,7 +622,7 @@ class AdvertisementService
         }
 
         try {
-            $result = $this->advertisementMapper->fetchAllWithStats($args);
+            $result = $this->advertisementMapper->fetchAllWithStats($specs, $args);
 
             return self::createSuccessResponse(12002, $result['affectedRows'], false);
         } catch (\Throwable $e) {
@@ -560,7 +633,6 @@ class AdvertisementService
 
     public function isAdvertisementDurationValid(string $postId): bool
     {
-
         $this->logger->debug('AdvertisementService.isAdvertisementDurationValid started');
 
         try {
@@ -613,7 +685,10 @@ class AdvertisementService
         $tag = $args['tag'] ?? null;
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
-        $titleConfig = ConstantsConfig::post()['TITLE'];
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $tagConfig = ConstantsConfig::post()['TAG'];
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this->respondWithError(30209);
@@ -632,7 +707,7 @@ class AdvertisementService
         }
 
         if ($tag !== null) {
-            if (!preg_match('/' . $titleConfig['PATTERN'] . '/u', $tag)) {
+            if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $tag)) {
                 $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }
@@ -649,7 +724,8 @@ class AdvertisementService
             }
 
             $invalidTypes = ContentFilterHelper::invalidAgainstAllowed(
-                $filterBy, ContentFilterHelper::CONTENT_TYPES
+                $filterBy,
+                ContentFilterHelper::CONTENT_TYPES
             );
 
             if (!empty($invalidTypes)) {
@@ -662,13 +738,200 @@ class AdvertisementService
 
         $this->logger->debug("AdvertisementService.findAdvertiser started");
 
-        $results = $this->advertisementMapper->findAdvertiser($this->currentUserId, $args);
+        $contentFilterCase = ContentFilteringCases::postFeed;
+
+        if ($tag) {
+            $contentFilterCase = ContentFilteringCases::searchByMeta;
+        }
+        if ($userId || $postId) {
+            $contentFilterCase = ContentFilteringCases::searchById;
+        }
+        if ($userId && $userId === $this->currentUserId) {
+            $contentFilterCase = ContentFilteringCases::myprofile;
+        }
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::post,
+            $this->currentUserId,
+        );
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+
+        $specs = [
+            $illegalContentSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
+            $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
+        ];
+
+        $results = $this->advertisementMapper->findAdvertiser($this->currentUserId, $specs, $args);
         //$this->logger->info('findAdvertiser', ['results' => $results]);
         $this->logger->info("AdvertisementService.findAdvertiser Done");
         if (empty($results) && $postId != null) {
             return $this->respondWithError(31510);
         }
 
+        // results is an array of ['post' => PostAdvanced, 'advertisement' => Advertisements]
+        // Extract only posts, enrich them, then merge back with their ads and return
+        if (!empty($results)) {
+            $posts = [];
+            foreach ($results as $item) {
+                if (isset($item['post']) && $item['post'] instanceof PostAdvanced) {
+                    $posts[] = $item['post'];
+                }
+            }
+
+            if (!empty($posts)) {
+                $enrichedPosts = $this->enrichWithProfileAndComment(
+                    $posts,
+                    $specs,
+                    $this->currentUserId,
+                    $commentOffset,
+                    $commentLimit
+                );
+                foreach ($enrichedPosts as $post) {
+                    ContentReplacer::placeholderPost($post, $specs);
+                }
+                // Merge enriched posts back to the original structure preserving order
+                $idx = 0;
+                foreach ($results as $key => $item) {
+                    if (isset($item['post']) && $item['post'] instanceof PostAdvanced) {
+                        $results[$key]['post'] = $enrichedPosts[$idx] ?? $item['post'];
+                        $idx++;
+                    }
+                }
+            }
+
+            // Enrich Advertisements with user profiles
+            $adUserIds = [];
+            $adUserIds = [];
+            foreach ($results as $item) {
+                if (isset($item['advertisement']) && $item['advertisement'] instanceof Advertisements) {
+                    $uid = $item['advertisement']->getUserId();
+                    if (!empty($uid)) {
+                        $adUserIds[$uid] = $uid;
+                    }
+                }
+            }
+
+            if (!empty($adUserIds)) {
+                $adProfiles = $this->profileRepository->fetchByIds(array_values($adUserIds), $this->currentUserId, $specs);
+
+                foreach ($results as $key => $item) {
+                    if (isset($item['advertisement']) && $item['advertisement'] instanceof Advertisements) {
+                        $ad = $item['advertisement'];
+                        $adData = $ad->getArrayCopy();
+                        $profile = $adProfiles[$ad->getUserId()] ?? null;
+                        $adEnriched = $this->enrichAndPlaceholderWithProfile($adData, $profile, $specs);
+                        $results[$key]['advertisement'] = new Advertisements($adEnriched, [], false);
+                    }
+                }
+            }
+
+        }
+
         return $results;
+    }
+
+    private function enrichWithProfileAndComment(
+        array $posts,
+        array $specs,
+        string $currentUserId,
+        int $commentOffset,
+        int $commentLimit
+    ): array {
+
+        $userIdsFromPosts = array_values(
+            array_unique(
+                array_filter(
+                    array_map(fn (HasUserId $post) => $post->getUserId(), $posts)
+                )
+            )
+        );
+
+        if (empty($userIdsFromPosts)) {
+            return $posts;
+        }
+
+        $profiles = $this->profileRepository->fetchByIds($userIdsFromPosts, $currentUserId, $specs);
+
+        $enriched = [];
+        foreach ($posts as $post) {
+            $data = $post->getArrayCopy();
+            $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($data, $profiles[$post->getUserId()], $specs);
+            $enrichedWithCommentsAndProfiles = $this->enrichAndPlaceholderWithComments(
+                $enrichedWithProfiles,
+                $specs,
+                $commentOffset,
+                $commentLimit,
+                $currentUserId
+            );
+            $post = new PostAdvanced($enrichedWithCommentsAndProfiles, [], false);
+            $enriched[] = $post;
+        }
+
+        return $enriched;
+    }
+
+    /**
+     * Enrich a single PostAdvanced with a Profile and return PostAdvancedWithUser.
+     */
+    private function enrichAndPlaceholderWithProfile(array $data, ?Profile $profile, array $specs): array
+    {
+        if ($profile instanceof Profile) {
+            ContentReplacer::placeholderProfile($profile, $specs);
+            $data['user'] = $profile->getArrayCopy();
+        }
+        return $data;
+    }
+
+    private function enrichAndPlaceholderWithComments(array $data, array $specs, int $commentOffset, int $commentLimit, string $currentUserId): array
+    {
+        $comments = $this->commentMapper->fetchAllByPostIdetaild($data['postid'], $specs, $currentUserId, $commentOffset, $commentLimit);
+        if (empty($comments)) {
+            return $data;
+        }
+
+        $userIdsFromComments = array_values(
+            array_unique(
+                array_filter(
+                    array_map(fn (CommentAdvanced $c) => $c->getUserId(), $comments)
+                )
+            )
+        );
+
+        if (empty($userIdsFromComments)) {
+            return $comments;
+        }
+
+        $profiles = $this->profileRepository->fetchByIds($userIdsFromComments, $currentUserId, $specs);
+        $commentsArray = [];
+
+        foreach ($comments as $comment) {
+            if ($comment instanceof CommentAdvanced) {
+                ContentReplacer::placeholderComments($comment, $specs);
+                $dataComment = $comment->getArrayCopy();
+                $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($dataComment, $profiles[$comment->getUserId()], $specs);
+                $commentsArray[] = $enrichedWithProfiles;
+            }
+        }
+        $data['comments'] = $commentsArray;
+        return $data;
     }
 }
