@@ -255,7 +255,7 @@ class AdvertisementMapper
 				  (SELECT COUNT(*) FROM user_post_likes    upl WHERE upl.postid = p.postid) AS amountlikes,
 				  (SELECT COUNT(*) FROM user_post_dislikes upd WHERE upd.postid = p.postid) AS amountdislikes,
 				  (SELECT COUNT(*) FROM user_post_views    upv WHERE upv.postid = p.postid) AS amountviews,
-				  (SELECT COUNT(*) FROM user_post_reports  upr WHERE upr.postid = p.postid) AS amountreports,
+				  (SELECT COUNT(*) FROM user_reports  ur WHERE ur.targetid = p.postid) AS amountreports,
 				  (SELECT COUNT(*) FROM comments           cmt WHERE cmt.postid = p.postid)  AS amountcomments,
 				  COALESCE((
 					  SELECT SUM(numbers) FROM logwins lw
@@ -263,8 +263,8 @@ class AdvertisementMapper
 				  ), 0) AS amounttrending,
 				  EXISTS (SELECT 1 FROM user_post_likes    upl2 WHERE upl2.postid = p.postid AND upl2.userid = al.userid) AS isliked,
 				  EXISTS (SELECT 1 FROM user_post_views    upv2 WHERE upv2.postid = p.postid AND upv2.userid = al.userid) AS isviewed,
-				  EXISTS (SELECT 1 FROM user_post_reports  upr2 WHERE upr2.postid = p.postid AND upr2.userid = al.userid) AS isreported,
-				  EXISTS (SELECT 1 FROM user_post_dislikes upd2 WHERE upd2.postid = p.postid AND upd2.userid = al.userid) AS isdisliked,
+				  EXISTS (SELECT 1 FROM user_reports ur2 WHERE ur2.targetid = p.postid AND ur2.reporter_userid = al.userid) AS isreported,
+                  EXISTS (SELECT 1 FROM user_post_dislikes upd2 WHERE upd2.postid = p.postid AND upd2.userid = al.userid) AS isdisliked,
 				  EXISTS (SELECT 1 FROM user_post_saves    ups2 WHERE  ups2.postid = p.postid AND  ups2.userid = al.userid) AS issaved,
 				  EXISTS (SELECT 1 FROM follows f WHERE f.followedid = p.userid AND f.followerid = al.userid) AS isfollowed,
 				  EXISTS (SELECT 1 FROM follows f WHERE f.followerid = p.userid AND f.followedid = al.userid) AS isfollowing,
@@ -903,7 +903,7 @@ class AdvertisementMapper
                 COALESCE((SELECT SUM(numbers) FROM logwins WHERE postid = p.postid AND createdat >= NOW() - INTERVAL '$trenddays days'), 0) AS amounttrending,
                 EXISTS (SELECT 1 FROM user_post_likes     WHERE postid = p.postid AND userid = :currentUserId) AS isliked,
                 EXISTS (SELECT 1 FROM user_post_views     WHERE postid = p.postid AND userid = :currentUserId) AS isviewed,
-                EXISTS (SELECT 1 FROM user_post_reports   WHERE postid = p.postid AND userid = :currentUserId) AS isreported,
+                EXISTS (SELECT 1 FROM user_reports WHERE targetid = p.postid AND reporter_userid = :currentUserId) AS isreported,
                 EXISTS (SELECT 1 FROM user_post_dislikes  WHERE postid = p.postid AND userid = :currentUserId) AS isdisliked,
                 EXISTS (SELECT 1 FROM user_post_saves     WHERE postid = p.postid AND userid = :currentUserId) AS issaved,
                 EXISTS (SELECT 1 FROM follows WHERE followedid = a.userid AND followerid = :currentUserId) AS tisfollowed,
