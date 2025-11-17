@@ -206,7 +206,14 @@ class UserService
             'updatedat' => (new \DateTime())->format('Y-m-d H:i:s.u')
         ];
 
-        $this->logger->debug('UserService.createUser.verificationData started', ['verificationData' => $verificationData]);
+        // Mask token for logging (show first 6 chars, hide the rest)
+        $maskedToken = substr($verificationData['token'], 0, 6) . str_repeat('*', strlen($verificationData['token']) - 6);
+
+        $this->logger->debug('UserService.createUser.verificationData started', [
+            'userid' => $verificationData['userid'],
+            'token' => $maskedToken,
+            'expiresat' => $verificationData['expiresat']
+        ]);
 
         $userData = [
             'uid' => $id,
@@ -331,7 +338,7 @@ class UserService
         }
 
         $this->userMapper->logLoginDaten($id);
-        $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
+        $this->logger->info('User registered successfully.', ['userid' => $id]);
 
         try {
             $data = [
@@ -641,7 +648,7 @@ class UserService
         $email = $args['email'] ?? null;
         $exPassword = $args['password'] ?? null;
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->warning('Invalid email format', ['email' => $email]);
+            $this->logger->warning('Invalid email format');
             return self::respondWithError(30224);
         }
 
@@ -651,7 +658,7 @@ class UserService
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
-            $this->logger->warning('Email already in use', ['email' => $email]);
+            $this->logger->warning('Email already in use');
             return self::respondWithError(31003);
         }
 
@@ -675,7 +682,7 @@ class UserService
             $data = $this->userMapper->updateProfil($user);
             $affectedRows = $data->getArrayCopy();
 
-            $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId, 'email' => $email]);
+            $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId]);
             $this->transactionManager->commit();
             return $this::createSuccessResponse(11006, $affectedRows, false);
         } catch (\Throwable $e) {
@@ -877,14 +884,29 @@ class UserService
             return self::respondWithError(60501);
         }
 
+        $userId = $args['userid'] ?? $this->currentUserId;
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-        $this->logger->info('Fetching friends list', ['currentUserId' => $this->currentUserId, 'offset' => $offset, 'limit' => $limit]);
+        if (!self::isValidUUID($userId)) {
+            $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
+            return self::respondWithError(30201);
+        }
+        if (!$this->userMapper->isUserExistById($userId)) {
+            $this->logger->warning('User not found for Follows', ['userId' => $userId]);
+            return self::respondWithError(31007);
+        }
+
+        $this->logger->info('Fetching friends list', [
+            'currentUserId' => $this->currentUserId,
+            'targetUserId'  => $userId, 
+            'offset' => $offset, 
+            'limit' => $limit
+        ]);
 
         try {
-            $users = $this->userMapper->fetchFriends($this->currentUserId, $offset, $limit, $contentFilterBy);
+            $users = $this->userMapper->fetchFriends($userId, $offset, $limit, $contentFilterBy);
 
             if (!empty($users)) {
                 $this->logger->info('Friends list retrieved successfully', ['userCount' => count($users)]);
@@ -896,7 +918,7 @@ class UserService
                 ];
             }
 
-            $this->logger->info('No friends found for the user', ['currentUserId' => $this->currentUserId]);
+            $this->logger->info('No friends found for the user', ['targetUserId' => $userId]);
             return self::createSuccessResponse(21101);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
@@ -1007,7 +1029,7 @@ class UserService
         $expiresAt = $this->getFutureTimestamp('+1 hour');
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->warning('Invalid email format', ['email' => $email]);
+            $this->logger->warning('Invalid email format');
             return self::respondWithError(30104);
         }
 
@@ -1017,7 +1039,7 @@ class UserService
             $user = $this->userMapper->loadByEmail($email);
 
             if (!$user) {
-                $this->logger->warning('Invalid user', ['email' => $email]);
+                $this->logger->warning('Invalid user');
                 return $this->genericPasswordResetSuccessResponse();
             }
 
@@ -1035,13 +1057,16 @@ class UserService
                 $this->userMapper->sendPasswordResetEmail($email, $data);
 
                 $this->transactionManager->commit();
-                return $this->genericPasswordResetSuccessResponse();
+
+                $passwordAttempt = $this->userMapper->checkForPasswordResetExpiry($userId);
+
+                return $this->genericPasswordResetSuccessResponse($passwordAttempt);
             }
 
             // Check for rate limiting: 1st attempt
             if ($this->userMapper->isFirstAttemptTooSoon($passwordAttempt)) {
                 $this->transactionManager->rollback();
-                return $this->userMapper->rateLimitResponse(60);
+                return $this->userMapper->rateLimitResponse(60, $passwordAttempt['last_attempt']);
             }
 
             // 2nd attempt
@@ -1066,8 +1091,11 @@ class UserService
 
                 $this->userMapper->sendPasswordResetEmail($email, $data);
             }
+
+            $passwordAttempt = $this->userMapper->checkForPasswordResetExpiry($userId);
+
             $this->transactionManager->commit();
-            return $this->genericPasswordResetSuccessResponse();
+            return $this->genericPasswordResetSuccessResponse($passwordAttempt);
 
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
@@ -1091,7 +1119,7 @@ class UserService
         $this->logger->debug('UserService.resetPasswordTokenVerify started');
 
         if (empty($token)) {
-            $this->logger->warning('Invalid reset token', ['token' => $token]);
+            $this->logger->warning('Invalid reset token');
             return self::respondWithError(31904);
         }
 
@@ -1099,24 +1127,55 @@ class UserService
             $isValidToken = $this->userMapper->getPasswordResetRequest($token);
 
             if (!$isValidToken) {
-                $this->logger->warning('Invalid or expired reset token. ', ['token' => $token]);
+                $this->logger->warning('Invalid or expired reset token');
                 return self::respondWithError(31904);
             }
 
-            $this->logger->info('Token verified successfully', ['token' => $token]);
+            $this->logger->info('Token verified successfully');
 
             return self::createSuccessResponse(11902);
         } catch (\Throwable $e) {
-            $this->logger->error('Unexpected error during token verification', ['error' => $e->getMessage(), 'token' => $token]);
+            $this->logger->error('Unexpected error during token verification', ['error' => $e->getMessage()]);
             return self::respondWithError(41004);
         }
     }
     /**
      * Standard success response (avoids revealing account existence).
      */
-    public function genericPasswordResetSuccessResponse(): array
+    public function genericPasswordResetSuccessResponse(array $passwordAttempt = []): array
     {
-        return self::createSuccessResponse(11901);
+
+        $nextAttemptAt = $this->calculateNextAttemptDelay($passwordAttempt);
+        
+        return [
+            'status' => 'success',
+            'ResponseCode' => "11901",
+            'nextAttemptAt' => $nextAttemptAt,
+        ];
+    }
+
+
+    /**
+     * Calculates the next attempt time based on wait seconds and last attempt time.
+     */
+    public function calculateNextAttemptDelay(array $passwordAttempt = []): string
+    {
+        $nextAttemptAt = '';
+
+        if (empty($passwordAttempt) || !isset($passwordAttempt['attempt_count'])) {
+            return $nextAttemptAt;
+        }
+        if($passwordAttempt['attempt_count'] === 1){
+            $nextAttemptAtArray = $this->userMapper->rateLimitResponse(60, $passwordAttempt['last_attempt']);
+        } elseif($passwordAttempt['attempt_count'] === 2){
+            $nextAttemptAtArray = $this->userMapper->rateLimitResponse(600, $passwordAttempt['last_attempt']);
+        }
+        
+        if(isset($nextAttemptAtArray['nextAttemptAt'])){
+            return $nextAttemptAtArray['nextAttemptAt'];
+        }
+        
+        return $nextAttemptAt;
     }
 
 

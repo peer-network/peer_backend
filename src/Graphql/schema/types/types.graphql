@@ -52,6 +52,7 @@ type AdvertisementHistoryResult {
 type ListedAdvertisementData {
   status: String!
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: AdvertisementHistoryResult
 }
 
@@ -77,6 +78,7 @@ type ContactusResponsePayload {
 type ListAdvertisementData {
   status: String!
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: [AdvertisementRow]
 }
 
@@ -149,6 +151,8 @@ type Transaction {
   transferaction: String!
   message: String!
   createdat: String!
+  sender: BasicUserInfo!
+  recipient: BasicUserInfo!
 }
 
 type TransferToken {
@@ -211,32 +215,6 @@ type CommentInfo {
   comments: Int!
 }
 
-type Chat {
-  id: ID!
-  image: String!
-  name: String!
-  createdat: Date
-  updatedat: Date
-  chatmessages: [ChatMessage!]!
-  chatparticipants: [ChatParticipant!]!
-}
-
-type ChatMessage {
-  id: ID!
-  senderid: ID!
-  chatid: ID!
-  content: String!
-  createdat: Date!
-}
-
-type ChatParticipant {
-  userid: ID!
-  img: String!
-  username: String!
-  slug: Int!
-  hasaccess: Int!
-}
-
 type Profile {
   id: ID
   username: String
@@ -261,6 +239,7 @@ type Profile {
 type ProfileInfo {
   status: String
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: Profile
 }
 
@@ -322,6 +301,8 @@ type DailyGemStatusData {
   d3: Decimal
   d4: Decimal
   d5: Decimal
+  d6: Decimal
+  d7: Decimal
   w0: Decimal
   m0: Decimal
   y0: Decimal
@@ -459,18 +440,6 @@ type PostInfo {
   comments: Int!
 }
 
-type ChatMessageInfo {
-  messid: ID
-  chatid: ID
-  userid: ID
-  content: String
-  createdat: Date
-}
-
-type ChatInfo {
-  chatid: ID
-}
-
 type AllUserInfo {
   followerid: ID
   followername: String
@@ -482,5 +451,6 @@ type AllUserFriends {
   status: String!
   counter: Int!
   ResponseCode: String
+  meta: DefaultResponse
   affectedRows: [AllUserInfo]
 }

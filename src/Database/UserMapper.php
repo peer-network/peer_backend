@@ -624,7 +624,7 @@ class UserMapper
                 return new User($data);
             }
 
-            $this->logger->warning("No user found with email", ['email' => $email]);
+            $this->logger->warning("No user found with email");
             return false;
 
         } catch (\Throwable $e) {
@@ -677,17 +677,17 @@ class UserMapper
 
     public function isEmailTaken(string $email): bool
     {
-        $this->logger->debug("UserMapper.isEmailTaken started", ['email' => $email]);
+        $this->logger->debug("UserMapper.isEmailTaken started");
 
         try {
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE email = :email");
             $stmt->execute(['email' => $email]);
             $isTaken = $stmt->fetchColumn() > 0;
 
-            $this->logger->info("Email availability check", ['email' => $email, 'isTaken' => $isTaken]);
+            $this->logger->info("Email availability check", ['isTaken' => $isTaken]);
             return $isTaken;
         } catch (\Throwable $e) {
-            $this->logger->error("General error while checking email", ['email' => $email, 'error' => $e->getMessage()]);
+            $this->logger->error("General error while checking email", ['error' => $e->getMessage()]);
             return false;
         }
     }
@@ -725,7 +725,7 @@ class UserMapper
                 return new User($data);
             }
 
-            $this->logger->warning("No user found with email", ['email' => $username]);
+            $this->logger->warning("No user found with username");
             return false;
 
         } catch (\Throwable $e) {
@@ -1272,7 +1272,12 @@ class UserMapper
         $this->logger->debug("UserMapper.insert started");
 
         $data = $user->getArrayCopy();
-        $this->logger->info('UserMapper.insert second', ['data' => $data]);
+        $this->logger->info('UserMapper.insert second', [
+            'uid' => $data['uid'],
+            'username' => $data['username'],
+            'status' => $data['status'],
+            'verified' => $data['verified']
+        ]);
 
         $query = "INSERT INTO users 
                   (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat)
@@ -1988,7 +1993,7 @@ class UserMapper
     {
         return $attempt['attempt_count'] === 2
             && !$attempt['collected']
-            && time() < strtotime($attempt['last_attempt'] . ' +5 minutes');
+            && time() < strtotime($attempt['last_attempt'] . ' +10 minutes');
     }
 
     /**
@@ -2075,7 +2080,10 @@ class UserMapper
         $this->logger->debug("UserMapper.insertoken started");
 
         $data = $data->getArrayCopy();
-        $this->logger->info('UserMapper.insertoken second', ['data' => $data]);
+        $this->logger->info('UserMapper.insertoken second', [
+            'userid' => $data['userid'],
+            'expiresat' => $data['expiresat']
+        ]);
 
         $query = "INSERT INTO token_holders 
                   (token, userid, expiresat)
@@ -2124,5 +2132,27 @@ class UserMapper
 
 
         return $result ?: null;
+    }
+
+     /**
+     * Get Inviter ID of a user.
+     * This method retrieves the inviter ID for a given user ID from the users_info table. 
+     *
+     */
+    public function getInviterID(string $userId): ?string
+    {
+        try {
+            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['userid' => $userId]);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (isset($result['invited']) && !empty($result['invited'])) {
+                return $result["invited"];
+            }
+            return null;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException($e->getMessage());
+        }
     }
 }

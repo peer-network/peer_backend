@@ -10,6 +10,7 @@ use Fawaz\Filter\PeerInputFilter;
 class Advertisements
 {
     protected string $advertisementid;
+    protected string $operationid;
     protected string $postid;
     protected string $userid;
     protected string $status;
@@ -38,6 +39,7 @@ class Advertisements
         }
 
         $this->advertisementid = $data['advertisementid'] ?? '';
+        $this->operationid = $data['operationid'] ?? '';
         $this->postid = $data['postid'] ?? '';
         $this->userid = $data['userid'] ?? '';
         $this->status = $data['status'] ?? 'basic';
@@ -62,6 +64,7 @@ class Advertisements
     {
         $att = [
             'advertisementid' => $this->advertisementid,
+            'operationid' => $this->operationid,
             'postid' => $this->postid,
             'userid' => $this->userid,
             'status' => $this->status,
@@ -149,6 +152,14 @@ class Advertisements
         $this->eurocost = $eurocost;
     }
 
+    public function getOperationId(): string
+    {
+        return $this->operationid;
+    }
+    public function setOperationId(string $operationid): void
+    {
+        $this->operationid = $operationid;
+    }
     // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array
     {
@@ -169,8 +180,6 @@ class Advertisements
         }
 
         throw new ValidationException(implode("", $errorMessages));
-
-        return [];
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter

@@ -25,7 +25,7 @@ services:
         condition: service_healthy
     ports: []
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/graphql"]
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 5s
       timeout: 5s
       retries: 5

@@ -85,7 +85,7 @@ reload-backend: ## Rebuild and restart backend container
 	docker-compose --env-file "./.env.ci" $(COMPOSE_FILES) up -d --force-recreate backend
 
 	@echo "Waiting for backend to be healthy..."
-	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
+	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/health | grep -q "200"; do \
 		echo "Waiting for Backend..."; sleep 2; \
 	done
 	@echo "Backend reloaded and ready!"
@@ -105,7 +105,7 @@ restart-db: ## Restart only the database (fresh schema & data, keep backend as-i
 
 	@echo "Database restarted and ready. Backend container was untouched."
 
-dev: check-hooks scan reset-db-and-backend init ## Full setup: env.ci, DB reset, vendors install, start DB+backend
+dev: check-hooks reset-db-and-backend init ## Full setup: env.ci, DB reset, vendors install, start DB+backend
 	@cp .env.dev .env.ci
 	@echo "Installing Composer dependencies on local host..."
 	composer install --prefer-dist --no-interaction
@@ -127,7 +127,10 @@ dev: check-hooks scan reset-db-and-backend init ## Full setup: env.ci, DB reset,
 	chmod +x .githooks/*
 	
 	@echo "Generating config..."
-	bash cd-generate-backend-config.sh
+	@if ! bash cd-generate-backend-config.sh; then \
+		echo "Config generation failed. Aborting dev setup."; \
+		exit 1; \
+	fi
 
 	@echo "Building images..."
 	docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml build
@@ -151,7 +154,7 @@ dev: check-hooks scan reset-db-and-backend init ## Full setup: env.ci, DB reset,
 	docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml up -d backend
 	
 	@echo "Waiting for backend to be healthy..."
-	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
+	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/health | grep -q "200"; do \
 		echo "Waiting for Backend..."; sleep 2; \
 	done
 
@@ -173,7 +176,7 @@ restart: ## Soft restart with fresh DB but keep current code & vendors
 	docker-compose --env-file .env.ci $(COMPOSE_FILES) up -d backend
 
 	@echo "Waiting for backend to be healthy..."
-	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/graphql | grep -q "200"; do \
+	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/health | grep -q "200"; do \
 		echo "Waiting for Backend..."; sleep 2; \
 	done
 
@@ -314,6 +317,12 @@ ci2: check-hooks scan env-ci phpstan-fast init ## Run full isolated local CI2 wo
 
 	@echo "Removing any old CI2 volumes..."
 	-@docker volume rm $$(docker volume ls -q | grep "$${CI2_PROJECT_NAME}.*db_data") 2>/dev/null || true
+
+	@echo "Generating backend config for CI2..."
+	@if ! php tests/utils/ConfigGeneration/GenerateConfig.php; then \
+		echo "CI2 config generation failed. Aborting pipeline."; \
+		exit 1; \
+	fi
 
 	@echo "Building CI2 images..."
 	COMPOSE_PROJECT_NAME=$${CI2_PROJECT_NAME} docker-compose --env-file .env.ci \
