@@ -194,7 +194,7 @@ class DailyFreeMapper
     public function incrementUserDailyUsage(string $userId, int $artType): bool
     {
         $this->logger->debug('DailyFreeMapper.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
-        
+
         $actions = ConstantsConfig::wallet()['ACTIONS'];
         $columnMap = [
             $actions['LIKE'] => 'liken',

@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Utils\HashObject;
 
-class Comment implements Hashable
+class Comment extends Model implements Hashable, CommentReplaceable
 {
     use HashObject;
 
@@ -21,6 +23,8 @@ class Comment implements Hashable
     protected string $content;
     protected string $createdat;
     protected ?int $userstatus;
+    protected ?int $activeReports = null;
+    protected ?string $visibilityStatus = null;
 
 
     // Constructor
@@ -37,11 +41,8 @@ class Comment implements Hashable
         $this->content = $data['content'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->userstatus = $data['userstatus'] ?? 0;
-
-        if ($this->userstatus == 6) {
-            $this->content = "Comment by deleted Account";
-        }
-
+        $this->activeReports = $data['reports'] ?? null;
+        $this->visibilityStatus = $data['visibility_status'] ?? null;
     }
 
     // Array Copy methods
@@ -54,6 +55,8 @@ class Comment implements Hashable
             'parentid' => $this->parentid,
             'content' => $this->content,
             'createdat' => $this->createdat,
+            'visibility_status' => $this->visibilityStatus,
+            'reports' => $this->activeReports,
         ];
         return $att;
     }
@@ -113,7 +116,20 @@ class Comment implements Hashable
     {
         $this->content = $content;
     }
+    public function visibilityStatus(): string
+    {
+        return $this->visibilityStatus ?? '';
+    }
 
+    public function setVisibilityStatus(?string $status): void
+    {
+        $this->visibilityStatus = $status;
+    }
+
+    public function getActiveReports(): ?int
+    {
+        return $this->activeReports;
+    }
     // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array|false
     {
@@ -199,5 +215,13 @@ class Comment implements Hashable
     public function hashValue(): string
     {
         return $this->hashObject($this);
+    }
+
+    /**
+     * Table name in the database
+     */
+    public static function table(): string
+    {
+        return 'comments';
     }
 }

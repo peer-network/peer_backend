@@ -1015,9 +1015,9 @@ class WalletMapper
         $dailyToken = (string)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
         // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
-        $gemsintoken = TokenHelper::divRc( $dailyToken, $totalGems);
+        $gemsintoken = TokenHelper::divRc($dailyToken, $totalGems);
 
-        $bestatigungInitial = TokenHelper::mulRc( $totalGems, $gemsintoken);
+        $bestatigungInitial = TokenHelper::mulRc($totalGems, $gemsintoken);
 
         $args = [
             'winstatus' => [
@@ -1255,12 +1255,12 @@ class WalletMapper
                 // User exists, safely calculate new liquidity
                 $currentBalance = (string)$row['liquidity'];
 
-                if($liquidity < 0){
+                if ($liquidity < 0) {
                     $liquidity = (string) (abs((float)$liquidity));
                     $type = 'DEBIT';
                 }
 
-                if($type === 'CREDIT'){
+                if ($type === 'CREDIT') {
                     $newLiquidity = TokenHelper::addRc($currentBalance, (string) $liquidity);
                 } else {
                     $newLiquidity = TokenHelper::subRc($currentBalance, (string) $liquidity);
@@ -1282,7 +1282,7 @@ class WalletMapper
             }
 
             $this->logger->info('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
-            $this->updateUserLiquidity($userId,  $newLiquidity);
+            $this->updateUserLiquidity($userId, $newLiquidity);
 
             return  (float) $newLiquidity;
         } catch (\Throwable $e) {
