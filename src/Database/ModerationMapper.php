@@ -181,7 +181,7 @@ class ModerationMapper
      */
     public function isAuthenticatedUserModerator(string $userId): bool
     {
-        return User::query()->where('uid', $userId)->where('roles_mask', Role::SUPER_MODERATOR)->exists();
+        return User::query()->where('uid', $userId)->where('roles_mask', Role::MODERATOR)->exists();
     }
 
 

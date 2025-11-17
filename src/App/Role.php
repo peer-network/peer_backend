@@ -15,13 +15,13 @@ final class Role
     public const CONTRIBUTOR = 32;
     public const COORDINATOR = 64;
     public const CREATOR = 128;
-    public const SUPER_MODERATOR = 256;
+    public const MODERATOR = 256;
     public const DIRECTOR = 512;
     public const EDITOR = 1024;
     public const EMPLOYEE = 2048;
     public const MAINTAINER = 4096;
     public const SUPER_EDITOR = 8192;
-    public const MODERATOR = 16384;
+    public const SUPER_MODERATOR = 16384;
     public const PUBLISHER = 32768;
     public const REVIEWER = 65536;
     public const SUBSCRIBER = 131072;

@@ -109,7 +109,7 @@ class GraphQLSchemaBuilder
                 $schema = $bridgeSchema;
             } elseif ($this->userRoles === Role::ADMIN) {
                 $schema = $adminSchema;
-            } elseif ($this->userRoles === Role::SUPER_MODERATOR) { // Role::SUPER_MODERATOR
+            } elseif ($this->userRoles === Role::MODERATOR) { // Role::MODERATOR
                 $schema = $moderatorSchema;
             }
         }
