@@ -22,3 +22,8 @@ extend type User {
   ip: String
   liquidity: Decimal
 }
+
+extend type HelloResponse {
+  userroles: Int!
+  userRoleString: String!
+}

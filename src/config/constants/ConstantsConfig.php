@@ -427,7 +427,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
         'POST_LIMIT' => [
             'MIN' => 0,
-            'MAX' => 200,
+            'MAX' => 20,
         ],
         'LIMIT' => [
             'MIN' => 1,

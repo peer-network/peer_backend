@@ -6,3 +6,8 @@ extend type Query {
 extend type Mutation {
   performModeration(moderationTicketId: ID!, moderationAction: ModerationStatus!): DefaultResponse!
 }
+
+extend type HelloResponse {
+  userroles: Int!
+  userRoleString: String!
+}
