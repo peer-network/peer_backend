@@ -7,7 +7,7 @@ namespace Fawaz\Services\TokenTransfer\Strategies;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
-class DislikeTransferStrategy implements TransferStrategy
+class PaidDislikeTransferStrategy implements TransferStrategy
 {
     use ResponseHelper;
 

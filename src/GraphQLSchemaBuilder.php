@@ -23,10 +23,10 @@ use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\TokenTransfer\Strategies\PostTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\LikeTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\CommentTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\DislikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
@@ -2750,10 +2750,10 @@ class GraphQLSchemaBuilder
 
             if (isset($response['status']) && $response['status'] === 'success') {
                 $transferStrategy = match($action) {
-                    'post' => new PostTransferStrategy(),
-                    'like' => new LikeTransferStrategy(),
-                    'comment' => new CommentTransferStrategy(),
-                    'dislike' => new DislikeTransferStrategy(),
+                    'post' => new PaidPostTransferStrategy(),
+                    'like' => new PaidLikeTransferStrategy(),
+                    'comment' => new PaidCommentTransferStrategy(),
+                    'dislike' => new PaidDislikeTransferStrategy(),
                     default => throw new \Exception("Invalid action type: {$action}")
                 };
 
