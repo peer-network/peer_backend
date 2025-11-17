@@ -128,6 +128,7 @@ class CommentService
                 'postid' => $postId,
                 'parentid' => $parentId,
                 'content' => $content,
+                'visibility_status' => 'normal',
             ];
 
             // Post speichern
@@ -164,7 +165,7 @@ class CommentService
                 'userid' => $this->currentUserId,
                 'likes' => 0,
                 'reports' => 0,
-                'comments' => 0,
+                'comments' => 0
             ];
             $commentInfo = new CommentInfo($commentInfoData);
             $this->commentInfoMapper->insert($commentInfo);
