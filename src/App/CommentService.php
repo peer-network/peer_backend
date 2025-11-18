@@ -244,7 +244,7 @@ class CommentService
         return $results;
     }
 
-    public function fetchAllByPostIdetaild(string $postId, int $offset = 0, int $limit = 10, array $specifications = []): array
+    public function fetchAllByPostIdetaild(string $postId, int $offset, int $limit, array $specifications): array
     {
         return $this->commentMapper->fetchAllByPostIdetaild($postId, $specifications, $this->currentUserId, $offset, $limit);
     }
