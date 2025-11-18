@@ -125,9 +125,14 @@ class UserInfoService
             $contentFilterCase,
             ContentType::user
         );
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
 
         $specs = [
-            $systemUserSpec
+            $systemUserSpec,
+            $deletedUserSpec
         ];
 
         if ($this->interactionsPermissionsMapper->isInteractionAllowed(
