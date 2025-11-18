@@ -248,7 +248,6 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
         'FEES' => [
             'INVITATION' => '0.01',
-            'POOL'       => '0.01',
             'PEER'       => '0.02',
             'BURN'       => '0.01',
         ],
