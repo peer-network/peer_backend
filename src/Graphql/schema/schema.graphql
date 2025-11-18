@@ -8,13 +8,17 @@ type Query {
   searchUser(userid: ID,contentFilterBy: ContentFilterType, username: String, offset: Int, limit: Int): UserListResponse! @deprecated(reason: "Use listUsersV2.")
   listUsers(contentFilterBy: ContentFilterType, offset: Int, limit: Int): UserListResponse! @deprecated(reason: "Use listUsersV2.")
   listUsersV2(contentFilterBy: ContentFilterType, userid: ID, username: String, offset: Int, limit: Int): UserListResponse!
-  getProfile(userid: ID,contentFilterBy: ContentFilterType, postLimit: Int): ProfileInfo!
+  getProfile(
+    userid: ID,
+    contentFilterBy: ContentFilterType, 
+    postLimit: Int @deprecated(reason: "to get posts, use listPosts with userid")
+  ): ProfileInfo!
   listFollowRelations(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): FollowRelationsResponse!
-  listFriends(contentFilterBy: ContentFilterType,offset: Int, limit: Int): UserFriendsResponse!
+  listFriends(contentFilterBy: ContentFilterType, userid: ID, offset: Int, limit: Int): UserFriendsResponse!
   getUserInfo: UserInfoResponse!
   listBlockedUsers(offset: Int, limit: Int): BlockedUsersResponse!
   listPosts(filterBy: [PostFilterType!], contentFilterBy: ContentFilterType, IgnorList: IgnoreOption, sortBy: PostSortType, userid: ID, postid: ID, title: String, tag: String, from: Date, to: Date, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): PostListResponse!
-  listAdvertisementPosts(filterBy: [ContentType!], userid: ID, postid: ID, tag: String, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): ListAdvertisementPostsResponse!
+  listAdvertisementPosts(filterBy: [ContentType!], contentFilterBy: ContentFilterType, userid: ID, postid: ID, tag: String, offset: Int, limit: Int, commentOffset: Int, commentLimit: Int): ListAdvertisementPostsResponse!
   listChildComments(parent: ID!, offset: Int, limit: Int): CommentResponse!
   listTags(offset: Int, limit: Int): TagSearchResponse!
   searchTags(tagName: String!, offset: Int, limit: Int): TagSearchResponse!
@@ -53,5 +57,5 @@ type Mutation {
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
   swapTokens(btcAddress: ID!, numberoftokens: Decimal!, password: String!): SwapTokenResponse!
   advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): ListAdvertisementData!
-  advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!, forceUpdate: Boolean): ListAdvertisementData!
+  advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!): ListAdvertisementData!
 }

@@ -8,8 +8,12 @@ use Fawaz\App\Wallet;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Exception;
+use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Database\PeerTokenMapper;
+use Fawaz\Services\TokenTransfer\Strategies\AdsTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 
 class WalletService
 {
@@ -19,6 +23,7 @@ class WalletService
     public function __construct(
         protected PeerLoggerInterface $logger,
         protected WalletMapper $walletMapper,
+        protected PeerTokenMapper $peerTokenMapper,
         protected TransactionManager $transactionManager
     ) {
     }
@@ -26,11 +31,6 @@ class WalletService
     public function setCurrentUserId(string $userId): void
     {
         $this->currentUserId = $userId;
-    }
-
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
     private function checkAuthentication(): bool
@@ -264,6 +264,103 @@ class WalletService
 
         } catch (\Exception $e) {
             return $this::respondWithError(41205);
+        }
+    }
+
+    /**
+     * Transfer Tokens from User Wallet for Advertisement Actions
+     * Add logwins entry
+     */
+    public function performPayment(string $userId, TransferStrategy $transferStrategy, ?array $args = []): ?array
+    {
+        $this->logger->debug('WalletService.performPayment started');
+
+        try {
+            $this->transactionManager->beginTransaction();
+
+            $postId = $args['postid'] ?? null;
+            $art = $args['art'] ?? null;
+            $prices = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
+            $actions = ConstantsConfig::wallet()['ACTIONS'];
+
+            $mapping = [
+                2 => ['price' => $prices['like'], 'whereby' => $actions['LIKE'], 'text' => 'Buy like'],
+                3 => ['price' => $prices['dislike'], 'whereby' => $actions['DISLIKE'], 'text' => 'Buy dislike'],
+                4 => ['price' => $prices['comment'], 'whereby' => $actions['COMMENT'], 'text' => 'Buy comment'],
+                5 => ['price' => $prices['post'], 'whereby' => $actions['POST'], 'text' => 'Buy post'],
+                6 => ['price' => $prices['advertisementBasic'], 'whereby' => $actions['POSTINVESTBASIC'], 'text' => 'Buy advertise basic'],
+                7 => ['price' => $prices['advertisementPinned'], 'whereby' => $actions['POSTINVESTPREMIUM'], 'text' => 'Buy advertise pinned'],
+            ];
+
+            if (!isset($mapping[$art])) {
+                $this->logger->warning('Invalid art type provided.', ['art' => $art]);
+                $this->transactionManager->rollback();
+                return self::respondWithError(30105);
+            }
+
+            $price = (!empty($args['price']) && (int)$args['price']) ? (int)$args['price'] : $mapping[$art]['price'];
+            $whereby = $mapping[$art]['whereby'];
+            $text = $mapping[$art]['text'];
+
+            $currentBalance = $this->getUserWalletBalance($userId);
+            $price = (string) $price;
+
+            // Determine required amount per fee policy mode
+            $mode = $transferStrategy->getFeePolicyMode();
+            $requiredAmount = $this->peerTokenMapper->calculateRequiredAmountByMode($userId, (string)$price, $mode);
+            if ($currentBalance < $requiredAmount) {
+                $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
+                    'senderId' => $this->currentUserId,
+                    'Balance' => $currentBalance,
+                    'requiredAmount' => $requiredAmount,
+                ]);
+                $this->transactionManager->rollback();
+                return self::respondWithError(51301);
+            }
+
+            [$poolWallet, $burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
+            $fromId = $args['fromid'] ?? $peerWallet;
+
+            $args = [
+                'postid' => $postId,
+                'fromid' => $fromId,
+                'gems' => 0.0,
+                'numbers' => -abs((float)$price),
+                'whereby' => $whereby,
+                'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
+            ];
+
+            $response = $this->peerTokenMapper->transferToken(
+                $userId,
+                $fromId,
+                $price,
+                $transferStrategy,
+                $text
+            );
+
+            $args['gemid'] = $transferStrategy->getOperationId();
+            $results = $this->walletMapper->insertWinToLog($userId, $args);
+            if ($results === false) {
+                $this->transactionManager->rollBack();
+                $this->logger->warning("Error occurred in performPayment.insertWinToLog", [
+                    'userId' => $userId,
+                    'args' => $args,
+                ]);
+                return self::respondWithError(41205);
+            }
+
+            if ($response['status'] === 'success') {
+                $this->transactionManager->commit();
+                return $response;
+            } else {
+                $this->transactionManager->rollBack();
+                return $response;
+            }
+
+        } catch (\Exception $e) {
+            $this->logger->error('Error while paying for advertisement WalletService.performPayment', ['exception' => $e->getMessage()]);
+            $this->transactionManager->rollBack();
+            return $this::respondWithError(40301);
         }
     }
 }
