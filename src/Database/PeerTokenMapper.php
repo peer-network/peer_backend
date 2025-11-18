@@ -425,6 +425,7 @@ class PeerTokenMapper
                 us.status AS sender_status, 
                 us.img AS sender_img, 
                 us.biography AS sender_biography, 
+                us.visibility_status AS sender_visibility_status, 
                 us.updatedat AS sender_updatedat,
                 ur.username AS recipient_username, 
                 ur.uid AS recipient_userid, 
@@ -432,7 +433,8 @@ class PeerTokenMapper
                 ur.status AS recipient_status, 
                 ur.img AS recipient_img, 
                 ur.biography AS recipient_biography, 
-                ur.updatedat AS recipient_updatedat
+                ur.updatedat AS recipient_updatedat,
+                ur.visibility_status AS recipient_visibility_status
                 FROM transactions tt
                 LEFT JOIN users AS us ON us.uid = tt.senderid
                 LEFT JOIN users AS ur ON ur.uid = tt.recipientid
@@ -561,6 +563,7 @@ class PeerTokenMapper
             'img' => $trans['sender_img'] ?? null,
             'biography' => $trans['sender_biography'] ?? null,
             'updatedat' => $trans['sender_updatedat'] ?? null,
+            'visibility_status' => $trans['sender_visibility_status'],
         ], [], false))->getArrayCopy();
 
         $items['recipient'] = (new User([
@@ -570,7 +573,7 @@ class PeerTokenMapper
             'status' => $trans['recipient_status'] ?? null,
             'img' => $trans['recipient_img'] ?? null,
             'biography' => $trans['recipient_biography'] ?? null,
-            'updatedat' => $trans['recipient_updatedat'] ?? null,
+            'visibility_status' => $trans['recipient_visibility_status'],
         ], [], false))->getArrayCopy();
 
         return $items;

@@ -170,6 +170,7 @@ class ModerationMapper
                 'status' => $item['status'],
                 'biography' => $item['biography'],
                 'updatedat' => $item['updatedat'],
+                'visibility_status' => $item['visibility_status'],
             ], [], false))->getArrayCopy();
         }
 

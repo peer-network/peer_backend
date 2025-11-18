@@ -203,7 +203,8 @@ class UserService
             'img' => $args['img'] ?? '/profile/' . $id . '.jpg',
             'biography' => $biography,
             'createdat' => $createdat,
-            'updatedat' => $createdat
+            'updatedat' => $createdat,
+            'visibility_status' => 'normal',
         ];
 
         $infoData = [
