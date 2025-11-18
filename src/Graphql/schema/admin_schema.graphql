@@ -13,9 +13,6 @@ extend type Mutation {
   gemsters(day: DayFilterType!): GemstersResponse!
 }
 
-extend type HelloResponse {
-  userroles: Int
-}
 
 extend type User {
   situation: String
@@ -24,4 +21,9 @@ extend type User {
   roles_mask: Int
   ip: String
   liquidity: Decimal
+}
+
+extend type HelloResponse {
+  userroles: Int!
+  userRoleString: String!
 }

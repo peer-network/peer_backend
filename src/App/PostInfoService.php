@@ -11,6 +11,7 @@ use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Database\PostMapper;
+use Fawaz\Database\ModerationMapper;
 use Fawaz\Utils\ResponseHelper;
 
 class PostInfoService
@@ -24,18 +25,14 @@ class PostInfoService
         protected CommentMapper $commentMapper,
         protected ReportsMapper $reportMapper,
         protected PostMapper $postMapper,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected ModerationMapper $moderationMapper
     ) {
     }
 
     public function setCurrentUserId(string $userId): void
     {
         $this->currentUserId = $userId;
-    }
-
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
 
@@ -202,10 +199,15 @@ class PostInfoService
                 return $this->respondWithError(31510);
             }
 
+            if ($this->moderationMapper->wasContentRestored($postId, 'post')) {
+                $this->logger->warning('PostInfoService: reportPost: User tries to report a restored post');
+                return $this->respondWithError(32104);
+            }
+
             $postInfo = $this->postInfoMapper->loadById($postId);
             if ($postInfo === null) {
                 $this->logger->warning('PostInfoService: reportPost: Error while fetching comment data from db');
-                return $this->respondWithError(31602);
+                return $this->respondWithError(responseCode: 31602);
             }
         } catch (\Exception $e) {
             $this->logger->error('PostInfoService: reportPost: Error while fetching data for report generation ', ['exception' => $e]);
@@ -224,6 +226,12 @@ class PostInfoService
         }
 
         try {
+            // Moderated items should not be reported again
+            if ($this->reportMapper->isModerated($postId, ReportTargetType::POST->value)) {
+                $this->logger->warning("PostInfoService: reportPost: User tries to report a moderated post");
+                return $this::respondWithError(32102); // This content has already been reviewed and moderated by our team.
+            }
+
             $this->transactionManager->beginTransaction();
 
             $exists = $this->reportMapper->addReport(
@@ -245,7 +253,8 @@ class PostInfoService
                 return $this::respondWithError(31503);
             }
 
-            $postInfo->setReports($postInfo->getReports() + 1);
+            $postInfo->setReports($postInfo->getActiveReports() + 1);
+            $postInfo->setTotalReports($postInfo->getTotalReports() + 1);
             $this->postInfoMapper->update($postInfo);
 
             $this->transactionManager->commit();
@@ -345,37 +354,6 @@ class PostInfoService
             $this->logger->error('PostInfoService: sharePost: Error while fetching post data', ['exception' => $e]);
             return $this::respondWithError(41505);
         }
-    }
-
-    public function toggleUserFollow(string $followedUserId): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        if (!self::isValidUUID($followedUserId)) {
-            return $this::respondWithError(30201);
-        }
-
-        $this->logger->debug('PostInfoService.toggleUserFollow started');
-
-        if (!$this->postInfoMapper->isUserExistById($followedUserId)) {
-            return $this::respondWithError(31105);
-        }
-
-        $this->transactionManager->beginTransaction();
-
-        $response = $this->postInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
-
-        if (isset($response['status']) && $response['status'] === 'error') {
-            $this->logger->error('PostInfoService.toggleUserFollow Error toggling user follow', ['error' => $response]);
-            $this->transactionManager->rollback();
-            return $response;
-        }
-        $this->transactionManager->commit();
-
-        return $response;
-
     }
 
     public function savePost(string $postId): array

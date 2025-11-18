@@ -26,7 +26,7 @@ class UserInfoMapper
 
         try {
             $stmt = $this->db->prepare(
-                'SELECT userid, liquidity, amountposts, amountblocked, amountfollower, 
+                'SELECT userid, liquidity, amountposts, amountblocked, amountfollower, reports, 
                         amountfollowed, amountfriends, isprivate, invited, updatedat 
                  FROM users_info 
                  WHERE userid = :id'
@@ -77,6 +77,7 @@ class UserInfoMapper
                           amountblocked = :amountblocked, 
                           isprivate = :isprivate, 
                           reports = :reports, 
+                          totalreports = :totalreports, 
                           invited = :invited,
                           phone = :phone,                          
                           pkey = :pkey,
@@ -92,6 +93,7 @@ class UserInfoMapper
             $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
             $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
+            $stmt->bindValue(':totalreports', $data['totalreports'], \PDO::PARAM_INT);
             $stmt->bindValue(':reports', $data['reports'], \PDO::PARAM_INT);
             $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
             $stmt->bindValue(':phone', $data['phone'], \PDO::PARAM_STR);
@@ -120,104 +122,6 @@ class UserInfoMapper
                 'error' => $e->getMessage()
             ]);
             throw $e;
-        }
-    }
-
-    public function loadById(string $id): User|false
-    {
-        $this->logger->debug('UserInfoMapper.loadById started', ['id' => $id]);
-
-        try {
-            $stmt = $this->db->prepare(
-                'SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, updatedat, createdat 
-                 FROM users 
-                 WHERE uid = :id'
-            );
-
-            $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
-            $stmt->execute();
-
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if ($data !== false) {
-                $this->logger->info('User loaded successfully', ['id' => $id, 'user' => $data]);
-                return new User($data);
-            } else {
-                $this->logger->warning("No user found with the given ID", ['id' => $id]);
-                return false;
-            }
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error in loadById", [
-                'id' => $id,
-                'error' => $e->getMessage()
-            ]);
-            return false;
-        } catch (\Exception $e) {
-            $this->logger->error("Unexpected error in loadById", [
-                'id' => $id,
-                'error' => $e->getMessage()
-            ]);
-            return false;
-        }
-    }
-
-    public function updateUsers(User $user): ?User
-    {
-        $this->logger->debug('UserInfoMapper.updateUsers started');
-
-        try {
-            $user->setUpdatedAt();
-            $user->setIp();
-            $data = $user->getArrayCopy();
-
-            $query = "UPDATE users 
-                      SET email = :email, 
-                          username = :username, 
-                          password = :password, 
-                          status = :status, 
-                          verified = :verified, 
-                          slug = :slug, 
-                          roles_mask = :roles_mask, 
-                          ip = :ip, 
-                          img = :img, 
-                          biography = :biography, 
-                          updatedat = :updatedat, 
-                          createdat = :createdat 
-                      WHERE uid = :uid";
-
-            $stmt = $this->db->prepare($query);
-
-            $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
-            $stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
-            $stmt->bindValue(':password', $data['password'], \PDO::PARAM_STR);
-            $stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
-            $stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
-            $stmt->bindValue(':slug', $data['slug'], \PDO::PARAM_INT);
-            $stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
-            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-            $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
-            $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
-
-            $stmt->execute();
-
-            $this->logger->info("User updated successfully", ['user' => $data]);
-
-            return new User($data);
-        } catch (\PDOException $e) {
-            $this->logger->error('Database error in updateUsers', [
-                'error' => $e->getMessage()
-            ]);
-
-            return null;
-        } catch (\Exception $e) {
-            $this->logger->error('Unexpected error in updateUsers', [
-                'error' => $e->getMessage()
-            ]);
-
-            return null;
         }
     }
 
