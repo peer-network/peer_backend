@@ -46,7 +46,7 @@ class CommentAdvanced implements CommentReplaceable
         $this->isreported = $data['isreported'] ?? false;
         $this->isliked = $data['isliked'] ?? false;
         $this->activeReports = $data['reports'] ?? null;
-        $this->visibilityStatus = $data['visibility_status'];
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
     }
 
@@ -228,7 +228,7 @@ class CommentAdvanced implements CommentReplaceable
                 'filters' => [['name' => 'Boolean']],
             ],
             'visibility_status' => [
-                'required' => false,
+                'required' => true,
                 'filters' => [
                     ['name' => 'StringTrim'],
                 ],

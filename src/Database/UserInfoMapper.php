@@ -184,7 +184,8 @@ class UserInfoMapper
                           img = :img, 
                           biography = :biography, 
                           updatedat = :updatedat, 
-                          createdat = :createdat 
+                          createdat = :createdat,
+                          visibility_status = :visibility_status
                       WHERE uid = :uid";
 
             $stmt = $this->db->prepare($query);
@@ -202,6 +203,7 @@ class UserInfoMapper
             $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
             $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
 
             $stmt->execute();
 

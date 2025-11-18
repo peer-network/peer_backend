@@ -47,7 +47,7 @@ class Post extends Model implements Hashable
         $this->url = $this->getPostUrl();
         $this->mediadescription = $data['mediadescription'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->visibilityStatus = $data['visibility_status'];
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -200,7 +200,7 @@ class Post extends Model implements Hashable
                 ],
             ],
             'visibility_status' => [
-                'required' => false,
+                'required' => true,
                 'filters' => [
                     ['name' => 'StringTrim'],
                 ],

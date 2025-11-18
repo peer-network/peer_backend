@@ -75,7 +75,7 @@ class PostAdvanced implements PostReplaceable
         $this->url = $this->getPostUrl();
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->activeReports = $data['reports'] ?? null;
-        $this->visibilityStatus = $data['visibility_status'];
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->comments = isset($data['comments']) && is_array($data['comments']) ? $data['comments'] : [];

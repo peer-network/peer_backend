@@ -35,7 +35,7 @@ class UserAdvanced implements ProfileReplaceable
     protected ?string $createdat;
     protected ?string $updatedat;
     protected ?int $activeReports;
-    protected ?string $visibilityStatus;
+    protected string $visibilityStatus;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -68,7 +68,7 @@ class UserAdvanced implements ProfileReplaceable
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->activeReports = $data['user_reports'] ?? 0;
-        $this->visibilityStatus = $data['visibility_status'] ?? '';
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods

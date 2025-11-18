@@ -469,6 +469,7 @@ class UserMapper
                         'liquidity' => (float)$row['liquidity'],
                         'createdat' => $row['createdat'],
                         'updatedat' => $row['updatedat'],
+                        'visibility_status' => $row['visibility_status'],
                     ]);
                 } catch (\Throwable $e) {
                     $this->logger->error("Failed to map user data", ['error' => $e->getMessage(), 'data' => $row]);
@@ -494,7 +495,7 @@ class UserMapper
         $this->logger->debug("UserMapper.loadByName started");
 
         try {
-            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
+            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status
                     FROM users 
                     WHERE username = :username";
 
@@ -528,7 +529,7 @@ class UserMapper
         $this->logger->debug("UserMapper.loadById started");
 
         try {
-            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
+            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status
                     FROM users 
                     WHERE uid = :id AND roles_mask = :roles_mask AND status = 0";
 
@@ -558,7 +559,7 @@ class UserMapper
         $this->logger->debug("UserMapper.loadById started");
 
         try {
-            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat 
+            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status
                     FROM users 
                     WHERE uid = :id AND status != :status";
 
@@ -588,7 +589,7 @@ class UserMapper
         $this->logger->debug("UserMapper.loadByEmail started");
 
         try {
-            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat FROM users WHERE email = :email";
+            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status FROM users WHERE email = :email";
             $stmt = $this->db->prepare($sql);
 
             $stmt->bindValue(':email', $email, \PDO::PARAM_STR);
@@ -614,7 +615,7 @@ class UserMapper
         $this->logger->debug("UserMapper.loadUserInfoById started", ['id' => $id]);
 
         try {
-            $sql = "SELECT uid, username, status, slug, img, biography, updatedat FROM users WHERE uid = :id";
+            $sql = "SELECT uid, username, status, slug, img, biography, updatedat, visibility_status FROM users WHERE uid = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);  // Use bindValue here
             $stmt->execute();
@@ -1045,9 +1046,9 @@ class UserMapper
         ]);
 
         $query = "INSERT INTO users 
-                  (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat)
+                  (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status)
                   VALUES 
-                  (:uid, :email, :username, :password, :status, :verified, :slug, :roles_mask, :ip, :img, :biography, :createdat, :updatedat)";
+                  (:uid, :email, :username, :password, :status, :verified, :slug, :roles_mask, :ip, :img, :biography, :createdat, :updatedat, :visibility_status)";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -1065,6 +1066,7 @@ class UserMapper
             $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
             $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
             $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -1276,7 +1278,8 @@ class UserMapper
                       ip = :ip,
                       img = :img,
                       biography = :biography,
-                      updatedat = :updatedat
+                      updatedat = :updatedat,
+                      visibility_status = :visibility_status
                   WHERE uid = :uid";
 
         try {
@@ -1293,7 +1296,7 @@ class UserMapper
             $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
             $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
-
+            $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
             $stmt->execute();
 
             $this->logger->info("Updated user in database", ['uid' => $data['uid']]);
@@ -1359,7 +1362,8 @@ class UserMapper
                       ip = :ip,
                       img = :img,
                       biography = :biography,
-                      updatedat = :updatedat
+                      updatedat = :updatedat,
+                      visibility_status = :visibility_status
                   WHERE uid = :uid";
 
         try {
@@ -1376,6 +1380,7 @@ class UserMapper
             $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
             $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -1897,7 +1902,8 @@ class UserMapper
                 u.username, 
                 u.slug, 
                 u.img, 
-                u.uid 
+                u.uid ,
+                u.visibility_status
             FROM 
                 user_referral_info ur 
             LEFT JOIN users u 

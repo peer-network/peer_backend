@@ -365,9 +365,9 @@ class PostMapper
         $data = $post->getArrayCopy();
 
         $query = "INSERT INTO posts 
-                  (postid, userid, feedid, contenttype, title, mediadescription, media, cover, createdat)
+                  (postid, userid, feedid, contenttype, title, mediadescription, media, cover, createdat, visibility_status)
                   VALUES 
-                  (:postid, :userid, :feedid, :contenttype, :title, :mediadescription, :media, :cover, :createdat)";
+                  (:postid, :userid, :feedid, :contenttype, :title, :mediadescription, :media, :cover, :createdat, :visibility_status)";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -383,6 +383,7 @@ class PostMapper
             //$stmt->bindValue(':cover', $data['cover'], \PDO::PARAM_STR);
             $stmt->bindValue(':cover', $data['cover'] ?? null, $data['cover'] !== null ? \PDO::PARAM_STR : \PDO::PARAM_NULL);
             $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
