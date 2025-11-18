@@ -21,7 +21,6 @@ class WalletMapper
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
-    private string $poolWallet;
     private string $burnWallet;
     private string $peerWallet;
 
@@ -47,12 +46,11 @@ class WalletMapper
 
         $liqpool = $accountsResult['response'] ?? null;
 
-        if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
-            $this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
+        if (!is_array($liqpool) || !isset($liqpool['peer'], $liqpool['burn'])) {
+            $this->logger->warning('Fehlt Ein Von Burn, Peer Accounts', ['liqpool' => $liqpool]);
             return self::respondWithError(30102);
         }
 
-        $this->poolWallet = $liqpool['pool'];
         $this->burnWallet = $liqpool['burn'];
         $this->peerWallet = $liqpool['peer'];
 

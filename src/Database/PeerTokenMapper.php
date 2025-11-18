@@ -21,7 +21,6 @@ use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 class PeerTokenMapper
 {
     use ResponseHelper;
-    private string $poolWallet;
     private string $burnWallet;
     private string $peerWallet;
     private string $btcpool;
@@ -49,13 +48,11 @@ class PeerTokenMapper
             throw new \RuntimeException("Liquidity pool wallets incomplete");
         }
 
-        $this->poolWallet = $data['pool'];
         $this->burnWallet = $data['burn'];
         $this->peerWallet = $data['peer'];
         $this->btcpool = $data['btcpool'];
 
         return [
-            $this->poolWallet,
             $this->burnWallet,
             $this->peerWallet,
             $this->btcpool
@@ -70,8 +67,7 @@ class PeerTokenMapper
     {
         $this->initializeLiquidityPool();
 
-        return $recipientId !== $this->poolWallet
-            && $recipientId !== $this->burnWallet
+        return $recipientId !== $this->burnWallet
             && $recipientId !== $this->peerWallet
             && $recipientId !== $this->btcpool;
     }
@@ -88,12 +84,12 @@ class PeerTokenMapper
 
         $accounts = $this->pool->returnAccounts();
         $liqpool = $accounts['response'] ?? null;
-        $this->poolWallet = $liqpool['pool'];
+        $poolWallet = $liqpool['pool'] ?? null;
 
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':userId', $this->poolWallet, \PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $poolWallet, \PDO::PARAM_STR);
             $stmt->execute();
             $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -128,8 +124,7 @@ class PeerTokenMapper
      */
     public function validateFeesWalletUUIDs(): bool
     {
-        return self::isValidUUID($this->poolWallet)
-            && self::isValidUUID($this->burnWallet)
+        return self::isValidUUID($this->burnWallet)
             && self::isValidUUID($this->peerWallet)
             && self::isValidUUID($this->btcpool);
     }
@@ -593,9 +588,6 @@ class PeerTokenMapper
         $fees = ConstantsConfig::tokenomics()['FEES'];
         if (isset($fees['PEER']) && (float)$fees['PEER'] > 0) {
             $walletsToLock[] = $this->peerWallet;
-        }
-        if (isset($fees['POOL']) && (float)$fees['POOL'] > 0) {
-            $walletsToLock[] = $this->poolWallet;
         }
         if (isset($fees['BURN']) && (float)$fees['BURN'] > 0) {
             $walletsToLock[] = $this->burnWallet;

@@ -318,7 +318,7 @@ class WalletService
                 return self::respondWithError(51301);
             }
 
-            [$poolWallet, $burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
+            [$burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
             $fromId = $args['fromid'] ?? $peerWallet;
 
             $args = [

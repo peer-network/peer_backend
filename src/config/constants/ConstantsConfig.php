@@ -196,7 +196,6 @@ class ConstantsConfig implements ConstantsConfigInterface
      *     },
      *     FEES: array{
      *         INVITATION: string,
-     *         POOL: string,
      *         PEER: string,
      *         BURN: string
      *     }
