@@ -185,6 +185,7 @@ class PostService
             'cover' => null,
             'mediadescription' => $args['mediadescription'] ?? null,
             'createdat' => $createdAt,
+            'visibility_status' => 'normal',
         ];
 
         try {
@@ -297,7 +298,7 @@ class PostService
                 }
                 return $this::respondWithError($e->getMessage());
             }
-            $this->postMapper->insert($post);
+            $this->postMapper->insert(post: $post);
 
             if (isset($mediaPath['path']) && !empty($mediaPath['path'])) {
                 // Media Posts_media
