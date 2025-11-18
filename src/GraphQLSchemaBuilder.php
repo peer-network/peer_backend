@@ -2865,7 +2865,7 @@ class GraphQLSchemaBuilder
 
         $freeActions = ['report', 'save', 'share', 'view'];
 
-        if (!empty($postId) && !$this->isValidUUID($postId)) {
+        if (!empty($postId) && !self::isValidUUID($postId)) {
             return $this::respondWithError(30209, ['postid' => $postId]);
         }
 
@@ -3465,7 +3465,7 @@ class GraphQLSchemaBuilder
         $this->logger->debug('Query.resolveVerifyReferral started');
         $referralString = $args['referralString'];
 
-        if (empty($referralString) || !$this->isValidUUID($referralString)) {
+        if (empty($referralString) || !self::isValidUUID($referralString)) {
             return self::respondWithError(31010); // Invalid referral string
         }
 
@@ -3747,11 +3747,6 @@ class GraphQLSchemaBuilder
             $this->logger->alert("Unhandled error in resolver for '{$fieldName}': " . $e->getMessage(), ['exception' => (string)$e]);
             throw new \GraphQL\Error\UserError("An unexpected error occurred while resolving field '{$fieldName}'.");
         }
-    }
-
-    protected static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
     protected function validateOffsetAndLimit(array $args = []): ?array

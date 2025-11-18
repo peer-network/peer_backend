@@ -214,7 +214,34 @@ class CommentAdvanced implements CommentReplaceable
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
+            'amountreports' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
             'isliked' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'isreported' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'visibility_status' => [
+                'required' => false,
+                'filters' => [
+                    ['name' => 'StringTrim'],
+                ],
+                'validators' => [
+                    ['name' => 'IsString'],
+                ],
+            ],
+            'reports' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'hasActiveReports' => [
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
             ],

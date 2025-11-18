@@ -65,11 +65,6 @@ class PostService
         $this->currentUserId = $userid;
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
-    }
-
     private static function validateDate($date, $format = 'Y-m-d')
     {
         $d = \DateTime::createFromFormat($format, $date);
@@ -536,7 +531,7 @@ class PostService
         $title = $args['title'] ?? null;
         $tag = $args['tag'] ?? null;
         $postId = $args['postid'] ?? null;
-        $tagConfig = ConstantsConfig::post()['TAG'];
+        $titleConfig = ConstantsConfig::post()['TITLE'];
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
@@ -549,7 +544,7 @@ class PostService
             return $this::respondWithError(30201);
         }
 
-        if ($title !== null && (strlen((string)$title) < $tagConfig['MIN_LENGTH'] || strlen((string)$title) > $tagConfig['MAX_LENGTH'])) {
+        if ($title !== null && (strlen((string)$title) < $titleConfig['MIN_LENGTH'] || strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
             return $this::respondWithError(30210);
         }
 
@@ -562,7 +557,7 @@ class PostService
         }
 
         if ($tag !== null) {
-            if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $tag)) {
+            if (!preg_match('/' . $titleConfig['PATTERN'] . '/u', $tag)) {
                 $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }

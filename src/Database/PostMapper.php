@@ -140,6 +140,7 @@ class PostMapper
                 sub.media, 
                 sub.createdat,
                 pi.reports AS post_reports,
+                pi.totalreports AS post_total_reports,
                 p.visibility_status as post_visibility_status
             FROM (
                 SELECT p.*, ROW_NUMBER() OVER (PARTITION BY p.contenttype ORDER BY p.createdat DESC) AS row_num
@@ -503,7 +504,7 @@ class PostMapper
     //     }
     // }
 
-    public function findPostser(string $currentUserId, ?array $args = []): array
+    public function findPostser(string $currentUserId, array $specifications,?array $args = []): array
     {
         $this->logger->debug("PostMapper.findPostser started");
 
@@ -779,7 +780,7 @@ class PostMapper
             'mediadescription' => (string)$row['mediadescription'],
             'createdat' => (string)$row['createdat'],
             'amountlikes' => (int)$row['amountlikes'],
-            'amountreports' => (int)$row['post_reports'],
+            'amountreports' => (int)$row['post_total_reports'],
             'amountviews' => (int)$row['amountviews'],
             'amountcomments' => (int)$row['amountcomments'],
             'amountdislikes' => (int)$row['amountdislikes'],
