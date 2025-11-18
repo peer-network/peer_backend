@@ -40,11 +40,6 @@ class ContactusService
         );
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
-    }
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {

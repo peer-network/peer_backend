@@ -8,18 +8,12 @@ use PDO;
 use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
-use Fawaz\App\ProfilUser;
-use Fawaz\App\Role;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\App\UserAdvanced;
 use Fawaz\App\Tokenize;
-use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Mail\PasswordRestMail;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Strategies\GetProfileContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\DateService;
 use Fawaz\App\Status;
@@ -190,23 +184,38 @@ class UserMapper
         }
     }
 
-    public function fetchAll(string $currentUserId, array $args = []): array
+    public function fetchAll(string $currentUserId, array $args = [], array $specifications = []): array
     {
         $this->logger->debug("UserMapper.fetchAll started");
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $trendlimit = 4;
 
-        $whereClauses = ["verified = :verified"];
-        $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
-        $whereClausesString = implode(" AND ", $whereClauses);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            new ListPostsContentFilteringStrategy(),
-            null,
-            $contentFilterBy
-        );
+        $params['currentUserId'] = $currentUserId;
+
+        foreach ($args as $field => $value) {
+            if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
+                $whereClauses[] = "u.$field = :$field";
+                $params[$field] = $value;
+            }
+
+            if ($field === 'username') {
+                $whereClauses[] = "u.username ILIKE :username";
+                $params['username'] = '%' . $value . '%';
+            }
+        }
+
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
+        $params['trendlimit'] = $trendlimit;
+
+        $whereClausesString = implode(' AND ', $whereClauses);
 
         $sql = sprintf(
             "
@@ -225,74 +234,62 @@ class UserMapper
                 u.createdat,
                 u.updatedat,
                 ui.reports AS user_reports,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed
+                u.visibility_status,
+                COALESCE((
+                    SELECT COUNT(p.postid)
+                    FROM posts p
+                    WHERE p.userid = u.uid
+                ), 0) AS amountposts,
+                COALESCE((
+                    SELECT COUNT(*) 
+                    FROM post_info pi 
+                    WHERE pi.userid = u.uid 
+                      AND pi.likes > :trendlimit 
+                      AND pi.createdat >= NOW() - INTERVAL '7 days'
+                ), 0) AS amounttrending,
+                CASE WHEN f1.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowed,
+                CASE WHEN f2.followerid IS NOT NULL THEN TRUE ELSE FALSE END AS isfollowing,
+                COALESCE((
+                    SELECT COUNT(*)
+                    FROM follows fr
+                    WHERE fr.followerid = u.uid
+                ), 0) AS amountfollowed,
+                COALESCE((
+                    SELECT COUNT(*)
+                    FROM follows fd
+                    WHERE fd.followedid = u.uid
+                ), 0) AS amountfollower,
+                COALESCE((
+                    SELECT SUM(numbers)
+                    FROM wallet w
+                    WHERE w.userid = u.uid
+                ), 0) AS liquidity
             FROM 
                 users u
-            LEFT JOIN users_info ui ON uid = ui.userid
-            WHERE %s",
-            $whereClausesString,
+            LEFT JOIN 
+                follows f1 ON u.uid = f1.followerid AND f1.followedid = :currentUserId
+            LEFT JOIN 
+                follows f2 ON u.uid = f2.followedid AND f2.followerid = :currentUserId
+            LEFT JOIN users_info ui ON ui.userid = u.uid
+            WHERE %s
+            ORDER BY u.createdat DESC 
+            LIMIT :limit 
+            OFFSET :offset",
+            $whereClausesString
         );
 
-        $conditions = [];
-        $queryParams = [':verified' => 1];
-
-        foreach ($args as $field => $value) {
-            if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
-                $conditions[] = "u.$field = :$field";
-                $queryParams[":$field"] = $value;
-            }
-
-            if ($field === 'username') {
-                $conditions[] = "username ILIKE :username";
-                $queryParams[':username'] = '%' . $value . '%';
-            }
-        }
-        $conditions[] = "status != :status";
-        $queryParams[':status'] = Status::DELETED;
-
-        $sql .= " AND " . implode(" AND ", $conditions);
-
-        $sql .= " ORDER BY uid LIMIT :limit OFFSET :offset";
-        $queryParams[':limit'] = $limit;
-        $queryParams[':offset'] = $offset;
-
-        $this->logger->info("Executing SQL query", ['sql' => $sql, 'params' => $queryParams]);
+        $this->logger->info("Executing SQL query", ['sql' => $sql, 'params' => $params]);
 
         try {
             $stmt = $this->db->prepare($sql);
 
-            foreach ($queryParams as $key => $value) {
-                if (is_int($value)) {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_INT);
-                } elseif (is_bool($value)) {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_BOOL);
-                } else {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_STR);
-                }
-            }
-
-            $stmt->execute();
+            $stmt->execute($params);
 
             $results = [];
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
-                    $user_reports = (int)$row['user_reports'];
-                    $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
-                    if ($contentFilterService->getContentFilterAction(
-                        ContentType::user,
-                        ContentType::user,
-                        $user_reports,
-                        $user_dismiss_moderation_amount,
-                        $currentUserId,
-                        $row['uid']
-                    ) == ContentFilteringAction::replaceWithPlaceholder) {
-                        $replacer = ContentReplacementPattern::flagged;
-                        $row['username'] = $replacer->username($row['username']);
-                        $row['img'] = $replacer->profilePicturePath($row['img']);
-                    }
-
-                    $results[] = new User([
+                    $results[] = new UserAdvanced([
                         'uid' => $row['uid'],
                         'email' => $row['email'],
                         'username' => $row['username'],
@@ -304,8 +301,17 @@ class UserMapper
                         'ip' => $row['ip'],
                         'img' => $row['img'],
                         'biography' => $row['biography'],
+                        'visibility_status' => $row['visibility_status'],
+                        'user_reports' => $row['user_reports'],
+                        'amountposts' => (int)$row['amountposts'],
+                        'amounttrending' => (int)$row['amounttrending'],
+                        'isfollowed' => (bool)$row['isfollowed'],
+                        'isfollowing' => (bool)$row['isfollowing'],
+                        'amountfollower' => (int)$row['amountfollower'],
+                        'amountfollowed' => (int)$row['amountfollowed'],
+                        'liquidity' => (float)$row['liquidity'],
                         'createdat' => $row['createdat'],
-                        'updatedat' => $row['updatedat']
+                        'updatedat' => $row['updatedat'],
                     ]);
                 } catch (\Throwable $e) {
                     $this->logger->error("Failed to map user data", ['error' => $e->getMessage(), 'data' => $row]);
@@ -326,7 +332,7 @@ class UserMapper
         }
     }
 
-    public function fetchAllAdvance(array $args = [], ?string $currentUserId = null, ?string $contentFilterBy = null): array
+    public function fetchAllAdvance(array $args, array $specifications, ?string $currentUserId = null): array
     {
         $this->logger->debug("UserMapper.fetchAll started");
 
@@ -335,18 +341,39 @@ class UserMapper
         $trendlimit = 4;
         $trenddays = 7;
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
-            null,
-            $contentFilterBy
-        );
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
 
-        $whereClauses = ["verified = :verified"];
         $includeDeleted = !empty($args['includeDeleted']);
         if ($includeDeleted) {
             unset($args['includeDeleted']);
         }
-        // $whereClauses[] = 'status = 0 AND roles_mask = 0 OR roles_mask = 16';
+
+        $params['currentUserId'] =  $currentUserId;
+
+        foreach ($args as $field => $value) {
+            if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
+                $whereClauses[] = "u.$field = :$field";
+                $params[$field] = $value;
+            }
+
+            if ($field === 'username') {
+                $whereClauses[] = "u.username ILIKE :username";
+                $params['username'] = '%' . $value . '%';
+            }
+        }
+
+        if (!$includeDeleted) {
+            $whereClauses[] = 'u.status != :statusExcluded';
+            $params['statusExcluded'] = Status::DELETED;
+        }
+
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
+        $params['trendlimit'] = $trendlimit;
+
         $whereClausesString = implode(" AND ", $whereClauses);
 
         $sql = sprintf(
@@ -366,7 +393,7 @@ class UserMapper
                 u.createdat,
                 u.updatedat,
                 ui.reports AS user_reports,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
+                u.visibility_status,
                 COALESCE((
                     SELECT COUNT(p.postid)
                     FROM posts p
@@ -403,75 +430,24 @@ class UserMapper
             LEFT JOIN 
                 follows f2 ON u.uid = f2.followedid AND f2.followerid = :currentUserId -- Is the current user following this user?
             LEFT JOIN users_info ui ON ui.userid = u.uid
-            WHERE %s",
+            WHERE %s
+            ORDER BY u.createdat DESC 
+            LIMIT :limit 
+            OFFSET :offset",
             $whereClausesString
         );
 
-        $conditions = [];
-        $queryParams = [':verified' => 1, ':currentUserId' => $currentUserId];
-
-        foreach ($args as $field => $value) {
-            if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
-                $conditions[] = "u.$field = :$field";
-                $queryParams[":$field"] = $value;
-            }
-
-            if ($field === 'username') {
-                $conditions[] = "u.username ILIKE :username";
-                $queryParams[':username'] = '%' . $value . '%';
-            }
-        }
-
-        if (!$includeDeleted) {
-            $conditions[] = 'u.status != :statusExcluded';
-            $queryParams[':statusExcluded'] = Status::DELETED;
-        }
-
-        if (!empty($conditions)) {
-            $sql .= ' AND ' . implode(' AND ', $conditions);
-        }
-
-        $sql .= " ORDER BY u.createdat DESC LIMIT :limit OFFSET :offset";
-        $queryParams[':limit'] = $limit;
-        $queryParams[':offset'] = $offset;
-        $queryParams[':trendlimit'] = $trendlimit;
-
-        $this->logger->info("Executing SQL query", ['sql' => $sql, 'params' => $queryParams]);
+        $this->logger->info("Executing SQL query", ['sql' => $sql, 'params' => $params]);
 
         try {
             $stmt = $this->db->prepare($sql);
 
-            foreach ($queryParams as $key => $value) {
-                if (is_int($value)) {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_INT);
-                } elseif (is_bool($value)) {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_BOOL);
-                } else {
-                    $stmt->bindValue($key, $value, \PDO::PARAM_STR);
-                }
-            }
-
-            $stmt->execute();
+            $stmt->execute($params);
 
             $results = [];
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
-                    $user_reports = (int)$row['user_reports'];
-                    $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
-                    if ($contentFilterService->getContentFilterAction(
-                        ContentType::user,
-                        ContentType::user,
-                        $user_reports,
-                        $user_dismiss_moderation_amount,
-                        $currentUserId,
-                        $row['uid']
-                    ) == ContentFilteringAction::replaceWithPlaceholder) {
-                        $replacer = ContentReplacementPattern::flagged;
-                        $row['username'] = $replacer->username($row['username']);
-                        $row['img'] = $replacer->profilePicturePath($row['img']);
-                    }
-
                     $results[] = new UserAdvanced([
                         'uid' => $row['uid'],
                         'email' => $row['email'],
@@ -794,41 +770,21 @@ class UserMapper
         }
     }
 
-    public function fetchCountPosts(string $userid): int
-    {
-        $this->logger->debug("UserMapper.fetchCountPosts started", ['userid' => $userid]);
-
-        try {
-            $sql = "SELECT COUNT(*) FROM posts WHERE userid = :userid";
-            $stmt = $this->db->prepare($sql);
-
-            $stmt->execute(['userid' => $userid]);
-
-            $postCount = (int) $stmt->fetchColumn();
-
-            $this->logger->info("Fetched post count", ['userid' => $userid, 'postCount' => $postCount]);
-
-            return $postCount;
-        } catch (\Throwable $e) {
-            $this->logger->error("Error fetching post count", ['userid' => $userid, 'error' => $e->getMessage()]);
-            return 0;
-        }
-    }
-
     public function fetchFriends(
         string $userId,
+        array $specifications,
         int $offset = 0,
-        int $limit = 10,
-        ?string $contentFilterBy = null
+        int $limit = 10
     ): ?array {
         $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
-            null,
-            $contentFilterBy
-        );
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = "f1.followerid = :userId AND f2.followedid = :userId";
+        $whereClausesString = implode(" AND ", $whereClauses);
 
+        $params = $allSpecs->paramsToPrepare;
         try {
             $sql = "
                 SELECT 
@@ -840,50 +796,30 @@ class UserMapper
                     u.biography, 
                     u.img,
                     ui.reports AS user_reports,
-                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed
+                    u.visibility_status
                 FROM follows f1 
                 INNER JOIN follows f2 ON f1.followedid = f2.followerid 
                 INNER JOIN users u ON f1.followedid = u.uid 
                 LEFT JOIN users_info ui ON ui.userid = u.uid
-                WHERE f1.followerid = :userId 
-                AND f2.followedid = :userId
+                WHERE $whereClausesString
                 ORDER BY u.username ASC
                 LIMIT :limit OFFSET :offset
             ";
 
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_INT);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $params['userId'] = $userId;
+            $params['limit'] = $limit;
+            $params['offset'] = $offset;
 
-            $stmt->execute();
+            $stmt->execute($params);
 
             $friends = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             $filtered_friends = [];
 
 
             foreach ($friends as $row) {
-                $user_reports = (int)$row['user_reports'];
-                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
-
-                $frdObj = (new User($row, [], false))->getArrayCopy();
-
-                $row['username'] = $frdObj['username'];
-                $row['img'] = $frdObj['img'];
-                $row['biography'] = $frdObj['biography'];
-
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::user,
-                    ContentType::user,
-                    $user_reports,
-                    $user_dismiss_moderation_amount
-                ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $row['username'] = $replacer->username($row['username']);
-                    $row['img'] = $replacer->profilePicturePath($row['img']);
-                }
-                $filtered_friends[] = $row;
+                $filtered_friends[] = new Profile($row, [], false);
             }
 
             if ($filtered_friends) {
@@ -902,17 +838,19 @@ class UserMapper
     public function fetchFollowers(
         string $userId,
         string $currentUserId,
+        array $specifications,
         int $offset = 0,
         int $limit = 10,
         ?string $contentFilterBy = null
     ): array {
         $this->logger->debug("UserMapper.fetchFollowers started", ['userId' => $userId]);
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
-            null,
-            $contentFilterBy
-        );
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = 'f.followedid = :userId';
+        $whereClausesString = implode(" AND ", $whereClauses);
+        $params = $allSpecs->paramsToPrepare;
 
         try {
             $sql = "
@@ -922,8 +860,10 @@ class UserMapper
                     u.slug,
                     u.status,
                     u.img,
+                    u.roles_mask,
+                    u.verified,
                     ui.reports AS user_reports,
-                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
+                    u.visibility_status,
                     EXISTS (
                         SELECT 1 
                         FROM follows ff 
@@ -937,44 +877,25 @@ class UserMapper
                 FROM follows f
                 JOIN users u ON u.uid = f.followerid
                 LEFT JOIN users_info ui ON ui.userid = u.uid
-                WHERE f.followedid = :userId
+                WHERE $whereClausesString
                 ORDER BY f.createdat DESC
                 LIMIT :limit OFFSET :offset
             ";
 
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
 
-            $stmt->execute();
+            $params['userId'] = $userId;
+            $params['currentUserId'] = $currentUserId;
+            $params['limit'] = $limit;
+            $params['offset'] = $offset;
+
+            $stmt->execute($params);
             $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
-            $filtered_results = [];
 
-            foreach ($uniqueResults as $row) {
-                $user_reports = (int)$row['user_reports'];
-                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
-
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::user,
-                    ContentType::user,
-                    $user_reports,
-                    $user_dismiss_moderation_amount,
-                    $currentUserId,
-                    $row['uid']
-                ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $row['username'] = $replacer->username($row['username']);
-                    $row['img'] = $replacer->profilePicturePath($row['img']);
-                }
-                $filtered_results[] = $row;
-            }
-
-            $users = array_map(fn ($row) => new ProfilUser($row), $filtered_results);
+            $users = array_map(fn ($row) => new Profile($row), $uniqueResults);
 
             $this->logger->info(
                 count($users) > 0 ? "fetchFollowers retrieved users" : "No users found",
@@ -991,17 +912,18 @@ class UserMapper
     public function fetchFollowing(
         string $userId,
         string $currentUserId,
+        array $specifications,
         int $offset = 0,
         int $limit = 10,
-        ?string $contentFilterBy = null
     ): array {
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
 
-        $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
-            null,
-            $contentFilterBy
-        );
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = 'f.followerid = :userId';
+        $whereClausesString = implode(" AND ", $whereClauses);
+        $params = $allSpecs->paramsToPrepare;
 
         try {
             $sql = "
@@ -1009,10 +931,12 @@ class UserMapper
                     f.followedid AS uid, 
                     u.username, 
                     u.slug,
-                    u.img,
                     u.status,
+                    u.img,
+                    u.roles_mask,
+                    u.verified,
                     ui.reports AS user_reports,
-                    ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
+                    u.visibility_status,
                     EXISTS (
                         SELECT 1 
                         FROM follows ff 
@@ -1026,44 +950,24 @@ class UserMapper
                 FROM follows f
                 JOIN users u ON u.uid = f.followedid
                 LEFT JOIN users_info ui ON ui.userid = u.uid
-                WHERE f.followerid = :userId
+                WHERE $whereClausesString
                 ORDER BY f.createdat DESC
                 LIMIT :limit OFFSET :offset
             ";
 
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $params['userId'] = $userId;
+            $params['currentUserId'] = $currentUserId;
+            $params['limit'] = $limit;
+            $params['offset'] = $offset;
 
-            $stmt->execute();
+            $stmt->execute($params);
             $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
-            $filtered_results = [];
 
-            foreach ($uniqueResults as $row) {
-                $user_reports = (int)$row['user_reports'];
-                $user_dismiss_moderation_amount = (int)$row['user_count_content_moderation_dismissed'];
-
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::user,
-                    ContentType::user,
-                    $user_reports,
-                    $user_dismiss_moderation_amount,
-                    $currentUserId,
-                    $row['uid']
-                ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $row['username'] = $replacer->username($row['username']);
-                    $row['img'] = $replacer->profilePicturePath($row['img']);
-                }
-                $filtered_results[] = $row;
-            }
-
-            $users = array_map(fn ($row) => new ProfilUser($row), $filtered_results);
+            $users = array_map(fn ($row) => new Profile($row), $uniqueResults);
 
             $this->logger->info(
                 count($users) > 0 ? "fetchFollowing retrieved users" : "No users found",
@@ -1074,145 +978,6 @@ class UserMapper
         } catch (\Throwable $e) {
             $this->logger->error("Database error in fetchFollowing", ['error' => $e->getMessage()]);
             return [];
-        }
-    }
-
-    public function isFollowing(string $userid, string $currentUserId): bool
-    {
-        $this->logger->debug("UserMapper.isFollowing started");
-
-        $sql = "SELECT COUNT(*) FROM follows WHERE followedid = :userid AND followerid = :currentUserId";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-
-            $stmt->execute();
-            return (bool) $stmt->fetchColumn();
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in isFollowing", ['error' => $e->getMessage()]);
-            return false;
-        }
-    }
-
-    public function isFollowed(string $userid, string $currentUserId): bool
-    {
-        $this->logger->debug("UserMapper.isFollowed started");
-
-        $sql = "SELECT COUNT(*) FROM follows WHERE followedid = :currentUserId AND followerid = :userid";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-
-            $stmt->execute();
-            return (bool) $stmt->fetchColumn();
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in isFollowed", ['error' => $e->getMessage()]);
-            return false;
-        }
-    }
-
-    public function fetchFollowCounts(string $userid, string $currentUserId): array
-    {
-        $sql = "
-            SELECT 
-                SUM(CASE WHEN f.followedid = :userid THEN 1 ELSE 0 END) AS amountfollower,
-                SUM(CASE WHEN f.followerid = :userid THEN 1 ELSE 0 END) AS amountfollowed,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :userid AND followerid = :currentUserId) AS isfollowing,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = :userid) AS isfollowed
-            FROM follows f
-        ";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-
-            $stmt->execute();
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            return $data ?: ['amountfollower' => 0, 'amountfollowed' => 0, 'isfollowing' => false, 'isfollowed' => false];
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in fetchFollowCounts", ['error' => $e->getMessage()]);
-            return ['amountfollower' => 0, 'amountfollowed' => 0, 'isfollowing' => false, 'isfollowed' => false];
-        }
-    }
-
-    public function fetchProfileData(string $userid, string $currentUserId, ?string $contentFilterBy): Profile|false
-    {
-        $whereClauses = ["u.uid = :userid AND u.verified = :verified"];
-        // $whereClauses[] = 'u.status = 0';
-        $whereClausesString = implode(" AND ", $whereClauses);
-
-        $contentFilterService = new ContentFilterServiceImpl(
-            new GetProfileContentFilteringStrategy(),
-            null,
-            $contentFilterBy
-        );
-
-        $sql = sprintf(
-            "
-            SELECT 
-                u.uid,
-                u.username,
-                u.slug,
-                u.status,
-                u.img,
-                u.biography,
-                ui.amountposts,
-                ui.amountfollower,
-                ui.amountfollowed,
-                ui.amountfriends,
-                ui.amountblocked,
-                ui.reports AS user_reports,
-                ui.count_content_moderation_dismissed AS user_count_content_moderation_dismissed,
-                COALESCE((SELECT COUNT(*) FROM post_info pi WHERE pi.userid = u.uid AND pi.likes > 4 AND pi.createdat >= NOW() - INTERVAL '7 days'), 0) AS amounttrending,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = u.uid AND followerid = :currentUserId) AS isfollowing,
-                EXISTS (SELECT 1 FROM follows WHERE followedid = :currentUserId AND followerid = u.uid) AS isfollowed
-            FROM users u
-            LEFT JOIN users_info ui ON ui.userid = u.uid
-            WHERE %s",
-            $whereClausesString
-        );
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            $stmt->bindValue(':verified', 1, \PDO::PARAM_INT);
-
-            $stmt->execute();
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-
-            if ($data !== false) {
-                $user_reports = (int)$data['user_reports'];
-                $user_dismiss_moderation_amount = (int)$data['user_count_content_moderation_dismissed'];
-
-                if ($contentFilterService->getContentFilterAction(
-                    ContentType::user,
-                    ContentType::user,
-                    $user_reports,
-                    $user_dismiss_moderation_amount,
-                    $currentUserId,
-                    $data['uid']
-                ) == ContentFilteringAction::replaceWithPlaceholder) {
-                    $replacer = ContentReplacementPattern::flagged;
-                    $data['username'] = $replacer->username($data['username']);
-                    $data['img'] = $replacer->profilePicturePath($data['img']);
-                }
-
-                return new Profile($data);
-            }
-
-            $this->logger->warning("No user found with ID", ['userid' => $userid]);
-            return false;
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in fetchProfileData", ['error' => $e->getMessage()]);
-            return false;
         }
     }
 
@@ -1357,7 +1122,13 @@ class UserMapper
             'userId' => $userId,
         ]);
 
-        $query = "SELECT referral_uuid, referral_link FROM user_referral_info WHERE uid = :uid";
+        $query = "SELECT 
+                referral_uuid, 
+                referral_link 
+            FROM 
+                user_referral_info 
+            WHERE 
+                uid = :uid";
 
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
@@ -1385,49 +1156,63 @@ class UserMapper
         return $result ?: null;
     }
 
-    public function getInviterByInvitee(string $userId): ?array
+    public function getInviterByInvitee(string $userId, array $specs): ?Profile
     {
         $this->logger->debug("UserMapper.getInviterByInvitee started", [
             'invitee_uuid' => $userId,
         ]);
-
-        $query = "
-        SELECT u.uid, u.status, u.username, u.slug, u.img
-        FROM users_info ui
-        JOIN users u ON ui.invited = u.uid
-        WHERE ui.userid = :invitee_uuid
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specs);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = "ui.userid = :invitee_uuid";
+        $whereClausesString = implode(" AND ", $whereClauses);
+        $params = $allSpecs->paramsToPrepare;
+        $query = "SELECT *
+            FROM users_info ui
+            JOIN users u ON ui.invited = u.uid
+            WHERE $whereClausesString
         ";
 
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':invitee_uuid', $userId, \PDO::PARAM_STR);
-        $stmt->execute();
+        $params['invitee_uuid'] = $userId;
+        $stmt->execute($params);
 
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        return $result ? ((new User($result, [], false))->getArrayCopy()) : null;
+        if (!empty($result)) {
+            return new Profile($result, [], false);
+        }
+
+        return null;
     }
 
-    public function getReferralRelations(string $userId, int $offset = 0, int $limit = 20): array
+    public function getReferralRelations(string $userId, array $specs, int $offset = 0, int $limit = 20): ?array
     {
-        $query = "
-            SELECT u.uid, u.status, u.username, u.slug, u.img
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specs);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $whereClauses[] = "ui.invited = :userId";
+        $whereClausesString = implode(" AND ", $whereClauses);
+        $params = $allSpecs->paramsToPrepare;
+
+
+        $query = "SELECT *
             FROM users_info ui
             JOIN users u ON ui.userid = u.uid
-            WHERE ui.invited = :userId
+            WHERE $whereClausesString
             ORDER BY ui.updatedat DESC
             LIMIT :limit OFFSET :offset
         ";
 
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':userId', $userId);
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
+        $params['userId'] = $userId;
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
+        $stmt->execute($params);
 
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        return [
-            'iInvited' => array_map(fn ($user) => (new User($user, [], false))->getArrayCopy(), $data)
-        ];
+
+        return array_map(fn ($user) => (new Profile($user, [], false)), $data);
     }
 
     public function generateReferralLink(string $referralUuid): string
@@ -1614,7 +1399,7 @@ class UserMapper
      * const Status::DELETED = 6;
      *
      * @param string $id User unique identifier (uid).
-     * @return bool True if user was flagged as deleted, false otherwise.
+     * @return bool True if user was hidden as deleted, false otherwise.
      * @throws \RuntimeException if database operation fails.
      */
     public function delete(string $id): bool
@@ -1815,9 +1600,9 @@ class UserMapper
     {
         $this->logger->debug("UserMapper.fetchAllFriends started");
 
-        $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, u1.status as followerstatus, 
+        $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, u1.status as followerstatus,
                                 u2.uid AS followed, u2.username AS followedname, u2.slug AS followedslug, u2.status as followedstatus
-                FROM follows f1
+                FROM follows 
                 INNER JOIN follows f2 ON f1.followerid = f2.followedid 
                                      AND f1.followedid = f2.followerid
                 INNER JOIN users u1 ON u1.uid = f1.followerid
@@ -1933,26 +1718,6 @@ class UserMapper
             $this->logger->error("Error checking reset request", ['error' => $e->getMessage()]);
         }
         return [];
-    }
-
-    public function loadTokenById(string $id): bool
-    {
-        $this->logger->debug("UserMapper.loadTokenById started");
-        $time = (int)\time();
-
-        try {
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM refresh_tokens WHERE userid = :id AND expiresat > :expiresat");
-            $stmt->bindParam(':id', $id);
-            $stmt->bindParam(':expiresat', $time, \PDO::PARAM_INT);
-            $stmt->execute();
-            $exists = $stmt->fetchColumn() > 0;
-
-            $this->logger->info("Refresh_token existence check", ['exists' => $exists]);
-            return $exists;
-        } catch (\Throwable $e) {
-            $this->logger->error("General error while checking if refresh_token exists", ['error' => $e->getMessage()]);
-            return false;
-        }
     }
 
     /**
@@ -2111,20 +1876,41 @@ class UserMapper
         }
     }
 
-    public function getValidReferralInfoByLink(string $referralLink): array|null
+    public function getValidReferralInfoByLink(string $referralLink, array $specifications): array|null
     {
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $whereClauses = $allSpecs->whereClauses;
+        $params = $allSpecs->paramsToPrepare;
+        $whereClauses[] = "ur.referral_uuid = :referral_uuid";
+
         $this->logger->debug("UserMapper.getValidReferralInfoByLink started", [
             'referralLink' => $referralLink,
         ]);
 
-        $query = "SELECT ur.referral_uuid, ur.referral_link, u.username, u.slug, u.img, u.uid FROM user_referral_info ur LEFT JOIN users u ON u.uid = ur.referral_uuid  WHERE u.status = 0 AND ur.referral_uuid = :referral_uuid AND u.roles_mask IN (:role1, :role2, :role3)";
+        $whereClausesString = implode(" AND ", $whereClauses);
+
+        $query = sprintf(
+            "SELECT 
+                ur.referral_uuid,
+                ur.referral_link, 
+                u.username, 
+                u.slug, 
+                u.img, 
+                u.uid 
+            FROM 
+                user_referral_info ur 
+            LEFT JOIN users u 
+                ON u.uid = ur.referral_uuid  
+            WHERE %s",
+            $whereClausesString
+        );
 
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':referral_uuid', $referralLink, \PDO::PARAM_STR);
-        $stmt->bindValue(':role1', Role::USER, \PDO::PARAM_INT);
-        $stmt->bindValue(':role2', Role::ADMIN, \PDO::PARAM_INT);
-        $stmt->bindValue(':role3', Role::COMPANY_ACCOUNT, \PDO::PARAM_INT);
-        $stmt->execute();
+
+        $params['referral_uuid'] = $referralLink;
+
+        $stmt->execute($params);
 
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -2134,11 +1920,11 @@ class UserMapper
         return $result ?: null;
     }
 
-     /**
-     * Get Inviter ID of a user.
-     * This method retrieves the inviter ID for a given user ID from the users_info table. 
-     *
-     */
+    /**
+    * Get Inviter ID of a user.
+    * This method retrieves the inviter ID for a given user ID from the users_info table.
+    *
+    */
     public function getInviterID(string $userId): ?string
     {
         try {

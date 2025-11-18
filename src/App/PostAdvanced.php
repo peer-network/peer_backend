@@ -7,8 +7,9 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 
-class PostAdvanced
+class PostAdvanced implements PostReplaceable
 {
     protected string $postid;
     protected string $userid;
@@ -25,6 +26,7 @@ class PostAdvanced
     protected ?int $amountcomments;
     protected ?int $amountposts;
     protected ?int $amounttrending;
+    protected ?int $amountreports;
     protected ?bool $isliked;
     protected ?bool $isviewed;
     protected ?bool $isreported;
@@ -37,6 +39,8 @@ class PostAdvanced
     protected ?array $tags = [];
     protected ?array $user = [];
     protected ?array $comments = [];
+    protected ?int $activeReports = null;
+    protected ?string $visibilityStatus = null;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -59,6 +63,7 @@ class PostAdvanced
         $this->amountcomments = $data['amountcomments'] ?? 0;
         $this->amountposts = $data['amountposts'] ?? 0;
         $this->amounttrending = $data['amounttrending'] ?? 0;
+        $this->amountreports = $data['amountreports'] ?? 0;
         $this->isliked = $data['isliked'] ?? false;
         $this->isviewed = $data['isviewed'] ?? false;
         $this->isreported = $data['isreported'] ?? false;
@@ -69,6 +74,8 @@ class PostAdvanced
         $this->isfriend = $data['isfriend'] ?? false;
         $this->url = $this->getPostUrl();
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->activeReports = $data['reports'] ?? null;
+        $this->visibilityStatus = $data['visibility_status'] ?? null;
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->comments = isset($data['comments']) && is_array($data['comments']) ? $data['comments'] : [];
@@ -93,6 +100,7 @@ class PostAdvanced
             'amountcomments' => $this->amountcomments,
             'amountposts' => $this->amountposts,
             'amounttrending' => $this->amounttrending,
+            'amountreports' => $this->amountreports,
             'isliked' => $this->isliked,
             'isviewed' => $this->isviewed,
             'isreported' => $this->isreported,
@@ -103,6 +111,8 @@ class PostAdvanced
             'isfriend' => $this->isfriend,
             'createdat' => $this->createdat,
             'tags' => $this->tags, // Include tags
+            'visibility_status' => $this->visibilityStatus,
+            'reports' => $this->activeReports,
             'user' => $this->user,
             'comments' => $this->comments,
         ];
@@ -118,6 +128,21 @@ class PostAdvanced
     public function setTags(array $tags): void
     {
         $this->tags = $tags;
+    }
+
+    // HasUser interface
+    public function getUser(): array
+    {
+        return $this->user ?? [];
+    }
+    public function getUserid(): string
+    {
+        return $this->userid;
+    }
+
+    public function setUser(array $user): void
+    {
+        $this->user = $user;
     }
 
     public function getPostId(): string
@@ -142,9 +167,10 @@ class PostAdvanced
     {
         $this->mediadescription = $mediadescription;
     }
-    public function getUserId(): string
+    // PostReplaceable requires setDescription
+    public function setDescription(string $descriptionConfig): void
     {
-        return $this->userid;
+        $this->mediadescription = $descriptionConfig;
     }
 
     public function getFeedId(): string
@@ -164,6 +190,21 @@ class PostAdvanced
     public function getContentType(): string
     {
         return $this->contenttype;
+    }
+    // Capabilities for content filtering
+    public function visibilityStatus(): string
+    {
+        return $this->visibilityStatus ?? '';
+    }
+
+    public function setVisibilityStatus(?string $status): void
+    {
+        $this->visibilityStatus = $status;
+    }
+
+    public function getActiveReports(): ?int
+    {
+        return $this->activeReports;
     }
 
     public function getPostUrl(): string
@@ -194,8 +235,6 @@ class PostAdvanced
         }
 
         throw new ValidationException(implode("", $errorMessages));
-
-        return [];
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter

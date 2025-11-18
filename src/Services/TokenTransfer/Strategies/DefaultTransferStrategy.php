@@ -15,7 +15,8 @@ class DefaultTransferStrategy implements TransferStrategy
 
     private static FeePolicyMode $mode;
 
-    public function __construct() {   
+    public function __construct()
+    {
         $this::$mode = FeePolicyMode::ADDED;
         $this->operationId = self::generateUUID();
         $this->transactionId = self::generateUUID();

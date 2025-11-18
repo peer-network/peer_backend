@@ -859,7 +859,7 @@
         "comment": "The 'userid' and 'username' fields cannot be used together in the same request",
         "userFriendlyComment": "Please provide either a user ID or a username, not both."
     },
-     "31101": {
+    "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",
         "userFriendlyComment": "This action is only available for friends."
     },
@@ -882,6 +882,10 @@
     "31106": {
         "comment": "Information Not Found: The user you tried to block does not exist. ",
         "userFriendlyComment": "User not found."
+    },
+    "31107": {
+        "comment": "It is forbidden to interact with this User(System Account)",
+        "userFriendlyComment": "It is forbidden to interact with this User(System Account)"
     },
     "31201": {
         "comment": "Market capitalization data is not available for the provided UUID",
@@ -943,6 +947,10 @@
         "comment": " Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.",
         "userFriendlyComment": "You have reached the limit of five files. Please try again in 1 hour."
     },
+    "31513": {
+        "comment": "It is forbidden to interact with this Post(illegal Post)",
+        "userFriendlyComment": "It is forbidden to interact with this Post(illegal Post)"
+    },
     "31601": {
         "comment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",
         "userFriendlyComment": "Comment not found. Check the ID and try again."
@@ -970,6 +978,10 @@
     "31607": {
         "comment": "Not Allowed: Comment owner cannot report their own comment",
         "userFriendlyComment": "You can't report your own comment."
+    },
+    "31608": {
+        "comment": "It is forbidden to interact with this Comment(illegal Comment / illegal Post)",
+        "userFriendlyComment": "It is forbidden to interact with this Comment(illegal Comment/ illegal Post)"
     },
     "31801": {
         "comment": "Forbidden: Access denied. You do not have the required permissions for this action",
@@ -1115,6 +1127,50 @@
         "comment": "Information Not Found: No advertisement found for the provided ID. Please check the ID and try again.",
         "userFriendlyComment": "Advertisement not found. Check the ID and try again."
     },
+    "32020": {
+        "comment": "It is forbidden to advertise this Post(illegal Post)",
+        "userFriendlyComment": "It is forbidden to advertise  this Post(illegal Post)"
+    },
+    "12101": {
+        "comment": "Success: Moderation stats retrieved successfully",
+        "userFriendlyComment": "Moderation statistics loaded."
+    },
+    "12102": {
+        "comment": "Success: Moderation items retrieved successfully",
+        "userFriendlyComment": "Moderation items loaded."
+    },
+    "12103": {
+        "comment": "Success: Moderation action performed successfully",
+        "userFriendlyComment": "Your moderation decision has been applied."
+    },
+    "22103": {
+        "comment": "Moderation item not found",
+        "userFriendlyComment": "Moderation item not found."
+    },
+    "62101": {
+        "comment": "Forbidden: Unauthorized access to moderation",
+        "userFriendlyComment": "You don't have permission to use moderation."
+    },
+    "32101": {
+        "comment": "Bad Request: Invalid input",
+        "userFriendlyComment": "Invalid input. Please check the fields and try again."
+    },
+    "32102": {
+        "comment": "Error: Content already reviewed and decided",
+        "userFriendlyComment": "This content was already decided and moderated."
+    },
+    "32103": {
+        "comment": "Error: Moderation action already performed",
+        "userFriendlyComment": "This item has already been decided."
+    },
+    "32104": {
+        "comment": "Error: Content already reviewed and restored",
+        "userFriendlyComment": "This content was already decided and restored."
+    },
+    "42101": {
+        "comment": "Error: Failed while performing moderation action",
+        "userFriendlyComment": "Error: Failed while performing moderation action"
+    },    
     "40301": {
         "comment": "Unexpected Error: An unexpected error occurred. Please try again later or contact support",
         "userFriendlyComment": "Something went wrong on our end. Please try again or contact support if it continues."

@@ -7,8 +7,9 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 
-class CommentAdvanced
+class CommentAdvanced implements CommentReplaceable
 {
     protected string $commentid;
     protected string $userid;
@@ -17,9 +18,12 @@ class CommentAdvanced
     protected string $content;
     protected string $createdat;
     protected ?int $amountlikes;
+    protected ?int $amountreports;
     protected ?int $amountreplies;
+    protected ?bool $isreported;
     protected ?bool $isliked;
-    protected ?int $userstatus;
+    protected ?int $activeReports = null;
+    protected ?string $visibilityStatus = null;
     protected ?array $user = [];
 
 
@@ -38,13 +42,12 @@ class CommentAdvanced
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->amountlikes = $data['amountlikes'] ?? 0;
         $this->amountreplies = $data['amountreplies'] ?? 0;
+        $this->amountreports = $data['amountreports'] ?? 0;
+        $this->isreported = $data['isreported'] ?? false;
         $this->isliked = $data['isliked'] ?? false;
-        $this->userstatus = $data['userstatus'] ?? 0;
+        $this->activeReports = $data['reports'] ?? null;
+        $this->visibilityStatus = $data['visibility_status'] ?? null;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
-
-        if ($this->userstatus == 6) {
-            $this->content = "Comment by deleted Account";
-        }
     }
 
     // Array Copy methods
@@ -59,7 +62,11 @@ class CommentAdvanced
             'createdat' => $this->createdat,
             'amountlikes' => $this->amountlikes,
             'amountreplies' => $this->amountreplies,
+            'amountreports' => $this->amountreports,
+            'isreported' => $this->isreported,
             'isliked' => $this->isliked,
+            'visibility_status' => $this->visibilityStatus,
+            'reports' => $this->activeReports,
             'user' => $this->user,
         ];
         return $att;
@@ -119,6 +126,20 @@ class CommentAdvanced
     public function setContent(string $content): void
     {
         $this->content = $content;
+    }
+    public function visibilityStatus(): string
+    {
+        return $this->visibilityStatus ?? '';
+    }
+
+    public function setVisibilityStatus(?string $status): void
+    {
+        $this->visibilityStatus = $status;
+    }
+
+    public function getActiveReports(): ?int
+    {
+        return $this->activeReports;
     }
 
     // Validation and Array Filtering methods
@@ -193,7 +214,34 @@ class CommentAdvanced
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
+            'amountreports' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
             'isliked' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'isreported' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'visibility_status' => [
+                'required' => false,
+                'filters' => [
+                    ['name' => 'StringTrim'],
+                ],
+                'validators' => [
+                    ['name' => 'IsString'],
+                ],
+            ],
+            'reports' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'hasActiveReports' => [
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
             ],

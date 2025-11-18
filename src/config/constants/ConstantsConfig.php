@@ -60,7 +60,8 @@ class ConstantsConfig implements ConstantsConfigInterface
      *             CREATE: int,
      *             SEARCH: int
      *         }
-     *     }
+     *     },
+     *     STATUS: array{PUBLISHED: int, ADVERTISED: int, ILLEGAL: int}
      * }
      */
     public static function post(): array
@@ -140,10 +141,12 @@ class ConstantsConfig implements ConstantsConfigInterface
     /**
      * @return array{
      *     OFFSET: array{MIN: int, MAX: int},
+     *     POST_OFFSET: array{MIN: int, MAX: int},
+     *     POST_LIMIT: array{MIN: int, MAX: int},
      *     LIMIT: array{MIN: int, MAX: int}
      * }
      */
-    public static function paging()
+    public static function paging(): array
     {
         return ConstantsConfig::PAGING;
     }
@@ -314,6 +317,11 @@ class ConstantsConfig implements ConstantsConfigInterface
                 'SEARCH' => 5,
             ],
         ],
+        'STATUS' => [
+            'PUBLISHED' => 0,
+            'ADVERTISED' => 1,
+            'ILLEGAL' => 2,
+        ],
     ];
 
     private const WALLET = [
@@ -412,6 +420,14 @@ class ConstantsConfig implements ConstantsConfigInterface
         'OFFSET' => [
             'MIN' => 0,
             'MAX' => 2147483647,
+        ],
+        'POST_OFFSET' => [
+            'MIN' => 0,
+            'MAX' => 2147483647,
+        ],
+        'POST_LIMIT' => [
+            'MIN' => 0,
+            'MAX' => 20,
         ],
         'LIMIT' => [
             'MIN' => 1,
