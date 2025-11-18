@@ -288,7 +288,7 @@ class UserInfoService
         try {
             $this->transactionManager->beginTransaction();
 
-            $user = $this->userInfoMapper->loadById($this->currentUserId);
+            $user = $this->userMapper->loadById($this->currentUserId);
             if (!$user) {
                 return $this::createSuccessResponse(21001);
             }
@@ -311,7 +311,7 @@ class UserInfoService
             }
 
             $user->setBiography($mediaPathFile);
-            $updatedUser = $this->userInfoMapper->updateUsers($user);
+            $updatedUser = $this->userMapper->update($user);
             $responseMessage = "11003";
 
             $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
@@ -342,7 +342,7 @@ class UserInfoService
         $this->logger->debug('UserInfoService.setProfilePicture started');
 
         try {
-            $user = $this->userInfoMapper->loadById($this->currentUserId);
+            $user = $this->userMapper->loadById($this->currentUserId);
             if (!$user) {
                 return $this::createSuccessResponse(21001);
             }
@@ -366,7 +366,7 @@ class UserInfoService
             $this->transactionManager->beginTransaction();
 
             $user->setProfilePicture($mediaPathFile);
-            $updatedUser = $this->userInfoMapper->updateUsers($user);
+            $updatedUser = $this->userMapper->update($user);
             $responseMessage = "11004";
 
             $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
