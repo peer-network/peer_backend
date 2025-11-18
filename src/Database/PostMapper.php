@@ -683,7 +683,7 @@ class PostMapper
                     p.mediadescription,
                     p.visibility_status,
                     p.createdat AS createdat,
-
+                    pi.totalreports AS post_total_reports,
                     -- Moderations-/Report-Daten
                     MAX(pi.reports) AS post_reports,
 
@@ -735,7 +735,7 @@ class PostMapper
                 WHERE " . implode(" AND ", $whereClauses) . "
                 GROUP BY
                     p.postid, p.userid, p.contenttype, p.title, p.media, p.cover,
-                    p.mediadescription, p.createdat, p.visibility_status
+                    p.mediadescription, p.createdat, p.visibility_status,pi.totalreports
             )
             SELECT * FROM base_posts
             $orderByClause

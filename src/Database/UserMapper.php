@@ -1294,7 +1294,7 @@ class UserMapper
             $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
             $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
             $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
             $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
             $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
             $stmt->execute();
