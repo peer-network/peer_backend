@@ -22,7 +22,7 @@ class Comment extends Model implements Hashable
     protected string $content;
     protected string $createdat;
     protected ?int $userstatus;
-    protected ?string $visibilityStatus = null;
+    protected string $visibilityStatus;
 
 
     // Constructor
@@ -39,7 +39,7 @@ class Comment extends Model implements Hashable
         $this->content = $data['content'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->userstatus = $data['userstatus'] ?? 0;
-        $this->visibilityStatus = $data['visibility_status'] ?? null;
+        $this->visibilityStatus = $data['visibility_status'];
     }
 
     // Array Copy methods

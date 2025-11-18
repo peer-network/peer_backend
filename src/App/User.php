@@ -31,7 +31,7 @@ class User extends Model implements Hashable, ProfileReplaceable
     protected string $createdat;
     protected string $updatedat;
     protected ?int $activeReports = null;
-    protected ?string $visibilityStatus = null;
+    protected string $visibilityStatus;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -55,7 +55,7 @@ class User extends Model implements Hashable, ProfileReplaceable
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
         $this->activeReports = $data['user_reports'] ?? ($data['reports'] ?? null);
-        $this->visibilityStatus = $data['visibility_status'] ?? null;
+        $this->visibilityStatus = $data['visibility_status'];
     }
 
     // Array Copy methods
@@ -259,10 +259,10 @@ class User extends Model implements Hashable, ProfileReplaceable
 
     public function visibilityStatus(): string
     {
-        return (string)($this->visibilityStatus ?? '');
+        return $this->visibilityStatus;
     }
 
-    public function setVisibilityStatus(?string $status): void
+    public function setVisibilityStatus(string $status): void
     {
         $this->visibilityStatus = $status;
     }

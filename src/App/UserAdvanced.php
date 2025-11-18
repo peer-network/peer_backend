@@ -283,10 +283,10 @@ class UserAdvanced implements ProfileReplaceable
 
     public function visibilityStatus(): string
     {
-        return (string)($this->visibilityStatus ?? '');
+        return $this->visibilityStatus;
     }
 
-    public function setVisibilityStatus(?string $status): void
+    public function setVisibilityStatus(string $status): void
     {
         $this->visibilityStatus = $status;
     }

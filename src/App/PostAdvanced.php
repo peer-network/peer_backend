@@ -40,7 +40,7 @@ class PostAdvanced implements PostReplaceable
     protected ?array $user = [];
     protected ?array $comments = [];
     protected ?int $activeReports = null;
-    protected ?string $visibilityStatus = null;
+    protected string $visibilityStatus;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -75,7 +75,7 @@ class PostAdvanced implements PostReplaceable
         $this->url = $this->getPostUrl();
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->activeReports = $data['reports'] ?? null;
-        $this->visibilityStatus = $data['visibility_status'] ?? null;
+        $this->visibilityStatus = $data['visibility_status'];
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->comments = isset($data['comments']) && is_array($data['comments']) ? $data['comments'] : [];
@@ -194,10 +194,10 @@ class PostAdvanced implements PostReplaceable
     // Capabilities for content filtering
     public function visibilityStatus(): string
     {
-        return $this->visibilityStatus ?? '';
+        return $this->visibilityStatus;
     }
 
-    public function setVisibilityStatus(?string $status): void
+    public function setVisibilityStatus(string $status): void
     {
         $this->visibilityStatus = $status;
     }
