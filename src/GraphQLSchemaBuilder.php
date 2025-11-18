@@ -3113,23 +3113,39 @@ class GraphQLSchemaBuilder
 
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        if ($contentFilterBy !== null) {
-            $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-            if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-                return $this::respondWithError(30103);
-            }
-        }
 
-        
-            $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
-            $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
+        $contentFilterCase = ContentFilteringCases::searchById; 
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::comment,
+            $this->currentUserId
+        );
+
+        $specs = [
+            $deletedUserSpec,
+            $systemUserSpec,
+            $hiddenContentFilterSpec,
+        ];
+
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
         try {
             $comments = $this->commentService->fetchAllByPostIdetaild(
                 $postId,
                 $commentOffset,
                 $commentLimit,
-                $contentFilterBy
+                $specs
             );
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch comments', [
@@ -3684,7 +3700,31 @@ class GraphQLSchemaBuilder
     protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit, ?string $contentFilterBy = null): array
     {
         $postArray = $post->getArrayCopy();
-        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit, $contentFilterBy);
+        
+        $contentFilterCase = ContentFilteringCases::searchById;
+        
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::comment,
+            $this->currentUserId
+        );
+
+        $specs = [
+            $deletedUserSpec,
+            $systemUserSpec,
+            $hiddenContentFilterSpec,
+        ];
+        
+        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit, $specs);
 
         $postArray['comments'] = array_map(
             fn (CommentAdvanced $comment) => $this->fetchCommentWithoutReplies($comment),
