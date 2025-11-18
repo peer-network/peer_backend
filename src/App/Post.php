@@ -9,7 +9,6 @@ use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\Hashable;
-use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Utils\HashObject;
 
 class Post extends Model implements Hashable
@@ -26,6 +25,7 @@ class Post extends Model implements Hashable
     protected ?string $cover;
     protected string $mediadescription;
     protected string $createdat;
+    protected string $visibilityStatus;
 
     // Constructor
     public function __construct(
@@ -47,6 +47,7 @@ class Post extends Model implements Hashable
         $this->url = $this->getPostUrl();
         $this->mediadescription = $data['mediadescription'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -63,6 +64,7 @@ class Post extends Model implements Hashable
             'url' => $this->url,
             'mediadescription' => $this->mediadescription,
             'createdat' => $this->createdat,
+            'visibility_status' => $this->visibilityStatus,
         ];
         return $att;
     }
@@ -195,6 +197,15 @@ class Post extends Model implements Hashable
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                     ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                ],
+            ],
+            'visibility_status' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'StringTrim'],
+                ],
+                'validators' => [
+                    ['name' => 'IsString'],
                 ],
             ],
         ];

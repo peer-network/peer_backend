@@ -365,9 +365,9 @@ class PostMapper
         $data = $post->getArrayCopy();
 
         $query = "INSERT INTO posts 
-                  (postid, userid, feedid, contenttype, title, mediadescription, media, cover, createdat)
+                  (postid, userid, feedid, contenttype, title, mediadescription, media, cover, createdat, visibility_status)
                   VALUES 
-                  (:postid, :userid, :feedid, :contenttype, :title, :mediadescription, :media, :cover, :createdat)";
+                  (:postid, :userid, :feedid, :contenttype, :title, :mediadescription, :media, :cover, :createdat, :visibility_status)";
 
         try {
             $stmt = $this->db->prepare($query);
@@ -383,6 +383,7 @@ class PostMapper
             //$stmt->bindValue(':cover', $data['cover'], \PDO::PARAM_STR);
             $stmt->bindValue(':cover', $data['cover'] ?? null, $data['cover'] !== null ? \PDO::PARAM_STR : \PDO::PARAM_NULL);
             $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -682,7 +683,7 @@ class PostMapper
                     p.mediadescription,
                     p.visibility_status,
                     p.createdat AS createdat,
-
+                    pi.totalreports AS post_total_reports,
                     -- Moderations-/Report-Daten
                     MAX(pi.reports) AS post_reports,
 
@@ -734,7 +735,7 @@ class PostMapper
                 WHERE " . implode(" AND ", $whereClauses) . "
                 GROUP BY
                     p.postid, p.userid, p.contenttype, p.title, p.media, p.cover,
-                    p.mediadescription, p.createdat, p.visibility_status
+                    p.mediadescription, p.createdat, p.visibility_status,pi.totalreports
             )
             SELECT * FROM base_posts
             $orderByClause

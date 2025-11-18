@@ -205,6 +205,7 @@ class CommentMapper
             u.img,
             u.biography,
             u.updatedat
+            u.visibility_status
         FROM 
             comments c
         LEFT JOIN 
@@ -279,14 +280,15 @@ class CommentMapper
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
             $userObj = [
-                        'uid' => $row['userid'],
-                        'status' => $row['status'],
-                        'username' => $row['username'],
-                        'slug' => $row['slug'],
-                        'img' => $row['img'],
-                        'biography' => $row['biography'],
-                        'updatedat' => $row['updatedat'],
-                    ];
+                'uid' => $row['userid'],
+                'status' => $row['status'],
+                'username' => $row['username'],
+                'slug' => $row['slug'],
+                'img' => $row['img'],
+                'biography' => $row['biography'],
+                'updatedat' => $row['updatedat'],
+                'visibility_status' => $row['visibility_status'],
+            ];
             $userObj = (new User($userObj, [], false))->getArrayCopy();
 
             $row['user'] = [
@@ -296,6 +298,7 @@ class CommentMapper
                 'img' =>  $userObj['img'] ?? '',
                 'biography' =>  $userObj['biography'] ?? '',
                 'updatedat' =>  $userObj['updatedat'] ?? '',
+                'visibility_status' => $row['visibility_status'],
             ];
             $row['userstatus'] = $row['status'];
             $subComment = new CommentAdvanced($row);
@@ -391,6 +394,7 @@ class CommentMapper
                         'username' => $row['username'],
                         'slug' => $row['slug'],
                         'img' => $row['img'],
+                        'visibility_status' => $row['user_visibility_status'],
                     ];
                 $userObj = (new User($userObj, [], false))->getArrayCopy();
 
@@ -500,7 +504,8 @@ class CommentMapper
                 postid,
                 parentid,
                 content,
-                createdat
+                createdat,
+                visibility_status
             FROM comments
             WHERE parentid = :parentId
             ORDER BY createdat ASC

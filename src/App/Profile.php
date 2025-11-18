@@ -29,7 +29,7 @@ class Profile implements ProfileReplaceable
     protected ?int $amountreports;
     protected ?int $rolesmask;
     protected ?int $activeReports;
-    protected ?string $visibilityStatus;
+    protected string $visibilityStatus;
 
 
     // Constructor
@@ -58,7 +58,7 @@ class Profile implements ProfileReplaceable
         $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->amountreports = $data['amountreports'] ?? 0;
         $this->activeReports = $data['user_reports'] ?? 0;
-        $this->visibilityStatus = $data['visibility_status'] ?? '';
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -124,7 +124,7 @@ class Profile implements ProfileReplaceable
         return $this->visibilityStatus;
     }
 
-    public function setVisibilityStatus(?string $status): void
+    public function setVisibilityStatus(string $status): void
     {
         $this->visibilityStatus = $status;
     }

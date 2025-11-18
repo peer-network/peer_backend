@@ -107,7 +107,7 @@ class PostInfoMapper
 
         try {
             $stmtSel = $this->db->prepare("
-                SELECT likes, dislikes, reports, views, saves, shares, comments
+                SELECT likes, dislikes, reports, views, saves, shares, comments, totalreports
                 FROM post_info
                 WHERE postid = :postid
                 FOR UPDATE
