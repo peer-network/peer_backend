@@ -1100,6 +1100,23 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'CommentListResponse' => [
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+                'counter' => function (array $root): int {
+                    $this->logger->debug('Query.CommentListResponse Resolvers');
+                    return $root['counter'] ?? 0;
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
             'AdvCreator' => [
                 'advertisementid' => function (array $root): string {
                     $this->logger->debug('Query.AdvCreator Resolvers');
@@ -2392,6 +2409,7 @@ class GraphQLSchemaBuilder
             'listPosts' => fn (mixed $root, array $args) => $this->resolvePosts($args),
             'guestListPost' => fn (mixed $root, array $args) => $this->guestListPost($args),
             'listAdvertisementPosts' => fn (mixed $root, array $args) => $this->resolveAdvertisementsPosts($args),
+            'listComments' => fn (mixed $root, array $args) => $this->resolveListComments($args),
             'listChildComments' => fn (mixed $root, array $args) => $this->resolveComments($args),
             'listTags' => fn (mixed $root, array $args) => $this->resolveTags($args),
             'searchTags' => fn (mixed $root, array $args) => $this->resolveTagsearch($args),
@@ -3073,6 +3091,85 @@ class GraphQLSchemaBuilder
         return $this::createSuccessResponse(21601);
     }
 
+    protected function resolveListComments(array $args): array
+    {
+        $this->logger->debug('GraphQLSchemaBuilder.resolveListComments started');
+
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+
+        $postId = $args['postid'] ?? null;
+        if (empty($postId) || !self::isValidUUID($postId)) {
+            return $this::respondWithError(30209); 
+        }
+
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+
+        $contentFilterCase = ContentFilteringCases::searchById; 
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::comment,
+            $this->currentUserId
+        );
+
+        $specs = [
+            $deletedUserSpec,
+            $systemUserSpec,
+            $hiddenContentFilterSpec,
+        ];
+
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
+
+        try {
+            $comments = $this->commentService->fetchAllByPostIdetaild(
+                $postId,
+                $commentOffset,
+                $commentLimit,
+                $specs
+            );
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to fetch comments', [
+                'postId' => $postId,
+                'error' => $e->getMessage()
+            ]);
+            return $this::respondWithError(41601);
+        }
+
+        $results = array_map(
+            fn (CommentAdvanced $comment) => $comment->getArrayCopy(),
+            $comments
+        );
+
+        $this->logger->info('Query.resolveListComments successful', ['commentCount' => count($results)]);
+
+        return [
+            'status' => 'success',
+            'counter' => count($results),
+            'ResponseCode' => empty($results) ? "21601" : "11601",
+            'affectedRows' => $results,
+        ];
+    }
+
     protected function resolvePostComments(array $args): array
     {
         if (!$this->checkAuthentication()) {
@@ -3603,7 +3700,31 @@ class GraphQLSchemaBuilder
     protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit, ?string $contentFilterBy = null): array
     {
         $postArray = $post->getArrayCopy();
-        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit, $contentFilterBy);
+        
+        $contentFilterCase = ContentFilteringCases::searchById;
+        
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::comment,
+            $this->currentUserId
+        );
+
+        $specs = [
+            $deletedUserSpec,
+            $systemUserSpec,
+            $hiddenContentFilterSpec,
+        ];
+        
+        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit, $specs);
 
         $postArray['comments'] = array_map(
             fn (CommentAdvanced $comment) => $this->fetchCommentWithoutReplies($comment),
