@@ -2714,6 +2714,7 @@ class GraphQLSchemaBuilder
                 return $this::respondWithError(51301);
             }
 
+            
             if ($action === 'comment') {
                 $response = $this->commentService->createComment($args);
                 if (isset($response['status']) && $response['status'] === 'error') {
@@ -2728,7 +2729,6 @@ class GraphQLSchemaBuilder
                 $response['ResponseCode'] = "11508";
 
                 if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])) {
-
                     unset($args['input'], $args['action']);
                     $args['postid'] = $response['affectedRows']['postid'];
                 }
@@ -2749,12 +2749,13 @@ class GraphQLSchemaBuilder
             }
 
             if (isset($response['status']) && $response['status'] === 'success') {
+                assert(in_array($action, ['post', 'like', 'comment', 'dislike'], true));
+            
                 $transferStrategy = match($action) {
                     'post' => new PaidPostTransferStrategy(),
                     'like' => new PaidLikeTransferStrategy(),
                     'comment' => new PaidCommentTransferStrategy(),
                     'dislike' => new PaidDislikeTransferStrategy(),
-                    default => throw new \Exception("Invalid action type: {$action}")
                 };
 
                 $deducted = $this->walletService->performPayment($this->currentUserId, $transferStrategy, $args);
