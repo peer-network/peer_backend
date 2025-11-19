@@ -40,11 +40,6 @@ class ContactusService
         );
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
-    }
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -87,7 +82,7 @@ class ContactusService
             $this->transactionManager->rollBack();
             $this->logger->error("Error occurred in ContactusService.insert", [
                 'error' => $e->getMessage(),
-                'contact' => $contact->getArrayCopy(),
+                'msgid' => $contact->getMsgId(),
             ]);
             return null;
         }

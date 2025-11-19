@@ -37,7 +37,7 @@ type ContactusResponse {
 
 type RegisterResponse {
   meta: DefaultResponse
-  status: String!
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
   ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
   userid: ID
 }
@@ -217,6 +217,12 @@ type CommentResponse {
   affectedRows: [Comment]
 }
 
+type CommentListResponse {
+  meta: DefaultResponse
+  counter: Int!
+  affectedRows: [Comment!]
+}
+
 type ReferralInfoResponse {
   meta: DefaultResponse
   status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
@@ -242,7 +248,7 @@ type GetActionPricesResponse {
 type TokenomicsResponse {
   meta: DefaultResponse
   status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
-  ResponseCode: Int!                         
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")                     
   actionTokenPrices: ActionPriceResult!
   actionGemsReturns: ActionGemsReturns!
   mintingData: MintingData!

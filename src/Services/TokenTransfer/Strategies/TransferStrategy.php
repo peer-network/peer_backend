@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Fawaz\Services\TokenTransfer\Strategies;
+
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
 interface TransferStrategy
