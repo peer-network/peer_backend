@@ -106,7 +106,7 @@ class WalletMapper
             $this->logger->warning('Send and Receive Same Wallet Error.');
             return self::respondWithError(31202);
         }
-        $fees = ConstantsConfig::tokenomics()['FEES'];
+        $fees = ConstantsConfig::tokenomics()['FEES_STRING'];
         $actions = ConstantsConfig::wallet()['ACTIONS'];
         $peerFee = (float)$fees['PEER'];
         $burnFee = (float)$fees['BURN'];
