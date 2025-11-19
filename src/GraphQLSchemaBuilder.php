@@ -361,6 +361,29 @@ class GraphQLSchemaBuilder
                     return $root['userid'] ?? '';
                 },
             ],
+            'VerifyAccountResponse' => [
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+                'status' => function (array $root): string {
+                    $this->logger->debug('Query.VerifyAccountResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? "";
+                },
+                'ResponseMessage' => function (array $root): string {
+                    return $this->responseMessagesProvider->getMessage($root['ResponseCode']) ?? '';
+                },
+                'RequestId' => function (array $root): string {
+                    return $this->logger->getRequestUid();
+                },
+            ],
             'ReferralResponse' => [
                 'meta' => function (array $root): array {
                     return [
