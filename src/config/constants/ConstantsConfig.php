@@ -6,6 +6,22 @@ namespace Fawaz\config\constants;
 
 use Fawaz\config\constants\ConstantsModeration;
 
+
+/*
+ 
+
+
+DONT CHANGE/REMOVE ANY EXISING TYPES/NAMES  
+
+all changes MUST be BACKWARDS COMPATITABLE 
+ otherwise front will crash💥
+
+
+
+all changes through adding new fields
+
+*/
+
 class ConstantsConfig implements ConstantsConfigInterface
 {
     public function getData()
@@ -195,11 +211,17 @@ class ConstantsConfig implements ConstantsConfigInterface
      *         comment: float
      *     },
      *     FEES: array{
+     *         INVITATION: float,
+     *         POOL: float,
+     *         PEER: float,
+     *         BURN: float
+     *     },
+     *     FEES_STRING: array{
      *         INVITATION: string,
      *         POOL: string,
      *         PEER: string,
      *         BURN: string
-     *     }
+     *     },
      * }
      */
     public static function tokenomics(): array
@@ -247,6 +269,12 @@ class ConstantsConfig implements ConstantsConfigInterface
             'comment' => 2.0,
         ],
         'FEES' => [
+            'INVITATION' => 0.01,
+            'POOL'       => 0.01,
+            'PEER'       => 0.02,
+            'BURN'       => 0.01,
+        ],
+        'FEES_STRING' => [
             'INVITATION' => '0.01',
             'POOL'       => '0.01',
             'PEER'       => '0.02',
