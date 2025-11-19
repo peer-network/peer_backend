@@ -10,7 +10,7 @@ type Query {
 
 type Mutation {
   register(input: RegistrationInput!): RegisterResponse!
-  verifyAccount(userid: ID!): DefaultResponse!
+  verifyAccount(userid: ID!): VerifyAccountResponse!
   login(email: String!, password: String!): AuthPayload!
   requestPasswordReset(email: String!): ResetPasswordRequestResponse!
   resetPasswordTokenVerify(token: String!): DefaultResponse!

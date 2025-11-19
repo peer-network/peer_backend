@@ -20,7 +20,13 @@ type HelloResponse {
   lastMergedPullRequestNumber: String
   companyAccountId: ID
 }
-
+type VerifyAccountResponse {
+  meta: DefaultResponse!
+  status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
+  RequestId: String @deprecated(reason: "use meta.RequestId . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  ResponseMessage: String @deprecated(reason: "use meta.ResponseMessage . this field will be removed after 15 October`.")
+}
 type ReferralResponse {
   meta: DefaultResponse
   status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")
