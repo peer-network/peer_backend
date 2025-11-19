@@ -1,4 +1,4 @@
-name: Newman Test For Postman on the php Backend Directory
+name: CI
  
 on:
   pull_request:
@@ -246,10 +246,10 @@ jobs:
           MAIL_ENCRYPTION="${{ vars.MAIL_ENCRYPTION }}"
           MAIL_FROM_ADDRESS="${{ vars.MAIL_FROM_ADDRESS }}"
           MAIL_FROM_NAME="${{ vars.MAIL_FROM_NAME }}"
-          PEER_BANK="${{ vars.PEER_BANK }}"
-          BURN_ACCOUNT="${{ vars.BURN_ACCOUNT }}"
-          LIQUIDITY_POOL="${{ vars.LIQUIDITY_POOL }}"
-          BTC_POOL="${{ vars.BTC_POOL }}"
+          PEER_BANK="${{ secrets.PEER_BANK }}"
+          BURN_ACCOUNT="${{ secrets.BURN_ACCOUNT }}"
+          LIQUIDITY_POOL="${{ secrets.LIQUIDITY_POOL }}"
+          BTC_POOL="${{ secrets.BTC_POOL }}"
           EOF
  
       - name: Show .env File (excluding password)
@@ -707,6 +707,9 @@ jobs:
               ;;
             bipin1611)
               echo "discord_mention=<@1358723876883923075>" >> $GITHUB_OUTPUT
+              ;;
+            devcrypt6)
+              echo "discord_mention=<@837718845330292766>" >> $GITHUB_OUTPUT
               ;;
             *)
               echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT

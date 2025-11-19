@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
-class Profile
+class Profile implements ProfileReplaceable
 {
     protected string $uid;
     protected string $username;
     protected int $status;
+    protected int $verified;
     protected int $slug;
     protected ?string $img;
     protected ?string $biography;
@@ -20,14 +21,16 @@ class Profile
     protected ?int $amounttrending;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
+    protected ?bool $isreported;
     protected ?int $amountfollower;
     protected ?int $amountfollowed;
     protected ?int $amountfriends;
     protected ?int $amountblocked;
-    protected ?array $imageposts = [];
-    protected ?array $textposts = [];
-    protected ?array $videoposts = [];
-    protected ?array $audioposts = [];
+    protected ?int $amountreports;
+    protected ?int $rolesmask;
+    protected ?int $activeReports;
+    protected string $visibilityStatus;
+
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -40,9 +43,12 @@ class Profile
         $this->username = $data['username'] ?? '';
         $this->status = $data['status'] ?? 0;
         $this->slug = $data['slug'] ?? 0;
+        $this->verified = $data['verified'] ?? 0;
+        $this->rolesmask = $data['roles_mask'] ?? 0;
         $this->img = $data['img'] ?? '';
         $this->biography = $data['biography'] ?? '';
         $this->amountposts = $data['amountposts'] ?? 0;
+        $this->isreported = $data['isreported'] ?? false;
         $this->amounttrending = $data['amounttrending'] ?? 0;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
@@ -50,16 +56,9 @@ class Profile
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
         $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->amountblocked = $data['amountblocked'] ?? 0;
-        $this->imageposts = isset($data['imageposts']) && is_array($data['imageposts']) ? $data['imageposts'] : [];
-        $this->textposts = isset($data['textposts']) && is_array($data['textposts']) ? $data['textposts'] : [];
-        $this->videoposts = isset($data['videoposts']) && is_array($data['videoposts']) ? $data['videoposts'] : [];
-        $this->audioposts = isset($data['audioposts']) && is_array($data['audioposts']) ? $data['audioposts'] : [];
-
-        if (($this->status == 6)) {
-            $this->username = 'Deleted_Account';
-            $this->img = '/profile/00000000-0000-0000-0000-000000000000.jpeg';
-            $this->biography = '/userData/00000000-0000-0000-0000-000000000000.txt';
-        }
+        $this->amountreports = $data['amountreports'] ?? 0;
+        $this->activeReports = $data['user_reports'] ?? 0;
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -69,6 +68,7 @@ class Profile
             'uid' => $this->uid,
             'username' => $this->username,
             'status' => $this->status,
+            'verified' => $this->verified,
             'slug' => $this->slug,
             'img' => $this->img,
             'biography' => $this->biography,
@@ -76,14 +76,15 @@ class Profile
             'amounttrending' => $this->amounttrending,
             'isfollowed' => $this->isfollowed,
             'isfollowing' => $this->isfollowing,
+            'isreported' => $this->isreported,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
             'amountfriends' => $this->amountfriends,
             'amountblocked' => $this->amountblocked,
-            'imageposts' => $this->imageposts,
-            'textposts' => $this->textposts,
-            'videoposts' => $this->videoposts,
-            'audioposts' => $this->audioposts,
+            'amountreports' => $this->amountreports,
+            'reports' => $this->activeReports,
+            'visibility_status' => $this->visibilityStatus,
+            'roles_mask' => $this->rolesmask
         ];
         return $att;
     }
@@ -107,6 +108,180 @@ class Profile
     public function setName(string $name): void
     {
         $this->username = $name;
+    }
+
+    public function getStatus(): int
+    {
+        return $this->status;
+    }
+
+    public function setStatus(int $status): void
+    {
+        $this->status = $status;
+    }
+    public function visibilityStatus(): string
+    {
+        return $this->visibilityStatus;
+    }
+
+    public function setVisibilityStatus(string $status): void
+    {
+        $this->visibilityStatus = $status;
+    }
+
+    public function isVerified(): int
+    {
+        return $this->verified;
+    }
+
+    public function getVerified(): int
+    {
+        return $this->verified;
+    }
+
+    public function setVerified(int $verified): void
+    {
+        $this->verified = $verified;
+    }
+
+    public function getSlug(): int
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(int $slug): void
+    {
+        $this->slug = $slug;
+    }
+
+    public function getRolesmask(): int
+    {
+        return $this->rolesmask;
+    }
+
+    public function setRolesmask(int $rolesmask): void
+    {
+        $this->rolesmask = $rolesmask;
+    }
+
+    public function getImg(): ?string
+    {
+        return $this->img;
+    }
+
+    public function setImg(?string $img): void
+    {
+        $this->img = $img;
+    }
+
+    public function getBiography(): ?string
+    {
+        return $this->biography;
+    }
+
+    public function setBiography(?string $biography): void
+    {
+        $this->biography = $biography;
+    }
+
+    public function getAmountposts(): ?int
+    {
+        return $this->amountposts;
+    }
+
+    public function setAmountposts(?int $amountposts): void
+    {
+        $this->amountposts = $amountposts;
+    }
+
+    public function getAmounttrending(): ?int
+    {
+        return $this->amounttrending;
+    }
+
+    public function setAmounttrending(?int $amounttrending): void
+    {
+        $this->amounttrending = $amounttrending;
+    }
+
+    public function getIsfollowed(): ?bool
+    {
+        return $this->isfollowed;
+    }
+
+    public function setIsfollowed(?bool $isfollowed): void
+    {
+        $this->isfollowed = $isfollowed;
+    }
+
+    public function getIsfollowing(): ?bool
+    {
+        return $this->isfollowing;
+    }
+
+    public function setIsfollowing(?bool $isfollowing): void
+    {
+        $this->isfollowing = $isfollowing;
+    }
+
+    public function getAmountfollower(): ?int
+    {
+        return $this->amountfollower;
+    }
+
+    public function setAmountfollower(?int $amountfollower): void
+    {
+        $this->amountfollower = $amountfollower;
+    }
+
+    public function getAmountfollowed(): ?int
+    {
+        return $this->amountfollowed;
+    }
+
+    public function setAmountfollowed(?int $amountfollowed): void
+    {
+        $this->amountfollowed = $amountfollowed;
+    }
+
+    public function getAmountfriends(): ?int
+    {
+        return $this->amountfriends;
+    }
+
+    public function setAmountfriends(?int $amountfriends): void
+    {
+        $this->amountfriends = $amountfriends;
+    }
+
+    public function getAmountblocked(): ?int
+    {
+        return $this->amountblocked;
+    }
+
+    public function setAmountblocked(?int $amountblocked): void
+    {
+        $this->amountblocked = $amountblocked;
+    }
+
+    public function getAmountreports(): ?int
+    {
+        return $this->amountreports;
+    }
+
+    public function setAmountreports(?int $amountreports): void
+    {
+        $this->amountreports = $amountreports;
+    }
+
+    public function getActiveReports(): int
+    {
+        return $this->activeReports;
+    }
+
+    public function setReports(?int $reports): void
+    {
+        $this->activeReports = $reports;
     }
 
     // Validation and Array Filtering methods
@@ -163,6 +338,13 @@ class Profile
                         'min' => $userConfig['SLUG']['MIN_LENGTH'],
                         'max' => $userConfig['SLUG']['MAX_LENGTH']
                         ]],
+                ],
+            ],
+            'verified' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [
+                    ['name' => 'IsInt'],
                 ],
             ],
             'img' => [
@@ -225,21 +407,10 @@ class Profile
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
-            'imageposts' => [
+            'reports' => [
                 'required' => false,
-                'validators' => [['name' => 'IsArray']],
-            ],
-            'textposts' => [
-                'required' => false,
-                'validators' => [['name' => 'IsArray']],
-            ],
-            'videoposts' => [
-                'required' => false,
-                'validators' => [['name' => 'IsArray']],
-            ],
-            'audioposts' => [
-                'required' => false,
-                'validators' => [['name' => 'IsArray']],
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
             ],
         ];
 

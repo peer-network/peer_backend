@@ -49,11 +49,6 @@ class CommentService
         );
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
-    }
-
     protected function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -128,6 +123,7 @@ class CommentService
                 'postid' => $postId,
                 'parentid' => $parentId,
                 'content' => $content,
+                'visibility_status' => 'normal',
             ];
 
             // Post speichern
@@ -164,7 +160,7 @@ class CommentService
                 'userid' => $this->currentUserId,
                 'likes' => 0,
                 'reports' => 0,
-                'comments' => 0,
+                'comments' => 0
             ];
             $commentInfo = new CommentInfo($commentInfoData);
             $this->commentInfoMapper->insert($commentInfo);
@@ -248,16 +244,8 @@ class CommentService
         return $results;
     }
 
-    public function fetchAllByPostIdetaild(string $postId, int $offset = 0, int $limit = 10, ?string $contentFilterBy = null): array
+    public function fetchAllByPostIdetaild(string $postId, int $offset, int $limit, array $specifications): array
     {
-        return $this->commentMapper->fetchAllByPostIdetaild($postId, $this->currentUserId, $offset, $limit, $contentFilterBy);
-    }
-
-    /**
-     * Get Comments for Geust based on Filter
-     */
-    public function fetchAllByGuestPostIdetaild(string $postId, int $offset = 0, int $limit = 10): array
-    {
-        return $this->commentMapper->fetchAllByGuestPostIdetaild($postId, $offset, $limit);
+        return $this->commentMapper->fetchAllByPostIdetaild($postId, $specifications, $this->currentUserId, $offset, $limit);
     }
 }

@@ -60,7 +60,8 @@ class ConstantsConfig implements ConstantsConfigInterface
      *             CREATE: int,
      *             SEARCH: int
      *         }
-     *     }
+     *     },
+     *     STATUS: array{PUBLISHED: int, ADVERTISED: int, ILLEGAL: int}
      * }
      */
     public static function post(): array
@@ -140,10 +141,12 @@ class ConstantsConfig implements ConstantsConfigInterface
     /**
      * @return array{
      *     OFFSET: array{MIN: int, MAX: int},
+     *     POST_OFFSET: array{MIN: int, MAX: int},
+     *     POST_LIMIT: array{MIN: int, MAX: int},
      *     LIMIT: array{MIN: int, MAX: int}
      * }
      */
-    public static function paging()
+    public static function paging(): array
     {
         return ConstantsConfig::PAGING;
     }
@@ -192,10 +195,10 @@ class ConstantsConfig implements ConstantsConfigInterface
      *         comment: float
      *     },
      *     FEES: array{
-     *         INVITATION: float,
-     *         POOL: float,
-     *         PEER: float,
-     *         BURN: float
+     *         INVITATION: string,
+     *         POOL: string,
+     *         PEER: string,
+     *         BURN: string
      *     }
      * }
      */
@@ -244,10 +247,10 @@ class ConstantsConfig implements ConstantsConfigInterface
             'comment' => 2.0,
         ],
         'FEES' => [
-            'INVITATION' => 0.01,
-            'POOL'       => 0.01,
-            'PEER'       => 0.02,
-            'BURN'       => 0.01,
+            'INVITATION' => '0.01',
+            'POOL'       => '0.01',
+            'PEER'       => '0.02',
+            'BURN'       => '0.01',
         ],
     ];
 
@@ -313,6 +316,11 @@ class ConstantsConfig implements ConstantsConfigInterface
                 'CREATE' => 10,
                 'SEARCH' => 5,
             ],
+        ],
+        'STATUS' => [
+            'PUBLISHED' => 0,
+            'ADVERTISED' => 1,
+            'ILLEGAL' => 2,
         ],
     ];
 
@@ -412,6 +420,14 @@ class ConstantsConfig implements ConstantsConfigInterface
         'OFFSET' => [
             'MIN' => 0,
             'MAX' => 2147483647,
+        ],
+        'POST_OFFSET' => [
+            'MIN' => 0,
+            'MAX' => 2147483647,
+        ],
+        'POST_LIMIT' => [
+            'MIN' => 0,
+            'MAX' => 20,
         ],
         'LIMIT' => [
             'MIN' => 1,
