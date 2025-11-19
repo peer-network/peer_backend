@@ -159,7 +159,7 @@ class PeerTokenMapper
      */
     private function getEachFeesAmount(): array
     {
-        $fees = ConstantsConfig::tokenomics()['FEES'];
+        $fees = ConstantsConfig::tokenomics()['FEES_STRING'];
         $peerFee = (string) $fees['PEER'];
         $poolFee = (string) $fees['POOL'];
         $burnFee = (string) $fees['BURN'];
@@ -610,7 +610,7 @@ class PeerTokenMapper
     {
         $walletsToLock = [...$userIds];
 
-        $fees = ConstantsConfig::tokenomics()['FEES'];
+        $fees = ConstantsConfig::tokenomics()['FEES_STRING'];
         if (isset($fees['PEER']) && (float)$fees['PEER'] > 0) {
             $walletsToLock[] = $this->peerWallet;
         }
