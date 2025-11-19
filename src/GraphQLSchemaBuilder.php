@@ -2867,7 +2867,6 @@ class GraphQLSchemaBuilder
 
         $postId = $args['postid'] ?? null;
         $action = $args['action'] = strtolower($args['action'] ?? 'LIKE');
-        $args['fromid'] = $this->currentUserId;
 
         $freeActions = ['report', 'save', 'share', 'view'];
 
