@@ -380,8 +380,6 @@ class WalletMapper
         $queryParams[':limit'] = $limit;
         $queryParams[':offset'] = $offset;
 
-        $this->logger->info('Executing SQL query', ['sql' => $sql, 'params' => $queryParams]);
-
         $stmt = $this->db->prepare($sql);
         $stmt->execute($queryParams);
 
@@ -389,7 +387,6 @@ class WalletMapper
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             try {
                 $results[] = new Wallet($row);
-                $this->logger->info('Executing SQL query', ['row' => $row]);
             } catch (\Throwable $e) {
                 $this->logger->error('Failed to create User object', ['error' => $e->getMessage(), 'data' => $row]);
             }
