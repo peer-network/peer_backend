@@ -278,8 +278,6 @@ class UserMapper
             $whereClausesString
         );
 
-        $this->logger->info("Executing SQL query", ['sql' => $sql, 'params' => $params]);
-
         try {
             $stmt = $this->db->prepare($sql);
 
@@ -436,8 +434,6 @@ class UserMapper
             OFFSET :offset",
             $whereClausesString
         );
-
-        $this->logger->info("Executing SQL query", ['sql' => $sql, 'params' => $params]);
 
         try {
             $stmt = $this->db->prepare($sql);
