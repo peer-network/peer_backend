@@ -402,7 +402,7 @@ class GraphQLSchemaBuilder
                     return $root['uid'] ?? '';
                 },
                 'visibilityStatus' => function (array $root): string {
-                    return strtoupper($root['visibility_status'] ?? '');
+                    return strtoupper($root['visibility_status'] ?? 'NORMAL');
                 },
                 'hasActiveReports' => function (array $root): bool {
                     $reports = $root['reports'] ?? 0;
@@ -501,7 +501,7 @@ class GraphQLSchemaBuilder
                     return $root['uid'] ?? '';
                 },
                 'visibilityStatus' => function (array $root): string {
-                    return strtoupper($root['visibility_status'] ?? '');
+                    return strtoupper($root['visibility_status'] ?? 'NORMAL');
                 },
                 'hasActiveReports' => function (array $root): bool {
                     $reports = $root['reports'] ?? 0;
@@ -613,7 +613,7 @@ class GraphQLSchemaBuilder
                     return $root['uid'] ?? '';
                 },
                 'visibilityStatus' => function (array $root): string {
-                    return strtoupper($root['visibility_status'] ?? '');
+                    return strtoupper($root['visibility_status'] ?? 'NORMAL');
                 },
                 'hasActiveReports' => function (array $root): bool {
                     $reports = $root['reports'] ?? 0;
@@ -647,7 +647,7 @@ class GraphQLSchemaBuilder
                     return $root['uid'] ?? '';
                 },
                 'visibilityStatus' => function (array $root): string {
-                    return strtoupper($root['visibility_status'] ?? '');
+                    return strtoupper($root['visibility_status'] ?? 'NORMAL');
                 },
                 'hasActiveReports' => function (array $root): bool {
                     $reports = $root['reports'] ?? 0;
@@ -817,7 +817,7 @@ class GraphQLSchemaBuilder
                     return $root['postid'] ?? '';
                 },
                 'visibilityStatus' => function (array $root): string {
-                    return strtoupper($root['visibility_status'] ?? '');
+                    return strtoupper($root['visibility_status'] ?? 'NORMAL');
                 },
                 'hasActiveReports' => function (array $root): bool {
                     $reports = $root['reports'] ?? 0;
@@ -1003,7 +1003,7 @@ class GraphQLSchemaBuilder
                     return $root['commentid'] ?? '';
                 },
                 'visibilityStatus' => function (array $root): string {
-                    return strtoupper($root['visibility_status'] ?? '');
+                    return strtoupper($root['visibility_status'] ?? 'NORMAL');
                 },
                 'hasActiveReports' => function (array $root): bool {
                     $reports = $root['reports'] ?? 0;
