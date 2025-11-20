@@ -212,7 +212,7 @@ class PostAdvanced implements PostReplaceable
         if (empty($this->postid)) {
             return '';
         }
-        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
+        return getenv('WEB_APP_URL') . '/post/' . $this->postid;
     }
 
     // Renew Validation and Array Filtering methods

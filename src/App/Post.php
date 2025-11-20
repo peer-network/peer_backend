@@ -238,7 +238,7 @@ class Post extends Model implements Hashable
         if (empty($this->postid)) {
             return '';
         }
-        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
+        return getenv('WEB_APP_URL') . '/post/' . $this->postid;
     }
 
     // Table name
