@@ -23,6 +23,12 @@ use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
+use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -2861,7 +2867,6 @@ class GraphQLSchemaBuilder
 
         $postId = $args['postid'] ?? null;
         $action = $args['action'] = strtolower($args['action'] ?? 'LIKE');
-        $args['fromid'] = $this->currentUserId;
 
         $freeActions = ['report', 'save', 'share', 'view'];
 
@@ -2998,6 +3003,7 @@ class GraphQLSchemaBuilder
                 return $this::respondWithError(51301);
             }
 
+            
             if ($action === 'comment') {
                 $response = $this->commentService->createComment($args);
                 if (isset($response['status']) && $response['status'] === 'error') {
@@ -3012,7 +3018,6 @@ class GraphQLSchemaBuilder
                 $response['ResponseCode'] = "11508";
 
                 if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])) {
-
                     unset($args['input'], $args['action']);
                     $args['postid'] = $response['affectedRows']['postid'];
                 }
@@ -3033,13 +3038,22 @@ class GraphQLSchemaBuilder
             }
 
             if (isset($response['status']) && $response['status'] === 'success') {
-                $deducted = $this->walletService->deductFromWallet($this->currentUserId, $args);
+                assert(in_array($action, ['post', 'like', 'comment', 'dislike'], true));
+            
+                $transferStrategy = match($action) {
+                    'post' => new PaidPostTransferStrategy(),
+                    'like' => new PaidLikeTransferStrategy(),
+                    'comment' => new PaidCommentTransferStrategy(),
+                    'dislike' => new PaidDislikeTransferStrategy(),
+                };
+
+                $deducted = $this->walletService->performPayment($this->currentUserId, $transferStrategy, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
                     return $deducted;
                 }
 
                 if (!$deducted) {
-                    $this->logger->error('Failed to deduct from wallet', ['userId' => $this->currentUserId]);
+                    $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
                     return $this::respondWithError($deducted['ResponseCode']);
                 }
 
