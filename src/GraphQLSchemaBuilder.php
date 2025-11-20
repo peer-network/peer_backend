@@ -2058,6 +2058,62 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'TransactionHistotyResponse' => [
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'TransactionHistotyItem' => [
+                'operationid' => function (array $root): string {
+                    return $root['operationid'] ?? '';
+                },
+                'transactiontype' => function (array $root): string {
+                    return $root['transactiontype'] ?? '';
+                },
+                'tokenamount' => function (array $root): float {
+                    return (float)($root['tokenamount'] ?? 0.0);
+                },
+                'netTokenAmount' => function (array $root): float {
+                    return (float)($root['netTokenAmount'] ?? 0.0);
+                },
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'sender' => function (array $root): array {
+                    return $root['sender'] ?? [];
+                },
+                'recipient' => function (array $root): array {
+                    return $root['recipient'] ?? [];
+                },
+                'fees' => function (array $root): ?array {
+                    return $root['fees'] ?? null;
+                },
+            ],
+            'TransactionFeeSummary' => [
+                'total' => function (array $root): ?float {
+                    return isset($root['total']) ? (float)$root['total'] : null;
+                },
+                'burn' => function (array $root): ?float {
+                    return isset($root['burn']) ? (float)$root['burn'] : null;
+                },
+                'peer' => function (array $root): ?float {
+                    return isset($root['peer']) ? (float)$root['peer'] : null;
+                },
+                'inviter' => function (array $root): ?float {
+                    return isset($root['inviter']) ? (float)$root['inviter'] : null;
+                },
+            ],
             'TransferTokenResponse' => [
                 'meta' => function (array $root): array {
                     return [
@@ -2436,6 +2492,7 @@ class GraphQLSchemaBuilder
             'getActionPrices' => fn (mixed $root, array $args) => $this->resolveActionPrices(),
             'postEligibility' => fn (mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn (mixed $root, array $args) => $this->transactionsHistory($args),
+            'transactionHistory' => fn (mixed $root, array $args) => $this->transactionsHistoryItems($args),
             'postInteractions' => fn (mixed $root, array $args) => $this->postInteractions($args),
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
@@ -3596,6 +3653,28 @@ class GraphQLSchemaBuilder
 
         try {
             return $this->peerTokenService->transactionsHistory($args);
+        } catch (\Exception $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
+            return self::respondWithError(41226);  // Error occurred while retrieving transaction history
+        }
+
+    }
+
+    public function transactionsHistoryItems(array $args): array
+    {
+        $this->logger->debug('GraphQLSchemaBuilder.transactionsHistory started');
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $validationResult = $this->validateOffsetAndLimit($args);
+        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+            return $validationResult;
+        }
+
+        try {
+            return $this->peerTokenService->transactionsHistoryItems($args);
         } catch (\Exception $e) {
             $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
             return self::respondWithError(41226);  // Error occurred while retrieving transaction history

@@ -201,7 +201,34 @@ class PeerTokenService
 
         try {
             $results = $this->peerTokenMapper->getTransactions($this->currentUserId, $args);
+            return $this::createSuccessResponse(
+                (int)$results['ResponseCode'],
+                $results['affectedRows'],
+                false // no counter needed for existing data
+            );
 
+        } catch (\Exception $e) {
+            $this->logger->error("Error in PeerTokenService.transactionsHistory", ['exception' => $e->getMessage()]);
+            throw new \RuntimeException("Database error while fetching transactions: " . $e->getMessage());
+        }
+
+    }
+
+    public function transactionsHistoryItems(array $args): array
+    {
+        $this->logger->info('WalletService.transactionsHistoryItems started');
+
+        if (!$this->checkAuthentication()) {
+            return $this->respondWithError(60501);
+        }
+
+        $this->logger->debug('PeerTokenService.transactionsHistory started');
+
+        try {
+            $results = $this->peerTokenMapper->getTransactionHistoryItems(
+                $this->currentUserId,
+                $args
+            );
             return $this::createSuccessResponse(
                 (int)$results['ResponseCode'],
                 $results['affectedRows'],

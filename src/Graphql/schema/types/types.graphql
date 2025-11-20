@@ -1,3 +1,23 @@
+type TransactionHistotyItem {
+  operationid: String!
+  transactiontype: String! #take from transactiontype of CREDIT transaction by operationid
+  tokenamount: Decimal! #sum with all fees transactions
+  netTokenAmount: Decimal! #value of CREDIT transaction
+  message: String!
+  createdat: String!
+  sender: BasicUserInfo!
+  recipient: BasicUserInfo!
+  fees: TransactionFeeSummary
+}
+
+type TransactionFeeSummary {
+  total: Decimal # sum of all fees transactions
+  burn: Decimal 
+  peer: Decimal
+  inviter: Decimal # can be null
+}
+
+
 type AdvertisementPost {
   post: Post!
   advertisement: AdvCreator!
