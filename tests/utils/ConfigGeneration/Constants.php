@@ -1,8 +1,10 @@
 <?php
-
 declare(strict_types=1);
 
+
 namespace Tests\utils\ConfigGeneration;
+
+use Dotenv\Dotenv;
 
 class Constants
 {
@@ -12,6 +14,8 @@ class Constants
     public static string $extension = ".json";
 
     public static function configUrlBase(): string {
-        return getenv('BASE_URL') . "/assets/";
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../../');
+        $dotenv->safeLoad();
+        return ( $_ENV['BASE_URL'] ?? getenv('BASE_URL') ?: '' ) . '/assets/';
     }
 }
