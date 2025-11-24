@@ -21,7 +21,6 @@ use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 class PeerTokenMapper
 {
     use ResponseHelper;
-    private string $poolWallet;
     private string $burnWallet;
     private string $peerWallet;
     private string $btcpool;
@@ -49,13 +48,11 @@ class PeerTokenMapper
             throw new \RuntimeException("Liquidity pool wallets incomplete");
         }
 
-        $this->poolWallet = $data['pool'];
         $this->burnWallet = $data['burn'];
         $this->peerWallet = $data['peer'];
         $this->btcpool = $data['btcpool'];
 
         return [
-            $this->poolWallet,
             $this->burnWallet,
             $this->peerWallet,
             $this->btcpool
@@ -70,8 +67,7 @@ class PeerTokenMapper
     {
         $this->initializeLiquidityPool();
 
-        return $recipientId !== $this->poolWallet
-            && $recipientId !== $this->burnWallet
+        return $recipientId !== $this->burnWallet
             && $recipientId !== $this->peerWallet
             && $recipientId !== $this->btcpool;
     }
@@ -88,12 +84,12 @@ class PeerTokenMapper
 
         $accounts = $this->pool->returnAccounts();
         $liqpool = $accounts['response'] ?? null;
-        $this->poolWallet = $liqpool['pool'];
+        $poolWallet = $liqpool['pool'] ?? null;
 
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':userId', $this->poolWallet, \PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $poolWallet, \PDO::PARAM_STR);
             $stmt->execute();
             $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -128,8 +124,7 @@ class PeerTokenMapper
      */
     public function validateFeesWalletUUIDs(): bool
     {
-        return self::isValidUUID($this->poolWallet)
-            && self::isValidUUID($this->burnWallet)
+        return self::isValidUUID($this->burnWallet)
             && self::isValidUUID($this->peerWallet)
             && self::isValidUUID($this->btcpool);
     }
@@ -149,9 +144,9 @@ class PeerTokenMapper
     {
         $this->senderId = $senderId;
 
-        [$peerFee, $poolFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
+        [$peerFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
 
-        return TokenHelper::calculateTokenRequiredAmount($numberOfTokens, $peerFee, $poolFee, $burnFee, $inviteFee);
+        return TokenHelper::calculateTokenRequiredAmount($numberOfTokens, $peerFee, $burnFee, $inviteFee);
     }
 
     /**
@@ -161,7 +156,6 @@ class PeerTokenMapper
     {
         $fees = ConstantsConfig::tokenomics()['FEES_STRING'];
         $peerFee = (string) $fees['PEER'];
-        $poolFee = (string) $fees['POOL'];
         $burnFee = (string) $fees['BURN'];
 
         // Check for Inviter Fee
@@ -172,7 +166,7 @@ class PeerTokenMapper
             $this->inviterId = $inviterId;
             $inviteFee = (string) $fees['INVITATION'];
         }
-        return [$peerFee, $poolFee, $burnFee, $inviteFee];
+        return [$peerFee, $burnFee, $inviteFee];
     }
 
     /**
@@ -180,11 +174,10 @@ class PeerTokenMapper
      */
     public function calculateEachFeesAmount(string $numberOfTokens): array
     {
-        [$peerFee, $poolFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
+        [$peerFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
 
         return [
             TokenHelper::mulRc($numberOfTokens, $peerFee), // Peer Fee Amount
-            TokenHelper::mulRc($numberOfTokens, $poolFee), // Pool Fee Amount
             TokenHelper::mulRc($numberOfTokens, $burnFee), // Burn Fee Amount
             TokenHelper::mulRc($numberOfTokens, $inviteFee), // Invite Fee Amount
         ];
@@ -225,7 +218,7 @@ class PeerTokenMapper
                 $this->lockBalances([$senderId, $recipientId]);
             }
             $mode = $strategy->getFeePolicyMode();
-            [$requiredAmount, $netRecipientAmount, $peerFeeAmount, $poolFeeAmount, $burnFeeAmount, $inviteFeeAmount] =
+            [$requiredAmount, $netRecipientAmount, $peerFeeAmount, $burnFeeAmount, $inviteFeeAmount] =
                 $this->calculateAmountsForMode($senderId, $numberOfTokens, $mode);
 
             $operationid = $strategy->getOperationId();
@@ -274,20 +267,6 @@ class PeerTokenMapper
 
             }
 
-            // 4. POOLWALLET: Fee To Pool Wallet
-            if (isset($poolFeeAmount) && $poolFeeAmount > 0) {
-                $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $operationid,
-                    'transactiontype' => $strategy->getPoolFeeTransactionType(),
-                    'senderid' => $senderId,
-                    'recipientid' => $this->poolWallet,
-                    'tokenamount' => $poolFeeAmount,
-                    'transferaction' => 'POOL_FEE'
-                ]);
-                // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->poolWallet, $poolFeeAmount);
-                $this->walletMapper->credit($this->poolWallet, ($poolFeeAmount));
-
-            }
 
             // 5. PEERWALLET: Fee To Peer Wallet
             if (isset($peerFeeAmount) && $peerFeeAmount > 0) {
@@ -346,18 +325,17 @@ class PeerTokenMapper
     private function calculateAmountsForMode(string $senderId, string $inputAmount, FeePolicyMode $mode): array
     {
         $this->senderId = $senderId;
-        [$peerFee, $poolFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
+        [$peerFee, $burnFee, $inviteFee] = $this->getEachFeesAmount();
 
         // Sum of fee rates
-        $sum1 = TokenHelper::addRc($peerFee, $poolFee);
-        $sum2 = TokenHelper::addRc($burnFee, $inviteFee);
-        $totalRate = TokenHelper::addRc($sum1, $sum2);
+        $sum1 = TokenHelper::addRc($peerFee, $burnFee);
+        $totalRate = TokenHelper::addRc($sum1, $inviteFee);
 
         if ($mode === FeePolicyMode::ADDED) {
             $net = $inputAmount;
-            $required = TokenHelper::calculateTokenRequiredAmount($net, $peerFee, $poolFee, $burnFee, $inviteFee);
-            [$peerAmt, $poolAmt, $burnAmt, $inviteAmt] = $this->calculateEachFeesAmount($net);
-            return [$required, $net, $peerAmt, $poolAmt, $burnAmt, $inviteAmt];
+            $required = TokenHelper::calculateTokenRequiredAmount($net, $peerFee, $burnFee, $inviteFee);
+            [$peerAmt, $burnAmt, $inviteAmt] = $this->calculateEachFeesAmount($net);
+            return [$required, $net, $peerAmt, $burnAmt, $inviteAmt];
         }
 
         // INCLUDED mode: input is gross (required)
@@ -613,9 +591,6 @@ class PeerTokenMapper
         $fees = ConstantsConfig::tokenomics()['FEES_STRING'];
         if (isset($fees['PEER']) && (float)$fees['PEER'] > 0) {
             $walletsToLock[] = $this->peerWallet;
-        }
-        if (isset($fees['POOL']) && (float)$fees['POOL'] > 0) {
-            $walletsToLock[] = $this->poolWallet;
         }
         if (isset($fees['BURN']) && (float)$fees['BURN'] > 0) {
             $walletsToLock[] = $this->burnWallet;

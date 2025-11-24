@@ -218,7 +218,6 @@ class ConstantsConfig implements ConstantsConfigInterface
      *     },
      *     FEES_STRING: array{
      *         INVITATION: string,
-     *         POOL: string,
      *         PEER: string,
      *         BURN: string
      *     },
@@ -276,7 +275,6 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
         'FEES_STRING' => [
             'INVITATION' => '0.01',
-            'POOL'       => '0.01',
             'PEER'       => '0.02',
             'BURN'       => '0.01',
         ],
