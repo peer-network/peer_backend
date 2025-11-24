@@ -92,9 +92,7 @@ class ConstantsConfig implements ConstantsConfigInterface
      *     NUMBERS: array{MIN: float, MAX: float},
      *     NUMBERSQ: array{MIN: int, MAX: float},
      *     WHEREBY: array{MIN: int, MAX: int},
-     *     ACTIONS: array<string, int>,
-     *     TRANSFER_MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int, FORBID_CONTROL_CHARS: string, PATTERN_URL: string},
-     *     TRANSFER_TOKEN: array{MIN_AMOUNT: float}
+     *     ACTIONS: array<string, int>
      * }
      */
     public static function wallet()
@@ -123,7 +121,8 @@ class ConstantsConfig implements ConstantsConfigInterface
      *     SLUG: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     LIQUIDITY: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     AVATAR: array{MAX_SIZE_MB: int},
-     *     TRANSACTION: array{MIN_TOKENS: int}
+     *     TRANSFER_MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int, FORBID_CONTROL_CHARS: string, PATTERN_URL: string},
+     *     TRANSACTION: array{MIN_TOKENS: float}
      * }
      */
     public static function user()
@@ -392,16 +391,7 @@ class ConstantsConfig implements ConstantsConfigInterface
             'FREELIKE' => 30,
             'FREECOMMENT' => 31,
             'FREEPOST' => 32,
-        ],
-        'TRANSFER_MESSAGE' => [
-            'MIN_LENGTH' => 0,
-            'MAX_LENGTH' => 500,
-            'FORBID_CONTROL_CHARS' => '[\x00-\x08\x0B-\x1F\x7F]',
-            'PATTERN_URL'          => '(https?:\/\/|www\.)',
-        ],
-        'TRANSFER_TOKEN' => [
-            'MIN_AMOUNT' => 0.1,
-        ],
+        ]
     ];
 
     private const WALLETT = [
@@ -507,8 +497,14 @@ class ConstantsConfig implements ConstantsConfigInterface
         'AVATAR' => [
             'MAX_SIZE_MB' => 5,
         ],
-        'TRANSACTION' => [
-            'MIN_TOKENS' => 10,
+        'TRANSFER_MESSAGE' => [
+            'MIN_LENGTH' => 0,
+            'MAX_LENGTH' => 500,
+            'FORBID_CONTROL_CHARS' => '[\x00-\x08\x0B-\x1F\x7F]',
+            'PATTERN_URL' => '(https?:\/\/|www\.)',
         ],
+        'TRANSACTION' => [
+            'MIN_TOKENS' => 0.1,
+        ]
     ];
 }

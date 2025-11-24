@@ -96,8 +96,8 @@ class PeerTokenService
             // NOTE for QA: previously we used the wrong response code 30210 here;
             // a new unified response code should be introduced for transfer-token message validation.
             if ($message !== null) {
-                $walletConfig  = ConstantsConfig::wallet();
-                $messageConfig = $walletConfig['TRANSFER_MESSAGE'];
+                $userConfig  = ConstantsConfig::user();
+                $messageConfig = $userConfig['TRANSFER_MESSAGE'];
 
                 $maxLength      = (int) $messageConfig['MAX_LENGTH'];
                 $controlPattern = '/'.$messageConfig['FORBID_CONTROL_CHARS'].'/';
@@ -118,8 +118,8 @@ class PeerTokenService
                     return self::respondWithError(00000);
                 }
             }
-            $transferConfig = $walletConfig['TRANSFER_TOKEN'];
-            $minAmount      = (float) $transferConfig['MIN_AMOUNT'];
+            $transferConfig = $userConfig['TRANSACTION'];
+            $minAmount      = (float) $transferConfig['MIN_TOKENS'];
             if ((float) $numberOfTokens < $minAmount) {
                 $this->logger->warning('Incorrect Amount Exception: less than minimum transfer amount', [
                     'numberOfTokens' => $numberOfTokens,
