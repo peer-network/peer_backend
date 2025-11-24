@@ -504,7 +504,8 @@ class ConstantsConfig implements ConstantsConfigInterface
             'PATTERN_URL' => '(https?:\/\/|www\.)',
         ],
         'TRANSACTION' => [
-            'MIN_TOKENS' => 0.1,
+            'MIN_AMOUNT' => 0.00000001,
+            'MAX_DECIMALS' =>8, 
         ]
     ];
 }
