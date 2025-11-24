@@ -17,6 +17,33 @@ let merged = {
     schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   item: [],
+  event: [
+    {
+        "listen": "test",
+        "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+                "// === Global Internal Server Error Detector ===",
+                "const body = pm.response.json();",
+                "",
+                "if (body.errors && Array.isArray(body.errors) && body.errors.length > 0) {",
+                "    const internalErrors = body.errors.filter(e => ",
+                "        (e.message && e.message.toLowerCase().includes(\"internal server error\")) ||",
+                "        (e.extensions && e.extensions.debugMessage && e.extensions.debugMessage.toLowerCase().includes(\"internal\"))",
+                "    );",
+                "",
+                "    if (internalErrors.length > 0) {",
+                "        pm.test(\"Internal Server Error SHOULD NOT appear\", function () {",
+                "            throw new Error(\"GraphQL Internal Server Error detected: \" + JSON.stringify(internalErrors));",
+                "        });",
+                "    }",
+                "}"
+            ]
+        }
+    }
+  ]
 };
 
 collections.forEach((file) => {
