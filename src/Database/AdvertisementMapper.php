@@ -448,7 +448,7 @@ class AdvertisementMapper
                 'isreported'      => (bool)$row['isreported'],
                 'isdisliked'      => (bool)$row['isdisliked'],
                 'issaved'         => (bool)$row['issaved'],
-                'url'             => (string)$_ENV['WEB_APP_URL'] . '/post/' . $row['postid'],
+                'url'             => (string)getenv('WEB_APP_URL') . '/post/' . $row['postid'],
                 'tags'            => $tags,
                 'visibility_status' => (string)$row['post_visibility_status'],
                 'user' => [

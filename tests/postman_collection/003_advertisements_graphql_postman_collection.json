@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "0d660337-68cf-4606-b525-1a6186e9427f",
-		"name": "003_advertisements_graphql",
+		"_postman_id": "52a78bcc-6715-48db-a67e-6acde034bb54",
+		"name": "003_advertisements_graphql Copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-0d660337-68cf-4606-b525-1a6186e9427f?action=share&source=collection_link&creator=43606001"
+		"_exporter_id": "32542010",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-52a78bcc-6715-48db-a67e-6acde034bb54?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -5083,7 +5083,7 @@
 							"let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
 							"",
 							"pm.test(\"Liquidity should decrease exactly by 160\", function () {",
-								"pm.expect(actualDifference.toFixed(4)).to.equal(expectedDifference.toFixed(4));",
+							"pm.expect(actualDifference.toFixed(4)).to.equal(expectedDifference.toFixed(4));",
 							"});",
 							"",
 							"pm.environment.set(\"liquidity\", newLiquidity);",
@@ -6467,6 +6467,348 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        status\n        ResponseCode\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertisement history (Sorting Oldest) Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Sorted by OLDEST and IDs are unique\", function () {",
+							"    const res = pm.response.json();",
+							"    const ads = res?.data?.advertisementHistory?.affectedRows?.advertisements || [];",
+							"",
+							"    // check unique ids",
+							"    const seenIds = new Set();",
+							"    ads.forEach((ad, index) => {",
+							"        pm.expect(ad.id, `Missing ad.id at index ${index}`).to.exist;",
+							"",
+							"        const alreadySeen = seenIds.has(ad.id);",
+							"        pm.expect(",
+							"            alreadySeen,",
+							"            `Duplicate advertisement id '${ad.id}' at index ${index}`",
+							"        ).to.be.false;",
+							"",
+							"        seenIds.add(ad.id);",
+							"    });",
+							"",
+							"    // check ordering: oldest first (createdAt ascending)",
+							"    for (let i = 1; i < ads.length; i++) {",
+							"        const prev = new Date(ads[i - 1].createdAt).getTime();",
+							"        const curr = new Date(ads[i].createdAt).getTime();",
+							"        pm.expect(curr, `createdAt out of order at index ${i} (OLDEST)`)",
+							"            .to.be.at.least(prev);",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(sort: OLDEST, limit: 20) {\n        status\n        ResponseCode\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertisement history (Sorting Newest) Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Advertisements are sorted by newest (createdAt DESC)\", function () {",
+							"    const res = pm.response.json();",
+							"    const ads = res?.data?.advertisementHistory?.affectedRows?.advertisements || [];",
+							"",
+							"    pm.expect(ads.length, \"No advertisements returned\").to.be.above(0);",
+							"",
+							"    for (let i = 1; i < ads.length; i++) {",
+							"        const prev = new Date(ads[i - 1].createdAt).getTime();",
+							"        const curr = new Date(ads[i].createdAt).getTime();",
+							"        pm.expect(curr, `Ad at index ${i} is newer than previous`).to.be.at.most(prev);",
+							"    }",
+							"});",
+							" "
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(sort: NEWEST, limit: 20) {\n        status\n        ResponseCode\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertisement history (Sorting Biggest Cost) Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Advertisements are sorted by biggest cost (totalTokenCost DESC)\", function () {",
+							"    const res = pm.response.json();",
+							"    const ads = res?.data?.advertisementHistory?.affectedRows?.advertisements || [];",
+							"",
+							"    pm.expect(ads.length, \"No advertisements returned\").to.be.above(0);",
+							"",
+							"    for (let i = 1; i < ads.length; i++) {",
+							"        const prev = Number(ads[i - 1].totalTokenCost);",
+							"        const curr = Number(ads[i].totalTokenCost);",
+							"",
+							"        pm.expect(isNaN(prev), `Invalid totalTokenCost at index ${i - 1}`).to.be.false;",
+							"        pm.expect(isNaN(curr), `Invalid totalTokenCost at index ${i}`).to.be.false;",
+							"",
+							"        pm.expect(curr, `Ad at index ${i} has higher cost than previous`).to.be.at.most(prev);",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(sort: BIGGEST_COST, limit: 20) {\n        status\n        ResponseCode\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Advertisement history (Sorting Smallest Cost) Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"12002\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Advertisements are sorted by smallest cost (totalTokenCost ASC)\", function () {",
+							"    const res = pm.response.json();",
+							"    const ads = res?.data?.advertisementHistory?.affectedRows?.advertisements || [];",
+							"",
+							"    pm.expect(ads.length, \"No advertisements returned\").to.be.above(0);",
+							"",
+							"    for (let i = 1; i < ads.length; i++) {",
+							"        const prev = Number(ads[i - 1].totalTokenCost);",
+							"        const curr = Number(ads[i].totalTokenCost);",
+							"",
+							"        pm.expect(isNaN(prev), `Invalid totalTokenCost at index ${i - 1}`).to.be.false;",
+							"        pm.expect(isNaN(curr), `Invalid totalTokenCost at index ${i}`).to.be.false;",
+							"",
+							"        pm.expect(curr, `Ad at index ${i} has lower cost than previous`).to.be.at.least(prev);",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query AdvertisementHistory {\n    advertisementHistory(sort: SMALLEST_COST, limit: 20) {\n        status\n        ResponseCode\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},

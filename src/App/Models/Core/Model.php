@@ -137,12 +137,15 @@ abstract class Model
     /**
      * Paginate results
      *
-     * @param int $page The current page (1-based)
-     * @param int $perPage Number of records per page
+     * Note: This method accepts offset and limit (not page/perPage).
+     * Some call sites pass offset/limit directly (e.g., ModerationMapper).
+     *
+     * @param int $offset Zero-based offset of the first record to return
+     * @param int $limit Number of records to return
      *
      * @return array An array containing 'data', 'total', 'per_page', 'current_page', 'last_page'
      */
-    public function paginate(int $page = 1, int $perPage = 10): array
+    public function paginate(int $offset = 0, int $limit = 10): array
     {
         $db = static::getDB();
         $params = [];
@@ -152,25 +155,31 @@ abstract class Model
 
         $orderSql = $this->buildOrderBy();
 
-        // Calculate offset
-        $offset = ($page - 1) * $perPage;
-
         // Determine columns to select
         $selectColumns = !empty($this->selects)
         ? implode(', ', $this->selects)
         : static::table() . '.*';
 
         // Fetch data with limit and offset
-        $sql = "SELECT {$selectColumns} FROM " . static::table() . " {$joinsSql} {$whereSql} {$orderSql} LIMIT :limit OFFSET :offset";
+        // Inline LIMIT/OFFSET to avoid driver limitations with bound params
+        $safeLimit = max(0, (int) $limit);
+        $inputOffset = max(0, (int) $offset);
+
+        // Heuristic: some callsites may pass page index instead of record offset.
+        // If page = 0, we want offset 0. If page > 0 but still less than limit,
+        // interpret it as a zero-based page index and convert to record offset.
+        // This keeps existing true-offset usages (large values) unaffected.
+        if ($safeLimit > 0 && $inputOffset > 0 && $inputOffset < $safeLimit) {
+            $safeOffset = $inputOffset * $safeLimit; // treat as page index
+        } else {
+            $safeOffset = $inputOffset; // treat as absolute record offset
+        }
+        $sql = "SELECT {$selectColumns} FROM " . static::table() . " {$joinsSql} {$whereSql} {$orderSql} LIMIT {$safeLimit} OFFSET {$safeOffset}";
 
         try {
             $stmt = $db->prepare($sql);
 
-            // Bind limit and offset
-            $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-
-            // Bind other where parameters
+            // Bind where parameters (if any)
             foreach ($params as $key => $val) {
                 $stmt->bindValue($key, $val);
             }
@@ -180,13 +189,15 @@ abstract class Model
 
             // Get total count
             $total = $this->count();
+            $perPage = $safeLimit > 0 ? $safeLimit : 1;
+            $currentPage = (int) floor($safeOffset / $perPage) + 1;
             $lastPage = (int) ceil($total / $perPage);
 
             return [
                 'data' => $data,
                 'total' => $total,
                 'per_page' => $perPage,
-                'current_page' => $page,
+                'current_page' => $currentPage,
                 'last_page' => $lastPage,
             ];
         } catch (\PDOException $e) {
