@@ -1,0 +1,87 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Fawaz\App\Models;
+
+use Fawaz\App\Contracts\HasUserRefs;
+use Fawaz\App\ReadModels\UserRef;
+
+/**
+ * Lightweight read model for a grouped transaction history item.
+ * Represents one logical operation with aggregated fees.
+ */
+class TransactionHistoryItem implements HasUserRefs
+{
+    private string $operationid;
+    private string $transactiontype;
+    private float $tokenamount; // gross = net + fees total
+    private float $netTokenAmount;
+    private ?string $message;
+    private string $createdat;
+    private string $senderid;
+    private string $recipientid;
+    /**
+     * fees = [ 'total' => float, 'burn' => ?float, 'peer' => ?float, 'inviter' => ?float ]
+     */
+    private array $fees;
+    private ?array $sender = null;
+    private ?array $recipient = null;
+
+    public function __construct(array $data)
+    {
+        $this->operationid = (string)($data['operationid'] ?? '');
+        $this->transactiontype = (string)($data['transactiontype'] ?? '');
+        $this->tokenamount = (float)($data['tokenamount'] ?? 0);
+        $this->netTokenAmount = (float)($data['netTokenAmount'] ?? 0);
+        $this->message = isset($data['message']) ? (string)$data['message'] : null;
+        $this->createdat = (string)($data['createdat'] ?? '');
+        $this->senderid = (string)($data['senderid'] ?? '');
+        $this->recipientid = (string)($data['recipientid'] ?? '');
+        $this->fees = $data['fees'] ?? ['total' => 0.0, 'burn' => null, 'peer' => null, 'inviter' => null];
+        // Optional pre-attached profiles if provided
+        $this->sender = $data['sender'] ?? null;
+        $this->recipient = $data['recipient'] ?? null;
+    }
+
+    public function getArrayCopy(): array
+    {
+        return [
+            'operationid' => $this->operationid,
+            'transactiontype' => $this->transactiontype,
+            'tokenamount' => $this->tokenamount,
+            'netTokenAmount' => $this->netTokenAmount,
+            'message' => $this->message,
+            'createdat' => $this->createdat,
+            'senderid' => $this->senderid,
+            'recipientid' => $this->recipientid,
+            'fees' => $this->fees,
+            'sender' => $this->sender,
+            'recipient' => $this->recipient,
+        ];
+    }
+
+    /**
+     * @return UserRef[]
+     */
+    public function getUserRefs(): array
+    {
+        $refs = [];
+        if ($this->senderid !== '') {
+            $refs[] = new UserRef('sender', $this->senderid);
+        }
+        if ($this->recipientid !== '') {
+            $refs[] = new UserRef('recipient', $this->recipientid);
+        }
+        return $refs;
+    }
+
+    public function attachUserProfile(string $refKey, array $profile): void
+    {
+        if ($refKey === 'sender') {
+            $this->sender = $profile;
+        } elseif ($refKey === 'recipient') {
+            $this->recipient = $profile;
+        }
+    }
+}
