@@ -3674,7 +3674,8 @@ class GraphQLSchemaBuilder
         }
 
         try {
-            return $this->peerTokenService->transactionsHistoryItems($args);
+            $items = $this->peerTokenService->transactionsHistoryItems($args);
+            return $this::createSuccessResponse(11215, $items);
         } catch (\Exception $e) {
             $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
             return self::respondWithError(41226);  // Error occurred while retrieving transaction history

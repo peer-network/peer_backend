@@ -8,6 +8,7 @@ use Fawaz\App\Models\Transaction;
 use Fawaz\App\Repositories\TransactionRepository;
 use Fawaz\App\User;
 use PDO;
+// Profile enrichment moved to service; no repository needed here
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
@@ -504,220 +505,127 @@ class PeerTokenMapper
      * Build grouped transaction history items by operationid with aggregated fees.
      * Returns data shaped for TransactionHistotyItem/TransactionFeeSummary.
      */
-    public function getTransactionHistoryItems(string $userId, array $args): ?array
+    public function getTransactionHistoryItems(string $userId, array $args, array $specs): array
     {
         $this->logger->debug('PeerTokenMapper.getTransactionsHistory started');
 
         // Resolve filters similar to getTransactions for consistency
         [$transactionTypes, $transferActions] = $this->resolveFilters($args);
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
-        $baseQuery =
-            "SELECT tt.*,
-                us.username AS sender_username,
-                us.uid AS sender_userid,
-                us.slug AS sender_slug,
-                us.status AS sender_status,
-                us.img AS sender_img,
-                us.biography AS sender_biography,
-                us.visibility_status AS sender_visibility_status,
-                us.updatedat AS sender_updatedat,
-                ur.username AS recipient_username,
-                ur.uid AS recipient_userid,
-                ur.slug AS recipient_slug,
-                ur.status AS recipient_status,
-                ur.img AS recipient_img,
-                ur.biography AS recipient_biography,
-                ur.updatedat AS recipient_updatedat,
-                ur.visibility_status AS recipient_visibility_status
-             FROM transactions tt
-             LEFT JOIN users AS us ON us.uid = tt.senderid
-             LEFT JOIN users AS ur ON ur.uid = tt.recipientid
-             WHERE (tt.senderid = :senderid OR tt.recipientid = :recipientid)";
-
-        $params = [
-            ':senderid' => $userId,
-            ':recipientid' => $userId,
-        ];
-
-        $baseQuery .= $this->appendInFilter('tt.transactiontype', $transactionTypes, $params, 'type');
-        $baseQuery .= $this->appendInFilter('tt.transferaction', $transferActions, $params, 'action');
-
-        if (!empty($args['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $args['start_date'])) {
-            $baseQuery .= ' AND tt.createdat >= :start_date';
-            $params[':start_date'] = $args['start_date'] . ' 00:00:00';
-        }
-        if (!empty($args['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $args['end_date'])) {
-            $baseQuery .= ' AND tt.createdat <= :end_date';
-            $params[':end_date'] = $args['end_date'] . ' 23:59:59';
-        }
-
-        // Sort by createdat of individual rows before grouping (will preserve order when picking CREDIT row)
+        // Sorting direction for final items
         $sortDirection = 'DESC';
         if (!empty($args['sort'])) {
             $sortValue = strtoupper(trim((string) $args['sort']));
             $sortDirection = $sortValue === 'OLDEST' ? 'ASC' : ($sortValue === 'NEWEST' ? 'DESC' : 'DESC');
         }
-        $baseQuery .= " ORDER BY tt.createdat $sortDirection";
 
-        // Pagination is applied after grouping, so first fetch candidate operationids with a broader window
-        try {
-            $stmt = $this->db->prepare($baseQuery);
-            foreach ($params as $key => $val) {
-                $stmt->bindValue($key, $val, is_int($val) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
-            }
-            $stmt->execute();
-            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        // Build dynamic filters for the initial operation selection
+        $params = [
+            ':senderid' => $userId,
+            ':recipientid' => $userId,
+        ];
+        $opFilter = " WHERE (t.senderid = :senderid OR t.recipientid = :recipientid)";
+        $opFilter .= $this->appendInFilter('t.transactiontype', $transactionTypes, $params, 'type');
+        $opFilter .= $this->appendInFilter('t.transferaction', $transferActions, $params, 'action');
 
-            if (empty($rows)) {
-                return [
-                    'status' => 'success',
-                    'ResponseCode' => '11215',
-                    'affectedRows' => [],
-                ];
-            }
-
-            // Group by operationid
-            $byOp = [];
-            foreach ($rows as $r) {
-                $op = $r['operationid'] ?? null;
-                if ($op === null) { continue; }
-                $byOp[$op][] = $r;
-            }
-
-            // If we are recipient for some operations, our initial filter may miss fee rows.
-            // Fetch all rows for the collected operationids to aggregate complete fees.
-            $opIds = array_keys($byOp);
-            $phs = [];
-            $opParams = [];
-            foreach ($opIds as $i => $op) {
-                $ph = ":op{$i}";
-                $phs[] = $ph;
-                $opParams[$ph] = $op;
-            }
-
-            $allRowsByOp = [];
-            if (!empty($phs)) {
-                $allQuery =
-                    "SELECT tt.*,
-                        us.username AS sender_username,
-                        us.uid AS sender_userid,
-                        us.slug AS sender_slug,
-                        us.status AS sender_status,
-                        us.img AS sender_img,
-                        us.biography AS sender_biography,
-                        us.visibility_status AS sender_visibility_status,
-                        us.updatedat AS sender_updatedat,
-                        ur.username AS recipient_username,
-                        ur.uid AS recipient_userid,
-                        ur.slug AS recipient_slug,
-                        ur.status AS recipient_status,
-                        ur.img AS recipient_img,
-                        ur.biography AS recipient_biography,
-                        ur.updatedat AS recipient_updatedat,
-                        ur.visibility_status AS recipient_visibility_status
-                     FROM transactions tt
-                     LEFT JOIN users AS us ON us.uid = tt.senderid
-                     LEFT JOIN users AS ur ON ur.uid = tt.recipientid
-                     WHERE tt.operationid IN (" . implode(',', $phs) . ")";
-
-                $stmt2 = $this->db->prepare($allQuery);
-                foreach ($opParams as $k => $v) {
-                    $stmt2->bindValue($k, $v, \PDO::PARAM_STR);
-                }
-                $stmt2->execute();
-                $all = $stmt2->fetchAll(\PDO::FETCH_ASSOC);
-                foreach ($all as $r) {
-                    $op = $r['operationid'];
-                    $allRowsByOp[$op][] = $r;
-                }
-            }
-
-            // Build history items
-            $items = [];
-            foreach ($opIds as $op) {
-                $opsRows = $allRowsByOp[$op] ?? $byOp[$op];
-
-                // CREDIT row determines main metadata
-                $credit = null;
-                foreach ($opsRows as $row) {
-                    if (($row['transferaction'] ?? '') === 'CREDIT') {
-                        $credit = $row;
-                        break;
-                    }
-                }
-                // Fallback to first row if CREDIT not present
-                $main = $credit ?? $opsRows[0];
-
-                // Sum fees by type
-                $feeMap = [
-                    'BURN_FEE' => 0.0,
-                    'POOL_FEE' => 0.0,
-                    'PEER_FEE' => 0.0,
-                    'INVITER_FEE' => 0.0,
-                ];
-                foreach ($opsRows as $row) {
-                    $ta = $row['transferaction'] ?? '';
-                    if (isset($feeMap[$ta])) {
-                        $feeMap[$ta] += (float)($row['tokenamount'] ?? 0);
-                    }
-                }
-                $feesTotal = array_sum($feeMap);
-
-                $netTokenAmount = (float)($credit['tokenamount'] ?? ($main['tokenamount'] ?? 0));
-                $grossAmount = $netTokenAmount + $feesTotal;
-
-                $items[] = [
-                    'operationid' => (string)($main['operationid'] ?? ''),
-                    'transactiontype' => (string)($credit['transactiontype'] ?? ($main['transactiontype'] ?? '')),
-                    'tokenamount' => $grossAmount,
-                    'netTokenAmount' => $netTokenAmount,
-                    'message' => (string)($main['message'] ?? ''),
-                    'createdat' => (string)($main['createdat'] ?? ''),
-                    'sender' => (new User([
-                        'username' => $main['sender_username'] ?? null,
-                        'uid' => $main['sender_userid'] ?? null,
-                        'slug' => $main['sender_slug'] ?? null,
-                        'status' => $main['sender_status'] ?? null,
-                        'img' => $main['sender_img'] ?? null,
-                        'biography' => $main['sender_biography'] ?? null,
-                        'visibility_status' => $main['sender_visibility_status'] ?? null,
-                    ], [], false))->getArrayCopy(),
-                    'recipient' => (new User([
-                        'username' => $main['recipient_username'] ?? null,
-                        'uid' => $main['recipient_userid'] ?? null,
-                        'slug' => $main['recipient_slug'] ?? null,
-                        'status' => $main['recipient_status'] ?? null,
-                        'img' => $main['recipient_img'] ?? null,
-                        'biography' => $main['recipient_biography'] ?? null,
-                        'visibility_status' => $main['recipient_visibility_status'] ?? null,
-                    ], [], false))->getArrayCopy(),
-                    'fees' => [
-                        'total' => $feesTotal,
-                        'burn' => $feeMap['BURN_FEE'] ?: null,
-                        'peer' => $feeMap['PEER_FEE'] ?: null,
-                        'inviter' => $feeMap['INVITER_FEE'] ?: null,
-                    ],
-                ];
-            }
-
-            // Apply pagination after grouping
-            $offset = isset($args['offset']) && is_numeric($args['offset']) ? (int)$args['offset'] : 0;
-            $limit = isset($args['limit']) && is_numeric($args['limit']) ? (int)$args['limit'] : null;
-            if ($offset > 0 || $limit !== null) {
-                $items = array_slice($items, $offset, $limit ?? null);
-            }
-
-            return [
-                'status' => 'success',
-                'ResponseCode' => '11215',
-                'affectedRows' => $items,
-            ];
-        } catch (\Throwable $th) {
-            $this->logger->error('Database error while building history - PeerTokenMapper.getTransactionsHistory', [
-                'error' => $th->getMessage(),
-            ]);
-            throw new \RuntimeException('Database error while fetching transactions: ' . $th->getMessage());
+        if (!empty($args['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $args['start_date'])) {
+            $opFilter .= ' AND t.createdat >= :start_date';
+            $params[':start_date'] = $args['start_date'] . ' 00:00:00';
         }
+        if (!empty($args['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $args['end_date'])) {
+            $opFilter .= ' AND t.createdat <= :end_date';
+            $params[':end_date'] = $args['end_date'] . ' 23:59:59';
+        }
+
+        // Final pagination
+        $limitOffsetSql = '';
+        if (isset($args['limit']) && is_numeric($args['limit'])) {
+            $limitOffsetSql .= ' LIMIT :limit';
+        }
+        if (isset($args['offset']) && is_numeric($args['offset'])) {
+            $limitOffsetSql .= ' OFFSET :offset';
+        }
+
+        // SQL to accumulate per-operation history with fee sums and a picked main row (prefer CREDIT)
+        $sql = "WITH ops AS (
+                    SELECT DISTINCT t.operationid
+                    FROM transactions t
+                    $opFilter
+                ),
+                agg AS (
+                    SELECT 
+                        tt.operationid,
+                        SUM(CASE WHEN tt.transferaction = 'BURN_FEE' THEN tt.tokenamount ELSE 0 END) AS burn_fee,
+                        SUM(CASE WHEN tt.transferaction = 'PEER_FEE' THEN tt.tokenamount ELSE 0 END) AS peer_fee,
+                        SUM(CASE WHEN tt.transferaction = 'INVITER_FEE' THEN tt.tokenamount ELSE 0 END) AS inviter_fee
+                    FROM transactions tt
+                    WHERE tt.operationid IN (SELECT operationid FROM ops)
+                    GROUP BY tt.operationid
+                ),
+                ranked AS (
+                    SELECT 
+                        tt.*, 
+                        ROW_NUMBER() OVER (
+                            PARTITION BY tt.operationid 
+                            ORDER BY CASE WHEN tt.transferaction = 'CREDIT' THEN 0 ELSE 1 END, tt.createdat DESC
+                        ) AS rn
+                    FROM transactions tt
+                    WHERE tt.operationid IN (SELECT operationid FROM ops)
+                )
+                SELECT 
+                    r.operationid,
+                    r.transactiontype,
+                    r.senderid,
+                    r.recipientid,
+                    r.message,
+                    r.tokenamount AS net_amount,
+                    r.createdat,
+                    COALESCE(a.peer_fee,0) AS peer_fee,
+                    COALESCE(a.burn_fee,0) AS burn_fee,
+                    COALESCE(a.inviter_fee,0) AS inviter_fee
+                FROM ranked r
+                JOIN agg a ON a.operationid = r.operationid
+                WHERE r.rn = 1
+                ORDER BY r.createdat $sortDirection
+                LIMIT :limit OFFSET :offset
+                $limitOffsetSql";
+
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $items = [];
+        foreach ($rows as $row) {
+            $feesTotal = (float)$row['peer_fee'] + (float)$row['burn_fee'] + (float)$row['inviter_fee'];
+            $netTokenAmount = (float)($row['net_amount'] ?? 0);
+            $grossAmount = $netTokenAmount + $feesTotal;
+
+            $items[] = [
+                'operationid' => (string)($row['operationid'] ?? ''),
+                'transactiontype' => (string)($row['transactiontype'] ?? ''),
+                'tokenamount' => $grossAmount,
+                'netTokenAmount' => $netTokenAmount,
+                'message' => (string)($row['message'] ?? ''),
+                'createdat' => (string)($row['createdat'] ?? ''),
+                'senderid' => (string)($row['senderid'] ?? ''),
+                'recipientid' => (string)($row['recipientid'] ?? ''),
+                'fees' => [
+                    'total' => $feesTotal,
+                    'burn' => (float)$row['burn_fee'] ?: null,
+                    'peer' => (float)$row['peer_fee'] ?: null,
+                    'inviter' => (float)$row['inviter_fee'] ?: null,
+                ],
+            ];
+        }
+
+        return $items;
     }
 
 
