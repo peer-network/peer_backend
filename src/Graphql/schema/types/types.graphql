@@ -3,7 +3,7 @@ type TransactionHistotyItem {
   transactiontype: String! #take from transactiontype of CREDIT transaction by operationid
   tokenamount: Decimal! #sum with all fees transactions
   netTokenAmount: Decimal! #value of CREDIT transaction
-  message: String!
+  message: String
   createdat: String!
   sender: BasicUserInfo!
   recipient: BasicUserInfo!
@@ -16,7 +16,6 @@ type TransactionFeeSummary {
   peer: Decimal
   inviter: Decimal # can be null
 }
-
 
 type AdvertisementPost {
   post: Post!

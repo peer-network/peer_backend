@@ -40,6 +40,8 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
+use Fawaz\App\Errors\ErrorMapper;
+use Fawaz\Utils\ArrayNormalizer;
 use Fawaz\App\ValidationException;
 use Fawaz\App\ModerationService;
 use Fawaz\App\Status;
@@ -56,6 +58,7 @@ use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
+use Fawaz\App\Models\TransactionHistoryItem;
 
 class GraphQLSchemaBuilder
 {
@@ -3653,9 +3656,9 @@ class GraphQLSchemaBuilder
 
         try {
             return $this->peerTokenService->transactionsHistory($args);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
-            return self::respondWithError(41226);  // Error occurred while retrieving transaction history
+            return ErrorMapper::toResponse($e);
         }
 
     }
@@ -3668,26 +3671,21 @@ class GraphQLSchemaBuilder
             return self::respondWithError(60501);
         }
 
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
+        $validation = RequestValidator::validate($args);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
         }
 
         try {
-            $items = $this->peerTokenService->transactionsHistoryItems($args);
-            // Service may return objects; convert to arrays for API response
-            $normalized = [];
-            foreach ($items as $it) {
-                if (is_object($it) && method_exists($it, 'getArrayCopy')) {
-                    $normalized[] = $it->getArrayCopy();
-                } else {
-                    $normalized[] = is_array($it) ? $it : (array)$it;
-                }
-            }
-            return $this::createSuccessResponse(11215, $normalized);
-        } catch (\Exception $e) {
-            $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
-            return self::respondWithError(41226);  // Error occurred while retrieving transaction history
+            $entitiesArray = $this->peerTokenService->transactionsHistoryItems($args);
+            $resultArray = array_map(fn (TransactionHistoryItem $item) => $item->getArrayCopy(),$entitiesArray);
+            return $this::createSuccessResponse(11215, $resultArray);
+        } catch (\Throwable $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistoryItems", ['exception' => $e->getMessage()]);
+            return ErrorMapper::toResponse($e);
         }
 
     }
@@ -3793,47 +3791,6 @@ class GraphQLSchemaBuilder
             empty($data) ? 21501 : 11501,
             $data
         );
-    }
-
-    protected function mapPostWithAdvertisement(Advertisements $advertise): ?array
-    {
-        return $advertise->getArrayCopy();
-    }
-
-    protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit, ?string $contentFilterBy = null): array
-    {
-        $postArray = $post->getArrayCopy();
-        
-        $contentFilterCase = ContentFilteringCases::searchById;
-        
-        $deletedUserSpec = new DeletedUserSpec(
-            $contentFilterCase,
-            ContentType::comment
-        );
-        $systemUserSpec = new SystemUserSpec(
-            $contentFilterCase,
-            ContentType::comment
-        );
-        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
-            $contentFilterCase,
-            $contentFilterBy,
-            ContentType::comment,
-            $this->currentUserId
-        );
-
-        $specs = [
-            $deletedUserSpec,
-            $systemUserSpec,
-            $hiddenContentFilterSpec,
-        ];
-        
-        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit, $specs);
-
-        $postArray['comments'] = array_map(
-            fn (CommentAdvanced $comment) => $this->fetchCommentWithoutReplies($comment),
-            $comments
-        );
-        return $postArray;
     }
 
     protected function fetchCommentWithoutReplies(CommentAdvanced $comment): ?array

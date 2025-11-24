@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\App\Assembler\ProfileEnrichmentAssemblerImpl;
+use Fawaz\App\Assembler\ProfileEnrichmentAssembler;
+use Fawaz\App\Errors\PermissionDeniedException;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
@@ -33,9 +34,9 @@ class PeerTokenService
         protected TransactionManager $transactionManager,
         protected UserMapper $userMapper,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected ProfileRepository $profileRepository
-    ) {
-    }
+        protected ProfileRepository $profileRepository,
+        protected ProfileEnrichmentAssembler $profileAssembler
+    ) {}
 
     public function setCurrentUserId(string $userId): void
     {
@@ -61,7 +62,7 @@ class PeerTokenService
         $this->logger->debug('WalletService.transferToken started');
 
         if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
+            throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 
         $recipientid =  $args['recipient'];
@@ -220,7 +221,7 @@ class PeerTokenService
         $this->logger->info('WalletService.transactionsHistoryItems started');
 
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 
         $contentFilterCase = ContentFilteringCases::searchById;
@@ -252,9 +253,8 @@ class PeerTokenService
                 $specs
             );
 
-            // Use assembler to enrich and attach profiles to the read-models
-            $assembler = new ProfileEnrichmentAssemblerImpl($this->profileRepository);
-            $assembler->enrichHasUserRefs($items, $specs, (string)$this->currentUserId);
+            // Enrich and attach profiles via DI assembler
+            $this->profileAssembler->enrichHasUserRefs($items, $specs, (string)$this->currentUserId);
 
             return $items;
 

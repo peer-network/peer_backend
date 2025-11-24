@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\App\Models;
 
 use Fawaz\App\Contracts\HasUserRefs;
+use Fawaz\App\Profile;
 use Fawaz\App\ReadModels\UserRef;
 
 /**
@@ -25,8 +26,8 @@ class TransactionHistoryItem implements HasUserRefs
      * fees = [ 'total' => float, 'burn' => ?float, 'peer' => ?float, 'inviter' => ?float ]
      */
     private array $fees;
-    private ?array $sender = null;
-    private ?array $recipient = null;
+    private ?Profile $sender = null;
+    private ?Profile $recipient = null;
 
     public function __construct(array $data)
     {
@@ -56,8 +57,8 @@ class TransactionHistoryItem implements HasUserRefs
             'senderid' => $this->senderid,
             'recipientid' => $this->recipientid,
             'fees' => $this->fees,
-            'sender' => $this->sender,
-            'recipient' => $this->recipient,
+            'sender' => $this->sender ? $this->sender->getArrayCopy() : null,
+            'recipient' => $this->recipient ? $this->recipient->getArrayCopy() : null,
         ];
     }
 
@@ -76,7 +77,7 @@ class TransactionHistoryItem implements HasUserRefs
         return $refs;
     }
 
-    public function attachUserProfile(string $refKey, array $profile): void
+    public function attachUserProfile(string $refKey, Profile $profile): void
     {
         if ($refKey === 'sender') {
             $this->sender = $profile;

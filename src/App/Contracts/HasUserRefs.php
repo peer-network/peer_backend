@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\App\Contracts;
 
+use Fawaz\App\Profile;
 use Fawaz\App\ReadModels\UserRef;
 
 /**
@@ -24,6 +25,6 @@ interface HasUserRefs
      * Attaches a hydrated profile for a given ref key.
      * Implementations decide where to store the enriched profile.
      */
-    public function attachUserProfile(string $refKey, array $profile): void;
+    public function attachUserProfile(string $refKey, Profile $profile): void;
 }
 
