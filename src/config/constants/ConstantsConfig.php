@@ -93,11 +93,8 @@ class ConstantsConfig implements ConstantsConfigInterface
      *     NUMBERSQ: array{MIN: int, MAX: float},
      *     WHEREBY: array{MIN: int, MAX: int},
      *     ACTIONS: array<string, int>,
-     *     TRANSFER_MESSAGE: array{
-     *         MIN_LENGTH: int,
-     *         MAX_LENGTH: int,
-     *         FORBID_CONTROL_CHARS: string,
-     *         PATTERN_URL: string
+     *     TRANSFER_MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int, FORBID_CONTROL_CHARS: string, PATTERN_URL: string},
+     *     TRANSFER_TOKEN: array{MIN_AMOUNT: float}
      * }
      */
     public static function wallet()
@@ -401,6 +398,9 @@ class ConstantsConfig implements ConstantsConfigInterface
             'MAX_LENGTH' => 500,
             'FORBID_CONTROL_CHARS' => '[\x00-\x08\x0B-\x1F\x7F]',
             'PATTERN_URL'          => '(https?:\/\/|www\.)',
+        ],
+        'TRANSFER_TOKEN' => [
+            'MIN_AMOUNT' => 0.1,
         ],
     ];
 

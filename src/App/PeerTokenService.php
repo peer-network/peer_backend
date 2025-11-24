@@ -118,9 +118,12 @@ class PeerTokenService
                     return self::respondWithError(00000);
                 }
             }
-            if ($numberOfTokens <= 0) {
-                $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
+            $transferConfig = $walletConfig['TRANSFER_TOKEN'];
+            $minAmount      = (float) $transferConfig['MIN_AMOUNT'];
+            if ((float) $numberOfTokens < $minAmount) {
+                $this->logger->warning('Incorrect Amount Exception: less than minimum transfer amount', [
                     'numberOfTokens' => $numberOfTokens,
+                    'minAmount'      => $minAmount,
                 ]);
                 return self::respondWithError(30264);
             }
