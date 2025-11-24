@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
+use Fawaz\App\Assembler\ProfileEnrichmentAssemblerImpl;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Database\UserMapper;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
@@ -224,8 +223,6 @@ class PeerTokenService
             return $this->respondWithError(60501);
         }
 
-        $this->logger->debug('PeerTokenService.transactionsHistory started');
-
         $contentFilterCase = ContentFilteringCases::searchById;
 
         $deletedUserSpec = new DeletedUserSpec(
@@ -254,29 +251,11 @@ class PeerTokenService
                 $args,
                 $specs
             );
-            // Enrich with profiles and apply placeholdering
-            $userIds = [];
-            foreach ($items as $it) {
-                if (!empty($it['senderid'])) { $userIds[$it['senderid']] = true; }
-                if (!empty($it['recipientid'])) { $userIds[$it['recipientid']] = true; }
-            }
-            $profiles = $this->profileRepository->fetchByIds(array_keys($userIds), $this->currentUserId, $specs);
 
-            foreach ($items as &$item) {
-                $sid = $item['senderid'] ?? null;
-                $rid = $item['recipientid'] ?? null;
-                if ($sid && isset($profiles[$sid])) {
-                    $senderProfile = $profiles[$sid];
-                    ContentReplacer::placeholderProfile($senderProfile, $specs);
-                    $item['sender'] = $senderProfile->getArrayCopy();
-                }
-                if ($rid && isset($profiles[$rid])) {
-                    $recipientProfile = $profiles[$rid];
-                     ContentReplacer::placeholderProfile($recipientProfile, $specs);
-                    $item['recipient'] = $recipientProfile->getArrayCopy();
-                }
-            }
-            unset($item);
+            // Use assembler to enrich and attach profiles to the read-models
+            $assembler = new ProfileEnrichmentAssemblerImpl($this->profileRepository);
+            $assembler->enrichHasUserRefs($items, $specs, (string)$this->currentUserId);
+
             return $items;
 
         } catch (\Exception $e) {

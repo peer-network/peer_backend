@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\Database;
 
 use Fawaz\App\Models\Transaction;
+use Fawaz\App\Models\TransactionHistoryItem;
 use Fawaz\App\Repositories\TransactionRepository;
 use Fawaz\App\User;
 use PDO;
@@ -539,15 +540,6 @@ class PeerTokenMapper
             $params[':end_date'] = $args['end_date'] . ' 23:59:59';
         }
 
-        // Final pagination
-        $limitOffsetSql = '';
-        if (isset($args['limit']) && is_numeric($args['limit'])) {
-            $limitOffsetSql .= ' LIMIT :limit';
-        }
-        if (isset($args['offset']) && is_numeric($args['offset'])) {
-            $limitOffsetSql .= ' OFFSET :offset';
-        }
-
         // SQL to accumulate per-operation history with fee sums and a picked main row (prefer CREDIT)
         $sql = "WITH ops AS (
                     SELECT DISTINCT t.operationid
@@ -589,8 +581,7 @@ class PeerTokenMapper
                 JOIN agg a ON a.operationid = r.operationid
                 WHERE r.rn = 1
                 ORDER BY r.createdat $sortDirection
-                LIMIT :limit OFFSET :offset
-                $limitOffsetSql";
+                LIMIT :limit OFFSET :offset";
 
         $stmt = $this->db->prepare($sql);
         foreach ($params as $key => $val) {
@@ -607,7 +598,7 @@ class PeerTokenMapper
             $netTokenAmount = (float)($row['net_amount'] ?? 0);
             $grossAmount = $netTokenAmount + $feesTotal;
 
-            $items[] = [
+            $tiData = [
                 'operationid' => (string)($row['operationid'] ?? ''),
                 'transactiontype' => (string)($row['transactiontype'] ?? ''),
                 'tokenamount' => $grossAmount,
@@ -623,6 +614,7 @@ class PeerTokenMapper
                     'inviter' => (float)$row['inviter_fee'] ?: null,
                 ],
             ];
+            $items[] = new TransactionHistoryItem($tiData);
         }
 
         return $items;

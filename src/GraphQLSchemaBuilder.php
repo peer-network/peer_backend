@@ -3675,7 +3675,16 @@ class GraphQLSchemaBuilder
 
         try {
             $items = $this->peerTokenService->transactionsHistoryItems($args);
-            return $this::createSuccessResponse(11215, $items);
+            // Service may return objects; convert to arrays for API response
+            $normalized = [];
+            foreach ($items as $it) {
+                if (is_object($it) && method_exists($it, 'getArrayCopy')) {
+                    $normalized[] = $it->getArrayCopy();
+                } else {
+                    $normalized[] = is_array($it) ? $it : (array)$it;
+                }
+            }
+            return $this::createSuccessResponse(11215, $normalized);
         } catch (\Exception $e) {
             $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
             return self::respondWithError(41226);  // Error occurred while retrieving transaction history
