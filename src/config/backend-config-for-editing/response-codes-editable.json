@@ -771,6 +771,14 @@
         "comment": "The 'advertisementId' field must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
         "userFriendlyComment": "Advertisement ID format. Please check and try again."
     },
+    "30270": {
+        "comment": "The 'transfer message' field must be between {USER.TRANSFER_MESSAGE.MIN_LENGTH} and {USER.TRANSFER_MESSAGE.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Message must be {USER.TRANSFER_MESSAGE.MIN_LENGTH}-{USER.TRANSFER_MESSAGE.MAX_LENGTH} characters."
+    },
+    "30271": {
+        "comment": "The 'transfer message' field must not contain {USER.TRANSFER_MESSAGE.FORBID_CONTROL_CHARS} symbols and links {USER.TRANSFER_MESSAGE.PATTERN_URL}",
+        "userFriendlyComment": "Message must not contain {USER.TRANSFER_MESSAGE.FORBID_CONTROL_CHARS} symbols and links."
+    },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
         "userFriendlyComment": "Input required. Please provide the needed information."
