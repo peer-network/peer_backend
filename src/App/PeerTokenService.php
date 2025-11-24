@@ -14,6 +14,7 @@ use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\config\constants\ConstantsConfig;
 
 class PeerTokenService
 {
@@ -92,12 +93,31 @@ class PeerTokenService
             }
 
             $message = isset($args['message']) ? (string) $args['message'] : null;
+            // NOTE for QA: previously we used the wrong response code 30210 here;
+            // a new unified response code should be introduced for transfer-token message validation.
+            if ($message !== null) {
+                $walletConfig  = ConstantsConfig::wallet();
+                $messageConfig = $walletConfig['TRANSFER_MESSAGE'];
 
-            if ($message !== null && strlen($message) > 200) {
-                $this->logger->warning('message length is too high');
-                return self::respondWithError(30210);
+                $maxLength      = (int) $messageConfig['MAX_LENGTH'];
+                $controlPattern = '/'.$messageConfig['FORBID_CONTROL_CHARS'].'/';
+                $urlPattern     = '/'.$messageConfig['PATTERN_URL'].'/i';
+
+                if (strlen($message) > $maxLength) {
+                    $this->logger->warning('Transfer message length is too high', [
+                        'maxLength' => $maxLength,
+                    ]);
+                    return self::respondWithError(00000);
+                }
+                if (preg_match($controlPattern, $message) === 1) {
+                    $this->logger->warning('Transfer message contains control characters');
+                    return self::respondWithError(00000);
+                }
+                if (preg_match($urlPattern, $message) === 1) {
+                    $this->logger->warning('Transfer message contains URL/link');
+                    return self::respondWithError(00000);
+                }
             }
-
             if ($numberOfTokens <= 0) {
                 $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
                     'numberOfTokens' => $numberOfTokens,

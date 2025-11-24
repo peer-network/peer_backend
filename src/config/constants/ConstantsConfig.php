@@ -92,7 +92,12 @@ class ConstantsConfig implements ConstantsConfigInterface
      *     NUMBERS: array{MIN: float, MAX: float},
      *     NUMBERSQ: array{MIN: int, MAX: float},
      *     WHEREBY: array{MIN: int, MAX: int},
-     *     ACTIONS: array<string, int>
+     *     ACTIONS: array<string, int>,
+     *     TRANSFER_MESSAGE: array{
+     *         MIN_LENGTH: int,
+     *         MAX_LENGTH: int,
+     *         FORBID_CONTROL_CHARS: string,
+     *         PATTERN_URL: string
      * }
      */
     public static function wallet()
@@ -390,6 +395,12 @@ class ConstantsConfig implements ConstantsConfigInterface
             'FREELIKE' => 30,
             'FREECOMMENT' => 31,
             'FREEPOST' => 32,
+        ],
+        'TRANSFER_MESSAGE' => [
+            'MIN_LENGTH' => 0,
+            'MAX_LENGTH' => 500,
+            'FORBID_CONTROL_CHARS' => '[\x00-\x08\x0B-\x1F\x7F]',
+            'PATTERN_URL'          => '(https?:\/\/|www\.)',
         ],
     ];
 
