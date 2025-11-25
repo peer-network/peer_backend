@@ -401,7 +401,7 @@ class ConstantsConfig implements ConstantsConfigInterface
             'FREELIKE' => 30,
             'FREECOMMENT' => 31,
             'FREEPOST' => 32,
-        ]
+        ],
     ];
 
     private const WALLETT = [
@@ -521,6 +521,6 @@ class ConstantsConfig implements ConstantsConfigInterface
         'TRANSACTION' => [
             'MIN_AMOUNT' => 0.00000001,
             'MAX_DECIMALS' => 8, 
-        ]
+        ],
     ];
 }
