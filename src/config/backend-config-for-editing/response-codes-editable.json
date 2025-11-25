@@ -668,8 +668,8 @@
         "userFriendlyComment": "Transaction ID is required."
     },
     "30243": {
-        "comment": "The 'tokenAmount' field (Transaction amount) must be more than {USER.TRANSACTION.MIN_TOKENS} tokens",
-        "userFriendlyComment": "Minimum transaction is {USER.TRANSACTION.MIN_TOKENS} tokens."
+        "comment": "The 'tokenAmount' field (Transaction amount) must be more than {USER.TRANSACTION.MIN_AMOUNT} tokens",
+        "userFriendlyComment": "Minimum transaction is {USER.TRANSACTION.MIN_AMOUNT} tokens."
     },
     "30244": {
         "comment": "The 'value' field must be an integer",
@@ -748,8 +748,8 @@
         "userFriendlyComment": "Media description must be {POST.MEDIADESCRIPTION.MIN_LENGTH}-{POST.MEDIADESCRIPTION.MAX_LENGTH} characters."
     },
     "30264": {
-        "comment": "The numberoftokens field must be a number, greater than zero, and less than the account balance",
-        "userFriendlyComment": "Token amount must be positive and within your balance."
+    "comment": "The numberoftokens field must be a number, greater than or equal to {USER.TRANSACTION.MIN_AMOUNT}, and less than the account balance",
+    "userFriendlyComment": "Token amount must be at least {USER.TRANSACTION.MIN_AMOUNT} PT and within your balance."
     },
     "30265": {
         "comment": "The 'content' field must be between {COMMENT.CONTENT.MIN_LENGTH} and {COMMENT.CONTENT.MAX_LENGTH} characters long",
@@ -776,8 +776,8 @@
         "userFriendlyComment": "Message must be {USER.TRANSFER_MESSAGE.MIN_LENGTH}-{USER.TRANSFER_MESSAGE.MAX_LENGTH} characters."
     },
     "30271": {
-        "comment": "The 'transfer message' field must not contain {USER.TRANSFER_MESSAGE.FORBID_CONTROL_CHARS} symbols and links {USER.TRANSFER_MESSAGE.PATTERN_URL}",
-        "userFriendlyComment": "Message must not contain {USER.TRANSFER_MESSAGE.FORBID_CONTROL_CHARS} symbols and links."
+        "comment": "The 'transfer message' field must not contain {INPUT.FORBID_CONTROL_CHARS_PATTERN} symbols and links {USER.TRANSFER_MESSAGE.PATTERN_URL}",
+        "userFriendlyComment": "Message must not contain {INPUT.FORBID_CONTROL_CHARS_PATTERN} symbols and links."
     },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
