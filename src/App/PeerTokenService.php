@@ -118,7 +118,15 @@ class PeerTokenService
                 }
             }
             $transferConfig = $userConfig['TRANSACTION'];
-            $minAmount      = (float) $transferConfig['MIN_TOKENS'];
+            $minAmount = (float) $transferConfig['MIN_AMOUNT'];
+            $maxDecimals = (int) $transferConfig['MAX_DECIMALS'];
+
+            $parts = explode('.', (string) $numberOfTokens);
+
+            if (isset($parts[1]) && strlen($parts[1]) > $maxDecimals) {
+                return self::respondWithError(00000);
+            }
+
             if ((float) $numberOfTokens < $minAmount) {
                 $this->logger->warning('Incorrect Amount Exception: less than minimum transfer amount', [
                     'numberOfTokens' => $numberOfTokens,
