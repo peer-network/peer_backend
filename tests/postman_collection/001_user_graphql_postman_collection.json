@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "4bfdfdf6-a3db-4d00-862b-a5adee67f0c9",
+		"_postman_id": "1c3a0a7c-e2ed-478a-a19c-1a5e7832020a",
 		"name": "001_user_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-4bfdfdf6-a3db-4d00-862b-a5adee67f0c9?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-1c3a0a7c-e2ed-478a-a19c-1a5e7832020a?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -82,7 +82,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -96,7 +97,8 @@
 							"pm.environment.set(\"random_email\", randomEmail);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -109,7 +111,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Contactus {\n    contactus(name: \"{{username}}\", email: \"{{random_email}}\", message: \"Bullshit!\") {\n        status\n        ResponseCode\n        affectedRows {\n            msgid\n            email\n            name\n            message\n            ip\n            createdat\n        }\n    }\n}",
+						"query": "mutation Contactus {\n    contactus(name: \"{{username}}\", email: \"{{random_email}}\", message: \"Bullshit!\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            msgid\n            email\n            name\n            message\n            ip\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -172,7 +174,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Register {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{w_userid_t2}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation Register {\n  register(input: {\n    email: \"{{random_email}}\",\n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{w_userid_t2}}\"\n  }) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -222,7 +224,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Register {\n  register(input: {\n    email: \"{{random_email}}\", \n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation Register {\n  register(input: {\n    email: \"{{random_email}}\", \n    password: \"{{password}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -269,7 +271,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"query": "mutation Login {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
 						"variables": ""
 					}
 				},
@@ -316,7 +318,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -369,7 +371,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -434,7 +436,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"query": "mutation Login {\n  login(email: \"{{random_email}}\", password: \"{{password}}\") {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
 						"variables": ""
 					}
 				},
@@ -502,7 +504,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{modified_email}}\", password: \"{{password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"query": "mutation Login {\n  login(email: \"{{modified_email}}\", password: \"{{password}}\") {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}\n",
 						"variables": ""
 					}
 				},
@@ -548,7 +550,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation RefreshToken {\n    refreshToken(refreshToken: \"{{accessToken}}\") {\n        status\n        ResponseCode\n        accessToken\n        refreshToken\n    }\n}\n",
+						"query": "mutation RefreshToken {\n    refreshToken(refreshToken: \"{{accessToken}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        accessToken\n        refreshToken\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -601,7 +603,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation RefreshToken {\n    refreshToken(refreshToken: \"{{refreshToken}}\") {\n        status\n        ResponseCode\n        accessToken\n        refreshToken\n    }\n}\n",
+						"query": "mutation RefreshToken {\n    refreshToken(refreshToken: \"{{refreshToken}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        accessToken\n        refreshToken\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -666,7 +668,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListUsers {\n  listUsers (offset:0, limit:20) {\n    status\n    counter\n    ResponseCode\n    affectedRows {\n      id\n      username\n      status\n      slug\n      img\n      biography\n      createdat\n      updatedat\n    }\n  }\n}\n\n",
+						"query": "query ListUsers {\n  listUsers (offset:0, limit:20) {\n    counter\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    affectedRows {\n      id\n      username\n      status\n      slug\n      img\n      biography\n      createdat\n      updatedat\n    }\n  }\n}\n\n",
 						"variables": ""
 					}
 				},
@@ -721,7 +723,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query SearchUser {\n    searchUser(userid: \"{{userid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
+						"query": "query SearchUser {\n    searchUser(userid: \"{{userid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -800,7 +802,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateUsername {\n    updateUsername(username: \"{{new_username}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"{{new_username}}\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -866,7 +868,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateUsername {\n    updateUsername(username: \"{{new_username}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"{{new_username}}\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -950,7 +952,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateUsername {\n    updateUsername(username: \"{{invalid_username}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"{{invalid_username}}\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1016,7 +1018,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateUsername {\n    updateUsername(username: \"12345\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"12345\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1082,7 +1084,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateUsername {\n    updateUsername(username: \"! @ # $ © ® ™ ±\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"! @ # $ © ® ™ ±\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1149,7 +1151,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateUsername {\n    updateUsername(username: \"validuservaliduservaliduser\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"validuservaliduservaliduser\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1216,7 +1218,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateUsername {\n    updateUsername(username: \"vu\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"vu\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1286,7 +1288,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{new_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
+						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{new_email}}\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1353,7 +1355,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{new_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
+						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{new_email}}\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1422,7 +1424,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{invalid_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
+						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{invalid_email}}\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1489,7 +1491,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{w_email_t3}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
+						"query": "mutation UpdateEmail {\n    updateEmail(email: \"{{w_email_t3}}\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1581,7 +1583,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdatePassword {\n    updatePassword(password: \"{{new_password}}\", expassword: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdatePassword {\n    updatePassword(password: \"{{new_password}}\", expassword: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1644,7 +1646,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdatePassword {\n    updatePassword(password: \"{{new_password}}\", expassword: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdatePassword {\n    updatePassword(password: \"{{new_password}}\", expassword: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1707,7 +1709,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdatePassword {\n    updatePassword(password: \"{{invalid_email}}\", expassword: \"{{new_password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdatePassword {\n    updatePassword(password: \"{{invalid_email}}\", expassword: \"{{new_password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1771,7 +1773,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdatePassword {\n    updatePassword(password: \"{{new_password}}\", expassword: \"{{new_password}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UpdatePassword {\n    updatePassword(password: \"{{new_password}}\", expassword: \"{{new_password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1815,7 +1817,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n    login(email: \"{{random_email}}\", password: \"{{password}}\") {\n        status\n        ResponseCode\n        accessToken\n        refreshToken\n    }\n}\n",
+						"query": "mutation Login {\n    login(email: \"{{random_email}}\", password: \"{{password}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        accessToken\n        refreshToken\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1879,7 +1881,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"query": "mutation Login {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
 						"variables": ""
 					}
 				},
@@ -1937,7 +1939,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1991,7 +1993,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateBio {\n    updateBio(biography: \"{{new_bio}}\") {\n        status\n        ResponseCode\n    }\n}",
+						"query": "mutation UpdateBio {\n    updateBio(biography: \"{{new_bio}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2045,7 +2047,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateBio {\n    updateBio(biography: \"va\") {\n        status\n        ResponseCode\n    }\n}",
+						"query": "mutation UpdateBio {\n    updateBio(biography: \"va\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2110,7 +2112,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateBio {\n    updateBio(biography: \"{{xss_bio}}\") {\n        status\n        ResponseCode\n    }\n}",
+						"query": "mutation UpdateBio {\n    updateBio(biography: \"{{xss_bio}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2164,7 +2166,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateProfileImage {\n    updateProfileImage(img: \"{{new_profile_pic}}\") {\n        status\n        ResponseCode\n    }\n}",
+						"query": "mutation UpdateProfileImage {\n    updateProfileImage(img: \"{{new_profile_pic}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2218,7 +2220,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UpdateProfileImage{\n  updateProfileImage(img: \"invalid_file.txt\") {\n    status\n    ResponseCode\n  }\n}",
+						"query": "mutation UpdateProfileImage{\n  updateProfileImage(img: \"invalid_file.txt\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2296,7 +2298,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query SearchUser {\n    searchUser(userid: \"{{userid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n\n\n\n\n\n\n\n\n\n\n",
+						"query": "query SearchUser {\n    searchUser(userid: \"{{userid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n\n\n\n\n\n\n\n\n\n\n",
 						"variables": ""
 					}
 				},
@@ -2358,7 +2360,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Register {\n  register(input: {\n    email: \"{{email_t1}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation Register {\n  register(input: {\n    email: \"{{email_t1}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -2420,7 +2422,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Register {\n  register(input: {\n    email: \"{{email_t2}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation Register {\n  register(input: {\n    email: \"{{email_t2}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -2467,7 +2469,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid_t2}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2524,7 +2526,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifyReferralString {\n    verifyReferralString(referralString: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            uid\n            username\n            slug\n            img\n        }\n    }\n}\n",
+						"query": "mutation VerifyReferralString {\n    verifyReferralString(referralString: \"{{userid_t2}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            uid\n            username\n            slug\n            img\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2586,7 +2588,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Register {\n  register(input: {\n    email: \"{{email_t3}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{userid_t2}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation Register {\n  register(input: {\n    email: \"{{email_t3}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{userid_t2}}\"\n  }) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -2633,7 +2635,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid_t1}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid_t1}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2680,7 +2682,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid_t3}}\") {\n        status\n        ResponseCode\n    }\n}\n",
+						"query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid_t3}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2742,7 +2744,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -2847,7 +2849,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2905,7 +2907,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{w_userid_t1}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{w_userid_t1}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2981,7 +2983,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{w_email_t1}}\",\n    password: \"{{w_password_t1}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"query": "mutation Login {\n  login(email: \"{{w_email_t1}}\",\n    password: \"{{w_password_t1}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3086,7 +3088,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3143,7 +3145,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3205,7 +3207,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -3263,7 +3265,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3328,7 +3330,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -3385,7 +3387,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t3}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t3}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3450,7 +3452,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -3507,7 +3509,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3564,7 +3566,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3622,7 +3624,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t3}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t3}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3683,7 +3685,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListFollowRelations {\n    listFollowRelations {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            followers {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            following {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
+						"query": "query ListFollowRelations {\n    listFollowRelations {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            followers {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            following {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3741,7 +3743,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3799,7 +3801,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3856,7 +3858,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t3}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t3}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3916,7 +3918,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListFollowRelations {\n    listFollowRelations {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            following {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}",
+						"query": "query ListFollowRelations {\n    listFollowRelations {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            following {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -3974,7 +3976,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4036,7 +4038,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -4094,7 +4096,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t3}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t3}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4151,7 +4153,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListFriends {\n    listFriends {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            updatedat\n        }\n    }\n}\n\n",
+						"query": "query ListFriends {\n    listFriends {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            updatedat\n        }\n    }\n}\n\n",
 						"variables": ""
 					}
 				},
@@ -4216,7 +4218,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -4273,7 +4275,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListFriends {\n    listFriends {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            updatedat\n        }\n    }\n}",
+						"query": "query ListFriends {\n    listFriends {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            updatedat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -4330,7 +4332,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4387,7 +4389,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListFriends {\n    listFriends {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            updatedat\n        }\n    }\n}\n",
+						"query": "query ListFriends {\n    listFriends {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            updatedat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4449,7 +4451,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -4506,7 +4508,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListFriends {\n    listFriends {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            updatedat\n        }\n    }\n}\n",
+						"query": "query ListFriends {\n    listFriends {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            updatedat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4570,7 +4572,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation Login {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation Login {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -4627,7 +4629,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4684,7 +4686,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4748,7 +4750,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -4805,7 +4807,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4862,7 +4864,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4926,7 +4928,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
+						"query": "mutation {\n  login(email: \"{{new_email}}\", password: \"{{new_password}}\") {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}\n\n\n\n",
 						"variables": ""
 					}
 				},
@@ -5031,7 +5033,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5088,7 +5090,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t1}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5145,7 +5147,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5202,7 +5204,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t3}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t3}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5263,7 +5265,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation {\n  login(email: \"{{email_t1}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -5320,7 +5322,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5384,7 +5386,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -5441,7 +5443,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5546,7 +5548,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5603,7 +5605,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5660,7 +5662,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t2}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5724,7 +5726,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -5760,8 +5762,8 @@
 							"let status = \"\";",
 							"",
 							"try {",
-							"    status = commentResponse?.data?.createComment?.status || \"\";",
-							"    commentResponseCode = commentResponse?.data?.createComment?.ResponseCode || \"\";",
+							"    status = commentResponse?.data?.createComment?.meta?.status || \"\";",
+							"    commentResponseCode = commentResponse?.data?.createComment?.meta?.ResponseCode || \"\";",
 							"} catch (e) {",
 							"    console.log(\"Error accessing response properties:\", e);",
 							"}",
@@ -5824,7 +5826,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{postid}}\", content: \"{{comment_content}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
+						"query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{postid}}\", content: \"{{comment_content}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5877,7 +5879,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetDailyFreeStatus {\n    getDailyFreeStatus {\n        status\n        ResponseCode\n        affectedRows {\n            name\n            used\n            available\n        }\n    }\n}\n",
+						"query": "query GetDailyFreeStatus {\n    getDailyFreeStatus {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            name\n            used\n            available\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5930,7 +5932,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetActionPrices {\n    getActionPrices {\n        status\n        ResponseCode\n        affectedRows {\n            postPrice\n            likePrice\n            dislikePrice\n            commentPrice\n        }\n    }\n}\n",
+						"query": "query GetActionPrices {\n    getActionPrices {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            postPrice\n            likePrice\n            dislikePrice\n            commentPrice\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6003,7 +6005,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"query": "query PostEligibility {\n    postEligibility {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        eligibilityToken\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -6186,7 +6188,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"{{invalid_email}}\"\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"{{invalid_email}}\"\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6253,7 +6255,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: 1\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: 1\n        commentOffset: null\n        commentLimit: null\n    ) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\nisreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6317,7 +6319,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query PostEligibility {\n    postEligibility {\n        status\n        ResponseCode\n        eligibilityToken\n    }\n}",
+						"query": "query PostEligibility {\n    postEligibility {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        eligibilityToken\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -6381,7 +6383,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\"]\n            mediadescription: \"{{random_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\",\"{{new_profile_pic}}\",\"{{new_profile_pic}}\"]\n            mediadescription: \"{{random_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6449,7 +6451,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6502,7 +6504,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation DeleteAccount {\n    deleteAccount(password: \"{{password}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
+						"query": "mutation DeleteAccount {\n    deleteAccount(password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6555,7 +6557,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation DeleteAccount {\n    deleteAccount(password: \"{{password_T}}\") {\n        status\n        ResponseCode\n    }\n}\n\n",
+						"query": "mutation DeleteAccount {\n    deleteAccount(password: \"{{password_T}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6602,7 +6604,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -6656,7 +6658,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  register(input: {\n    email: \"{{email_t2}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    status\n    ResponseCode\n    userid\n  }\n}",
+						"query": "mutation {\n  register(input: {\n    email: \"{{email_t2}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    userid\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -6703,7 +6705,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation RefreshToken {\n    refreshToken(refreshToken: \"{{refreshToken}}\") {\n        status\n        ResponseCode\n        accessToken\n        refreshToken\n    }\n}\n",
+						"query": "mutation RefreshToken {\n    refreshToken(refreshToken: \"{{refreshToken}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        accessToken\n        refreshToken\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6750,7 +6752,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation VerifyReferralString {\n    verifyReferralString(referralString: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            uid\n            username\n            slug\n            img\n        }\n    }\n}\n",
+						"query": "mutation VerifyReferralString {\n    verifyReferralString(referralString: \"{{userid_t2}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            uid\n            username\n            slug\n            img\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6824,7 +6826,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}\n",
+						"query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6906,7 +6908,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6963,7 +6965,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(filterBy: FOLLOWER, limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(filterBy: FOLLOWER, limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7020,7 +7022,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(filterBy: FOLLOWED, limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(filterBy: FOLLOWED, limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7084,7 +7086,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{userid_t3}}\", numberoftokens: 105, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{userid_t3}}\", numberoftokens: 105, message: \"hi\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7148,7 +7150,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{userid_t2}}\", numberoftokens: 105, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{userid_t2}}\", numberoftokens: 105, message: \"hi\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -7228,7 +7230,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 5) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -7292,7 +7294,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -7350,7 +7352,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7414,7 +7416,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{userid}}\", numberoftokens: 100, message: \"hi\") {\n        status\n        ResponseCode\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{userid}}\", numberoftokens: 100, message: \"hi\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7461,8 +7463,8 @@
 							"        pm.expect(newLiquidity).to.be.below(oldLiquidity, \"Expected liquidity to decrease\");",
 							"    });",
 							"",
-							"    pm.test(\"Liquidity decreased by exactly 105\", function () {",
-							"        let expectedChange = 105;",
+							"    pm.test(\"Liquidity decreased by exactly 104\", function () {",
+							"        let expectedChange = 104;",
 							"        let actualChange = oldLiquidity - newLiquidity;",
 							"        pm.expect(actualChange).to.be.closeTo(expectedChange, 0.01, `Expected liquidity to decrease by ${expectedChange}, but got ${actualChange}`);",
 							"    });",
@@ -7504,7 +7506,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7590,7 +7592,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 6) {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
+						"query": "query GetTransactionHistory {\n    getTransactionHistory(limit: 6) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -7681,7 +7683,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: 1\n        limit: 1\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: 1\n        limit: 1\n        commentOffset: null\n        commentLimit: null\n    ) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7748,7 +7750,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: 2\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: 2\n        commentOffset: null\n        commentLimit: null\n    ) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7767,23 +7769,39 @@
 			"response": []
 		},
 		{
-			"name": "Check if postid is invalid",
+			"name": "Check postid",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"31510\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
 							"});",
 							"",
-							""
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All posts by userid_t2 have username 'Deleted_Account'\", function () {",
+							"    const response = pm.response.json();",
+							"    const posts = response.data?.listPosts?.affectedRows || [];",
+							"    const expectedUserId = pm.environment.get(\"userid_t2\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'userid_t2' is not set.\");",
+							"    }",
+							"",
+							"    posts.forEach(post => {",
+							"        if (post.user?.id === expectedUserId) {",
+							"            pm.expect(post.user.username, `Post ID ${post.id} has correct username`).to.eql(\"Deleted_Account\");",
+							"        }",
+							"    });",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -7793,7 +7811,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -7813,7 +7832,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: \"{{postid}}\"\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: \"{{postid}}\"\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7871,7 +7890,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListUsers {\n    listUsers(limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
+						"query": "query ListUsers {\n    listUsers(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7939,7 +7958,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ReferralList {\n    referralList {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            invitedBy {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
+						"query": "query ReferralList {\n    referralList {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            invitedBy {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7965,16 +7984,25 @@
 					"script": {
 						"exec": [
 							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"31007\");",
+							"    pm.expect(pm.response.text()).to.include(\"11009\");",
 							"});",
 							"",
 							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Username is Deleted_Account\", function () {",
+							"    const res = pm.response.json();",
+							"    const user = res?.data?.searchUser?.affectedRows?.[0];",
+							"",
+							"    pm.expect(user).to.be.an(\"object\");",
+							"    pm.expect(user.username).to.eql(\"Deleted_Account\");",
 							"});",
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -7994,7 +8022,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query SearchUser {\n    searchUser(userid: \"{{userid_t2}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
+						"query": "query SearchUser {\n    searchUser(userid: \"{{userid_t2}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8069,7 +8097,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GetProfile {\n    getProfile(userid: \"{{userid_t2}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            isfollowed\n            isfollowing\n            amountposts\n            amounttrending\n            amountfollowed\n            amountfollower\n            amountfriends\n            amountblocked\n        }\n    }\n}\n",
+						"query": "query GetProfile {\n    getProfile(userid: \"{{userid_t2}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            isfollowed\n            isfollowing\n            amountposts\n            amounttrending\n            amountfollowed\n            amountfollower\n            amountfriends\n            amountblocked\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8148,7 +8176,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListFollowRelations {\n    listFollowRelations {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            followers {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            following {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
+						"query": "query ListFollowRelations {\n    listFollowRelations {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            followers {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            following {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8220,7 +8248,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListFriends {\n    listFriends {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            updatedat\n        }\n    }\n}\n",
+						"query": "query ListFriends {\n    listFriends {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            updatedat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8284,7 +8312,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    status\n    ResponseCode\n    accessToken\n    refreshToken\n  }\n}",
+						"query": "mutation {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
 						"variables": ""
 					}
 				},
@@ -8365,7 +8393,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(sortBy: FOR_ME, limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(sortBy: FOR_ME, limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8422,7 +8450,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{w_userid_t2}}\") {\n        status\n        isfollowing\n        ResponseCode\n    }\n}\n",
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{w_userid_t2}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8503,7 +8531,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(sortBy: FOR_ME, limit: 20) {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(sortBy: FOR_ME, limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8528,8 +8556,9 @@
 			"script": {
 				"type": "text/javascript",
 				"packages": {},
+				"requests": {},
 				"exec": [
-					"let accessToken = pm.environment.get(\"accessToken\")"
+					""
 				]
 			}
 		},
@@ -8538,10 +8567,9 @@
 			"script": {
 				"type": "text/javascript",
 				"packages": {},
+				"requests": {},
 				"exec": [
-					"pm.test(\"Query is successful\", function () {",
-					"    pm.response.to.have.status(200);",
-					"});"
+					""
 				]
 			}
 		}

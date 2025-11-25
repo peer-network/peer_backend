@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\Hashable;
 use Fawaz\Utils\HashObject;
 
-class Post implements Hashable
+class Post extends Model implements Hashable
 {
     use HashObject;
 
@@ -24,6 +25,7 @@ class Post implements Hashable
     protected ?string $cover;
     protected string $mediadescription;
     protected string $createdat;
+    protected string $visibilityStatus;
 
     // Constructor
     public function __construct(
@@ -45,6 +47,7 @@ class Post implements Hashable
         $this->url = $this->getPostUrl();
         $this->mediadescription = $data['mediadescription'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -61,6 +64,7 @@ class Post implements Hashable
             'url' => $this->url,
             'mediadescription' => $this->mediadescription,
             'createdat' => $this->createdat,
+            'visibility_status' => $this->visibilityStatus,
         ];
         return $att;
     }
@@ -195,6 +199,15 @@ class Post implements Hashable
                     ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
+            'visibility_status' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'StringTrim'],
+                ],
+                'validators' => [
+                    ['name' => 'IsString'],
+                ],
+            ],
         ];
 
         if ($elements) {
@@ -225,6 +238,13 @@ class Post implements Hashable
         if (empty($this->postid)) {
             return '';
         }
-        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
+        return getenv('WEB_APP_URL') . '/post/' . $this->postid;
     }
+
+    // Table name
+    public static function table(): string
+    {
+        return 'posts';
+    }
+
 }

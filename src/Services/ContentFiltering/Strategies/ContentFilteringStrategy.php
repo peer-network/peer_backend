@@ -19,5 +19,5 @@ interface ContentFilteringStrategy
      * @return ?ContentFilteringAction
      * For each combination funciton returns an action 'ContentFilteringAction' according to used strategy.
      */
-    public function getAction(ContentType $contentTarget, ContentType $showingContent): ?ContentFilteringAction;
+    public static function getAction(ContentType $contentTarget, ContentType $showingContent): ?ContentFilteringAction;
 }

@@ -33,11 +33,6 @@ class WalletService
         $this->currentUserId = $userId;
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
-    }
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -323,7 +318,7 @@ class WalletService
                 return self::respondWithError(51301);
             }
 
-            [$poolWallet, $burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
+            [$burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
             $fromId = $args['fromid'] ?? $peerWallet;
 
             $args = [
@@ -336,9 +331,9 @@ class WalletService
             ];
 
             $response = $this->peerTokenMapper->transferToken(
-                $userId, 
-                $fromId, 
-                $price, 
+                $userId,
+                $fromId,
+                $price,
                 $transferStrategy,
                 $text
             );

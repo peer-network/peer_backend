@@ -21,7 +21,6 @@ class WalletMapper
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
-    private string $poolWallet;
     private string $burnWallet;
     private string $peerWallet;
 
@@ -47,12 +46,11 @@ class WalletMapper
 
         $liqpool = $accountsResult['response'] ?? null;
 
-        if (!is_array($liqpool) || !isset($liqpool['pool'], $liqpool['peer'], $liqpool['burn'])) {
-            $this->logger->warning('Fehlt Ein Von Pool, Burn, Peer Accounts', ['liqpool' => $liqpool]);
+        if (!is_array($liqpool) || !isset($liqpool['peer'], $liqpool['burn'])) {
+            $this->logger->warning('Fehlt Ein Von Burn, Peer Accounts', ['liqpool' => $liqpool]);
             return self::respondWithError(30102);
         }
 
-        $this->poolWallet = $liqpool['pool'];
         $this->burnWallet = $liqpool['burn'];
         $this->peerWallet = $liqpool['peer'];
 
@@ -108,18 +106,16 @@ class WalletMapper
             $this->logger->warning('Send and Receive Same Wallet Error.');
             return self::respondWithError(31202);
         }
-        $fees = ConstantsConfig::tokenomics()['FEES'];
+        $fees = ConstantsConfig::tokenomics()['FEES_STRING'];
         $actions = ConstantsConfig::wallet()['ACTIONS'];
         $peerFee = (float)$fees['PEER'];
-        $poolFee = (float)$fees['POOL'];
         $burnFee = (float)$fees['BURN'];
         $inviteFee = (float)$fees['INVITATION'];
 
-        $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee);
-        $feeAmount = round((float)$numberoftokens * $poolFee, 2);
+        $requiredAmount = $numberoftokens * (1 + $peerFee + $burnFee);
         $peerAmount = round((float)$numberoftokens * $peerFee, 2);
         $burnAmount = round((float)$numberoftokens * $burnFee, 2);
-        $countAmount = $feeAmount + $peerAmount + $burnAmount;
+        $countAmount = $peerAmount + $burnAmount;
         $inviterId = null;
         $inviterWin = 0.0;
 
@@ -132,8 +128,8 @@ class WalletMapper
             if (isset($result['invited']) && !empty($result['invited']) && $result['status'] != 6) {
                 $inviterId = $result['invited'];
                 $inviterWin = round((float)$numberoftokens * $inviteFee, 2);
-                $countAmount = $feeAmount + $peerAmount + $burnAmount + $inviterWin;
-                $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnAmount + $inviteFee);
+                $countAmount = $peerAmount + $burnAmount + $inviterWin;
+                $requiredAmount = $numberoftokens * (1 + $peerFee + $burnAmount + $inviteFee);
                 $this->logger->info('Invited By', [
                     'invited' => $inviterId,
                 ]);
@@ -142,8 +138,8 @@ class WalletMapper
             // If user's account deleted then we will send that percentage amount to PEER
             if (isset($result['invited']) && !empty($result['invited']) && $result['status'] == 6) {
                 $peerAmount = $peerAmount + round((float)$numberoftokens * $inviteFee, 2);
-                $countAmount = $feeAmount + $peerAmount + $burnAmount;
-                $requiredAmount = $numberoftokens * (1 + $peerFee + $poolFee + $burnFee + $inviteFee);
+                $countAmount = $peerAmount + $burnAmount;
+                $requiredAmount = $numberoftokens * (1 + $peerFee + $burnFee + $inviteFee);
             }
 
 
@@ -227,20 +223,6 @@ class WalletMapper
                 $this->insertWinToPool($userId, $args);
             }
 
-            // 5. POOLWALLET: Fee To Account
-            if ($feeAmount) {
-                $id = self::generateUUID();
-
-                $args = [
-                    'token' => $id,
-                    'fromid' => $userId,
-                    'numbers' => abs($feeAmount),
-                    'whereby' => $actions['TRANSFER'],
-                ];
-
-                $this->insertWinToLog($this->poolWallet, $args);
-                $this->insertWinToPool($this->poolWallet, $args);
-            }
 
             // 6. PEERWALLET: Fee To Account
             if ($peerAmount) {
@@ -380,8 +362,6 @@ class WalletMapper
         $queryParams[':limit'] = $limit;
         $queryParams[':offset'] = $offset;
 
-        $this->logger->info('Executing SQL query', ['sql' => $sql, 'params' => $queryParams]);
-
         $stmt = $this->db->prepare($sql);
         $stmt->execute($queryParams);
 
@@ -389,7 +369,6 @@ class WalletMapper
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             try {
                 $results[] = new Wallet($row);
-                $this->logger->info('Executing SQL query', ['row' => $row]);
             } catch (\Throwable $e) {
                 $this->logger->error('Failed to create User object', ['error' => $e->getMessage(), 'data' => $row]);
             }
@@ -1015,9 +994,9 @@ class WalletMapper
         $dailyToken = (string)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
         // $gemsintoken = bcdiv("$dailyToken", "$totalGems", 10);
-        $gemsintoken = TokenHelper::divRc( $dailyToken, $totalGems);
+        $gemsintoken = TokenHelper::divRc($dailyToken, $totalGems);
 
-        $bestatigungInitial = TokenHelper::mulRc( $totalGems, $gemsintoken);
+        $bestatigungInitial = TokenHelper::mulRc($totalGems, $gemsintoken);
 
         $args = [
             'winstatus' => [
@@ -1255,12 +1234,12 @@ class WalletMapper
                 // User exists, safely calculate new liquidity
                 $currentBalance = (string)$row['liquidity'];
 
-                if($liquidity < 0){
+                if ($liquidity < 0) {
                     $liquidity = (string) (abs((float)$liquidity));
                     $type = 'DEBIT';
                 }
 
-                if($type === 'CREDIT'){
+                if ($type === 'CREDIT') {
                     $newLiquidity = TokenHelper::addRc($currentBalance, (string) $liquidity);
                 } else {
                     $newLiquidity = TokenHelper::subRc($currentBalance, (string) $liquidity);
@@ -1282,7 +1261,7 @@ class WalletMapper
             }
 
             $this->logger->info('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
-            $this->updateUserLiquidity($userId,  $newLiquidity);
+            $this->updateUserLiquidity($userId, $newLiquidity);
 
             return  (float) $newLiquidity;
         } catch (\Throwable $e) {
