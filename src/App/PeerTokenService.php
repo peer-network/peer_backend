@@ -225,19 +225,20 @@ class PeerTokenService
         }
 
         $contentFilterCase = ContentFilteringCases::searchById;
-
+        $targetContent = ContentType::user;
+        
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
-            ContentType::user
+            $targetContent
         );
         $systemUserSpec = new SystemUserSpec(
             $contentFilterCase,
-            ContentType::user
+            $targetContent
         );
 
         $illegalContentSpec = new IllegalContentFilterSpec(
             $contentFilterCase,
-            ContentType::user
+            $targetContent
         );
 
         $specs = [
@@ -253,7 +254,6 @@ class PeerTokenService
                 $specs
             );
 
-            // Enrich and attach profiles via DI assembler
             $this->profileAssembler->enrichHasUserRefs($items, $specs, (string)$this->currentUserId);
 
             return $items;

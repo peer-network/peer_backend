@@ -344,8 +344,8 @@ class PeerTokenMapper
         $required = $inputAmount;
         $onePlus = TokenHelper::addRc('1', $totalRate);
         $net = TokenHelper::divRc($required, $onePlus);
-        [$peerAmt, $poolAmt, $burnAmt, $inviteAmt] = $this->calculateEachFeesAmount($net);
-        return [$required, $net, $peerAmt, $poolAmt, $burnAmt, $inviteAmt];
+        [$peerAmt, $burnAmt, $inviteAmt] = $this->calculateEachFeesAmount($net);
+        return [$required, $net, $peerAmt, $burnAmt, $inviteAmt];
     }
 
     /**

@@ -94,8 +94,10 @@ class ProfileRepositoryImpl implements ProfileRepository
         $params = $allSpecs->paramsToPrepare;
         $userIdsForInStatement = array_map(fn ($id) => "'$id'", $userIds);
 
-        $userIdsString = implode(',', $userIdsForInStatement);
-        $whereClauses[] = "u.uid IN ($userIdsString)";
+        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+        $whereClauses[] = "u.uid IN ($placeholders)";
+
+
         $whereClausesString = implode(' AND ', $whereClauses);
         $sql = sprintf(
             "
@@ -123,8 +125,8 @@ class ProfileRepositoryImpl implements ProfileRepository
             $whereClausesString
         );
         try {
-            $stmt = $this->db->prepare($sql);
             $params['currentUserId'] = $currentUserId;
+            $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             if (!$rows) {
