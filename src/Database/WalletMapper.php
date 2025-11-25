@@ -1014,8 +1014,8 @@ class WalletMapper
                 $totalTokenNumber = TokenHelper::mulRc((string) $row['total_numbers'], $gemsintoken);
                 $args[$userId] = [
                     'userid' => $userId,
-                    'gems' => (float)$row['total_numbers'],
-                    'tokens' => $totalTokenNumber,
+                    'gems' => (float) $row['total_numbers'],
+                    'tokens' => (float) $totalTokenNumber,
                     'percentage' => (float)$row['percentage'],
                     'details' => []
                 ];
@@ -1416,7 +1416,6 @@ class WalletMapper
     {
         return \bcadd($qValue1, $qValue2);
     }
-
 
 
     /**

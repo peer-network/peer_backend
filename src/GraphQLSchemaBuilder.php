@@ -20,6 +20,7 @@ use Fawaz\App\PostService;
 use Fawaz\App\UserInfoService;
 use Fawaz\App\UserService;
 use Fawaz\App\TagService;
+use Fawaz\App\PeerTokenService;
 use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
@@ -35,7 +36,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
 use Fawaz\Utils\LastGithubPullRequestNumberProvider;
-use Fawaz\App\PeerTokenService;
+use ReflectionNamedType;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -136,7 +137,7 @@ class GraphQLSchemaBuilder
 
         $schema = $this->getQueriesDependingOnRole();
         if (empty($schema)) {
-            $this->logger->critical('Invalid schema', ['schema' => $schema]);
+            // $this->logger->critical('Invalid schema', ['schema' => $schema]);
             return $this::respondWithError(40301);
         }
 
@@ -1865,6 +1866,18 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'SwapTokenResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->debug('Query.SwapTokenResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
             'ReferralInfoResponse' => [
                 'meta' => function (array $root): array {
                     return [
@@ -1911,6 +1924,31 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
+            'AddLiquidityResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.AddLiquidityResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'UpdateSwapResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.UpdateSwapResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            
             'ReferralUsers' => [
                 'invitedBy' => function (array $root): ?array {
                     return $root['invitedBy'] ?? null;
@@ -1918,7 +1956,90 @@ class GraphQLSchemaBuilder
                 'iInvited' => function (array $root): array {
                     return $root['iInvited'] ?? [];
                 },
+            ],   
+            'AddLiquidity' => [
+                'newTokenAmount' => function (array $root): float {
+                    return (float) ($root['newTokenAmount'] ?? 0.0);
+                },
+                'newBtcAmount' => function (array $root): float {
+                    return (float) ($root['newBtcAmount'] ?? 0.0);
+                },
+                'newTokenPrice' => function (array $root): float {
+                    return (float) ($root['newTokenPrice'] ?? 0.0);
+                },
             ],
+            'SwapToken' => [
+                'tokenSend' => function (array $root): float {
+                    return (float) ($root['tokenSend'] ?? 0.0);
+                },
+                'tokensSubstractedFromWallet' => function (array $root): float {
+                    return (float) ($root['tokensSubstractedFromWallet'] ?? 0.0);
+                },
+                'expectedBtcReturn' => function (array $root): float {
+                    return (float) ($root['expectedBtcReturn'] ?? 0.0);
+                },
+            ],
+            'LiquidityPoolHistoryResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.LiquidityPoolHistoryResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'TokenPriceResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.TokenPriceResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? '';
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'TokenPriceData' => [
+                'currentTokenPrice' => function (array $root): string {
+                    return (string) ($root['currentTokenPrice'] ?? 0);
+                },
+                'updatedAt' => function (array $root): string {
+                    return $root['updatedAt'] ?? '';
+                },
+            ],
+            'LiquidityPoolTransaction' => [
+                'swapid' => function (array $root): string {
+                    return $root['swapid'] ?? '';
+                },
+                'transactionid' => function (array $root): string {
+                    return $root['transactionid'] ?? '';
+                },
+                'transactiontype' => function (array $root): string {
+                    return $root['transactiontype'] ?? '';
+                },
+                'senderid' => function (array $root): string {
+                    return $root['senderid'] ?? '';
+                },
+                'tokenamount' => function (array $root): float {
+                    return (float) ($root['tokenamount'] ?? 0.0);
+                },
+                'btcamount' => function (array $root): float {
+                    return (float) ($root['btcamount'] ?? 0.0);
+                },
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+                'status' => function (array $root): string {
+                    return $root['status'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                }
+            ],      
             'GetActionPricesResponse' => [
                 'meta' => function (array $root): array {
                     return [
@@ -2079,11 +2200,11 @@ class GraphQLSchemaBuilder
                 },
             ],
             'TransferToken' => [
-                'tokenSend' => function (array $root): float {
-                    return $root['tokenSend'] ?? 0.0;
+                'tokenSend' => function (array $root): string {
+                    return $root['tokenSend'] ?? '0.0';
                 },
-                'tokensSubstractedFromWallet' => function (array $root): float {
-                    return $root['tokensSubstractedFromWallet'] ?? 0.0;
+                'tokensSubstractedFromWallet' => function (array $root): string {
+                    return $root['tokensSubstractedFromWallet'] ?? '0.0';
                 },
                 'createdat' => function (array $root): string {
                     return $root['createdat'] ?? '';
@@ -2439,6 +2560,8 @@ class GraphQLSchemaBuilder
             'postInteractions' => fn (mixed $root, array $args) => $this->postInteractions($args),
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
+            'getLiquidityPoolHistory' => fn(mixed $root, array $args) => $this->peerTokenService->getLiquidityPoolHistory($args),
+            'getTokenPrice' => fn(mixed $root, array $args) => $this->peerTokenService->getTokenPrice(),
             'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
             'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
         ];
@@ -2473,6 +2596,9 @@ class GraphQLSchemaBuilder
             'resolvePostAction' => fn (mixed $root, array $args) => $this->resolveActionPost($args),
             'resolveTransfer' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'resolveTransferV2' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
+            'swapTokens' => fn(mixed $root, array $args) => $this->peerTokenService->swapTokens($args),
+            'addLiquidity' => fn(mixed $root, array $args) => $this->peerTokenService->addLiquidity($args),
+            'updateSwapTranStatus' => fn(mixed $root, array $args) => $this->peerTokenService->updateSwapTranStatus($args),
             'globalwins' => fn (mixed $root, array $args) => $this->walletService->callGlobalWins(),
             'gemsters' => fn (mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
